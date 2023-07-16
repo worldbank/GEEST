@@ -55,23 +55,23 @@ class GenderIndicatorToolDialog(QtWidgets.QDialog, FORM_CLASS):
         self.pbExecute.clicked.connect(self.execute)
         self.tbOutputFile.clicked.connect(self.saveFile)
 
-        def saveFile(self):
-            response = QFileDialog.getSaveFileName(
-                parent=self,
-                caption='Save file',
-                directory=os.getcwd()
-            )
+    def saveFile(self):
+        response = QFileDialog.getSaveFileName(
+            parent=self,
+            caption='Save file',
+            directory=os.getcwd()
+        )
 
-            self.OutputFileLineEdit.setText(str(response[0]))
+        self.OutputFileLineEdit.setText(str(response[0]))
 
-        def Rasterize(self):
-            file = self.AmenitiesDayCareFile.filePath()
+    def Rasterize(self):
+        file = self.AmenitiesDayCareFile.filePath()
 
-        def execute(self):
-            # shp = gpd.read_file(???)
-            # shp_wgs84 = shp.to_crs('EPSG:4326')
-            UTM_crs = self.CRScomboBox.currentText().split(":")[1].strip()
-            self.OutputFileLineEdit.setText(UTM_crs)
-            # shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}}')
-            # utm_file = dayCare[:-4] + "_UTM.shp"
-            # shp_utm.to_file(utm_file)
+    def execute(self):
+        # shp = gpd.read_file(???)
+        # shp_wgs84 = shp.to_crs('EPSG:4326')
+        UTM_crs = self.CRScomboBox.currentText().split(":")[1].strip()
+        self.OutputFileLineEdit.setText(UTM_crs)
+        # shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}}')
+        # utm_file = dayCare[:-4] + "_UTM.shp"
+        # shp_utm.to_file(utm_file)
