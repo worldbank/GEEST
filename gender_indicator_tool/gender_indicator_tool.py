@@ -21,15 +21,27 @@
  *                                                                         *
  ***************************************************************************/
 """
+import sys
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QApplication
+
+from qgis.core import *
+
+# Prepare processing framework
+sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
+from processing.core.Processing import Processing
+Processing.initialize()
+# from processing.tools import *
+import processing
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .gender_indicator_tool_dialog import GenderIndicatorToolDialog
 import os.path
+import geopandas as gpd
 
 
 class GenderIndicatorTool:
@@ -191,10 +203,59 @@ class GenderIndicatorTool:
 
         # show the dialog
         self.dlg.show()
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+
+        # Setting CRS
+        CRS = [["Other", 0],
+               ["Comoros", 32738],
+               ["Dominican Republic", 32619],
+               ["Papua New Guinea", 32755],
+               ]
+        CRScomboBox_list = [x[0] + " - EPSG: " + str(x[1]) for x in CRS]
+        self.dlg.CRScomboBox.addItems(CRScomboBox_list)
+
+        self.dlg.pbExecute.clicked.connect(self.Rasterize)
+        self.dlg.tbOutputFile.clicked.connect(self.saveFile)
+    def saveFile(self):
+        response = QFileDialog.getSaveFileName(
+            parent=self.dlg,
+            caption='Save file',
+            directory=os.getcwd()
+        )
+
+        self.dlg.OutputFileLineEdit.setText(str(response[0]))
+
+
+    def Rasterize(self):
+        polygonlayer = self.dlg.polygonLayer.filePath()
+        shp_utm_output = polygonlayer[:-4] + "_UTM.shp"
+        outputFile = self.dlg.OutputFileLineEdit.text()
+
+
+        self.convertCRS(polygonlayer)
+        shp_utm.to_file(shp_utm_output)
+
+        buffer = processing.run("native:buffer", {'INPUT': shp_utm_output,
+                                                  'DISTANCE': 1000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'OUTPUT': outputFile})
+
+        layer = QgsVectorLayer(outputFile, f"Buffer", "ogr")
+
+
+        QMessageBox.information(self.dlg, "Message", f"Country layers CRS was converted to EPSG: {UTM_crs}")
+
+    def convertCRS(self, country):
+        global shp_utm, UTM_crs
+
+        shp = gpd.read_file(country)
+        shp_wgs84 = shp.to_crs('EPSG:4326')
+
+        UTM_crs = self.dlg.CRScomboBox.currentText().split(":")[1].strip()
+
+        shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}')
+
+        

@@ -23,9 +23,14 @@
 """
 
 import os
+import geopandas as gpd
+import rasterio
+from rasterio.features import rasterize
+from rasterio.transform import from_origin
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -42,36 +47,3 @@ class GenderIndicatorToolDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-
-        # Setting CRS
-        CRS = [["Other", 0],
-               ["Comoros", 32738],
-               ["Dominican Republic", 32619],
-               ["Papua New Guinea", 32755],
-               ]
-        CRScomboBox_list = [x[0] + " - EPSG: " + str(x[1]) for x in CRS]
-        self.CRScomboBox.addItems(CRScomboBox_list)
-
-        self.pbExecute.clicked.connect(self.execute)
-        self.tbOutputFile.clicked.connect(self.saveFile)
-
-    def saveFile(self):
-        response = QFileDialog.getSaveFileName(
-            parent=self,
-            caption='Save file',
-            directory=os.getcwd()
-        )
-
-        self.OutputFileLineEdit.setText(str(response[0]))
-
-    def Rasterize(self):
-        file = self.AmenitiesDayCareFile.filePath()
-
-    def execute(self):
-        # shp = gpd.read_file(???)
-        # shp_wgs84 = shp.to_crs('EPSG:4326')
-        UTM_crs = self.CRScomboBox.currentText().split(":")[1].strip()
-        self.OutputFileLineEdit.setText(UTM_crs)
-        # shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}}')
-        # utm_file = dayCare[:-4] + "_UTM.shp"
-        # shp_utm.to_file(utm_file)
