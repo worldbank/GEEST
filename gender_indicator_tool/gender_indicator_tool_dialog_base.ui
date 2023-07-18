@@ -29,7 +29,7 @@
     <attribute name="title">
      <string>Setup</string>
     </attribute>
-    <widget class="QgsFileWidget" name="countryLayer">
+    <widget class="QgsFileWidget" name="countryLayer_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -39,7 +39,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="countylabel">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -52,7 +52,7 @@
       <string>Country Adminstartive boundry (Polygon)</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="CRScomboBox">
+    <widget class="QComboBox" name="CRS_comboBox">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -62,7 +62,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QgsFilterLineEdit" name="mLineEdit">
+    <widget class="QgsFilterLineEdit" name="CRSLineEdit">
      <property name="geometry">
       <rect>
        <x>320</x>
@@ -104,54 +104,12 @@
       <string>Select appropriate UTM CRS for the region</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>140</y>
-       <width>81</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
-     <string>Rasterize</string>
+     <string>IDW</string>
     </attribute>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>70</y>
-       <width>231</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Field in the shapefile to use for rasterization</string>
-     </property>
-    </widget>
-    <widget class="QgsFilterLineEdit" name="rasterField">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>90</y>
-       <width>201</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="qgisRelation" stdset="0">
-      <string notr="true"/>
-     </property>
-    </widget>
-    <widget class="QToolButton" name="tbOutputFile">
+    <widget class="QToolButton" name="IDWRasterOutputFilePath_Button">
      <property name="geometry">
       <rect>
        <x>220</x>
@@ -164,7 +122,7 @@
       <string>...</string>
      </property>
     </widget>
-    <widget class="QgsFilterLineEdit" name="OutputFileLineEdit">
+    <widget class="QgsFilterLineEdit" name="IDWRasterOutputFilePath_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -200,10 +158,10 @@
       </rect>
      </property>
      <property name="text">
-      <string>Ploygon layer to rasterize</string>
+      <string>Point Layer Input</string>
      </property>
     </widget>
-    <widget class="QgsFileWidget" name="polygonLayer">
+    <widget class="QgsFileWidget" name="pointLayer_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -213,7 +171,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="pbExecute">
+    <widget class="QPushButton" name="pbIDWExecute">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -229,7 +187,7 @@
     <widget class="QLabel" name="label_14">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>10</x>
        <y>70</y>
        <width>231</width>
        <height>16</height>
@@ -242,7 +200,7 @@
     <widget class="QgsSpinBox" name="sbpixelSize">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>10</x>
        <y>90</y>
        <width>90</width>
        <height>27</height>
@@ -253,6 +211,82 @@
      </property>
      <property name="value">
       <number>250</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>230</y>
+       <width>521</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Feedback: </string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_17">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>70</y>
+       <width>231</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Buffer Distance in meters</string>
+     </property>
+    </widget>
+    <widget class="QgsSpinBox" name="bufferDistance_spinBox">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>90</y>
+       <width>90</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>100000</number>
+     </property>
+     <property name="value">
+      <number>1000</number>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_5">
+    <attribute name="title">
+     <string>Rasterize</string>
+    </attribute>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>60</y>
+       <width>231</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Field in the shapefile to use for rasterization</string>
+     </property>
+    </widget>
+    <widget class="QgsFilterLineEdit" name="rasterField">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>80</y>
+       <width>201</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="qgisRelation" stdset="0">
+      <string notr="true"/>
      </property>
     </widget>
    </widget>

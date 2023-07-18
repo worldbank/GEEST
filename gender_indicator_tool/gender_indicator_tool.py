@@ -28,6 +28,7 @@ from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog, QApplication
 
 from qgis.core import *
+import time
 
 # Prepare processing framework
 sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
@@ -42,6 +43,7 @@ from .resources import *
 from .gender_indicator_tool_dialog import GenderIndicatorToolDialog
 import os.path
 import geopandas as gpd
+import pandas as pd
 
 
 class GenderIndicatorTool:
@@ -211,10 +213,10 @@ class GenderIndicatorTool:
                ["Papua New Guinea", 32755],
                ]
         CRScomboBox_list = [x[0] + " - EPSG: " + str(x[1]) for x in CRS]
-        self.dlg.CRScomboBox.addItems(CRScomboBox_list)
+        self.dlg.CRS_comboBox.addItems(CRScomboBox_list)
 
-        self.dlg.pbExecute.clicked.connect(self.Rasterize)
-        self.dlg.tbOutputFile.clicked.connect(self.saveFile)
+        self.dlg.pbIDWExecute.clicked.connect(self.IDW)
+        self.dlg.IDWRasterOutputFilePath_Button.clicked.connect(self.saveFile)
     def saveFile(self):
         response = QFileDialog.getSaveFileName(
             parent=self.dlg,
@@ -222,39 +224,70 @@ class GenderIndicatorTool:
             directory=os.getcwd()
         )
 
-        self.dlg.OutputFileLineEdit.setText(str(response[0]))
+        self.dlg.IDWRasterOutputFilePath_Field.setText(str(response[0]))
 
 
-    def Rasterize(self):
-        polygonlayer = self.dlg.polygonLayer.filePath()
-        shp_utm_output = polygonlayer[:-4] + "_UTM.shp"
-        outputFile = self.dlg.OutputFileLineEdit.text()
+    def IDW(self):
+        pointlayer = self.dlg.pointLayer_Field.filePath()
+        shp_utm_output = pointlayer[:-4] + "_UTM.shp"
+        lineToPoint_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\lineToPoint.shp"
+        outputFile = self.dlg.IDWRasterOutputFilePath_Field.text()
+        pixelSize = self.dlg.sbpixelSize.value()
+        bufferDistance = self.dlg.bufferDistance_spinBox.value()
+        # self.dlg.label_5.setText(f"Feedback: {type(shp_utm)}")
 
+        # Convert original CRS to UTM CRS
+        self.convertCRS(pointlayer)
+        shp_utm["EScore"] = 5
+        # shp_utm.to_file(shp_utm_output)
 
-        self.convertCRS(polygonlayer)
-        shp_utm.to_file(shp_utm_output)
-
+        #Geoprocessing Algorithms
         buffer = processing.run("native:buffer", {'INPUT': shp_utm_output,
-                                                  'DISTANCE': 1000,
+                                                  'DISTANCE': bufferDistance,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
                                                   'MITER_LIMIT': 2,
                                                   'DISSOLVE': True,
-                                                  'OUTPUT': outputFile})
+                                                  'OUTPUT': "memory:"})
+        bufferOutput = buffer["OUTPUT"]
 
-        layer = QgsVectorLayer(outputFile, f"Buffer", "ogr")
+        polyToLine = processing.run("native:polygonstolines", {'INPUT':bufferOutput,
+                                                               'OUTPUT': "memory:"})
+
+        polyToLineOutput = polyToLine["OUTPUT"]
+
+        lineToPoint =  processing.run("native:pointsalonglines", {'INPUT':polyToLineOutput,
+                                                                  'DISTANCE':1000,
+                                                                  'START_OFFSET':0,
+                                                                  'END_OFFSET':0,
+                                                                  'OUTPUT': lineToPoint_output})
 
 
-        QMessageBox.information(self.dlg, "Message", f"Country layers CRS was converted to EPSG: {UTM_crs}")
+        lineToPoint_shp = gpd.read_file(lineToPoint_output)
+        lineToPoint_shp["EScore"] = 0
 
-    def convertCRS(self, country):
+        merged_gdf = pd.concat([shp_utm, lineToPoint_shp], ignore_index=True)
+        merged_gdf.to_file(outputFile)
+        # self.dlg.label_5.setText(f"Feedback: {type(lineToPoint['OUTPUT'])}")
+
+        # layer = QgsVectorLayer(outputFile, f"Buffer", "ogr")
+        #
+        # if not layer.isValid():
+        #     print("Layer failed to load!")
+        #
+        # QgsProject.instance().addMapLayer(layer)
+
+
+        QMessageBox.information(self.dlg, "Message", f"Buffer file created /n CRS EPSG:{UTM_crs} /nBuffer Distance {bufferDistance}m")
+
+    def convertCRS(self, vector):
         global shp_utm, UTM_crs
 
-        shp = gpd.read_file(country)
+        shp = gpd.read_file(vector)
         shp_wgs84 = shp.to_crs('EPSG:4326')
 
-        UTM_crs = self.dlg.CRScomboBox.currentText().split(":")[1].strip()
+        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
 
         shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}')
 
