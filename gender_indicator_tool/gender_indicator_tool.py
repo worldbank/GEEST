@@ -219,16 +219,66 @@ class GenderIndicatorTool:
         self.dlg.CRS_comboBox.addItems(CRScomboBox_list)
 
         ## TAB 2
+        self.dlg.IDWRasterOutputFilePath_Button.clicked.connect(lambda: self.saveFile(1))
         self.dlg.pbIDWExecute.clicked.connect(self.IDW)
-        self.dlg.IDWRasterOutputFilePath_Button.clicked.connect(self.saveFile)
-    def saveFile(self):
+
+        ## TAB 3
+        self.dlg.rasterSet_Button.clicked.connect(self.RasterizeSet)
+        self.dlg.RasterOutputFilePath_Button.clicked.connect(lambda: self.saveFile(2))
+        self.dlg.pbRasterizeExecute.clicked.connect(self.Rasterize)
+
+    def saveFile(self,button_num):
         response = QFileDialog.getSaveFileName(
             parent=self.dlg,
             caption='Save file',
             directory=os.getcwd()
         )
 
-        self.dlg.IDWRasterOutputFilePath_Field.setText(str(response[0]))
+        if button_num == 1:
+            self.dlg.IDWRasterOutputFilePath_Field.setText(str(response[0]))
+
+        elif button_num == 2:
+            self.dlg.RasterOutputFilePath_Field.setText(str(response[0]))
+
+    def Rasterize(self):
+        #INPUT
+        polygonlayer = self.dlg.polygonLayer_Field.filePath()
+        rasField = self.dlg.rasField_comboBox.currentText()
+        pixelSize = self.dlg.pixelSize_spinBox_2.value()
+
+        #OUTPUT
+        rasOutput = self.dlg.RasterOutputFilePath_Field.text()
+
+        layer = QgsVectorLayer(polygonlayer, 'Polygon Layer', 'ogr')
+        extent = layer.extent()
+
+        # Get the width and height of the extent
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+        self.dlg.label_5.setText(f"Feedback: Width:{raster_width} Height: {raster_height}")
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': polygonlayer,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': 0,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        # self.dlg.label_5.setText(f"Feedback: {fields}")
+    def RasterizeSet(self):
+        polygonlayer = self.dlg.polygonLayer_Field.filePath()
+        layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+        fields = [field.name() for field in layer.fields()]
+        self.dlg.rasField_comboBox.addItems(fields)
 
 
     def IDW(self):
