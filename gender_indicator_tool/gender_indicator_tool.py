@@ -213,8 +213,12 @@ class GenderIndicatorTool:
                ["Papua New Guinea", 32755],
                ]
         CRScomboBox_list = [x[0] + " - EPSG: " + str(x[1]) for x in CRS]
+
+        # WIDGETS
+        ## TAB 1
         self.dlg.CRS_comboBox.addItems(CRScomboBox_list)
 
+        ## TAB 2
         self.dlg.pbIDWExecute.clicked.connect(self.IDW)
         self.dlg.IDWRasterOutputFilePath_Button.clicked.connect(self.saveFile)
     def saveFile(self):
@@ -228,21 +232,31 @@ class GenderIndicatorTool:
 
 
     def IDW(self):
-        pointlayer = self.dlg.pointLayer_Field.filePath()
-        shp_utm_output = pointlayer[:-4] + "_UTM.shp"
-        lineToPoint_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\lineToPoint.shp"
-        outputFile = self.dlg.IDWRasterOutputFilePath_Field.text()
-        pixelSize = self.dlg.sbpixelSize.value()
-        bufferDistance = self.dlg.bufferDistance_spinBox.value()
-        # self.dlg.label_5.setText(f"Feedback: {type(shp_utm)}")
+        #INPUT
+        countryAdminLayer = self.dlg.countryLayer_Field.filePath()
+        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
 
-        # Convert original CRS to UTM CRS
-        self.convertCRS(pointlayer)
+        FaciltyPointlayer = self.dlg.pointLayer_Field.filePath()
+        bufferDistance = self.dlg.bufferDistance_spinBox.value()
+        pixelSize = self.dlg.pixelSize_spinBox.value()
+
+        # OUTPUT
+        countryAdminLayer_utm_otput = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\Admin0_UTM.shp"
+        FaciltyPoint_utm_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\university_UTM.shp"
+        lineToPoint_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\lineToPoint.shp"
+        mergedPoints_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\mergedPoints.shp"
+        finalOutput = self.dlg.IDWRasterOutputFilePath_Field.text()
+
+        # Convert spatial data to UTM CRS
+        self.convertCRS(countryAdminLayer, UTM_crs)
+        shp_utm.to_file(countryAdminLayer_utm_otput)
+
+        self.convertCRS(FaciltyPointlayer, UTM_crs)
         shp_utm["EScore"] = 5
-        # shp_utm.to_file(shp_utm_output)
+        shp_utm.to_file(FaciltyPoint_utm_output)
 
         #Geoprocessing Algorithms
-        buffer = processing.run("native:buffer", {'INPUT': shp_utm_output,
+        buffer = processing.run("native:buffer", {'INPUT': FaciltyPoint_utm_output,
                                                   'DISTANCE': bufferDistance,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
@@ -268,10 +282,20 @@ class GenderIndicatorTool:
         lineToPoint_shp["EScore"] = 0
 
         merged_gdf = pd.concat([shp_utm, lineToPoint_shp], ignore_index=True)
-        merged_gdf.to_file(outputFile)
-        # self.dlg.label_5.setText(f"Feedback: {type(lineToPoint['OUTPUT'])}")
+        merged_gdf.to_file(mergedPoints_output)
 
-        # layer = QgsVectorLayer(outputFile, f"Buffer", "ogr")
+        layer = QgsVectorLayer(mergedPoints_output, "mergedPoints", 'ogr')
+        desired_field = 'EScore'
+        field_index = layer.fields().indexFromName(desired_field)
+
+        # self.dlg.label_5.setText(f"Feedback: {field_index}")
+        IDW = processing.run("qgis:idwinterpolation", {'INTERPOLATION_DATA': mergedPoints_output + f"::~::0::~::{field_index}::~::0",     #'C:/Users/Andre/Nextcloud/GIS_WBGIT/QGIS_WBGIT/test.shp::~::0::~::3::~::0'
+                                                       'DISTANCE_COEFFICIENT': 2,
+                                                       'EXTENT': '306969.217500000,450078.884900000,8626350.630799999,8743170.112700000 [EPSG:32738]',
+                                                       'PIXEL_SIZE': pixelSize,
+                                                       'OUTPUT': finalOutput})
+
+        # layer = QgsRasterLayer(finalOutput, f"IDW")
         #
         # if not layer.isValid():
         #     print("Layer failed to load!")
@@ -281,14 +305,11 @@ class GenderIndicatorTool:
 
         QMessageBox.information(self.dlg, "Message", f"Buffer file created /n CRS EPSG:{UTM_crs} /nBuffer Distance {bufferDistance}m")
 
-    def convertCRS(self, vector):
-        global shp_utm, UTM_crs
+    def convertCRS(self, vector, UTM_crs):
+        global shp_utm
 
         shp = gpd.read_file(vector)
         shp_wgs84 = shp.to_crs('EPSG:4326')
-
-        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
-
         shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}')
 
         
