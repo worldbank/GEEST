@@ -44,6 +44,8 @@ from .gender_indicator_tool_dialog import GenderIndicatorToolDialog
 import os.path
 import geopandas as gpd
 import pandas as pd
+import rasterio
+import shutil
 
 
 class GenderIndicatorTool:
@@ -216,6 +218,7 @@ class GenderIndicatorTool:
 
         # WIDGETS
         ## TAB 1
+        self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
         self.dlg.CRS_comboBox.addItems(CRScomboBox_list)
 
         ## TAB 2
@@ -226,6 +229,16 @@ class GenderIndicatorTool:
         self.dlg.rasterSet_Button.clicked.connect(self.RasterizeSet)
         self.dlg.RasterOutputFilePath_Button.clicked.connect(lambda: self.saveFile(2))
         self.dlg.pbRasterizeExecute.clicked.connect(self.Rasterize)
+
+    def getFolder(self, button_num):
+        response = QFileDialog.getExistingDirectory(
+            parent=self.dlg,
+            caption='Select a folder/directory',
+            directory=os.getcwd()
+        )
+
+        if button_num == 1:
+            self.dlg.workingDir_Field.setText(str(response + "/"))
 
     def saveFile(self,button_num):
         response = QFileDialog.getSaveFileName(
@@ -240,22 +253,39 @@ class GenderIndicatorTool:
         elif button_num == 2:
             self.dlg.RasterOutputFilePath_Field.setText(str(response[0]))
 
+
+
     def Rasterize(self):
+        workingDir = self.dlg.workingDir_Field.text()
+        tempDir = workingDir + "temp/"
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+
+        os.mkdir(tempDir)
+
         #INPUT
         polygonlayer = self.dlg.polygonLayer_Field.filePath()
         rasField = self.dlg.rasField_comboBox.currentText()
         pixelSize = self.dlg.pixelSize_spinBox_2.value()
+        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
 
         #OUTPUT
+        polygonUTM = f"{tempDir}polygonLayer_UTM.shp"
+        rasterizeOutput = f"{tempDir}polygonRas.tif"
         rasOutput = self.dlg.RasterOutputFilePath_Field.text()
 
-        layer = QgsVectorLayer(polygonlayer, 'Polygon Layer', 'ogr')
+        # Convert spatial data to UTM CRS
+        self.convertCRS(polygonlayer, UTM_crs)
+        shp_utm.to_file(polygonUTM)
+        # self.dlg.label_5.setText(f"Feedback: {polygonUTM}")
+        layer = QgsVectorLayer(polygonUTM, 'Polygon Layer', 'ogr')
         extent = layer.extent()
 
         # Get the width and height of the extent
         raster_width = int(extent.width() / pixelSize)
         raster_height = int(extent.height() / pixelSize)
-        self.dlg.label_5.setText(f"Feedback: Width:{raster_width} Height: {raster_height}")
+        # self.dlg.label_5.setText(f"Feedback: Width:{raster_width} Height: {raster_height}")
 
         rasterize = processing.run("gdal:rasterize", {'INPUT': polygonlayer,
                                                       'FIELD': rasField,
@@ -271,21 +301,42 @@ class GenderIndicatorTool:
                                                       'INIT': None,
                                                       'INVERT': False,
                                                       'EXTRA': '',
-                                                      'OUTPUT': rasOutput})
+                                                      'OUTPUT': rasterizeOutput})
 
-        # self.dlg.label_5.setText(f"Feedback: {fields}")
+        #Standardisation
+        rasterizeOutput = rasterize["OUTPUT"]
+
+        with rasterio.open(rasterizeOutput) as src:
+            data = src.read(1)
+            meta = src.meta
+
+        result = (data - 0)/(100 - 0) * 5
+
+        meta.update(dtype=rasterio.float32)
+
+        with rasterio.open(rasOutput, 'w', **meta) as dst:
+            dst.write(result, 1)
+
+        shutil.rmtree(tempDir)
+
+        # QMessageBox.information(self.dlg, "Message", f"Rasterized file has been created /n CRS EPSG:{UTM_crs} /nthreshold Distance {bufferDistance}m")
+
     def RasterizeSet(self):
         polygonlayer = self.dlg.polygonLayer_Field.filePath()
         layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+        self.dlg.rasField_comboBox.clear()
         fields = [field.name() for field in layer.fields()]
         self.dlg.rasField_comboBox.addItems(fields)
 
 
     def IDW(self):
+
+        # workingDirectory =  self.dlg.workingDir_Field.text()
+        self.dlg.label_5.setText(f"Feedback: {workingDirectory}")
+
         #INPUT
         countryAdminLayer = self.dlg.countryLayer_Field.filePath()
         UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
-
         FaciltyPointlayer = self.dlg.pointLayer_Field.filePath()
         bufferDistance = self.dlg.bufferDistance_spinBox.value()
         pixelSize = self.dlg.pixelSize_spinBox.value()
@@ -325,26 +376,27 @@ class GenderIndicatorTool:
                                                                   'DISTANCE':1000,
                                                                   'START_OFFSET':0,
                                                                   'END_OFFSET':0,
-                                                                  'OUTPUT': lineToPoint_output})
+                                                                  'OUTPUT': "memory:"})
+
+        lineToPointOutput = lineToPoint["OUTPUT"]
 
 
-        lineToPoint_shp = gpd.read_file(lineToPoint_output)
-        lineToPoint_shp["EScore"] = 0
-
-        merged_gdf = pd.concat([shp_utm, lineToPoint_shp], ignore_index=True)
-        merged_gdf.to_file(mergedPoints_output)
-
-        layer = QgsVectorLayer(mergedPoints_output, "mergedPoints", 'ogr')
-        desired_field = 'EScore'
-        field_index = layer.fields().indexFromName(desired_field)
-
-        # self.dlg.label_5.setText(f"Feedback: {field_index}")
-        IDW = processing.run("qgis:idwinterpolation", {'INTERPOLATION_DATA': mergedPoints_output + f"::~::0::~::{field_index}::~::0",     #'C:/Users/Andre/Nextcloud/GIS_WBGIT/QGIS_WBGIT/test.shp::~::0::~::3::~::0'
-                                                       'DISTANCE_COEFFICIENT': 2,
-                                                       'EXTENT': '306969.217500000,450078.884900000,8626350.630799999,8743170.112700000 [EPSG:32738]',
-                                                       'PIXEL_SIZE': pixelSize,
-                                                       'OUTPUT': finalOutput})
-
+        # lineToPoint_shp = gpd.read_file(lineToPoint_output)
+        # lineToPoint_shp["EScore"] = 0
+        #
+        # merged_gdf = pd.concat([shp_utm, lineToPoint_shp], ignore_index=True)
+        # merged_gdf.to_file(mergedPoints_output)
+        #
+        # layer = QgsVectorLayer(mergedPoints_output, "mergedPoints", 'ogr')
+        # desired_field = 'EScore'
+        # field_index = layer.fields().indexFromName(desired_field)
+        #
+        # IDW = processing.run("qgis:idwinterpolation", {'INTERPOLATION_DATA': mergedPoints_output + f"::~::0::~::{field_index}::~::0",     #'C:/Users/Andre/Nextcloud/GIS_WBGIT/QGIS_WBGIT/test.shp::~::0::~::3::~::0'
+        #                                                'DISTANCE_COEFFICIENT': 2,
+        #                                                'EXTENT': '306969.217500000,450078.884900000,8626350.630799999,8743170.112700000 [EPSG:32738]',
+        #                                                'PIXEL_SIZE': pixelSize,
+        #                                                'OUTPUT': finalOutput})
+        #
         # layer = QgsRasterLayer(finalOutput, f"IDW")
         #
         # if not layer.isValid():
@@ -353,7 +405,7 @@ class GenderIndicatorTool:
         # QgsProject.instance().addMapLayer(layer)
 
 
-        QMessageBox.information(self.dlg, "Message", f"Buffer file created /n CRS EPSG:{UTM_crs} /nBuffer Distance {bufferDistance}m")
+        QMessageBox.information(self.dlg, "Message", f"IDW interpolated raster file has been created /n CRS EPSG:{UTM_crs} /threshold Distance {bufferDistance}m")
 
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
