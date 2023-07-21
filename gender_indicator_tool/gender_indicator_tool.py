@@ -21,31 +21,35 @@
  *                                                                         *
  ***************************************************************************/
 """
-import sys
+# QGIS and PyQt libraries and modules
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog, QApplication
-
 from qgis.core import *
+
+# Auxiliary libraries
+import os
+import sys
+import geopandas as gpd
+import pandas as pd
+import rasterio
+import numpy as np
+import math
+import shutil
 import time
 
 # Prepare processing framework
 sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
 from processing.core.Processing import Processing
 Processing.initialize()
-# from processing.tools import *
 import processing
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .gender_indicator_tool_dialog import GenderIndicatorToolDialog
-import os.path
-import geopandas as gpd
-import pandas as pd
-import rasterio
-import shutil
+
 
 
 class GenderIndicatorTool:
@@ -216,19 +220,22 @@ class GenderIndicatorTool:
                ]
         CRScomboBox_list = [x[0] + " - EPSG: " + str(x[1]) for x in CRS]
 
-        # WIDGETS
-        ## TAB 1
+        ## TAB 1 *******************************************************************
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
         self.dlg.CRS_comboBox.addItems(CRScomboBox_list)
 
-        ## TAB 2
+        ## TAB 2 *******************************************************************
         self.dlg.IDWRasterOutputFilePath_Button.clicked.connect(lambda: self.saveFile(1))
         self.dlg.pbIDWExecute.clicked.connect(self.IDW)
 
-        ## TAB 3
+        ## TAB 3 *******************************************************************
         self.dlg.rasterSet_Button.clicked.connect(self.RasterizeSet)
         self.dlg.RasterOutputFilePath_Button.clicked.connect(lambda: self.saveFile(2))
         self.dlg.pbRasterizeExecute.clicked.connect(self.Rasterize)
+
+        ## TAB 4 *******************************************************************
+        self.dlg.MCAOutputFilePath_Button.clicked.connect(lambda: self.saveFile(3))
+        self.dlg.pbMCAExecute.clicked.connect(self.MCA)
 
     def getFolder(self, button_num):
         response = QFileDialog.getExistingDirectory(
@@ -253,15 +260,28 @@ class GenderIndicatorTool:
         elif button_num == 2:
             self.dlg.RasterOutputFilePath_Field.setText(str(response[0]))
 
+        elif button_num == 3:
+            self.dlg.MCAOutputFilePath_Field.setText(str(response[0]))
 
+    def RasterizeSet(self):
+        polygonlayer = self.dlg.polygonLayer_Field.filePath()
+        layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+        self.dlg.rasField_comboBox.clear()
+        fields = [field.name() for field in layer.fields()]
+        self.dlg.rasField_comboBox.addItems(fields)
 
+    def convertCRS(self, vector, UTM_crs):
+        global shp_utm
+
+        shp = gpd.read_file(vector)
+        shp_wgs84 = shp.to_crs('EPSG:4326')
+        shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}')
+
+# *************************** Geoprocessing Functions ********************************** #
     def Rasterize(self):
+
         workingDir = self.dlg.workingDir_Field.text()
-        tempDir = workingDir + "temp/"
-
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-
+        tempDir = workingDir + "temp"
         os.mkdir(tempDir)
 
         #INPUT
@@ -271,21 +291,19 @@ class GenderIndicatorTool:
         UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
 
         #OUTPUT
-        polygonUTM = f"{tempDir}polygonLayer_UTM.shp"
-        rasterizeOutput = f"{tempDir}polygonRas.tif"
+        polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
+        rasterizeOutput = f"{tempDir}/polygonRas.tif"
         rasOutput = self.dlg.RasterOutputFilePath_Field.text()
 
         # Convert spatial data to UTM CRS
         self.convertCRS(polygonlayer, UTM_crs)
         shp_utm.to_file(polygonUTM)
-        # self.dlg.label_5.setText(f"Feedback: {polygonUTM}")
-        layer = QgsVectorLayer(polygonUTM, 'Polygon Layer', 'ogr')
-        extent = layer.extent()
 
         # Get the width and height of the extent
-        raster_width = int(extent.width() / pixelSize)
-        raster_height = int(extent.height() / pixelSize)
-        # self.dlg.label_5.setText(f"Feedback: Width:{raster_width} Height: {raster_height}")
+        layer = QgsVectorLayer(polygonUTM, 'Polygon Layer', 'ogr')
+        extent = layer.extent()
+        raster_width = int(extent.width() / pixelSize) + 1
+        raster_height = int(extent.height() / pixelSize) + 1
 
         rasterize = processing.run("gdal:rasterize", {'INPUT': polygonlayer,
                                                       'FIELD': rasField,
@@ -303,13 +321,15 @@ class GenderIndicatorTool:
                                                       'EXTRA': '',
                                                       'OUTPUT': rasterizeOutput})
 
-        #Standardisation
+
         rasterizeOutput = rasterize["OUTPUT"]
 
+        # *************************** Standardization **********************************
         with rasterio.open(rasterizeOutput) as src:
             data = src.read(1)
             meta = src.meta
 
+        # Raster Calculation
         result = (data - 0)/(100 - 0) * 5
 
         meta.update(dtype=rasterio.float32)
@@ -317,22 +337,22 @@ class GenderIndicatorTool:
         with rasterio.open(rasOutput, 'w', **meta) as dst:
             dst.write(result, 1)
 
-        shutil.rmtree(tempDir)
+        # Loading final output to QGIS GUI viewer
+        layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
+
+        if not layer.isValid():
+            print("Layer failed to load!")
+
+        QgsProject.instance().addMapLayer(layer)
 
         # QMessageBox.information(self.dlg, "Message", f"Rasterized file has been created /n CRS EPSG:{UTM_crs} /nthreshold Distance {bufferDistance}m")
-
-    def RasterizeSet(self):
-        polygonlayer = self.dlg.polygonLayer_Field.filePath()
-        layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
-        self.dlg.rasField_comboBox.clear()
-        fields = [field.name() for field in layer.fields()]
-        self.dlg.rasField_comboBox.addItems(fields)
 
 
     def IDW(self):
 
-        # workingDirectory =  self.dlg.workingDir_Field.text()
-        self.dlg.label_5.setText(f"Feedback: {workingDirectory}")
+        workingDir = self.dlg.workingDir_Field.text()
+        tempDir = workingDir + "temp"
+        os.mkdir(tempDir)
 
         #INPUT
         countryAdminLayer = self.dlg.countryLayer_Field.filePath()
@@ -342,10 +362,10 @@ class GenderIndicatorTool:
         pixelSize = self.dlg.pixelSize_spinBox.value()
 
         # OUTPUT
-        countryAdminLayer_utm_otput = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\Admin0_UTM.shp"
-        FaciltyPoint_utm_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\university_UTM.shp"
-        lineToPoint_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\lineToPoint.shp"
-        mergedPoints_output = r"C:\Users\Andre\Nextcloud\GIS_WBGIT\QGIS_WBGIT\mergedPoints.shp"
+        countryAdminLayer_utm_otput = f"{tempDir}/Admin0_UTM.shp"
+        FaciltyPoint_utm_output = f"{tempDir}/university_UTM.shp"
+        lineToPoint_output = f"{tempDir}/lineToPoint.shp"
+        mergedPoints_output = f"{tempDir}/mergedPoints.shp"
         finalOutput = self.dlg.IDWRasterOutputFilePath_Field.text()
 
         # Convert spatial data to UTM CRS
@@ -376,42 +396,69 @@ class GenderIndicatorTool:
                                                                   'DISTANCE':1000,
                                                                   'START_OFFSET':0,
                                                                   'END_OFFSET':0,
-                                                                  'OUTPUT': "memory:"})
-
-        lineToPointOutput = lineToPoint["OUTPUT"]
+                                                                  'OUTPUT': lineToPoint_output})
 
 
-        # lineToPoint_shp = gpd.read_file(lineToPoint_output)
-        # lineToPoint_shp["EScore"] = 0
-        #
-        # merged_gdf = pd.concat([shp_utm, lineToPoint_shp], ignore_index=True)
-        # merged_gdf.to_file(mergedPoints_output)
-        #
-        # layer = QgsVectorLayer(mergedPoints_output, "mergedPoints", 'ogr')
-        # desired_field = 'EScore'
-        # field_index = layer.fields().indexFromName(desired_field)
-        #
-        # IDW = processing.run("qgis:idwinterpolation", {'INTERPOLATION_DATA': mergedPoints_output + f"::~::0::~::{field_index}::~::0",     #'C:/Users/Andre/Nextcloud/GIS_WBGIT/QGIS_WBGIT/test.shp::~::0::~::3::~::0'
-        #                                                'DISTANCE_COEFFICIENT': 2,
-        #                                                'EXTENT': '306969.217500000,450078.884900000,8626350.630799999,8743170.112700000 [EPSG:32738]',
-        #                                                'PIXEL_SIZE': pixelSize,
-        #                                                'OUTPUT': finalOutput})
-        #
-        # layer = QgsRasterLayer(finalOutput, f"IDW")
-        #
-        # if not layer.isValid():
-        #     print("Layer failed to load!")
-        #
-        # QgsProject.instance().addMapLayer(layer)
+        lineToPoint_shp = gpd.read_file(lineToPoint_output)
+        lineToPoint_shp["EScore"] = 0
 
+        merged_gdf = pd.concat([shp_utm, lineToPoint_shp], ignore_index=True)
+        merged_gdf.to_file(mergedPoints_output)
+
+        layer = QgsVectorLayer(mergedPoints_output, "mergedPoints", 'ogr')
+        desired_field = 'EScore'
+        field_index = layer.fields().indexFromName(desired_field)
+
+        IDW = processing.run("qgis:idwinterpolation", {'INTERPOLATION_DATA': mergedPoints_output + f"::~::0::~::{field_index}::~::0",     #'C:/Users/Andre/Nextcloud/GIS_WBGIT/QGIS_WBGIT/test.shp::~::0::~::3::~::0'
+                                                       'DISTANCE_COEFFICIENT': 2,
+                                                       'EXTENT': '306969.217500000,450078.884900000,8626350.630799999,8743170.112700000 [EPSG:32738]',
+                                                       'PIXEL_SIZE': pixelSize,
+                                                       'OUTPUT': finalOutput})
+
+        layer = QgsRasterLayer(finalOutput, f"{finalOutput}")
+
+        if not layer.isValid():
+            print("Layer failed to load!")
+
+        QgsProject.instance().addMapLayer(layer)
 
         QMessageBox.information(self.dlg, "Message", f"IDW interpolated raster file has been created /n CRS EPSG:{UTM_crs} /threshold Distance {bufferDistance}m")
 
-    def convertCRS(self, vector, UTM_crs):
-        global shp_utm
+    def MCA(self):
+        # workingDir = self.dlg.workingDir_Field.text()
 
-        shp = gpd.read_file(vector)
-        shp_wgs84 = shp.to_crs('EPSG:4326')
-        shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}')
+        #INPUT
+        Factor1_ras = self.dlg.factor1_Field.filePath()
+        Factor2_ras = self.dlg.factor2_Field.filePath()
 
-        
+
+        #OUTPUT
+        MCA_output = self.dlg.MCAOutputFilePath_Field.text()
+
+
+        with rasterio.open(Factor1_ras) as src:
+            ras1 = src.read(1)
+            meta1 = src.meta
+
+        with rasterio.open(Factor2_ras) as src:
+            ras2 = src.read(1)
+
+        # Raster Calculation
+        Factor1_weight = self.dlg.IDWweight_spinBox.value() / 100
+        Factor2_weight = self.dlg.rasterizeWeight_spinBox.value() / 100
+        result = ((Factor1_weight*ras1) + (Factor2_weight*ras2))
+
+
+        meta1.update(dtype=rasterio.float32)
+
+        with rasterio.open(MCA_output, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        layer = QgsRasterLayer(MCA_output, f"{MCA_output}")
+
+        if not layer.isValid():
+            print("Layer failed to load!")
+
+        QgsProject.instance().addMapLayer(layer)
+
+        QMessageBox.information(self.dlg, "Message", f"{type(result)}")
