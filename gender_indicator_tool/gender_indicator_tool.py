@@ -212,6 +212,10 @@ class GenderIndicatorTool:
         # show the dialog
         self.dlg.show()
 
+
+        ## TAB 1 *******************************************************************
+        self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
+
         # Setting CRS
         CRS = [["Other", 0],
                ["Comoros", 32738],
@@ -220,8 +224,6 @@ class GenderIndicatorTool:
                ]
         CRScomboBox_list = [x[0] + " - EPSG: " + str(x[1]) for x in CRS]
 
-        ## TAB 1 *******************************************************************
-        self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
         self.dlg.CRS_comboBox.addItems(CRScomboBox_list)
 
         ## TAB 2 *******************************************************************
@@ -234,7 +236,19 @@ class GenderIndicatorTool:
         self.dlg.pbRasterizeExecute.clicked.connect(self.Rasterize)
 
         ## TAB 4 *******************************************************************
-        self.dlg.MCAOutputFilePath_Button.clicked.connect(lambda: self.saveFile(3))
+        # Setting Travel Mode
+        travelModes = ["Driving-car", "Walking"]
+        self.dlg.travelMode_comboBox.addItems(travelModes)
+
+        # Setting Measurment Metric
+        metric = ["time", "distance"]
+        self.dlg.metric_comboBox.addItems(metric)
+
+        self.dlg.serviceAreaOutputFilePath_Button.clicked.connect(lambda: self.saveFile(3))
+        self.dlg.pbserviceAreaExecute.clicked.connect(self.ServiceArea)
+
+        ## TAB 5 *******************************************************************
+        self.dlg.MCAOutputFilePath_Button.clicked.connect(lambda: self.saveFile(4))
         self.dlg.pbMCAExecute.clicked.connect(self.MCA)
 
     def getFolder(self, button_num):
@@ -261,6 +275,9 @@ class GenderIndicatorTool:
             self.dlg.RasterOutputFilePath_Field.setText(str(response[0]))
 
         elif button_num == 3:
+            self.dlg.serviceAreaOutputFilePath_Field.setText(str(response[0]))
+
+        elif button_num == 4:
             self.dlg.MCAOutputFilePath_Field.setText(str(response[0]))
 
     def RasterizeSet(self):
@@ -415,6 +432,7 @@ class GenderIndicatorTool:
                                                        'PIXEL_SIZE': pixelSize,
                                                        'OUTPUT': finalOutput})
 
+
         layer = QgsRasterLayer(finalOutput, f"{finalOutput}")
 
         if not layer.isValid():
@@ -423,6 +441,60 @@ class GenderIndicatorTool:
         QgsProject.instance().addMapLayer(layer)
 
         QMessageBox.information(self.dlg, "Message", f"IDW interpolated raster file has been created /n CRS EPSG:{UTM_crs} /threshold Distance {bufferDistance}m")
+
+    def ServiceArea(self):
+
+        workingDir = self.dlg.workingDir_Field.text()
+        tempDir = workingDir + "temp"
+        os.mkdir(tempDir)
+
+        # INPUT
+        FaciltyPointlayer = self.dlg.pointLayer_Field_2.filePath()
+
+        # Setting Travel Mode
+        if self.dlg.travelMode_comboBox.currentText() == "Driving-car":
+            traveMode = 0
+        elif self.dlg.travelMode_comboBox.currentText() == "Walking":
+            traveMode = 6
+        else:
+            pass
+
+        # Setting Measurment Metric
+        if self.dlg.metric_comboBox.currentText() == "Driving-car":
+            metric = 0
+        elif self.dlg.metric_comboBox.currentText() == "Walking":
+            metric = 1
+        else:
+            pass
+
+        ranges = self.dlg.serviceAreaRanges_Field.text()
+        
+        pixelSize = self.dlg.pixelSize_spinBox_3.value()
+
+        # OUTPUT
+        countryAdminLayer_utm_otput = f"{tempDir}/Admin0_UTM.shp"
+        finalOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
+
+        
+        Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
+                                                                          'INPUT_PROFILE': traveMode,
+                                                                          'INPUT_POINT_LAYER': FaciltyPointlayer,
+                                                                          'INPUT_FIELD': '',
+                                                                          'INPUT_METRIC': 0,
+                                                                          'INPUT_RANGES': ranges,
+                                                                          'INPUT_AVOID_FEATURES': [],
+                                                                          'INPUT_AVOID_BORDERS': None,
+                                                                          'INPUT_AVOID_COUNTRIES': '',
+                                                                          'INPUT_AVOID_POLYGONS': None,
+                                                                          'OUTPUT': finalOutput})
+
+        # Loading final output to QGIS GUI viewer
+        layer = QgsVectorLayer(finalOutput, f"{finalOutput}")
+
+        if not layer.isValid():
+            print("Layer failed to load!")
+
+        QgsProject.instance().addMapLayer(layer)
 
     def MCA(self):
         # workingDir = self.dlg.workingDir_Field.text()
