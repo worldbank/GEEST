@@ -473,6 +473,7 @@ class GenderIndicatorTool:
 
         # OUTPUT
         countryAdminLayer_utm_otput = f"{tempDir}/Admin0_UTM.shp"
+        SAOutput = f"{tempDir}/SA_OUTPUT.shp"
         finalOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
 
         
@@ -486,8 +487,42 @@ class GenderIndicatorTool:
                                                                           'INPUT_AVOID_BORDERS': None,
                                                                           'INPUT_AVOID_COUNTRIES': '',
                                                                           'INPUT_AVOID_POLYGONS': None,
-                                                                          'OUTPUT': finalOutput})
+                                                                          'OUTPUT': SAOutput})
 
+        SA_df = gpd.read_file(SAOutput)
+        no_spaces_string = "".join(ranges.split())
+        ranges_list = no_spaces_string.split(",")
+        int_ranges_list = [int(x) for x in ranges_list]
+        int_ranges_list.sort()
+
+        # QMessageBox.information(self.dlg, "Message", f"{ranges_list}")
+        for i in int_ranges_list:
+            df = SA_df[SA_df['AA_MINS'] == i]
+            output = f"{tempDir}/band_{i}"
+            df.to_file(output + ".shp")
+
+            dissolve = processing.run("native:dissolve", {'INPUT': output + ".shp",
+                                                          'FIELD':[],
+                                                          'SEPARATE_DISJOINT':False,
+                                                          'OUTPUT':f"{output}_dis.shp"})
+        Merge_list = []
+        len_range = len(int_ranges_list)
+        int_ranges_list.sort(reverse=True)
+        for i in range(0, len_range-1):
+            output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i+1]}.shp"
+            Merge_list.append(output)
+            processing.run("native:difference", {'INPUT': f"{tempDir}/band_{int_ranges_list[i]}_dis.shp",
+                                                 'OVERLAY': f"{tempDir}/band_{int_ranges_list[i+1]}_dis.shp",
+                                                 'OUTPUT': output,
+                                                 'GRID_SIZE': None})
+
+        Merge_list.append(f"{tempDir}/band_{int_ranges_list[-1]}_dis.shp")
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
+                                                            'CRS':None,
+                                                            'OUTPUT':finalOutput})
+
+        
         # Loading final output to QGIS GUI viewer
         layer = QgsVectorLayer(finalOutput, f"{finalOutput}")
 
