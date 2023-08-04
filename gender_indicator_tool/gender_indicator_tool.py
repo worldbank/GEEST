@@ -364,7 +364,6 @@ class GenderIndicatorTool:
 
         # QMessageBox.information(self.dlg, "Message", f"Rasterized file has been created /n CRS EPSG:{UTM_crs} /nthreshold Distance {bufferDistance}m")
 
-
     def IDW(self):
 
         workingDir = self.dlg.workingDir_Field.text()
@@ -449,7 +448,9 @@ class GenderIndicatorTool:
         os.mkdir(tempDir)
 
         # INPUT
+        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
         FaciltyPointlayer = self.dlg.pointLayer_Field_2.filePath()
+        rasField = 'rasField'
 
         # Setting Travel Mode
         if self.dlg.travelMode_comboBox.currentText() == "Driving-car":
@@ -474,7 +475,12 @@ class GenderIndicatorTool:
         # OUTPUT
         countryAdminLayer_utm_otput = f"{tempDir}/Admin0_UTM.shp"
         SAOutput = f"{tempDir}/SA_OUTPUT.shp"
-        finalOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
+        mergeOutput = f"{tempDir}/Merge.shp"
+        mergeRasfield = f"{tempDir}/Merge_rasField.shp"
+        polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
+        rasterizeOutput = f"{tempDir}/polygonRas.tif"
+        rasOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
+        # finalOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
 
         
         Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
@@ -520,16 +526,73 @@ class GenderIndicatorTool:
 
         Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
                                                             'CRS':None,
-                                                            'OUTPUT':finalOutput})
+                                                            'OUTPUT':mergeOutput})
 
-        
+        merge_df = gpd.read_file(mergeOutput)
+        merge_df["rasField"] = [1,2,3,4,5]
+        merge_df.to_file(mergeRasfield)
+        polygonlayer = mergeRasfield
+
+        # Convert spatial data to UTM CRS
+        self.convertCRS(polygonlayer, UTM_crs)
+        shp_utm.to_file(polygonUTM)
+
+        # Get the width and height of the extent
+        layer = QgsVectorLayer(polygonUTM, 'Polygon Layer', 'ogr')
+        extent = layer.extent()
+        raster_width = int(extent.width() / pixelSize) + 1
+        raster_height = int(extent.height() / pixelSize) + 1
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': polygonlayer,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': 0,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        # rasterizeOutput = rasterize["OUTPUT"]
+        #
+        # # *************************** Standardization **********************************
+        #
+        # with rasterio.open(rasterizeOutput) as src:
+        #     data = src.read(1)
+        #     meta = src.meta
+        #     min_value = data.min()
+        #     max_value = data.max()
+        #
+        # # Raster Calculation
+        # # result = (data - min_value) / (max_value - min_value) * 5 #Linear Scaling
+        # result = 5 - ((data - 0) / (max_value - 0)) * (5 - 1)
+        #
+        # meta.update(dtype=rasterio.float32)
+        #
+        # with rasterio.open(rasOutput, 'w', **meta) as dst:
+        #     dst.write(result, 1)
+
         # Loading final output to QGIS GUI viewer
-        layer = QgsVectorLayer(finalOutput, f"{finalOutput}")
+        layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
 
         if not layer.isValid():
             print("Layer failed to load!")
 
         QgsProject.instance().addMapLayer(layer)
+        
+        # Loading final output to QGIS GUI viewer
+        # layer = QgsVectorLayer(finalOutput, f"{finalOutput}")
+        #
+        # if not layer.isValid():
+        #     print("Layer failed to load!")
+        #
+        # QgsProject.instance().addMapLayer(layer)
 
     def MCA(self):
         # workingDir = self.dlg.workingDir_Field.text()
