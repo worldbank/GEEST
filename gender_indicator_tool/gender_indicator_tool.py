@@ -212,45 +212,55 @@ class GenderIndicatorTool:
         # show the dialog
         self.dlg.show()
 
-
-        ## TAB 1 *******************************************************************
+        ## TAB 1 - Analysis Setup ***********************************************************************
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
 
-        # Setting CRS
-        CRS = [["Other", 0],
-               ["Comoros", 32738],
-               ["Dominican Republic", 32619],
-               ["Papua New Guinea", 32755],
-               ]
-        CRScomboBox_list = [x[0] + " - EPSG: " + str(x[1]) for x in CRS]
+        ## TAB 2 - Individual ***************************************************************************
+        ## TAB 2.1 - Education --------------------------------------------------------------------------
+        self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
+        self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
 
-        self.dlg.CRS_comboBox.addItems(CRScomboBox_list)
+        self.dlg.mMapLayerComboBox.layerChanged.connect(self.mMapLayerComboBox_layerChanged)
 
-        ## TAB 2 *******************************************************************
-        self.dlg.IDWRasterOutputFilePath_Button.clicked.connect(lambda: self.saveFile(1))
-        self.dlg.pbIDWExecute.clicked.connect(self.IDW)
+        ## TAB 2.2 - Care Responsibilities ---------------------------------------------------------------
+        self.dlg.CRE_Set_PB.clicked.connect(lambda: self.RasterizeSet(1))
+        self.dlg.CRE_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
 
-        ## TAB 3 *******************************************************************
-        self.dlg.rasterSet_Button.clicked.connect(self.RasterizeSet)
-        self.dlg.RasterOutputFilePath_Button.clicked.connect(lambda: self.saveFile(2))
-        self.dlg.pbRasterizeExecute.clicked.connect(self.Rasterize)
+        ## TAB 2.3 - Domestic Violence -------------------------------------------------------------------
+        self.dlg.DOV_Set_PB.clicked.connect(lambda: self.RasterizeSet(2))
+        self.dlg.DOV_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
-        ## TAB 4 *******************************************************************
-        # Setting Travel Mode
-        travelModes = ["Driving-car", "Walking"]
-        self.dlg.travelMode_comboBox.addItems(travelModes)
 
-        # Setting Measurment Metric
-        metric = ["time", "distance"]
-        self.dlg.metric_comboBox.addItems(metric)
+        ## TAB 3 - Contextual ***************************************************************************
 
-        self.dlg.serviceAreaOutputFilePath_Button.clicked.connect(lambda: self.saveFile(3))
-        self.dlg.pbserviceAreaExecute.clicked.connect(self.ServiceArea)
 
-        ## TAB 5 *******************************************************************
+
+        ## TAB 4 - Accessibility ************************************************************************
+        ## TAB 4.1 - Women's Travel Patterns ------------------------------------------------------------
+
+        ## TAB 4.2 - Public Transport -------------------------------------------------------------------
+        self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
+
+        ## TAB 4.3 - Ediucation & Training --------------------------------------------------------------
+        self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
+
+        ## TAB 4.4 - Jobs -------------------------------------------------------------------------------
+        self.dlg.JOB_Execute_PB.clicked.connect(lambda: self.ServiceArea(2))
+
+        ## TAB 4.5 - Health Facilities ------------------------------------------------------------------
+        self.dlg.HEA_Execute_PB.clicked.connect(lambda: self.ServiceArea(3))
+
+        ## TAB 4.6 - Financial Facilities ---------------------------------------------------------------
+        self.dlg.FIF_Execute_PB.clicked.connect(lambda: self.ServiceArea(4))
+
+        ## TAB 5 - Place Charqacterization **************************************************************
+
+        ## TAB 6 - Dimension MCE ************************************************************************
         self.dlg.MCAOutputFilePath_Button.clicked.connect(lambda: self.saveFile(4))
         self.dlg.pbMCAExecute.clicked.connect(self.MCA)
 
+    def mMapLayerComboBox_layerChanged(self, lyr):
+        self.dlg.mFieldComboBox.setLayer(lyr)
     def getFolder(self, button_num):
         response = QFileDialog.getExistingDirectory(
             parent=self.dlg,
@@ -280,12 +290,27 @@ class GenderIndicatorTool:
         elif button_num == 4:
             self.dlg.MCAOutputFilePath_Field.setText(str(response[0]))
 
-    def RasterizeSet(self):
-        polygonlayer = self.dlg.polygonLayer_Field.filePath()
-        layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
-        self.dlg.rasField_comboBox.clear()
-        fields = [field.name() for field in layer.fields()]
-        self.dlg.rasField_comboBox.addItems(fields)
+    def RasterizeSet(self, factor_no):
+        if factor_no == 0:
+            polygonlayer = self.dlg.EDU_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.EDU_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.EDU_rasField_CB.addItems(fields)
+
+        elif factor_no == 1:
+            polygonlayer = self.dlg.CRE_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.CRE_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.CRE_rasField_CB.addItems(fields)
+
+        elif factor_no == 2:
+            polygonlayer = self.dlg.DOV_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.DOV_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.DOV_rasField_CB.addItems(fields)
 
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
@@ -295,22 +320,42 @@ class GenderIndicatorTool:
         shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}')
 
 # *************************** Geoprocessing Functions ********************************** #
-    def Rasterize(self):
+    def Rasterize(self, factor_no):
 
         workingDir = self.dlg.workingDir_Field.text()
-        tempDir = workingDir + "temp"
+        os.chdir(workingDir)
+        tempDir = "temp"
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
         os.mkdir(tempDir)
 
         #INPUT
-        polygonlayer = self.dlg.polygonLayer_Field.filePath()
-        rasField = self.dlg.rasField_comboBox.currentText()
-        pixelSize = self.dlg.pixelSize_spinBox_2.value()
-        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
+        if factor_no == 0:
+            polygonlayer = self.dlg.EDU_Input_Field.filePath()
+            rasField = self.dlg.EDU_rasField_CB.currentText()
+            pixelSize = self.dlg.EDU_pixelSize_SB.value()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            
+        elif factor_no == 1:
+            polygonlayer = self.dlg.CRE_Input_Field.filePath()
+            rasField = self.dlg.CRE_rasField_CB.currentText()
+            pixelSize = self.dlg.CRE_pixelSize_SB.value()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
-        #OUTPUT
+        elif factor_no == 2:
+            polygonlayer = self.dlg.DOV_Input_Field.filePath()
+            rasField = self.dlg.DOV_rasField_CB.currentText()
+            pixelSize = self.dlg.DOV_pixelSize_SB.value()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+
+        #TEMPORARY OUTPUTS
         polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
         rasterizeOutput = f"{tempDir}/polygonRas.tif"
-        rasOutput = self.dlg.RasterOutputFilePath_Field.text()
+
 
         # Convert spatial data to UTM CRS
         self.convertCRS(polygonlayer, UTM_crs)
@@ -347,12 +392,56 @@ class GenderIndicatorTool:
             meta = src.meta
 
         # Raster Calculation
-        result = (data - 0)/(100 - 0) * 5
+        if factor_no == 0:
+            result = (data - 0)/(100 - 0) * 5
 
-        meta.update(dtype=rasterio.float32)
+            meta.update(dtype=rasterio.float32)
 
-        with rasterio.open(rasOutput, 'w', **meta) as dst:
-            dst.write(result, 1)
+            Dimension  = "Indivdual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = "EDU_" + self.dlg.EDU_Output_Field.text()
+
+            with rasterio.open(rasOutput, 'w', **meta) as dst:
+                dst.write(result, 1)
+
+        elif factor_no == 1:
+            max_value = 100
+            min_value = 0
+            result = 5 - ((data - min_value) / (max_value - min_value)) * (5 - 1)
+
+            Dimension = "Indivdual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = "CRE_" + self.dlg.CRE_Output_Field.text()
+
+            with rasterio.open(rasOutput, 'w', **meta) as dst:
+                dst.write(result, 1)
+
+        elif factor_no == 2:
+            max_value = 100
+            min_value = 0
+            result = 5 - ((data - min_value) / (max_value - min_value)) * (5 - 1)
+
+            Dimension = "Indivdual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = "DOV_" + self.dlg.DOV_Output_Field.text()
+
+            with rasterio.open(rasOutput, 'w', **meta) as dst:
+                dst.write(result, 1)
 
         # Loading final output to QGIS GUI viewer
         layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
@@ -362,8 +451,6 @@ class GenderIndicatorTool:
 
         QgsProject.instance().addMapLayer(layer)
 
-        # QMessageBox.information(self.dlg, "Message", f"Rasterized file has been created /n CRS EPSG:{UTM_crs} /nthreshold Distance {bufferDistance}m")
-
     def IDW(self):
 
         workingDir = self.dlg.workingDir_Field.text()
@@ -372,7 +459,7 @@ class GenderIndicatorTool:
 
         #INPUT
         countryAdminLayer = self.dlg.countryLayer_Field.filePath()
-        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
         FaciltyPointlayer = self.dlg.pointLayer_Field.filePath()
         bufferDistance = self.dlg.bufferDistance_spinBox.value()
         pixelSize = self.dlg.pixelSize_spinBox.value()
@@ -441,53 +528,73 @@ class GenderIndicatorTool:
 
         QMessageBox.information(self.dlg, "Message", f"IDW interpolated raster file has been created /n CRS EPSG:{UTM_crs} /threshold Distance {bufferDistance}m")
 
-    def ServiceArea(self):
+    def ServiceArea(self, factor_no):
 
         workingDir = self.dlg.workingDir_Field.text()
-        tempDir = workingDir + "temp"
+        os.chdir(workingDir)
+        tempDir = "temp"
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
         os.mkdir(tempDir)
 
         # INPUT
-        UTM_crs = self.dlg.CRS_comboBox.currentText().split(":")[1].strip()
-        FaciltyPointlayer = self.dlg.pointLayer_Field_2.filePath()
-        rasField = 'rasField'
+        if factor_no == 0:
+            FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            ranges = self.dlg.PBT_Ranges_Field.text()
+            pixelSize = self.dlg.PBT_pixelSize_SB.value()
+            rasOutput = "PBT_" + self.dlg.PBT_Output_Field.text()
 
-        # Setting Travel Mode
-        if self.dlg.travelMode_comboBox.currentText() == "Driving-car":
-            traveMode = 0
-        elif self.dlg.travelMode_comboBox.currentText() == "Walking":
-            traveMode = 6
-        else:
-            pass
+        elif factor_no == 1:
+            FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            ranges = self.dlg.ETF_Ranges_Field.text()
+            pixelSize = self.dlg.ETF_pixelSize_SB.value()
+            rasOutput = "ETF_" + self.dlg.ETF_Output_Field.text()
 
-        # Setting Measurment Metric
-        if self.dlg.metric_comboBox.currentText() == "Driving-car":
-            metric = 0
-        elif self.dlg.metric_comboBox.currentText() == "Walking":
-            metric = 1
-        else:
-            pass
+        elif factor_no == 2:
+            FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            ranges = self.dlg.JOB_Ranges_Field.text()
+            pixelSize = self.dlg.JOB_pixelSize_SB.value()
+            rasOutput = "JOB_" + self.dlg.JOB_Output_Field.text()
 
-        ranges = self.dlg.serviceAreaRanges_Field.text()
-        
-        pixelSize = self.dlg.pixelSize_spinBox_3.value()
+        elif factor_no == 3:
+            FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            ranges = self.dlg.HEA_Ranges_Field.text()
+            pixelSize = self.dlg.HEA_pixelSize_SB.value()
+            rasOutput = "HEA_" + self.dlg.HEA_Output_Field.text()
 
-        # OUTPUT
-        countryAdminLayer_utm_otput = f"{tempDir}/Admin0_UTM.shp"
+        elif factor_no == 4:
+            FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            ranges = self.dlg.FIF_Ranges_Field.text()
+            pixelSize = self.dlg.FIF_pixelSize_SB.value()
+            rasOutput = "FIF_" + self.dlg.FIF_Output_Field.text()
+
+
+        # TEMPORARY OUTPUT
+        SAOutput_utm_otput = f"{tempDir}/FaciltyPointlayer_UTM.shp"
         SAOutput = f"{tempDir}/SA_OUTPUT.shp"
         mergeOutput = f"{tempDir}/Merge.shp"
         mergeRasfield = f"{tempDir}/Merge_rasField.shp"
         polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
         rasterizeOutput = f"{tempDir}/polygonRas.tif"
-        rasOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
+
         # finalOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
+
 
         
         Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
-                                                                          'INPUT_PROFILE': traveMode,
+                                                                          'INPUT_PROFILE': 6,   #Walking
                                                                           'INPUT_POINT_LAYER': FaciltyPointlayer,
                                                                           'INPUT_FIELD': '',
-                                                                          'INPUT_METRIC': 0,
+                                                                          'INPUT_METRIC': 1,    #Distance in meters
                                                                           'INPUT_RANGES': ranges,
                                                                           'INPUT_AVOID_FEATURES': [],
                                                                           'INPUT_AVOID_BORDERS': None,
@@ -495,7 +602,11 @@ class GenderIndicatorTool:
                                                                           'INPUT_AVOID_POLYGONS': None,
                                                                           'OUTPUT': SAOutput})
 
-        SA_df = gpd.read_file(SAOutput)
+        # Convert spatial data to UTM CRS
+        self.convertCRS(SAOutput, UTM_crs)
+        shp_utm.to_file(SAOutput_utm_otput)
+
+        SA_df = gpd.read_file(SAOutput_utm_otput)
         no_spaces_string = "".join(ranges.split())
         ranges_list = no_spaces_string.split(",")
         int_ranges_list = [int(x) for x in ranges_list]
@@ -503,7 +614,7 @@ class GenderIndicatorTool:
 
         # QMessageBox.information(self.dlg, "Message", f"{ranges_list}")
         for i in int_ranges_list:
-            df = SA_df[SA_df['AA_MINS'] == i]
+            df = SA_df[SA_df['AA_METERS'] == i]
             output = f"{tempDir}/band_{i}"
             df.to_file(output + ".shp")
 
@@ -531,7 +642,7 @@ class GenderIndicatorTool:
         merge_df = gpd.read_file(mergeOutput)
         merge_df["rasField"] = [1,2,3,4,5]
         merge_df.to_file(mergeRasfield)
-        polygonlayer = mergeRasfield
+        polygonlayer = workingDir + mergeRasfield
 
         # Convert spatial data to UTM CRS
         self.convertCRS(polygonlayer, UTM_crs)
@@ -543,8 +654,16 @@ class GenderIndicatorTool:
         raster_width = int(extent.width() / pixelSize) + 1
         raster_height = int(extent.height() / pixelSize) + 1
 
+
+        Dimension = "Accessibility"
+        if os.path.exists(Dimension):
+            os.chdir(Dimension)
+        else:
+            os.mkdir(Dimension)
+            os.chdir(Dimension)
+
         rasterize = processing.run("gdal:rasterize", {'INPUT': polygonlayer,
-                                                      'FIELD': rasField,
+                                                      'FIELD': "rasField",
                                                       'BURN': 0,
                                                       'USE_Z': False,
                                                       'UNITS': 0,
@@ -558,25 +677,6 @@ class GenderIndicatorTool:
                                                       'INVERT': False,
                                                       'EXTRA': '',
                                                       'OUTPUT': rasOutput})
-
-        # rasterizeOutput = rasterize["OUTPUT"]
-        #
-        # # *************************** Standardization **********************************
-        #
-        # with rasterio.open(rasterizeOutput) as src:
-        #     data = src.read(1)
-        #     meta = src.meta
-        #     min_value = data.min()
-        #     max_value = data.max()
-        #
-        # # Raster Calculation
-        # # result = (data - min_value) / (max_value - min_value) * 5 #Linear Scaling
-        # result = 5 - ((data - 0) / (max_value - 0)) * (5 - 1)
-        #
-        # meta.update(dtype=rasterio.float32)
-        #
-        # with rasterio.open(rasOutput, 'w', **meta) as dst:
-        #     dst.write(result, 1)
 
         # Loading final output to QGIS GUI viewer
         layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
