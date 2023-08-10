@@ -216,19 +216,25 @@ class GenderIndicatorTool:
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
 
         ## TAB 2 - Individual ***************************************************************************
-        ## TAB 2.1 - Education --------------------------------------------------------------------------
+        ###### TAB 2.1 - Education --------------------------------------------------------------------------
         self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
 
-        self.dlg.mMapLayerComboBox.layerChanged.connect(self.mMapLayerComboBox_layerChanged)
-
-        ## TAB 2.2 - Care Responsibilities ---------------------------------------------------------------
+        ###### TAB 2.2 - Care Responsibilities ---------------------------------------------------------------
         self.dlg.CRE_Set_PB.clicked.connect(lambda: self.RasterizeSet(1))
         self.dlg.CRE_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
 
-        ## TAB 2.3 - Domestic Violence -------------------------------------------------------------------
+        ###### TAB 2.3 - Domestic Violence -------------------------------------------------------------------
         self.dlg.DOV_Set_PB.clicked.connect(lambda: self.RasterizeSet(2))
         self.dlg.DOV_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
+
+        ###### TAB 2.4 - Aggregate ---------------------------------------------------------------------------
+        self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
+        self.dlg.CRE_Aggregate_TB.clicked.connect(lambda: self.getFile(2))
+        self.dlg.DOV_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
+
+        self.dlg.Indivdual_AggregateExecute_PB.clicked.connect(self.indivdualAggregation)
+
 
 
         ## TAB 3 - Contextual ***************************************************************************
@@ -236,31 +242,45 @@ class GenderIndicatorTool:
 
 
         ## TAB 4 - Accessibility ************************************************************************
-        ## TAB 4.1 - Women's Travel Patterns ------------------------------------------------------------
+        ###### TAB 4.1 - Women's Travel Patterns ------------------------------------------------------------
 
-        ## TAB 4.2 - Public Transport -------------------------------------------------------------------
+        ###### TAB 4.2 - Public Transport -------------------------------------------------------------------
         self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
 
-        ## TAB 4.3 - Ediucation & Training --------------------------------------------------------------
+        ###### TAB 4.3 - Ediucation & Training --------------------------------------------------------------
         self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
 
-        ## TAB 4.4 - Jobs -------------------------------------------------------------------------------
+        ###### TAB 4.4 - Jobs -------------------------------------------------------------------------------
         self.dlg.JOB_Execute_PB.clicked.connect(lambda: self.ServiceArea(2))
 
-        ## TAB 4.5 - Health Facilities ------------------------------------------------------------------
+        ###### TAB 4.5 - Health Facilities ------------------------------------------------------------------
         self.dlg.HEA_Execute_PB.clicked.connect(lambda: self.ServiceArea(3))
 
-        ## TAB 4.6 - Financial Facilities ---------------------------------------------------------------
+        ###### TAB 4.6 - Financial Facilities ---------------------------------------------------------------
         self.dlg.FIF_Execute_PB.clicked.connect(lambda: self.ServiceArea(4))
 
         ## TAB 5 - Place Charqacterization **************************************************************
 
         ## TAB 6 - Dimension MCE ************************************************************************
         self.dlg.MCAOutputFilePath_Button.clicked.connect(lambda: self.saveFile(4))
-        self.dlg.pbMCAExecute.clicked.connect(self.MCA)
+        # self.dlg.pbMCAExecute.clicked.connect(self.MCA)
 
-    def mMapLayerComboBox_layerChanged(self, lyr):
-        self.dlg.mFieldComboBox.setLayer(lyr)
+    def getFile(self, button_num):
+        response = QFileDialog.getOpenFileName(
+            parent=self.dlg,
+            caption='Select a file',
+            directory=os.getcwd()
+        )
+
+        if button_num == 1:
+            self.dlg.EDU_Aggregate_Field.setText(response[0])
+
+        elif button_num == 2:
+            self.dlg.CRE_Aggregate_Field.setText(response[0])
+
+        elif button_num == 3:
+            self.dlg.DOV_Aggregate_Field.setText(response[0])
+
     def getFolder(self, button_num):
         response = QFileDialog.getExistingDirectory(
             parent=self.dlg,
@@ -388,12 +408,15 @@ class GenderIndicatorTool:
 
         # *************************** Standardization **********************************
         with rasterio.open(rasterizeOutput) as src:
-            data = src.read(1)
+            Ri = src.read(1)
             meta = src.meta
+            Rmax = 100
+            Rmin = 0
+            m = 5
 
         # Raster Calculation
         if factor_no == 0:
-            result = (data - 0)/(100 - 0) * 5
+            result = (Ri - Rmin)/(Rmax - Rmin) * m
 
             meta.update(dtype=rasterio.float32)
 
@@ -409,10 +432,10 @@ class GenderIndicatorTool:
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
+            self.dlg.EDU_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
+
         elif factor_no == 1:
-            max_value = 100
-            min_value = 0
-            result = 5 - ((data - min_value) / (max_value - min_value)) * (5 - 1)
+            result = (Ri - Rmax) / (Rmin - Rmax) * m
 
             Dimension = "Indivdual"
             if os.path.exists(Dimension):
@@ -426,10 +449,10 @@ class GenderIndicatorTool:
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
+            self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
+
         elif factor_no == 2:
-            max_value = 100
-            min_value = 0
-            result = 5 - ((data - min_value) / (max_value - min_value)) * (5 - 1)
+            result = (Ri - Rmax) / (Rmin - Rmax) * m
 
             Dimension = "Indivdual"
             if os.path.exists(Dimension):
@@ -442,6 +465,8 @@ class GenderIndicatorTool:
 
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
+
+            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
 
         # Loading final output to QGIS GUI viewer
         layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
@@ -694,37 +719,50 @@ class GenderIndicatorTool:
         #
         # QgsProject.instance().addMapLayer(layer)
 
-    def MCA(self):
-        # workingDir = self.dlg.workingDir_Field.text()
+# *************************** Aggregation Functions ************************************ #
+    def indivdualAggregation(self):
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
 
         #INPUT
-        Factor1_ras = self.dlg.factor1_Field.filePath()
-        Factor2_ras = self.dlg.factor2_Field.filePath()
-
+        EDU_ras = self.dlg.EDU_Aggregate_Field.text()
+        CRE_ras = self.dlg.CRE_Aggregate_Field.text()
+        DOV_ras = self.dlg.DOV_Aggregate_Field.text()
 
         #OUTPUT
-        MCA_output = self.dlg.MCAOutputFilePath_Field.text()
+        aggregation = self.dlg.Indivdual_AggregateOutput_Field.text()
 
 
-        with rasterio.open(Factor1_ras) as src:
-            ras1 = src.read(1)
+        with rasterio.open(EDU_ras) as src:
+            EDU_ras = src.read(1)
             meta1 = src.meta
 
-        with rasterio.open(Factor2_ras) as src:
-            ras2 = src.read(1)
+        with rasterio.open(CRE_ras) as src:
+            CRE_ras = src.read(1)
+
+        with rasterio.open(DOV_ras) as src:
+            DOV_ras = src.read(1)
 
         # Raster Calculation
-        Factor1_weight = self.dlg.IDWweight_spinBox.value() / 100
-        Factor2_weight = self.dlg.rasterizeWeight_spinBox.value() / 100
-        result = ((Factor1_weight*ras1) + (Factor2_weight*ras2))
+        EDU_weight = self.dlg.EDU_Aggregate_SB.value() / 100
+        CRE_weight = self.dlg.CRE_Aggregate_SB.value() / 100
+        DOV_weight = self.dlg.DOV_Aggregate_SB.value() / 100
+        result = ((EDU_ras*EDU_weight) + (CRE_ras*CRE_weight) + (DOV_ras*DOV_weight))
 
 
         meta1.update(dtype=rasterio.float32)
 
-        with rasterio.open(MCA_output, 'w', **meta1) as dst:
+        Dimension = "Indivdual"
+        if os.path.exists(Dimension):
+            os.chdir(Dimension)
+        else:
+            os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+        with rasterio.open(aggregation, 'w', **meta1) as dst:
             dst.write(result, 1)
 
-        layer = QgsRasterLayer(MCA_output, f"{MCA_output}")
+        layer = QgsRasterLayer(aggregation, f"{aggregation}")
 
         if not layer.isValid():
             print("Layer failed to load!")

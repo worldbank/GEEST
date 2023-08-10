@@ -174,16 +174,6 @@
       <attribute name="title">
        <string>Education</string>
       </attribute>
-      <widget class="QgsMapLayerComboBox" name="mMapLayerComboBox">
-       <property name="geometry">
-        <rect>
-         <x>570</x>
-         <y>30</y>
-         <width>160</width>
-         <height>27</height>
-        </rect>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_16">
        <property name="geometry">
         <rect>
@@ -217,16 +207,6 @@
          <y>100</y>
          <width>201</width>
          <height>22</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QgsFieldComboBox" name="mFieldComboBox">
-       <property name="geometry">
-        <rect>
-         <x>570</x>
-         <y>70</y>
-         <width>160</width>
-         <height>27</height>
         </rect>
        </property>
       </widget>
@@ -588,18 +568,8 @@
      </widget>
      <widget class="QWidget" name="tab_12">
       <attribute name="title">
-       <string>MCE</string>
+       <string>Aggregate</string>
       </attribute>
-      <widget class="QgsFileWidget" name="factor2_Field_7">
-       <property name="geometry">
-        <rect>
-         <x>160</x>
-         <y>80</y>
-         <width>281</width>
-         <height>31</height>
-        </rect>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_41">
        <property name="geometry">
         <rect>
@@ -611,22 +581,6 @@
        </property>
        <property name="text">
         <string>Education (EDU)</string>
-       </property>
-      </widget>
-      <widget class="QgsSpinBox" name="rasterizeWeight_spinBox_8">
-       <property name="geometry">
-        <rect>
-         <x>450</x>
-         <y>110</y>
-         <width>90</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>33</number>
        </property>
       </widget>
       <widget class="QLabel" name="label_43">
@@ -668,32 +622,6 @@
         <string>Domestic Violence (DOV)</string>
        </property>
       </widget>
-      <widget class="QgsFileWidget" name="factor1_Field_3">
-       <property name="geometry">
-        <rect>
-         <x>160</x>
-         <y>50</y>
-         <width>281</width>
-         <height>31</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QgsSpinBox" name="rasterizeWeight_spinBox_9">
-       <property name="geometry">
-        <rect>
-         <x>450</x>
-         <y>80</y>
-         <width>90</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>33</number>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_46">
        <property name="geometry">
         <rect>
@@ -707,30 +635,169 @@
         <string>Factors</string>
        </property>
       </widget>
-      <widget class="QgsSpinBox" name="IDWweight_spinBox_3">
+      <widget class="QgsFilterLineEdit" name="EDU_Aggregate_Field">
        <property name="geometry">
         <rect>
-         <x>450</x>
+         <x>160</x>
          <y>50</y>
-         <width>90</width>
+         <width>251</width>
          <height>21</height>
         </rect>
        </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>34</number>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
        </property>
       </widget>
-      <widget class="QgsFileWidget" name="factor2_Field_9">
+      <widget class="QToolButton" name="EDU_Aggregate_TB">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>50</y>
+         <width>21</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="CRE_Aggregate_Field">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>80</y>
+         <width>251</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="DOV_Aggregate_Field">
        <property name="geometry">
         <rect>
          <x>160</x>
          <y>110</y>
-         <width>281</width>
-         <height>31</height>
+         <width>251</width>
+         <height>21</height>
         </rect>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QToolButton" name="CRE_Aggregate_TB">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>80</y>
+         <width>21</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+      <widget class="QToolButton" name="DOV_Aggregate_TB">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>110</y>
+         <width>21</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="Indivdual_AggregateOutput_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_81">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>160</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Aggregate Raster File</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="Indivdual_AggregateExecute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>210</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="EDU_Aggregate_SB">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>50</y>
+         <width>62</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <double>100.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>33.329999999999998</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="CRE_Aggregate_SB">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>80</y>
+         <width>62</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <double>100.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>33.329999999999998</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="DOV_Aggregate_SB">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>110</y>
+         <width>62</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <double>100.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>33.329999999999998</double>
        </property>
       </widget>
      </widget>
@@ -750,7 +817,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_14">
       <attribute name="title">
@@ -764,7 +831,7 @@
      </widget>
      <widget class="QWidget" name="tab_16">
       <attribute name="title">
-       <string>MCE</string>
+       <string>Aggregate</string>
       </attribute>
       <widget class="QgsSpinBox" name="rasterizeWeight_spinBox_11">
        <property name="geometry">
@@ -887,7 +954,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="tab_17">
       <attribute name="title">
@@ -1521,7 +1588,7 @@
      </widget>
      <widget class="QWidget" name="tab_23">
       <attribute name="title">
-       <string>MCE</string>
+       <string>Aggregate</string>
       </attribute>
       <widget class="QLabel" name="label_49">
        <property name="geometry">
@@ -1804,44 +1871,69 @@
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
-       <string>Women's Travel Patterns</string>
+       <string>Walkability</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_25">
       <attribute name="title">
-       <string>Public Transport</string>
+       <string>Cycleways</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_26">
       <attribute name="title">
-       <string>Education and Training</string>
+       <string>Public Transport</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_27">
       <attribute name="title">
-       <string>Jobs</string>
+       <string>Urban Design</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_28">
       <attribute name="title">
-       <string>Health Facilities</string>
+       <string>Security</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_29">
       <attribute name="title">
-       <string>Finance Facilities</string>
+       <string>Income Level</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Electrical Access</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Urbanization</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_13">
+      <attribute name="title">
+       <string>Housing</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_31">
+      <attribute name="title">
+       <string>Digital Inclusion</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_32">
+      <attribute name="title">
+       <string>Natural Environment</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_30">
       <attribute name="title">
-       <string>MCE</string>
+       <string>Aggregate</string>
       </attribute>
      </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
-     <string>MCE</string>
+     <string>Aggregate</string>
     </attribute>
     <widget class="QLabel" name="label_18">
      <property name="geometry">
@@ -1854,19 +1946,6 @@
      </property>
      <property name="text">
       <string>Dimensions</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_19">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>10</y>
-       <width>81</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Weight %</string>
      </property>
     </widget>
     <widget class="QgsFileWidget" name="factor1_Field">
@@ -1887,38 +1966,6 @@
        <width>281</width>
        <height>31</height>
       </rect>
-     </property>
-    </widget>
-    <widget class="QgsSpinBox" name="IDWweight_spinBox">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>50</y>
-       <width>90</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="maximum">
-      <number>100</number>
-     </property>
-     <property name="value">
-      <number>17</number>
-     </property>
-    </widget>
-    <widget class="QgsSpinBox" name="rasterizeWeight_spinBox">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>80</y>
-       <width>90</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="maximum">
-      <number>100</number>
-     </property>
-     <property name="value">
-      <number>17</number>
      </property>
     </widget>
     <widget class="QLabel" name="label_20">
@@ -2022,38 +2069,6 @@
       <string>Accessibility</string>
      </property>
     </widget>
-    <widget class="QgsSpinBox" name="rasterizeWeight_spinBox_2">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>110</y>
-       <width>90</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="maximum">
-      <number>100</number>
-     </property>
-     <property name="value">
-      <number>33</number>
-     </property>
-    </widget>
-    <widget class="QgsSpinBox" name="rasterizeWeight_spinBox_3">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>140</y>
-       <width>90</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="maximum">
-      <number>100</number>
-     </property>
-     <property name="value">
-      <number>33</number>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_26">
      <property name="geometry">
       <rect>
@@ -2082,11 +2097,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QgsFieldComboBox</class>
-   <extends>QComboBox</extends>
-   <header>qgsfieldcombobox.h</header>
-  </customwidget>
-  <customwidget>
    <class>QgsFileWidget</class>
    <extends>QWidget</extends>
    <header>qgsfilewidget.h</header>
@@ -2095,11 +2105,6 @@
    <class>QgsFilterLineEdit</class>
    <extends>QLineEdit</extends>
    <header>qgsfilterlineedit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QgsMapLayerComboBox</class>
-   <extends>QComboBox</extends>
-   <header>qgsmaplayercombobox.h</header>
   </customwidget>
   <customwidget>
    <class>QgsProjectionSelectionWidget</class>
