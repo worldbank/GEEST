@@ -215,20 +215,22 @@ class GenderIndicatorTool:
         ## TAB 1 - Analysis Setup ***********************************************************************
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
 
+
+
         ## TAB 2 - Individual ***************************************************************************
-        ###### TAB 2.1 - Education --------------------------------------------------------------------------
+        ###### TAB 2.1 - Education ----------------------------------------------------------------------
         self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
 
-        ###### TAB 2.2 - Care Responsibilities ---------------------------------------------------------------
+        ###### TAB 2.2 - Care Responsibilities ----------------------------------------------------------
         self.dlg.CRE_Set_PB.clicked.connect(lambda: self.RasterizeSet(1))
         self.dlg.CRE_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
 
-        ###### TAB 2.3 - Domestic Violence -------------------------------------------------------------------
+        ###### TAB 2.3 - Domestic Violence --------------------------------------------------------------
         self.dlg.DOV_Set_PB.clicked.connect(lambda: self.RasterizeSet(2))
         self.dlg.DOV_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
-        ###### TAB 2.4 - Aggregate ---------------------------------------------------------------------------
+        ###### TAB 2.4 - Aggregate ----------------------------------------------------------------------
         self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
         self.dlg.CRE_Aggregate_TB.clicked.connect(lambda: self.getFile(2))
         self.dlg.DOV_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
@@ -238,25 +240,32 @@ class GenderIndicatorTool:
 
 
         ## TAB 3 - Contextual ***************************************************************************
+        ###### TAB 3.1 - Policy and Legal Protection ----------------------------------------------------
+
+        ###### TAB 3.2 - Access to Finance --------------------------------------------------------------
+        self.dlg.FIN_Set_PB.clicked.connect(lambda: self.RasterizeSet(3))
+        self.dlg.FIN_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
+
+        ###### TAB 3.2 - Aggregate ----------------------------------------------------------------------
 
 
 
         ## TAB 4 - Accessibility ************************************************************************
-        ###### TAB 4.1 - Women's Travel Patterns ------------------------------------------------------------
+        ###### TAB 4.1 - Women's Travel Patterns --------------------------------------------------------
 
-        ###### TAB 4.2 - Public Transport -------------------------------------------------------------------
+        ###### TAB 4.2 - Public Transport ---------------------------------------------------------------
         self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
 
-        ###### TAB 4.3 - Ediucation & Training --------------------------------------------------------------
+        ###### TAB 4.3 - Ediucation & Training ----------------------------------------------------------
         self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
 
-        ###### TAB 4.4 - Jobs -------------------------------------------------------------------------------
+        ###### TAB 4.4 - Jobs ---------------------------------------------------------------------------
         self.dlg.JOB_Execute_PB.clicked.connect(lambda: self.ServiceArea(2))
 
-        ###### TAB 4.5 - Health Facilities ------------------------------------------------------------------
+        ###### TAB 4.5 - Health Facilities --------------------------------------------------------------
         self.dlg.HEA_Execute_PB.clicked.connect(lambda: self.ServiceArea(3))
 
-        ###### TAB 4.6 - Financial Facilities ---------------------------------------------------------------
+        ###### TAB 4.6 - Financial Facilities -----------------------------------------------------------
         self.dlg.FIF_Execute_PB.clicked.connect(lambda: self.ServiceArea(4))
 
         ## TAB 5 - Place Charqacterization **************************************************************
@@ -280,6 +289,19 @@ class GenderIndicatorTool:
 
         elif button_num == 3:
             self.dlg.DOV_Aggregate_Field.setText(response[0])
+
+        elif button_num == 4:
+            self.dlg.PLP_Aggregate_Field.setText(response[0])
+
+        elif button_num == 5:
+            self.dlg.FIN_Aggregate_Field.setText(response[0])
+
+    def weightingCheck(self):
+        '''
+        This function will be used to check and ensure factor weightings add up to 100%
+        even when there are missing factors.
+        '''
+        pass
 
     def getFolder(self, button_num):
         response = QFileDialog.getExistingDirectory(
@@ -332,6 +354,13 @@ class GenderIndicatorTool:
             fields = [field.name() for field in layer.fields()]
             self.dlg.DOV_rasField_CB.addItems(fields)
 
+        elif factor_no == 3:
+            polygonlayer = self.dlg.FIN_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.FIN_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.FIN_rasField_CB.addItems(fields)
+
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
 
@@ -370,6 +399,12 @@ class GenderIndicatorTool:
             polygonlayer = self.dlg.DOV_Input_Field.filePath()
             rasField = self.dlg.DOV_rasField_CB.currentText()
             pixelSize = self.dlg.DOV_pixelSize_SB.value()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+
+        elif factor_no == 3:
+            polygonlayer = self.dlg.FIN_Input_Field.filePath()
+            rasField = self.dlg.FIN_rasField_CB.currentText()
+            pixelSize = self.dlg.FIN_pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
         #TEMPORARY OUTPUTS
@@ -414,6 +449,8 @@ class GenderIndicatorTool:
             Rmin = 0
             m = 5
 
+            #Xi = m_max - ((Ri - Rmin) / (Rmax - Rmin)) * (m_max - m_min) #Inverser Linear scaling formula???
+
         # Raster Calculation
         if factor_no == 0:
             result = (Ri - Rmin)/(Rmax - Rmin) * m
@@ -427,12 +464,12 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = "EDU_" + self.dlg.EDU_Output_Field.text()
+            rasOutput = "/EDU_" + self.dlg.EDU_Output_Field.text()
 
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
-            self.dlg.EDU_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
+            self.dlg.EDU_Aggregate_Field.setText(f"{workingDir}{Dimension}{rasOutput}")
 
         elif factor_no == 1:
             result = (Ri - Rmax) / (Rmin - Rmax) * m
@@ -444,12 +481,12 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = "CRE_" + self.dlg.CRE_Output_Field.text()
+            rasOutput = "/CRE_" + self.dlg.CRE_Output_Field.text()
 
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
-            self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
+            self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{Dimension}{rasOutput}")
 
         elif factor_no == 2:
             result = (Ri - Rmax) / (Rmin - Rmax) * m
@@ -461,12 +498,32 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = "DOV_" + self.dlg.DOV_Output_Field.text()
+            rasOutput = "/DOV_" + self.dlg.DOV_Output_Field.text()
 
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
-            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
+            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}{rasOutput}")
+
+        if factor_no == 3:
+            result = (Ri - Rmin)/(Rmax - Rmin) * m
+
+            meta.update(dtype=rasterio.float32)
+
+            Dimension  = "Contextual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = "FIN_" + self.dlg.FIN_Output_Field.text()
+
+            with rasterio.open(rasOutput, 'w', **meta) as dst:
+                dst.write(result, 1)
+
+            self.dlg.FIN_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
+
 
         # Loading final output to QGIS GUI viewer
         layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
