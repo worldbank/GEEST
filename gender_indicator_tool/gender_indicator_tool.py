@@ -213,41 +213,44 @@ class GenderIndicatorTool:
         self.dlg.show()
 
         ## TAB 1 - Analysis Setup ***********************************************************************
-        self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(1))
+        self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(0))
 
 
 
         ## TAB 2 - Individual ***************************************************************************
-        ###### TAB 2.1 - Education ----------------------------------------------------------------------
+        ###### TAB 2.1 - Education
         self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
 
-        ###### TAB 2.2 - Care Responsibilities ----------------------------------------------------------
+        ###### TAB 2.2 - Care Responsibilities
         self.dlg.CRE_Set_PB.clicked.connect(lambda: self.RasterizeSet(1))
         self.dlg.CRE_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
 
-        ###### TAB 2.3 - Domestic Violence --------------------------------------------------------------
+        ###### TAB 2.3 - Domestic Violence
         self.dlg.DOV_Set_PB.clicked.connect(lambda: self.RasterizeSet(2))
         self.dlg.DOV_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
-        ###### TAB 2.4 - Aggregate ----------------------------------------------------------------------
-        self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
-        self.dlg.CRE_Aggregate_TB.clicked.connect(lambda: self.getFile(2))
-        self.dlg.DOV_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
+        ###### TAB 2.4 - Aggregate
+        self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
+        self.dlg.CRE_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
+        self.dlg.DOV_Aggregate_TB.clicked.connect(lambda: self.getFile(2))
 
         self.dlg.Indivdual_AggregateExecute_PB.clicked.connect(self.indivdualAggregation)
 
 
 
         ## TAB 3 - Contextual ***************************************************************************
-        ###### TAB 3.1 - Policy and Legal Protection ----------------------------------------------------
+        ###### TAB 3.1 - Policy and Legal Protection
 
-        ###### TAB 3.2 - Access to Finance --------------------------------------------------------------
+        ###### TAB 3.2 - Access to Finance
         self.dlg.FIN_Set_PB.clicked.connect(lambda: self.RasterizeSet(3))
         self.dlg.FIN_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
 
-        ###### TAB 3.2 - Aggregate ----------------------------------------------------------------------
+        ###### TAB 3.2 - Aggregate
+        self.dlg.PLP_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
+        self.dlg.FIN_Aggregate_TB.clicked.connect(lambda: self.getFile(4))
 
+        self.dlg.Contextual_AggregateExecute_PB.clicked.connect(self.contextualAggregation)
 
 
         ## TAB 4 - Accessibility ************************************************************************
@@ -281,27 +284,56 @@ class GenderIndicatorTool:
             directory=os.getcwd()
         )
 
-        if button_num == 1:
+        if button_num == 0:
             self.dlg.EDU_Aggregate_Field.setText(response[0])
 
-        elif button_num == 2:
+        elif button_num == 1:
             self.dlg.CRE_Aggregate_Field.setText(response[0])
 
-        elif button_num == 3:
+        elif button_num == 2:
             self.dlg.DOV_Aggregate_Field.setText(response[0])
 
-        elif button_num == 4:
+        elif button_num == 3:
             self.dlg.PLP_Aggregate_Field.setText(response[0])
 
-        elif button_num == 5:
+        elif button_num == 4:
             self.dlg.FIN_Aggregate_Field.setText(response[0])
 
-    def weightingCheck(self):
+    def Check(self):
         '''
         This function will be used to check and ensure factor weightings add up to 100%
         even when there are missing factors.
         '''
-        pass
+        EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
+        CRE_ras = self.dlg.CRE_Aggregate_Field.text().strip(" ")
+        DOV_ras = self.dlg.DOV_Aggregate_Field.text().strip(" ")
+
+        rasLayers = [EDU_ras, CRE_ras, DOV_ras]
+
+        EDU_weight = self.dlg.EDU_Aggregate_SB.value()
+        CRE_weight = self.dlg.CRE_Aggregate_SB.value()
+        DOV_weight = self.dlg.DOV_Aggregate_SB.value()
+
+        IndivdualWeighting = [EDU_weight, CRE_weight, DOV_weight]
+
+        weightingSum = round(sum(IndivdualWeighting))
+
+        if weightingSum == 100:
+            self.dlg.Check.setText("Weighting % adds up to 100 %")
+            if "" in rasLayers:
+                self.dlg.Check.setText("Factor layer missing")
+                missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
+                presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
+
+                for i in missingLayers:
+                    rasLayers[i] = rasLayers[presentLayers[0]]
+                    IndivdualWeighting[i] = 0
+
+                self.dlg.Check.setText(str(IndivdualWeighting))
+            else:
+                self.dlg.Check.setText("All layers present")
+        else:
+            self.dlg.Check.setText("Weighting % does not add up to 100 %")
 
     def getFolder(self, button_num):
         response = QFileDialog.getExistingDirectory(
@@ -310,7 +342,7 @@ class GenderIndicatorTool:
             directory=os.getcwd()
         )
 
-        if button_num == 1:
+        if button_num == 0:
             self.dlg.workingDir_Field.setText(str(response + "/"))
 
     def saveFile(self,button_num):
@@ -440,20 +472,21 @@ class GenderIndicatorTool:
 
 
         rasterizeOutput = rasterize["OUTPUT"]
-
         # *************************** Standardization **********************************
         with rasterio.open(rasterizeOutput) as src:
             Ri = src.read(1)
+            Ri[Ri == 0] = np.nan
             meta = src.meta
             Rmax = 100
             Rmin = 0
-            m = 5
+            m_max = 5
+            m_min = 0
 
             #Xi = m_max - ((Ri - Rmin) / (Rmax - Rmin)) * (m_max - m_min) #Inverser Linear scaling formula???
 
         # Raster Calculation
         if factor_no == 0:
-            result = (Ri - Rmin)/(Rmax - Rmin) * m
+            result = (Ri - Rmin)/(Rmax - Rmin) * m_max
 
             meta.update(dtype=rasterio.float32)
 
@@ -464,15 +497,16 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = "/EDU_" + self.dlg.EDU_Output_Field.text()
+            rasOutput = "EDU_" + self.dlg.EDU_Output_Field.text()
 
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
-            self.dlg.EDU_Aggregate_Field.setText(f"{workingDir}{Dimension}{rasOutput}")
+            self.dlg.EDU_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 1:
-            result = (Ri - Rmax) / (Rmin - Rmax) * m
+            result = (Ri - Rmax)/(Rmin - Rmax) * m_max
+                # m_max - ((Ri - Rmin) / (Rmax - Rmin)) * (m_max - m_min)
 
             Dimension = "Indivdual"
             if os.path.exists(Dimension):
@@ -481,15 +515,16 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = "/CRE_" + self.dlg.CRE_Output_Field.text()
+            rasOutput = "CRE_" + self.dlg.CRE_Output_Field.text()
 
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
-            self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{Dimension}{rasOutput}")
+            self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 2:
-            result = (Ri - Rmax) / (Rmin - Rmax) * m
+            result = (Ri - Rmax)/(Rmin - Rmax) * m_max
+                # m_max - ((Ri - Rmin) / (Rmax - Rmin)) * (m_max - m_min)
 
             Dimension = "Indivdual"
             if os.path.exists(Dimension):
@@ -498,15 +533,15 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = "/DOV_" + self.dlg.DOV_Output_Field.text()
+            rasOutput = "DOV_" + self.dlg.DOV_Output_Field.text()
 
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
-            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}{rasOutput}")
+            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         if factor_no == 3:
-            result = (Ri - Rmin)/(Rmax - Rmin) * m
+            result = (Ri - Rmin)/(Rmax - Rmin) * m_max
 
             meta.update(dtype=rasterio.float32)
 
@@ -522,7 +557,7 @@ class GenderIndicatorTool:
             with rasterio.open(rasOutput, 'w', **meta) as dst:
                 dst.write(result, 1)
 
-            self.dlg.FIN_Aggregate_Field.setText(f"{workingDir}{rasOutput}")
+            self.dlg.FIN_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
 
         # Loading final output to QGIS GUI viewer
@@ -782,48 +817,143 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
         #INPUT
-        EDU_ras = self.dlg.EDU_Aggregate_Field.text()
-        CRE_ras = self.dlg.CRE_Aggregate_Field.text()
-        DOV_ras = self.dlg.DOV_Aggregate_Field.text()
+        EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
+        CRE_ras = self.dlg.CRE_Aggregate_Field.text().strip(" ")
+        DOV_ras = self.dlg.DOV_Aggregate_Field.text().strip(" ")
+
+        EDU_weight = self.dlg.EDU_Aggregate_SB.value()
+        CRE_weight = self.dlg.CRE_Aggregate_SB.value()
+        DOV_weight = self.dlg.DOV_Aggregate_SB.value()
 
         #OUTPUT
         aggregation = self.dlg.Indivdual_AggregateOutput_Field.text()
 
+        rasLayers = [EDU_ras, CRE_ras, DOV_ras]
+        IndivdualWeighting = [EDU_weight, CRE_weight, DOV_weight]
 
-        with rasterio.open(EDU_ras) as src:
-            EDU_ras = src.read(1)
-            meta1 = src.meta
+        weightingSum = round(sum(IndivdualWeighting))
 
-        with rasterio.open(CRE_ras) as src:
-            CRE_ras = src.read(1)
+        if weightingSum == 100:
+            if "" in rasLayers:
+                self.dlg.individualAggregation_Check.setText("Factor layer/s missing")
+                missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
+                presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
 
-        with rasterio.open(DOV_ras) as src:
-            DOV_ras = src.read(1)
+                for i in missingLayers:
+                    rasLayers[i] = rasLayers[presentLayers[0]]
+                    IndivdualWeighting[i] = 0
 
-        # Raster Calculation
-        EDU_weight = self.dlg.EDU_Aggregate_SB.value() / 100
-        CRE_weight = self.dlg.CRE_Aggregate_SB.value() / 100
-        DOV_weight = self.dlg.DOV_Aggregate_SB.value() / 100
-        result = ((EDU_ras*EDU_weight) + (CRE_ras*CRE_weight) + (DOV_ras*DOV_weight))
+            else:
+                self.dlg.individualAggregation_Check.setText("All layers present")
 
+            with rasterio.open(rasLayers[0]) as src:
+                EDU_ras = src.read(1)
+                EDU_weight = IndivdualWeighting[0]
+                meta1 = src.meta
 
-        meta1.update(dtype=rasterio.float32)
+            with rasterio.open(rasLayers[1]) as src:
+                CRE_ras = src.read(1)
+                CRE_weight = IndivdualWeighting[1]
 
-        Dimension = "Indivdual"
-        if os.path.exists(Dimension):
-            os.chdir(Dimension)
+            with rasterio.open(rasLayers[2]) as src:
+                DOV_ras = src.read(1)
+                DOV_weight = IndivdualWeighting[2]
+
+            # Raster Calculation
+
+            result = ((EDU_ras * EDU_weight / 100) + (CRE_ras * CRE_weight / 100) + (DOV_ras * DOV_weight / 100))
+
+            meta1.update(dtype=rasterio.float32)
+
+            Dimension = "Indivdual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            with rasterio.open(aggregation, 'w', **meta1) as dst:
+                dst.write(result, 1)
+
+            layer = QgsRasterLayer(aggregation, f"{aggregation}")
+
+            if not layer.isValid():
+                print("Layer failed to load!")
+
+            QgsProject.instance().addMapLayer(layer)
+
+            QMessageBox.information(self.dlg, "Message", f"Individual dimension aggregation complete!")
+            
         else:
-            os.mkdir(Dimension)
-            os.chdir(Dimension)
+            self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
 
-        with rasterio.open(aggregation, 'w', **meta1) as dst:
-            dst.write(result, 1)
+    def contextualAggregation(self):
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
 
-        layer = QgsRasterLayer(aggregation, f"{aggregation}")
+        # INPUT
+        PLP_ras = self.dlg.PLP_Aggregate_Field.text().strip(" ")
+        FIN_ras = self.dlg.FIN_Aggregate_Field.text().strip(" ")
 
-        if not layer.isValid():
-            print("Layer failed to load!")
+        PLP_weight = self.dlg.PLP_Aggregate_SB.value()
+        FIN_weight = self.dlg.FIN_Aggregate_SB.value()
 
-        QgsProject.instance().addMapLayer(layer)
+        # OUTPUT
+        aggregation = self.dlg.Contextual_AggregateOutput_Field.text()
 
-        QMessageBox.information(self.dlg, "Message", f"{type(result)}")
+        rasLayers = [PLP_ras, FIN_ras]
+        IndivdualWeighting = [PLP_weight, FIN_weight]
+
+        weightingSum = round(sum(IndivdualWeighting))
+
+        if weightingSum == 100:
+            if "" in rasLayers:
+                self.dlg.contextualAggregation_Check.setText("Factor layer/s missing")
+                missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
+                presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
+
+                for i in missingLayers:
+                    rasLayers[i] = rasLayers[presentLayers[0]]
+                    IndivdualWeighting[i] = 0
+
+            else:
+                self.dlg.contextualAggregation_Check.setText("All layers present")
+
+            with rasterio.open(rasLayers[0]) as src:
+                PLP_ras = src.read(1)
+                PLP_weight = IndivdualWeighting[0]
+                meta1 = src.meta
+
+            with rasterio.open(rasLayers[1]) as src:
+                FIN_ras = src.read(1)
+                FIN_weight = IndivdualWeighting[1]
+
+
+            # Raster Calculation
+
+            result = ((PLP_ras * PLP_weight / 100) + (FIN_ras * FIN_weight / 100))
+
+            meta1.update(dtype=rasterio.float32)
+
+            Dimension = "Contextual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            with rasterio.open(aggregation, 'w', **meta1) as dst:
+                dst.write(result, 1)
+
+            layer = QgsRasterLayer(aggregation, f"{aggregation}")
+
+            if not layer.isValid():
+                print("Layer failed to load!")
+
+            QgsProject.instance().addMapLayer(layer)
+
+            QMessageBox.information(self.dlg, "Message", f"Contextual dimension aggregation complete!")
+
+        else:
+            self.dlg.contextualAggregation_Check.setText("Weighting % does not add up to 100 %")
+

@@ -100,6 +100,9 @@
        <height>21</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hello&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="qgisRelation" stdset="0">
       <string notr="true"/>
      </property>
@@ -168,7 +171,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_9">
       <attribute name="title">
@@ -800,6 +803,19 @@
         <double>33.329999999999998</double>
        </property>
       </widget>
+      <widget class="QLabel" name="indivdualAggregation_Check">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>250</y>
+         <width>701</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
@@ -817,7 +833,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_14">
       <attribute name="title">
@@ -1109,7 +1125,7 @@
         <string>Excute</string>
        </property>
       </widget>
-      <widget class="QgsFilterLineEdit" name="Contextual_AggregateOutput_Field_2">
+      <widget class="QgsFilterLineEdit" name="Contextual_AggregateOutput_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -1135,6 +1151,19 @@
         <string>Output Aggregate Raster File</string>
        </property>
       </widget>
+      <widget class="QLabel" name="contextualAggregation_Check">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>240</y>
+         <width>701</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
@@ -1152,7 +1181,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>6</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_17">
       <attribute name="title">
