@@ -254,28 +254,79 @@ class GenderIndicatorTool:
 
 
         ## TAB 4 - Accessibility ************************************************************************
-        ###### TAB 4.1 - Women's Travel Patterns --------------------------------------------------------
+        ###### TAB 4.1 - Women's Travel Patterns
 
-        ###### TAB 4.2 - Public Transport ---------------------------------------------------------------
+        ###### TAB 4.2 - Public Transport
         self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
 
-        ###### TAB 4.3 - Ediucation & Training ----------------------------------------------------------
+        ###### TAB 4.3 - Ediucation & Training
         self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
 
-        ###### TAB 4.4 - Jobs ---------------------------------------------------------------------------
+        ###### TAB 4.4 - Jobs
         self.dlg.JOB_Execute_PB.clicked.connect(lambda: self.ServiceArea(2))
 
-        ###### TAB 4.5 - Health Facilities --------------------------------------------------------------
+        ###### TAB 4.5 - Health Facilities
         self.dlg.HEA_Execute_PB.clicked.connect(lambda: self.ServiceArea(3))
 
-        ###### TAB 4.6 - Financial Facilities -----------------------------------------------------------
+        ###### TAB 4.6 - Financial Facilities
         self.dlg.FIF_Execute_PB.clicked.connect(lambda: self.ServiceArea(4))
 
-        ## TAB 5 - Place Charqacterization **************************************************************
+        ###### TAB 4.7 - Aggregate
+        self.dlg.WTP_Aggregate_TB.clicked.connect(lambda: self.getFile(5))
+        self.dlg.PBT_Aggregate_TB.clicked.connect(lambda: self.getFile(6))
+        self.dlg.ETF_Aggregate_TB.clicked.connect(lambda: self.getFile(7))
+        self.dlg.JOB_Aggregate_TB.clicked.connect(lambda: self.getFile(8))
+        self.dlg.HEA_Aggregate_TB.clicked.connect(lambda: self.getFile(9))
+        self.dlg.FIF_Aggregate_TB.clicked.connect(lambda: self.getFile(10))
 
-        ## TAB 6 - Dimension MCE ************************************************************************
-        self.dlg.MCAOutputFilePath_Button.clicked.connect(lambda: self.saveFile(4))
-        # self.dlg.pbMCAExecute.clicked.connect(self.MCA)
+        self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(self.accessibilityAggregation)
+
+
+        ## TAB 5 - Place Charqacterization **************************************************************
+        ###### TAB 5.1 - Walkability
+
+        ###### TAB 5.2 - Cycleways
+
+        ###### TAB 5.3 - Public Transport
+
+        ###### TAB 5.4 - Urban Design
+
+        ###### TAB 5.5 - Security
+
+        ###### TAB 5.6 - Income Level
+
+        ###### TAB 5.7 - Electrical Access
+
+        ###### TAB 5.8 - Urbanization
+
+        ###### TAB 5.9 - Housing
+
+        ###### TAB 5.10 - Digital Inclusion
+
+        ###### TAB 5.11 - Natural Environment
+
+        ###### TAB 5.12 - Aggregate
+        self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
+        self.dlg.CYC_Aggregate_TB.clicked.connect(lambda: self.getFile(12))
+        self.dlg.APT_Aggregate_TB.clicked.connect(lambda: self.getFile(13))
+        self.dlg.SAF_Aggregate_TB.clicked.connect(lambda: self.getFile(14))
+        self.dlg.SEC_Aggregate_TB.clicked.connect(lambda: self.getFile(15))
+        self.dlg.INC_Aggregate_TB.clicked.connect(lambda: self.getFile(16))
+        self.dlg.ELC_Aggregate_TB.clicked.connect(lambda: self.getFile(17))
+        self.dlg.LOU_Aggregate_TB.clicked.connect(lambda: self.getFile(18))
+        self.dlg.QUH_Aggregate_TB.clicked.connect(lambda: self.getFile(19))
+        self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
+        self.dlg.ENV_Aggregate_TB.clicked.connect(lambda: self.getFile(21))
+
+        self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(self.accessibilityAggregation)
+
+        ## TAB 6 - Dimension Aggregation ************************************************************************
+        self.dlg.ID_Aggregate_TB.clicked.connect(lambda: self.getFile(22))
+        self.dlg.CD_Aggregate_TB.clicked.connect(lambda: self.getFile(23))
+        self.dlg.AD_Aggregate_TB.clicked.connect(lambda: self.getFile(24))
+        self.dlg.PD_Aggregate_TB.clicked.connect(lambda: self.getFile(25))
+
+        self.dlg.Dimensions_AggregateExecute_PB.clicked.connect(self.accessibilityAggregation)
 
     def getFile(self, button_num):
         response = QFileDialog.getOpenFileName(
@@ -298,6 +349,69 @@ class GenderIndicatorTool:
 
         elif button_num == 4:
             self.dlg.FIN_Aggregate_Field.setText(response[0])
+
+        elif button_num == 5:
+            self.dlg.WTP_Aggregate_Field.setText(response[0])
+
+        elif button_num == 6:
+            self.dlg.PBT_Aggregate_Field.setText(response[0])
+
+        elif button_num == 7:
+            self.dlg.ETF_Aggregate_Field.setText(response[0])
+
+        elif button_num == 8:
+            self.dlg.JOB_Aggregate_Field.setText(response[0])
+
+        elif button_num == 9:
+            self.dlg.HEA_Aggregate_Field.setText(response[0])
+
+        elif button_num == 10:
+            self.dlg.FIF_Aggregate_Field.setText(response[0])
+
+        elif button_num == 11:
+            self.dlg.WLK_Aggregate_Field.setText(response[0])
+
+        elif button_num == 12:
+            self.dlg.CYC_Aggregate_Field.setText(response[0])
+
+        elif button_num == 13:
+            self.dlg.APT_Aggregate_Field.setText(response[0])
+
+        elif button_num == 14:
+            self.dlg.SAF_Aggregate_Field.setText(response[0])
+
+        elif button_num == 15:
+            self.dlg.SEC_Aggregate_Field.setText(response[0])
+
+        elif button_num == 16:
+            self.dlg.INC_Aggregate_Field.setText(response[0])
+
+        elif button_num == 17:
+            self.dlg.ELC_Aggregate_Field.setText(response[0])
+
+        elif button_num == 18:
+            self.dlg.LOU_Aggregate_Field.setText(response[0])
+
+        elif button_num == 19:
+            self.dlg.QUH_Aggregate_Field.setText(response[0])
+
+        elif button_num == 20:
+            self.dlg.DIG_Aggregate_Field.setText(response[0])
+
+        elif button_num == 21:
+            self.dlg.ENV_Aggregate_Field.setText(response[0])
+
+        elif button_num == 22:
+            self.dlg.ID_Aggregate_Field.setText(response[0])
+
+        elif button_num == 23:
+            self.dlg.CD_Aggregate_Field.setText(response[0])
+
+        elif button_num == 24:
+            self.dlg.AD_Aggregate_Field.setText(response[0])
+
+        elif button_num == 25:
+            self.dlg.PD_Aggregate_Field.setText(response[0])
 
     def Check(self):
         '''
@@ -658,46 +772,49 @@ class GenderIndicatorTool:
 
         os.mkdir(tempDir)
 
+        Dimension = "Accessibility"
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+
         # INPUT
         if factor_no == 0:
             FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
-            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
             ranges = self.dlg.PBT_Ranges_Field.text()
             pixelSize = self.dlg.PBT_pixelSize_SB.value()
             rasOutput = "PBT_" + self.dlg.PBT_Output_Field.text()
+            self.dlg.PBT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 1:
             FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
-            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
             ranges = self.dlg.ETF_Ranges_Field.text()
             pixelSize = self.dlg.ETF_pixelSize_SB.value()
             rasOutput = "ETF_" + self.dlg.ETF_Output_Field.text()
+            self.dlg.ETF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 2:
             FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
-            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
             ranges = self.dlg.JOB_Ranges_Field.text()
             pixelSize = self.dlg.JOB_pixelSize_SB.value()
             rasOutput = "JOB_" + self.dlg.JOB_Output_Field.text()
+            self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 3:
             FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
-            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
             ranges = self.dlg.HEA_Ranges_Field.text()
             pixelSize = self.dlg.HEA_pixelSize_SB.value()
             rasOutput = "HEA_" + self.dlg.HEA_Output_Field.text()
+            self.dlg.HEA_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 4:
             FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
-            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
             ranges = self.dlg.FIF_Ranges_Field.text()
             pixelSize = self.dlg.FIF_pixelSize_SB.value()
             rasOutput = "FIF_" + self.dlg.FIF_Output_Field.text()
+            self.dlg.FIF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
 
         # TEMPORARY OUTPUT
         SAOutput_utm_otput = f"{tempDir}/FaciltyPointlayer_UTM.shp"
-        SAOutput = f"{tempDir}/SA_OUTPUT.shp"
+        SAOutput = f"{tempDir}/SA_OUTPUT"
         mergeOutput = f"{tempDir}/Merge.shp"
         mergeRasfield = f"{tempDir}/Merge_rasField.shp"
         polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
@@ -705,22 +822,36 @@ class GenderIndicatorTool:
 
         # finalOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
 
+        gdf = gpd.read_file(FaciltyPointlayer)
 
-        
-        Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
-                                                                          'INPUT_PROFILE': 6,   #Walking
-                                                                          'INPUT_POINT_LAYER': FaciltyPointlayer,
-                                                                          'INPUT_FIELD': '',
-                                                                          'INPUT_METRIC': 1,    #Distance in meters
-                                                                          'INPUT_RANGES': ranges,
-                                                                          'INPUT_AVOID_FEATURES': [],
-                                                                          'INPUT_AVOID_BORDERS': None,
-                                                                          'INPUT_AVOID_COUNTRIES': '',
-                                                                          'INPUT_AVOID_POLYGONS': None,
-                                                                          'OUTPUT': SAOutput})
+        subset_size = 5
+        subsets = []
+
+        for i in range(0, len(gdf), subset_size):
+            subset = gdf.iloc[i:i + subset_size]
+
+            subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
+
+
+            subsets.append(f"{SAOutput}_{i}.shp")
+            Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
+                                                                              'INPUT_PROFILE': 6,   #Walking
+                                                                              'INPUT_POINT_LAYER': subset,
+                                                                              'INPUT_FIELD': '',
+                                                                              'INPUT_METRIC': 1,    #Distance in meters
+                                                                              'INPUT_RANGES': ranges,
+                                                                              'INPUT_AVOID_FEATURES': [],
+                                                                              'INPUT_AVOID_BORDERS': None,
+                                                                              'INPUT_AVOID_COUNTRIES': '',
+                                                                              'INPUT_AVOID_POLYGONS': None,
+                                                                              'OUTPUT': f"{SAOutput}_{i}.shp"})
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
+                                                            'CRS': None,
+                                                            'OUTPUT': f"{SAOutput}.shp"})
 
         # Convert spatial data to UTM CRS
-        self.convertCRS(SAOutput, UTM_crs)
+        self.convertCRS(f"{SAOutput}.shp", UTM_crs)
         shp_utm.to_file(SAOutput_utm_otput)
 
         SA_df = gpd.read_file(SAOutput_utm_otput)
@@ -772,7 +903,7 @@ class GenderIndicatorTool:
         raster_height = int(extent.height() / pixelSize) + 1
 
 
-        Dimension = "Accessibility"
+
         if os.path.exists(Dimension):
             os.chdir(Dimension)
         else:
@@ -795,6 +926,7 @@ class GenderIndicatorTool:
                                                       'EXTRA': '',
                                                       'OUTPUT': rasOutput})
 
+
         # Loading final output to QGIS GUI viewer
         layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
 
@@ -802,14 +934,6 @@ class GenderIndicatorTool:
             print("Layer failed to load!")
 
         QgsProject.instance().addMapLayer(layer)
-        
-        # Loading final output to QGIS GUI viewer
-        # layer = QgsVectorLayer(finalOutput, f"{finalOutput}")
-        #
-        # if not layer.isValid():
-        #     print("Layer failed to load!")
-        #
-        # QgsProject.instance().addMapLayer(layer)
 
 # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
@@ -829,9 +953,9 @@ class GenderIndicatorTool:
         aggregation = self.dlg.Indivdual_AggregateOutput_Field.text()
 
         rasLayers = [EDU_ras, CRE_ras, DOV_ras]
-        IndivdualWeighting = [EDU_weight, CRE_weight, DOV_weight]
+        factorWeighting = [EDU_weight, CRE_weight, DOV_weight]
 
-        weightingSum = round(sum(IndivdualWeighting))
+        weightingSum = round(sum(factorWeighting))
 
         if weightingSum == 100:
             if "" in rasLayers:
@@ -841,49 +965,54 @@ class GenderIndicatorTool:
 
                 for i in missingLayers:
                     rasLayers[i] = rasLayers[presentLayers[0]]
-                    IndivdualWeighting[i] = 0
+                    factorWeighting[i] = 0
 
             else:
-                self.dlg.individualAggregation_Check.setText("All layers present")
+                pass
 
-            with rasterio.open(rasLayers[0]) as src:
-                EDU_ras = src.read(1)
-                EDU_weight = IndivdualWeighting[0]
-                meta1 = src.meta
+            weightingSum = round(sum(factorWeighting))
+            if weightingSum == 100:
+                with rasterio.open(rasLayers[0]) as src:
+                    EDU_ras = src.read(1)
+                    EDU_weight = factorWeighting[0]
+                    meta1 = src.meta
 
-            with rasterio.open(rasLayers[1]) as src:
-                CRE_ras = src.read(1)
-                CRE_weight = IndivdualWeighting[1]
+                with rasterio.open(rasLayers[1]) as src:
+                    CRE_ras = src.read(1)
+                    CRE_weight = factorWeighting[1]
 
-            with rasterio.open(rasLayers[2]) as src:
-                DOV_ras = src.read(1)
-                DOV_weight = IndivdualWeighting[2]
+                with rasterio.open(rasLayers[2]) as src:
+                    DOV_ras = src.read(1)
+                    DOV_weight = factorWeighting[2]
 
-            # Raster Calculation
+                # Raster Calculation
 
-            result = ((EDU_ras * EDU_weight / 100) + (CRE_ras * CRE_weight / 100) + (DOV_ras * DOV_weight / 100))
+                result = ((EDU_ras * EDU_weight / 100) + (CRE_ras * CRE_weight / 100) + (DOV_ras * DOV_weight / 100))
 
-            meta1.update(dtype=rasterio.float32)
+                meta1.update(dtype=rasterio.float32)
 
-            Dimension = "Indivdual"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
+                Dimension = "Indivdual"
+                if os.path.exists(Dimension):
+                    os.chdir(Dimension)
+                else:
+                    os.mkdir(Dimension)
+                    os.chdir(Dimension)
+
+                with rasterio.open(aggregation, 'w', **meta1) as dst:
+                    dst.write(result, 1)
+
+                self.dlg.ID_Aggregate_Field.setText(f"{workingDir}{Dimension}/{aggregation}")
+
+                layer = QgsRasterLayer(aggregation, f"{aggregation}")
+
+                if not layer.isValid():
+                    print("Layer failed to load!")
+
+                QgsProject.instance().addMapLayer(layer)
+
+                QMessageBox.information(self.dlg, "Message", f"Individual dimension aggregation complete!")
             else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            with rasterio.open(aggregation, 'w', **meta1) as dst:
-                dst.write(result, 1)
-
-            layer = QgsRasterLayer(aggregation, f"{aggregation}")
-
-            if not layer.isValid():
-                print("Layer failed to load!")
-
-            QgsProject.instance().addMapLayer(layer)
-
-            QMessageBox.information(self.dlg, "Message", f"Individual dimension aggregation complete!")
-            
+                self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
         else:
             self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
 
@@ -902,9 +1031,9 @@ class GenderIndicatorTool:
         aggregation = self.dlg.Contextual_AggregateOutput_Field.text()
 
         rasLayers = [PLP_ras, FIN_ras]
-        IndivdualWeighting = [PLP_weight, FIN_weight]
+        factorWeighting = [PLP_weight, FIN_weight]
 
-        weightingSum = round(sum(IndivdualWeighting))
+        weightingSum = round(sum(factorWeighting))
 
         if weightingSum == 100:
             if "" in rasLayers:
@@ -914,46 +1043,273 @@ class GenderIndicatorTool:
 
                 for i in missingLayers:
                     rasLayers[i] = rasLayers[presentLayers[0]]
-                    IndivdualWeighting[i] = 0
+                    factorWeighting[i] = 0
 
             else:
-                self.dlg.contextualAggregation_Check.setText("All layers present")
+                pass
 
-            with rasterio.open(rasLayers[0]) as src:
-                PLP_ras = src.read(1)
-                PLP_weight = IndivdualWeighting[0]
-                meta1 = src.meta
+            weightingSum = round(sum(factorWeighting))
+            if weightingSum == 100:
 
-            with rasterio.open(rasLayers[1]) as src:
-                FIN_ras = src.read(1)
-                FIN_weight = IndivdualWeighting[1]
+                with rasterio.open(rasLayers[0]) as src:
+                    PLP_ras = src.read(1)
+                    PLP_weight = factorWeighting[0]
+                    meta1 = src.meta
+
+                with rasterio.open(rasLayers[1]) as src:
+                    FIN_ras = src.read(1)
+                    FIN_weight = factorWeighting[1]
 
 
-            # Raster Calculation
+                # Raster Calculation
 
-            result = ((PLP_ras * PLP_weight / 100) + (FIN_ras * FIN_weight / 100))
+                result = ((PLP_ras * PLP_weight / 100) + (FIN_ras * FIN_weight / 100))
 
-            meta1.update(dtype=rasterio.float32)
+                meta1.update(dtype=rasterio.float32)
 
-            Dimension = "Contextual"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
+                Dimension = "Contextual"
+                if os.path.exists(Dimension):
+                    os.chdir(Dimension)
+                else:
+                    os.mkdir(Dimension)
+                    os.chdir(Dimension)
+
+                with rasterio.open(aggregation, 'w', **meta1) as dst:
+                    dst.write(result, 1)
+
+                self.dlg.CD_Aggregate_Field.setText(f"{workingDir}{Dimension}/{aggregation}")
+
+                layer = QgsRasterLayer(aggregation, f"{aggregation}")
+
+                if not layer.isValid():
+                    print("Layer failed to load!")
+
+                QgsProject.instance().addMapLayer(layer)
+
+                QMessageBox.information(self.dlg, "Message", f"Contextual dimension aggregation complete!")
             else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            with rasterio.open(aggregation, 'w', **meta1) as dst:
-                dst.write(result, 1)
-
-            layer = QgsRasterLayer(aggregation, f"{aggregation}")
-
-            if not layer.isValid():
-                print("Layer failed to load!")
-
-            QgsProject.instance().addMapLayer(layer)
-
-            QMessageBox.information(self.dlg, "Message", f"Contextual dimension aggregation complete!")
+                self.dlg.contextualAggregation_Check.setText("Weighting % does not add up to 100 %")
 
         else:
             self.dlg.contextualAggregation_Check.setText("Weighting % does not add up to 100 %")
 
+    def accessibilityAggregation(self):
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+
+        # INPUT
+        WLK_ras = self.dlg.WLK_Aggregate_Field.text().strip(" ")
+        CYC_ras = self.dlg.CYC_Aggregate_Field.text().strip(" ")
+        APT_ras = self.dlg.APT_Aggregate_Field.text().strip(" ")
+        SAF_ras = self.dlg.SAF_Aggregate_Field.text().strip(" ")
+        SEC_ras = self.dlg.SEC_Aggregate_Field.text().strip(" ")
+        INC_ras = self.dlg.INC_Aggregate_Field.text().strip(" ")
+        ELC_ras = self.dlg.ELC_Aggregate_Field.text().strip(" ")
+        LOU_ras = self.dlg.LOU_Aggregate_Field.text().strip(" ")
+        QUH_ras = self.dlg.QUH_Aggregate_Field.text().strip(" ")
+        DIG_ras = self.dlg.DIG_Aggregate_Field.text().strip(" ")
+        ENV_ras = self.dlg.ENV_Aggregate_Field.text().strip(" ")
+
+        WLK_weight = self.dlg.WLK_Aggregate_SB.value()
+        CYC_weight = self.dlg.CYC_Aggregate_SB.value()
+        APT_weight = self.dlg.APT_Aggregate_SB.value()
+        SAF_weight = self.dlg.SAF_Aggregate_SB.value()
+        SEC_weight = self.dlg.SEC_Aggregate_SB.value()
+        INC_weight = self.dlg.INC_Aggregate_SB.value()
+        ELC_weight = self.dlg.ELC_Aggregate_SB.value()
+        LOU_weight = self.dlg.LOU_Aggregate_SB.value()
+        QUH_weight = self.dlg.QUH_Aggregate_SB.value()
+        DIG_weight = self.dlg.DIG_Aggregate_SB.value()
+        ENV_weight = self.dlg.ENV_Aggregate_SB.value()
+
+        # OUTPUT
+        aggregation = self.dlg.Accessibility_AggregateOutput_Field.text()
+
+        rasLayers = [WLK_ras, CYC_ras, APT_ras, SAF_ras, SEC_ras, INC_ras, ELC_ras, LOU_ras, QUH_ras, DIG_ras, ENV_ras]
+        factorWeighting = [WLK_weight, CYC_weight, APT_weight, SAF_weight, SEC_weight, INC_weight, ELC_weight, LOU_weight, QUH_weight, DIG_weight, ENV_weight]
+        
+
+        weightingSum = round(sum(factorWeighting))
+
+        if weightingSum == 100:
+            if "" in rasLayers:
+                self.dlg.placeCharacterizationAggregation_Check.setText("Factor layer/s missing")
+                missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
+                presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
+
+                for i in missingLayers:
+                    rasLayers[i] = rasLayers[presentLayers[0]]
+                    factorWeighting[i] = 0
+
+            else:
+                pass
+
+            weightingSum = round(sum(factorWeighting))
+            if weightingSum == 100:
+
+                with rasterio.open(rasLayers[0]) as src:
+                    WLK_ras = src.read(1)
+                    WLK_weight = factorWeighting[0]
+                    meta1 = src.meta
+
+                with rasterio.open(rasLayers[1]) as src:
+                    CYC_ras = src.read(1)
+                    CYC_weight = factorWeighting[1]
+
+                with rasterio.open(rasLayers[2]) as src:
+                    APT_ras = src.read(1)
+                    APT_weight = factorWeighting[2]
+
+                with rasterio.open(rasLayers[3]) as src:
+                    SAF_ras = src.read(1)
+                    SAF_weight = factorWeighting[3]
+
+                with rasterio.open(rasLayers[4]) as src:
+                    SEC_ras = src.read(1)
+                    SEC_weight = factorWeighting[4]
+
+                with rasterio.open(rasLayers[5]) as src:
+                    INC_ras = src.read(1)
+                    INC_weight = factorWeighting[5]
+
+                with rasterio.open(rasLayers[6]) as src:
+                    ELC_ras = src.read(1)
+                    ELC_weight = factorWeighting[6]
+
+                with rasterio.open(rasLayers[7]) as src:
+                    LOU_ras = src.read(1)
+                    LOU_weight = factorWeighting[7]
+
+                with rasterio.open(rasLayers[8]) as src:
+                    QUH_ras = src.read(1)
+                    QUH_weight = factorWeighting[8]
+
+                with rasterio.open(rasLayers[9]) as src:
+                    DIG_ras = src.read(1)
+                    DIG_weight = factorWeighting[9]
+
+                with rasterio.open(rasLayers[10]) as src:
+                    ENV_ras = src.read(1)
+                    ENV_weight = factorWeighting[10]
+
+                # Raster Calculation
+
+                result = ((WLK_ras * WLK_weight / 100) + (CYC_ras * CYC_weight / 100) + (APT_ras * APT_weight / 100)
+                          + (SAF_ras * SAF_weight / 100) + (SEC_ras * SEC_weight / 100) + (INC_ras * INC_weight / 100)
+                          + (ELC_ras * ELC_weight / 100) + (LOU_ras * LOU_weight / 100) + (QUH_ras * QUH_weight / 100)
+                          + (DIG_ras * DIG_weight / 100) + (ENV_ras * ENV_weight / 100))
+
+                meta1.update(dtype=rasterio.float32)
+
+                Dimension = "Place Characterization"
+                if os.path.exists(Dimension):
+                    os.chdir(Dimension)
+                else:
+                    os.mkdir(Dimension)
+                    os.chdir(Dimension)
+
+                with rasterio.open(aggregation, 'w', **meta1) as dst:
+                    dst.write(result, 1)
+
+                self.dlg.PD_Aggregate_Field.setText(f"{workingDir}{Dimension}/{aggregation}")
+
+                layer = QgsRasterLayer(aggregation, f"{aggregation}")
+
+                if not layer.isValid():
+                    print("Layer failed to load!")
+
+                QgsProject.instance().addMapLayer(layer)
+
+                QMessageBox.information(self.dlg, "Message", f"Place Characterization dimension aggregation complete!")
+            else:
+                self.dlg.placeCharacterizationAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+        else:
+            self.dlg.placeCharacterizationAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+    def dimesnionsAggregation(self):
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+
+        # INPUT
+        ID_ras = self.dlg.ID_Aggregate_Field.text().strip(" ")
+        CD_ras = self.dlg.CD_Aggregate_Field.text().strip(" ")
+        AD_ras = self.dlg.AD_Aggregate_Field.text().strip(" ")
+        PD_ras = self.dlg.PD_Aggregate_Field.text().strip(" ")
+
+        ID_weight = self.dlg.ID_Aggregate_SB.value()
+        CD_weight = self.dlg.CD_Aggregate_SB.value()
+        AD_weight = self.dlg.AD_Aggregate_SB.value()
+        PD_weight = self.dlg.PD_Aggregate_SB.value()
+
+        # OUTPUT
+        aggregation = self.dlg.Contextual_AggregateOutput_Field.text()
+
+        rasLayers = [ID_ras, CD_ras, AD_ras, PD_ras]
+        dimensionWeighting = [ID_weight, CD_weight, AD_weight, PD_weight]
+
+        weightingSum = round(sum(dimensionWeighting))
+
+        if weightingSum == 100:
+            if "" in rasLayers:
+                self.dlg.dimensionAggregation_Check.setText("Dimension layer/s missing")
+                missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
+                presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
+
+                for i in missingLayers:
+                    rasLayers[i] = rasLayers[presentLayers[0]]
+                    dimensionWeighting[i] = 0
+
+            else:
+                pass
+
+            weightingSum = round(sum(dimensionWeighting))
+            if weightingSum == 100:
+
+                with rasterio.open(rasLayers[0]) as src:
+                    ID_ras = src.read(1)
+                    ID_weight = dimensionWeighting[0]
+                    meta1 = src.meta
+
+                with rasterio.open(rasLayers[1]) as src:
+                    CD_ras = src.read(1)
+                    CD_weight = dimensionWeighting[1]
+
+                with rasterio.open(rasLayers[2]) as src:
+                    AD_ras = src.read(1)
+                    AD_weight = dimensionWeighting[2]
+
+                with rasterio.open(rasLayers[3]) as src:
+                    PD_ras = src.read(1)
+                    PD_weight = dimensionWeighting[3]
+
+
+                # Raster Calculation
+
+                result = ((ID_ras * ID_weight / 100) + (CD_ras * CD_weight / 100) + (AD_ras * AD_weight / 100) + (PD_ras * PD_weight / 100))
+
+                meta1.update(dtype=rasterio.float32)
+
+                Final_output = "Final_output"
+                if os.path.exists(Final_output):
+                    os.chdir(Final_output)
+                else:
+                    os.mkdir(Final_output)
+                    os.chdir(Final_output)
+
+                with rasterio.open(aggregation, 'w', **meta1) as dst:
+                    dst.write(result, 1)
+
+                layer = QgsRasterLayer(aggregation, f"{aggregation}")
+
+                if not layer.isValid():
+                    print("Layer failed to load!")
+
+                QgsProject.instance().addMapLayer(layer)
+
+                QMessageBox.information(self.dlg, "Message", f"Dimensional aggregation complete!")
+            else:
+                self.dlg.dimensionAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+        else:
+            self.dlg.dimensionAggregation_Check.setText("Weighting % does not add up to 100 %")
