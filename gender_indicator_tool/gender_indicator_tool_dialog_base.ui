@@ -1181,7 +1181,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="tab_17">
       <attribute name="title">
@@ -2291,6 +2291,133 @@
       <attribute name="title">
        <string>Electrical Access</string>
       </attribute>
+      <widget class="QLabel" name="label_21">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Polygon Layer Input</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ELC_Set_PB">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>30</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="ELC_rasField_CB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>201</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="ELC_Input_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>130</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Raster File</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Field in the shapefile to use for rasterization</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ELC_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
+      <widget class="QgsSpinBox" name="ELC_pixelSize_SB">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>100</y>
+         <width>90</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>250</number>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="ELC_Output_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_22">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>80</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Set pixel size in meters squared:</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
@@ -2973,7 +3100,7 @@
         <string>Income Level (INC)</string>
        </property>
       </widget>
-      <widget class="QgsFilterLineEdit" name="Accessibility_AggregateOutput_Field_2">
+      <widget class="QgsFilterLineEdit" name="PlaceCharacterization_AggregateOutput_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -2986,7 +3113,7 @@
         <string notr="true"/>
        </property>
       </widget>
-      <widget class="QPushButton" name="Accessibility_AggregateExecute_PB_2">
+      <widget class="QPushButton" name="PlaceCharacterization_AggregateExecute_PB">
        <property name="geometry">
         <rect>
          <x>10</x>

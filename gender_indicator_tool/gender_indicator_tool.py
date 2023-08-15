@@ -279,7 +279,7 @@ class GenderIndicatorTool:
         self.dlg.HEA_Aggregate_TB.clicked.connect(lambda: self.getFile(9))
         self.dlg.FIF_Aggregate_TB.clicked.connect(lambda: self.getFile(10))
 
-        self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(self.accessibilityAggregation)
+        self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(self.accessibiltyAggregation)
 
 
         ## TAB 5 - Place Charqacterization **************************************************************
@@ -296,6 +296,8 @@ class GenderIndicatorTool:
         ###### TAB 5.6 - Income Level
 
         ###### TAB 5.7 - Electrical Access
+        self.dlg.ELC_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
+        self.dlg.ELC_Execute_PB.clicked.connect(lambda: self.Rasterize(4))
 
         ###### TAB 5.8 - Urbanization
 
@@ -318,7 +320,7 @@ class GenderIndicatorTool:
         self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
         self.dlg.ENV_Aggregate_TB.clicked.connect(lambda: self.getFile(21))
 
-        self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(self.accessibilityAggregation)
+        self.dlg.PlaceCharacterization_AggregateExecute_PB.clicked.connect(self.placeCharacterizationAggregation)
 
         ## TAB 6 - Dimension Aggregation ************************************************************************
         self.dlg.ID_Aggregate_TB.clicked.connect(lambda: self.getFile(22))
@@ -326,7 +328,7 @@ class GenderIndicatorTool:
         self.dlg.AD_Aggregate_TB.clicked.connect(lambda: self.getFile(24))
         self.dlg.PD_Aggregate_TB.clicked.connect(lambda: self.getFile(25))
 
-        self.dlg.Dimensions_AggregateExecute_PB.clicked.connect(self.accessibilityAggregation)
+        self.dlg.Dimensions_AggregateExecute_PB.clicked.connect(self.dimesnionsAggregation)
 
     def getFile(self, button_num):
         response = QFileDialog.getOpenFileName(
@@ -507,6 +509,13 @@ class GenderIndicatorTool:
             fields = [field.name() for field in layer.fields()]
             self.dlg.FIN_rasField_CB.addItems(fields)
 
+        elif factor_no == 4:
+            polygonlayer = self.dlg.ELC_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.ELC_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.ELC_rasField_CB.addItems(fields)
+
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
 
@@ -551,6 +560,12 @@ class GenderIndicatorTool:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = self.dlg.FIN_rasField_CB.currentText()
             pixelSize = self.dlg.FIN_pixelSize_SB.value()
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+
+        elif factor_no == 4:
+            polygonlayer = self.dlg.ELC_Input_Field.filePath()
+            rasField = self.dlg.ELC_rasField_CB.currentText()
+            pixelSize = self.dlg.ELC_pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
         #TEMPORARY OUTPUTS
@@ -673,6 +688,25 @@ class GenderIndicatorTool:
 
             self.dlg.FIN_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
+        if factor_no == 4:
+            result = (Ri - Rmin) / (Rmax - Rmin) * m_max
+
+            meta.update(dtype=rasterio.float32)
+
+            Dimension = "Place Characterization"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = "ELC_" + self.dlg.ELC_Output_Field.text()
+
+            with rasterio.open(rasOutput, 'w', **meta) as dst:
+                dst.write(result, 1)
+
+            self.dlg.ELC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
 
         # Loading final output to QGIS GUI viewer
         layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
@@ -760,180 +794,206 @@ class GenderIndicatorTool:
         QMessageBox.information(self.dlg, "Message", f"IDW interpolated raster file has been created /n CRS EPSG:{UTM_crs} /threshold Distance {bufferDistance}m")
 
     def ServiceArea(self, factor_no):
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            tempDir = "temp"
 
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-        tempDir = "temp"
+            if os.path.exists(tempDir):
+                shutil.rmtree(tempDir)
+            else:
+                pass
 
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-        else:
-            pass
+            time.sleep(1)
+            os.mkdir(tempDir)
 
-        os.mkdir(tempDir)
+            Dimension = "Accessibility"
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
-        Dimension = "Accessibility"
-        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            # INPUT
+            if factor_no == 0:
+                countryLayer = self.dlg.countryLayer_Field.filePath()
+                FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
+                ranges = self.dlg.PBT_Ranges_Field.text()
+                pixelSize = self.dlg.PBT_pixelSize_SB.value()
+                rasOutput = "PBT_" + self.dlg.PBT_Output_Field.text()
+                self.dlg.PBT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        # INPUT
-        if factor_no == 0:
-            FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
-            ranges = self.dlg.PBT_Ranges_Field.text()
-            pixelSize = self.dlg.PBT_pixelSize_SB.value()
-            rasOutput = "PBT_" + self.dlg.PBT_Output_Field.text()
-            self.dlg.PBT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            elif factor_no == 1:
+                countryLayer = self.dlg.countryLayer_Field.filePath()
+                FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
+                ranges = self.dlg.ETF_Ranges_Field.text()
+                pixelSize = self.dlg.ETF_pixelSize_SB.value()
+                rasOutput = "ETF_" + self.dlg.ETF_Output_Field.text()
+                self.dlg.ETF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        elif factor_no == 1:
-            FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
-            ranges = self.dlg.ETF_Ranges_Field.text()
-            pixelSize = self.dlg.ETF_pixelSize_SB.value()
-            rasOutput = "ETF_" + self.dlg.ETF_Output_Field.text()
-            self.dlg.ETF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            elif factor_no == 2:
+                countryLayer = self.dlg.countryLayer_Field.filePath()
+                FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
+                ranges = self.dlg.JOB_Ranges_Field.text()
+                pixelSize = self.dlg.JOB_pixelSize_SB.value()
+                rasOutput = "JOB_" + self.dlg.JOB_Output_Field.text()
+                self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        elif factor_no == 2:
-            FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
-            ranges = self.dlg.JOB_Ranges_Field.text()
-            pixelSize = self.dlg.JOB_pixelSize_SB.value()
-            rasOutput = "JOB_" + self.dlg.JOB_Output_Field.text()
-            self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            elif factor_no == 3:
+                countryLayer = self.dlg.countryLayer_Field.filePath()
+                FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
+                ranges = self.dlg.HEA_Ranges_Field.text()
+                pixelSize = self.dlg.HEA_pixelSize_SB.value()
+                rasOutput = "HEA_" + self.dlg.HEA_Output_Field.text()
+                self.dlg.HEA_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        elif factor_no == 3:
-            FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
-            ranges = self.dlg.HEA_Ranges_Field.text()
-            pixelSize = self.dlg.HEA_pixelSize_SB.value()
-            rasOutput = "HEA_" + self.dlg.HEA_Output_Field.text()
-            self.dlg.HEA_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-        elif factor_no == 4:
-            FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
-            ranges = self.dlg.FIF_Ranges_Field.text()
-            pixelSize = self.dlg.FIF_pixelSize_SB.value()
-            rasOutput = "FIF_" + self.dlg.FIF_Output_Field.text()
-            self.dlg.FIF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-
-        # TEMPORARY OUTPUT
-        SAOutput_utm_otput = f"{tempDir}/FaciltyPointlayer_UTM.shp"
-        SAOutput = f"{tempDir}/SA_OUTPUT"
-        mergeOutput = f"{tempDir}/Merge.shp"
-        mergeRasfield = f"{tempDir}/Merge_rasField.shp"
-        polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
-        rasterizeOutput = f"{tempDir}/polygonRas.tif"
-
-        # finalOutput = self.dlg.serviceAreaOutputFilePath_Field.text()
-
-        gdf = gpd.read_file(FaciltyPointlayer)
-
-        subset_size = 5
-        subsets = []
-
-        for i in range(0, len(gdf), subset_size):
-            subset = gdf.iloc[i:i + subset_size]
-
-            subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
+            elif factor_no == 4:
+                countryLayer = self.dlg.countryLayer_Field.filePath()
+                FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
+                ranges = self.dlg.FIF_Ranges_Field.text()
+                pixelSize = self.dlg.FIF_pixelSize_SB.value()
+                rasOutput = "FIF_" + self.dlg.FIF_Output_Field.text()
+                self.dlg.FIF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
 
-            subsets.append(f"{SAOutput}_{i}.shp")
-            Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
-                                                                              'INPUT_PROFILE': 6,   #Walking
-                                                                              'INPUT_POINT_LAYER': subset,
-                                                                              'INPUT_FIELD': '',
-                                                                              'INPUT_METRIC': 1,    #Distance in meters
-                                                                              'INPUT_RANGES': ranges,
-                                                                              'INPUT_AVOID_FEATURES': [],
-                                                                              'INPUT_AVOID_BORDERS': None,
-                                                                              'INPUT_AVOID_COUNTRIES': '',
-                                                                              'INPUT_AVOID_POLYGONS': None,
-                                                                              'OUTPUT': f"{SAOutput}_{i}.shp"})
+            # TEMPORARY OUTPUT
+            SAOutput = f"{tempDir}/SA_OUTPUT"
+            SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
 
-        Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
-                                                            'CRS': None,
-                                                            'OUTPUT': f"{SAOutput}.shp"})
-
-        # Convert spatial data to UTM CRS
-        self.convertCRS(f"{SAOutput}.shp", UTM_crs)
-        shp_utm.to_file(SAOutput_utm_otput)
-
-        SA_df = gpd.read_file(SAOutput_utm_otput)
-        no_spaces_string = "".join(ranges.split())
-        ranges_list = no_spaces_string.split(",")
-        int_ranges_list = [int(x) for x in ranges_list]
-        int_ranges_list.sort()
-
-        # QMessageBox.information(self.dlg, "Message", f"{ranges_list}")
-        for i in int_ranges_list:
-            df = SA_df[SA_df['AA_METERS'] == i]
-            output = f"{tempDir}/band_{i}"
-            df.to_file(output + ".shp")
-
-            dissolve = processing.run("native:dissolve", {'INPUT': output + ".shp",
-                                                          'FIELD':[],
-                                                          'SEPARATE_DISJOINT':False,
-                                                          'OUTPUT':f"{output}_dis.shp"})
-        Merge_list = []
-        len_range = len(int_ranges_list)
-        int_ranges_list.sort(reverse=True)
-        for i in range(0, len_range-1):
-            output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i+1]}.shp"
-            Merge_list.append(output)
-            processing.run("native:difference", {'INPUT': f"{tempDir}/band_{int_ranges_list[i]}_dis.shp",
-                                                 'OVERLAY': f"{tempDir}/band_{int_ranges_list[i+1]}_dis.shp",
-                                                 'OUTPUT': output,
-                                                 'GRID_SIZE': None})
-
-        Merge_list.append(f"{tempDir}/band_{int_ranges_list[-1]}_dis.shp")
-
-        Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
-                                                            'CRS':None,
-                                                            'OUTPUT':mergeOutput})
-
-        merge_df = gpd.read_file(mergeOutput)
-        merge_df["rasField"] = [1,2,3,4,5]
-        merge_df.to_file(mergeRasfield)
-        polygonlayer = workingDir + mergeRasfield
-
-        # Convert spatial data to UTM CRS
-        self.convertCRS(polygonlayer, UTM_crs)
-        shp_utm.to_file(polygonUTM)
-
-        # Get the width and height of the extent
-        layer = QgsVectorLayer(polygonUTM, 'Polygon Layer', 'ogr')
-        extent = layer.extent()
-        raster_width = int(extent.width() / pixelSize) + 1
-        raster_height = int(extent.height() / pixelSize) + 1
+            mergeOutput = f"{tempDir}/Merge.shp"
+            mergeRasfield = f"{tempDir}/Merge_rasField.shp"
+            countryUTMLayer = f"{tempDir}/countryUTMLayer.shp"
+            countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuffer.shp"
+            difference = f"{tempDir}/Difference.shp"
+            finalMerge = f"{tempDir}/finalMerge.shp"
 
 
 
-        if os.path.exists(Dimension):
-            os.chdir(Dimension)
-        else:
-            os.mkdir(Dimension)
-            os.chdir(Dimension)
+            gdf = gpd.read_file(FaciltyPointlayer)
 
-        rasterize = processing.run("gdal:rasterize", {'INPUT': polygonlayer,
-                                                      'FIELD': "rasField",
-                                                      'BURN': 0,
-                                                      'USE_Z': False,
-                                                      'UNITS': 0,
-                                                      'WIDTH': raster_width,
-                                                      'HEIGHT': raster_height,
-                                                      'EXTENT': None,
-                                                      'NODATA': 0,
-                                                      'OPTIONS': '',
-                                                      'DATA_TYPE': 5,
-                                                      'INIT': None,
-                                                      'INVERT': False,
-                                                      'EXTRA': '',
-                                                      'OUTPUT': rasOutput})
+            subset_size = 5
+            subsets = []
+
+            for i in range(0, len(gdf), subset_size):
+                subset = gdf.iloc[i:i + subset_size]
+                subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
+                subsets.append(f"{SAOutput}_{i}.shp")
+
+                Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
+                                                                                  'INPUT_PROFILE': 6,   #Walking
+                                                                                  'INPUT_POINT_LAYER': subset,
+                                                                                  'INPUT_FIELD': '',
+                                                                                  'INPUT_METRIC': 1,    #Distance in meters
+                                                                                  'INPUT_RANGES': ranges,
+                                                                                  'INPUT_AVOID_FEATURES': [],
+                                                                                  'INPUT_AVOID_BORDERS': None,
+                                                                                  'INPUT_AVOID_COUNTRIES': '',
+                                                                                  'INPUT_AVOID_POLYGONS': None,
+                                                                                  'OUTPUT': f"{SAOutput}_{i}.shp"})
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
+                                                                'CRS': None,
+                                                                'OUTPUT': f"{SAOutput}.shp"})
+
+            # Convert spatial data to UTM CRS
+            self.convertCRS(f"{SAOutput}.shp", UTM_crs)
+            shp_utm.to_file(SAOutput_utm)
+
+            SA_df = gpd.read_file(SAOutput_utm)
+            no_spaces_string = "".join(ranges.split())
+            ranges_list = no_spaces_string.split(",")
+            int_ranges_list = [int(x) for x in ranges_list]
+            int_ranges_list.sort()
 
 
-        # Loading final output to QGIS GUI viewer
-        layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
+            for i in int_ranges_list:
+                df = SA_df[SA_df['AA_METERS'] == i]
+                output = f"{tempDir}/band_{i}"
+                df.to_file(output + ".shp")
 
-        if not layer.isValid():
-            print("Layer failed to load!")
+                dissolve = processing.run("native:dissolve", {'INPUT': output + ".shp",
+                                                              'FIELD':[],
+                                                              'SEPARATE_DISJOINT':False,
+                                                              'OUTPUT':f"{output}_dis.shp"})
+            Merge_list = []
+            len_range = len(int_ranges_list)
+            int_ranges_list.sort(reverse=True)
+            for i in range(0, len_range-1):
+                output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i+1]}.shp"
+                Merge_list.append(output)
+                processing.run("native:difference", {'INPUT': f"{tempDir}/band_{int_ranges_list[i]}_dis.shp",
+                                                     'OVERLAY': f"{tempDir}/band_{int_ranges_list[i+1]}_dis.shp",
+                                                     'OUTPUT': output,
+                                                     'GRID_SIZE': None})
 
-        QgsProject.instance().addMapLayer(layer)
+            Merge_list.append(f"{tempDir}/band_{int_ranges_list[-1]}_dis.shp")
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
+                                                                'CRS':None,
+                                                                'OUTPUT':mergeOutput})
+
+            merge_df = gpd.read_file(mergeOutput)
+            merge_df["rasField"] = [1,2,3,4,5]
+            merge_df.to_file(mergeRasfield)
+            mergelayer = workingDir + mergeRasfield
+            finalMerge = workingDir + finalMerge
+
+            # Convert countryLayer data to UTM CRS
+            self.convertCRS(countryLayer, UTM_crs)
+            shp_utm["rasField"] = [0]
+            shp_utm.to_file(countryUTMLayer)
+
+            processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                             'DISTANCE': 2000,
+                                             'SEGMENTS': 5,
+                                             'END_CAP_STYLE': 0,
+                                             'JOIN_STYLE': 0,
+                                             'MITER_LIMIT': 2,
+                                             'DISSOLVE': True,
+                                             'SEPARATE_DISJOINT': False,
+                                             'OUTPUT': countryUTMLayerBuf})
+
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY':mergelayer,
+                                                              'OUTPUT':difference,
+                                                              'GRID_SIZE':None})
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [mergelayer, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': finalMerge})
+
+            # Get the width and height of the extent
+            layer = QgsVectorLayer(finalMerge, 'Polygon Layer', 'ogr')
+            extent = layer.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasterize = processing.run("gdal:rasterize", {'INPUT': finalMerge,
+                                                          'FIELD': "rasField",
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
+
+
+            # Loading final output to QGIS GUI viewer
+            layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
+
+            if not layer.isValid():
+                print("Layer failed to load!")
+
+            QgsProject.instance().addMapLayer(layer)
 
 # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
@@ -941,6 +1001,7 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
         #INPUT
+
         EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
         CRE_ras = self.dlg.CRE_Aggregate_Field.text().strip(" ")
         DOV_ras = self.dlg.DOV_Aggregate_Field.text().strip(" ")
@@ -1093,7 +1154,106 @@ class GenderIndicatorTool:
         else:
             self.dlg.contextualAggregation_Check.setText("Weighting % does not add up to 100 %")
 
-    def accessibilityAggregation(self):
+    def accessibiltyAggregation(self):
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+
+        #INPUT
+        WTP_ras = self.dlg.WTP_Aggregate_Field.text().strip(" ")
+        PBT_ras = self.dlg.PBT_Aggregate_Field.text().strip(" ")
+        ETF_ras = self.dlg.ETF_Aggregate_Field.text().strip(" ")
+        JOB_ras = self.dlg.JOB_Aggregate_Field.text().strip(" ")
+        HEA_ras = self.dlg.HEA_Aggregate_Field.text().strip(" ")
+        FIF_ras = self.dlg.FIF_Aggregate_Field.text().strip(" ")
+
+        WTP_weight = self.dlg.WTP_Aggregate_SB.value()
+        PBT_weight = self.dlg.PBT_Aggregate_SB.value()
+        ETF_weight = self.dlg.ETF_Aggregate_SB.value()
+        JOB_weight = self.dlg.JOB_Aggregate_SB.value()
+        HEA_weight = self.dlg.HEA_Aggregate_SB.value()
+        FIF_weight = self.dlg.FIF_Aggregate_SB.value()
+
+        #OUTPUT
+        aggregation = self.dlg.Accessibility_AggregateOutput_Field.text()
+
+        rasLayers = [WTP_ras, PBT_ras, ETF_ras, JOB_ras, HEA_ras, FIF_ras]
+        factorWeighting = [WTP_weight, PBT_weight, ETF_weight, JOB_weight, HEA_weight, FIF_weight]
+
+        weightingSum = round(sum(factorWeighting))
+
+        if weightingSum == 100:
+            if "" in rasLayers:
+                self.dlg.accessibilityAggregation_Check.setText("Factor layer/s missing")
+                missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
+                presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
+
+                for i in missingLayers:
+                    rasLayers[i] = rasLayers[presentLayers[0]]
+                    factorWeighting[i] = 0
+
+            else:
+                pass
+
+            weightingSum = round(sum(factorWeighting))
+            if weightingSum == 100:
+                with rasterio.open(rasLayers[0]) as src:
+                    WTP_ras = src.read(1)
+                    WTP_weight = factorWeighting[0]
+                    meta1 = src.meta
+
+                with rasterio.open(rasLayers[1]) as src:
+                    PBT_ras = src.read(1)
+                    PBT_weight = factorWeighting[1]
+
+                with rasterio.open(rasLayers[2]) as src:
+                    ETF_ras = src.read(1)
+                    ETF_weight = factorWeighting[2]
+
+                with rasterio.open(rasLayers[3]) as src:
+                    JOB_ras = src.read(1)
+                    JOB_weight = factorWeighting[3]
+
+                with rasterio.open(rasLayers[4]) as src:
+                    HEA_ras = src.read(1)
+                    HEA_weight = factorWeighting[4]
+
+                with rasterio.open(rasLayers[5]) as src:
+                    FIF_ras = src.read(1)
+                    FIF_weight = factorWeighting[5]
+
+                # Raster Calculation
+
+                result = ((WTP_ras * WTP_weight / 100) + (PBT_ras * PBT_weight / 100) + (ETF_ras * ETF_weight / 100)
+                          + (JOB_ras * JOB_weight / 100) + (HEA_ras * HEA_weight / 100) + (FIF_ras * FIF_weight / 100))
+
+                meta1.update(dtype=rasterio.float32)
+
+                Dimension = "Accessibility"
+                if os.path.exists(Dimension):
+                    os.chdir(Dimension)
+                else:
+                    os.mkdir(Dimension)
+                    os.chdir(Dimension)
+
+                with rasterio.open(aggregation, 'w', **meta1) as dst:
+                    dst.write(result, 1)
+
+                self.dlg.AD_Aggregate_Field.setText(f"{workingDir}{Dimension}/{aggregation}")
+
+                layer = QgsRasterLayer(aggregation, f"{aggregation}")
+
+                if not layer.isValid():
+                    print("Layer failed to load!")
+
+                QgsProject.instance().addMapLayer(layer)
+
+                QMessageBox.information(self.dlg, "Message", f"Accessibility dimension aggregation complete!")
+            else:
+                self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
+        else:
+            self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+    def placeCharacterizationAggregation(self):
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
 
@@ -1123,7 +1283,7 @@ class GenderIndicatorTool:
         ENV_weight = self.dlg.ENV_Aggregate_SB.value()
 
         # OUTPUT
-        aggregation = self.dlg.Accessibility_AggregateOutput_Field.text()
+        aggregation = self.dlg.PlaceCharacterization_AggregateOutput_Field.text()
 
         rasLayers = [WLK_ras, CYC_ras, APT_ras, SAF_ras, SEC_ras, INC_ras, ELC_ras, LOU_ras, QUH_ras, DIG_ras, ENV_ras]
         factorWeighting = [WLK_weight, CYC_weight, APT_weight, SAF_weight, SEC_weight, INC_weight, ELC_weight, LOU_weight, QUH_weight, DIG_weight, ENV_weight]
