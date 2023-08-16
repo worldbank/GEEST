@@ -294,10 +294,10 @@ class GenderIndicatorTool:
         ###### TAB 5.5 - Security
 
         ###### TAB 5.6 - Income Level
+        self.dlg.INC_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
+        self.dlg.INC_Execute_PB.clicked.connect(lambda: self.Rasterize(4))
 
         ###### TAB 5.7 - Electrical Access
-        self.dlg.ELC_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
-        self.dlg.ELC_Execute_PB.clicked.connect(lambda: self.Rasterize(4))
 
         ###### TAB 5.8 - Urbanization
 
@@ -510,11 +510,11 @@ class GenderIndicatorTool:
             self.dlg.FIN_rasField_CB.addItems(fields)
 
         elif factor_no == 4:
-            polygonlayer = self.dlg.ELC_Input_Field.filePath()
+            polygonlayer = self.dlg.INC_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
-            self.dlg.ELC_rasField_CB.clear()
+            self.dlg.INC_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
-            self.dlg.ELC_rasField_CB.addItems(fields)
+            self.dlg.INC_rasField_CB.addItems(fields)
 
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
@@ -536,6 +536,8 @@ class GenderIndicatorTool:
             pass
 
         os.mkdir(tempDir)
+
+        countryLayer = self.dlg.countryLayer_Field.filePath()
 
         #INPUT
         if factor_no == 0:
@@ -563,79 +565,108 @@ class GenderIndicatorTool:
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
         elif factor_no == 4:
-            polygonlayer = self.dlg.ELC_Input_Field.filePath()
-            rasField = self.dlg.ELC_rasField_CB.currentText()
-            pixelSize = self.dlg.ELC_pixelSize_SB.value()
+            polygonlayer = self.dlg.INC_Input_Field.filePath()
+            rasField = self.dlg.INC_rasField_CB.currentText()
+            pixelSize = self.dlg.INC_pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
         #TEMPORARY OUTPUTS
+        countryUTMLayer = f"{tempDir}/countryUTMLayer.shp"
+        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuffer.shp"
         polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
         rasterizeOutput = f"{tempDir}/polygonRas.tif"
+        difference = f"{tempDir}/Difference.shp"
+        mergeOutput = f"{tempDir}/Merge.shp"
+
+
+        # Convert countryLayer data to UTM CRS
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        shp_utm.to_file(countryUTMLayer)
+
+        processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                         'DISTANCE': 2000,
+                                         'SEGMENTS': 5,
+                                         'END_CAP_STYLE': 0,
+                                         'JOIN_STYLE': 0,
+                                         'MITER_LIMIT': 2,
+                                         'DISSOLVE': True,
+                                         'SEPARATE_DISJOINT': False,
+                                         'OUTPUT': countryUTMLayerBuf})
 
 
         # Convert spatial data to UTM CRS
         self.convertCRS(polygonlayer, UTM_crs)
-        shp_utm.to_file(polygonUTM)
-
-        # Get the width and height of the extent
-        layer = QgsVectorLayer(polygonUTM, 'Polygon Layer', 'ogr')
-        extent = layer.extent()
-        raster_width = int(extent.width() / pixelSize) + 1
-        raster_height = int(extent.height() / pixelSize) + 1
-
-        rasterize = processing.run("gdal:rasterize", {'INPUT': polygonlayer,
-                                                      'FIELD': rasField,
-                                                      'BURN': 0,
-                                                      'USE_Z': False,
-                                                      'UNITS': 0,
-                                                      'WIDTH': raster_width,
-                                                      'HEIGHT': raster_height,
-                                                      'EXTENT': None,
-                                                      'NODATA': 0,
-                                                      'OPTIONS': '',
-                                                      'DATA_TYPE': 5,
-                                                      'INIT': None,
-                                                      'INVERT': False,
-                                                      'EXTRA': '',
-                                                      'OUTPUT': rasterizeOutput})
-
-
-        rasterizeOutput = rasterize["OUTPUT"]
-        # *************************** Standardization **********************************
-        with rasterio.open(rasterizeOutput) as src:
-            Ri = src.read(1)
-            Ri[Ri == 0] = np.nan
-            meta = src.meta
-            Rmax = 100
-            Rmin = 0
-            m_max = 5
-            m_min = 0
-
-            #Xi = m_max - ((Ri - Rmin) / (Rmax - Rmin)) * (m_max - m_min) #Inverser Linear scaling formula???
-
-        # Raster Calculation
+        Rmax = 100
+        Rmin = 0
+        m_max = 5
+        m_min = 0
         if factor_no == 0:
-            result = (Ri - Rmin)/(Rmax - Rmin) * m_max
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            shp_utm.to_file(polygonUTM)
 
-            meta.update(dtype=rasterio.float32)
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': difference,
+                                                              'GRID_SIZE': None})
 
-            Dimension  = "Indivdual"
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': mergeOutput})
+
+            # Get the width and height of the extent
+            layer = QgsVectorLayer(mergeOutput, 'Polygon Layer', 'ogr')
+            extent = layer.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Indivdual"
             if os.path.exists(Dimension):
                 os.chdir(Dimension)
             else:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
+            mergeOutput = workingDir + mergeOutput
+
             rasOutput = "EDU_" + self.dlg.EDU_Output_Field.text()
 
-            with rasterio.open(rasOutput, 'w', **meta) as dst:
-                dst.write(result, 1)
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
 
             self.dlg.EDU_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 1:
-            result = (Ri - Rmax)/(Rmin - Rmax) * m_max
-                # m_max - ((Ri - Rmin) / (Rmax - Rmin)) * (m_max - m_min)
+            shp_utm[rasField] = (shp_utm[rasField] - Rmax)/(Rmin - Rmax) * m_max
+            shp_utm.to_file(polygonUTM)
+
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': difference,
+                                                              'GRID_SIZE': None})
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': mergeOutput})
+
+            # Get the width and height of the extent
+            layer = QgsVectorLayer(mergeOutput, 'Polygon Layer', 'ogr')
+            extent = layer.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
 
             Dimension = "Indivdual"
             if os.path.exists(Dimension):
@@ -644,16 +675,45 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
+            mergeOutput = workingDir + mergeOutput
             rasOutput = "CRE_" + self.dlg.CRE_Output_Field.text()
 
-            with rasterio.open(rasOutput, 'w', **meta) as dst:
-                dst.write(result, 1)
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
 
             self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         elif factor_no == 2:
-            result = (Ri - Rmax)/(Rmin - Rmax) * m_max
-                # m_max - ((Ri - Rmin) / (Rmax - Rmin)) * (m_max - m_min)
+            shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
+            shp_utm.to_file(polygonUTM)
+
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': difference,
+                                                              'GRID_SIZE': None})
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': mergeOutput})
+
+            # Get the width and height of the extent
+            layer = QgsVectorLayer(mergeOutput, 'Polygon Layer', 'ogr')
+            extent = layer.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
 
             Dimension = "Indivdual"
             if os.path.exists(Dimension):
@@ -662,36 +722,92 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
+            mergeOutput = workingDir + mergeOutput
             rasOutput = "DOV_" + self.dlg.DOV_Output_Field.text()
 
-            with rasterio.open(rasOutput, 'w', **meta) as dst:
-                dst.write(result, 1)
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
 
             self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        if factor_no == 3:
-            result = (Ri - Rmin)/(Rmax - Rmin) * m_max
+        elif factor_no == 3:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            shp_utm.to_file(polygonUTM)
 
-            meta.update(dtype=rasterio.float32)
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': difference,
+                                                              'GRID_SIZE': None})
 
-            Dimension  = "Contextual"
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': mergeOutput})
+
+            # Get the width and height of the extent
+            layer = QgsVectorLayer(mergeOutput, 'Polygon Layer', 'ogr')
+            extent = layer.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Contextual"
             if os.path.exists(Dimension):
                 os.chdir(Dimension)
             else:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
+            mergeOutput = workingDir + mergeOutput
             rasOutput = "FIN_" + self.dlg.FIN_Output_Field.text()
 
-            with rasterio.open(rasOutput, 'w', **meta) as dst:
-                dst.write(result, 1)
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
 
             self.dlg.FIN_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        if factor_no == 4:
-            result = (Ri - Rmin) / (Rmax - Rmin) * m_max
+        elif factor_no == 4:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            shp_utm.to_file(polygonUTM)
 
-            meta.update(dtype=rasterio.float32)
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': difference,
+                                                              'GRID_SIZE': None})
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': mergeOutput})
+
+            # Get the width and height of the extent
+            layer = QgsVectorLayer(mergeOutput, 'Polygon Layer', 'ogr')
+            extent = layer.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
 
             Dimension = "Place Characterization"
             if os.path.exists(Dimension):
@@ -700,12 +816,27 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = "ELC_" + self.dlg.ELC_Output_Field.text()
+            mergeOutput = workingDir + mergeOutput
+            rasOutput = "INC_" + self.dlg.INC_Output_Field.text()
 
-            with rasterio.open(rasOutput, 'w', **meta) as dst:
-                dst.write(result, 1)
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
 
-            self.dlg.ELC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            self.dlg.INC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
 
 
         # Loading final output to QGIS GUI viewer
@@ -1403,7 +1534,7 @@ class GenderIndicatorTool:
         PD_weight = self.dlg.PD_Aggregate_SB.value()
 
         # OUTPUT
-        aggregation = self.dlg.Contextual_AggregateOutput_Field.text()
+        aggregation = self.dlg.Dimensions_AggregateOutput_Field.text()
 
         rasLayers = [ID_ras, CD_ras, AD_ras, PD_ras]
         dimensionWeighting = [ID_weight, CD_weight, AD_weight, PD_weight]

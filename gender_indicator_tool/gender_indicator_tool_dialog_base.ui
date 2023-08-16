@@ -38,6 +38,9 @@
        <height>31</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Country Boundary&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
     </widget>
     <widget class="QLabel" name="countylabel">
      <property name="geometry">
@@ -49,7 +52,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Set country adminstrative boundry</string>
+      <string>Set country adminstrative boundary</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">
@@ -101,7 +104,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hello&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Full path to the working directory folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="qgisRelation" stdset="0">
       <string notr="true"/>
@@ -115,6 +118,9 @@
        <width>441</width>
        <height>27</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Co-ordinate Reference System&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_14">
@@ -154,6 +160,25 @@
      </property>
      <property name="text">
       <string>Dominican Republic - EPSG: 32619</string>
+     </property>
+    </widget>
+    <widget class="QFrame" name="frame">
+     <property name="geometry">
+      <rect>
+       <x>540</x>
+       <y>10</y>
+       <width>211</width>
+       <height>511</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="lineWidth">
+      <number>1</number>
      </property>
     </widget>
    </widget>
@@ -212,6 +237,9 @@
          <height>22</height>
         </rect>
        </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer Field&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
       </widget>
       <widget class="QLabel" name="label_7">
        <property name="geometry">
@@ -234,6 +262,9 @@
          <width>231</width>
          <height>31</height>
         </rect>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QgsSpinBox" name="EDU_pixelSize_SB">
@@ -287,6 +318,9 @@
          <height>23</height>
         </rect>
        </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Excute</string>
        </property>
@@ -299,6 +333,9 @@
          <width>201</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="qgisRelation" stdset="0">
         <string notr="true"/>
@@ -1181,7 +1218,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>6</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_17">
       <attribute name="title">
@@ -2274,7 +2311,7 @@
      </widget>
      <widget class="QWidget" name="tab_27">
       <attribute name="title">
-       <string>Urban Design</string>
+       <string>Safety</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_28">
@@ -2285,11 +2322,6 @@
      <widget class="QWidget" name="tab_29">
       <attribute name="title">
        <string>Income Level</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tab_4">
-      <attribute name="title">
-       <string>Electrical Access</string>
       </attribute>
       <widget class="QLabel" name="label_21">
        <property name="geometry">
@@ -2304,7 +2336,85 @@
         <string>Polygon Layer Input</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="ELC_Set_PB">
+      <widget class="QComboBox" name="INC_rasField_CB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>201</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QgsSpinBox" name="INC_pixelSize_SB">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>100</y>
+         <width>90</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>250</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Field in the shapefile to use for rasterization</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_22">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>80</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Set pixel size in meters squared:</string>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="INC_Output_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="INC_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="INC_Set_PB">
        <property name="geometry">
         <rect>
          <x>250</x>
@@ -2317,17 +2427,7 @@
         <string>Set</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="ELC_rasField_CB">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>100</y>
-         <width>201</width>
-         <height>22</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QgsFileWidget" name="ELC_Input_Field">
+      <widget class="QgsFileWidget" name="INC_Input_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -2350,74 +2450,11 @@
         <string>Output Raster File</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>80</y>
-         <width>231</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Field in the shapefile to use for rasterization</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="ELC_Execute_PB">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>180</y>
-         <width>75</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Excute</string>
-       </property>
-      </widget>
-      <widget class="QgsSpinBox" name="ELC_pixelSize_SB">
-       <property name="geometry">
-        <rect>
-         <x>260</x>
-         <y>100</y>
-         <width>90</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>100000</number>
-       </property>
-       <property name="value">
-        <number>250</number>
-       </property>
-      </widget>
-      <widget class="QgsFilterLineEdit" name="ELC_Output_Field">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>150</y>
-         <width>201</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="qgisRelation" stdset="0">
-        <string notr="true"/>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_22">
-       <property name="geometry">
-        <rect>
-         <x>260</x>
-         <y>80</y>
-         <width>231</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Set pixel size in meters squared:</string>
-       </property>
-      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Electrical Access</string>
+      </attribute>
      </widget>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
