@@ -254,21 +254,43 @@ class GenderIndicatorTool:
 
 
         ## TAB 4 - Accessibility ************************************************************************
+        Modes = ['Walking', 'Driving']
+        Measurement = ['Distance', 'Time']
         ###### TAB 4.1 - Women's Travel Patterns
 
         ###### TAB 4.2 - Public Transport
+        self.dlg.PBT_mode_CB.clear()
+        self.dlg.PBT_mode_CB.addItems(Modes)
+        self.dlg.PBT_measurement_CB.clear()
+        self.dlg.PBT_measurement_CB.addItems(Measurement)
         self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
 
         ###### TAB 4.3 - Ediucation & Training
+        self.dlg.ETF_mode_CB.clear()
+        self.dlg.ETF_mode_CB.addItems(Modes)
+        self.dlg.ETF_measurement_CB.clear()
+        self.dlg.ETF_measurement_CB.addItems(Measurement)
         self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
 
         ###### TAB 4.4 - Jobs
+        self.dlg.JOB_mode_CB.clear()
+        self.dlg.JOB_mode_CB.addItems(Modes)
+        self.dlg.JOB_measurement_CB.clear()
+        self.dlg.JOB_measurement_CB.addItems(Measurement)
         self.dlg.JOB_Execute_PB.clicked.connect(lambda: self.ServiceArea(2))
 
         ###### TAB 4.5 - Health Facilities
+        self.dlg.HEA_mode_CB.clear()
+        self.dlg.HEA_mode_CB.addItems(Modes)
+        self.dlg.HEA_measurement_CB.clear()
+        self.dlg.HEA_measurement_CB.addItems(Measurement)
         self.dlg.HEA_Execute_PB.clicked.connect(lambda: self.ServiceArea(3))
 
         ###### TAB 4.6 - Financial Facilities
+        self.dlg.FIF_mode_CB.clear()
+        self.dlg.FIF_mode_CB.addItems(Modes)
+        self.dlg.FIF_measurement_CB.clear()
+        self.dlg.FIF_measurement_CB.addItems(Measurement)
         self.dlg.FIF_Execute_PB.clicked.connect(lambda: self.ServiceArea(4))
 
         ###### TAB 4.7 - Aggregate
@@ -415,42 +437,6 @@ class GenderIndicatorTool:
         elif button_num == 25:
             self.dlg.PD_Aggregate_Field.setText(response[0])
 
-    def Check(self):
-        '''
-        This function will be used to check and ensure factor weightings add up to 100%
-        even when there are missing factors.
-        '''
-        EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
-        CRE_ras = self.dlg.CRE_Aggregate_Field.text().strip(" ")
-        DOV_ras = self.dlg.DOV_Aggregate_Field.text().strip(" ")
-
-        rasLayers = [EDU_ras, CRE_ras, DOV_ras]
-
-        EDU_weight = self.dlg.EDU_Aggregate_SB.value()
-        CRE_weight = self.dlg.CRE_Aggregate_SB.value()
-        DOV_weight = self.dlg.DOV_Aggregate_SB.value()
-
-        IndivdualWeighting = [EDU_weight, CRE_weight, DOV_weight]
-
-        weightingSum = round(sum(IndivdualWeighting))
-
-        if weightingSum == 100:
-            self.dlg.Check.setText("Weighting % adds up to 100 %")
-            if "" in rasLayers:
-                self.dlg.Check.setText("Factor layer missing")
-                missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
-                presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
-
-                for i in missingLayers:
-                    rasLayers[i] = rasLayers[presentLayers[0]]
-                    IndivdualWeighting[i] = 0
-
-                self.dlg.Check.setText(str(IndivdualWeighting))
-            else:
-                self.dlg.Check.setText("All layers present")
-        else:
-            self.dlg.Check.setText("Weighting % does not add up to 100 %")
-
     def getFolder(self, button_num):
         response = QFileDialog.getExistingDirectory(
             parent=self.dlg,
@@ -543,48 +529,40 @@ class GenderIndicatorTool:
         if factor_no == 0:
             polygonlayer = self.dlg.EDU_Input_Field.filePath()
             rasField = self.dlg.EDU_rasField_CB.currentText()
-            pixelSize = self.dlg.EDU_pixelSize_SB.value()
+            pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
             
         elif factor_no == 1:
             polygonlayer = self.dlg.CRE_Input_Field.filePath()
             rasField = self.dlg.CRE_rasField_CB.currentText()
-            pixelSize = self.dlg.CRE_pixelSize_SB.value()
+            pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
         elif factor_no == 2:
             polygonlayer = self.dlg.DOV_Input_Field.filePath()
             rasField = self.dlg.DOV_rasField_CB.currentText()
-            pixelSize = self.dlg.DOV_pixelSize_SB.value()
+            pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
         elif factor_no == 3:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = self.dlg.FIN_rasField_CB.currentText()
-            pixelSize = self.dlg.FIN_pixelSize_SB.value()
+            pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
 
         elif factor_no == 4:
             polygonlayer = self.dlg.INC_Input_Field.filePath()
             rasField = self.dlg.INC_rasField_CB.currentText()
-            pixelSize = self.dlg.INC_pixelSize_SB.value()
+            pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
-
-        #TEMPORARY OUTPUTS
-        countryUTMLayer = f"{tempDir}/countryUTMLayer.shp"
-        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuffer.shp"
-        polygonUTM = f"{tempDir}/polygonLayer_UTM.shp"
-        rasterizeOutput = f"{tempDir}/polygonRas.tif"
-        difference = f"{tempDir}/Difference.shp"
-        mergeOutput = f"{tempDir}/Merge.shp"
 
 
         # Convert countryLayer data to UTM CRS
         self.convertCRS(countryLayer, UTM_crs)
         shp_utm[rasField] = [0]
-        shp_utm.to_file(countryUTMLayer)
+        countryUTMLayer =  QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
-        processing.run("native:buffer", {'INPUT': countryUTMLayer,
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
                                          'DISTANCE': 2000,
                                          'SEGMENTS': 5,
                                          'END_CAP_STYLE': 0,
@@ -592,8 +570,9 @@ class GenderIndicatorTool:
                                          'MITER_LIMIT': 2,
                                          'DISSOLVE': True,
                                          'SEPARATE_DISJOINT': False,
-                                         'OUTPUT': countryUTMLayerBuf})
+                                         'OUTPUT': "memory:"})
 
+        countryUTMLayerBuf = buffer["OUTPUT"]
 
         # Convert spatial data to UTM CRS
         self.convertCRS(polygonlayer, UTM_crs)
@@ -603,20 +582,24 @@ class GenderIndicatorTool:
         m_min = 0
         if factor_no == 0:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
-            shp_utm.to_file(polygonUTM)
+            # shp_utm.to_file(polygonUTM)
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
 
             Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
                                                               'OVERLAY': polygonUTM,
-                                                              'OUTPUT': difference,
+                                                              'OUTPUT': "memory:",
                                                               'GRID_SIZE': None})
+
+            difference = Difference["OUTPUT"]
 
             Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
                                                                 'CRS': None,
-                                                                'OUTPUT': mergeOutput})
+                                                                'OUTPUT': "memory:"})
+
+            mergeOutput = Merge["OUTPUT"]
 
             # Get the width and height of the extent
-            layer = QgsVectorLayer(mergeOutput, 'Polygon Layer', 'ogr')
-            extent = layer.extent()
+            extent = mergeOutput.extent()
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
 
@@ -627,9 +610,7 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            mergeOutput = workingDir + mergeOutput
-
-            rasOutput = "EDU_" + self.dlg.EDU_Output_Field.text()
+            rasOutput = self.dlg.EDU_Output_Field.text()
 
             rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
                                                           'FIELD': rasField,
@@ -676,7 +657,7 @@ class GenderIndicatorTool:
                 os.chdir(Dimension)
 
             mergeOutput = workingDir + mergeOutput
-            rasOutput = "CRE_" + self.dlg.CRE_Output_Field.text()
+            rasOutput = self.dlg.CRE_Output_Field.text()
 
             rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
                                                           'FIELD': rasField,
@@ -723,7 +704,7 @@ class GenderIndicatorTool:
                 os.chdir(Dimension)
 
             mergeOutput = workingDir + mergeOutput
-            rasOutput = "DOV_" + self.dlg.DOV_Output_Field.text()
+            rasOutput = self.dlg.DOV_Output_Field.text()
 
             rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
                                                           'FIELD': rasField,
@@ -770,7 +751,7 @@ class GenderIndicatorTool:
                 os.chdir(Dimension)
 
             mergeOutput = workingDir + mergeOutput
-            rasOutput = "FIN_" + self.dlg.FIN_Output_Field.text()
+            rasOutput = self.dlg.FIN_Output_Field.text()
 
             rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
                                                           'FIELD': rasField,
@@ -817,7 +798,7 @@ class GenderIndicatorTool:
                 os.chdir(Dimension)
 
             mergeOutput = workingDir + mergeOutput
-            rasOutput = "INC_" + self.dlg.INC_Output_Field.text()
+            rasOutput = self.dlg.INC_Output_Field.text()
 
             rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
                                                           'FIELD': rasField,
@@ -934,7 +915,7 @@ class GenderIndicatorTool:
             else:
                 pass
 
-            time.sleep(1)
+            time.sleep(0.5)
             os.mkdir(tempDir)
 
             Dimension = "Accessibility"
@@ -945,42 +926,101 @@ class GenderIndicatorTool:
                 countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
                 ranges = self.dlg.PBT_Ranges_Field.text()
-                pixelSize = self.dlg.PBT_pixelSize_SB.value()
-                rasOutput = "PBT_" + self.dlg.PBT_Output_Field.text()
+                pixelSize = self.dlg.pixelSize_SB.value()
+                rasOutput = self.dlg.PBT_Output_Field.text()
                 self.dlg.PBT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+                if self.dlg.PBT_mode_CB.currentText() == "Driving":
+                    mode = 0
+                elif self.dlg.PBT_mode_CB.currentText() == "Walking":
+                    mode = 6
+
+                if self.dlg.PBT_measurement_CB.currentText() == "Time":
+                    measurement = 0
+                    ranges_field = "AA_MINS"
+                elif self.dlg.PBT_measurement_CB.currentText() == "Distance":
+                    measurement = 1
+                    ranges_field = "AA_METERS"
 
             elif factor_no == 1:
                 countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
                 ranges = self.dlg.ETF_Ranges_Field.text()
-                pixelSize = self.dlg.ETF_pixelSize_SB.value()
-                rasOutput = "ETF_" + self.dlg.ETF_Output_Field.text()
+                pixelSize = self.dlg.pixelSize_SB.value()
+                rasOutput = self.dlg.ETF_Output_Field.text()
                 self.dlg.ETF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+                if self.dlg.ETF_mode_CB.currentText() == "Driving":
+                    mode = 0
+                elif self.dlg.ETF_mode_CB.currentText() == "Walking":
+                    mode = 6
+
+                if self.dlg.ETF_measurement_CB.currentText() == "Time":
+                    measurement = 0
+                    ranges_field = "AA_MINS"
+                elif self.dlg.ETF_measurement_CB.currentText() == "Distance":
+                    measurement = 1
+                    ranges_field = "AA_METERS"
 
             elif factor_no == 2:
                 countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
                 ranges = self.dlg.JOB_Ranges_Field.text()
-                pixelSize = self.dlg.JOB_pixelSize_SB.value()
-                rasOutput = "JOB_" + self.dlg.JOB_Output_Field.text()
+                pixelSize = self.dlg.pixelSize_SB.value()
+                rasOutput = self.dlg.JOB_Output_Field.text()
                 self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+                if self.dlg.JOB_mode_CB.currentText() == "Driving":
+                    mode = 0
+                elif self.dlg.JOB_mode_CB.currentText() == "Walking":
+                    mode = 6
+
+                if self.dlg.JOB_measurement_CB.currentText() == "Time":
+                    measurement = 0
+                    ranges_field = "AA_MINS"
+                elif self.dlg.JOB_measurement_CB.currentText() == "Distance":
+                    measurement = 1
+                    ranges_field = "AA_METERS"
 
             elif factor_no == 3:
                 countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
                 ranges = self.dlg.HEA_Ranges_Field.text()
-                pixelSize = self.dlg.HEA_pixelSize_SB.value()
-                rasOutput = "HEA_" + self.dlg.HEA_Output_Field.text()
+                pixelSize = self.dlg.pixelSize_SB.value()
+                rasOutput = self.dlg.HEA_Output_Field.text()
                 self.dlg.HEA_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+                if self.dlg.HEA_mode_CB.currentText() == "Driving":
+                    mode = 0
+                elif self.dlg.HEA_mode_CB.currentText() == "Walking":
+                    mode = 6
+
+                if self.dlg.HEA_measurement_CB.currentText() == "Time":
+                    measurement = 0
+                    ranges_field = "AA_MINS"
+                elif self.dlg.HEA_measurement_CB.currentText() == "Distance":
+                    measurement = 1
+                    ranges_field = "AA_METERS"
 
             elif factor_no == 4:
                 countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
                 ranges = self.dlg.FIF_Ranges_Field.text()
-                pixelSize = self.dlg.FIF_pixelSize_SB.value()
-                rasOutput = "FIF_" + self.dlg.FIF_Output_Field.text()
+                pixelSize = self.dlg.pixelSize_SB.value()
+                rasOutput = self.dlg.FIF_Output_Field.text()
                 self.dlg.FIF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
+                if self.dlg.FIF_mode_CB.currentText() == "Driving":
+                    mode = 0
+                elif self.dlg.FIF_mode_CB.currentText() == "Walking":
+                    mode = 6
+
+                if self.dlg.FIF_measurement_CB.currentText() == "Time":
+                    measurement = 0
+                    ranges_field = "AA_MINS"
+                elif self.dlg.FIF_measurement_CB.currentText() == "Distance":
+                    measurement = 1
+                    ranges_field = "AA_METERS"
 
             # TEMPORARY OUTPUT
             SAOutput = f"{tempDir}/SA_OUTPUT"
@@ -1006,10 +1046,10 @@ class GenderIndicatorTool:
                 subsets.append(f"{SAOutput}_{i}.shp")
 
                 Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
-                                                                                  'INPUT_PROFILE': 6,   #Walking
+                                                                                  'INPUT_PROFILE': mode,
                                                                                   'INPUT_POINT_LAYER': subset,
                                                                                   'INPUT_FIELD': '',
-                                                                                  'INPUT_METRIC': 1,    #Distance in meters
+                                                                                  'INPUT_METRIC': measurement,
                                                                                   'INPUT_RANGES': ranges,
                                                                                   'INPUT_AVOID_FEATURES': [],
                                                                                   'INPUT_AVOID_BORDERS': None,
@@ -1033,7 +1073,7 @@ class GenderIndicatorTool:
 
 
             for i in int_ranges_list:
-                df = SA_df[SA_df['AA_METERS'] == i]
+                df = SA_df[SA_df[ranges_field] == i]
                 output = f"{tempDir}/band_{i}"
                 df.to_file(output + ".shp")
 
@@ -1117,6 +1157,7 @@ class GenderIndicatorTool:
                                                           'EXTRA': '',
                                                           'OUTPUT': rasOutput})
 
+            time.sleep(0.5)
 
             # Loading final output to QGIS GUI viewer
             layer = QgsRasterLayer(rasOutput, f"{rasOutput}")
@@ -1125,6 +1166,15 @@ class GenderIndicatorTool:
                 print("Layer failed to load!")
 
             QgsProject.instance().addMapLayer(layer)
+
+            os.chdir(workingDir)
+            tempDir = "temp"
+
+            if os.path.exists(tempDir):
+                shutil.rmtree(tempDir)
+            else:
+                pass
+
 
 # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
