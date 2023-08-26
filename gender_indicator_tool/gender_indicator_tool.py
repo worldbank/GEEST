@@ -257,6 +257,13 @@ class GenderIndicatorTool:
         Modes = ['Walking', 'Driving']
         Measurement = ['Distance', 'Time']
         ###### TAB 4.1 - Women's Travel Patterns
+        self.dlg.WTP_mode_CB.clear()
+        self.dlg.WTP_mode_CB.addItems(Modes)
+        self.dlg.WTP_measurement_CB.clear()
+        self.dlg.WTP_measurement_CB.addItems(Measurement)
+        self.dlg.WTP_Execute_PB.clicked.connect(lambda: self.ServiceArea(5))
+
+        self.dlg.WTP_Aggregate_PB.clicked.connect(self.wtpAggregate)
 
         ###### TAB 4.2 - Public Transport
         self.dlg.PBT_mode_CB.clear()
@@ -920,13 +927,13 @@ class GenderIndicatorTool:
 
             Dimension = "Accessibility"
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            countryLayer = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
 
             # INPUT
             if factor_no == 0:
-                countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
                 ranges = self.dlg.PBT_Ranges_Field.text()
-                pixelSize = self.dlg.pixelSize_SB.value()
                 rasOutput = self.dlg.PBT_Output_Field.text()
                 self.dlg.PBT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
@@ -943,10 +950,8 @@ class GenderIndicatorTool:
                     ranges_field = "AA_METERS"
 
             elif factor_no == 1:
-                countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
                 ranges = self.dlg.ETF_Ranges_Field.text()
-                pixelSize = self.dlg.pixelSize_SB.value()
                 rasOutput = self.dlg.ETF_Output_Field.text()
                 self.dlg.ETF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
@@ -963,10 +968,8 @@ class GenderIndicatorTool:
                     ranges_field = "AA_METERS"
 
             elif factor_no == 2:
-                countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
                 ranges = self.dlg.JOB_Ranges_Field.text()
-                pixelSize = self.dlg.pixelSize_SB.value()
                 rasOutput = self.dlg.JOB_Output_Field.text()
                 self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
@@ -983,10 +986,8 @@ class GenderIndicatorTool:
                     ranges_field = "AA_METERS"
 
             elif factor_no == 3:
-                countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
                 ranges = self.dlg.HEA_Ranges_Field.text()
-                pixelSize = self.dlg.pixelSize_SB.value()
                 rasOutput = self.dlg.HEA_Output_Field.text()
                 self.dlg.HEA_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
@@ -1003,10 +1004,8 @@ class GenderIndicatorTool:
                     ranges_field = "AA_METERS"
 
             elif factor_no == 4:
-                countryLayer = self.dlg.countryLayer_Field.filePath()
                 FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
                 ranges = self.dlg.FIF_Ranges_Field.text()
-                pixelSize = self.dlg.pixelSize_SB.value()
                 rasOutput = self.dlg.FIF_Output_Field.text()
                 self.dlg.FIF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
@@ -1019,6 +1018,24 @@ class GenderIndicatorTool:
                     measurement = 0
                     ranges_field = "AA_MINS"
                 elif self.dlg.FIF_measurement_CB.currentText() == "Distance":
+                    measurement = 1
+                    ranges_field = "AA_METERS"
+
+            elif factor_no == 5:
+                FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
+                ranges = self.dlg.WTP_Ranges_Field.text()
+                rasOutput = self.dlg.WTP_FacilityOutput_Field.text()
+                self.dlg.WTP_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+                if self.dlg.WTP_mode_CB.currentText() == "Driving":
+                    mode = 0
+                elif self.dlg.WTP_mode_CB.currentText() == "Walking":
+                    mode = 6
+
+                if self.dlg.WTP_measurement_CB.currentText() == "Time":
+                    measurement = 0
+                    ranges_field = "AA_MINS"
+                elif self.dlg.WTP_measurement_CB.currentText() == "Distance":
                     measurement = 1
                     ranges_field = "AA_METERS"
 
@@ -1043,7 +1060,7 @@ class GenderIndicatorTool:
             for i in range(0, len(gdf), subset_size):
                 subset = gdf.iloc[i:i + subset_size]
                 subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
-                subsets.append(f"{SAOutput}_{i}.shp")
+
 
                 Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
                                                                                   'INPUT_PROFILE': mode,
@@ -1055,7 +1072,9 @@ class GenderIndicatorTool:
                                                                                   'INPUT_AVOID_BORDERS': None,
                                                                                   'INPUT_AVOID_COUNTRIES': '',
                                                                                   'INPUT_AVOID_POLYGONS': None,
-                                                                                  'OUTPUT': f"{SAOutput}_{i}.shp"})
+                                                                                  'OUTPUT': "memory:"})
+                SA_OUTPUT = Service_Area["OUTPUT"]
+                subsets.append(SA_OUTPUT)
 
             Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
                                                                 'CRS': None,
@@ -1141,6 +1160,16 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
+            if factor_no == 5:
+                Output_Folder = "WTP"
+                if os.path.exists(Output_Folder):
+                    os.chdir(Output_Folder)
+                else:
+                    os.mkdir(Output_Folder)
+                    os.chdir(Output_Folder)
+            else:
+                pass
+
             rasterize = processing.run("gdal:rasterize", {'INPUT': finalMerge,
                                                           'FIELD': "rasField",
                                                           'BURN': 0,
@@ -1174,6 +1203,46 @@ class GenderIndicatorTool:
                 shutil.rmtree(tempDir)
             else:
                 pass
+
+    def wtpAggregate(self):
+        # OUTPUT
+        Output_Raster = self.dlg.WTP_AGGOutput_Field.text()
+
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        WTP_Folder = "Accessibility/WTP"
+
+        if os.path.exists(WTP_Folder):
+            os.chdir(WTP_Folder)
+        else:
+            pass
+
+        tif_list = [f for f in os.listdir(os.getcwd()) if f.endswith('.tif')]
+
+        raster_list = []
+
+        for ras in tif_list:
+            with rasterio.open(ras) as src:
+                raster_list.append(src.read(1))
+                meta1 = src.meta
+
+        len_raster_list = len(raster_list)
+        cumulative_sum = 0
+
+        for i in range(len_raster_list):
+            value = raster_list[i]
+            cumulative_sum += value
+
+        aggregation = cumulative_sum / len_raster_list
+        os.chdir("..")
+
+        with rasterio.open(Output_Raster, 'w', **meta1) as dst:
+            dst.write(aggregation, 1)
+
+
+
+
+
 
 
 # *************************** Aggregation Functions ************************************ #
