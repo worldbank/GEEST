@@ -514,7 +514,7 @@ class GenderIndicatorTool:
 
         shp = gpd.read_file(vector)
         shp_wgs84 = shp.to_crs('EPSG:4326')
-        shp_utm = shp_wgs84.to_crs(f'EPSG:{UTM_crs}')
+        shp_utm = shp_wgs84.to_crs(UTM_crs)
 
 # *************************** Geoprocessing Functions ********************************** #
     def Rasterize(self, factor_no):
@@ -926,7 +926,7 @@ class GenderIndicatorTool:
             os.mkdir(tempDir)
 
             Dimension = "Accessibility"
-            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
             countryLayer = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
 
@@ -1043,7 +1043,7 @@ class GenderIndicatorTool:
             SAOutput = f"{tempDir}/SA_OUTPUT"
             SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
 
-            mergeOutput = f"{tempDir}/Merge.shp"
+            mergeOutput = f"{tempDir}/Range_merge.shp"
             mergeRasfield = f"{tempDir}/Merge_rasField.shp"
             countryUTMLayer = f"{tempDir}/countryUTMLayer.shp"
             countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuffer.shp"
@@ -1077,58 +1077,84 @@ class GenderIndicatorTool:
                 subsets.append(SA_OUTPUT)
 
             Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
-                                                                'CRS': None,
-                                                                'OUTPUT': f"{SAOutput}.shp"})
-
-            # Convert spatial data to UTM CRS
-            self.convertCRS(f"{SAOutput}.shp", UTM_crs)
-            shp_utm.to_file(SAOutput_utm)
-
+                                                                'CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                                                                'OUTPUT': SAOutput_utm})
+    #
+    #         # Convert spatial data to UTM CRS
+    #         self.convertCRS(f"{SAOutput}.shp", UTM_crs)
+    #         shp_utm.to_file(SAOutput_utm)
+    #
             SA_df = gpd.read_file(SAOutput_utm)
             no_spaces_string = "".join(ranges.split())
             ranges_list = no_spaces_string.split(",")
             int_ranges_list = [int(x) for x in ranges_list]
             int_ranges_list.sort()
 
+            range_subsets = []
 
             for i in int_ranges_list:
-                df = SA_df[SA_df[ranges_field] == i]
-                output = f"{tempDir}/band_{i}"
-                df.to_file(output + ".shp")
+                range_subset = SA_df[SA_df[ranges_field] == i]
+                range_subset = QgsVectorLayer(range_subset.to_json(), f"range_{i}", "ogr")
+                # output = f"{tempDir}/band_{i}"
+                # df.to_file(output + ".shp")
 
-                dissolve = processing.run("native:dissolve", {'INPUT': output + ".shp",
+                dissolve = processing.run("native:dissolve", {'INPUT': range_subset,
                                                               'FIELD':[],
                                                               'SEPARATE_DISJOINT':False,
-                                                              'OUTPUT':f"{output}_dis.shp"})
-            Merge_list = []
-            len_range = len(int_ranges_list)
-            int_ranges_list.sort(reverse=True)
-            for i in range(0, len_range-1):
-                output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i+1]}.shp"
-                Merge_list.append(output)
-                processing.run("native:difference", {'INPUT': f"{tempDir}/band_{int_ranges_list[i]}_dis.shp",
-                                                     'OVERLAY': f"{tempDir}/band_{int_ranges_list[i+1]}_dis.shp",
-                                                     'OUTPUT': output,
-                                                     'GRID_SIZE': None})
+                                                              'OUTPUT':"memory:"})
 
-            Merge_list.append(f"{tempDir}/band_{int_ranges_list[-1]}_dis.shp")
+                Range_output = dissolve["OUTPUT"]
+
+                range_subsets.append(range_subset)
+
+            Merge_list = []
+            len_range = len(range_subsets)
+            # int_ranges_list.sort(reverse=True)
+            for i in range(-1, -len(range_subsets), -1):
+                output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                # Merge_list.append(output)
+                difference = processing.run("native:difference", {'INPUT': range_subsets[i],
+                                                                  'OVERLAY': range_subsets[i-1],
+                                                                  'OUTPUT': "memory:",
+                                                                  'GRID_SIZE': None})
+                diff_output = difference["OUTPUT"]
+
+                dissolve = processing.run("native:dissolve", {'INPUT': diff_output,
+                                                              'FIELD': [],
+                                                              'SEPARATE_DISJOINT': False,
+                                                              'OUTPUT': "memory:"})
+
+                dis_output = dissolve["OUTPUT"]
+                Merge_list.append(dis_output)
+
+
+
+            dissolve = processing.run("native:dissolve", {'INPUT': range_subsets[0],
+                                                          'FIELD': [],
+                                                          'SEPARATE_DISJOINT': False,
+                                                          'OUTPUT': "memory:"})
+
+            dis_output = dissolve["OUTPUT"]
+            Merge_list.append(dis_output)
 
             Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
                                                                 'CRS':None,
                                                                 'OUTPUT':mergeOutput})
 
             merge_df = gpd.read_file(mergeOutput)
-            merge_df["rasField"] = [1,2,3,4,5]
-            merge_df.to_file(mergeRasfield)
-            mergelayer = workingDir + mergeRasfield
-            finalMerge = workingDir + finalMerge
+            merge_df["rasField"] = [5,4,3,2,1]
+            merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
+            # merge_df.to_file(mergeRasfield)
+            # mergelayer = workingDir + mergeRasfield
+            # finalMerge = workingDir + finalMerge
 
             # Convert countryLayer data to UTM CRS
             self.convertCRS(countryLayer, UTM_crs)
             shp_utm["rasField"] = [0]
-            shp_utm.to_file(countryUTMLayer)
+            shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
+            # shp_utm.to_file(countryUTMLayer)
 
-            processing.run("native:buffer", {'INPUT': countryUTMLayer,
+            buffer = processing.run("native:buffer", {'INPUT': shp_utm_,
                                              'DISTANCE': 2000,
                                              'SEGMENTS': 5,
                                              'END_CAP_STYLE': 0,
@@ -1136,20 +1162,26 @@ class GenderIndicatorTool:
                                              'MITER_LIMIT': 2,
                                              'DISSOLVE': True,
                                              'SEPARATE_DISJOINT': False,
-                                             'OUTPUT': countryUTMLayerBuf})
+                                             'OUTPUT': "memory:"})
 
-            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
-                                                              'OVERLAY':mergelayer,
-                                                              'OUTPUT':difference,
+            buffer_output = buffer["OUTPUT"]
+
+            Difference = processing.run("native:difference", {'INPUT': buffer_output,
+                                                              'OVERLAY':merge_SA_UTM,
+                                                              'OUTPUT':"memory:",
                                                               'GRID_SIZE':None})
 
-            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [mergelayer, difference],
+            diff_output = Difference["OUTPUT"]
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [merge_SA_UTM, diff_output],
                                                                 'CRS': None,
-                                                                'OUTPUT': finalMerge})
+                                                                'OUTPUT': "memory:"})
+
+            merge_output = Merge["OUTPUT"]
 
             # Get the width and height of the extent
-            layer = QgsVectorLayer(finalMerge, 'Polygon Layer', 'ogr')
-            extent = layer.extent()
+            # layer = QgsVectorLayer(finalMerge, 'Polygon Layer', 'ogr')
+            extent = merge_output.extent()
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
 
@@ -1170,7 +1202,7 @@ class GenderIndicatorTool:
             else:
                 pass
 
-            rasterize = processing.run("gdal:rasterize", {'INPUT': finalMerge,
+            rasterize = processing.run("gdal:rasterize", {'INPUT': merge_output,
                                                           'FIELD': "rasField",
                                                           'BURN': 0,
                                                           'USE_Z': False,
