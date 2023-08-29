@@ -225,7 +225,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_9">
       <attribute name="title">
@@ -827,13 +827,13 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_14">
       <attribute name="title">
        <string>Policy and Legal Protection</string>
       </attribute>
-      <widget class="QPushButton" name="PLP_Set_PB_2">
+      <widget class="QPushButton" name="PLP_Set_PB">
        <property name="geometry">
         <rect>
          <x>250</x>
@@ -846,7 +846,7 @@
         <string>Set</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="PLP_rasField_CB_2">
+      <widget class="QComboBox" name="PLP_rasField_CB">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -869,7 +869,7 @@
         <string>Field in the shapefile to use for rasterization</string>
        </property>
       </widget>
-      <widget class="QgsFileWidget" name="PLP_Input_Field_2">
+      <widget class="QgsFileWidget" name="PLP_Input_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -879,7 +879,7 @@
         </rect>
        </property>
       </widget>
-      <widget class="QgsFilterLineEdit" name="PLP_Output_Field_2">
+      <widget class="QgsFilterLineEdit" name="PLP_Output_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -895,7 +895,7 @@
         <string notr="true"/>
        </property>
       </widget>
-      <widget class="QPushButton" name="PLP_Execute_PB_2">
+      <widget class="QPushButton" name="PLP_Execute_PB">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -2612,7 +2612,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>11</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
