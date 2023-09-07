@@ -39,6 +39,7 @@ import math
 import shutil
 import time
 import logging
+import ast
 
 # Prepare processing framework
 sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
@@ -315,12 +316,16 @@ class GenderIndicatorTool:
 
         ## TAB 5 - Place Charqacterization **************************************************************
         ###### TAB 5.1 - Walkability
+        self.dlg.WLK_Set_PB.clicked.connect(self.walkabilitySet)
+        self.dlg.WLK_unique_PB.clicked.connect(self.uniqueValues)
+        self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
         ###### TAB 5.2 - Cycleways
 
         ###### TAB 5.3 - Public Transport
 
-        ###### TAB 5.4 - Urban Design
+        ###### TAB 5.4 - Safe Urban Design
+        self.dlg.SAF_Execute_PB.clicked.connect(self.nightTimeLights)
 
         ###### TAB 5.5 - Security
 
@@ -517,6 +522,25 @@ class GenderIndicatorTool:
             self.dlg.INC_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.INC_rasField_CB.addItems(fields)
+
+    def walkabilitySet(self):
+        polygonlayer = self.dlg.WLK_Input_Field.filePath()
+        layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+        self.dlg.WLK_roadTypeField_CB.clear()
+        fields = [field.name() for field in layer.fields()]
+        self.dlg.WLK_roadTypeField_CB.addItems(fields)
+
+    def uniqueValues(self):
+        gdf = gpd.read_file(self.dlg.WLK_Input_Field.filePath())
+        roadTypeField = self.dlg.WLK_roadTypeField_CB.currentText()
+        uniqueValues = gdf[roadTypeField].unique().tolist()
+        scoreList = []
+
+        for val in uniqueValues:
+            scoreList.append([val,0])
+
+        self.dlg.WLK_typeScore_Field.setText(str(scoreList))
+
 
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
@@ -1389,6 +1413,170 @@ class GenderIndicatorTool:
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+
+    def walkability(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        if os.path.exists(Dimension):
+            pass
+        else:
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        lineLayer = self.dlg.WLK_Input_Field.filePath()
+        roadTypeField = self.dlg.WLK_roadTypeField_CB.currentText()
+        roadType_Score = ast.literal_eval(self.dlg.WLK_typeScore_Field.text())
+        rasField = "Score"
+
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        countrybuf_out = f"{workingDir}/{tempDir}/roadBuf.shp"
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': "memory:"})
+
+        countryUTMLayerBuf = buffer["OUTPUT"]
+
+        self.convertCRS(lineLayer, UTM_crs)
+        shp_utm[rasField] = ''
+
+
+        for i in roadType_Score:
+            shp_utm.loc[shp_utm[roadTypeField] == i[0], 'Score'] = i[1]
+
+        shp_utm[rasField] = shp_utm[rasField].astype(int)
+
+        ###############
+
+        scoredRoadsUTM = QgsVectorLayer(shp_utm.to_json(), "linebufUTM", "ogr")
+        roadBuf_out = f"{workingDir}/{tempDir}/roadBuf.shp"
+
+        Buffer = processing.run("gdal:buffervectors",{'INPUT': scoredRoadsUTM,
+                                             'GEOMETRY': 'geometry',
+                                             'DISTANCE': 250,
+                                             'FIELD': roadTypeField,
+                                             'DISSOLVE': False,
+                                             'EXPLODE_COLLECTIONS': False,
+                                             'OPTIONS': '',
+                                             'OUTPUT': roadBuf_out})
+
+
+        # dif_out = f"{workingDir}/{tempDir}/dif.shp"
+        Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                          'OVERLAY': roadBuf_out,
+                                                          'OUTPUT': "memory:",
+                                                          'GRID_SIZE': None})
+
+        difference = Difference["OUTPUT"]
+        # merge_out  = f"{workingDir}/{tempDir}/merge.shp"
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [roadBuf_out, difference],
+                                                            'CRS': None,
+                                                            'OUTPUT': "memory:"})
+
+        mergeOutput = Merge["OUTPUT"]
+
+        # Get the width and height of the extent
+        extent = mergeOutput.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        os.chdir(Dimension)
+        rasOutput = self.dlg.WLK_Output_Field.text()
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        self.dlg.WLK_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+    def nightTimeLights(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        Dimension = "Place Characterization"
+
+
+        NTL_input = self.dlg.SAF_Input_Field.filePath()
+        rasOutput = self.dlg.SAF_Output_Field.text()
+
+        # styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        # styleFileDestination = f"{workingDir}{Dimension}/"
+        # styleFile = f"{rasOutput.split('.')[0]}.qml"
+        #
+        # shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        with rasterio.open(NTL_input) as src:
+            SAF_ras = src.read(1)
+            meta1 = src.meta
+            Rmax = SAF_ras.max()
+            Rmin = SAF_ras.min()
+            m_max = 5
+            m_min = 0
+
+        # Raster Calculation
+
+        # processing.run("qgis:rastercalculator",
+        #                {'EXPRESSION': '"NightTimeLights_Comoros_UTM@1" + "NightTimeLights_Comoros_UTM@1"',
+        #                 'LAYERS': ['C:/Users/Andre/Documents/NightTimeLights/NightTimeLights_Comoros_UTM.tif'],
+        #                 'CELLSIZE': 0, 'EXTENT': None, 'CRS': QgsCoordinateReferenceSystem('EPSG:32738'),
+        #                 'OUTPUT': 'TEMPORARY_OUTPUT'})
+
+        result = (SAF_ras.astype(float) - Rmin) / (Rmax - Rmin) * m_max
+
+        meta1.update(dtype=rasterio.float32)
+
+        if os.path.exists(Dimension):
+            os.chdir(Dimension)
+        else:
+            os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+        with rasterio.open(rasOutput, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
 
 
