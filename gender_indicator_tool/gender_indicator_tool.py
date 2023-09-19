@@ -323,11 +323,16 @@ class GenderIndicatorTool:
         ###### TAB 5.2 - Cycleways
 
         ###### TAB 5.3 - Public Transport
-
-        ###### TAB 5.4 - Safe Urban Design
         self.dlg.SAF_Execute_PB.clicked.connect(self.nightTimeLights)
 
+        ###### TAB 5.4 - Safe Urban Design
+        self.dlg.APT_Execute_PB.clicked.connect(self.transportCount)
+
         ###### TAB 5.5 - Security
+        self.dlg.SEC_Set_PB.clicked.connect(lambda: self.RasterizeSet(6))
+        self.dlg.SEC_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
+
+        self.dlg.SEC_Aggregate_PB.clicked.connect(self.secAggregate)
 
         ###### TAB 5.6 - Income Level
         self.dlg.INC_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
@@ -523,6 +528,13 @@ class GenderIndicatorTool:
             fields = [field.name() for field in layer.fields()]
             self.dlg.INC_rasField_CB.addItems(fields)
 
+        elif factor_no == 6:
+            polygonlayer = self.dlg.SEC_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.SEC_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.SEC_rasField_CB.addItems(fields)
+
     def walkabilitySet(self):
         polygonlayer = self.dlg.WLK_Input_Field.filePath()
         layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
@@ -583,6 +595,10 @@ class GenderIndicatorTool:
         elif factor_no == 5:
             polygonlayer = self.dlg.INC_Input_Field.filePath()
             rasField = self.dlg.INC_rasField_CB.currentText()
+
+        elif factor_no == 6:
+            polygonlayer = self.dlg.SEC_Input_Field.filePath()
+            rasField = self.dlg.SEC_rasField_CB.currentText()
 
 
         # Convert countryLayer data to UTM CRS
@@ -938,7 +954,72 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+        elif factor_no == 6:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmax)/(Rmin - Rmax) * m_max
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': "memory:",
+                                                              'GRID_SIZE': None})
+
+            difference = Difference["OUTPUT"]
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': "memory:"})
+
+            mergeOutput = Merge["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Place Characterization"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            Output_Folder = "SEC"
+            if os.path.exists(Output_Folder):
+                os.chdir(Output_Folder)
+            else:
+                os.mkdir(Output_Folder)
+                os.chdir(Output_Folder)
+
+
+            rasOutput = self.dlg.SEC_incidentOutput_Field.text()
+
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
+
+            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+        os.chdir(workingDir)
 
     def IDW(self):
 
@@ -1365,8 +1446,9 @@ class GenderIndicatorTool:
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
 
-            QMessageBox.information(self.dlg, "Message", f"Processing Complete! {subsets}")
+            QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
+            os.chdir(workingDir)
 
     def wtpAggregate(self):
         # OUTPUT
@@ -1414,6 +1496,55 @@ class GenderIndicatorTool:
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
+        os.chdir(workingDir)
+
+    def secAggregate(self):
+        # OUTPUT
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        Dimension = "Place Characterization"
+        SEC_Folder = f"{Dimension}/SEC"
+
+        if os.path.exists(SEC_Folder):
+            os.chdir(SEC_Folder)
+        else:
+            pass
+
+        rasOutput = self.dlg.SEC_AGGOutput_Field.text()
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        tif_list = [f for f in os.listdir(os.getcwd()) if f.endswith('.tif')]
+        raster_list = []
+
+        for ras in tif_list:
+            with rasterio.open(ras) as src:
+                raster_list.append(src.read(1))
+                meta1 = src.meta
+
+        len_raster_list = len(raster_list)
+        cumulative_sum = 0
+
+        for i in range(len_raster_list):
+            value = raster_list[i]
+            cumulative_sum += value
+
+        aggregation = cumulative_sum / len_raster_list
+        os.chdir("..")
+
+        with rasterio.open(rasOutput, 'w', **meta1) as dst:
+            dst.write(aggregation, 1)
+
+        self.dlg.SEC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+        os.chdir(workingDir)
 
     def walkability(self):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -1447,7 +1578,7 @@ class GenderIndicatorTool:
         shp_utm[rasField] = [0]
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
-        countrybuf_out = f"{workingDir}/{tempDir}/roadBuf.shp"
+        scoredRoads = f"{workingDir}/{tempDir}/Scored_roads.shp"
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
                                                   'DISTANCE': 2000,
@@ -1469,13 +1600,12 @@ class GenderIndicatorTool:
             shp_utm.loc[shp_utm[roadTypeField] == i[0], 'Score'] = i[1]
 
         shp_utm[rasField] = shp_utm[rasField].astype(int)
+        shp_utm.to_file(scoredRoads)
 
-        ###############
-
-        scoredRoadsUTM = QgsVectorLayer(shp_utm.to_json(), "linebufUTM", "ogr")
+        # scoredRoadsUTM = QgsVectorLayer(shp_utm.to_json(), "linebufUTM", "ogr")
         roadBuf_out = f"{workingDir}/{tempDir}/roadBuf.shp"
 
-        Buffer = processing.run("gdal:buffervectors",{'INPUT': scoredRoadsUTM,
+        Buffer = processing.run("gdal:buffervectors",{'INPUT': scoredRoads,
                                              'GEOMETRY': 'geometry',
                                              'DISTANCE': 250,
                                              'FIELD': roadTypeField,
@@ -1484,16 +1614,16 @@ class GenderIndicatorTool:
                                              'OPTIONS': '',
                                              'OUTPUT': roadBuf_out})
 
+        dif_out = f"{workingDir}/{tempDir}/Dif.shp"
 
-        # dif_out = f"{workingDir}/{tempDir}/dif.shp"
         Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
                                                           'OVERLAY': roadBuf_out,
-                                                          'OUTPUT': "memory:",
+                                                          'OUTPUT': dif_out,
                                                           'GRID_SIZE': None})
 
-        difference = Difference["OUTPUT"]
-        # merge_out  = f"{workingDir}/{tempDir}/merge.shp"
-        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [roadBuf_out, difference],
+        # difference = Difference["OUTPUT"]
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [roadBuf_out, dif_out],
                                                             'CRS': None,
                                                             'OUTPUT': "memory:"})
 
@@ -1531,6 +1661,10 @@ class GenderIndicatorTool:
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+        os.chdir(workingDir)
+
     def nightTimeLights(self):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
@@ -1539,6 +1673,7 @@ class GenderIndicatorTool:
 
 
         NTL_input = self.dlg.SAF_Input_Field.filePath()
+        rasOutput_temp = "temp_" + self.dlg.SAF_Output_Field.text()
         rasOutput = self.dlg.SAF_Output_Field.text()
 
         # styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1547,13 +1682,33 @@ class GenderIndicatorTool:
         #
         # shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+
+
         with rasterio.open(NTL_input) as src:
             SAF_ras = src.read(1)
             meta1 = src.meta
-            Rmax = SAF_ras.max()
-            Rmin = SAF_ras.min()
+            Rmax = SAF_ras.max().astype(float)
+            Rmin = SAF_ras.min().astype(float)
+            denom = Rmax - Rmin
             m_max = 5
             m_min = 0
+
+        QMessageBox.information(self.dlg, "Message", f"{SAF_ras}, {Rmax}, {Rmin}, {denom}")
+
+        # processing.run("gdal:rastercalculator", {
+        #     'INPUT_A': NTL_input,
+        #     'BAND_A': 1, 'INPUT_B': None, 'BAND_B': None, 'INPUT_C': None, 'BAND_C': None, 'INPUT_D': None,
+        #     'BAND_D': None, 'INPUT_E': None, 'BAND_E': None, 'INPUT_F': None, 'BAND_F': None, 'FORMULA': f'(A-{Rmin})*{m_max}',
+        #     'NO_DATA': None, 'EXTENT_OPT': 0, 'PROJWIN': None, 'RTYPE': 5, 'OPTIONS': '', 'EXTRA': '',
+        #     'OUTPUT': rasOutput_temp})
+        #
+        # processing.run("gdal:rastercalculator", {
+        #     'INPUT_A': rasOutput_temp,
+        #     'BAND_A': 1, 'INPUT_B': None, 'BAND_B': None, 'INPUT_C': None, 'BAND_C': None, 'INPUT_D': None,
+        #     'BAND_D': None, 'INPUT_E': None, 'BAND_E': None, 'INPUT_F': None, 'BAND_F': None,
+        #     'FORMULA': f'(A/{denom}',
+        #     'NO_DATA': None, 'EXTENT_OPT': 0, 'PROJWIN': None, 'RTYPE': 5, 'OPTIONS': '', 'EXTRA': '',
+        #     'OUTPUT': rasOutput})
 
         # Raster Calculation
 
@@ -1563,28 +1718,158 @@ class GenderIndicatorTool:
         #                 'CELLSIZE': 0, 'EXTENT': None, 'CRS': QgsCoordinateReferenceSystem('EPSG:32738'),
         #                 'OUTPUT': 'TEMPORARY_OUTPUT'})
 
-        result = (SAF_ras.astype(float) - Rmin) / (Rmax - Rmin) * m_max
 
-        meta1.update(dtype=rasterio.float32)
+        # # result = SAF_ras - Rmin
+        # # # result = np.divide(result,Rmax)
+        # result = (SAF_ras * m_max)
+        # QMessageBox.information(self.dlg, "Message", f"{SAF_ras}, {result}")
+        #
+        # meta1.update(dtype=rasterio.float32)
+        #
+        # if os.path.exists(Dimension):
+        #     os.chdir(Dimension)
+        # else:
+        #     os.mkdir(Dimension)
+        #     os.chdir(Dimension)
+        #
+        # with rasterio.open(rasOutput, 'w', **meta1) as dst:
+        #     dst.write(result, 1)
+        #
+        # self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        os.chdir(workingDir)
+
+    def transportCount(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
 
         if os.path.exists(Dimension):
-            os.chdir(Dimension)
+            pass
         else:
             os.mkdir(Dimension)
-            os.chdir(Dimension)
 
-        with rasterio.open(rasOutput, 'w', **meta1) as dst:
-            dst.write(result, 1)
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
 
-        self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        pointLayer = self.dlg.APT_pointInput_Field.filePath()
+        polygonLayer = self.dlg.APT_polygonInput_Field.filePath()
+        rasField = "Score"
+
+        #TempOutput
+        pointCount_out = f"{tempDir}/pointCountPoly.shp"
+        adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
+        pointUTMLayer = f"{tempDir}/pointUTMLayer.shp"
+        pointCount_std = f"{tempDir}/pointCount_std.shp"
 
 
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': "memory:"})
+
+        countryUTMLayerBuf = buffer["OUTPUT"]
+
+        self.convertCRS(polygonLayer, UTM_crs)
+        shp_utm.to_file(adminUTMLayer)
+        # adminUTMLayer = QgsVectorLayer(shp_utm.to_json(), "adminUTMLayer", "ogr")
+        self.convertCRS(pointLayer, UTM_crs)
+        shp_utm.to_file(pointUTMLayer)
+        # pointUTMLayer = QgsVectorLayer(shp_utm.to_json(), "adminUTMLayer", "ogr")
+
+        pointCount = processing.run("native:countpointsinpolygon",{'POLYGONS': QgsProcessingFeatureSourceDefinition(adminUTMLayer,
+                                                                   selectedFeaturesOnly = False,
+                                                                   featureLimit = -1,
+                                                                   flags = QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
+                                                                   geometryCheck = QgsFeatureRequest.GeometrySkipInvalid),
+                                                                  'POINTS': pointUTMLayer,
+                                                                  'WEIGHT': '',
+                                                                  'CLASSFIELD': '',
+                                                                  'FIELD': rasField,
+                                                                  'OUTPUT': pointCount_out})
 
 
+        pointCount_out_df = gpd.read_file(pointCount_out)
+
+        Rmax = pointCount_out_df[rasField].max()
+        Rmin = pointCount_out_df[rasField].min()
+        m_max = 5
+        m_min = 0
+
+        pointCount_out_df[rasField] = (pointCount_out_df[rasField] - Rmin) / (Rmax - Rmin) * m_max
+        pointCount_out_df.to_file(pointCount_std)
+        # pointCount_out = QgsVectorLayer(pointCount_out.to_json(), "polygonUTM", "ogr")
+
+        Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                          'OVERLAY': pointCount_std,
+                                                          'OUTPUT': "memory:",
+                                                          'GRID_SIZE': None})
+
+        difference = Difference["OUTPUT"]
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [pointCount_std, difference],
+                                                            'CRS': None,
+                                                            'OUTPUT': "memory:"})
+
+        mergeOutput = Merge["OUTPUT"]
+
+        extent = mergeOutput.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        os.chdir(Dimension)
+
+        rasOutput = self.dlg.APT_Output_Field.text()
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        self.dlg.APT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))\
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+        os.chdir(workingDir)
 
 
-
-# *************************** Aggregation Functions ************************************ #
+    # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
 
 
@@ -1667,7 +1952,7 @@ class GenderIndicatorTool:
                 handlerID.setFormatter(formatterID)
                 loggerID.addHandler(handlerID)
 
-                loggerID.info(f"Factors: {non_empty_count}/3 - {non_empty_count/3 * 100} %")
+                loggerID.info(f"Factors: {non_empty_count}/3 - {non_empty_count/3 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1688,6 +1973,8 @@ class GenderIndicatorTool:
                 self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
         else:
             self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+        os.chdir(workingDir)
 
     def contextualAggregation(self):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -1761,7 +2048,7 @@ class GenderIndicatorTool:
                 handlerCD.setFormatter(formatterCD)
                 loggerCD.addHandler(handlerCD)
 
-                loggerCD.info(f"Factors: {non_empty_count}/2 - {non_empty_count/2 * 100} %")
+                loggerCD.info(f"Factors: {non_empty_count}/2 - {non_empty_count/2 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1783,6 +2070,8 @@ class GenderIndicatorTool:
 
         else:
             self.dlg.contextualAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+        os.chdir(workingDir)
 
     def accessibiltyAggregation(self):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -1879,7 +2168,7 @@ class GenderIndicatorTool:
                 handlerAD.setFormatter(formatterAD)
                 loggerAD.addHandler(handlerAD)
 
-                loggerAD.info(f"Factors: {non_empty_count}/6 - {non_empty_count/6 * 100} %")
+                loggerAD.info(f"Factors: {non_empty_count}/6 - {non_empty_count/6 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1900,6 +2189,8 @@ class GenderIndicatorTool:
                 self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
         else:
             self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+        os.chdir(workingDir)
 
     def placeCharacterizationAggregation(self):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -2030,7 +2321,7 @@ class GenderIndicatorTool:
                 handlerPD.setFormatter(formatterPD)
                 loggerPD.addHandler(handlerPD)
 
-                loggerPD.info(f"Factors: {non_empty_count}/11 - {non_empty_count / 11 * 100} %")
+                loggerPD.info(f"Factors: {non_empty_count}/11 - {non_empty_count / 11 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -2052,6 +2343,8 @@ class GenderIndicatorTool:
 
         else:
             self.dlg.placeCharacterizationAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+        os.chdir(workingDir)
 
     def dimesnionsAggregation(self):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -2133,22 +2426,28 @@ class GenderIndicatorTool:
 
                 shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-                # log_list = ['Individual', 'Contextual', 'Accessibility', 'Place Characterization']
-                # factor_num = []
-                #
-                # for dimension in log_list:
-                #     log_file = f"{workingDir}{dimension}/{dimension}.log"
-                #     if os.path.exists(log_file):
-                #         with open(log_file, 'r') as file:
-                #             last_lines = file.readlines()[-1]
-                #             # last_line = lines[-1]
-                #             # num_of_factors = int(lines[-1].strip().split("-")[-2].split(":").strip().split("/")[0])
-                #
-                #             factor_num.append(lines)
-                #     else:
-                #         pass
+                log_list = ['Individual', 'Contextual', 'Accessibility', 'Place Characterization']
+                factor_num = []
 
+                for dimension in log_list:
+                    log_file = f"{workingDir}{dimension}/{dimension}.log"
+                    if os.path.exists(log_file):
+                        with open(log_file, 'r') as file:
+                            lines = file.readlines()
 
+                            if lines:
+                                last_line = lines[-1].split("-")[-1].strip()
+                            else:
+                                pass
+
+                            factor_num.append(last_line)
+                    else:
+                        pass
+
+                integer_list = [int(item) for item in factor_num]
+                sum_list = sum(integer_list)
+                Confidence = round(sum_list/22 * 100, 2)
+                
 
 
 
@@ -2159,9 +2458,11 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                QMessageBox.information(self.dlg, "Message", f"Dimensional aggregation complete!")
+                QMessageBox.information(self.dlg, "Message", f"Dimensional aggregation complete! - Confidence: {sum_list}/22 factors used. ({Confidence} %)")
             else:
                 self.dlg.dimensionAggregation_Check.setText("Weighting % does not add up to 100 %")
 
         else:
             self.dlg.dimensionAggregation_Check.setText("Weighting % does not add up to 100 %")
+
+        os.chdir(workingDir)
