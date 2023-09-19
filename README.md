@@ -10,9 +10,10 @@ https://qgis.org/en/site/forusers/download.html
 1. Open QGIS and select the __Plugins__ tab.
    
 2. Select "Manage and Install Plugins... ". (The Plugins window will appear)
+
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/444af469-3479-4020-8272-562166669136)
 
-3. Type "ORS" in the search bar.
+4. Type "ORS" in the search bar.
    
 5. Select the "ORS Tools" in the list
    
