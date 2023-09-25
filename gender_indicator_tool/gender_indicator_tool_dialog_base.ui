@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>4</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -2625,7 +2625,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
@@ -2785,7 +2785,7 @@
       <attribute name="title">
        <string>Cycleways</string>
       </attribute>
-      <widget class="QPushButton" name="WLK_Set_PB_2">
+      <widget class="QPushButton" name="CYC_Set_PB">
        <property name="geometry">
         <rect>
          <x>250</x>
@@ -2811,7 +2811,7 @@
         <string>Road  Layer Input</string>
        </property>
       </widget>
-      <widget class="QgsFileWidget" name="WLK_Input_Field_2">
+      <widget class="QgsFileWidget" name="CYC_Input_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -2821,43 +2821,7 @@
         </rect>
        </property>
       </widget>
-      <widget class="QgsFileWidget" name="WLK_Input_Field_3">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>90</y>
-         <width>231</width>
-         <height>31</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_73">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>201</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Polygon  Layer Input</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="WLK_Set_PB_3">
-       <property name="geometry">
-        <rect>
-         <x>250</x>
-         <y>90</y>
-         <width>75</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Set</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="WLK_unique_PB_2">
+      <widget class="QPushButton" name="CYC_unique_PB">
        <property name="geometry">
         <rect>
          <x>240</x>
@@ -2883,7 +2847,7 @@
         <string>Field in the line shapefile conatining road type</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="WLK_roadTypeField_CB_2">
+      <widget class="QComboBox" name="CYC_roadTypeField_CB">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -2893,7 +2857,7 @@
         </rect>
        </property>
       </widget>
-      <widget class="QComboBox" name="WLK_roadTypeField_CB_3">
+      <widget class="QComboBox" name="CYC_roadType_CB">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -2916,40 +2880,78 @@
         <string>Unique value inidcateing road has a cycleway</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_108">
+      <widget class="QLabel" name="label_118">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>250</y>
-         <width>321</width>
+         <y>70</y>
+         <width>231</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
-        <string>Field in the polygon shapefile conatining dsaggrgation name</string>
+        <string>Hexagon grid size in meters squared:</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="WLK_roadTypeField_CB_4">
+      <widget class="QgsSpinBox" name="CYC_hexSize_SB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>90</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>1000</number>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="CYC_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>300</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_73">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>250</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Raster File</string>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="CYC_Output_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
          <y>270</y>
          <width>201</width>
-         <height>22</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="WLK_unique_PB_4">
-       <property name="geometry">
-        <rect>
-         <x>240</x>
-         <y>270</y>
-         <width>91</width>
-         <height>23</height>
+         <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>Set</string>
+        <string>CYC_.tif</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
        </property>
       </widget>
      </widget>
@@ -2981,32 +2983,6 @@
        </property>
        <property name="text">
         <string>Public Transport Point Layer Input</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_112">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>241</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Administrative Boundary Polygon Layer Input</string>
-       </property>
-      </widget>
-      <widget class="QgsFileWidget" name="APT_polygonInput_Field">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>90</y>
-         <width>231</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QgsFilterLineEdit" name="APT_Output_Field">
@@ -3055,6 +3031,35 @@
        </property>
        <property name="text">
         <string>Excute</string>
+       </property>
+      </widget>
+      <widget class="QgsSpinBox" name="APT_hexSize_SB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>90</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>1000</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_112">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hexagon grid size in meters squared:</string>
        </property>
       </widget>
      </widget>
@@ -3400,6 +3405,107 @@
       <attribute name="title">
        <string>Electrical Access</string>
       </attribute>
+      <widget class="QComboBox" name="ELC_rasField_CB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>201</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="ELC_Output_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ELC_.tif</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ELC_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_108">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Polygon Layer Input</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_119">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Field in the shapefile to use for rasterization</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ELC_Set_PB">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>30</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_120">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>130</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Raster File</string>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="ELC_Input_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
@@ -3410,16 +3516,398 @@
       <attribute name="title">
        <string>Housing</string>
       </attribute>
+      <widget class="QgsFilterLineEdit" name="QUH_Output_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>QUH_.tif</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_122">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hexagon grid size in meters squared:</string>
+       </property>
+      </widget>
+      <widget class="QgsSpinBox" name="QUH_hexSize_SB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>90</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100000</number>
+       </property>
+       <property name="value">
+        <number>1000</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_123">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Building Footprint  Layer Input</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_125">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>130</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Raster File</string>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="QUH_Input_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="QUH_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_31">
       <attribute name="title">
        <string>Digital Inclusion</string>
       </attribute>
+      <widget class="QLabel" name="label_121">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Field in the shapefile to use for rasterization</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_124">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Internet access Polygon Layer Input</string>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="DIG_Input_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_126">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>130</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Raster File</string>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="DIG_Output_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>150</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>DIG_.tif</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="DIG_Set_PB">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>30</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="DIG_rasField_CB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>201</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="DIG_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>180</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_32">
       <attribute name="title">
        <string>Natural Environment</string>
       </attribute>
+      <widget class="QLabel" name="label_127">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>200</y>
+         <width>231</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Raster File</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="ENV_roadTypeField_CB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>201</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_128">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hazard polygon Layer Input</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_129">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>251</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Score extracted risk levels from (0-5)</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ENV_Set_PB">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>30</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="ENV_typeScore_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>160</y>
+         <width>321</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="inputMask">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>E.g. [[&quot;low&quot;, 4], [&quot;medium&quot;, 2], [&quot;high&quot;, 1]]</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="ENV_Output_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>220</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hazard_.tif</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ENV_unique_PB">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>100</y>
+         <width>91</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Unique Values</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ENV_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>250</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Excute</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_130">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>251</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Field in the shapefile to use to extract risk level</string>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="ENV_Input_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ENV_Aggregate_PB">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>330</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Aggregate</string>
+       </property>
+      </widget>
+      <widget class="QgsFilterLineEdit" name="ENV_AGGOutput_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>300</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>ENV_.tif</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_30">
       <attribute name="title">

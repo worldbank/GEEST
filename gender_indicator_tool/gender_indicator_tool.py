@@ -316,11 +316,14 @@ class GenderIndicatorTool:
 
         ## TAB 5 - Place Charqacterization **************************************************************
         ###### TAB 5.1 - Walkability
-        self.dlg.WLK_Set_PB.clicked.connect(self.walkabilitySet)
-        self.dlg.WLK_unique_PB.clicked.connect(self.uniqueValues)
+        self.dlg.WLK_Set_PB.clicked.connect(lambda: self.roadTypeSet(1))
+        self.dlg.WLK_unique_PB.clicked.connect(lambda: self.uniqueValues(1))
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
         ###### TAB 5.2 - Cycleways
+        self.dlg.CYC_Set_PB.clicked.connect(lambda: self.roadTypeSet(2))
+        self.dlg.CYC_unique_PB.clicked.connect(lambda: self.uniqueValues(2))
+        self.dlg.CYC_Execute_PB.clicked.connect(self.cycleways)
 
         ###### TAB 5.3 - Public Transport
         self.dlg.SAF_Execute_PB.clicked.connect(self.nightTimeLights)
@@ -535,24 +538,39 @@ class GenderIndicatorTool:
             fields = [field.name() for field in layer.fields()]
             self.dlg.SEC_rasField_CB.addItems(fields)
 
-    def walkabilitySet(self):
-        polygonlayer = self.dlg.WLK_Input_Field.filePath()
-        layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
-        self.dlg.WLK_roadTypeField_CB.clear()
-        fields = [field.name() for field in layer.fields()]
-        self.dlg.WLK_roadTypeField_CB.addItems(fields)
+    def roadTypeSet(self,factor_no):
+        if factor_no == 1:
+            roadlayer = self.dlg.WLK_Input_Field.filePath()
+            layer = QgsVectorLayer(roadlayer, "polygonlayer", 'ogr')
+            self.dlg.WLK_roadTypeField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.WLK_roadTypeField_CB.addItems(fields)
 
-    def uniqueValues(self):
-        gdf = gpd.read_file(self.dlg.WLK_Input_Field.filePath())
-        roadTypeField = self.dlg.WLK_roadTypeField_CB.currentText()
-        uniqueValues = gdf[roadTypeField].unique().tolist()
-        scoreList = []
+        elif factor_no == 2:
+            roadlayer = self.dlg.CYC_Input_Field.filePath()
+            layer = QgsVectorLayer(roadlayer, "polygonlayer", 'ogr')
+            self.dlg.CYC_roadTypeField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.CYC_roadTypeField_CB.addItems(fields)
 
-        for val in uniqueValues:
-            scoreList.append([val,0])
+    def uniqueValues(self, factor_no):
+        if factor_no == 1:
+            gdf = gpd.read_file(self.dlg.WLK_Input_Field.filePath())
+            roadTypeField = self.dlg.WLK_roadTypeField_CB.currentText()
+            uniqueValues = gdf[roadTypeField].unique().tolist()
+            scoreList = []
 
-        self.dlg.WLK_typeScore_Field.setText(str(scoreList))
+            for val in uniqueValues:
+                scoreList.append([val,0])
 
+            self.dlg.WLK_typeScore_Field.setText(str(scoreList))
+
+        elif factor_no == 2:
+            gdf = gpd.read_file(self.dlg.CYC_Input_Field.filePath())
+            roadTypeField = self.dlg.CYC_roadTypeField_CB.currentText()
+            self.dlg.CYC_roadType_CB.clear()
+            uniqueValues = gdf[roadTypeField].unique().tolist()
+            self.dlg.CYC_roadType_CB.addItems(uniqueValues)
 
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
@@ -1762,8 +1780,9 @@ class GenderIndicatorTool:
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
+        hexSize = self.dlg.APT_hexSize_SB.value()
         pointLayer = self.dlg.APT_pointInput_Field.filePath()
-        polygonLayer = self.dlg.APT_polygonInput_Field.filePath()
+
         rasField = "Score"
 
         #TempOutput
@@ -1789,12 +1808,23 @@ class GenderIndicatorTool:
 
         countryUTMLayerBuf = buffer["OUTPUT"]
 
-        self.convertCRS(polygonLayer, UTM_crs)
-        shp_utm.to_file(adminUTMLayer)
-        # adminUTMLayer = QgsVectorLayer(shp_utm.to_json(), "adminUTMLayer", "ogr")
+
+        country_extent = shp_utm.total_bounds
+
+
+        Grid = processing.run("native:creategrid", {'TYPE': 4, 'EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+                                                    'HSPACING': hexSize, 'VSPACING': hexSize, 'HOVERLAY': 0, 'VOVERLAY': 0,
+                                                    'CRS': QgsCoordinateReferenceSystem(f'{UTM_crs}'),
+                                                    'OUTPUT': "memory:"})
+        grid_out = Grid["OUTPUT"]
+
+        Clip = processing.run("native:clip", {'INPUT': grid_out,
+                                                'OVERLAY': countryUTMLayer,
+                                                'OUTPUT': adminUTMLayer})
+
         self.convertCRS(pointLayer, UTM_crs)
         shp_utm.to_file(pointUTMLayer)
-        # pointUTMLayer = QgsVectorLayer(shp_utm.to_json(), "adminUTMLayer", "ogr")
+
 
         pointCount = processing.run("native:countpointsinpolygon",{'POLYGONS': QgsProcessingFeatureSourceDefinition(adminUTMLayer,
                                                                    selectedFeaturesOnly = False,
@@ -1817,7 +1847,6 @@ class GenderIndicatorTool:
 
         pointCount_out_df[rasField] = (pointCount_out_df[rasField] - Rmin) / (Rmax - Rmin) * m_max
         pointCount_out_df.to_file(pointCount_std)
-        # pointCount_out = QgsVectorLayer(pointCount_out.to_json(), "polygonUTM", "ogr")
 
         Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
                                                           'OVERLAY': pointCount_std,
@@ -1862,12 +1891,204 @@ class GenderIndicatorTool:
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))\
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
         os.chdir(workingDir)
 
+    def cycleways(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        if os.path.exists(Dimension):
+            pass
+        else:
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        hexSize = self.dlg.CYC_hexSize_SB.value()
+        lineLayer = self.dlg.CYC_Input_Field.filePath()
+        roadTypeField = self.dlg.CYC_roadTypeField_CB.currentText()
+        cycleType = self.dlg.CYC_roadType_CB.currentText()
+        rasField = "Perc"
+
+
+        #TempFiles
+        scoredRoads = f"{workingDir}/{tempDir}/Scored_roads.shp"
+        adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
+        roadOutput = f"{tempDir}/roadOutput.shp"
+        hexOutput = f"{tempDir}/hexOutput.shp"
+        hexPercOutput = f"{tempDir}/hexPercOutput.shp"
+        roadsUTM = f"{tempDir}/roadsUTM.shp"
+
+
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': "memory:"})
+
+        countryUTMLayerBuf = buffer["OUTPUT"]
+
+        country_extent = shp_utm.total_bounds
+
+        Grid = processing.run("native:creategrid", {'TYPE': 4,
+                                                    'EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+                                                    'HSPACING': hexSize, 'VSPACING': hexSize, 'HOVERLAY': 0,
+                                                    'VOVERLAY': 0,
+                                                    'CRS': QgsCoordinateReferenceSystem(f'{UTM_crs}'),
+                                                    'OUTPUT': "memory:"})
+        grid_out = Grid["OUTPUT"]
+
+        Clip = processing.run("native:clip", {'INPUT': grid_out,
+                                              'OVERLAY': countryUTMLayer,
+                                              'OUTPUT': adminUTMLayer})
+
+        self.convertCRS(lineLayer, UTM_crs)
+        shp_utm.to_file(roadsUTM)
+        #
+        # shp_utm.loc[shp_utm[roadTypeField] == cycleType, 'Score'] = 5
+        #
+        # shp_utm[rasField] = shp_utm[rasField].astype(int)
+        # shp_utm.to_file(scoredRoads)
+
+        hex_gdf = gpd.read_file(adminUTMLayer)
+        len_hex_gdf = len(hex_gdf)
+
+        road_merge_list = []
+        hex_merge_list = []
+
+        for i in range(len_hex_gdf):
+            hex_file_name = f"{tempDir}/hex_{i}.shp"
+            rec = hex_gdf.iloc[i:i+1]
+            hex_gdf.loc[i, 'layer'] = f"hex_{i}_roads"
+            hex_merge_list.append(rec)
+            rec.to_file(hex_file_name)
+
+
+            hex_roads_file_name = f"{tempDir}/hex_{i}_roads.shp"
+
+            processing.run("native:clip", {'INPUT': roadsUTM,
+                                           'OVERLAY': hex_file_name,
+                                           'OUTPUT': hex_roads_file_name})
+
+            hex_road = gpd.read_file(hex_roads_file_name)
+            hex_road["hex"] = ""
+            hex_road.loc[0, 'hex'] = f"hex_{i}"
+            hex_road.to_file(hex_roads_file_name)
+            road_merge_list.append(hex_roads_file_name)
+
+        processing.run("native:mergevectorlayers", {'LAYERS': road_merge_list,
+                                                    'CRS': QgsCoordinateReferenceSystem(f'{UTM_crs}'),
+                                                    'OUTPUT': roadOutput})
+
+        merged_shapefile = gpd.pd.concat(hex_merge_list, ignore_index=True)
+        merged_shapefile.to_file(hexOutput)
+
+        merge_gdf = gpd.read_file(roadOutput)
+        line_geometries = merge_gdf['geometry']
+        merge_gdf['length'] = line_geometries.length
+        merge_gdf.to_file(roadOutput)
+
+        grouped = merge_gdf.groupby('layer')
+        total_sum_of_groups = grouped['length'].sum()
+        total_sum_of_groups_df = total_sum_of_groups.reset_index()
+
+        filtered_df = merge_gdf[merge_gdf[roadTypeField] == cycleType]
+
+        grouped2 = filtered_df.groupby('layer')
+        cycleway_sum_of_groups = grouped2['length'].sum()
+        cycleway_sum_of_groups_df = cycleway_sum_of_groups.reset_index()
+
+        merged = pd.merge(total_sum_of_groups_df, cycleway_sum_of_groups_df, on=['layer'], how='outer')
+        merged_length_gdf = pd.DataFrame(merged)
+        merged_length_gdf[rasField] = merged_length_gdf["length_y"] / merged_length_gdf["length_x"] * 100
+
+        hex_gdf = gpd.read_file(hexOutput)
+        merge_hex_gdf = hex_gdf.merge(merged_length_gdf, on='layer')
+
+        # merge_hex_gdf.to_file(hexPercOutput)
+
+        ########################################
+
+        Rmax = 100
+        Rmin = 0
+        m_max = 5
+        m_min = 0
+
+        merge_hex_gdf[rasField] = (merge_hex_gdf[rasField] - Rmin) / (Rmax - Rmin) * m_max
+        merge_hex_gdf.to_file(hexPercOutput)
+
+        Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                          'OVERLAY': hexPercOutput,
+                                                          'OUTPUT': "memory:",
+                                                          'GRID_SIZE': None})
+
+        difference = Difference["OUTPUT"]
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [hexPercOutput, difference],
+                                                            'CRS': None,
+                                                            'OUTPUT': "memory:"})
+
+        mergeOutput = Merge["OUTPUT"]
+
+        extent = mergeOutput.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        os.chdir(Dimension)
+
+        rasOutput = self.dlg.CYC_Output_Field.text()
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        self.dlg.APT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
     # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
