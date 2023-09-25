@@ -342,12 +342,17 @@ class GenderIndicatorTool:
         self.dlg.INC_Execute_PB.clicked.connect(lambda: self.Rasterize(5))
 
         ###### TAB 5.7 - Electrical Access
+        self.dlg.ELC_Set_PB.clicked.connect(lambda: self.RasterizeSet(7))
+        self.dlg.ELC_Execute_PB.clicked.connect(lambda: self.Rasterize(7))
 
         ###### TAB 5.8 - Urbanization
 
         ###### TAB 5.9 - Housing
+        self.dlg.QUH_Execute_PB.clicked.connect(self.housing)
 
         ###### TAB 5.10 - Digital Inclusion
+        self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
+        self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(8))
 
         ###### TAB 5.11 - Natural Environment
 
@@ -538,6 +543,20 @@ class GenderIndicatorTool:
             fields = [field.name() for field in layer.fields()]
             self.dlg.SEC_rasField_CB.addItems(fields)
 
+        elif factor_no == 7:
+            polygonlayer = self.dlg.ELC_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.ELC_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.ELC_rasField_CB.addItems(fields)
+
+        elif factor_no == 8:
+            polygonlayer = self.dlg.DIG_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.DIG_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.DIG_rasField_CB.addItems(fields)
+
     def roadTypeSet(self,factor_no):
         if factor_no == 1:
             roadlayer = self.dlg.WLK_Input_Field.filePath()
@@ -617,6 +636,14 @@ class GenderIndicatorTool:
         elif factor_no == 6:
             polygonlayer = self.dlg.SEC_Input_Field.filePath()
             rasField = self.dlg.SEC_rasField_CB.currentText()
+
+        elif factor_no == 7:
+            polygonlayer = self.dlg.ELC_Input_Field.filePath()
+            rasField = self.dlg.ELC_rasField_CB.currentText()
+
+        elif factor_no == 8:
+            polygonlayer = self.dlg.DIG_Input_Field.filePath()
+            rasField = self.dlg.DIG_rasField_CB.currentText()
 
 
         # Convert countryLayer data to UTM CRS
@@ -1035,9 +1062,117 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+        elif factor_no == 7:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
 
-        os.chdir(workingDir)
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': "memory:",
+                                                              'GRID_SIZE': None})
+
+            difference = Difference["OUTPUT"]
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': "memory:"})
+
+            mergeOutput = Merge["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Place Characterization"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = self.dlg.ELC_Output_Field.text()
+
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
+
+            self.dlg.ELC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        elif factor_no == 8:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+
+            Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                              'OVERLAY': polygonUTM,
+                                                              'OUTPUT': "memory:",
+                                                              'GRID_SIZE': None})
+
+            difference = Difference["OUTPUT"]
+
+            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [polygonUTM, difference],
+                                                                'CRS': None,
+                                                                'OUTPUT': "memory:"})
+
+            mergeOutput = Merge["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Place Characterization"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = self.dlg.DIG_Output_Field.text()
+
+            rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                          'FIELD': rasField,
+                                                          'BURN': 0,
+                                                          'USE_Z': False,
+                                                          'UNITS': 0,
+                                                          'WIDTH': raster_width,
+                                                          'HEIGHT': raster_height,
+                                                          'EXTENT': None,
+                                                          'NODATA': None,
+                                                          'OPTIONS': '',
+                                                          'DATA_TYPE': 5,
+                                                          'INIT': None,
+                                                          'INVERT': False,
+                                                          'EXTRA': '',
+                                                          'OUTPUT': rasOutput})
+
+            self.dlg.DIG_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
     def IDW(self):
 
@@ -2080,7 +2215,7 @@ class GenderIndicatorTool:
                                                       'EXTRA': '',
                                                       'OUTPUT': rasOutput})
 
-        self.dlg.APT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+        self.dlg.CYC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
@@ -2090,6 +2225,190 @@ class GenderIndicatorTool:
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
+    def housing(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        if os.path.exists(Dimension):
+            pass
+        else:
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        hexSize = self.dlg.QUH_hexSize_SB.value()
+        buildingFootprints = self.dlg.QUH_Input_Field.filePath()
+        rasField = "Perc"
+
+        # TempFiles
+        scoredRoads = f"{workingDir}/{tempDir}/Scored_roads.shp"
+        adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
+        buildingOutput = f"{tempDir}/buildingOutput.shp"
+        hexOutput = f"{tempDir}/hexOutput.shp"
+        hexPercOutput = f"{tempDir}/hexPercOutput.shp"
+        buildingFootprintsUTM = f"{tempDir}/buildingFootprintsUTM.shp"
+
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': "memory:"})
+
+        countryUTMLayerBuf = buffer["OUTPUT"]
+
+        country_extent = shp_utm.total_bounds
+
+        Grid = processing.run("native:creategrid", {'TYPE': 4,
+                                                    'EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+                                                    'HSPACING': hexSize, 'VSPACING': hexSize, 'HOVERLAY': 0,
+                                                    'VOVERLAY': 0,
+                                                    'CRS': QgsCoordinateReferenceSystem(f'{UTM_crs}'),
+                                                    'OUTPUT': "memory:"})
+        grid_out = Grid["OUTPUT"]
+
+        Clip = processing.run("native:clip", {'INPUT': grid_out,
+                                              'OVERLAY': countryUTMLayer,
+                                              'OUTPUT': adminUTMLayer})
+
+        self.convertCRS(buildingFootprints, UTM_crs)
+        shp_utm.to_file(buildingFootprintsUTM)
+
+        hex_gdf = gpd.read_file(adminUTMLayer)
+        len_hex_gdf = len(hex_gdf)
+
+        building_merge_list = []
+        hex_merge_list = []
+
+        for i in range(len_hex_gdf):
+            hex_file_name = f"{tempDir}/hex_{i}.shp"
+            rec = hex_gdf.iloc[i:i + 1]
+            hex_gdf.loc[i, 'layer'] = f"hex_{i}_buildings"
+            hex_merge_list.append(rec)
+            rec.to_file(hex_file_name)
+
+            hex_buildings_file_name = f"{tempDir}/hex_{i}_buildings.shp"
+
+            processing.run("native:clip", {'INPUT': QgsProcessingFeatureSourceDefinition(buildingFootprintsUTM,
+                                                                                         selectedFeaturesOnly=False,
+                                                                                         featureLimit=-1,
+                                                                                         flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
+                                                                                         geometryCheck=QgsFeatureRequest.GeometrySkipInvalid),
+                                           'OVERLAY': hex_file_name,
+                                           'OUTPUT': hex_buildings_file_name})
+
+            hex_building = gpd.read_file(hex_buildings_file_name)
+            hex_building["layer"] = f"hex_{i}_buildings"
+            # hex_building.loc[0, 'hex'] = f"hex_{i}"
+            hex_building.to_file(hex_buildings_file_name)
+            building_merge_list.append(hex_building)
+
+        # processing.run("native:mergevectorlayers", {'LAYERS': building_merge_list,
+        #                                             'CRS': QgsCoordinateReferenceSystem(f'{UTM_crs}'),
+        #                                             'OUTPUT': buildingOutput})
+
+        merged_shapefile = gpd.pd.concat(building_merge_list, ignore_index=True)
+        merged_shapefile.to_file(buildingOutput)
+
+        merged_shapefile = gpd.pd.concat(hex_merge_list, ignore_index=True)
+        merged_shapefile.to_file(hexOutput)
+
+        merge_gdf = gpd.read_file(buildingOutput)
+        line_geometries = merge_gdf['geometry']
+        merge_gdf['Area'] = line_geometries.area
+        merge_gdf['more_60'] = 0
+        merge_gdf.loc[merge_gdf['Area'] > 60, 'more_60'] = 1
+        merge_gdf.to_file(buildingOutput)
+
+        grouped = merge_gdf.groupby('layer').size().reset_index(name='Total_Count')
+
+        filtered_df = merge_gdf[merge_gdf['more_60'] == 1]
+
+        grouped2 = filtered_df.groupby('layer').size().reset_index(name='More60_Count')
+
+        merged = pd.merge(grouped, grouped2, on=['layer'], how='outer')
+        merged_length_gdf = pd.DataFrame(merged)
+        merged_length_gdf[rasField] = merged_length_gdf["More60_Count"] / merged_length_gdf["Total_Count"] * 100
+
+        hex_gdf = gpd.read_file(hexOutput)
+        merge_hex_gdf = hex_gdf.merge(merged_length_gdf, on='layer', how='outer')
+
+
+        ############################################################
+
+        Rmax = 100
+        Rmin = 0
+        m_max = 5
+        m_min = 0
+
+        merge_hex_gdf[rasField] = (merge_hex_gdf[rasField] - Rmin) / (Rmax - Rmin) * m_max
+        merge_hex_gdf.to_file(hexPercOutput)
+
+        Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                          'OVERLAY': hexPercOutput,
+                                                          'OUTPUT': "memory:",
+                                                          'GRID_SIZE': None})
+
+        difference = Difference["OUTPUT"]
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [hexPercOutput, difference],
+                                                            'CRS': None,
+                                                            'OUTPUT': "memory:"})
+
+        mergeOutput = Merge["OUTPUT"]
+
+        extent = mergeOutput.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        os.chdir(Dimension)
+
+        rasOutput = self.dlg.QUH_Output_Field.text()
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        self.dlg.QUH_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
     # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
 
