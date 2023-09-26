@@ -2625,7 +2625,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>8</number>
+      <number>10</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
@@ -3737,7 +3737,7 @@
         <string>Output Raster File</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="ENV_roadTypeField_CB">
+      <widget class="QComboBox" name="ENV_riskLevelField_CB">
        <property name="geometry">
         <rect>
          <x>10</x>

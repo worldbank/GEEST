@@ -316,12 +316,12 @@ class GenderIndicatorTool:
 
         ## TAB 5 - Place Charqacterization **************************************************************
         ###### TAB 5.1 - Walkability
-        self.dlg.WLK_Set_PB.clicked.connect(lambda: self.roadTypeSet(1))
+        self.dlg.WLK_Set_PB.clicked.connect(lambda: self.TypeSet(1))
         self.dlg.WLK_unique_PB.clicked.connect(lambda: self.uniqueValues(1))
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
         ###### TAB 5.2 - Cycleways
-        self.dlg.CYC_Set_PB.clicked.connect(lambda: self.roadTypeSet(2))
+        self.dlg.CYC_Set_PB.clicked.connect(lambda: self.TypeSet(2))
         self.dlg.CYC_unique_PB.clicked.connect(lambda: self.uniqueValues(2))
         self.dlg.CYC_Execute_PB.clicked.connect(self.cycleways)
 
@@ -355,6 +355,11 @@ class GenderIndicatorTool:
         self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(8))
 
         ###### TAB 5.11 - Natural Environment
+        self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
+        self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
+        self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
+
+        self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
 
         ###### TAB 5.12 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
@@ -557,7 +562,7 @@ class GenderIndicatorTool:
             fields = [field.name() for field in layer.fields()]
             self.dlg.DIG_rasField_CB.addItems(fields)
 
-    def roadTypeSet(self,factor_no):
+    def TypeSet(self,factor_no):
         if factor_no == 1:
             roadlayer = self.dlg.WLK_Input_Field.filePath()
             layer = QgsVectorLayer(roadlayer, "polygonlayer", 'ogr')
@@ -571,6 +576,13 @@ class GenderIndicatorTool:
             self.dlg.CYC_roadTypeField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.CYC_roadTypeField_CB.addItems(fields)
+
+        elif factor_no == 3:
+            polygonlayer = self.dlg.ENV_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
+            self.dlg.ENV_riskLevelField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.ENV_riskLevelField_CB.addItems(fields)
 
     def uniqueValues(self, factor_no):
         if factor_no == 1:
@@ -590,6 +602,17 @@ class GenderIndicatorTool:
             self.dlg.CYC_roadType_CB.clear()
             uniqueValues = gdf[roadTypeField].unique().tolist()
             self.dlg.CYC_roadType_CB.addItems(uniqueValues)
+
+        if factor_no == 3:
+            gdf = gpd.read_file(self.dlg.ENV_Input_Field.filePath())
+            riskTypeField = self.dlg.ENV_riskLevelField_CB.currentText()
+            uniqueValues = gdf[riskTypeField].unique().tolist()
+            scoreList = []
+
+            for val in uniqueValues:
+                scoreList.append([val,0])
+
+            self.dlg.ENV_typeScore_Field.setText(str(scoreList))
 
     def convertCRS(self, vector, UTM_crs):
         global shp_utm
@@ -2409,10 +2432,173 @@ class GenderIndicatorTool:
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+    def natEnvironment(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        if os.path.exists(Dimension):
+            pass
+        else:
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        polygonLayer = self.dlg.ENV_Input_Field.filePath()
+        riskLevelField = self.dlg.ENV_riskLevelField_CB.currentText()
+        riskType_Score = ast.literal_eval(self.dlg.ENV_typeScore_Field.text())
+        rasField = "Score"
+
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        scoredRisks = f"{workingDir}/{tempDir}/Scored_risks.shp"
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': "memory:"})
+
+        countryUTMLayerBuf = buffer["OUTPUT"]
+
+        self.convertCRS(polygonLayer, UTM_crs)
+        shp_utm[rasField] = 0
+
+        for i in riskType_Score:
+            # QMessageBox.information(self.dlg, "Message", f"{i}")
+            shp_utm.loc[shp_utm[riskLevelField] == i[0], 'Score'] = i[1]
+
+        shp_utm[rasField] = shp_utm[rasField].astype(int)
+        shp_utm.to_file(scoredRisks)
+
+        dif_out = f"{workingDir}/{tempDir}/Dif.shp"
+
+        Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                          'OVERLAY': QgsProcessingFeatureSourceDefinition(scoredRisks,
+                                                                                                         selectedFeaturesOnly=False, featureLimit=-1,
+                                                                                                         flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
+                                                                                                         geometryCheck=QgsFeatureRequest.GeometrySkipInvalid),
+                                                          'OUTPUT': dif_out,
+                                                          'GRID_SIZE': None})
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [scoredRisks, dif_out],
+                                                            'CRS': None,
+                                                            'OUTPUT': "memory:"})
+
+        mergeOutput = Merge["OUTPUT"]
+
+        # Get the width and height of the extent
+        extent = mergeOutput.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        if os.path.exists(Dimension):
+            os.chdir(Dimension)
+        else:
+            os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+        Output_Folder = "ENV"
+        if os.path.exists(Output_Folder):
+            os.chdir(Output_Folder)
+        else:
+            os.mkdir(Output_Folder)
+            os.chdir(Output_Folder)
+
+        rasOutput = self.dlg.ENV_Output_Field.text()
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        self.dlg.ENV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+    def envAggregate(self):
+        # OUTPUT
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        Dimension = "Place Characterization"
+        ENV_Folder = f"{Dimension}/ENV"
+
+        if os.path.exists(ENV_Folder):
+            os.chdir(ENV_Folder)
+        else:
+            pass
+
+        rasOutput = self.dlg.ENV_AGGOutput_Field.text()
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        tif_list = [f for f in os.listdir(os.getcwd()) if f.endswith('.tif')]
+        raster_list = []
+
+        for ras in tif_list:
+            with rasterio.open(ras) as src:
+                raster_list.append(src.read(1))
+                meta1 = src.meta
+
+        len_raster_list = len(raster_list)
+        cumulative_sum = 0
+
+        for i in range(len_raster_list):
+            value = raster_list[i]
+            cumulative_sum += value
+
+        aggregation = cumulative_sum / len_raster_list
+        os.chdir("..")
+
+        with rasterio.open(rasOutput, 'w', **meta1) as dst:
+            dst.write(aggregation, 1)
+
+        self.dlg.ENV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
     # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
-
-
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
