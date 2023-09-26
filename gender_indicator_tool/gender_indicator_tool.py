@@ -1624,8 +1624,6 @@ class GenderIndicatorTool:
 
             QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
-            os.chdir(workingDir)
-
     def wtpAggregate(self):
         # OUTPUT
         current_script_path = os.path.dirname(os.path.abspath(__file__))
