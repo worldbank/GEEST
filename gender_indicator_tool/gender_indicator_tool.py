@@ -321,9 +321,9 @@ class GenderIndicatorTool:
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
         ###### TAB 5.2 - Cycleways
-        self.dlg.CYC_Set_PB.clicked.connect(lambda: self.TypeSet(2))
-        self.dlg.CYC_unique_PB.clicked.connect(lambda: self.uniqueValues(2))
-        self.dlg.CYC_Execute_PB.clicked.connect(self.cycleways)
+        # self.dlg.CYC_Set_PB.clicked.connect(lambda: self.TypeSet(2))
+        # self.dlg.CYC_unique_PB.clicked.connect(lambda: self.uniqueValues(2))
+        # self.dlg.CYC_Execute_PB.clicked.connect(self.cycleways)
 
         ###### TAB 5.3 - Public Transport
         self.dlg.SAF_Execute_PB.clicked.connect(self.nightTimeLights)
@@ -348,7 +348,7 @@ class GenderIndicatorTool:
         ###### TAB 5.8 - Urbanization
 
         ###### TAB 5.9 - Housing
-        self.dlg.QUH_Execute_PB.clicked.connect(self.housing)
+        self.dlg.QUH_Execute_PB.clicked.connect(self.housing2)
 
         ###### TAB 5.10 - Digital Inclusion
         self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
@@ -363,7 +363,6 @@ class GenderIndicatorTool:
 
         ###### TAB 5.12 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
-        self.dlg.CYC_Aggregate_TB.clicked.connect(lambda: self.getFile(12))
         self.dlg.APT_Aggregate_TB.clicked.connect(lambda: self.getFile(13))
         self.dlg.SAF_Aggregate_TB.clicked.connect(lambda: self.getFile(14))
         self.dlg.SEC_Aggregate_TB.clicked.connect(lambda: self.getFile(15))
@@ -2243,6 +2242,141 @@ class GenderIndicatorTool:
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+    def housing2(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        if os.path.exists(Dimension):
+            pass
+        else:
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        hexSize = self.dlg.QUH_hexSize_SB.value()
+        buildingFootprints = self.dlg.QUH_Input_Field.filePath()
+        rasField = "Perc"
+
+        # TempFiles
+        scoredRoads = f"{workingDir}/{tempDir}/Scored_roads.shp"
+        adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
+        buildingOutput = f"{tempDir}/buildingOutput.shp"
+        FinalHexOutput = f"{tempDir}/FinalHexOutput.shp"
+        hexRasOutput = f"{tempDir}/hexRasOutput.tif"
+        zonalOutput = f"{tempDir}/zonalOutput.shp"
+        buildingFootprintsUTM = f"{tempDir}/buildingFootprintsUTM.shp"
+
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': "memory:"})
+
+        countryUTMLayerBuf = buffer["OUTPUT"]
+
+        country_extent = shp_utm.total_bounds
+
+        Grid = processing.run("native:creategrid", {'TYPE': 4,
+                                                    'EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+                                                    'HSPACING': hexSize, 'VSPACING': hexSize, 'HOVERLAY': 0,
+                                                    'VOVERLAY': 0,
+                                                    'CRS': QgsCoordinateReferenceSystem(f'{UTM_crs}'),
+                                                    'OUTPUT': "memory:"})
+        grid_out = Grid["OUTPUT"]
+
+        Clip = processing.run("native:clip", {'INPUT': grid_out,
+                                              'OVERLAY': countryUTMLayer,
+                                              'OUTPUT': "memory:"})
+
+        clip_out = Clip["OUTPUT"]
+
+        #Rasterize hexegons
+        extent = clip_out.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': clip_out,
+                                                      'FIELD': "id",
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': hexRasOutput})
+
+        self.convertCRS(buildingFootprints, UTM_crs)
+        shp_utm.to_file(buildingFootprintsUTM)
+
+        #Zonal Statistics using majority
+
+        zonal =  processing.run("native:zonalstatisticsfb", {'INPUT':QgsProcessingFeatureSourceDefinition(buildingFootprintsUTM,
+                                                                                                          selectedFeaturesOnly=False,
+                                                                                                          featureLimit=-1,
+                                                                                                          flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
+                                                                                                          geometryCheck=QgsFeatureRequest.GeometrySkipInvalid),
+                                                             'INPUT_RASTER':hexRasOutput,
+                                                             'RASTER_BAND':1,
+                                                             'COLUMN_PREFIX':'_',
+                                                             'STATISTICS':[9],
+                                                             'OUTPUT':zonalOutput})
+
+
+        Clip = processing.run("native:clip", {'INPUT': grid_out,
+                                              'OVERLAY': countryUTMLayer,
+                                              'OUTPUT': adminUTMLayer})
+
+        BF_gdf = gpd.read_file(zonalOutput)
+        building_geometries = BF_gdf['geometry']
+        BF_gdf['Area'] = building_geometries.area
+        BF_gdf['more_60'] = 0
+        BF_gdf.loc[BF_gdf['Area'] > 60, 'more_60'] = 1
+        BF_gdf['_majority'] = BF_gdf['_majority'].astype(int)
+        BF_gdf.to_file(buildingOutput)
+
+        grouped = BF_gdf.groupby('_majority').size().reset_index(name='Total_Count')
+
+        filtered_df = BF_gdf[BF_gdf['more_60'] == 1]
+
+        grouped2 = filtered_df.groupby('_majority').size().reset_index(name='More60_Count')
+
+        merged = pd.merge(grouped, grouped2, on=['_majority'], how='outer')
+        merged_length_gdf = pd.DataFrame(merged)
+        merged_length_gdf[rasField] = merged_length_gdf["More60_Count"] / merged_length_gdf["Total_Count"] * 100
+
+        hex_gdf = gpd.read_file(adminUTMLayer)
+        merge_hex_gdf = hex_gdf.merge(merged_length_gdf, on='_majority', how='outer')
+        merge_hex_gdf.to_file(FinalHexOutput)
+
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
