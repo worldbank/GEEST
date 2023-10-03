@@ -2276,7 +2276,7 @@ class GenderIndicatorTool:
         scoredRoads = f"{workingDir}/{tempDir}/Scored_roads.shp"
         adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
         buildingOutput = f"{tempDir}/buildingOutput.shp"
-        FinalHexOutput = f"{tempDir}/FinalHexOutput.shp"
+        hexPercOutput = f"{tempDir}/hexPercOutput.shp"
         hexRasOutput = f"{tempDir}/hexRasOutput.tif"
         zonalOutput = f"{tempDir}/zonalOutput.shp"
         buildingFootprintsUTM = f"{tempDir}/buildingFootprintsUTM.shp"
@@ -2315,8 +2315,8 @@ class GenderIndicatorTool:
 
         #Rasterize hexegons
         extent = clip_out.extent()
-        raster_width = int(extent.width() / pixelSize)
-        raster_height = int(extent.height() / pixelSize)
+        raster_width = int(extent.width() / (pixelSize/10))
+        raster_height = int(extent.height() / (pixelSize))
 
         rasterize = processing.run("gdal:rasterize", {'INPUT': clip_out,
                                                       'FIELD': "id",
@@ -2360,22 +2360,77 @@ class GenderIndicatorTool:
         BF_gdf['Area'] = building_geometries.area
         BF_gdf['more_60'] = 0
         BF_gdf.loc[BF_gdf['Area'] > 60, 'more_60'] = 1
-        BF_gdf['_majority'] = BF_gdf['_majority'].astype(int)
+        BF_gdf['id'] = BF_gdf['_majority'].astype(int)
         BF_gdf.to_file(buildingOutput)
 
-        grouped = BF_gdf.groupby('_majority').size().reset_index(name='Total_Count')
+        grouped = BF_gdf.groupby('id').size().reset_index(name='Total_Count')
 
         filtered_df = BF_gdf[BF_gdf['more_60'] == 1]
 
-        grouped2 = filtered_df.groupby('_majority').size().reset_index(name='More60_Count')
+        grouped2 = filtered_df.groupby('id').size().reset_index(name='More60_Count')
 
-        merged = pd.merge(grouped, grouped2, on=['_majority'], how='outer')
+        merged = pd.merge(grouped, grouped2, on=['id'], how='outer')
         merged_length_gdf = pd.DataFrame(merged)
         merged_length_gdf[rasField] = merged_length_gdf["More60_Count"] / merged_length_gdf["Total_Count"] * 100
 
         hex_gdf = gpd.read_file(adminUTMLayer)
-        merge_hex_gdf = hex_gdf.merge(merged_length_gdf, on='_majority', how='outer')
-        merge_hex_gdf.to_file(FinalHexOutput)
+        merge_hex_gdf = hex_gdf.merge(merged_length_gdf, on='id', how='outer')
+        # merge_hex_gdf.to_file(FinalHexOutput)
+
+        # Rasterization
+
+        Rmax = 100
+        Rmin = 0
+        m_max = 5
+        m_min = 0
+
+        merge_hex_gdf[rasField] = (merge_hex_gdf[rasField] - Rmin) / (Rmax - Rmin) * m_max
+        merge_hex_gdf.to_file(hexPercOutput)
+
+        Difference = processing.run("native:difference", {'INPUT': countryUTMLayerBuf,
+                                                          'OVERLAY': hexPercOutput,
+                                                          'OUTPUT': "memory:",
+                                                          'GRID_SIZE': None})
+
+        difference = Difference["OUTPUT"]
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [hexPercOutput, difference],
+                                                            'CRS': None,
+                                                            'OUTPUT': "memory:"})
+
+        mergeOutput = Merge["OUTPUT"]
+
+        extent = mergeOutput.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        os.chdir(Dimension)
+
+        rasOutput = self.dlg.QUH_Output_Field.text()
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': mergeOutput,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+
+        self.dlg.QUH_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
