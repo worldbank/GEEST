@@ -33,6 +33,7 @@ import os
 import sys
 import geopandas as gpd
 import pandas as pd
+from rasterio.crs import CRS
 import rasterio
 import numpy as np
 import math
@@ -326,10 +327,10 @@ class GenderIndicatorTool:
         # self.dlg.CYC_Execute_PB.clicked.connect(self.cycleways)
 
         ###### TAB 5.3 - Public Transport
-        self.dlg.SAF_Execute_PB.clicked.connect(self.nightTimeLights)
+        self.dlg.APT_Execute_PB.clicked.connect(self.transportCount)
 
         ###### TAB 5.4 - Safe Urban Design
-        self.dlg.APT_Execute_PB.clicked.connect(self.transportCount)
+        self.dlg.SAF_Execute_PB.clicked.connect(self.nightTimeLights)
 
         ###### TAB 5.5 - Security
         self.dlg.SEC_Set_PB.clicked.connect(lambda: self.RasterizeSet(6))
@@ -346,6 +347,7 @@ class GenderIndicatorTool:
         self.dlg.ELC_Execute_PB.clicked.connect(lambda: self.Rasterize(7))
 
         ###### TAB 5.8 - Urbanization
+        self.dlg.LOU_Execute_PB.clicked.connect(self.urbanization)
 
         ###### TAB 5.9 - Housing
         self.dlg.QUH_Execute_PB.clicked.connect(self.housing2)
@@ -1849,66 +1851,44 @@ class GenderIndicatorTool:
         rasOutput_temp = "temp_" + self.dlg.SAF_Output_Field.text()
         rasOutput = self.dlg.SAF_Output_Field.text()
 
-        # styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
-        # styleFileDestination = f"{workingDir}{Dimension}/"
-        # styleFile = f"{rasOutput.split('.')[0]}.qml"
-        #
-        # shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
 
 
-        with rasterio.open(NTL_input) as src:
+        with rasterio.open(NTL_input,'r+') as src:
+            src.crs = CRS.from_epsg(32619)
             SAF_ras = src.read(1)
+            SAF_ras[SAF_ras==0] = np.nan
             meta1 = src.meta
+
             Rmax = SAF_ras.max().astype(float)
             Rmin = SAF_ras.min().astype(float)
-            denom = Rmax - Rmin
             m_max = 5
             m_min = 0
 
-        QMessageBox.information(self.dlg, "Message", f"{SAF_ras}, {Rmax}, {Rmin}, {denom}")
+        QMessageBox.information(self.dlg, "Message", f"{Rmax}, {Rmin}")
 
-        # processing.run("gdal:rastercalculator", {
-        #     'INPUT_A': NTL_input,
-        #     'BAND_A': 1, 'INPUT_B': None, 'BAND_B': None, 'INPUT_C': None, 'BAND_C': None, 'INPUT_D': None,
-        #     'BAND_D': None, 'INPUT_E': None, 'BAND_E': None, 'INPUT_F': None, 'BAND_F': None, 'FORMULA': f'(A-{Rmin})*{m_max}',
-        #     'NO_DATA': None, 'EXTENT_OPT': 0, 'PROJWIN': None, 'RTYPE': 5, 'OPTIONS': '', 'EXTRA': '',
-        #     'OUTPUT': rasOutput_temp})
-        #
-        # processing.run("gdal:rastercalculator", {
-        #     'INPUT_A': rasOutput_temp,
-        #     'BAND_A': 1, 'INPUT_B': None, 'BAND_B': None, 'INPUT_C': None, 'BAND_C': None, 'INPUT_D': None,
-        #     'BAND_D': None, 'INPUT_E': None, 'BAND_E': None, 'INPUT_F': None, 'BAND_F': None,
-        #     'FORMULA': f'(A/{denom}',
-        #     'NO_DATA': None, 'EXTENT_OPT': 0, 'PROJWIN': None, 'RTYPE': 5, 'OPTIONS': '', 'EXTRA': '',
-        #     'OUTPUT': rasOutput})
-
-        # Raster Calculation
-
-        # processing.run("qgis:rastercalculator",
-        #                {'EXPRESSION': '"NightTimeLights_Comoros_UTM@1" + "NightTimeLights_Comoros_UTM@1"',
-        #                 'LAYERS': ['C:/Users/Andre/Documents/NightTimeLights/NightTimeLights_Comoros_UTM.tif'],
-        #                 'CELLSIZE': 0, 'EXTENT': None, 'CRS': QgsCoordinateReferenceSystem('EPSG:32738'),
-        #                 'OUTPUT': 'TEMPORARY_OUTPUT'})
-
-
-        # # result = SAF_ras - Rmin
-        # # # result = np.divide(result,Rmax)
-        # result = (SAF_ras * m_max)
+        # result = ((SAF_ras - Rmin)/(Rmax - Rmin)) * m_max
+        # result = (SAF_ras - Rmin) / (Rmax - Rmin)
+        result = SAF_ras
         # QMessageBox.information(self.dlg, "Message", f"{SAF_ras}, {result}")
-        #
-        # meta1.update(dtype=rasterio.float32)
-        #
-        # if os.path.exists(Dimension):
-        #     os.chdir(Dimension)
-        # else:
-        #     os.mkdir(Dimension)
-        #     os.chdir(Dimension)
-        #
-        # with rasterio.open(rasOutput, 'w', **meta1) as dst:
-        #     dst.write(result, 1)
-        #
-        # self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+        meta1.update(dtype=rasterio.float32)
+
+        if os.path.exists(Dimension):
+            os.chdir(Dimension)
+        else:
+            os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+        with rasterio.open(rasOutput, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
         os.chdir(workingDir)
 
@@ -2244,6 +2224,142 @@ class GenderIndicatorTool:
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
         QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+
+    def urbanization(self):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        if os.path.exists(Dimension):
+            pass
+        else:
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+
+        LOU_input = self.dlg.LOU_Input_Field.filePath()
+        rasOutput = self.dlg.LOU_Output_Field.text()
+        rasField = "Score"
+
+        #Temp Files
+        tempRas = f"{tempDir}/RasReproj.tif"
+        tempVect = f"{tempDir}/tempVect.shp"
+        Dissolve = f"{tempDir}/Dissolve.shp"
+        DisReclass = f"{tempDir}/DisReclass.shp"
+
+        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleFileDestination = f"{workingDir}{Dimension}/"
+        styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm[rasField] = [0]
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': "memory:"})
+
+        countryUTMLayerBuf = buffer["OUTPUT"]
+
+        Reproject = processing.run("gdal:warpreproject", {'INPUT':LOU_input,
+                                                           'SOURCE_CRS':None,
+                                                           'TARGET_CRS':QgsCoordinateReferenceSystem(UTM_crs),
+                                                           'RESAMPLING':0,
+                                                           'NODATA':None,
+                                                           'TARGET_RESOLUTION':None,
+                                                           'OPTIONS':'',
+                                                           'DATA_TYPE':0,
+                                                           'TARGET_EXTENT':None,
+                                                           'TARGET_EXTENT_CRS':None,
+                                                           'MULTITHREADING':False,
+                                                           'EXTRA':'',
+                                                           'OUTPUT': tempRas})
+
+
+        vector = processing.run("gdal:polygonize", {'INPUT': tempRas,
+                                           'BAND': 1,
+                                           'FIELD': 'DN',
+                                           'EIGHT_CONNECTEDNESS': False,
+                                           'EXTRA': '',
+                                           'OUTPUT': tempVect})
+
+        #'C:/Users/Andre/AppData/Local/Temp/processing_NDrdeq/f7e4f3d1903e44afb1675b8617ee470b/OUTPUT.gpkg'
+
+        dissolve = processing.run("native:dissolve", {'INPUT': tempVect,
+                                                      'FIELD':["DN"],
+                                                      'SEPARATE_DISJOINT': False,
+                                                      'OUTPUT': Dissolve})
+
+        GHS_df = gpd.read_file(Dissolve)
+        GHS_df["Score"] = 0
+        GHS_df["Score"] = GHS_df["Score"].astype(int)
+
+        conditions = [
+            (GHS_df["DN"] == 30),
+            (GHS_df["DN"] == 23),
+            (GHS_df["DN"] == 22),
+            (GHS_df["DN"] == 21),
+            (GHS_df["DN"] == 13),
+            (GHS_df["DN"] == 12),
+            (GHS_df["DN"] == 11),
+            (GHS_df["DN"] == 10)
+        ]
+
+        values = [5, 4, 3, 3, 2, 1, 1, 0]
+        GHS_df["Score"] = np.select(conditions, values)
+
+        GHS_vec = QgsVectorLayer(GHS_df.to_json(), "GHS_vec", "ogr")
+
+        Clip = processing.run("native:clip", {'INPUT': GHS_vec,
+                                              'OVERLAY': countryUTMLayerBuf,
+                                              'OUTPUT': "memory:"})
+
+        Clip_out = Clip["OUTPUT"]
+
+        extent = Clip_out.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+        os.chdir(Dimension)
+        rasOutput = self.dlg.LOU_Output_Field.text()
+
+        rasterize = processing.run("gdal:rasterize", {'INPUT': Clip_out,
+                                                      'FIELD': rasField,
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
+        
+        self.dlg.LOU_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
     def housing2(self):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
