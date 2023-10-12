@@ -27,10 +27,14 @@ import geopandas as gpd
 import rasterio
 from rasterio.features import rasterize
 from rasterio.transform import from_origin
+import sys
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
+
+os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+app = QtWidgets.QApplication(sys.argv)
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
