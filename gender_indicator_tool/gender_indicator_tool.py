@@ -47,6 +47,8 @@ sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Fold
 from processing.core.Processing import Processing
 Processing.initialize()
 import processing
+import sys
+from qgis.PyQt import QtWidgets
 
 # Initialize Qt resources from file resources.py
 from .resources import *
