@@ -3815,7 +3815,7 @@ class GenderIndicatorTool:
 
                 integer_list = [int(item) for item in factor_num]
                 sum_list = sum(integer_list)
-                Confidence = round(sum_list/22 * 100, 2)
+                Confidence = round(sum_list/21 * 100, 2)
                 
 
 
@@ -3827,7 +3827,7 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                QMessageBox.information(self.dlg, "Message", f"Dimensional aggregation complete! - Confidence: {sum_list}/22 factors used. ({Confidence} %)")
+                QMessageBox.information(self.dlg, "Message", f"Dimensional aggregation complete! - Confidence: {sum_list}/21 factors used. ({Confidence} %)")
             else:
                 self.dlg.dimensionAggregation_Check.setText("Weighting % does not add up to 100 %")
 
