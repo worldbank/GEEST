@@ -680,7 +680,7 @@ class GenderIndicatorTool:
         countryUTMLayer =  QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                         'DISTANCE': 3000,
+                                         'DISTANCE': 2000,
                                          'SEGMENTS': 5,
                                          'END_CAP_STYLE': 0,
                                          'JOIN_STYLE': 0,
@@ -1557,7 +1557,7 @@ class GenderIndicatorTool:
             # shp_utm.to_file(countryUTMLayer)
 
             buffer = processing.run("native:buffer", {'INPUT': shp_utm_,
-                                             'DISTANCE': 3000,
+                                             'DISTANCE': 2000,
                                              'SEGMENTS': 5,
                                              'END_CAP_STYLE': 0,
                                              'JOIN_STYLE': 0,
@@ -1760,7 +1760,7 @@ class GenderIndicatorTool:
         scoredRoads = f"{workingDir}/{tempDir}/Scored_roads.shp"
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -1892,7 +1892,7 @@ class GenderIndicatorTool:
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2063,7 +2063,7 @@ class GenderIndicatorTool:
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2170,7 +2170,7 @@ class GenderIndicatorTool:
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2276,7 +2276,7 @@ class GenderIndicatorTool:
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2422,7 +2422,7 @@ class GenderIndicatorTool:
 
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2614,7 +2614,7 @@ class GenderIndicatorTool:
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2746,7 +2746,7 @@ class GenderIndicatorTool:
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2935,7 +2935,7 @@ class GenderIndicatorTool:
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3000,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
