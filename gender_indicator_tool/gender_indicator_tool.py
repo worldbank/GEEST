@@ -640,38 +640,83 @@ class GenderIndicatorTool:
         if factor_no == 0:
             polygonlayer = self.dlg.EDU_Input_Field.filePath()
             rasField = self.dlg.EDU_rasField_CB.currentText()
+            self.dlg.EDU_status.setText("Variables Set")
+            self.dlg.EDU_status.repaint()
+            time.sleep(0.5)
+            self.dlg.EDU_status.setText("Proccesing...")
+            self.dlg.EDU_status.repaint()
 
         elif factor_no == 1:
             polygonlayer = self.dlg.CRE_Input_Field.filePath()
             rasField = self.dlg.CRE_rasField_CB.currentText()
+            self.dlg.CRE_status.setText("Variables Set")
+            self.dlg.CRE_status.repaint()
+            time.sleep(0.5)
+            self.dlg.CRE_status.setText("Proccesing...")
+            self.dlg.CRE_status.repaint()
 
         elif factor_no == 2:
             polygonlayer = self.dlg.DOV_Input_Field.filePath()
             rasField = self.dlg.DOV_rasField_CB.currentText()
+            self.dlg.DOV_status.setText("Variables Set")
+            self.dlg.DOV_status.repaint()
+            time.sleep(0.5)
+            self.dlg.DOV_status.setText("Proccesing...")
+            self.dlg.DOV_status.repaint()
 
         elif factor_no == 3:
             polygonlayer = self.dlg.PLP_Input_Field.filePath()
             rasField = self.dlg.PLP_rasField_CB.currentText()
+            self.dlg.PLP_status.setText("Variables Set")
+            self.dlg.PLP_status.repaint()
+            time.sleep(0.5)
+            self.dlg.PLP_status.setText("Proccesing...")
+            self.dlg.PLP_status.repaint()
 
         elif factor_no == 4:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = self.dlg.FIN_rasField_CB.currentText()
+            self.dlg.FIN_status.setText("Variables Set")
+            self.dlg.FIN_status.repaint()
+            time.sleep(0.5)
+            self.dlg.FIN_status.setText("Proccesing...")
+            self.dlg.FIN_status.repaint()
 
         elif factor_no == 5:
             polygonlayer = self.dlg.INC_Input_Field.filePath()
             rasField = self.dlg.INC_rasField_CB.currentText()
+            self.dlg.INC_status.setText("Variables Set")
+            self.dlg.INC_status.repaint()
+            time.sleep(0.5)
+            self.dlg.INC_status.setText("Proccesing...")
+            self.dlg.INC_status.repaint()
 
         elif factor_no == 6:
             polygonlayer = self.dlg.SEC_Input_Field.filePath()
             rasField = self.dlg.SEC_rasField_CB.currentText()
+            self.dlg.SEC_status.setText("Variables Set")
+            self.dlg.SEC_status.repaint()
+            time.sleep(0.5)
+            self.dlg.SEC_status.setText("Proccesing...")
+            self.dlg.SEC_status.repaint()
 
         elif factor_no == 7:
             polygonlayer = self.dlg.ELC_Input_Field.filePath()
             rasField = self.dlg.ELC_rasField_CB.currentText()
+            self.dlg.ELC_status.setText("Variables Set")
+            self.dlg.ELC_status.repaint()
+            time.sleep(0.5)
+            self.dlg.ELC_status.setText("Proccesing...")
+            self.dlg.ELC_status.repaint()
 
         elif factor_no == 8:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             rasField = self.dlg.DIG_rasField_CB.currentText()
+            self.dlg.DIG_status.setText("Variables Set")
+            self.dlg.DIG_status.repaint()
+            time.sleep(0.5)
+            self.dlg.DIG_status.setText("Proccesing...")
+            self.dlg.DIG_status.repaint()
 
 
         # Convert countryLayer data to UTM CRS
@@ -752,6 +797,9 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+            self.dlg.EDU_status.setText("Processing has been completed!")
+            self.dlg.EDU_status.repaint()
+
         elif factor_no == 1:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax)/(Rmin - Rmax) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
@@ -806,6 +854,9 @@ class GenderIndicatorTool:
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.CRE_status.setText("Processing has been completed!")
+            self.dlg.CRE_status.repaint()
 
         elif factor_no == 2:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax)/(Rmin - Rmax) * m_max
@@ -862,6 +913,9 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+            self.dlg.DOV_status.setText("Processing has been completed!")
+            self.dlg.DOV_status.repaint()
+
         elif factor_no == 3:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
@@ -916,6 +970,9 @@ class GenderIndicatorTool:
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.PLP_status.setText("Processing has been completed!")
+            self.dlg.PLP_status.repaint()
 
         elif factor_no == 4:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
@@ -972,6 +1029,9 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+            self.dlg.FIN_status.setText("Processing has been completed!")
+            self.dlg.FIN_status.repaint()
+
         elif factor_no == 5:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
@@ -1026,6 +1086,9 @@ class GenderIndicatorTool:
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.INC_status.setText("Processing has been completed!")
+            self.dlg.INC_status.repaint()
 
         elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax)/(Rmin - Rmax) * m_max
@@ -1090,6 +1153,9 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+            self.dlg.SEC_status.setText("Processing has been completed!")
+            self.dlg.SEC_status.repaint()
+
         elif factor_no == 7:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
@@ -1144,6 +1210,9 @@ class GenderIndicatorTool:
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.ELC_status.setText("Processing has been completed!")
+            self.dlg.ELC_status.repaint()
 
         elif factor_no == 8:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
@@ -1200,7 +1269,8 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+            self.dlg.DIG_status.setText("Processing has been completed!")
+            self.dlg.DIG_status.repaint()
 
     def IDW(self):
 
@@ -1334,7 +1404,7 @@ class GenderIndicatorTool:
                 FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
                 ranges = self.dlg.ETF_Ranges_Field.text()
                 rasOutput = self.dlg.ETF_Output_Field.text()
-                mergeOutput = f"{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
@@ -1358,7 +1428,7 @@ class GenderIndicatorTool:
                 FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
                 ranges = self.dlg.JOB_Ranges_Field.text()
                 rasOutput = self.dlg.JOB_Output_Field.text()
-                mergeOutput = f"{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
@@ -1382,7 +1452,7 @@ class GenderIndicatorTool:
                 FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
                 ranges = self.dlg.HEA_Ranges_Field.text()
                 rasOutput = self.dlg.HEA_Output_Field.text()
-                mergeOutput = f"{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
@@ -1406,7 +1476,7 @@ class GenderIndicatorTool:
                 FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
                 ranges = self.dlg.FIF_Ranges_Field.text()
                 rasOutput = self.dlg.FIF_Output_Field.text()
-                mergeOutput = f"{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
                 styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
@@ -1430,7 +1500,7 @@ class GenderIndicatorTool:
                 FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
                 ranges = self.dlg.WTP_Ranges_Field.text()
                 rasOutput = self.dlg.WTP_FacilityOutput_Field.text()
-                mergeOutput = f"{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
 
                 if self.dlg.WTP_mode_CB.currentText() == "Driving":
