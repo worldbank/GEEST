@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>816</width>
+    <width>826</width>
     <height>616</height>
    </rect>
   </property>
@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>6</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -52,7 +52,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Set country boundary layer</string>
+      <string>Set country boundary layer (Admin 0)</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">
@@ -977,9 +977,9 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>300</y>
+         <y>280</y>
          <width>751</width>
-         <height>211</height>
+         <height>231</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -1006,7 +1006,7 @@ p, li { white-space: pre-wrap; }
         <rect>
          <x>100</x>
          <y>210</y>
-         <width>221</width>
+         <width>641</width>
          <height>20</height>
         </rect>
        </property>
@@ -1517,9 +1517,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QLabel" name="contextualAggregation_Check">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>240</y>
-         <width>701</width>
+         <x>90</x>
+         <y>200</y>
+         <width>651</width>
          <height>16</height>
         </rect>
        </property>
@@ -1534,9 +1534,9 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>240</y>
+         <y>250</y>
          <width>751</width>
-         <height>271</height>
+         <height>251</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -1862,6 +1862,32 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;Step 2: The algorithm identifies all raster layers created in step 1 and aggregates them by calculating the mean score for each pixel. The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QLabel" name="WTP_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>330</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="WTPAGG_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>450</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_18">
       <attribute name="title">
@@ -2040,6 +2066,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The algorithm runs a service area network analysis and the result is five catchment areas, based on the road network, of increasing size and decreasing accessibility. These catchment area polygons are assigned decreasing scores ranging from 5 to 1, with areas outside of the catchment areas assigned a score of zero, and the output is rasterized. &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="PBT_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>300</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -2222,6 +2261,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QLabel" name="ETF_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>300</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_20">
       <attribute name="title">
@@ -2400,6 +2452,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The algorithm runs a service area network analysis and the result is five catchment areas, based on the road network, of increasing size and decreasing accessibility. These catchment area polygons are assigned decreasing scores ranging from 5 to 1, with areas outside of the catchment areas assigned a score of zero, and the output is rasterized. &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="JOB_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>300</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -2582,6 +2647,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QLabel" name="HEA_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>300</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_22">
       <attribute name="title">
@@ -2760,6 +2838,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The algorithm runs a service area network analysis and the result is five catchment areas, based on the road network, of increasing size and decreasing accessibility. These catchment area polygons are assigned decreasing scores ranging from 5 to 1, with areas outside of the catchment areas assigned a score of zero, and the output is rasterized. &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="FIF_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>300</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -3168,10 +3259,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QLabel" name="accessibilityAggregation_Check">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>330</y>
-         <width>701</width>
-         <height>16</height>
+         <x>90</x>
+         <y>300</y>
+         <width>651</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
@@ -3223,7 +3314,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
@@ -5073,9 +5164,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QLabel" name="placeCharacterizationAggregation_Check">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>460</y>
-         <width>701</width>
+         <x>90</x>
+         <y>420</y>
+         <width>431</width>
          <height>16</height>
         </rect>
        </property>
@@ -6080,7 +6171,7 @@ p, li { white-space: pre-wrap; }
     </attribute>
     <widget class="QTextEdit" name="textEdit_19">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -6093,6 +6184,12 @@ p, li { white-space: pre-wrap; }
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
      <property name="html">
       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -6100,26 +6197,27 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#535353;&quot;&gt;Output 1&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;This algorithm characterizes areas based on the degree to which they support safe and efficient walking &lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt; color:#535353;&quot;&gt;active transport &lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt; for women, through the classification of road type.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:14pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#535353;&quot;&gt;Output 2&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The algorithm requires the user to select the field containing road type classifications and extracts the unique road types in the field.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The user reclassifies the extracted road types to scores ranging from 1 to 5 based on local knowledge, where 5 is a highly walkable road type and 1 is a road type where walking is unsafe. The algorithm assigns a score of 0 to areas where there are no roads at all.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:14pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#535353;&quot;&gt;Output 3&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;This algorithm characterizes areas based on the degree to which they support safe and efficient walking &lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt; color:#535353;&quot;&gt;active transport &lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt; for women, through the classification of road type.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:14pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#535353;&quot;&gt;Output 4&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The reclassified roads are buffered to a distance of 250 m and the output is rasterized. The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input 1&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): Raster (.tif) output of scores (this can be the final aggregation output, individual dimension output, or even individual factor outputs)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input 2&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Raster layer representing population of interest. This should be expressed as number of people per pixel.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input 3&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Polygon (.shp) layer representing the scale of aggregation of interest to the user. e.g. municipal boundary layer&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input 4&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Point (.shp) layer representing locations of interest (e.g. existing RE job locations)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input 5&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): ReZoning raster layer of interest (.tif)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output 1&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Score (Input 1) aggregated to the scale of Input 3. The user can select the metric of aggregation (i.e. mean score, summed score, maximum score)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output 2&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Population (Input 2) aggregated to the scale of Input 3. The user can select the metric of aggregation (i.e. population count or population density)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output 3&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Score aggregated within a 10km radius of each location in Input 4. The user can select the metric of aggregation (i.e. mean score, summed score, maximum score)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output 4&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Population aggregated within a 10km radius of each location in Input 4. The user can select the metric of aggregation (i.e. population count or population density)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output 5&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Input 5 representing potential zones for renewable energy projects.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
     <widget class="QPushButton" name="WLK_Execute_PB_3">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>370</y>
+       <y>510</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -6132,7 +6230,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>340</y>
+       <y>480</y>
        <width>201</width>
        <height>21</height>
       </rect>
@@ -6148,33 +6246,33 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>260</y>
-       <width>251</width>
+       <y>330</y>
+       <width>301</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Summary Metric</string>
+      <string>Score Summary Metric</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_261">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>320</y>
+       <y>460</y>
        <width>231</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Output Filename/s</string>
+      <string>Output prefix</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_262">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>70</y>
+       <y>130</y>
        <width>201</width>
        <height>16</height>
       </rect>
@@ -6187,7 +6285,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>90</y>
+       <y>150</y>
        <width>231</width>
        <height>31</height>
       </rect>
@@ -6197,20 +6295,20 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>130</y>
+       <y>190</y>
        <width>251</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Job Location Input Layer (Point)</string>
+      <string>Location Input Layer (Point)</string>
      </property>
     </widget>
     <widget class="QgsFileWidget" name="WLK_Input_Field_4">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>150</y>
+       <y>210</y>
        <width>231</width>
        <height>31</height>
       </rect>
@@ -6220,7 +6318,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>280</y>
+       <y>350</y>
        <width>201</width>
        <height>22</height>
       </rect>
@@ -6230,20 +6328,20 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>190</y>
+       <y>250</y>
        <width>251</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Femal Population Input Layer (Raster)</string>
+      <string>Potential RE Zones Input Layer (Raster)</string>
      </property>
     </widget>
     <widget class="QgsFileWidget" name="WLK_Input_Field_5">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>210</y>
+       <y>270</y>
        <width>231</width>
        <height>31</height>
       </rect>
@@ -6259,7 +6357,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="text">
-      <string>Dimension Aggregation Input layer (Raster)</string>
+      <string>Score Input layer (Raster)</string>
      </property>
     </widget>
     <widget class="QgsFileWidget" name="WLK_Input_Field_6">
@@ -6269,6 +6367,52 @@ p, li { white-space: pre-wrap; }
        <y>30</y>
        <width>231</width>
        <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_266">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>251</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Population Input Layer (Raster)</string>
+     </property>
+    </widget>
+    <widget class="QgsFileWidget" name="WLK_Input_Field_7">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
+       <width>231</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_267">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>390</y>
+       <width>301</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Population Summary Metric</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="WTP_mode_CB_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>410</y>
+       <width>201</width>
+       <height>22</height>
       </rect>
      </property>
     </widget>

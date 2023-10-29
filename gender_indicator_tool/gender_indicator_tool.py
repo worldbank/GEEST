@@ -262,6 +262,7 @@ class GenderIndicatorTool:
         ## TAB 4 - Accessibility ************************************************************************
         Modes = ['Walking', 'Driving']
         Measurement = ['Distance', 'Time']
+
         ###### TAB 4.1 - Women's Travel Patterns
         self.dlg.WTP_mode_CB.clear()
         self.dlg.WTP_mode_CB.addItems(Modes)
@@ -738,6 +739,7 @@ class GenderIndicatorTool:
 
         # Convert spatial data to UTM CRS
         self.convertCRS(polygonlayer, UTM_crs)
+        shp_utm[rasField] = shp_utm[rasField].astype(float)
         Rmax = 100
         Rmin = 0
         m_max = 5
@@ -1272,330 +1274,293 @@ class GenderIndicatorTool:
             self.dlg.DIG_status.setText("Processing has been completed!")
             self.dlg.DIG_status.repaint()
 
-    def IDW(self):
-
+    def ServiceArea(self, factor_no):
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
-        tempDir = workingDir + "temp"
+        os.chdir(workingDir)
+        tempDir = f"{workingDir}temp"
+        Dimension = "Accessibility"
+
+        if os.path.exists(Dimension):
+            pass
+        else:
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(1)
         os.mkdir(tempDir)
 
-        #INPUT
-        countryAdminLayer = self.dlg.countryLayer_Field.filePath()
-        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
-        FaciltyPointlayer = self.dlg.pointLayer_Field.filePath()
-        bufferDistance = self.dlg.bufferDistance_spinBox.value()
-        pixelSize = self.dlg.pixelSize_spinBox.value()
 
-        # OUTPUT
-        countryAdminLayer_utm_otput = f"{tempDir}/Admin0_UTM.shp"
-        FaciltyPoint_utm_output = f"{tempDir}/university_UTM.shp"
-        lineToPoint_output = f"{tempDir}/lineToPoint.shp"
-        mergedPoints_output = f"{tempDir}/mergedPoints.shp"
-        finalOutput = self.dlg.IDWRasterOutputFilePath_Field.text()
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
 
-        # Convert spatial data to UTM CRS
-        self.convertCRS(countryAdminLayer, UTM_crs)
-        shp_utm.to_file(countryAdminLayer_utm_otput)
+        # INPUT
+        if factor_no == 0:
+            self.dlg.PBT_status.setText("")
+            self.dlg.PBT_status.repaint()
+            FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
+            ranges = self.dlg.PBT_Ranges_Field.text()
+            rasOutput = self.dlg.PBT_Output_Field.text()
+            mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-        self.convertCRS(FaciltyPointlayer, UTM_crs)
-        shp_utm["EScore"] = 5
-        shp_utm.to_file(FaciltyPoint_utm_output)
-
-        #Geoprocessing Algorithms
-        buffer = processing.run("native:buffer", {'INPUT': FaciltyPoint_utm_output,
-                                                  'DISTANCE': bufferDistance,
-                                                  'SEGMENTS': 5,
-                                                  'END_CAP_STYLE': 0,
-                                                  'JOIN_STYLE': 0,
-                                                  'MITER_LIMIT': 2,
-                                                  'DISSOLVE': True,
-                                                  'OUTPUT': "memory:"})
-        bufferOutput = buffer["OUTPUT"]
-
-        polyToLine = processing.run("native:polygonstolines", {'INPUT':bufferOutput,
-                                                               'OUTPUT': "memory:"})
-
-        polyToLineOutput = polyToLine["OUTPUT"]
-
-        lineToPoint =  processing.run("native:pointsalonglines", {'INPUT':polyToLineOutput,
-                                                                  'DISTANCE':1000,
-                                                                  'START_OFFSET':0,
-                                                                  'END_OFFSET':0,
-                                                                  'OUTPUT': lineToPoint_output})
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
 
 
-        lineToPoint_shp = gpd.read_file(lineToPoint_output)
-        lineToPoint_shp["EScore"] = 0
+            self.dlg.PBT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        merged_gdf = pd.concat([shp_utm, lineToPoint_shp], ignore_index=True)
-        merged_gdf.to_file(mergedPoints_output)
+            if self.dlg.PBT_mode_CB.currentText() == "Driving":
+                mode = 0
+            elif self.dlg.PBT_mode_CB.currentText() == "Walking":
+                mode = 6
 
-        layer = QgsVectorLayer(mergedPoints_output, "mergedPoints", 'ogr')
-        desired_field = 'EScore'
-        field_index = layer.fields().indexFromName(desired_field)
+            if self.dlg.PBT_measurement_CB.currentText() == "Time":
+                measurement = 0
+                ranges_field = "AA_MINS"
+            elif self.dlg.PBT_measurement_CB.currentText() == "Distance":
+                measurement = 1
+                ranges_field = "AA_METERS"
 
-        IDW = processing.run("qgis:idwinterpolation", {'INTERPOLATION_DATA': mergedPoints_output + f"::~::0::~::{field_index}::~::0",     #'C:/Users/Andre/Nextcloud/GIS_WBGIT/QGIS_WBGIT/test.shp::~::0::~::3::~::0'
-                                                       'DISTANCE_COEFFICIENT': 2,
-                                                       'EXTENT': '306969.217500000,450078.884900000,8626350.630799999,8743170.112700000 [EPSG:32738]',
-                                                       'PIXEL_SIZE': pixelSize,
-                                                       'OUTPUT': finalOutput})
-
-
-        layer = QgsRasterLayer(finalOutput, f"{finalOutput}")
-
-        if not layer.isValid():
-            print("Layer failed to load!")
-
-        QgsProject.instance().addMapLayer(layer)
-
-        QMessageBox.information(self.dlg, "Message", f"IDW interpolated raster file has been created /n CRS EPSG:{UTM_crs} /threshold Distance {bufferDistance}m")
-
-    def ServiceArea(self, factor_no):
-            current_script_path = os.path.dirname(os.path.abspath(__file__))
-            workingDir = self.dlg.workingDir_Field.text()
-            os.chdir(workingDir)
-            tempDir = "temp"
-            Dimension = "Accessibility"
-
-            if os.path.exists(Dimension):
-                pass
-            else:
-                os.mkdir(Dimension)
-
-            if os.path.exists(tempDir):
-                shutil.rmtree(tempDir)
-            else:
-                pass
-
+            self.dlg.PBT_status.setText("Variables Set")
+            self.dlg.PBT_status.repaint()
             time.sleep(0.5)
-            os.mkdir(tempDir)
+            self.dlg.PBT_status.setText("Processing...")
+            self.dlg.PBT_status.repaint()
+
+        elif factor_no == 1:
+            self.dlg.ETF_status.setText("")
+            self.dlg.ETF_status.repaint()
+            FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
+            ranges = self.dlg.ETF_Ranges_Field.text()
+            rasOutput = self.dlg.ETF_Output_Field.text()
+            mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            self.dlg.ETF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            if self.dlg.ETF_mode_CB.currentText() == "Driving":
+                mode = 0
+            elif self.dlg.ETF_mode_CB.currentText() == "Walking":
+                mode = 6
+
+            if self.dlg.ETF_measurement_CB.currentText() == "Time":
+                measurement = 0
+                ranges_field = "AA_MINS"
+            elif self.dlg.ETF_measurement_CB.currentText() == "Distance":
+                measurement = 1
+                ranges_field = "AA_METERS"
+
+            self.dlg.ETF_status.setText("Variables Set")
+            self.dlg.ETF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.ETF_status.setText("Processing...")
+            self.dlg.ETF_status.repaint()
 
 
-            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
-            countryLayer = self.dlg.countryLayer_Field.filePath()
-            pixelSize = self.dlg.pixelSize_SB.value()
+        elif factor_no == 2:
+            self.dlg.JOB_status.setText("")
+            self.dlg.JOB_status.repaint()
+            FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
+            ranges = self.dlg.JOB_Ranges_Field.text()
+            rasOutput = self.dlg.JOB_Output_Field.text()
+            mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-            # INPUT
-            if factor_no == 0:
-                FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
-                ranges = self.dlg.PBT_Ranges_Field.text()
-                rasOutput = self.dlg.PBT_Output_Field.text()
-                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/"
-                styleFile = f"{rasOutput.split('.')[0]}.qml"
+            self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
+            if self.dlg.JOB_mode_CB.currentText() == "Driving":
+                mode = 0
+            elif self.dlg.JOB_mode_CB.currentText() == "Walking":
+                mode = 6
 
-                self.dlg.PBT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            if self.dlg.JOB_measurement_CB.currentText() == "Time":
+                measurement = 0
+                ranges_field = "AA_MINS"
+            elif self.dlg.JOB_measurement_CB.currentText() == "Distance":
+                measurement = 1
+                ranges_field = "AA_METERS"
 
-                if self.dlg.PBT_mode_CB.currentText() == "Driving":
-                    mode = 0
-                elif self.dlg.PBT_mode_CB.currentText() == "Walking":
-                    mode = 6
+            self.dlg.JOB_status.setText("Variables Set")
+            self.dlg.JOB_status.repaint()
+            time.sleep(0.5)
+            self.dlg.JOB_status.setText("Processing...")
+            self.dlg.JOB_status.repaint()
 
-                if self.dlg.PBT_measurement_CB.currentText() == "Time":
-                    measurement = 0
-                    ranges_field = "AA_MINS"
-                elif self.dlg.PBT_measurement_CB.currentText() == "Distance":
-                    measurement = 1
-                    ranges_field = "AA_METERS"
+        elif factor_no == 3:
+            self.dlg.HEA_status.setText("")
+            self.dlg.HEA_status.repaint()
+            FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
+            ranges = self.dlg.HEA_Ranges_Field.text()
+            rasOutput = self.dlg.HEA_Output_Field.text()
+            mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-            elif factor_no == 1:
-                FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
-                ranges = self.dlg.ETF_Ranges_Field.text()
-                rasOutput = self.dlg.ETF_Output_Field.text()
-                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/"
-                styleFile = f"{rasOutput.split('.')[0]}.qml"
+            self.dlg.HEA_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-                self.dlg.ETF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            if self.dlg.HEA_mode_CB.currentText() == "Driving":
+                mode = 0
+            elif self.dlg.HEA_mode_CB.currentText() == "Walking":
+                mode = 6
 
-                if self.dlg.ETF_mode_CB.currentText() == "Driving":
-                    mode = 0
-                elif self.dlg.ETF_mode_CB.currentText() == "Walking":
-                    mode = 6
+            if self.dlg.HEA_measurement_CB.currentText() == "Time":
+                measurement = 0
+                ranges_field = "AA_MINS"
+            elif self.dlg.HEA_measurement_CB.currentText() == "Distance":
+                measurement = 1
+                ranges_field = "AA_METERS"
 
-                if self.dlg.ETF_measurement_CB.currentText() == "Time":
-                    measurement = 0
-                    ranges_field = "AA_MINS"
-                elif self.dlg.ETF_measurement_CB.currentText() == "Distance":
-                    measurement = 1
-                    ranges_field = "AA_METERS"
+            self.dlg.HEA_status.setText("Variables Set")
+            self.dlg.HEA_status.repaint()
+            time.sleep(0.5)
+            self.dlg.HEA_status.setText("Processing...")
+            self.dlg.HEA_status.repaint()
 
-            elif factor_no == 2:
-                FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
-                ranges = self.dlg.JOB_Ranges_Field.text()
-                rasOutput = self.dlg.JOB_Output_Field.text()
-                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+        elif factor_no == 4:
+            self.dlg.FIF_status.setText("")
+            self.dlg.FIF_status.repaint()
+            FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
+            ranges = self.dlg.FIF_Ranges_Field.text()
+            rasOutput = self.dlg.FIF_Output_Field.text()
+            mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/"
-                styleFile = f"{rasOutput.split('.')[0]}.qml"
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
 
-                self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            self.dlg.FIF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-                if self.dlg.JOB_mode_CB.currentText() == "Driving":
-                    mode = 0
-                elif self.dlg.JOB_mode_CB.currentText() == "Walking":
-                    mode = 6
+            if self.dlg.FIF_mode_CB.currentText() == "Driving":
+                mode = 0
+            elif self.dlg.FIF_mode_CB.currentText() == "Walking":
+                mode = 6
 
-                if self.dlg.JOB_measurement_CB.currentText() == "Time":
-                    measurement = 0
-                    ranges_field = "AA_MINS"
-                elif self.dlg.JOB_measurement_CB.currentText() == "Distance":
-                    measurement = 1
-                    ranges_field = "AA_METERS"
+            if self.dlg.FIF_measurement_CB.currentText() == "Time":
+                measurement = 0
+                ranges_field = "AA_MINS"
+            elif self.dlg.FIF_measurement_CB.currentText() == "Distance":
+                measurement = 1
+                ranges_field = "AA_METERS"
 
-            elif factor_no == 3:
-                FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
-                ranges = self.dlg.HEA_Ranges_Field.text()
-                rasOutput = self.dlg.HEA_Output_Field.text()
-                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+            self.dlg.FIF_status.setText("Variables Set")
+            self.dlg.FIF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.FIF_status.setText("Processing...")
+            self.dlg.FIF_status.repaint()
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/"
-                styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-                self.dlg.HEA_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-                if self.dlg.HEA_mode_CB.currentText() == "Driving":
-                    mode = 0
-                elif self.dlg.HEA_mode_CB.currentText() == "Walking":
-                    mode = 6
-
-                if self.dlg.HEA_measurement_CB.currentText() == "Time":
-                    measurement = 0
-                    ranges_field = "AA_MINS"
-                elif self.dlg.HEA_measurement_CB.currentText() == "Distance":
-                    measurement = 1
-                    ranges_field = "AA_METERS"
-
-            elif factor_no == 4:
-                FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
-                ranges = self.dlg.FIF_Ranges_Field.text()
-                rasOutput = self.dlg.FIF_Output_Field.text()
-                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
-
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/"
-                styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-                self.dlg.FIF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-                if self.dlg.FIF_mode_CB.currentText() == "Driving":
-                    mode = 0
-                elif self.dlg.FIF_mode_CB.currentText() == "Walking":
-                    mode = 6
-
-                if self.dlg.FIF_measurement_CB.currentText() == "Time":
-                    measurement = 0
-                    ranges_field = "AA_MINS"
-                elif self.dlg.FIF_measurement_CB.currentText() == "Distance":
-                    measurement = 1
-                    ranges_field = "AA_METERS"
-
-            elif factor_no == 5:
-                FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
-                ranges = self.dlg.WTP_Ranges_Field.text()
-                rasOutput = self.dlg.WTP_FacilityOutput_Field.text()
-                mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
+        elif factor_no == 5:
+            self.dlg.WTP_status.setText("")
+            self.dlg.WTP_status.repaint()
+            FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
+            ranges = self.dlg.WTP_Ranges_Field.text()
+            rasOutput = self.dlg.WTP_FacilityOutput_Field.text()
+            mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
 
-                if self.dlg.WTP_mode_CB.currentText() == "Driving":
-                    mode = 0
-                elif self.dlg.WTP_mode_CB.currentText() == "Walking":
-                    mode = 6
+            if self.dlg.WTP_mode_CB.currentText() == "Driving":
+                mode = 0
+            elif self.dlg.WTP_mode_CB.currentText() == "Walking":
+                mode = 6
 
-                if self.dlg.WTP_measurement_CB.currentText() == "Time":
-                    measurement = 0
-                    ranges_field = "AA_MINS"
-                elif self.dlg.WTP_measurement_CB.currentText() == "Distance":
-                    measurement = 1
-                    ranges_field = "AA_METERS"
+            if self.dlg.WTP_measurement_CB.currentText() == "Time":
+                measurement = 0
+                ranges_field = "AA_MINS"
+            elif self.dlg.WTP_measurement_CB.currentText() == "Distance":
+                measurement = 1
+                ranges_field = "AA_METERS"
 
-            #OUTPUT
-            SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
-            # mergeOutput = f"{tempDir}/{}.shp"
+            self.dlg.WTP_status.setText("Variables Set")
+            self.dlg.WTP_status.repaint()
+            time.sleep(0.5)
+            self.dlg.WTP_status.setText("Processing...")
+            self.dlg.WTP_status.repaint()
 
-
-
-            gdf = gpd.read_file(FaciltyPointlayer)
-
-            subset_size = 5
-            subsets = []
-
-            for i in range(0, len(gdf), subset_size):
-                subset = gdf.iloc[i:i + subset_size]
-                subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
-                subset_outfile = f"{tempDir}/SA_subset_{i + subset_size}.shp"
-
-
-                Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
-                                                                                  'INPUT_PROFILE': mode,
-                                                                                  'INPUT_POINT_LAYER': subset,
-                                                                                  'INPUT_FIELD': '',
-                                                                                  'INPUT_METRIC': measurement,
-                                                                                  'INPUT_RANGES': ranges,
-                                                                                  'INPUT_AVOID_FEATURES': [],
-                                                                                  'INPUT_AVOID_BORDERS': None,
-                                                                                  'INPUT_AVOID_COUNTRIES': '',
-                                                                                  'INPUT_AVOID_POLYGONS': None,
-                                                                                  'OUTPUT': subset_outfile})
-                subsets.append(subset_outfile)
+        #OUTPUT
+        SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
+        # mergeOutput = f"{tempDir}/{}.shp"
 
 
 
-            Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
-                                                                'CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                                                                'OUTPUT': SAOutput_utm})
+        gdf = gpd.read_file(FaciltyPointlayer)
+
+        subset_size = 5
+        subsets = []
+
+        for i in range(0, len(gdf), subset_size):
+            subset = gdf.iloc[i:i + subset_size]
+            subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
+            subset_outfile = f"{tempDir}/SA_subset_{i + subset_size}.shp"
 
 
-            SA_df = gpd.read_file(SAOutput_utm)
-            no_spaces_string = "".join(ranges.split())
-            ranges_list = no_spaces_string.split(",")
-            int_ranges_list = [int(x) for x in ranges_list]
-            int_ranges_list.sort()
-
-            range_subsets = []
-
-            for i in int_ranges_list:
-                range_subset = SA_df[SA_df[ranges_field] == i]
-                range_subset = QgsVectorLayer(range_subset.to_json(), f"range_{i}", "ogr")
-
-                dissolve = processing.run("native:dissolve", {'INPUT': range_subset,
-                                                              'FIELD':[],
-                                                              'SEPARATE_DISJOINT':False,
-                                                              'OUTPUT':"memory:"})
-
-                Range_output = dissolve["OUTPUT"]
-
-                range_subsets.append(range_subset)
-
-            Merge_list = []
-            len_range = len(range_subsets)
-            # int_ranges_list.sort(reverse=True)
-            for i in range(-1, -len(range_subsets), -1):
-                output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
-                # Merge_list.append(output)
-                difference = processing.run("native:difference", {'INPUT': range_subsets[i],
-                                                                  'OVERLAY': range_subsets[i-1],
-                                                                  'OUTPUT': "memory:",
-                                                                  'GRID_SIZE': None})
-                diff_output = difference["OUTPUT"]
-
-                dissolve = processing.run("native:dissolve", {'INPUT': diff_output,
-                                                              'FIELD': [],
-                                                              'SEPARATE_DISJOINT': False,
-                                                              'OUTPUT': "memory:"})
-
-                dis_output = dissolve["OUTPUT"]
-                Merge_list.append(dis_output)
+            Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
+                                                                              'INPUT_PROFILE': mode,
+                                                                              'INPUT_POINT_LAYER': subset,
+                                                                              'INPUT_FIELD': '',
+                                                                              'INPUT_METRIC': measurement,
+                                                                              'INPUT_RANGES': ranges,
+                                                                              'INPUT_AVOID_FEATURES': [],
+                                                                              'INPUT_AVOID_BORDERS': None,
+                                                                              'INPUT_AVOID_COUNTRIES': '',
+                                                                              'INPUT_AVOID_POLYGONS': None,
+                                                                              'OUTPUT': subset_outfile})
+            subsets.append(subset_outfile)
 
 
 
-            dissolve = processing.run("native:dissolve", {'INPUT': range_subsets[0],
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
+                                                            'CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                                                            'OUTPUT': SAOutput_utm})
+
+        time.sleep(0.5)
+
+        SA_df = gpd.read_file(SAOutput_utm)
+        no_spaces_string = "".join(ranges.split())
+        ranges_list = no_spaces_string.split(",")
+        int_ranges_list = [int(x) for x in ranges_list]
+        int_ranges_list.sort()
+
+        range_subsets = []
+
+        for i in int_ranges_list:
+            range_subset = SA_df[SA_df[ranges_field] == i]
+            range_subset = QgsVectorLayer(range_subset.to_json(), f"range_{i}", "ogr")
+
+            dissolve = processing.run("native:dissolve", {'INPUT': range_subset,
+                                                          'FIELD':[],
+                                                          'SEPARATE_DISJOINT':False,
+                                                          'OUTPUT':"memory:"})
+
+            Range_output = dissolve["OUTPUT"]
+
+            range_subsets.append(range_subset)
+
+        Merge_list = []
+        len_range = len(range_subsets)
+        # int_ranges_list.sort(reverse=True)
+        for i in range(-1, -len(range_subsets), -1):
+            output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+            # Merge_list.append(output)
+            difference = processing.run("native:difference", {'INPUT': range_subsets[i],
+                                                              'OVERLAY': range_subsets[i-1],
+                                                              'OUTPUT': "memory:",
+                                                              'GRID_SIZE': None})
+            diff_output = difference["OUTPUT"]
+
+            dissolve = processing.run("native:dissolve", {'INPUT': diff_output,
                                                           'FIELD': [],
                                                           'SEPARATE_DISJOINT': False,
                                                           'OUTPUT': "memory:"})
@@ -1603,103 +1568,137 @@ class GenderIndicatorTool:
             dis_output = dissolve["OUTPUT"]
             Merge_list.append(dis_output)
 
-            if os.path.exists(f"{Dimension}/SA_SHP"):
-                pass
+
+
+        dissolve = processing.run("native:dissolve", {'INPUT': range_subsets[0],
+                                                      'FIELD': [],
+                                                      'SEPARATE_DISJOINT': False,
+                                                      'OUTPUT': "memory:"})
+
+        dis_output = dissolve["OUTPUT"]
+        Merge_list.append(dis_output)
+
+        if os.path.exists(f"{Dimension}/SA_SHP"):
+            pass
+        else:
+            os.mkdir(f"{Dimension}/SA_SHP")
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
+                                                            'CRS':None,
+                                                            'OUTPUT':mergeOutput})
+
+
+        merge_df = gpd.read_file(mergeOutput)
+        merge_df["rasField"] = [1,2,3,4,5]
+        merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
+        # merge_df.to_file(mergeRasfield)
+        # mergelayer = workingDir + mergeRasfield
+        # finalMerge = workingDir + finalMerge
+
+        # Convert countryLayer data to UTM CRS
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm["rasField"] = [0]
+        shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
+        # shp_utm.to_file(countryUTMLayer)
+
+        buffer = processing.run("native:buffer", {'INPUT': shp_utm_,
+                                         'DISTANCE': 2000,
+                                         'SEGMENTS': 5,
+                                         'END_CAP_STYLE': 0,
+                                         'JOIN_STYLE': 0,
+                                         'MITER_LIMIT': 2,
+                                         'DISSOLVE': True,
+                                         'SEPARATE_DISJOINT': False,
+                                         'OUTPUT': "memory:"})
+
+        buffer_output = buffer["OUTPUT"]
+
+        Difference = processing.run("native:difference", {'INPUT': buffer_output,
+                                                          'OVERLAY':merge_SA_UTM,
+                                                          'OUTPUT':"memory:",
+                                                          'GRID_SIZE':None})
+
+        diff_output = Difference["OUTPUT"]
+
+        Merge = processing.run("native:mergevectorlayers", {'LAYERS': [merge_SA_UTM, diff_output],
+                                                            'CRS': None,
+                                                            'OUTPUT': "memory:"})
+
+        merge_output = Merge["OUTPUT"]
+
+        # Get the width and height of the extent
+        # layer = QgsVectorLayer(finalMerge, 'Polygon Layer', 'ogr')
+        extent = merge_output.extent()
+        raster_width = int(extent.width() / pixelSize)
+        raster_height = int(extent.height() / pixelSize)
+
+
+        if os.path.exists(Dimension):
+            os.chdir(Dimension)
+        else:
+            os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+        if factor_no == 5:
+            Output_Folder = "WTP"
+            if os.path.exists(Output_Folder):
+                os.chdir(Output_Folder)
             else:
-                os.mkdir(f"{Dimension}/SA_SHP")
+                os.mkdir(Output_Folder)
+                os.chdir(Output_Folder)
 
-            Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
-                                                                'CRS':None,
-                                                                'OUTPUT':mergeOutput})
+            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+        else:
+            pass
 
+        rasterize = processing.run("gdal:rasterize", {'INPUT': merge_output,
+                                                      'FIELD': "rasField",
+                                                      'BURN': 0,
+                                                      'USE_Z': False,
+                                                      'UNITS': 0,
+                                                      'WIDTH': raster_width,
+                                                      'HEIGHT': raster_height,
+                                                      'EXTENT': None,
+                                                      'NODATA': None,
+                                                      'OPTIONS': '',
+                                                      'DATA_TYPE': 5,
+                                                      'INIT': None,
+                                                      'INVERT': False,
+                                                      'EXTRA': '',
+                                                      'OUTPUT': rasOutput})
 
-            merge_df = gpd.read_file(mergeOutput)
-            merge_df["rasField"] = [1,2,3,4,5]
-            merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
-            # merge_df.to_file(mergeRasfield)
-            # mergelayer = workingDir + mergeRasfield
-            # finalMerge = workingDir + finalMerge
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-            # Convert countryLayer data to UTM CRS
-            self.convertCRS(countryLayer, UTM_crs)
-            shp_utm["rasField"] = [0]
-            shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
-            # shp_utm.to_file(countryUTMLayer)
+        if factor_no == 0:
+            self.dlg.PBT_status.setText("Processing Complete!")
+            self.dlg.PBT_status.repaint()
 
-            buffer = processing.run("native:buffer", {'INPUT': shp_utm_,
-                                             'DISTANCE': 2000,
-                                             'SEGMENTS': 5,
-                                             'END_CAP_STYLE': 0,
-                                             'JOIN_STYLE': 0,
-                                             'MITER_LIMIT': 2,
-                                             'DISSOLVE': True,
-                                             'SEPARATE_DISJOINT': False,
-                                             'OUTPUT': "memory:"})
+        elif factor_no == 1:
+            self.dlg.ETF_status.setText("Processing Complete!")
+            self.dlg.ETF_status.repaint()
 
-            buffer_output = buffer["OUTPUT"]
+        elif factor_no == 2:
+            self.dlg.JOB_status.setText("Processing Complete!")
+            self.dlg.JOB_status.repaint()
 
-            Difference = processing.run("native:difference", {'INPUT': buffer_output,
-                                                              'OVERLAY':merge_SA_UTM,
-                                                              'OUTPUT':"memory:",
-                                                              'GRID_SIZE':None})
+        elif factor_no == 3:
+            self.dlg.HEA_status.setText("Processing Complete!")
+            self.dlg.HEA_status.repaint()
 
-            diff_output = Difference["OUTPUT"]
+        elif factor_no == 4:
+            self.dlg.FIF_status.setText("Processing Complete!")
+            self.dlg.FIF_status.repaint()
 
-            Merge = processing.run("native:mergevectorlayers", {'LAYERS': [merge_SA_UTM, diff_output],
-                                                                'CRS': None,
-                                                                'OUTPUT': "memory:"})
+        elif factor_no == 5:
+            self.dlg.WTP_status.setText("Processing Complete!")
+            self.dlg.WTP_status.repaint()
 
-            merge_output = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            # layer = QgsVectorLayer(finalMerge, 'Polygon Layer', 'ogr')
-            extent = merge_output.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            if factor_no == 5:
-                Output_Folder = "WTP"
-                if os.path.exists(Output_Folder):
-                    os.chdir(Output_Folder)
-                else:
-                    os.mkdir(Output_Folder)
-                    os.chdir(Output_Folder)
-
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
-                styleFile = f"{rasOutput.split('.')[0]}.qml"
-            else:
-                pass
-
-            rasterize = processing.run("gdal:rasterize", {'INPUT': merge_output,
-                                                          'FIELD': "rasField",
-                                                          'BURN': 0,
-                                                          'USE_Z': False,
-                                                          'UNITS': 0,
-                                                          'WIDTH': raster_width,
-                                                          'HEIGHT': raster_height,
-                                                          'EXTENT': None,
-                                                          'NODATA': None,
-                                                          'OPTIONS': '',
-                                                          'DATA_TYPE': 5,
-                                                          'INIT': None,
-                                                          'INVERT': False,
-                                                          'EXTRA': '',
-                                                          'OUTPUT': rasOutput})
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-
-            QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
 
     def wtpAggregate(self):
+        self.dlg.WTPAGG_status.setText("")
+        self.dlg.WTPAGG_status.repaint()
         # OUTPUT
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
@@ -1743,7 +1742,8 @@ class GenderIndicatorTool:
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        QMessageBox.information(self.dlg, "Message", f"Processing Complete!")
+        self.dlg.WTPAGG_status.setText("Processing Complete!")
+        self.dlg.WTPAGG_status.repaint()
 
         os.chdir(workingDir)
 
@@ -3316,11 +3316,11 @@ class GenderIndicatorTool:
 
     # *************************** Aggregation Functions ************************************ #
     def indivdualAggregation(self):
+        self.dlg.individualAggregation_Check.setText("")
+        self.dlg.individualAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
-
-
 
         #INPUT
 
@@ -3344,7 +3344,6 @@ class GenderIndicatorTool:
 
         if weightingSum == 100:
             if "" in rasLayers:
-                self.dlg.individualAggregation_Check.setText("Factor layer/s missing")
                 missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
                 presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
 
@@ -3411,7 +3410,7 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                QMessageBox.information(self.dlg, "Message", f"Individual dimension aggregation complete!")
+                self.dlg.individualAggregation_Check.setText("Individual dimension aggregation complete!")
             else:
                 self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
         else:
@@ -3420,6 +3419,8 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def contextualAggregation(self):
+        self.dlg.contextualAggregation_Check.setText("")
+        self.dlg.contextualAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -3442,7 +3443,6 @@ class GenderIndicatorTool:
 
         if weightingSum == 100:
             if "" in rasLayers:
-                self.dlg.contextualAggregation_Check.setText("Factor layer/s missing")
                 missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
                 presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
 
@@ -3507,7 +3507,7 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                QMessageBox.information(self.dlg, "Message", f"Contextual dimension aggregation complete!")
+                self.dlg.contextualAggregation_Check.setText("Contextual dimension aggregation complete!")
             else:
                 self.dlg.contextualAggregation_Check.setText("Weighting % does not add up to 100 %")
 
@@ -3517,6 +3517,8 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def accessibiltyAggregation(self):
+        self.dlg.accessibilityAggregation_Check.setText("")
+        self.dlg.accessibilityAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -3547,7 +3549,6 @@ class GenderIndicatorTool:
 
         if weightingSum == 100:
             if "" in rasLayers:
-                self.dlg.accessibilityAggregation_Check.setText("Factor layer/s missing")
                 missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
                 presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
 
@@ -3627,15 +3628,17 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                QMessageBox.information(self.dlg, "Message", f"Accessibility dimension aggregation complete!")
+                self.dlg.accessibilityAggregation_Check.setText("Accessibility dimension aggregation complete!")
             else:
-                self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
+                self.dlg.accessibilityAggregation_Check.setText("Weighting % does not add up to 100 %")
         else:
-            self.dlg.individualAggregation_Check.setText("Weighting % does not add up to 100 %")
+            self.dlg.accessibilityAggregation_Check.setText("Weighting % does not add up to 100 %")
 
         os.chdir(workingDir)
 
     def placeCharacterizationAggregation(self):
+        self.dlg.placeCharacterizationAggregation_Check.setText("")
+        self.dlg.placeCharacterizationAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -3677,7 +3680,6 @@ class GenderIndicatorTool:
 
         if weightingSum == 100:
             if "" in rasLayers:
-                self.dlg.placeCharacterizationAggregation_Check.setText("Factor layer/s missing")
                 missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
                 presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
 
@@ -3776,16 +3778,17 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                QMessageBox.information(self.dlg, "Message", f"Place Characterization dimension aggregation complete!")
+                self.dlg.placeCharacterizationAggregation_Check.setText("Place Characterization dimension aggregation complete!")
             else:
                 self.dlg.placeCharacterizationAggregation_Check.setText("Weighting % does not add up to 100 %")
-
         else:
             self.dlg.placeCharacterizationAggregation_Check.setText("Weighting % does not add up to 100 %")
 
         os.chdir(workingDir)
 
     def dimesnionsAggregation(self):
+        self.dlg.dimensionAggregation_Check.setText("")
+        self.dlg.dimensionAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -3811,7 +3814,6 @@ class GenderIndicatorTool:
 
         if weightingSum == 100:
             if "" in rasLayers:
-                self.dlg.dimensionAggregation_Check.setText("Dimension layer/s missing")
                 missingLayers = [index for index, item in enumerate(rasLayers) if item == ""]
                 presentLayers = [index for index, item in enumerate(rasLayers) if item != ""]
 
@@ -3886,9 +3888,6 @@ class GenderIndicatorTool:
                 integer_list = [int(item) for item in factor_num]
                 sum_list = sum(integer_list)
                 Confidence = round(sum_list/21 * 100, 2)
-                
-
-
 
                 layer = QgsRasterLayer(aggregation, f"{aggregation}")
 
@@ -3897,7 +3896,7 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                QMessageBox.information(self.dlg, "Message", f"Dimensional aggregation complete! - Confidence: {sum_list}/21 factors used. ({Confidence} %)")
+                self.dlg.dimensionAggregation_Check.setText(f"Dimensional aggregation complete! - Confidence: {sum_list}/21 factors used. ({Confidence} %)")
             else:
                 self.dlg.dimensionAggregation_Check.setText("Weighting % does not add up to 100 %")
 
