@@ -3502,6 +3502,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QLabel" name="WLK_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>240</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_26">
       <attribute name="title">
@@ -3643,6 +3656,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QLabel" name="APT_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>180</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_27">
       <attribute name="title">
@@ -3751,6 +3777,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The raster is resampled to align with other output from other factors.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="SAF_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>120</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -4015,6 +4054,32 @@ p, li { white-space: pre-wrap; }
         <string/>
        </property>
       </widget>
+      <widget class="QLabel" name="SEC_status_3">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>200</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="SECAGG_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>320</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_29">
       <attribute name="title">
@@ -4160,6 +4225,19 @@ p, li { white-space: pre-wrap; }
          <x>100</x>
          <y>180</y>
          <width>221</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="INC_status_3">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>180</y>
+         <width>251</width>
          <height>20</height>
         </rect>
        </property>
@@ -4417,6 +4495,32 @@ p, li { white-space: pre-wrap; }
         <string/>
        </property>
       </widget>
+      <widget class="QLabel" name="ELC_status_3">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>180</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="ELCNTL_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>380</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
@@ -4525,6 +4629,19 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="LOU_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>120</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -4658,6 +4775,45 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;Data are then standardized scale of 0 to 5 using a linear scaling process, such that 5 represents areas where 100% of buildings have a footprint larger than 60 m&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#535353; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;, and 0 represents areas where no buildings have a footprint larger than 60m&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#535353; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;The default raster output filename does not need to be altered unless the user wishes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="QUH_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>180</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="QUH_status_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>210</y>
+         <width>341</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>WARNING: This is a computer intensive process.It may take a few</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="QUH_status_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>230</y>
+         <width>351</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>minutes to run and QGIS may freeze while processing.</string>
        </property>
       </widget>
      </widget>
@@ -5097,6 +5253,32 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Step 2: Aggregate Natural Disaster Risk&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QLabel" name="ENV_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>290</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="ENVAGG_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>410</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
       <zorder>label_127</zorder>
       <zorder>ENV_riskLevelField_CB</zorder>
       <zorder>label_128</zorder>
@@ -5114,6 +5296,8 @@ p, li { white-space: pre-wrap; }
       <zorder>label_133</zorder>
       <zorder>textEdit_40</zorder>
       <zorder>textEdit_32</zorder>
+      <zorder>ENV_status</zorder>
+      <zorder>ENVAGG_status</zorder>
      </widget>
      <widget class="QWidget" name="tab_30">
       <attribute name="title">
@@ -6164,6 +6348,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#535353;&quot;&gt;If data for a dimension is missing, the weighting of the remaining dimensions should be adjusted such that Place Characterization or Accessibility Dimensions are weighted double the Contextual or Individual Dimensions, and the weights still add up to 100%.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
+    <widget class="QLabel" name="FinalAggregation_Check">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>250</y>
+       <width>671</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab_25">
     <attribute name="title">
@@ -6213,7 +6410,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output 5&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Input 5 representing potential zones for renewable energy projects.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="WLK_Execute_PB_3">
+    <widget class="QPushButton" name="Insights_Execute_PB">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -6242,19 +6439,6 @@ p, li { white-space: pre-wrap; }
       <string notr="true"/>
      </property>
     </widget>
-    <widget class="QLabel" name="label_260">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>330</y>
-       <width>301</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Score Summary Metric</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_261">
      <property name="geometry">
       <rect>
@@ -6272,7 +6456,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>130</y>
+       <y>190</y>
        <width>201</width>
        <height>16</height>
       </rect>
@@ -6281,30 +6465,7 @@ p, li { white-space: pre-wrap; }
       <string>Aggregation Input Layer (Polygon)</string>
      </property>
     </widget>
-    <widget class="QgsFileWidget" name="WLK_Input_Field_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>231</width>
-       <height>31</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_263">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>190</y>
-       <width>251</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Location Input Layer (Point)</string>
-     </property>
-    </widget>
-    <widget class="QgsFileWidget" name="WLK_Input_Field_4">
+    <widget class="QgsFileWidget" name="Insights_Agg_Input_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -6314,17 +6475,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
     </widget>
-    <widget class="QComboBox" name="WTP_mode_CB_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>350</y>
-       <width>201</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_264">
+    <widget class="QLabel" name="label_263">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -6334,14 +6485,37 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="text">
-      <string>Potential RE Zones Input Layer (Raster)</string>
+      <string>Location Input Layer (Point)</string>
      </property>
     </widget>
-    <widget class="QgsFileWidget" name="WLK_Input_Field_5">
+    <widget class="QgsFileWidget" name="Insights_Points_Input_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>270</y>
+       <width>231</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_264">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>130</y>
+       <width>251</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Potential RE Zones Input Layer (Raster)</string>
+     </property>
+    </widget>
+    <widget class="QgsFileWidget" name="Insights_RE_Input_Field">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
        <width>231</width>
        <height>31</height>
       </rect>
@@ -6360,7 +6534,7 @@ p, li { white-space: pre-wrap; }
       <string>Score Input layer (Raster)</string>
      </property>
     </widget>
-    <widget class="QgsFileWidget" name="WLK_Input_Field_6">
+    <widget class="QgsFileWidget" name="Insights_Score_Input_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -6383,7 +6557,7 @@ p, li { white-space: pre-wrap; }
       <string>Population Input Layer (Raster)</string>
      </property>
     </widget>
-    <widget class="QgsFileWidget" name="WLK_Input_Field_7">
+    <widget class="QgsFileWidget" name="Insights_Population_Input_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -6393,27 +6567,17 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label_267">
+    <widget class="QLabel" name="Insights_status">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>390</y>
-       <width>301</width>
-       <height>16</height>
+       <x>90</x>
+       <y>510</y>
+       <width>281</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="text">
-      <string>Population Summary Metric</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="WTP_mode_CB_4">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>410</y>
-       <width>201</width>
-       <height>22</height>
-      </rect>
+      <string/>
      </property>
     </widget>
    </widget>
