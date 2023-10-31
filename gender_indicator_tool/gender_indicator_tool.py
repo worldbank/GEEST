@@ -3443,42 +3443,83 @@ class GenderIndicatorTool:
         aggregation = self.dlg.Insights_Agg_Input_Field.filePath()
         point_loc = self.dlg.Insights_Points_Input_Field.filePath()
 
-        # #Score Reclassify
-        # with rasterio.open(score) as src:
-        #     score_ras = src.read(1)
-        #     meta1 = src.meta
-        #
-        # # Raster Calculation
-        #
-        # result = 0*(score_ras<=0.5) + 1*(score_ras>0.5)*(score_ras<=1.5) + 2*(score_ras>1.5)*(score_ras<=2.5) + \
-        #          3*(score_ras>2.5)*(score_ras<=3.5) + 4*(score_ras>3.5)*(score_ras<=4.5) + 5*(score_ras>4.5)
-        #
-        # meta1.update(dtype=rasterio.float32)
-        #
-        # score_rec = f"{tempDir}/score_rec.tif"
-        # with rasterio.open(score_rec, 'w', **meta1) as dst:
-        #     dst.write(result, 1)
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+        tempResample = f"{tempDir}/tempResample.tif"
 
-
-        # Population Reclassify
-        with rasterio.open(population) as src:
-            pop_ras = src.read(1)
+        #Score Reclassify
+        with rasterio.open(score) as src:
+            score_ras = src.read(1)
             meta1 = src.meta
-
-            percentile_33 = np.percentile(pop_ras, 33)
-            percentile_66 = np.percentile(pop_ras, 66)
-
-            self.dlg.Insights_status.setText(f"33rd: {percentile_33}, 66th: {percentile_66}")
-            self.dlg.Insights_status.repaint()
 
         # Raster Calculation
 
-        result = 1*(pop_ras<=percentile_33) + 2*(pop_ras>percentile_33)*(pop_ras<=percentile_66) + 3*(pop_ras>percentile_66)
+        result = 0*(score_ras<=0.5) + 1*(score_ras>0.5)*(score_ras<=1.5) + 2*(score_ras>1.5)*(score_ras<=2.5) + \
+                 3*(score_ras>2.5)*(score_ras<=3.5) + 4*(score_ras>3.5)*(score_ras<=4.5) + 5*(score_ras>4.5)
 
+        meta1.update(dtype=rasterio.float32)
+
+        score_rec = f"{tempDir}/score_rec.tif"
+        with rasterio.open(score_rec, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        self.convertCRS(countryLayer, UTM_crs)
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': countryUTMLayerBuf})
+
+        # countryUTMLayerBuf = buffer["OUTPUT"]
+
+        CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+        country_extent = CountryBuf_df.total_bounds
+
+        processing.run("gdal:warpreproject", {
+            'INPUT': population,
+            'SOURCE_CRS': None,
+            'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'RESAMPLING': 0,
+            'NODATA': None,
+            'TARGET_RESOLUTION': pixelSize,
+            'OPTIONS': '',
+            'DATA_TYPE': 0,
+            'TARGET_EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+            'TARGET_EXTENT_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'MULTITHREADING': False,
+            'EXTRA': '',
+            'OUTPUT': tempResample})
+
+        # Population Reclassify
+        with rasterio.open(tempResample) as src:
+            pop_ras = src.read(1)
+            meta1 = src.meta
+
+            pop_ras[pop_ras == src.nodata] = 0
+
+        percentile_33 = np.percentile(pop_ras, 33)
+        percentile_66 = np.percentile(pop_ras, 66)
+
+        self.dlg.Insights_status.setText(f"33rd: {percentile_33}, 66th: {percentile_66}")
+        self.dlg.Insights_status.repaint()
+
+        # Raster Calculation
+
+        result = 1 * (pop_ras <= percentile_33) + 2 * (pop_ras > percentile_33) * (pop_ras <= percentile_66) + 3 * (pop_ras > percentile_66)
         meta1.update(dtype=rasterio.float32)
 
         pop_rec = f"{tempDir}/pop_rec.tif"
         with rasterio.open(pop_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
+
+        #Convert RE to vector and extract underlying reclassified raster values 
 
