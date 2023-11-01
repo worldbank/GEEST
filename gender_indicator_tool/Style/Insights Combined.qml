@@ -29,7 +29,7 @@
             <Option name="type" type="QString" value="collection"/>
           </Option>
         </data_defined_properties>
-        <layer locked="0" id="{dcc3eec4-255f-492e-bb00-e0127b09c0b0}" enabled="1" class="SimpleLine" pass="0">
+        <layer locked="0" id="{4715ee03-9525-4c8e-b1a6-8cc609cac99b}" enabled="1" class="SimpleLine" pass="0">
           <Option type="Map">
             <Option name="align_dash_pattern" type="QString" value="0"/>
             <Option name="capstyle" type="QString" value="square"/>
@@ -41,7 +41,7 @@
             <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
             <Option name="draw_inside_polygon" type="QString" value="0"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
-            <Option name="line_color" type="QString" value="183,72,75,255"/>
+            <Option name="line_color" type="QString" value="152,125,183,255"/>
             <Option name="line_style" type="QString" value="solid"/>
             <Option name="line_width" type="QString" value="0.6"/>
             <Option name="line_width_unit" type="QString" value="MM"/>
@@ -78,17 +78,17 @@
             <Option name="type" type="QString" value="collection"/>
           </Option>
         </data_defined_properties>
-        <layer locked="0" id="{0cb2f0e0-c6a4-4cc3-b280-bb2a300c8b62}" enabled="1" class="SimpleFill" pass="0">
+        <layer locked="0" id="{370b4b98-88b6-4c97-b6f0-7f7f189dc122}" enabled="1" class="SimpleFill" pass="0">
           <Option type="Map">
             <Option name="border_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
-            <Option name="color" type="QString" value="183,72,75,255"/>
+            <Option name="color" type="QString" value="152,125,183,255"/>
             <Option name="joinstyle" type="QString" value="bevel"/>
             <Option name="offset" type="QString" value="0,0"/>
             <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
             <Option name="offset_unit" type="QString" value="MM"/>
-            <Option name="outline_color" type="QString" value="131,51,54,255"/>
-            <Option name="outline_style" type="QString" value="solid"/>
-            <Option name="outline_width" type="QString" value="0.2"/>
+            <Option name="outline_color" type="QString" value="35,35,35,255"/>
+            <Option name="outline_style" type="QString" value="no"/>
+            <Option name="outline_width" type="QString" value="0.26"/>
             <Option name="outline_width_unit" type="QString" value="MM"/>
             <Option name="style" type="QString" value="solid"/>
           </Option>
@@ -108,8 +108,7 @@
       <Option name="WMSBackgroundLayer" type="bool" value="false"/>
       <Option name="WMSPublishDataSourceUrl" type="bool" value="false"/>
       <Option name="embeddedWidgets/count" type="int" value="0"/>
-      <Option name="variableNames" type="invalid"/>
-      <Option name="variableValues" type="invalid"/>
+      <Option name="identify/format" type="QString" value="Value"/>
     </Option>
   </customproperties>
   <mapTip enabled="1"></mapTip>
@@ -135,11 +134,21 @@
         <stdDevFactor>2</stdDevFactor>
       </minMaxOrigin>
       <colorPalette>
-        <paletteEntry color="#ef5911" alpha="255" value="1" label="Very low enablement"/>
-        <paletteEntry color="#e2dc38" alpha="255" value="2" label="Low enablement"/>
-        <paletteEntry color="#48f882" alpha="255" value="3" label="Moderately enabling"/>
-        <paletteEntry color="#3e9cfe" alpha="255" value="4" label="Enabling"/>
-        <paletteEntry color="#30123b" alpha="255" value="5" label="Highly enabling"/>
+        <paletteEntry color="#ff927f" alpha="255" value="1" label="Very low enablement, low population"/>
+        <paletteEntry color="#e55339" alpha="255" value="2" label="Very low enablement, medium population"/>
+        <paletteEntry color="#9a1700" alpha="255" value="3" label="Very low enablement, high population"/>
+        <paletteEntry color="#ffc37f" alpha="255" value="4" label="Low enablement, low population"/>
+        <paletteEntry color="#ff9d3a" alpha="255" value="5" label="Low enablement, medium population"/>
+        <paletteEntry color="#ff6f00" alpha="255" value="6" label="Low enablement, high population"/>
+        <paletteEntry color="#feffb2" alpha="255" value="7" label="Moderately enabling, low population"/>
+        <paletteEntry color="#e8e96f" alpha="255" value="8" label="Moderately enabling, medium population"/>
+        <paletteEntry color="#dbcd02" alpha="255" value="9" label="Moderately enabling, high population"/>
+        <paletteEntry color="#b4e1a7" alpha="255" value="10" label="Enabling, low population"/>
+        <paletteEntry color="#63a449" alpha="255" value="11" label="Enabling, medium population"/>
+        <paletteEntry color="#346b00" alpha="255" value="12" label="Enabling, high population"/>
+        <paletteEntry color="#8be7fe" alpha="255" value="13" label="Highly enabling, low population"/>
+        <paletteEntry color="#00accd" alpha="255" value="14" label="Highly enabling, medium population"/>
+        <paletteEntry color="#007bd9" alpha="255" value="15" label="Highly enabling, high population"/>
       </colorPalette>
       <colorramp name="[source]" type="gradient">
         <Option type="Map">

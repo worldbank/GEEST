@@ -41,6 +41,8 @@ import shutil
 import time
 import logging
 import ast
+from rasterio.mask import mask
+from rasterio.features import geometry_mask
 
 # Prepare processing framework
 sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
@@ -391,7 +393,9 @@ class GenderIndicatorTool:
         self.dlg.Dimensions_AggregateExecute_PB.clicked.connect(self.dimesnionsAggregation)
 
         ## TAB 7 - Insights ************************************************************************
-        self.dlg.Insights_Execute_PB.clicked.connect(self.reclassify)
+        self.dlg.RE_Execute_PB.clicked.connect(self.REinsights)
+        self.dlg.Aggregation_Execute_PB.clicked.connect(self.Aggregationinsights)
+        self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
 
     def getFile(self, button_num):
         response = QFileDialog.getOpenFileName(
@@ -3420,14 +3424,20 @@ class GenderIndicatorTool:
 
     # *************************** Insights Tab Functions *********************************** #
 
-    def reclassify(self):
+    def REinsights(self):
         # self.dlg.individualAggregation_Check.setText("")
         # self.dlg.individualAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
-        tempDir = f"temp"
-        os.chdir(workingDir)
 
+        os.chdir(workingDir)
+        Insights_folder = "Insights"
+        if os.path.exists(Insights_folder):
+            pass
+        else:
+            os.mkdir(Insights_folder)
+
+        tempDir = f"temp"
         if os.path.exists(tempDir):
             shutil.rmtree(tempDir)
         else:
@@ -3446,8 +3456,13 @@ class GenderIndicatorTool:
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
+
+
+        #OUTPUT
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
-        tempResample = f"{tempDir}/tempResample.tif"
+        PoptempResample = f"{tempDir}/PoptempResample.tif"
+        REtempResample = f"{tempDir}/REtempResample.tif"
+        OUTPUT = f"{tempDir}/OUTPUT.shp"
 
         #Score Reclassify
         with rasterio.open(score) as src:
@@ -3461,9 +3476,15 @@ class GenderIndicatorTool:
 
         meta1.update(dtype=rasterio.float32)
 
-        score_rec = f"{tempDir}/score_rec.tif"
+        score_rec = f"{workingDir}{Insights_folder}/Score_reclassified.tif"
         with rasterio.open(score_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{score_rec.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
         self.convertCRS(countryLayer, UTM_crs)
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
@@ -3496,30 +3517,299 @@ class GenderIndicatorTool:
             'TARGET_EXTENT_CRS': QgsCoordinateReferenceSystem(UTM_crs),
             'MULTITHREADING': False,
             'EXTRA': '',
-            'OUTPUT': tempResample})
+            'OUTPUT': PoptempResample})
 
         # Population Reclassify
-        with rasterio.open(tempResample) as src:
+        with rasterio.open(PoptempResample) as src:
             pop_ras = src.read(1)
             meta1 = src.meta
 
             pop_ras[pop_ras == src.nodata] = 0
+            masked_raster = np.ma.masked_where(pop_ras == 0, pop_ras)
 
-        percentile_33 = np.percentile(pop_ras, 33)
-        percentile_66 = np.percentile(pop_ras, 66)
+        percentile_33 = np.percentile(masked_raster.compressed(), 25)
+        percentile_66 = np.percentile(masked_raster.compressed(), 75)
+        # percentile_33 = np.percentile(pop_ras, 33)
+        # percentile_66 = np.percentile(pop_ras, 66)
 
-        self.dlg.Insights_status.setText(f"33rd: {percentile_33}, 66th: {percentile_66}")
-        self.dlg.Insights_status.repaint()
+        # self.dlg.Insights_status.setText(f"33rd: {percentile_33}, 66th: {percentile_66}")
+        # self.dlg.Insights_status.repaint()
 
         # Raster Calculation
 
         result = 1 * (pop_ras <= percentile_33) + 2 * (pop_ras > percentile_33) * (pop_ras <= percentile_66) + 3 * (pop_ras > percentile_66)
         meta1.update(dtype=rasterio.float32)
 
-        pop_rec = f"{tempDir}/pop_rec.tif"
+        pop_rec = f"{workingDir}{Insights_folder}/Population_reclassified.tif"
         with rasterio.open(pop_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
+        styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{pop_rec.split('.')[0]}.qml"
 
-        #Convert RE to vector and extract underlying reclassified raster values 
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+        # Combine Population and Score Reclassify
+
+        with rasterio.open(score_rec) as src:
+            score_rec_ras = src.read(1)
+            meta1 = src.meta
+
+        with rasterio.open(pop_rec) as src:
+            pop_rec_ras = src.read(1)
+
+        # Raster Calculation
+
+        result =\
+        1 * (score_rec_ras == 1) * (pop_rec_ras == 1) + \
+        2 * (score_rec_ras == 2) * (pop_rec_ras == 1) + \
+        3 * (score_rec_ras == 3) * (pop_rec_ras == 1) + \
+        4 * (score_rec_ras == 4) * (pop_rec_ras == 1) + \
+        5 * (score_rec_ras == 5) * (pop_rec_ras == 1) + \
+        6 * (score_rec_ras == 1) * (pop_rec_ras == 2) + \
+        7 * (score_rec_ras == 2) * (pop_rec_ras == 2) + \
+        8 * (score_rec_ras == 3) * (pop_rec_ras == 2) + \
+        9 * (score_rec_ras == 4) * (pop_rec_ras == 2) + \
+        10 * (score_rec_ras == 5) * (pop_rec_ras == 2) + \
+        11 * (score_rec_ras == 1) * (pop_rec_ras == 3) + \
+        12 * (score_rec_ras == 2) * (pop_rec_ras == 3) + \
+        13 * (score_rec_ras == 3) * (pop_rec_ras == 3) + \
+        14 * (score_rec_ras == 4) * (pop_rec_ras == 3) + \
+        15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
+
+
+
+        meta1.update(dtype=rasterio.float32)
+
+        combined_rec = f"{workingDir}{Insights_folder}/Combine.tif"
+        with rasterio.open(combined_rec, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{combined_rec.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        self.dlg.Insights_Agg_Input_Field.setFilePath(f"{combined_rec}")
+        self.dlg.Insights_Buf_Input_Field.setFilePath(f"{combined_rec}")
+
+
+
+        processing.run("gdal:warpreproject", {
+            'INPUT': re_zones,
+            'SOURCE_CRS': None,
+            'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'RESAMPLING': 0,
+            'NODATA': None,
+            'TARGET_RESOLUTION': pixelSize,
+            'OPTIONS': '',
+            'DATA_TYPE': 0,
+            'TARGET_EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+            'TARGET_EXTENT_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'MULTITHREADING': False,
+            'EXTRA': '',
+            'OUTPUT': REtempResample})
+
+        # Reclassified rasters join to RE zones
+
+        with rasterio.open(score_rec) as src:
+            score_rec_ras = src.read(1)
+            meta1 = src.meta
+
+        with rasterio.open(pop_rec) as src:
+            pop_rec_ras = src.read(1)
+
+        with rasterio.open(combined_rec) as src:
+            combined_rec_ras = src.read(1)
+
+        with rasterio.open(REtempResample) as src:
+            re_zones = src.read(1)
+            re_zones[re_zones == src.nodata] = 0
+
+        # Raster Calculation
+
+        result_score = score_rec_ras * re_zones
+        result_pop = pop_rec_ras * re_zones
+        result_combined = combined_rec_ras * re_zones
+
+        meta1.update(dtype=rasterio.float32)
+
+
+       #########################################################
+        score_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Score.tif"
+        with rasterio.open(score_RE, 'w', **meta1) as dst:
+            dst.write(result_score, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{score_RE.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        layer1 = QgsRasterLayer(score_RE, f"{self.dlg.RE_Output_Field.text()}Score")
+        QgsProject.instance().addMapLayer(layer1)
+
+        ############################################################
+        pop_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Population.tif"
+        with rasterio.open(pop_RE, 'w', **meta1) as dst:
+            dst.write(result_pop, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{pop_RE.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        layer2 = QgsRasterLayer(pop_RE, f"{self.dlg.RE_Output_Field.text()}Population")
+        QgsProject.instance().addMapLayer(layer2)
+
+        ##################################################################
+        combined_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Combine.tif"
+        with rasterio.open(combined_RE, 'w', **meta1) as dst:
+            dst.write(result_combined, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{combined_RE.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        layer3 = QgsRasterLayer(combined_RE, f"{self.dlg.RE_Output_Field.text()}Combine")
+        QgsProject.instance().addMapLayer(layer3)
+
+
+    def Aggregationinsights(self):
+        # self.dlg.individualAggregation_Check.setText("")
+        # self.dlg.individualAggregation_Check.repaint()
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+
+        os.chdir(workingDir)
+        Insights_folder = "Insights"
+        if os.path.exists(Insights_folder):
+            pass
+        else:
+            os.mkdir(Insights_folder)
+
+        tempDir = f"temp"
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # INPUT
+        insights_raster = self.dlg.Insights_Agg_Input_Field.filePath()
+        aggregation_polygon = self.dlg.Insights_Polygon_Input_Field.filePath()
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+
+        # TEMP OUTPUT
+        aggregation_polygon_utm = f"{tempDir}/aggregation_polygon_utm.shp"
+
+        self.convertCRS(aggregation_polygon, UTM_crs)
+        shp_utm.to_file(aggregation_polygon_utm)
+
+        shpOutput = f"{workingDir}{Insights_folder}/" + self.dlg.AGG_Output_Field.text() + ".shp"
+
+        processing.run("native:zonalstatisticsfb", {'INPUT': QgsProcessingFeatureSourceDefinition(aggregation_polygon_utm,
+                                                    selectedFeaturesOnly=False, featureLimit=-1,
+                                                    flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
+                                                    geometryCheck=QgsFeatureRequest.GeometrySkipInvalid),
+                                                    'INPUT_RASTER': insights_raster,
+                                                    'RASTER_BAND': 1, 'COLUMN_PREFIX': '_', 'STATISTICS': [9],
+                                                    'OUTPUT': shpOutput})
+
+        styleTemplate = f"{current_script_path}\Style\Insights Aggregation.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{self.dlg.AGG_Output_Field.text()}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        layer = QgsVectorLayer(shpOutput, f"{self.dlg.AGG_Output_Field.text()}")
+        QgsProject.instance().addMapLayer(layer)
+
+        
+    def Bufferinsights(self):
+        # self.dlg.individualAggregation_Check.setText("")
+        # self.dlg.individualAggregation_Check.repaint()
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+
+        os.chdir(workingDir)
+        Insights_folder = "Insights"
+        if os.path.exists(Insights_folder):
+            pass
+        else:
+            os.mkdir(Insights_folder)
+
+        tempDir = f"temp"
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # INPUT
+        insights_raster = self.dlg.Insights_Buf_Input_Field.filePath()
+        location_point = self.dlg.Insights_Points_Input_Field.filePath()
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+
+        # TEMP OUTPUT
+        adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
+        location_point_utm = f"{tempDir}/aggregation_polygon_utm.shp"
+        location_buffer = f"{tempDir}/location_buffer.shp"
+        location_buffer_clip = f"{tempDir}/location_buffer_clip.shp"
+
+        self.convertCRS(countryLayer, UTM_crs)
+        shp_utm.to_file(adminUTMLayer)
+
+        self.convertCRS(location_point, UTM_crs)
+        location_point_utm = QgsVectorLayer(shp_utm.to_json(), "location_point_utm", "ogr")
+
+
+        processing.run("native:buffer", {'INPUT': location_point_utm,
+                                         'DISTANCE': 10000,
+                                         'SEGMENTS': 5,
+                                         'END_CAP_STYLE': 0,
+                                         'JOIN_STYLE': 0,
+                                         'MITER_LIMIT': 2,
+                                         'DISSOLVE': False,
+                                         'SEPARATE_DISJOINT': False,
+                                         'OUTPUT': location_buffer})
+
+        processing.run("native:clip", {'INPUT': location_buffer,
+                                       'OVERLAY': QgsProcessingFeatureSourceDefinition(adminUTMLayer,
+                                                    selectedFeaturesOnly=False, featureLimit=-1,
+                                                    flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
+                                                    geometryCheck=QgsFeatureRequest.GeometrySkipInvalid),
+                                       'OUTPUT': location_buffer_clip})
+
+        shpOutput = f"{workingDir}{Insights_folder}/" + self.dlg.Buffer_Output_Field.text() + ".shp"
+
+        processing.run("native:zonalstatisticsfb",{'INPUT': QgsProcessingFeatureSourceDefinition(location_buffer_clip,
+                                                              selectedFeaturesOnly=False, featureLimit=-1,
+                                                              flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
+                                                              geometryCheck=QgsFeatureRequest.GeometrySkipInvalid),
+                                                    'INPUT_RASTER': insights_raster,
+                                                    'RASTER_BAND': 1,
+                                                    'COLUMN_PREFIX': '_',
+                                                    'STATISTICS': [9],
+                                                    'OUTPUT': shpOutput})
+
+        styleTemplate = f"{current_script_path}\Style\Insights Buffer Aggregation.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{self.dlg.Buffer_Output_Field.text()}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        layer = QgsVectorLayer(shpOutput, f"{self.dlg.Buffer_Output_Field.text()}")
+        QgsProject.instance().addMapLayer(layer)

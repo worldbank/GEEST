@@ -23,8 +23,50 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
+   <widget class="QWidget" name="tab_33">
+    <attribute name="title">
+     <string>About</string>
+    </attribute>
+    <widget class="QTextEdit" name="textEdit_22">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>771</width>
+       <height>551</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;About&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Heading 1&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Heading 2&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.This tab allows the user to aggregate and summarize the previously created outputs to a spatial scale of interest, and allows the user to consider scores in relation to population distribution as well as RE project locations.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">
      <string>Setup</string>
@@ -6410,11 +6452,11 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output 5&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Input 5 representing potential zones for renewable energy projects.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="Insights_Execute_PB">
+    <widget class="QPushButton" name="RE_Execute_PB">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>510</y>
+       <x>220</x>
+       <y>180</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -6423,17 +6465,17 @@ p, li { white-space: pre-wrap; }
       <string>Excute</string>
      </property>
     </widget>
-    <widget class="QgsFilterLineEdit" name="WLK_Output_Field_3">
+    <widget class="QgsFilterLineEdit" name="RE_Output_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>480</y>
+       <y>180</y>
        <width>201</width>
        <height>21</height>
       </rect>
      </property>
      <property name="text">
-      <string>Insights_</string>
+      <string>RE_</string>
      </property>
      <property name="qgisRelation" stdset="0">
       <string notr="true"/>
@@ -6443,20 +6485,20 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>460</y>
+       <y>160</y>
        <width>231</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Output prefix</string>
+      <string>Output RE Raster File</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_262">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>190</y>
+       <y>280</y>
        <width>201</width>
        <height>16</height>
       </rect>
@@ -6465,11 +6507,11 @@ p, li { white-space: pre-wrap; }
       <string>Aggregation Input Layer (Polygon)</string>
      </property>
     </widget>
-    <widget class="QgsFileWidget" name="Insights_Agg_Input_Field">
+    <widget class="QgsFileWidget" name="Insights_Polygon_Input_Field">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>210</y>
+       <y>300</y>
        <width>231</width>
        <height>31</height>
       </rect>
@@ -6479,7 +6521,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>250</y>
+       <y>450</y>
        <width>251</width>
        <height>16</height>
       </rect>
@@ -6492,7 +6534,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>270</y>
+       <y>470</y>
        <width>231</width>
        <height>31</height>
       </rect>
@@ -6502,7 +6544,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>130</y>
+       <y>110</y>
        <width>251</width>
        <height>16</height>
       </rect>
@@ -6515,7 +6557,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>150</y>
+       <y>130</y>
        <width>231</width>
        <height>31</height>
       </rect>
@@ -6548,7 +6590,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>70</y>
+       <y>60</y>
        <width>251</width>
        <height>16</height>
       </rect>
@@ -6561,23 +6603,140 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>90</y>
+       <y>80</y>
        <width>231</width>
        <height>31</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="Insights_status">
+    <widget class="QPushButton" name="Aggregation_Execute_PB">
      <property name="geometry">
       <rect>
-       <x>90</x>
-       <y>510</y>
-       <width>281</width>
-       <height>20</height>
+       <x>220</x>
+       <y>350</y>
+       <width>75</width>
+       <height>23</height>
       </rect>
      </property>
      <property name="text">
-      <string/>
+      <string>Excute</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_267">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>330</y>
+       <width>231</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Output Aggregated File (Polygon)</string>
+     </property>
+    </widget>
+    <widget class="QgsFilterLineEdit" name="AGG_Output_Field">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>350</y>
+       <width>201</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Aggregation_</string>
+     </property>
+     <property name="qgisRelation" stdset="0">
+      <string notr="true"/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Buffer_Execute_PB">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>520</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Excute</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_268">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>500</y>
+       <width>231</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Output buffer Raster File (Raster)</string>
+     </property>
+    </widget>
+    <widget class="QgsFilterLineEdit" name="Buffer_Output_Field">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>520</y>
+       <width>201</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Location_10km_Buffer_</string>
+     </property>
+     <property name="qgisRelation" stdset="0">
+      <string notr="true"/>
+     </property>
+    </widget>
+    <widget class="QgsFileWidget" name="Insights_Agg_Input_Field">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>250</y>
+       <width>231</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_269">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>230</y>
+       <width>321</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Insights Input Layer (Raster)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_270">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>400</y>
+       <width>321</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Insights Input Layer (Raster)</string>
+     </property>
+    </widget>
+    <widget class="QgsFileWidget" name="Insights_Buf_Input_Field">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>420</y>
+       <width>231</width>
+       <height>31</height>
+      </rect>
      </property>
     </widget>
    </widget>
