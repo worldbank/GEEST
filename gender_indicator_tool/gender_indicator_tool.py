@@ -3413,7 +3413,7 @@ class GenderIndicatorTool:
 
                 QgsProject.instance().addMapLayer(layer)
 
-                self.dlg.dimensionAggregation_Check.setText(f"Dimensional aggregation complete! - Confidence: {sum_list}/21 factors used. ({Confidence} %)")
+                self.dlg.FinalAggregation_Check.setText(f"Dimensional aggregation complete! - Confidence: {sum_list}/21 factors used. ({Confidence} %)")
             else:
                 self.dlg.dimensionAggregation_Check.setText("Weighting % does not add up to 100 %")
 
@@ -3563,19 +3563,19 @@ class GenderIndicatorTool:
 
         result =\
         1 * (score_rec_ras == 1) * (pop_rec_ras == 1) + \
-        2 * (score_rec_ras == 2) * (pop_rec_ras == 1) + \
-        3 * (score_rec_ras == 3) * (pop_rec_ras == 1) + \
-        4 * (score_rec_ras == 4) * (pop_rec_ras == 1) + \
-        5 * (score_rec_ras == 5) * (pop_rec_ras == 1) + \
-        6 * (score_rec_ras == 1) * (pop_rec_ras == 2) + \
-        7 * (score_rec_ras == 2) * (pop_rec_ras == 2) + \
+        2 * (score_rec_ras == 1) * (pop_rec_ras == 2) + \
+        3 * (score_rec_ras == 1) * (pop_rec_ras == 3) + \
+        4 * (score_rec_ras == 2) * (pop_rec_ras == 1) + \
+        5 * (score_rec_ras == 2) * (pop_rec_ras == 2) + \
+        6 * (score_rec_ras == 2) * (pop_rec_ras == 3) + \
+        7 * (score_rec_ras == 3) * (pop_rec_ras == 1) + \
         8 * (score_rec_ras == 3) * (pop_rec_ras == 2) + \
-        9 * (score_rec_ras == 4) * (pop_rec_ras == 2) + \
-        10 * (score_rec_ras == 5) * (pop_rec_ras == 2) + \
-        11 * (score_rec_ras == 1) * (pop_rec_ras == 3) + \
-        12 * (score_rec_ras == 2) * (pop_rec_ras == 3) + \
-        13 * (score_rec_ras == 3) * (pop_rec_ras == 3) + \
-        14 * (score_rec_ras == 4) * (pop_rec_ras == 3) + \
+        9 * (score_rec_ras == 3) * (pop_rec_ras == 3) + \
+        10 * (score_rec_ras == 4) * (pop_rec_ras == 1) + \
+        11 * (score_rec_ras == 4) * (pop_rec_ras == 2) + \
+        12 * (score_rec_ras == 4) * (pop_rec_ras == 3) + \
+        13 * (score_rec_ras == 5) * (pop_rec_ras == 1) + \
+        14 * (score_rec_ras == 5) * (pop_rec_ras == 2) + \
         15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
 
 
