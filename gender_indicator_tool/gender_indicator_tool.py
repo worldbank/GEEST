@@ -2694,7 +2694,7 @@ class GenderIndicatorTool:
         scoredRisks = f"{workingDir}/{tempDir}/Scored_risks.shp"
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 3,
+                                                  'DISTANCE': 2000,
                                                   'SEGMENTS': 5,
                                                   'END_CAP_STYLE': 0,
                                                   'JOIN_STYLE': 0,
@@ -2732,7 +2732,7 @@ class GenderIndicatorTool:
         mergeOutput = Merge["OUTPUT"]
 
         # Get the width and height of the extent
-        extent = mergeOutput.extent()
+        extent = countryUTMLayerBuf.extent()
         raster_width = int(extent.width() / pixelSize)
         raster_height = int(extent.height() / pixelSize)
 
@@ -3594,6 +3594,9 @@ class GenderIndicatorTool:
 
         self.dlg.Insights_Agg_Input_Field.setFilePath(f"{combined_rec}")
         self.dlg.Insights_Buf_Input_Field.setFilePath(f"{combined_rec}")
+
+        layer0 = QgsRasterLayer(combined_rec, f"Combine")
+        QgsProject.instance().addMapLayer(layer0)
 
 
 

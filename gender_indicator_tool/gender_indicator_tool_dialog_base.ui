@@ -3342,7 +3342,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
@@ -6183,58 +6183,6 @@ p, li { white-space: pre-wrap; }
      </property>
      <property name="text">
       <string>Weighting</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_89">
-     <property name="geometry">
-      <rect>
-       <x>520</x>
-       <y>70</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>1/6 (16,67%)</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_91">
-     <property name="geometry">
-      <rect>
-       <x>520</x>
-       <y>130</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>1/3 (33,33%)</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_92">
-     <property name="geometry">
-      <rect>
-       <x>520</x>
-       <y>100</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>1/3 (33,33%)</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_90">
-     <property name="geometry">
-      <rect>
-       <x>520</x>
-       <y>40</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>1/6 (16,67%)</string>
      </property>
     </widget>
     <widget class="QDoubleSpinBox" name="ID_Aggregate_SB">
