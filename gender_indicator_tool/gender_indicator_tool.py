@@ -1498,9 +1498,7 @@ class GenderIndicatorTool:
 
         #OUTPUT
         SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
-        # mergeOutput = f"{tempDir}/{}.shp"
-
-
+        temp_merge = f"{tempDir}/temp_merge.shp"
 
         gdf = gpd.read_file(FaciltyPointlayer)
 
@@ -1510,7 +1508,7 @@ class GenderIndicatorTool:
         for i in range(0, len(gdf), subset_size):
             subset = gdf.iloc[i:i + subset_size]
             subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
-            subset_outfile = f"{tempDir}/SA_subset_{i + subset_size}.shp"
+            subset_outfile = f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
 
 
             Service_Area = processing.run("ORS Tools:isochrones_from_layer", {'INPUT_PROVIDER': 0,
@@ -1532,8 +1530,11 @@ class GenderIndicatorTool:
                                                             'CRS': QgsCoordinateReferenceSystem(UTM_crs),
                                                             'OUTPUT': SAOutput_utm})
 
+
         time.sleep(0.5)
 
+        # self.convertCRS(SAOutput_utm, UTM_crs)
+        # SA_df = shp_utm
         SA_df = gpd.read_file(SAOutput_utm)
         no_spaces_string = "".join(ranges.split())
         ranges_list = no_spaces_string.split(",")
@@ -1545,19 +1546,19 @@ class GenderIndicatorTool:
         for i in int_ranges_list:
             range_subset = SA_df[SA_df[ranges_field] == i]
             range_subset = QgsVectorLayer(range_subset.to_json(), f"range_{i}", "ogr")
+            temp_out = f"{tempDir}/{rasOutput[:-4]}Range_dis_{i}.shp"
 
             dissolve = processing.run("native:dissolve", {'INPUT': range_subset,
                                                           'FIELD':[],
                                                           'SEPARATE_DISJOINT':False,
-                                                          'OUTPUT':"memory:"})
+                                                          'OUTPUT':temp_out})
 
             Range_output = dissolve["OUTPUT"]
 
             range_subsets.append(range_subset)
 
         Merge_list = []
-        len_range = len(range_subsets)
-        # int_ranges_list.sort(reverse=True)
+
         for i in range(-1, -len(range_subsets), -1):
             output = f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
             # Merge_list.append(output)
@@ -1592,16 +1593,18 @@ class GenderIndicatorTool:
 
         Merge = processing.run("native:mergevectorlayers", {'LAYERS': Merge_list,
                                                             'CRS':None,
-                                                            'OUTPUT':mergeOutput})
+                                                            'OUTPUT':f"{mergeOutput}"})
 
 
-        merge_df = gpd.read_file(mergeOutput)
+        merge_df = gpd.read_file(f"{mergeOutput}")
         merge_df["rasField"] = [1,2,3,4,5]
         merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
-        # merge_df.to_file(mergeRasfield)
-        # mergelayer = workingDir + mergeRasfield
-        # finalMerge = workingDir + finalMerge
 
+#################################
+        # merge_df.to_file(temp)
+        # # mergelayer = workingDir + mergeRasfield
+        # # finalMerge = workingDir + finalMerge
+        #
         # Convert countryLayer data to UTM CRS
         self.convertCRS(countryLayer, UTM_crs)
         shp_utm["rasField"] = [0]
@@ -1634,7 +1637,8 @@ class GenderIndicatorTool:
         merge_output = Merge["OUTPUT"]
 
         # Get the width and height of the extent
-        # layer = QgsVectorLayer(finalMerge, 'Polygon Layer', 'ogr')
+        # merge_output_df = gpd.read_file(temp_merge)
+        # merge_output = QgsVectorLayer(merge_output_df.to_json(), 'Polygon Layer', 'ogr')
         extent = merge_output.extent()
         raster_width = int(extent.width() / pixelSize)
         raster_height = int(extent.height() / pixelSize)
