@@ -3629,7 +3629,13 @@ class GenderIndicatorTool:
 
         with rasterio.open(REtempResample) as src:
             re_zones = src.read(1)
+
+            # Set all non-nodata values to 1
+            # re_zones[re_zones != src.nodata] = 1
+
             re_zones[re_zones == src.nodata] = 0
+
+
 
         # Raster Calculation
 
