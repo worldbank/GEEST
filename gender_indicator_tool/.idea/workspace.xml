@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6cb757d1-568a-4654-a1b5-6b1cabd8e249" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../WBGIT_Tool_User_Manual_V1.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../gender_indicator_tool.zip" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gender_indicator_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/gender_indicator_tool.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gender_indicator_tool_dialog_base.ui" beforeDir="false" afterPath="$PROJECT_DIR$/gender_indicator_tool_dialog_base.ui" afterDir="false" />
