@@ -1523,6 +1523,31 @@ class GenderIndicatorTool:
                                                                               'OUTPUT': subset_outfile})
             subsets.append(subset_outfile)
 
+            batch = i + subset_size
+
+            if batch > len(gdf):
+                batch = len(gdf)
+
+            if factor_no == 0:
+                self.dlg.PBT_status.setText(f"Processing... {batch} of {len(gdf)}")
+                self.dlg.PBT_status.repaint()
+            elif factor_no == 1:
+                self.dlg.ETF_status.setText(f"Processing... {batch} of {len(gdf)}")
+                self.dlg.ETF_status.repaint()
+            elif factor_no == 2:
+                self.dlg.JOB_status.setText(f"Processing... {batch} of {len(gdf)}")
+                self.dlg.JOB_status.repaint()
+            elif factor_no == 3:
+                self.dlg.HEA_status.setText(f"Processing... {batch} of {len(gdf)}")
+                self.dlg.HEA_status.repaint()
+            elif factor_no == 4:
+                self.dlg.FIF_status.setText(f"Processing... {batch} of {len(gdf)}")
+                self.dlg.FIF_status.repaint()
+            elif factor_no == 5:
+                self.dlg.WTP_status.setText(f"Processing... {batch} of {len(gdf)}")
+                self.dlg.WTP_status.repaint()
+
+
 
 
         Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
@@ -3019,6 +3044,8 @@ class GenderIndicatorTool:
                 styleFile = f"{aggregation.split('.')[0]}.qml"
 
                 shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                time.sleep(1)
 
                 layer = QgsRasterLayer(aggregation, f"{aggregation}")
 

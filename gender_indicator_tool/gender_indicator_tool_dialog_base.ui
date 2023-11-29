@@ -269,7 +269,7 @@ p, li { white-space: pre-wrap; }
     </widget>
     <widget class="QTextEdit" name="textEdit">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -288,13 +288,16 @@ p, li { white-space: pre-wrap; }
      <property name="lineWidth">
       <number>1</number>
      </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
      <property name="html">
       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Setup&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;In this tab, the user must: &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Set  the output directory. The output directory must be created by the user prior to setup and it is where all outputs from the tool will be stored; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;2)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Locate the boundary layer of the administrative level of analysis. The boundary layer must be in vector format (.shp); &lt;/span&gt;&lt;/p&gt;
@@ -446,7 +449,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_9">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -459,13 +462,16 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Education&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:24pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the percentage of women who have achieved a post-secondary education in the country of interest.   &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;_Hlk146891458&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;I&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;nput&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A Polygon layer (.shp) containing a field reporting the percentage of women who have achieved a post-secondary education. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates regions where all women have completed post-secondary education, whereas a value of 0 indicates areas where no women have attained post-secondary education. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -592,7 +598,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_3">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -605,13 +611,16 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Care Responsibilities&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the percentage of time that women spend on household provision of services. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A Polygon layer (.shp) containing a field reporting &lt;/span&gt;&lt;a name=&quot;_Hlk146891905&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;t&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;he percentage of time women spend on household activities. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory.  A value of 5 indicates areas where women spend less than 15% of their time on household activities, whereas a value of 0 indicates areas where women spend all their time on unpaid household activities. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -738,7 +747,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_4">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -751,13 +760,16 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Domestic Violence&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the percentage of women who have suffered some form of domestic violence. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A Polygon layer (.shp) containing a field reporting &lt;/span&gt;&lt;a name=&quot;_Hlk146892169&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;t&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;he percentage of women who have suffered domestic violence. This can include physical, sexual, or emotional violence. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where no women have experienced domestic violence, whereas a value of 0 indicates areas where all women have experienced domestic violence. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1045,6 +1057,9 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -1196,7 +1211,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_6">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -1209,14 +1224,17 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Policy and Legal Protection&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the policy and legal protections afforded to women in the country of interest. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Policy and Legal Protection&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the policy and legal protections afforded to women in the country of interest. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer (.shp) containing a field reporting a percentage that represents the level of protective policies afforded to women. The calculation of this percentage is described in detail in the methodological framework document. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of protective policies afforded to women, whereas a value of 0 indicates areas where no protective policies are afforded to women. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -1342,7 +1360,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_7">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -1355,6 +1373,9 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -1363,7 +1384,6 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Access to Finance&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the percentage of women who have a bank account or have borrowed from a formal financial institution.   &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer (.shp) containing a field reporting the &lt;/span&gt;&lt;a name=&quot;_Hlk146893042&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;p&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;ercentage of women who have a bank account. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 signifies areas where all women possess a bank account or have borrowed from a formal financial institution, whereas  a value of 0 represents areas where no women have a bank account or have borrowed from a formal institution. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -1592,6 +1612,9 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -1812,19 +1835,6 @@ p, li { white-space: pre-wrap; }
         <string>WTP Raster Output Filename</string>
        </property>
       </widget>
-      <widget class="QLabel" name="Feedback">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>450</y>
-         <width>701</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
       <widget class="QTextEdit" name="textEdit_35">
        <property name="enabled">
         <bool>false</bool>
@@ -1886,6 +1896,9 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -1893,7 +1906,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Women's Travel Patterns&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;This tab estimates the ease with which women can access amenities related to their role as caregivers. The algorithm uses the road network and travel &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;distances or times to estimate ease of access to the input locations at five incrementally increasing measurement intervals, with the largest being the maximum distance or time women would travel to reach these locations. The algorithm conducts a service area network analysis, producing five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero. &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab estimates the ease with which women can access amenities related to their role as caregivers. The algorithm uses the road network and travel&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;distances or times to estimate ease of access to the input locations at five incrementally increasing measurement intervals, with the largest being the maximum distance or time women would travel to reach these locations. The algorithm conducts a service area network analysis, producing five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Point locations &lt;/span&gt;&lt;a name=&quot;_Hlk146893610&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;.shp) of amenities related to women's role as caregivers, including &lt;/span&gt;&lt;a name=&quot;_Hlk146893640&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;hildcare, primary and secondary schools, markets, grocery stores and recreational areas. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 1&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: This step is repeated for each facility type. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Travel mode&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: The user can select walking or driving as a travel mode and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature. &lt;/span&gt;&lt;/p&gt;
@@ -2090,6 +2103,9 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2279,6 +2295,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2470,6 +2489,9 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2659,6 +2681,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2850,6 +2875,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -3312,6 +3340,9 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -3499,18 +3530,21 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_18">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
          <x>360</x>
-         <y>10</y>
+         <y>-10</y>
          <width>391</width>
-         <height>511</height>
+         <height>531</height>
         </rect>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -3518,7 +3552,8 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Active Transport&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab defines areas based on the degree to which they support safe and efficient active transport (walking, cycling and other forms of non-motorized transport) for women, through the classification of road type.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab defines areas based on the degree to which they support safe and efficient active transport (walking, cycling and other forms of non-motorized transport) for women, through the classification of road type.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Input: A road network polyline layer (.shp) containing a field where each road is classified into type (e.g., Motorway, Residential, Trail, Cycleway).&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Process: The user selects the field containing road type classifications and once this field is set, the algorithm extracts the unique road types in the field. The user reclassifies the extracted road types to scores ranging from &lt;/span&gt;&lt;a name=&quot;_Hlk146896051&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; to 5 based on local knowledge, where 5 is a road type that is very safe for active transport and 1 is a road type that is unsafe for these activities. The algorithm buffers reclassified roads to a distance of 250 m and the output is rasterized. The algorithm assigns a score of 0 to cells where there are no roads at all.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas that are most conducive to active transport. A value of 1 indicates areas that are least conducive to active transport. A value of 0 indicates areas where there are no roads at all, and thus active transport is assumed to be impossible.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -3647,7 +3682,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_20">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -3659,6 +3694,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -3767,7 +3805,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_21">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -3779,6 +3817,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -3960,7 +4001,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_24">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -3973,13 +4014,16 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Security&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:24pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab defines areas based on the number of crime incidents per 100,000 residents. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: One or many polygon layers (.shp) which contain a field representing the number of crime incidents per 100,000 people. Different classes of crime (such as violent assault or sexual assault) are often represented by separate input layers, and so each layer is processed individually in step 1, before aggregating outputs in step 2. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 1&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
@@ -4195,7 +4239,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_25">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -4208,13 +4252,16 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Income level&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:24pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab characterizes areas based on their wealth index. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer (.shp) which contains a field representing the wealth index information.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where the wealth index is 100 and 0 indicates areas where the wealth index is zero. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -4428,7 +4475,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_26">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -4440,6 +4487,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -4527,7 +4577,7 @@ p, li { white-space: pre-wrap; }
       </attribute>
       <widget class="QTextEdit" name="textEdit_27">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -4539,6 +4589,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -4743,7 +4796,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_28">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -4755,6 +4808,9 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -4916,7 +4972,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QTextEdit" name="textEdit_29">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -4929,13 +4985,16 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Digital Inclusion&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:24pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab characterizes areas based on the percentage of houses with access to the Internet. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer (.shp) containing a field representing the percentage of houses with Internet access. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where all houses have access to the Internet while 0 indicates areas where no houses have Internet access. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -5158,20 +5217,23 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Natural Environment and Climatic factors&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:24pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;This tab characterizes areas based on their vulnerability to natural disasters. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;: One or many polygon layers (.shp) which contain a field representing the level of risk of natural disasters. Risk should be classed as either low, medium or high. Different classes of natural disasters (such as landslide risk or flood risk) are often represented by separate input layers, and so each type of natural disaster is processed individually in step 1, before aggregating outputs in step 2. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt; font-weight:600;&quot;&gt;Step 1 &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;For each layer representing a different class of natural disaster, the input layer is set, and the user selects the field containing the level of risk from the drop-down list. In each layer, areas are classified as having either low, medium, or high risk. The algorithm reclassifies the input field such that low-risk areas are assigned a score of 5, medium-risk areas are assigned a score of 2, and high-risk areas are assigned a score of 0. The reclassified data are rasterized. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt; font-weight:600;&quot;&gt;Step 2&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;The algorithm identifies all raster layers created in step 1 and aggregates them by calculating the mean score for each pixel. The default raster output filename does not need to be altered unless the user wishes. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where natural disaster risk is lowest. A value of 0 indicates areas where natural disaster risk is highest. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab characterizes areas based on their vulnerability to natural disasters. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: One or many polygon layers (.shp) which contain a field representing the level of risk of natural disasters. Risk should be classed as either low, medium or high. Different classes of natural disasters (such as landslide risk or flood risk) are often represented by separate input layers, and so each type of natural disaster is processed individually in step 1, before aggregating outputs in step 2. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 1 &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;For each layer representing a different class of natural disaster, the input layer is set, and the user selects the field containing the level of risk from the drop-down list. In each layer, areas are classified as having either low, medium, or high risk. The algorithm reclassifies the input field such that low-risk areas are assigned a score of 5, medium-risk areas are assigned a score of 2, and high-risk areas are assigned a score of 0. The reclassified data are rasterized. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 2&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The algorithm identifies all raster layers created in step 1 and aggregates them by calculating the mean score for each pixel. The default raster output filename does not need to be altered unless the user wishes. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where natural disaster risk is lowest. A value of 0 indicates areas where natural disaster risk is highest. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_133">
@@ -5929,14 +5991,17 @@ p, li { white-space: pre-wrap; }
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Place Characterization Factor Aggregation &lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab aggregates the raster outputs of all available factors within the place characterization dimension by assuming equal weighting of all factors within the dimension. If equal weights are not appropriate for the specific context of the analysis, the user can adjust weights as necessary provided all weights still sum to 100%. If a factor was not calculated (perhaps due to missing data, or because it was deemed to be unimportant) that factor should be assigned a weight of 0%, and the remaining factor weights adjusted such that they add up to 100%. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab aggregates the raster outputs of all available factors within the place characterization dimension by assuming equal weighting of all factors within the dimension. If equal weights are not appropriate for the specific context of the analysis, the user can adjust weights as necessary provided all weights still sum to 100%. If a factor was not calculated (perhaps due to missing data, or because it was deemed to be unimportant) that factor should be assigned a weight of 0%, and the remaining factor weights adjusted such that they add up to 100%. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Factor outputs that are created during the current working session are automatically loaded. &lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:9pt;&quot;&gt;Users can choose to load previously generated factor outputs from the output directory set up at tool initiation.&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:8pt;&quot;&gt;: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A raster file containing values ranging from 0 to 5 is saved to the output directory and loaded into the workspace. Scores should be interpreted as outlined in the “About” tab.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -6268,6 +6333,9 @@ p, li { white-space: pre-wrap; }
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
      <property name="html">
       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
