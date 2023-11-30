@@ -392,6 +392,11 @@ class GenderIndicatorTool:
         self.dlg.Dimensions_AggregateExecute_PB.clicked.connect(self.dimesnionsAggregation)
 
         ## TAB 7 - Insights ************************************************************************
+        ###### TAB 7.1 - Reclassify
+        self.dlg.Score_reclassify.clicked.connect(self.scoreReclassInsights)
+        self.dlg.Pop_reclassify.clicked.connect(self.populationReclassInsights)
+        self.dlg.Combine_reclassify.clicked.connect(self.combineReclassInsights)
+
         self.dlg.RE_Execute_PB.clicked.connect(self.REinsights)
         self.dlg.Aggregation_Execute_PB.clicked.connect(self.Aggregationinsights)
         self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
@@ -3453,6 +3458,220 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     # *************************** Insights Tab Functions *********************************** #
+    def scoreReclassInsights(self):
+        # self.dlg.individualAggregation_Check.setText("")
+        # self.dlg.individualAggregation_Check.repaint()
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+
+        os.chdir(workingDir)
+        Insights_folder = "Insights"
+        if os.path.exists(Insights_folder):
+            pass
+        else:
+            os.mkdir(Insights_folder)
+
+        tempDir = f"temp"
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # INPUT
+        score = self.dlg.Insights_Score_Input_Field.filePath()
+
+        # Score Reclassify
+        with rasterio.open(score) as src:
+            score_ras = src.read(1)
+            meta1 = src.meta
+
+        # Raster Calculation
+
+        result = 0 * (score_ras <= 0.5) + 1 * (score_ras > 0.5) * (score_ras <= 1.5) + 2 * (score_ras > 1.5) * (
+                    score_ras <= 2.5) + \
+                 3 * (score_ras > 2.5) * (score_ras <= 3.5) + 4 * (score_ras > 3.5) * (score_ras <= 4.5) + 5 * (
+                             score_ras > 4.5)
+
+        meta1.update(dtype=rasterio.float32)
+
+        score_rec = f"{workingDir}{Insights_folder}/Score_reclassified.tif"
+        with rasterio.open(score_rec, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{score_rec.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        self.dlg.Insights_ScoreReclass_Input_Field.setFilePath(f"{score_rec}")
+
+    def populationReclassInsights(self):
+        # self.dlg.individualAggregation_Check.setText("")
+        # self.dlg.individualAggregation_Check.repaint()
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+
+        os.chdir(workingDir)
+        Insights_folder = "Insights"
+        if os.path.exists(Insights_folder):
+            pass
+        else:
+            os.mkdir(Insights_folder)
+
+        tempDir = f"temp"
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # INPUT
+        population = self.dlg.Insights_Population_Input_Field.filePath()
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+
+        # Temp OUTPUT
+        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+        PoptempResample = f"{tempDir}/PoptempResample.tif"
+
+        self.convertCRS(countryLayer, UTM_crs)
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': countryUTMLayerBuf})
+
+        CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+        country_extent = CountryBuf_df.total_bounds
+
+        processing.run("gdal:warpreproject", {
+            'INPUT': population,
+            'SOURCE_CRS': None,
+            'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'RESAMPLING': 0,
+            'NODATA': None,
+            'TARGET_RESOLUTION': pixelSize,
+            'OPTIONS': '',
+            'DATA_TYPE': 0,
+            'TARGET_EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+            'TARGET_EXTENT_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'MULTITHREADING': False,
+            'EXTRA': '',
+            'OUTPUT': PoptempResample})
+
+        # Population Reclassify
+        with rasterio.open(PoptempResample) as src:
+            pop_ras = src.read(1)
+            meta1 = src.meta
+
+            pop_ras[pop_ras == src.nodata] = 0
+            masked_raster = np.ma.masked_where(pop_ras == 0, pop_ras)
+
+        percentile_25 = np.percentile(masked_raster.compressed(), 25)
+        percentile_75 = np.percentile(masked_raster.compressed(), 75)
+
+        # Raster Calculation
+
+        result = 1 * (pop_ras <= percentile_25) + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75) + 3 * (
+                    pop_ras > percentile_75)
+        meta1.update(dtype=rasterio.float32)
+
+        pop_rec = f"{workingDir}{Insights_folder}/Population_reclassified.tif"
+        with rasterio.open(pop_rec, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{pop_rec.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        self.dlg.Insights_PopulationReclass_Input_Field.setFilePath(f"{pop_rec}")
+
+    def combineReclassInsights(self):
+        # self.dlg.individualAggregation_Check.setText("")
+        # self.dlg.individualAggregation_Check.repaint()
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+
+        os.chdir(workingDir)
+        Insights_folder = "Insights"
+        if os.path.exists(Insights_folder):
+            pass
+        else:
+            os.mkdir(Insights_folder)
+
+        tempDir = f"temp"
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # INPUT
+        score_rec = self.dlg.Insights_ScoreReclass_Input_Field.filePath()
+        pop_rec = self.dlg.Insights_PopulationReclass_Input_Field.filePath()
+    
+        # Combine Population and Score Reclassify
+
+        with rasterio.open(score_rec) as src:
+            score_rec_ras = src.read(1)
+            meta1 = src.meta
+
+        with rasterio.open(pop_rec) as src:
+            pop_rec_ras = src.read(1)
+
+        # Raster Calculation
+
+        result = \
+            1 * (score_rec_ras == 1) * (pop_rec_ras == 1) + \
+            2 * (score_rec_ras == 1) * (pop_rec_ras == 2) + \
+            3 * (score_rec_ras == 1) * (pop_rec_ras == 3) + \
+            4 * (score_rec_ras == 2) * (pop_rec_ras == 1) + \
+            5 * (score_rec_ras == 2) * (pop_rec_ras == 2) + \
+            6 * (score_rec_ras == 2) * (pop_rec_ras == 3) + \
+            7 * (score_rec_ras == 3) * (pop_rec_ras == 1) + \
+            8 * (score_rec_ras == 3) * (pop_rec_ras == 2) + \
+            9 * (score_rec_ras == 3) * (pop_rec_ras == 3) + \
+            10 * (score_rec_ras == 4) * (pop_rec_ras == 1) + \
+            11 * (score_rec_ras == 4) * (pop_rec_ras == 2) + \
+            12 * (score_rec_ras == 4) * (pop_rec_ras == 3) + \
+            13 * (score_rec_ras == 5) * (pop_rec_ras == 1) + \
+            14 * (score_rec_ras == 5) * (pop_rec_ras == 2) + \
+            15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
+
+        meta1.update(dtype=rasterio.float32)
+
+        combined_rec = f"{workingDir}{Insights_folder}/ScPop_Combined_reclassification.tif"
+        with rasterio.open(combined_rec, 'w', **meta1) as dst:
+            dst.write(result, 1)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{combined_rec.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        self.dlg.Insights_Agg_Input_Field.setFilePath(f"{combined_rec}")
+        self.dlg.Insights_Buf_Input_Field.setFilePath(f"{combined_rec}")
+
+        layer0 = QgsRasterLayer(combined_rec, f"Combine")
+        QgsProject.instance().addMapLayer(layer0)
 
     def REinsights(self):
         # self.dlg.individualAggregation_Check.setText("")
@@ -3480,19 +3699,16 @@ class GenderIndicatorTool:
         score = self.dlg.Insights_Score_Input_Field.filePath()
         population = self.dlg.Insights_Population_Input_Field.filePath()
         re_zones = self.dlg.Insights_RE_Input_Field.filePath()
-        aggregation = self.dlg.Insights_Agg_Input_Field.filePath()
-        point_loc = self.dlg.Insights_Points_Input_Field.filePath()
 
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
 
 
-        #OUTPUT
+        #Temp OUTPUT
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
         PoptempResample = f"{tempDir}/PoptempResample.tif"
         REtempResample = f"{tempDir}/REtempResample.tif"
-        OUTPUT = f"{tempDir}/OUTPUT.shp"
 
         #Score Reclassify
         with rasterio.open(score) as src:
@@ -3529,8 +3745,6 @@ class GenderIndicatorTool:
                                                   'SEPARATE_DISJOINT': False,
                                                   'OUTPUT': countryUTMLayerBuf})
 
-        # countryUTMLayerBuf = buffer["OUTPUT"]
-
         CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
         country_extent = CountryBuf_df.total_bounds
 
@@ -3557,17 +3771,12 @@ class GenderIndicatorTool:
             pop_ras[pop_ras == src.nodata] = 0
             masked_raster = np.ma.masked_where(pop_ras == 0, pop_ras)
 
-        percentile_33 = np.percentile(masked_raster.compressed(), 25)
-        percentile_66 = np.percentile(masked_raster.compressed(), 75)
-        # percentile_33 = np.percentile(pop_ras, 33)
-        # percentile_66 = np.percentile(pop_ras, 66)
-
-        # self.dlg.Insights_status.setText(f"33rd: {percentile_33}, 66th: {percentile_66}")
-        # self.dlg.Insights_status.repaint()
+        percentile_25 = np.percentile(masked_raster.compressed(), 25)
+        percentile_75 = np.percentile(masked_raster.compressed(), 75)
 
         # Raster Calculation
 
-        result = 1 * (pop_ras <= percentile_33) + 2 * (pop_ras > percentile_33) * (pop_ras <= percentile_66) + 3 * (pop_ras > percentile_66)
+        result = 1 * (pop_ras <= percentile_25) + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75) + 3 * (pop_ras > percentile_75)
         meta1.update(dtype=rasterio.float32)
 
         pop_rec = f"{workingDir}{Insights_folder}/Population_reclassified.tif"
@@ -3612,7 +3821,7 @@ class GenderIndicatorTool:
 
         meta1.update(dtype=rasterio.float32)
 
-        combined_rec = f"{workingDir}{Insights_folder}/Combine.tif"
+        combined_rec = f"{workingDir}{Insights_folder}/ScPop_Combined_reclassification.tif"
         with rasterio.open(combined_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
