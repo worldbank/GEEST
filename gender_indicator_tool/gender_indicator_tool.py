@@ -397,7 +397,12 @@ class GenderIndicatorTool:
         self.dlg.Pop_reclassify.clicked.connect(self.populationReclassInsights)
         self.dlg.Combine_reclassify.clicked.connect(self.combineReclassInsights)
 
-        self.dlg.RE_Execute_PB.clicked.connect(self.REinsights)
+        ###### TAB 7.2 - RE Zones
+        Style = ['Score', 'Population', "Combine"]
+        self.dlg.Symbology_Style.clear()
+        self.dlg.Symbology_Style.addItems(Style)
+        self.dlg.RE_Execute_PB.clicked.connect(self.reZones)
+        
         self.dlg.Aggregation_Execute_PB.clicked.connect(self.Aggregationinsights)
         self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
 
@@ -3672,6 +3677,128 @@ class GenderIndicatorTool:
 
         layer0 = QgsRasterLayer(combined_rec, f"Combine")
         QgsProject.instance().addMapLayer(layer0)
+
+    def reZones(self):
+        # self.dlg.individualAggregation_Check.setText("")
+        # self.dlg.individualAggregation_Check.repaint()
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+
+        os.chdir(workingDir)
+        Insights_folder = "Insights"
+        if os.path.exists(Insights_folder):
+            pass
+        else:
+            os.mkdir(Insights_folder)
+
+        tempDir = f"temp"
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        else:
+            pass
+
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # INPUT
+        reclassified_layer = self.dlg.Insights_Reclass_Input_Field.filePath()
+        re_zones = self.dlg.Insights_RE_Input_Field.filePath()
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+
+        # Temp OUTPUT
+        REtempResample = f"{tempDir}/REtempResample.tif"
+        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+
+        self.convertCRS(countryLayer, UTM_crs)
+        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
+                                                  'DISTANCE': 2000,
+                                                  'SEGMENTS': 5,
+                                                  'END_CAP_STYLE': 0,
+                                                  'JOIN_STYLE': 0,
+                                                  'MITER_LIMIT': 2,
+                                                  'DISSOLVE': True,
+                                                  'SEPARATE_DISJOINT': False,
+                                                  'OUTPUT': countryUTMLayerBuf})
+
+        CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+        country_extent = CountryBuf_df.total_bounds
+
+        processing.run("gdal:warpreproject", {
+            'INPUT': re_zones,
+            'SOURCE_CRS': None,
+            'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'RESAMPLING': 0,
+            'NODATA': None,
+            'TARGET_RESOLUTION': pixelSize,
+            'OPTIONS': '',
+            'DATA_TYPE': 0,
+            'TARGET_EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
+            'TARGET_EXTENT_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+            'MULTITHREADING': False,
+            'EXTRA': '',
+            'OUTPUT': REtempResample})
+
+        # Reclassified rasters join to RE zones
+
+        with rasterio.open(reclassified_layer) as src:
+            reclassified_layer_ras = src.read(1)
+            meta1 = src.meta
+            
+        with rasterio.open(REtempResample) as src:
+            re_zones = src.read(1)
+
+        # Raster Calculation
+
+        result = reclassified_layer_ras * re_zones
+
+        meta1.update(dtype=rasterio.float32)
+
+        if self.dlg.Symbology_Style.currentText() == "Score":
+            score_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Score.tif"
+            with rasterio.open(score_RE, 'w', **meta1) as dst:
+                dst.write(result, 1)
+
+            styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
+            styleFileDestination = f"{workingDir}{Insights_folder}/"
+            styleFile = f"{score_RE.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            layer1 = QgsRasterLayer(score_RE, f"{self.dlg.RE_Output_Field.text()}Score")
+            QgsProject.instance().addMapLayer(layer1)
+
+        elif self.dlg.Symbology_Style.currentText() == "Population":
+            pop_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Population.tif"
+            with rasterio.open(pop_RE, 'w', **meta1) as dst:
+                dst.write(result, 1)
+
+            styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
+            styleFileDestination = f"{workingDir}{Insights_folder}/"
+            styleFile = f"{pop_RE.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            layer2 = QgsRasterLayer(pop_RE, f"{self.dlg.RE_Output_Field.text()}Population")
+            QgsProject.instance().addMapLayer(layer2)
+
+        elif self.dlg.Symbology_Style.currentText() == "Combine":
+            combined_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Combine.tif"
+            with rasterio.open(combined_RE, 'w', **meta1) as dst:
+                dst.write(result, 1)
+
+            styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
+            styleFileDestination = f"{workingDir}{Insights_folder}/"
+            styleFile = f"{combined_RE.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            layer3 = QgsRasterLayer(combined_RE, f"{self.dlg.RE_Output_Field.text()}Combine")
+            QgsProject.instance().addMapLayer(layer3)
+
 
     def REinsights(self):
         # self.dlg.individualAggregation_Check.setText("")

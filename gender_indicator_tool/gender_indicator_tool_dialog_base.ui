@@ -6620,7 +6620,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>110</y>
+         <y>160</y>
          <width>231</width>
          <height>16</height>
         </rect>
@@ -6656,7 +6656,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>220</x>
-         <y>130</y>
+         <y>180</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6669,7 +6669,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>130</y>
+         <y>180</y>
          <width>201</width>
          <height>21</height>
         </rect>
@@ -6701,6 +6701,29 @@ p, li { white-space: pre-wrap; }
          <y>30</y>
          <width>231</width>
          <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_274">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>110</y>
+         <width>251</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Select Visualisation</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="Symbology_Style">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>130</y>
+         <width>201</width>
+         <height>22</height>
         </rect>
        </property>
       </widget>
@@ -6804,7 +6827,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Insights Layer (Raster)</string>
+        <string>Combined Insights Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_Polygon_Input_Field">
@@ -6911,7 +6934,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Insights Layer (Raster)</string>
+        <string>Combined Insights Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_263">

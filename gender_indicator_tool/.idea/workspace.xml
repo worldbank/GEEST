@@ -6,8 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6cb757d1-568a-4654-a1b5-6b1cabd8e249" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WBG_Vertical-RGB-high-resize.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/WBG_Vertical-RGB-high.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gender_indicator_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/gender_indicator_tool.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gender_indicator_tool_dialog_base.ui" beforeDir="false" afterPath="$PROJECT_DIR$/gender_indicator_tool_dialog_base.ui" afterDir="false" />
     </list>
@@ -49,7 +47,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/gender_indicator_tool.py</url>
-          <line>3190</line>
+          <line>3195</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
