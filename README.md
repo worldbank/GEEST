@@ -2,13 +2,15 @@
 
 ## User Manual September 2023
 
-[1 Install QGIS](#1-install-qgis)
+-[1 Install QGIS](#1-install-qgis)
 
 [2 Install Open Route Service (ORS) plugin](#2-install-open-route-service-ors-plugin)
 
-[3 Installing Plugin on local device](#3-installing-plugin-on-local-device)]
+[3 Installing Plugin on local device](#3-installing-plugin-on-local-device)
 
 [4 Using the Plugin](#4-using-the-plugin)
+
+[5 Troubleshooting](#5-troubleshooting)
 
 ## 1 Install QGIS
 
