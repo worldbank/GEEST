@@ -2,7 +2,7 @@
 
 ## User Manual September 2023
 
-[Install QGIS](#install-qgis)
+[Install QGIS](##-1-install-qgis)
 
 [Install Open Route Service (ORS) plugin](#Install-Open-Route-Service)
 
