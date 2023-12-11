@@ -9,14 +9,6 @@
 [3 Installing Plugin on local device](#3-installing-plugin-on-local-device)
 
 [4 Using the Plugin](#4-using-the-plugin)
- [4.1 SETUP TAB](#41-level-2-heading)
- [4.2 INDIVIDUAL TAB](#41-level-2-heading)
- [4.3 CONTEXTUAL TAB](#41-level-2-heading)
- [4.4 ACCESSIBILITY TAB](#41-level-2-heading)
- [4.5 PLACE CHARACTERIZATION TAB](#41-level-2-heading)
- [4.6 DIMENSION AGGREGATION TAB](#41-level-2-heading)
- [4.7 INSIGHTS TAB](#41-level-2-heading)
-
 
 [5 Troubleshooting](#5-troubleshooting)
 
