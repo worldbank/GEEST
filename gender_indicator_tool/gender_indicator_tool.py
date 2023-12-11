@@ -315,61 +315,52 @@ class GenderIndicatorTool:
         self.dlg.JOB_Aggregate_TB.clicked.connect(lambda: self.getFile(8))
         self.dlg.HEA_Aggregate_TB.clicked.connect(lambda: self.getFile(9))
         self.dlg.FIF_Aggregate_TB.clicked.connect(lambda: self.getFile(10))
-
         self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(self.accessibiltyAggregation)
 
 
         ## TAB 5 - Place Charqacterization **************************************************************
-        ###### TAB 5.1 - Walkability
+        ###### TAB 5.1 - Walkability / Active Transport
         self.dlg.WLK_Set_PB.clicked.connect(lambda: self.TypeSet(1))
         self.dlg.WLK_unique_PB.clicked.connect(lambda: self.uniqueValues(1))
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
-        ###### TAB 5.2 - Cycleways
-        # self.dlg.CYC_Set_PB.clicked.connect(lambda: self.TypeSet(2))
-        # self.dlg.CYC_unique_PB.clicked.connect(lambda: self.uniqueValues(2))
-        # self.dlg.CYC_Execute_PB.clicked.connect(self.cycleways)
-
-        ###### TAB 5.3 - Public Transport
+        ###### TAB 5.2 - Public Transport
         self.dlg.APT_Execute_PB.clicked.connect(self.transportCount)
 
-        ###### TAB 5.4 - Safe Urban Design
+        ###### TAB 5.3 - Safe Urban Design
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
-        ###### TAB 5.5 - Security
+        ###### TAB 5.4 - Security
         self.dlg.SEC_Set_PB.clicked.connect(lambda: self.RasterizeSet(6))
         self.dlg.SEC_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
-
         self.dlg.SEC_Aggregate_PB.clicked.connect(self.secAggregate)
 
-        ###### TAB 5.6 - Income Level
+        ###### TAB 5.5 - Income Level
         self.dlg.INC_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
         self.dlg.INC_Execute_PB.clicked.connect(lambda: self.Rasterize(5))
 
-        ###### TAB 5.7 - Electrical Access
+        ###### TAB 5.6 - Electrical Access
         self.dlg.ELC_Set_PB.clicked.connect(lambda: self.RasterizeSet(7))
         self.dlg.ELC_Execute_PB.clicked.connect(lambda: self.Rasterize(7))
-
         self.dlg.ELC_NTLExecute_PB.clicked.connect(self.ELCnightTimeLights)
 
-        ###### TAB 5.8 - Urbanization
+        ###### TAB 5.7 - Urbanization
         self.dlg.LOU_Execute_PB.clicked.connect(self.urbanization)
 
-        ###### TAB 5.9 - Housing
+        ###### TAB 5.8 - Housing
         self.dlg.QUH_Execute_PB.clicked.connect(self.housing)
 
-        ###### TAB 5.10 - Digital Inclusion
+        ###### TAB 5.9 - Digital Inclusion
         self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
         self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(8))
 
-        ###### TAB 5.11 - Natural Environment
+        ###### TAB 5.10 - Natural Environment
         self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
         self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
-
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
 
-        ###### TAB 5.12 - Aggregate
+        ###### TAB 5.11 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
         self.dlg.APT_Aggregate_TB.clicked.connect(lambda: self.getFile(13))
         self.dlg.SAF_Aggregate_TB.clicked.connect(lambda: self.getFile(14))
@@ -380,7 +371,6 @@ class GenderIndicatorTool:
         self.dlg.QUH_Aggregate_TB.clicked.connect(lambda: self.getFile(19))
         self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
         self.dlg.ENV_Aggregate_TB.clicked.connect(lambda: self.getFile(21))
-
         self.dlg.PlaceCharacterization_AggregateExecute_PB.clicked.connect(self.placeCharacterizationAggregation)
 
         ## TAB 6 - Dimension Aggregation ************************************************************************
@@ -388,22 +378,19 @@ class GenderIndicatorTool:
         self.dlg.CD_Aggregate_TB.clicked.connect(lambda: self.getFile(23))
         self.dlg.AD_Aggregate_TB.clicked.connect(lambda: self.getFile(24))
         self.dlg.PD_Aggregate_TB.clicked.connect(lambda: self.getFile(25))
-
         self.dlg.Dimensions_AggregateExecute_PB.clicked.connect(self.dimesnionsAggregation)
 
         ## TAB 7 - Insights ************************************************************************
-        ###### TAB 7.1 - Reclassify
+        ###### TAB 7.1 - Enablement
         self.dlg.Score_reclassify.clicked.connect(self.scoreReclassInsights)
         self.dlg.Pop_reclassify.clicked.connect(self.populationReclassInsights)
         self.dlg.Combine_reclassify.clicked.connect(self.combineReclassInsights)
-
-        ###### TAB 7.2 - RE Zones
-        Style = ['Score', 'Population', "Combine"]
-        self.dlg.Symbology_Style.clear()
-        self.dlg.Symbology_Style.addItems(Style)
-        self.dlg.RE_Execute_PB.clicked.connect(self.reZones)
-        
         self.dlg.Aggregation_Execute_PB.clicked.connect(self.Aggregationinsights)
+
+        ###### TAB 7.2 - Raster Locations
+        self.dlg.RE_Execute_PB.clicked.connect(self.reZones)
+
+        ###### TAB 7.3 - Point Locations
         self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
 
     def getFile(self, button_num):
@@ -500,25 +487,6 @@ class GenderIndicatorTool:
 
         if button_num == 0:
             self.dlg.workingDir_Field.setText(str(response + "/"))
-
-    def saveFile(self,button_num):
-        response = QFileDialog.getSaveFileName(
-            parent=self.dlg,
-            caption='Save file',
-            directory=os.getcwd()
-        )
-
-        if button_num == 1:
-            self.dlg.IDWRasterOutputFilePath_Field.setText(str(response[0]))
-
-        elif button_num == 2:
-            self.dlg.RasterOutputFilePath_Field.setText(str(response[0]))
-
-        elif button_num == 3:
-            self.dlg.serviceAreaOutputFilePath_Field.setText(str(response[0]))
-
-        elif button_num == 4:
-            self.dlg.MCAOutputFilePath_Field.setText(str(response[0]))
 
     def RasterizeSet(self, factor_no):
         if factor_no == 0:
@@ -643,7 +611,7 @@ class GenderIndicatorTool:
         shp_wgs84 = shp.to_crs('EPSG:4326')
         shp_utm = shp_wgs84.to_crs(UTM_crs)
 
-# *************************** Geoprocessing Functions ********************************** #
+# *************************** Factor Functions ********************************** #
     def Rasterize(self, factor_no):
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
@@ -2869,7 +2837,7 @@ class GenderIndicatorTool:
         self.dlg.ENVAGG_status.setText("Processing Complete!")
         self.dlg.ENVAGG_status.repaint()
 
-    # *************************** Aggregation Functions ************************************ #
+    # *************************** Factor Aggregation Functions ************************************ #
     def indivdualAggregation(self):
         self.dlg.individualAggregation_Check.setText("")
         self.dlg.individualAggregation_Check.repaint()
@@ -3502,7 +3470,7 @@ class GenderIndicatorTool:
 
         meta1.update(dtype=rasterio.float32)
 
-        score_rec = f"{workingDir}{Insights_folder}/Score_reclassified.tif"
+        score_rec = f"{workingDir}{Insights_folder}/Enablement_categories.tif"
         with rasterio.open(score_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
@@ -3594,7 +3562,7 @@ class GenderIndicatorTool:
                     pop_ras > percentile_75)
         meta1.update(dtype=rasterio.float32)
 
-        pop_rec = f"{workingDir}{Insights_folder}/Population_reclassified.tif"
+        pop_rec = f"{workingDir}{Insights_folder}/Relative_Population_Count_Reclassified.tif"
         with rasterio.open(pop_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
@@ -3662,7 +3630,7 @@ class GenderIndicatorTool:
 
         meta1.update(dtype=rasterio.float32)
 
-        combined_rec = f"{workingDir}{Insights_folder}/ScPop_Combined_reclassification.tif"
+        combined_rec = f"{workingDir}{Insights_folder}/ScPop_Combined_categorization.tif"
         with rasterio.open(combined_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
@@ -3672,6 +3640,7 @@ class GenderIndicatorTool:
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+        self.dlg.Insights_Reclass_Input_Field.setFilePath(f"{combined_rec}")
         self.dlg.Insights_Agg_Input_Field.setFilePath(f"{combined_rec}")
         self.dlg.Insights_Buf_Input_Field.setFilePath(f"{combined_rec}")
 
@@ -3706,10 +3675,16 @@ class GenderIndicatorTool:
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
+        aggregate = self.dlg.Insights_AGGReclass_Input_Field.filePath()
 
         # Temp OUTPUT
         REtempResample = f"{tempDir}/REtempResample.tif"
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+        poly_temp = f"{tempDir}/poly_temp.shp"
+        temp_dis = f"{tempDir}/temp_dis.shp"
+        final_temp_dis = f"{tempDir}/final_temp_dis.shp"
+
+
 
         self.convertCRS(countryLayer, UTM_crs)
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
@@ -3757,293 +3732,9 @@ class GenderIndicatorTool:
 
         meta1.update(dtype=rasterio.float32)
 
-        if self.dlg.Symbology_Style.currentText() == "Score":
-            score_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Score.tif"
-            with rasterio.open(score_RE, 'w', **meta1) as dst:
-                dst.write(result, 1)
-
-            styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
-            styleFileDestination = f"{workingDir}{Insights_folder}/"
-            styleFile = f"{score_RE.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            layer1 = QgsRasterLayer(score_RE, f"{self.dlg.RE_Output_Field.text()}Score")
-            QgsProject.instance().addMapLayer(layer1)
-
-        elif self.dlg.Symbology_Style.currentText() == "Population":
-            pop_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Population.tif"
-            with rasterio.open(pop_RE, 'w', **meta1) as dst:
-                dst.write(result, 1)
-
-            styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
-            styleFileDestination = f"{workingDir}{Insights_folder}/"
-            styleFile = f"{pop_RE.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            layer2 = QgsRasterLayer(pop_RE, f"{self.dlg.RE_Output_Field.text()}Population")
-            QgsProject.instance().addMapLayer(layer2)
-
-        elif self.dlg.Symbology_Style.currentText() == "Combine":
-            combined_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Combine.tif"
-            with rasterio.open(combined_RE, 'w', **meta1) as dst:
-                dst.write(result, 1)
-
-            styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
-            styleFileDestination = f"{workingDir}{Insights_folder}/"
-            styleFile = f"{combined_RE.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            layer3 = QgsRasterLayer(combined_RE, f"{self.dlg.RE_Output_Field.text()}Combine")
-            QgsProject.instance().addMapLayer(layer3)
-
-
-    def REinsights(self):
-        # self.dlg.individualAggregation_Check.setText("")
-        # self.dlg.individualAggregation_Check.repaint()
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-
-        os.chdir(workingDir)
-        Insights_folder = "Insights"
-        if os.path.exists(Insights_folder):
-            pass
-        else:
-            os.mkdir(Insights_folder)
-
-        tempDir = f"temp"
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-        else:
-            pass
-
-        time.sleep(0.5)
-        os.mkdir(tempDir)
-
-        # INPUT
-        score = self.dlg.Insights_Score_Input_Field.filePath()
-        population = self.dlg.Insights_Population_Input_Field.filePath()
-        re_zones = self.dlg.Insights_RE_Input_Field.filePath()
-
-        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
-        countryLayer = self.dlg.countryLayer_Field.filePath()
-        pixelSize = self.dlg.pixelSize_SB.value()
-
-
-        #Temp OUTPUT
-        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
-        PoptempResample = f"{tempDir}/PoptempResample.tif"
-        REtempResample = f"{tempDir}/REtempResample.tif"
-
-        #Score Reclassify
-        with rasterio.open(score) as src:
-            score_ras = src.read(1)
-            meta1 = src.meta
-
-        # Raster Calculation
-
-        result = 0*(score_ras<=0.5) + 1*(score_ras>0.5)*(score_ras<=1.5) + 2*(score_ras>1.5)*(score_ras<=2.5) + \
-                 3*(score_ras>2.5)*(score_ras<=3.5) + 4*(score_ras>3.5)*(score_ras<=4.5) + 5*(score_ras>4.5)
-
-        meta1.update(dtype=rasterio.float32)
-
-        score_rec = f"{workingDir}{Insights_folder}/Score_reclassified.tif"
-        with rasterio.open(score_rec, 'w', **meta1) as dst:
-            dst.write(result, 1)
-
-        styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
-        styleFileDestination = f"{workingDir}{Insights_folder}/"
-        styleFile = f"{score_rec.split('.')[0]}.qml"
-
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        self.convertCRS(countryLayer, UTM_crs)
-        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
-
-        buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
-                                                  'DISTANCE': 2000,
-                                                  'SEGMENTS': 5,
-                                                  'END_CAP_STYLE': 0,
-                                                  'JOIN_STYLE': 0,
-                                                  'MITER_LIMIT': 2,
-                                                  'DISSOLVE': True,
-                                                  'SEPARATE_DISJOINT': False,
-                                                  'OUTPUT': countryUTMLayerBuf})
-
-        CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
-        country_extent = CountryBuf_df.total_bounds
-
-        processing.run("gdal:warpreproject", {
-            'INPUT': population,
-            'SOURCE_CRS': None,
-            'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-            'RESAMPLING': 0,
-            'NODATA': None,
-            'TARGET_RESOLUTION': pixelSize,
-            'OPTIONS': '',
-            'DATA_TYPE': 0,
-            'TARGET_EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
-            'TARGET_EXTENT_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-            'MULTITHREADING': False,
-            'EXTRA': '',
-            'OUTPUT': PoptempResample})
-
-        # Population Reclassify
-        with rasterio.open(PoptempResample) as src:
-            pop_ras = src.read(1)
-            meta1 = src.meta
-
-            pop_ras[pop_ras == src.nodata] = 0
-            masked_raster = np.ma.masked_where(pop_ras == 0, pop_ras)
-
-        percentile_25 = np.percentile(masked_raster.compressed(), 25)
-        percentile_75 = np.percentile(masked_raster.compressed(), 75)
-
-        # Raster Calculation
-
-        result = 1 * (pop_ras <= percentile_25) + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75) + 3 * (pop_ras > percentile_75)
-        meta1.update(dtype=rasterio.float32)
-
-        pop_rec = f"{workingDir}{Insights_folder}/Population_reclassified.tif"
-        with rasterio.open(pop_rec, 'w', **meta1) as dst:
-            dst.write(result, 1)
-
-        styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
-        styleFileDestination = f"{workingDir}{Insights_folder}/"
-        styleFile = f"{pop_rec.split('.')[0]}.qml"
-
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        # Combine Population and Score Reclassify
-
-        with rasterio.open(score_rec) as src:
-            score_rec_ras = src.read(1)
-            meta1 = src.meta
-
-        with rasterio.open(pop_rec) as src:
-            pop_rec_ras = src.read(1)
-
-        # Raster Calculation
-
-        result =\
-        1 * (score_rec_ras == 1) * (pop_rec_ras == 1) + \
-        2 * (score_rec_ras == 1) * (pop_rec_ras == 2) + \
-        3 * (score_rec_ras == 1) * (pop_rec_ras == 3) + \
-        4 * (score_rec_ras == 2) * (pop_rec_ras == 1) + \
-        5 * (score_rec_ras == 2) * (pop_rec_ras == 2) + \
-        6 * (score_rec_ras == 2) * (pop_rec_ras == 3) + \
-        7 * (score_rec_ras == 3) * (pop_rec_ras == 1) + \
-        8 * (score_rec_ras == 3) * (pop_rec_ras == 2) + \
-        9 * (score_rec_ras == 3) * (pop_rec_ras == 3) + \
-        10 * (score_rec_ras == 4) * (pop_rec_ras == 1) + \
-        11 * (score_rec_ras == 4) * (pop_rec_ras == 2) + \
-        12 * (score_rec_ras == 4) * (pop_rec_ras == 3) + \
-        13 * (score_rec_ras == 5) * (pop_rec_ras == 1) + \
-        14 * (score_rec_ras == 5) * (pop_rec_ras == 2) + \
-        15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
-
-
-
-        meta1.update(dtype=rasterio.float32)
-
-        combined_rec = f"{workingDir}{Insights_folder}/ScPop_Combined_reclassification.tif"
-        with rasterio.open(combined_rec, 'w', **meta1) as dst:
-            dst.write(result, 1)
-
-        styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
-        styleFileDestination = f"{workingDir}{Insights_folder}/"
-        styleFile = f"{combined_rec.split('.')[0]}.qml"
-
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        self.dlg.Insights_Agg_Input_Field.setFilePath(f"{combined_rec}")
-        self.dlg.Insights_Buf_Input_Field.setFilePath(f"{combined_rec}")
-
-        layer0 = QgsRasterLayer(combined_rec, f"Combine")
-        QgsProject.instance().addMapLayer(layer0)
-
-
-
-        processing.run("gdal:warpreproject", {
-            'INPUT': re_zones,
-            'SOURCE_CRS': None,
-            'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-            'RESAMPLING': 0,
-            'NODATA': None,
-            'TARGET_RESOLUTION': pixelSize,
-            'OPTIONS': '',
-            'DATA_TYPE': 0,
-            'TARGET_EXTENT': f'{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]',
-            'TARGET_EXTENT_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-            'MULTITHREADING': False,
-            'EXTRA': '',
-            'OUTPUT': REtempResample})
-
-        # Reclassified rasters join to RE zones
-
-        with rasterio.open(score_rec) as src:
-            score_rec_ras = src.read(1)
-            meta1 = src.meta
-
-        with rasterio.open(pop_rec) as src:
-            pop_rec_ras = src.read(1)
-
-        with rasterio.open(combined_rec) as src:
-            combined_rec_ras = src.read(1)
-
-        with rasterio.open(REtempResample) as src:
-            re_zones = src.read(1)
-
-            # Set all non-nodata values to 1
-            # re_zones[re_zones != src.nodata] = 1
-
-            re_zones[re_zones == src.nodata] = 0
-
-
-
-        # Raster Calculation
-
-        result_score = score_rec_ras * re_zones
-        result_pop = pop_rec_ras * re_zones
-        result_combined = combined_rec_ras * re_zones
-
-        meta1.update(dtype=rasterio.float32)
-
-
-       #########################################################
-        score_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Score.tif"
-        with rasterio.open(score_RE, 'w', **meta1) as dst:
-            dst.write(result_score, 1)
-
-        styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
-        styleFileDestination = f"{workingDir}{Insights_folder}/"
-        styleFile = f"{score_RE.split('.')[0]}.qml"
-
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        layer1 = QgsRasterLayer(score_RE, f"{self.dlg.RE_Output_Field.text()}Score")
-        QgsProject.instance().addMapLayer(layer1)
-
-        ############################################################
-        pop_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Population.tif"
-        with rasterio.open(pop_RE, 'w', **meta1) as dst:
-            dst.write(result_pop, 1)
-
-        styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
-        styleFileDestination = f"{workingDir}{Insights_folder}/"
-        styleFile = f"{pop_RE.split('.')[0]}.qml"
-
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        layer2 = QgsRasterLayer(pop_RE, f"{self.dlg.RE_Output_Field.text()}Population")
-        QgsProject.instance().addMapLayer(layer2)
-
-        ##################################################################
         combined_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Combine.tif"
         with rasterio.open(combined_RE, 'w', **meta1) as dst:
-            dst.write(result_combined, 1)
+            dst.write(result, 1)
 
         styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/"
@@ -4051,9 +3742,52 @@ class GenderIndicatorTool:
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+        # Vectorize raster
+        Polygon = processing.run("gdal:polygonize", {'INPUT': combined_RE,
+                                                     'BAND': 1,
+                                                     'FIELD': 'DN',
+                                                     'EIGHT_CONNECTEDNESS': False,
+                                                     'EXTRA': '',
+                                                     'OUTPUT': poly_temp})
+
+        Dissolve = processing.run("native:dissolve", {'INPUT': poly_temp,
+                                                      'FIELD': ['DN'],
+                                                      'SEPARATE_DISJOINT': False,
+                                                      'OUTPUT': temp_dis})
+
+        gdf = gpd.read_file(temp_dis)
+        gdf = gdf[(gdf['DN'] > 0) & (gdf['DN'] < 15)]
+        gdf.to_file(final_temp_dis)
+
+        # Load the main polygon layer
+        main_layer = gpd.read_file(aggregate)
+
+        # Load the layer you want to check for intersection
+        intersect_layer = gpd.read_file(final_temp_dis)
+
+        # Perform a spatial join
+        intersecting_records = gpd.sjoin(main_layer, intersect_layer, how='inner', op='intersects')
+
+        # Extract the intersecting polygons
+        intersecting_polygons = main_layer.loc[intersecting_records.index]
+
+        # Save to a new shapefile
+        admin_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Admin.shp"
+        intersecting_polygons.to_file(admin_RE)
+
+
+        styleTemplate = f"{current_script_path}\Style\Insights Aggregation.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{admin_RE.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+
+        layer4 = QgsVectorLayer(admin_RE, f"{self.dlg.RE_Output_Field.text()}Admin")
+        QgsProject.instance().addMapLayer(layer4)
+
         layer3 = QgsRasterLayer(combined_RE, f"{self.dlg.RE_Output_Field.text()}Combine")
         QgsProject.instance().addMapLayer(layer3)
-
 
     def Aggregationinsights(self):
         # self.dlg.individualAggregation_Check.setText("")
@@ -4105,10 +3839,11 @@ class GenderIndicatorTool:
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        layer = QgsVectorLayer(shpOutput, f"{self.dlg.AGG_Output_Field.text()}")
-        QgsProject.instance().addMapLayer(layer)
+        self.dlg.Insights_AGGReclass_Input_Field.setFilePath(f"{shpOutput}")
 
-        
+        # layer = QgsVectorLayer(shpOutput, f"{self.dlg.AGG_Output_Field.text()}")
+        # QgsProject.instance().addMapLayer(layer)
+
     def Bufferinsights(self):
         # self.dlg.individualAggregation_Check.setText("")
         # self.dlg.individualAggregation_Check.repaint()
@@ -4135,6 +3870,7 @@ class GenderIndicatorTool:
         insights_raster = self.dlg.Insights_Buf_Input_Field.filePath()
         location_point = self.dlg.Insights_Points_Input_Field.filePath()
         countryLayer = self.dlg.countryLayer_Field.filePath()
+        aggregate = self.dlg.Insights_AGGReclass_Input_Field_2.filePath()
 
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
 
@@ -4185,6 +3921,31 @@ class GenderIndicatorTool:
         styleFile = f"{self.dlg.Buffer_Output_Field.text()}.qml"
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        # Load the main polygon layer
+        main_layer = gpd.read_file(aggregate)
+
+        # Load the layer you want to check for intersection
+        intersect_layer = gpd.read_file(shpOutput)
+
+        # Perform a spatial join
+        intersecting_records = gpd.sjoin(main_layer, intersect_layer, how='inner', op='intersects')
+
+        # Extract the intersecting polygons
+        intersecting_polygons = main_layer.loc[intersecting_records.index]
+
+        # Save to a new shapefile
+        admin_RE = f"{workingDir}{Insights_folder}/" + self.dlg.RE_Output_Field.text() + "Admin_buffer.shp"
+        intersecting_polygons.to_file(admin_RE)
+
+        styleTemplate = f"{current_script_path}\Style\Insights Aggregation.qml"
+        styleFileDestination = f"{workingDir}{Insights_folder}/"
+        styleFile = f"{admin_RE.split('.')[0]}.qml"
+
+        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+        layer2 = QgsVectorLayer(admin_RE, f"{self.dlg.RE_Output_Field.text()}Admin_buffer")
+        QgsProject.instance().addMapLayer(layer2)
 
         layer = QgsVectorLayer(shpOutput, f"{self.dlg.Buffer_Output_Field.text()}")
         QgsProject.instance().addMapLayer(layer)

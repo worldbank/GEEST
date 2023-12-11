@@ -296,7 +296,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Setup&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;GEEST - Setup&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;In this tab, the user must: &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Set  the output directory. The output directory must be created by the user prior to setup and it is where all outputs from the tool will be stored; &lt;/span&gt;&lt;/p&gt;
@@ -3373,7 +3373,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>9</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
@@ -6392,7 +6392,7 @@ p, li { white-space: pre-wrap; }
      </property>
      <widget class="QWidget" name="tab_38">
       <attribute name="title">
-       <string>Reclassify</string>
+       <string>Enablement</string>
       </attribute>
       <widget class="QLabel" name="label_266">
        <property name="geometry">
@@ -6427,7 +6427,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Score Input layer (Raster)</string>
+        <string>Enablement Score Input layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_Population_Input_Field">
@@ -6450,7 +6450,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Reclassify</string>
+        <string>Categorize</string>
        </property>
       </widget>
       <widget class="QPushButton" name="Pop_reclassify">
@@ -6463,7 +6463,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Reclassify</string>
+        <string>Categorize</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_271">
@@ -6476,7 +6476,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Reclassified Score Input layer (Raster)</string>
+        <string>Categorized Score Input layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_ScoreReclass_Input_Field">
@@ -6509,7 +6509,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Reclassified Population Input Layer (Raster)</string>
+        <string>Categorized Population Input Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QPushButton" name="Combine_reclassify">
@@ -6517,12 +6517,12 @@ p, li { white-space: pre-wrap; }
         <rect>
          <x>10</x>
          <y>280</y>
-         <width>75</width>
+         <width>131</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
-        <string>Combine</string>
+        <string>Combine Categorization</string>
        </property>
       </widget>
       <widget class="QTextEdit" name="textEdit_34">
@@ -6568,10 +6568,98 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;9.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffered Location Output File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to a 10-km radius of each point in the Location Input Layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
+      <widget class="QgsFilterLineEdit" name="AGG_Output_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>440</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Aggregation_</string>
+       </property>
+       <property name="qgisRelation" stdset="0">
+        <string notr="true"/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_269">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>320</y>
+         <width>321</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Combined Categarization Layer (Raster)</string>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="Insights_Polygon_Input_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>390</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="Insights_Agg_Input_Field">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>340</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="Aggregation_Execute_PB">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>440</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Execute</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_267">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>420</y>
+         <width>291</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output Aggregated File (Polygon)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_262">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>370</y>
+         <width>281</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Aggregation Input Layer (Polygon)</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_35">
       <attribute name="title">
-       <string>RE Zones</string>
+       <string>Raster Locations</string>
       </attribute>
       <widget class="QTextEdit" name="textEdit_13">
        <property name="enabled">
@@ -6633,7 +6721,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>60</y>
+         <y>110</y>
          <width>251</width>
          <height>16</height>
         </rect>
@@ -6646,7 +6734,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>80</y>
+         <y>130</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6691,7 +6779,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Reclassified Input layer (Raster)</string>
+        <string>Combined Categarization Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_Reclass_Input_Field">
@@ -6704,133 +6792,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
       </widget>
-      <widget class="QLabel" name="label_274">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>110</y>
-         <width>251</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Select Visualisation</string>
-       </property>
-      </widget>
-      <widget class="QComboBox" name="Symbology_Style">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>201</width>
-         <height>22</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="tab_36">
-      <attribute name="title">
-       <string>Aggregation</string>
-      </attribute>
-      <widget class="QTextEdit" name="textEdit_23">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>360</x>
-         <y>-10</y>
-         <width>391</width>
-         <height>521</height>
-        </rect>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Aggregation&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to glean further insights from the results based on proximity to either women's residences or RE opportunities. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;2.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Population Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required):&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Population count layer (.tif). This should be represented as the count of women in each raster cell. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;3.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Potential RE Zones Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Zones of high RE potential (.tif) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;4.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Raster File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: This produces six output rasters: &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;a)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The score input layer reclassed into five discrete classes.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;b)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The population input layer reclassed into three discrete classes&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt; based on the lower, median, and upper quartile range of data to identify areas of low, medium, and high population.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;c)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;    &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A raster layer which combines the five Score and three Population classes. This layer contains 15 classes defined in the ‘About’ tab. This output covers the entire country or region of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;d)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(a) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;e)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(b) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;f)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(c) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;5.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Insights layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: The raster created in 4(c) above (filepath automatically loaded). &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;6.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;7.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Aggregated File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to the scale of the aggregation input layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;8.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Location Input laye&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;r: (optional) Point locations of interest (.shp). These could be existing RE job locations or other points of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;9.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffered Location Output File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to a 10-km radius of each point in the Location Input Layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_262">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>281</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Aggregation Input Layer (Polygon)</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_267">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>110</y>
-         <width>291</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Output Aggregated File (Polygon)</string>
-       </property>
-      </widget>
-      <widget class="QgsFilterLineEdit" name="AGG_Output_Field">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>201</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Aggregation_</string>
-       </property>
-       <property name="qgisRelation" stdset="0">
-        <string notr="true"/>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_269">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>321</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Combined Insights Layer (Raster)</string>
-       </property>
-      </widget>
-      <widget class="QgsFileWidget" name="Insights_Polygon_Input_Field">
+      <widget class="QgsFileWidget" name="Insights_AGGReclass_Input_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -6840,33 +6802,23 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
       </widget>
-      <widget class="QPushButton" name="Aggregation_Execute_PB">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>130</y>
-         <width>75</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Execute</string>
-       </property>
-      </widget>
-      <widget class="QgsFileWidget" name="Insights_Agg_Input_Field">
+      <widget class="QLabel" name="label_275">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
-         <width>231</width>
-         <height>31</height>
+         <y>60</y>
+         <width>311</width>
+         <height>16</height>
         </rect>
+       </property>
+       <property name="text">
+        <string>Aggregated Combined Categarization Layer (Polygon)</string>
        </property>
       </widget>
      </widget>
      <widget class="QWidget" name="tab_37">
       <attribute name="title">
-       <string>Buffer</string>
+       <string>Point Locations</string>
       </attribute>
       <widget class="QTextEdit" name="textEdit_31">
        <property name="enabled">
@@ -6915,7 +6867,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>110</y>
+         <y>160</y>
          <width>291</width>
          <height>16</height>
         </rect>
@@ -6941,7 +6893,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>60</y>
+         <y>110</y>
          <width>321</width>
          <height>16</height>
         </rect>
@@ -6954,7 +6906,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>130</y>
+         <y>180</y>
          <width>201</width>
          <height>21</height>
         </rect>
@@ -6970,7 +6922,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>80</y>
+         <y>130</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6990,13 +6942,36 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>220</x>
-         <y>130</y>
+         <y>180</y>
          <width>75</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
         <string>Execute</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_276">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>60</y>
+         <width>311</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Aggregated Combined Categarization Layer (Polygon)</string>
+       </property>
+      </widget>
+      <widget class="QgsFileWidget" name="Insights_AGGReclass_Input_Field_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>231</width>
+         <height>31</height>
+        </rect>
        </property>
       </widget>
      </widget>
