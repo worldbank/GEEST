@@ -6,7 +6,7 @@
 
 [Install Open Route Service (ORS) plugin](##-2-Install-Open-Route-Service-(ORS)-plugin)
 
-
+[Install Open Route Service (ORS) plugin](##-2-Install-Open-Route-Service-ORS-plugin)
 
 ## 1 Install QGIS
 
