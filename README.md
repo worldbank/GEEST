@@ -155,9 +155,9 @@ pip install -r requirements.txt
 
 7. Set your preferred out raster output resolution in meters squared.
 
-## 4.2 INDIVIDUAL TAB
+### 4.2 INDIVIDUAL TAB
 
-### 4.2.1 Education
+#### 4.2.1 Education
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/39326777-56ac-4070-9926-40a7f064758e)
 
@@ -175,7 +175,7 @@ pip install -r requirements.txt
 
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
 
-### 4.2.2 Care Responsibilities
+#### 4.2.2 Care Responsibilities
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/93de6a5b-15cb-4ca9-89a6-2bc7f4bc0537)
 
@@ -193,7 +193,7 @@ pip install -r requirements.txt
 
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
 
-### 4.2.3 Domestic Violence
+#### 4.2.3 Domestic Violence
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/b7aa52c3-a1f9-4554-9754-c9ddec97c46a)
 
@@ -211,7 +211,7 @@ pip install -r requirements.txt
 
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
 
-### 4.2.4 Aggregate
+#### 4.2.4 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/652149bb-9205-4b14-9f01-cb19da7e8701)
 
@@ -233,9 +233,9 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
 
-## 4.3 CONTEXTUAL TAB
+### 4.3 CONTEXTUAL TAB
 
-### 4.3.1 Policy and Legal Protection
+#### 4.3.1 Policy and Legal Protection
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/c77e07f2-2980-4294-9f70-9506c3bf7f81)
 
@@ -247,7 +247,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 6. Status text next to the "Execute" button will appear and let you know once processing is complete.
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_ Folder/Contextual/Raster\_output.tif_)
 
-### 4.3.2 Access to Finance
+#### 4.3.2 Access to Finance
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/5644492a-99c3-41c2-a8bf-d61f68827cdf)
 
@@ -265,7 +265,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_ Folder/Contextual/Raster\_output.tif_)
 
-### 4.3.3 Aggregate
+#### 4.3.3 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/7d78a94b-076f-438a-b5f3-14bdf44edf17)
 
@@ -287,9 +287,9 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_ Folder/Contextual/Raster\_output.tif_)
 
-## 4.4 ACCESSIBILITY TAB
+### 4.4 ACCESSIBILITY TAB
 
-### 4.4.1 Women's Travel Patterns
+#### 4.4.1 Women's Travel Patterns
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/96b72156-45d7-4310-b959-2f17b7718e27)
 
@@ -324,7 +324,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 12. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_Foldser/Accessibility/Raster\_output.tif_)
 
-### 4.4.2 Access to Public Transport
+#### 4.4.2 Access to Public Transport
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/c3bf07a4-3a6e-4cf1-a59b-6731b5d6cbf3)
 
@@ -344,7 +344,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. The aggregated output raster file will be stored in the project folder set in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
 
-### 4.4.3 Access to Education and Training Facilities
+#### 4.4.3 Access to Education and Training Facilities
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/38c5ef9e-0b82-4db7-b22a-afce1e678e65)
 
@@ -364,7 +364,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
 
-### 4.4.4 Access to Jobs in the RE sector
+#### 4.4.4 Access to Jobs in the RE sector
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/3138898e-1c2a-419f-ab45-8bf1e0a025e0)
 
@@ -384,7 +384,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
 
-### 4.4.5 Access to Health Facilities
+#### 4.4.5 Access to Health Facilities
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/74cab802-4d1a-42e0-a15e-0b062e308217)
 
@@ -404,7 +404,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder. (_Project\_ Folder/Accessibility/Raster\_output.tif_)
 
-### 4.4.6 Access to Financial Facilities
+#### 4.4.6 Access to Financial Facilities
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/df5b270e-b77a-4820-af28-343088359878)
 
@@ -424,7 +424,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
 
-### 4.4.7 Aggregate
+#### 4.4.7 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/395612a1-f2d1-4c4c-9a03-80874651ddf2)
 
@@ -446,9 +446,9 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
 
-## 4.5 PLACE CHARACTERIZATION TAB
+### 4.5 PLACE CHARACTERIZATION TAB
 
-### 4.5.1 Active Transport
+#### 4.5.1 Active Transport
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/437ac901-0f25-4750-acf4-ee3f7f460d3f)
 
@@ -470,7 +470,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/__Place Characterization/Raster\_output.tif_).
 
-### 4.5.2 Availability of Public Transport
+#### 4.5.2 Availability of Public Transport
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/19f8a8bc-1868-42f5-a199-023dc6f14849)
 
@@ -488,7 +488,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/__Place Characterization/Raster\_output.tif_).
 
-### 4.5.3 Safety
+#### 4.5.3 Safety
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/93fa284e-77ab-4f77-a15e-6886ce90623b)
 
@@ -530,7 +530,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 11. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_Folder//Place Characterization/Raster\_output.tif_)
 
-### 4.5.5 Income Level
+#### 4.5.5 Income Level
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/5e244e96-ba82-4c63-a6ca-5b569d6c8d13)
 
@@ -548,7 +548,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_Folder//Place Characterization/Raster\_output.tif_).
 
-### 4.5.6 Electricity Access
+#### 4.5.6 Electricity Access
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/a24d2cb5-f62f-411f-9774-49b41b455d7d)
 
@@ -580,7 +580,7 @@ OR
 
 **N.B. If night time lights raster data is used for the "Safe Urban Design" factor it should not be used in the "Electrical Access" factor and vice-versa**
 
-### 4.5.7Urbanization
+#### 4.5.7Urbanization
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/dd3e2069-b8cc-4a63-b69d-e0ec16110662)
 
@@ -594,7 +594,7 @@ OR
 
 5. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/Place Characterization/Raster\_output.tif_).
 
-### 4.5.8 Size of Housing
+#### 4.5.8 Size of Housing
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/98ade628-c27b-4103-8b19-22402d71c6b4)
 
@@ -612,7 +612,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/__Place Characterization/Raster\_output.tif_).
 
-### 4.5.9 Digital Inclusion
+#### 4.5.9 Digital Inclusion
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/3a31dbee-636f-48bb-bf5a-8f3aea50fed6)
 
@@ -630,7 +630,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_Folder//Place Characterization/Raster\_output.tif_).
 
-### 4.5.10 Natural Environment and Climatic Factors
+#### 4.5.10 Natural Environment and Climatic Factors
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/503e2e4f-f4d2-46be-b941-19dd81a37e34)
 
@@ -662,7 +662,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 13. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_Folder//Place Characterization/Raster\_output.tif_).
 
-### 4.5.11 Aggregate
+#### 4.5.11 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/86a30af0-6fe2-4711-8f2a-43ecdd854098)
 
@@ -684,7 +684,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_ Folder/Place Characterization/Raster\_output.tif_).
 
-## 4.6 DIMENSION AGGREGATION TAB
+### 4.6 DIMENSION AGGREGATION TAB
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/f0e52173-c037-49d3-be0f-b30b3f858ebc)
 
@@ -706,7 +706,7 @@ If a dimension is missing it needs to be given a weighting of 0%.
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Final\_output" folder (_Project\_ Folder/Final\_Output/Raster\_output.tif_).
 
-## 4.7 INSIGHTS TAB
+### 4.7 INSIGHTS TAB
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/d6f7ba73-01f4-4791-b09b-7f1276811f10)
 
@@ -714,35 +714,35 @@ If a dimension is missing it needs to be given a weighting of 0%.
 
 To be populated during the tool trial period as we identify common bugs or issues that aren't necessarily related to the back end programming of the tool.
 
-## 5.1 Acceccibilty tab processing Permission Error
+### 5.1 Acceccibilty tab processing Permission Error
 
-## 5.2 INTERFACE WIDGETS AND TEXT ARE DISTORTED
+### 5.2 INTERFACE WIDGETS AND TEXT ARE DISTORTED
 
-## 5.3 Raster outputs not dispalying correctly
+### 5.3 Raster outputs not dispalying correctly
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/383081b1-4b8b-41c7-8c4b-bf3fe09b5215)
 
 Occasionally, some of the outputs that are automatically loaded to the QGIS table of contents don't display correctly. To correct this, try and removing the layer that is displayed incorrectly and add it again to QGIS.
-
+#
 ## 5.4 ERROR: OUTPUT DIRECTORY NOT SET
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/9ae44237-e6f8-4bb9-ac4d-ba9081cc83b9)
 
 If you see the following error message, please check if you're output directory has been set in the "Setup" tab.
 
-## 5.5 ERROR: Country boundary Polygon not set
+### 5.5 ERROR: Country boundary Polygon not set
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/8c92f6df-07b3-4953-bf7b-0a57a3c10072)
 
 If you see the following error message, please check if you're country boundary polygon layer has been set in the "Setup" tab.
 
-## 5.6 ERROR: Co-ordinate Reference System (CRS) not set
+### 5.6 ERROR: Co-ordinate Reference System (CRS) not set
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/fd3baffa-6b3f-4ef7-a89a-8168b57cd7be)
 
 If you see the following error message, please check if you're CRS has been set in the "Setup" tab.
 
-## 5.7 Steps to take if tool freezes or does not run as expected
+### 5.7 Steps to take if tool freezes or does not run as expected
 
 1. Install the "Plugin Reloader" plugin.
 
