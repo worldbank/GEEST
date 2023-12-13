@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>World Bank Gender Indicator Tool</string>
+   <string>Gender Enabling Environments Spatial Tool (GEEST)</string>
   </property>
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
@@ -57,7 +57,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#2b2b2b;&quot;&gt;About&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#2b2b2b;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#2b2b2b;&quot;&gt;This tool spatially identifies regions where enabling environments exist to support women to secure employment or business opportunities in the renewable energy (RE) sector by implementing the framework described in “A Methodological Framework for a Geospatial Assessment of Women’s Employment and Business Opportunities in the Renewable Energy Sector”. For additional detail on the framework, and particular geoprocessing methods utilized, please consult the methodology document which can be accessed here (hyperlink).&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#2b2b2b;&quot;&gt;GEEST spatially identifies regions where enabling environments exist to support women to secure employment or business opportunities in the renewable energy (RE) sector by implementing the framework described in “A Methodological Framework for a Geospatial Assessment of Women’s Employment and Business Opportunities in the Renewable Energy Sector”. For additional detail on the framework, and particular geoprocessing methods utilized, please consult the methodology document which can be accessed here (hyperlink).&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#2b2b2b;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#2b2b2b;&quot;&gt;For information on how to use the tool, consult the tool manual which is stored here (hyperlink). &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; color:#2b2b2b;&quot;&gt;Brief summary of the framework&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#2b2b2b;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
@@ -3373,7 +3373,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="currentIndex">
-      <number>9</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
@@ -6450,7 +6450,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Categorize</string>
+        <string>Classify</string>
        </property>
       </widget>
       <widget class="QPushButton" name="Pop_reclassify">
@@ -6463,7 +6463,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Categorize</string>
+        <string>Classify</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_271">
@@ -6476,7 +6476,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Categorized Score Input layer (Raster)</string>
+        <string>Classified Score Input layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_ScoreReclass_Input_Field">
@@ -6509,7 +6509,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Categorized Population Input Layer (Raster)</string>
+        <string>Classified Population Input Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QPushButton" name="Combine_reclassify">
@@ -6522,7 +6522,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Combine Categorization</string>
+        <string>Combine Classification</string>
        </property>
       </widget>
       <widget class="QTextEdit" name="textEdit_34">
@@ -6548,7 +6548,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Reclassification&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Enablement&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to glean further insights from the results based on proximity to either women's residences or RE opportunities. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
@@ -6594,7 +6594,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Combined Categarization Layer (Raster)</string>
+        <string>Combined Classified Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_Polygon_Input_Field">
@@ -6684,7 +6684,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - RE Zones&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Raster Locations&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to glean further insights from the results based on proximity to either women's residences or RE opportunities. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
@@ -6779,7 +6779,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Combined Categarization Layer (Raster)</string>
+        <string>Combined Classification Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_Reclass_Input_Field">
@@ -6812,7 +6812,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Aggregated Combined Categarization Layer (Polygon)</string>
+        <string>Aggregated Combined Classification Layer (Polygon)</string>
        </property>
       </widget>
      </widget>
@@ -6843,7 +6843,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Buffer&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Point Locations&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to glean further insights from the results based on proximity to either women's residences or RE opportunities. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
@@ -6886,7 +6886,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Combined Insights Layer (Raster)</string>
+        <string>Combined Classification Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_263">
@@ -6961,7 +6961,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Aggregated Combined Categarization Layer (Polygon)</string>
+        <string>Aggregated Combined Classification Layer (Polygon)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_AGGReclass_Input_Field_2">

@@ -3,14 +3,14 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=World Bank Gender Indicator Tool
+name=Gender Enabling Environments Spatial Tool (GEEST)
 qgisMinimumVersion=3.0
-description=Gender Indicator Tool
+description=Gender Enabling Environments Spatial Tool
 version=0.1
 author=Pegasys
 email=andre@pegasys.co.za
 
-about=This tool employs a multicriteria evaluation (MCE) framework to spatially describe communities' access to formal employment and business opportunities in the renewable energy sector in Small Island Developing States (SIDS). The MCE framework allows for the incorporation and assessment of dimensions, factors, and indicators to identify where the enabling environments (or lack thereof) are located for women to secure employment opportunities in SIDS.
+about=This tool employs a multicriteria evaluation (MCE) framework to spatially describe womens' access to formal employment and business opportunities in the renewable energy sector in Small Island Developing States (SIDS). The MCE framework allows for the incorporation and assessment of dimensions, factors, and indicators to identify where the enabling environments (or lack thereof) are located for women to secure employment opportunities in SIDS.
 
 tracker=https://github.com/Pegasys-Resilience/WBGIT/issues
 repository=https://github.com/Pegasys-Resilience/WBGIT
@@ -44,4 +44,3 @@ Category of the plugin: Raster, Vector, Database or Web
 
 # If the plugin can run on QGIS Server.
 server=False
-

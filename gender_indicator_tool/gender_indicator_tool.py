@@ -3470,7 +3470,7 @@ class GenderIndicatorTool:
 
         meta1.update(dtype=rasterio.float32)
 
-        score_rec = f"{workingDir}{Insights_folder}/Enablement_categories.tif"
+        score_rec = f"{workingDir}{Insights_folder}/Enablement_classification.tif"
         with rasterio.open(score_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
@@ -3511,11 +3511,12 @@ class GenderIndicatorTool:
         pixelSize = self.dlg.pixelSize_SB.value()
 
         # Temp OUTPUT
+        countryUTMLayer = f"{tempDir}/countryUTMLayer.shp"
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
         PoptempResample = f"{tempDir}/PoptempResample.tif"
 
         self.convertCRS(countryLayer, UTM_crs)
-        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+        shp_utm.to_file(countryUTMLayer)
 
         buffer = processing.run("native:buffer", {'INPUT': countryUTMLayer,
                                                   'DISTANCE': 2000,
@@ -3550,19 +3551,24 @@ class GenderIndicatorTool:
             pop_ras = src.read(1)
             meta1 = src.meta
 
-            pop_ras[pop_ras == src.nodata] = 0
-            masked_raster = np.ma.masked_where(pop_ras == 0, pop_ras)
+            pop_ras[pop_ras == src.nodata] = -1
+            masked_raster = np.ma.masked_where(pop_ras == -1, pop_ras)
+
+            # out_image, out_transform = np.ma.mask(masked_raster, countryUTMLayer, invert=True)
 
         percentile_25 = np.percentile(masked_raster.compressed(), 25)
         percentile_75 = np.percentile(masked_raster.compressed(), 75)
 
-        # Raster Calculation
-
-        result = 1 * (pop_ras <= percentile_25) + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75) + 3 * (
+        # # Raster Calculation
+        #
+        result = 0 * (pop_ras == -1) + 1 * (pop_ras > -1) * (pop_ras <= percentile_25) + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75) + 3 * (
                     pop_ras > percentile_75)
+
+        # result = pop_ras
+
         meta1.update(dtype=rasterio.float32)
 
-        pop_rec = f"{workingDir}{Insights_folder}/Relative_Population_Count_Reclassified.tif"
+        pop_rec = f"{workingDir}{Insights_folder}/Relative_Population_Count_Classified.tif"
         with rasterio.open(pop_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
@@ -3630,7 +3636,7 @@ class GenderIndicatorTool:
 
         meta1.update(dtype=rasterio.float32)
 
-        combined_rec = f"{workingDir}{Insights_folder}/ScPop_Combined_categorization.tif"
+        combined_rec = f"{workingDir}{Insights_folder}/ScPop_Combined_classification.tif"
         with rasterio.open(combined_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
@@ -3644,7 +3650,7 @@ class GenderIndicatorTool:
         self.dlg.Insights_Agg_Input_Field.setFilePath(f"{combined_rec}")
         self.dlg.Insights_Buf_Input_Field.setFilePath(f"{combined_rec}")
 
-        layer0 = QgsRasterLayer(combined_rec, f"Combine")
+        layer0 = QgsRasterLayer(combined_rec, f"ScPop_Combined_classification")
         QgsProject.instance().addMapLayer(layer0)
 
     def reZones(self):
@@ -3840,6 +3846,7 @@ class GenderIndicatorTool:
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
         self.dlg.Insights_AGGReclass_Input_Field.setFilePath(f"{shpOutput}")
+        self.dlg.Insights_AGGReclass_Input_Field_2.setFilePath(f"{shpOutput}")
 
         # layer = QgsVectorLayer(shpOutput, f"{self.dlg.AGG_Output_Field.text()}")
         # QgsProject.instance().addMapLayer(layer)
