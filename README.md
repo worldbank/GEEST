@@ -1,6 +1,6 @@
-# World Bank Gender Indicator Tool
+# Gender Enabling Environments Spatial Tool (GEEST)
 
-## User Manual September 2023
+## User Manual December 2023
 
 [1 Install QGIS](#1-install-qgis)
 
