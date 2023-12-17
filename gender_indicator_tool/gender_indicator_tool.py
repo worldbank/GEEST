@@ -4021,7 +4021,7 @@ class GenderIndicatorTool:
         intersecting_polygons = main_layer.loc[intersecting_records.index]
 
         # Save to a new shapefile
-        admin_RE = f"{workingDir}{Insights_folder}/{Insights_re_point}/" + self.dlg.RE_Output_Field.text() + f"admin_unit_{str(bufferDistance)}m_buffer_intersection.shp"
+        admin_RE = f"{workingDir}{Insights_folder}/{Insights_re_point}/" + self.dlg.Buffer_Output_Field.text() + f"admin_unit_{str(bufferDistance)}m_buffer_intersection.shp"
         intersecting_polygons.to_file(admin_RE)
 
         styleTemplate = f"{current_script_path}\Style\Insights Aggregation.qml"
@@ -4030,7 +4030,7 @@ class GenderIndicatorTool:
 
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        layer2 = QgsVectorLayer(admin_RE, f"{self.dlg.RE_Output_Field.text()}admin_unit_{str(bufferDistance)}m_buffer_intersection")
+        layer2 = QgsVectorLayer(admin_RE, f"{self.dlg.Buffer_Output_Field.text()}admin_unit_{str(bufferDistance)}m_buffer_intersection")
         QgsProject.instance().addMapLayer(layer2)
 
         layer = QgsVectorLayer(shpOutput, f"{self.dlg.Buffer_Output_Field.text()}{str(bufferDistance)}m_buffer")
