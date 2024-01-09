@@ -1289,7 +1289,7 @@ class GenderIndicatorTool:
             self.dlg.PBT_status.repaint()
             FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
             ranges = self.dlg.PBT_Ranges_Field.text()
-            rasOutput = self.dlg.PBT_Output_Field.text()
+            rasOutput = f"{self.dlg.PBT_Output_Field.text()[:-4]}{self.dlg.PBT_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
             styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1322,7 +1322,7 @@ class GenderIndicatorTool:
             self.dlg.ETF_status.repaint()
             FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
             ranges = self.dlg.ETF_Ranges_Field.text()
-            rasOutput = self.dlg.ETF_Output_Field.text()
+            rasOutput = f"{self.dlg.ETF_Output_Field.text()[:-4]}{self.dlg.ETF_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
             styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1355,7 +1355,7 @@ class GenderIndicatorTool:
             self.dlg.JOB_status.repaint()
             FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
             ranges = self.dlg.JOB_Ranges_Field.text()
-            rasOutput = self.dlg.JOB_Output_Field.text()
+            rasOutput = f"{self.dlg.JOB_Output_Field.text()[:-4]}{self.dlg.JOB_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
             styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1387,7 +1387,7 @@ class GenderIndicatorTool:
             self.dlg.HEA_status.repaint()
             FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
             ranges = self.dlg.HEA_Ranges_Field.text()
-            rasOutput = self.dlg.HEA_Output_Field.text()
+            rasOutput = f"{self.dlg.HEA_Output_Field.text()[:-4]}{self.dlg.HEA_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
             styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1419,7 +1419,7 @@ class GenderIndicatorTool:
             self.dlg.FIF_status.repaint()
             FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
             ranges = self.dlg.FIF_Ranges_Field.text()
-            rasOutput = self.dlg.FIF_Output_Field.text()
+            rasOutput = f"{self.dlg.FIF_Output_Field.text()[:-4]}{self.dlg.FIF_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
             styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
@@ -1451,7 +1451,7 @@ class GenderIndicatorTool:
             self.dlg.WTP_status.repaint()
             FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
             ranges = self.dlg.WTP_Ranges_Field.text()
-            rasOutput = self.dlg.WTP_FacilityOutput_Field.text()
+            rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
 
