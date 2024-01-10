@@ -1647,7 +1647,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_17">
       <attribute name="title">
@@ -4121,7 +4121,7 @@ p, li { white-space: pre-wrap; }
          <x>10</x>
          <y>10</y>
          <width>311</width>
-         <height>31</height>
+         <height>21</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -4144,7 +4144,7 @@ p, li { white-space: pre-wrap; }
          <x>10</x>
          <y>240</y>
          <width>311</width>
-         <height>31</height>
+         <height>21</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -6464,7 +6464,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>90</y>
+         <y>110</y>
          <width>251</width>
          <height>16</height>
         </rect>
@@ -6477,7 +6477,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
+         <y>50</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6487,7 +6487,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
+         <y>30</y>
          <width>231</width>
          <height>16</height>
         </rect>
@@ -6500,7 +6500,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>110</y>
+         <y>130</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6510,7 +6510,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>60</y>
+         <y>80</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6523,7 +6523,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>140</y>
+         <y>160</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6536,7 +6536,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>180</y>
+         <y>210</y>
          <width>231</width>
          <height>16</height>
         </rect>
@@ -6549,7 +6549,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>200</y>
+         <y>230</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6559,7 +6559,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>250</y>
+         <y>280</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6569,7 +6569,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>230</y>
+         <y>260</y>
          <width>251</width>
          <height>16</height>
         </rect>
@@ -6582,7 +6582,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>280</y>
+         <y>310</y>
          <width>131</width>
          <height>23</height>
         </rect>
@@ -6616,29 +6616,30 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Enablement&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to glean further insights from the results based on proximity to either women's residences or RE opportunities. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;2.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Population Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required):&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Population count layer (.tif). This should be represented as the count of women in each raster cell. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;3.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Potential RE Zones Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Zones of high RE potential (.tif) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;4.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Raster File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: This produces six output rasters: &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;a)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The score input layer reclassed into five discrete classes.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;b)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The population input layer reclassed into three discrete classes&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt; based on the lower, median, and upper quartile range of data to identify areas of low, medium, and high population.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;c)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;    &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A raster layer which combines the five Score and three Population classes. This layer contains 15 classes defined in the ‘About’ tab. This output covers the entire country or region of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;d)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(a) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;e)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(b) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;f)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(c) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;5.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Insights layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: The raster created in 4(c) above (filepath automatically loaded). &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;6.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;7.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Aggregated File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to the scale of the aggregation input layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;8.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Location Input laye&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;r: (optional) Point locations of interest (.shp). These could be existing RE job locations or other points of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;9.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffered Location Output File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to a 10-km radius of each point in the Location Input Layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain furthe refined insights from the results based on discrete descriptive classes from the scored raster output derived in the previous tabs. Population data can also be incorporation and combined with score dataset allow for more nuanced insights that take into account both level of enablament and population. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Step 1: Classify into discrete classes&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Enablement Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (Level of Enablment): &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The enablement score input layer classified into five discrete classes.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Population Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required):&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Population count layer (.tif). This should be represented as the count of women in each raster cell. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (Relative Population Count): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The population input layer classified into three discrete classes&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt; based on the lower quartile range, &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;interquartile range&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt;, and upper quartile range of data to identify areas of relatively low, medium, and high population as per region.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Step 2: Combine score and population classifications&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Level of Enablment Input Layer: &lt;/span&gt;The level of enablement output raster layer produced in step 1.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Relative Population Count Input Layer: &lt;/span&gt;The relative population count output raster layer produced in step 1.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Output (Combine Classification): &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A single raster layer which combines the five levels of enablement descrptive classes three population classes. This layer contains 15 classes defined in the ‘About’ tab. This output covers the entire country or region of interest. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Step 3: Aggregation&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Combine Classification Input Layer: &lt;/span&gt;The combine classification output raster layer produced in step 2.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Aggregation Input Layer: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer) &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (Aggregation): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A polygon layer showing the 15 score-population classes produced in step 2 aggregated to the scale of the aggregation input layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QgsFilterLineEdit" name="AGG_Output_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>440</y>
+         <y>480</y>
          <width>201</width>
          <height>21</height>
         </rect>
@@ -6654,20 +6655,20 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>320</y>
+         <y>360</y>
          <width>321</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
-        <string>Combined Classification Layer (Raster)</string>
+        <string>Combined Classification Input Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_Polygon_Input_Field">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>390</y>
+         <y>430</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6677,7 +6678,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>340</y>
+         <y>380</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6687,7 +6688,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>220</x>
-         <y>440</y>
+         <y>480</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6700,7 +6701,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>420</y>
+         <y>460</y>
          <width>291</width>
          <height>16</height>
         </rect>
@@ -6713,13 +6714,82 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>370</y>
+         <y>410</y>
          <width>281</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
         <string>Aggregation Input Layer (Polygon)</string>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="textEdit_42">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>0</y>
+         <width>311</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 1: Classify into discrete classes&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="textEdit_43">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>190</y>
+         <width>311</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 2: Combine score and population classifications&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="textEdit_44">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>340</y>
+         <width>311</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 3: Aggregation&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
@@ -6752,22 +6822,11 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Raster Locations&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to glean further insights from the results based on proximity to either women's residences or RE opportunities. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;2.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Population Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required):&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Population count layer (.tif). This should be represented as the count of women in each raster cell. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;3.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Potential RE Zones Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Zones of high RE potential (.tif) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;4.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Raster File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: This produces six output rasters: &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;a)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The score input layer reclassed into five discrete classes.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;b)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The population input layer reclassed into three discrete classes&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt; based on the lower, median, and upper quartile range of data to identify areas of low, medium, and high population.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;c)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;    &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A raster layer which combines the five Score and three Population classes. This layer contains 15 classes defined in the ‘About’ tab. This output covers the entire country or region of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;d)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(a) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;e)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(b) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;f)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(c) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;5.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Insights layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: The raster created in 4(c) above (filepath automatically loaded). &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;6.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;7.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Aggregated File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to the scale of the aggregation input layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;8.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Location Input laye&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;r: (optional) Point locations of interest (.shp). These could be existing RE job locations or other points of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;9.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffered Location Output File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to a 10-km radius of each point in the Location Input Layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain further insights from the results based on proximity to potential RE zones. The outputs from this tab assign the combine classification score to the RE zones input  raster and extract the aggregated polygon/admin units that intersect with RE zones.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Combine Classification Input Layer:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;The combine classification output raster layer produced in step 2 of the previous tab.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregated Combine Classification Input Layer: &lt;/span&gt;The aggregated combine classification output polygon layer produced in step 3 of the previous tab.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Potential RE Zones Input Layer: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster layer highlighting the potetial RE zones. (Zones in the region that have no RE potential need to be represented with &amp;quot;no data&amp;quot; values in the raster file)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (RE zones): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; Raster layer of the RE zones with the combine classification scores assigned to the highlited RE zones. Additionally, the aggregated polygon/admin units that intersect with RE zones are extracted along with their majority class to a new polygon layer.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_261">
@@ -6780,7 +6839,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Output Raster File</string>
+        <string>RE Zones Output File/s</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_264">
@@ -6845,7 +6904,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Combined Classification Layer (Raster)</string>
+        <string>Combined Classification Input Layer (Raster)</string>
        </property>
       </widget>
       <widget class="QgsFileWidget" name="Insights_Reclass_Input_Field">
@@ -6878,7 +6937,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Aggregated Combined Classification Layer (Polygon)</string>
+        <string>Aggregated Combined Classification Input Layer (Polygon)</string>
        </property>
       </widget>
      </widget>
@@ -6911,22 +6970,13 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Point Locations&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to glean further insights from the results based on proximity to either women's residences or RE opportunities. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;2.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Population Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required):&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Population count layer (.tif). This should be represented as the count of women in each raster cell. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;3.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Potential RE Zones Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Zones of high RE potential (.tif) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;4.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Raster File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: This produces six output rasters: &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;a)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The score input layer reclassed into five discrete classes.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;b)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The population input layer reclassed into three discrete classes&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt; based on the lower, median, and upper quartile range of data to identify areas of low, medium, and high population.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;c)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;    &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A raster layer which combines the five Score and three Population classes. This layer contains 15 classes defined in the ‘About’ tab. This output covers the entire country or region of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;d)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(a) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;e)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(b) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;f)&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster 4(c) intersected with just the zones of high RE potential. This layer is automatically loaded into the workspace&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;5.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Insights layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: The raster created in 4(c) above (filepath automatically loaded). &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;6.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (optional): Polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer) &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;7.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output Aggregated File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to the scale of the aggregation input layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;8.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Location Input laye&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;r: (optional) Point locations of interest (.shp). These could be existing RE job locations or other points of interest. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;9.&lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt;     &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt; font-weight:600;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffered Location Output File&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A polygon layer showing the 15 score-population classes created in 4(c) aggregated to a 10-km radius of each point in the Location Input Layer by identifying the majority class. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain further insights from the results based on proximity to RE point locations. The outputs from this tab aggregate  the combine classification score based on the majority class that fall within RE point location buffers and extract the aggregated polygon/admin units that intersect with RE point location buffers from the original combine classification raster produced in the in step 2 of the &amp;quot;Enablement&amp;quot; tab.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Combine Classification Input Layer:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;The combine classification output raster layer produced in step 2 of the previous tab.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregated Combine Classification Input Layer: &lt;/span&gt;The aggregated combine classification output polygon layer produced in step 3 of the previous tab.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;RE Point Location Input Layer: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Point locations of interest (.shp). These could be existing RE job locations or other points of interest.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffer Distance: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Radial distance of circular buffer from point location in meters.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (RE Point): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A polygon layer showing the 15 score-population classes aggregated to the RE point buffers scalr by identifying the majority class that fall within the buffers. Additionally, the aggregated polygon/admin units that intersect with RE point location buffers are extracted along with their majority class to a new polygon layer.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_268">
@@ -6939,7 +6989,7 @@ p, li { white-space: pre-wrap; }
         </rect>
        </property>
        <property name="text">
-        <string>Buffered Location Output File (Polygon)</string>
+        <string>RE Point Location Output File/s</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_270">
