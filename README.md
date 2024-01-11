@@ -12,13 +12,13 @@
    - [4.1 Setup Tab](#setup-tab)
    - [4.2 Indivdual Tab](#indivdual-tab)
       - [4.2.1 Education](#education-tab)
-      - [4.2.2 Care Responsibilities](#education-tab)
+      - [4.2.2 Care Responsibilities](#care-responsibilities-tab)
       - [4.2.3 Domestic Violence](#domestic-violence-tab)
-      - [4.2.4 Aggregation](#ID-aggregation-tab)
+      - [4.2.4 Aggregation](#id-aggregation-tab)
    - [4.3 Contextual Tab](#contextual-tab)
       - [4.3.1 Policy and Legal Protection](#policy-and-legal-protection-tab)
       - [4.3.2 Access to Finance](#access-to-finance-tab)
-      - [4.3.3 Aggregation](#CD-aggregation-tab)
+      - [4.3.3 Aggregation](#cd-aggregation-tab)
 
 - [5 Troubleshooting](#5-troubleshooting)
 
@@ -227,7 +227,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/DOV_Raster_output.tif*)
 
-#### <a name="ID-aggregation-tab"></a>4.2.4 Aggregate
+#### <a name="id-aggregation-tab"></a>4.2.4 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/a6cc36ed-377b-4c9d-933a-a8556832494e)
 
@@ -291,7 +291,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/FIN_Raster_output.tif*)
 
-#### <a name="CD-aggregation-tab"></a>4.3.3 Aggregate
+#### <a name="cd-aggregation-tab"></a>4.3.3 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/732852d1-27bc-42b5-bfe7-6165a70cf0b6)
 
