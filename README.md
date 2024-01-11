@@ -840,18 +840,33 @@ Information on the tool it's framework, scoring system, and how results should o
 
 ## 5 Troubleshooting
 
-To be populated during the tool trial period as we identify common bugs or issues that aren't necessarily related to the back end programming of the tool.
+### 5.1 ACCESSIBILTY TABS PERMISSIONS ERROR
 
-### 5.1 Acceccibilty tab processing Permission Error
+This error occurs sometimes when some of the shapefiles produced in the temp folder of the working directory are trying to be overwritten or deleted but can't because it's still being stored in QGIS's memory. This sometimes occurs even when the layer is removed fromthe QGIS table of contents.
 
-### 5.2 INTERFACE WIDGETS AND TEXT ARE DISTORTED
+This error occurs even when the tool ran correctly so first check the desired output file was produce in the working directory.
 
-### 5.3 Raster outputs not dispalying correctly
+If the file is not produced you can try the following:
+- Delete the *temp* folder in the working directory
+- If you are unable to delete the *temp* folder you will have to close QGIS and open it again, complete the setup tab, and go back to the tab the error occured and re-run the tab again.
+
+### 5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/83c37f7b-d95f-4bbe-b4a7-9040be5ddce1)
+
+this is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked here, highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting Microsoft does indicate that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
+
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/d30c84da-4371-487e-b0e6-811ae76e821b)
+
+Possible solutions to this are:
+- Adjust the scale for all monitors to 100%.
+- Ensure that the display resolution is the same for both monitors. i.e. If the smallest monitor is set to 1920 x 1080 set the 4k monitor to this display resolution as well.
+
+### 5.3 RASTER OUTPUTS NOT DISPLAYING CORRECTLY
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/383081b1-4b8b-41c7-8c4b-bf3fe09b5215)
 
 Occasionally, some of the outputs that are automatically loaded to the QGIS table of contents don't display correctly. To correct this, try and removing the layer that is displayed incorrectly and add it again to QGIS.
-#
+
 ## 5.4 ERROR: OUTPUT DIRECTORY NOT SET
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/9ae44237-e6f8-4bb9-ac4d-ba9081cc83b9)
