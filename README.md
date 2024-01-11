@@ -27,7 +27,7 @@
       - [4.4.5 Health Facilites](#health-facilities-tab)
       - [4.4.6 Financial Facilities](#financial-facilities-tab)
       - [4.4.7 Aggregation](#ad-aggregation-tab)
-   - [4.5 Place Charaterization Tab](#place-charaterization-tab)
+   - [4.5 Place Characterization Tab](#place-charaterization-tab)
       - [4.5.1 Active Transport](#active-transport-tab)
       - [4.5.2 Availability of Public Transport](#availability-of-public-transport-tab)
       - [4.5.3 Safe Urban Design](#safe-urban-design-tab)
@@ -59,24 +59,24 @@ QGIS website: [https://www.qgis.org/en/site/](https://www.qgis.org/en/site/)
 
 2. Once the installation file is downloaded run the installation file.
 
-3. A pop up window as seen in image below should show up. Follow the prompts and leave all settings on default.
+3. A pop-up window as seen in the image below should show up. Follow the prompts and leave all settings on default.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/9cf1103d-c112-46ef-8c83-b866b25796e0)
 
 
 ## 2 Install Open Route Service (ORS) plugin
 
-1. Open QGIS, navigate to the "Plugins" tab and select "Manage and Install Plugins…" option from the drop-down menu.
+1. Open QGIS, navigate to the "Plugins" tab and select the "Manage and Install Plugins…" option from the drop-down menu.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/8bb04beb-4649-49a7-ad2a-c062cd818692)
 
-2. The "Plugins" pop up window should appear as seen in image below.
+2. The "Plugins" pop-up window should appear as seen in the image below.
 
 3. In the search bar type "ORS", select the "ORS Tool" from the list of plugins, and select the install button to install the plugin.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/d0e22d26-4dfa-47a7-89a7-fab42ecea2a6)
 
-4. You will now have to setup an account on the Open Route Service website which can be accessed by clicking the link below.
+4. You will now have to set up an account on the Open Route Service website which can be accessed by clicking the link below.
 
 ORS website: [https://openrouteservice.org/](https://openrouteservice.org/)
 
@@ -86,11 +86,11 @@ ORS Sign up: [https://openrouteservice.org/dev/#/signup](https://openrouteservic
 
 5. Fill in all the necessary fields to sign up and then log into your account.
 
-6. Request a standard token and provide a name for Token.
+6. Request a standard token and provide a name for the Token.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/efe9f9ab-1f29-4c28-81ec-73c8268b0e5e)
 
-7. Once token has been created, navigate to the Dashboard tab and click on the API key as seen in the image below. The API key should now be copied to clipboard.
+7. Once the token has been created, navigate to the Dashboard tab and click on the API key as seen in the image below. The API key should now be copied to the clipboard.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/5d0e7d0d-561b-46bd-980d-d9ef7059148e)
 
@@ -99,13 +99,13 @@ ORS Sign up: [https://openrouteservice.org/dev/#/signup](https://openrouteservic
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/7234b8ac-99a6-4668-8867-a0f4b29efb6a)
 
-9. The provider settings pop up window should now appear as seen in the image below.
+9. The provider settings pop-up window should now appear as seen in the image below.
 
 10. Past the API key that has been copied to the clipboard into the API Key field and press "OK".
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/6cdf18f4-5908-46ef-a6c7-f36fb3d07048)
 
-**N.B.** Additional credits can be requested on the ORS site by applying for the collaborative plan as described [here](https://openrouteservice.org/plans/). You will have to provide a brief motivation, however, if your application is in a humanitarian, academic, governmental, or non-for-profit organization, you should be eligible for the collaborative plan.
+**N.B.** Additional credits can be requested on the ORS site by applying for the collaborative plan as described [here](https://openrouteservice.org/plans/). You will have to provide a brief motivation, however, if your application is in a humanitarian, academic, governmental, or not-for-profit organization, you should be eligible for the collaborative plan.
 
 This email address can also be used for further assistance:
 
@@ -138,34 +138,34 @@ support@openrouteservice.heigit.org
 
 8. All the Python libraries that the Plugin is dependent on will now be installed. This can take a few minutes to install.
 
-9. Once the installations are complete you can close command line pop-up window.
+9. Once the installations are complete you can close the command line pop-up window.
 
-10. Open QGIS, navigate to the "Plugins" tab and select "Manage and Install Plugins…" option from the drop-down menu.
+10. Open QGIS, navigate to the "Plugins" tab and select the "Manage and Install Plugins…" option from the drop-down menu.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/17d610e1-c989-435c-ba10-187657d853b7)
 
-11. In the plugin pop up window navigate to the "Install from ZIP" tab.
+11. In the plugin pop-up window navigate to the "Install from ZIP" tab.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/34ed8ae1-d533-43af-8dc7-17645189201a)
 
-12. From the "Install from ZIP" tab navigate back to your extracted ZIP folder and select the "gender\_indicator\_tool" compressed (zipped) folder as seen in the image bellow.
+12. From the "Install from ZIP" tab navigate back to your extracted ZIP folder and select the "gender\_indicator\_tool" compressed (zipped) folder as seen in the image below.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/2cc9b67e-a990-4375-953a-2131f801dfcc)
 
-13. Once ZIP file has been selected click on "Install Plugin".
+13. Once the ZIP file has been selected click on "Install Plugin".
 
-14. Once plugin has been installed navigate to the "All" tab.
+14. Once the plugin has been installed navigate to the "All" tab.
 
 15. In the search bar type "GEEST" and click the check box next to the "Gender Enabling Environments Spatial Tool (GEEST)" to install the plugin.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/93ba70f0-1eca-48a4-aaad-cc68872d01f7)
 
-16. The plugin is now installed and you should now be able to access it in you tool bar or under the Plugin's tab as seen in the image below.
+16. The plugin is now installed and you should now be able to access it in your toolbar or under the Plugin's tab as seen in the image below.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/aba6f895-bb9a-4148-83a3-5a1fc82c5834)
 
 ## 4 Using the Plugin
-Examples of files that can be used as input at a particular step as per the Pilot Country Database will be inidcated at the end of the step. The following format will be use:
+Examples of files that can be used as input at a particular step as per the Pilot Country Database will be indicated at the end of the step. The following format will be used:
 
 **Input File:** *Folder/file_name* --> *AccessFinance/Access_to_finance.shp*
 
@@ -175,15 +175,15 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 1. Create a project folder that will be used to store all tool outputs.
    
-3. Set the output directory to project folder created in the previous step.
+3. Set the output directory to the project folder created in the previous step.
    
 5. Set the country boundary layer by navigating to and selecting the **Admin 0** country boundary polygon shapefile for the country you want to analyze.
 
    **Input File:** *AdminBoundaries/Admin0.shp*
 
-7. Select the appropriate coordinate reference system (CRS) form the QGIS CRS database.
+7. Select the appropriate coordinate reference system (CRS) from the QGIS CRS database.
 
-**Appendix A**  _lists the all the CRS to be used for the SIDS countries._
+**Appendix A**  _lists all the CRS to be used for the SIDS countries._
 
 5. Copy and paste the EPSG code for your specific country and paste it in the Filter bar as seen in the image below.
 
@@ -191,7 +191,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 6. Select the CRS from the list and click "OK".
 
-7. Set your preferred out raster output resolution in meters squared.
+7. Set your preferred output raster output resolution in meters squared.
 
 ### <a name="indivdual-tab"></a>4.2 INDIVIDUAL TAB
 
@@ -199,7 +199,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/68baff0a-cf3d-4045-b62b-432d505117bf)
 
-1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have achieved a post-secondary education.
+1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of women who have achieved a post-secondary education.
 
    **Input File:** *Education/Level_of_education*
 
@@ -209,35 +209,35 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/EDU_Raster_output.tif*)
+8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/EDU_Raster_output.tif*)
 
 #### <a name="care-responsibilities-tab"></a>4.2.2 Care Responsibilities
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/4b6f1c50-96fc-4ea2-985f-e226f41ab005)
 
-1. Navigate to and select polygon input shapefile containing a field reporting the percentage of time women spend on care responsibilities or household activities.
+1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of time women spend on care responsibilities or household activities.
 
 3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Select the field containing the numeric value representing percentage of time women spend on care responsibilities or household activities.
+4. Select the field containing the numeric value representing the percentage of time women spend on care responsibilities or household activities.
 
 5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/CRE_Raster_output.tif*)
+8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/CRE_Raster_output.tif*)
 
 #### <a name="domestic-violence-tab"></a>4.2.3 Domestic Violence
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/2adef90d-03ee-48ae-a16d-d7055939f636)
 
-1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have suffered domestic violence.
+1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of women who have suffered domestic violence.
 
    **Input File:** *DomesticViolence/Prevalence_of_domestic_violence.shp*
    
@@ -247,11 +247,11 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/DOV_Raster_output.tif*)
+8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/DOV_Raster_output.tif*)
 
 #### <a name="id-aggregation-tab"></a>4.2.4 Aggregate
 
@@ -259,21 +259,21 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Individual Dimension.
 
-_If a factor was executed in the same work session, it's file path will automatically be populated after execution._
+_If a factor was executed in the same work session, its file path will automatically be populated after execution._
 
-2. If factors are missing adjust weighting percentage accordingly and ensure it totals to 100%.
+2. If factors are missing adjust the weighting percentage accordingly and ensure it totals to 100%.
 
 _If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension._
 
 3. Enter an alternate aggregated raster output file name if desired.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
+6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/AGG_Raster_output.tif*)
+7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/AGG_Raster_output.tif*)
 
 ### <a name="contextual-tab"></a>4.3 CONTEXTUAL TAB
 
@@ -291,11 +291,11 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/PLP_Raster_output.tif*)
+8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/PLP_Raster_output.tif*)
 
 #### <a name="access-to-finance-tab"></a>4.3.2 Access to Finance
 
@@ -311,11 +311,11 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/FIN_Raster_output.tif*)
+8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/FIN_Raster_output.tif*)
 
 #### <a name="cd-aggregation-tab"></a>4.3.3 Aggregate
 
@@ -323,21 +323,21 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
 
-_If a factor was executed in the same work session, it's file path will automatically be populated after execution._
+_If a factor was executed in the same work session, its file path will automatically be populated after execution._
 
-2. If factors are missing adjust weighting percentage accordingly and ensure it totals to 100%.
+2. If factors are missing adjust the weighting percentage accordingly and ensure it totals to 100%.
 
 If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension.
 
 3. Enter an alternate aggregated raster output file name if desired.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
+6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/AGG_Raster_output.tif*)
+7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/AGG_Raster_output.tif*)
 
 ### <a name="accessibility-tab"></a>4.4 ACCESSIBILITY TAB
 
@@ -358,23 +358,23 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 2. Select the mode of travel (Walking OR Driving).
 
-3. Select method of measurement (Distance OR Time).
+3. Select the method of measurement (Distance OR Time).
 
 4. Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
 5. Edit the facility raster output file name for each unique type of facility.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The output raster file will be store in the project folder specified in the "Setup" tab, in the "WTP" folder under the "Accessibility" folder. (*Project_Folder/Accessibility/WTP/Facility_Raster_output.tif*)
+8. The output raster file will be stored in the project folder specified in the "Setup" tab, in the "WTP" folder under the "Accessibility" folder. (*Project_Folder/Accessibility/WTP/Facility_Raster_output.tif*)
 
 **Steps 1 – 8 will have to be repeated for all facility types**.
 
-9. Once all facilities have completed the processing, move onto the next steo and enter aggregated raster output file name.
+9. Once all facilities have completed the processing, move on to the next step and enter the aggregated raster output file name.
 
-10. Click "Aggregate" button to run the algorithm.
+10. Click the "Aggregate" button to run the algorithm.
 
 11. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -390,13 +390,13 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 3. Select the mode of travel (Walking OR Driving).
 
-4. Select method of measurement (Distance OR Time).
+4. Select the method of measurement (Distance OR Time).
 
 5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
 6. Enter an alternate raster output file name if desired.
 
-7. Click "Execute" button to run the algorithm.
+7. Click the "Execute" button to run the algorithm.
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -414,13 +414,13 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 3. Select the mode of travel (Walking OR Driving).
 
-4. Select method of measurement (Distance OR Time).
+4. Select the method of measurement (Distance OR Time).
 
 5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-6. Enter alternate raster output file name if desired.
+6. Enter an alternate raster output file name if desired.
 
-7. Click "Execute" button to run the algorithm.
+7. Click the "Execute" button to run the algorithm.
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -434,13 +434,13 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 3. Select the mode of travel (Walking OR Driving).
 
-4. Select method of measurement (Distance OR Time).
+4. Select the method of measurement (Distance OR Time).
 
 5. Specify travel distance or time increments in meters or time respectively using comma delamination.
 
-6. Enter alternate raster output file name if desired.
+6. Enter an alternate raster output file name if desired.
 
-7. Click "Execute" button to run the algorithm.
+7. Click the "Execute" button to run the algorithm.
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -456,13 +456,13 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 3. Select the mode of travel (Walking OR Driving).
 
-4. Select method of measurement (Distance OR Time).
+4. Select the method of measurement (Distance OR Time).
 
 5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-6. Enter alternate raster output file name if desired.
+6. Enter an alternate raster output file name if desired.
 
-7. Click "Execute" button to run the algorithm.
+7. Click the "Execute" button to run the algorithm.
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -478,13 +478,13 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 3. Select the mode of travel (Walking OR Driving).
 
-4. Select method of measurement (Distance OR Time).
+4. Select the method of measurement (Distance OR Time).
 
 5. Specify travel distance or time increments in meters or time respectively using comma delamination.
 
-6. Enter alternate raster output file name if desired.
+6. Enter an alternate raster output file name if desired.
 
-7. Click "Execute" button to run the algorithm.
+7. Click the "Execute" button to run the algorithm.
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -498,17 +498,17 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 _If a factor was executed in the same work session, the file path will automatically be populated after execution._
 
-2. If factors are missing, adjust weighting percentage accordingly and ensure it totals to 100%.
+2. If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
 
 _If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension._
 
 3. Enter alternate aggregated raster output file name if desired.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
+6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Accessibility/AGG_Raster_output.tif*).
 
@@ -528,11 +528,11 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 5. Click the "Unique Values" button to extract all the unique road type values.
 
-6. Score each of the extracted road types from 1 to 5 based on local knowledge, where 5 is a road type that is very safe for walking and cycling and 1 is a road type that is unsafe.
+6. Score each of the extracted road types from 1 to 5 based on local knowledge, where 5 is a road type that is very safe for walking and cycling and 1 is an unsafe road type.
 
-7. Enter alternate raster output file name if desired.
+7. Enter an alternate raster output file name if desired.
 
-8. Click "Execute" button to run the algorithm.
+8. Click the "Execute" button to run the algorithm.
 
 9. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -550,9 +550,9 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 The smaller size the more computationally intensive the algorithm will be.
 
-3. Enter alternate raster output file name if desired.
+3. Enter an alternate raster output file name if desired.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -562,13 +562,13 @@ The smaller size the more computationally intensive the algorithm will be.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/1e73b47a-1717-441d-a2db-cb6ca7683165)
 
-1. Navigate to and select night time lights raster input.
+1. Navigate to and select nighttime lights raster input.
 
    **Input File:** *Electricity/Nighttime_Lights_2021.tif*
 
-3. Enter alternate raster output file name if desired.
+3. Enter an alternate raster output file name if desired.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -578,7 +578,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b9f6c3c8-be8e-45f6-b351-cf76327b8b40)
 
-1. Navigate to and select crime rate polygon input shapefile containing a field reporting crime rate for a specific incident.
+1. Navigate to and select the crime rate polygon input shapefile containing a field reporting the crime rate for a specific incident.
 
    **Input File:** *Security/Crime_Incidence_Serious_Assaults.shp*
 
@@ -586,11 +586,11 @@ The smaller size the more computationally intensive the algorithm will be.
 
 3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Select the field containing the numeric value representing crime rate.
+4. Select the field containing the numeric value representing the crime rate.
 
-5. Enter raster output file name for the crime type.
+5. Enter the raster output file name for the crime type.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -598,9 +598,9 @@ The smaller size the more computationally intensive the algorithm will be.
 
 **Steps 1 – 8 will have to be repeated for all facility types**.
 
-8. Once all crime types have completed the processing, enter aggregated raster output file name.
+8. Once all crime types have completed the processing, enter the aggregated raster output file name.
 
-9. Click "Aggregate" button to run the algorithm.
+9. Click the "Aggregate" button to run the algorithm.
 
 10. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -610,17 +610,17 @@ The smaller size the more computationally intensive the algorithm will be.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/effab4d6-77fd-42b6-b27c-c674ca6a26a3)
 
-1. Navigate to and select wealth index polygon input shapefile containing a field with the wealth index.
+1. Navigate to and select the wealth index polygon input shapefile containing a field with the wealth index.
 
    **Input File:** *Income/Wealth_Index.shp*
 
 3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Select the field containing the numeric value representing wealth index.
+4. Select the field containing the numeric value representing the wealth index.
 
-5. Enter alternate raster output file name if desired.
+5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -630,17 +630,17 @@ The smaller size the more computationally intensive the algorithm will be.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/7344c605-f7ce-4e15-bd73-2a75d84c6b69)
 
-1. Navigate to and select electricity access polygon input shapefile containing a field indicating percentage individuals that have access to electricity.
+1. Navigate to and select electricity access polygon input shapefile containing a field indicating the percentage of individuals that have access to electricity.
 
    **Input File:** *Electricity/Electrification_rate.shp*
 
 3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Select the field containing the numeric value representing percentage individuals that have access to electricity.
+4. Select the field containing the numeric value representing the percentage of individuals that have access to electricity.
 
 5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -648,19 +648,19 @@ The smaller size the more computationally intensive the algorithm will be.
 
 OR
 
-1. Navigate to and select night time lights raster input.
+1. Navigate to and select nighttime lights raster input.
 
    **Input File:** *Electricity/Nighttime_Lights_2021.tif*
 
-3. Enter raster output file name.
+3. Enter the raster output file name.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
 6. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/ELC_Raster_output.tif*).
 
-**N.B. If night time lights raster data is used for the "Safe Urban Design" factor it should not be used in the "Electrical Access" factor and vice-versa**
+**N.B. If nighttime lights raster data is used for the "Safe Urban Design" factor it should not be used in the "Electrical Access" factor and vice-versa**
 
 #### <a name="level-of-urbanization-tab"></a>4.5.7 Level of Urbanization
 
@@ -670,9 +670,9 @@ OR
 
    **Input File:** *Urbanization/GHS_SMOD_E2020_GLOBE_R2023A_54009_1000_V1_0_R7_C12.tif*
 
-3. Enter alternate raster output file name if desired.
+3. Enter an alternate raster output file name if desired.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -690,9 +690,9 @@ OR
 
 The smaller size the more computationally intensive the algorithm will be.
 
-3. Enter alternate raster output file name if desired.
+3. Enter an alternate raster output file name if desired.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -710,9 +710,9 @@ The smaller size the more computationally intensive the algorithm will be.
 
 4. Select the field containing the numeric value representing the percentage of houses with Internet access
 
-5. Enter alternate raster output file name if desired.
+5. Enter an alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+6. Click the "Execute" button to run the algorithm.
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -732,11 +732,11 @@ The smaller size the more computationally intensive the algorithm will be.
 
 5. Click the "Unique Values" button to extract all the unique risk level values.
 
-6. Score each of the extracted risk levels from 1 to 5, where 5 is a lowest risk and 1 is highest risk.
+6. Score each of the extracted risk levels from 1 to 5, where 5 is the lowest risk and 1 is the highest risk.
 
 7. Enter hazard type raster output file name.
 
-8. Click "Execute" button to run the algorithm.
+8. Click the "Execute" button to run the algorithm.
 
 9. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -744,9 +744,9 @@ The smaller size the more computationally intensive the algorithm will be.
 
 **Steps 1 – 9 will have to be repeated for all hazard types**.
 
-10. Once all hazard types have been processed, enter aggregated raster output file name.
+10. Once all hazard types have been processed, enter the aggregated raster output file name.
 
-11. Click "Aggregate" button to run the algorithm.
+11. Click the "Aggregate" button to run the algorithm.
 
 12. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -758,19 +758,19 @@ The smaller size the more computationally intensive the algorithm will be.
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.
 
-_If a factor was executed in the same work session, it's file path will automatically be populated after execution._
+_If a factor was executed in the same work session, its file path will automatically be populated after execution._
 
-2. If factors are missing, adjust weighting percentage accordingly and ensure it totals to 100%.
+2. If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
 
 _If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension._
 
-3. Enter aggregated raster output file name.
+3. Enter the aggregated raster output file name.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
+6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/AGG_Raster_output.tif*).
 
@@ -778,21 +778,21 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/8d2787d9-78ac-4774-9b70-6bee722bfe0a)
 
-1. Load each dimensions aggregated raster outputs.
+1. Load each dimension's aggregated raster outputs.
 
-_If a dimension's factor aggregation was executed in the same work session, it's file path will automatically be populated after execution._
+_If a dimension's factor aggregation was executed in the same work session, its file path will automatically be populated after execution._
 
-2. If dimensions are missing, adjust weighting percentage accordingly and ensure it totals up to 100%.
+2. If dimensions are missing, adjust the weighting percentage accordingly and ensure it totals up to 100%.
 
 _If a dimension is missing it needs to be given a weighting of 0%._
 
 3. Enter aggregated dimensions raster output file name.
 
-4. Click "Execute" button to run the algorithm.
+4. Click the "Execute" button to run the algorithm.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-6. The aggregated dimensional layer will be loaded to the QGIS and appear in the table of content.
+6. The aggregated dimensional layer will be loaded to the QGIS and appear in the table of contents.
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Final\_output" folder (*Project_Folder/Final_Output/Final_AGG_Raster_output.tif_).
 
@@ -800,7 +800,7 @@ _If a dimension is missing it needs to be given a weighting of 0%._
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/4064c4f2-75a9-4c6c-8727-6c0674699b2c)
 
-Information on the tool it's framework, scoring system, and how results should or can be interpreted. 
+Information on the tool its framework, scoring system, and how results should or can be interpreted. 
 
 ### <a name="insights-tab"></a>4.8 INSIGHTS TAB
 #### <a name="enablement-tab"></a>4.8.1 Enablement
@@ -817,11 +817,11 @@ Information on the tool it's framework, scoring system, and how results should o
 
 5. Click the "Unique Values" button to extract all the unique risk level values.
 
-6. Score each of the extracted risk levels from 1 to 5, where 5 is a lowest risk and 1 is highest risk.
+6. Score each of the extracted risk levels from 1 to 5, where 5 is the lowest risk and 1 is the highest risk.
 
 7. Enter hazard type raster output file name.
 
-8. Click "Execute" button to run the algorithm.
+8. Click the "Execute" button to run the algorithm.
 
 9. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
@@ -840,20 +840,20 @@ Information on the tool it's framework, scoring system, and how results should o
 
 ## 5 Troubleshooting
 
-### 5.1 ACCESSIBILTY TABS PERMISSIONS ERROR
+### <a name="accessibility-permissions-error"></a>5.1 ACCESSIBILTY TABS PERMISSIONS ERROR
 
-This error occurs sometimes when some of the shapefiles produced in the temp folder of the working directory are trying to be overwritten or deleted but can't because it's still being stored in QGIS's memory. This sometimes occurs even when the layer is removed fromthe QGIS table of contents.
+This error occurs sometimes when some of the shapefiles produced in the temp folder of the working directory are trying to be overwritten or deleted but can't because it's still being stored in QGIS's memory. This sometimes occurs even when the layer is removed from the QGIS table of contents.
 
-This error occurs even when the tool ran correctly so first check the desired output file was produce in the working directory.
+This error occurs even when the tool ran correctly so first check if the desired output file was produced in the working directory.
 
 If the file is not produced you can try the following:
 - Delete the *temp* folder in the working directory
-- If you are unable to delete the *temp* folder you will have to close QGIS and open it again, complete the setup tab, and go back to the tab the error occured and re-run the tab again.
+- If you cannot delete the *temp* folder you will have to close QGIS and open it again, complete the setup tab, go back to the tab where the error occurred and re-run the tab again.
 
-### 5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED
+### <a name="distorted"></a>5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/83c37f7b-d95f-4bbe-b4a7-9040be5ddce1)
 
-This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked [here](https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d), highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting Microsoft does indicate that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
+This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked [here](https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d), highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting, Microsoft indicates that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/d30c84da-4371-487e-b0e6-811ae76e821b)
 
@@ -861,31 +861,31 @@ Possible solutions to this are:
 - Adjust the scale for all monitors to 100%.
 - Ensure that the display resolution is the same for both monitors. i.e. If the smallest monitor is set to 1920 x 1080 set the 4k monitor to this display resolution as well.
 
-### 5.3 RASTER OUTPUTS NOT DISPLAYING CORRECTLY
+### <a name="raster-outputs"></a>5.3 RASTER OUTPUTS NOT DISPLAYING CORRECTLY
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/383081b1-4b8b-41c7-8c4b-bf3fe09b5215)
 
-Occasionally, some of the outputs that are automatically loaded to the QGIS table of contents don't display correctly. To correct this, try and removing the layer that is displayed incorrectly and add it again to QGIS.
+Occasionally, some of the outputs automatically loaded to the QGIS table of contents do not display correctly. To correct this, try removing the layer that is displayed incorrectly and add it again to QGIS.
 
-## 5.4 ERROR: OUTPUT DIRECTORY NOT SET
+## <a name="output-directory"></a>5.4 ERROR: OUTPUT DIRECTORY NOT SET
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/9ae44237-e6f8-4bb9-ac4d-ba9081cc83b9)
 
-If you see the following error message, please check if you're output directory has been set in the "Setup" tab.
+If you see the following error message, please check if your output directory has been set in the "Setup" tab.
 
-### 5.5 ERROR: Country boundary Polygon not set
+### <a name="country-boundary"></a>5.5 ERROR: Country boundary Polygon not set 
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/8c92f6df-07b3-4953-bf7b-0a57a3c10072)
 
 If you see the following error message, please check if you're country boundary polygon layer has been set in the "Setup" tab.
 
-### 5.6 ERROR: Co-ordinate Reference System (CRS) not set
+### <a name="crs"></a>5.6 ERROR: Co-ordinate Reference System (CRS) not set
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/fd3baffa-6b3f-4ef7-a89a-8168b57cd7be)
 
 If you see the following error message, please check if you're CRS has been set in the "Setup" tab.
 
-### 5.7 Steps to take if tool freezes or does not run as expected
+### <a name="alternative"></a>5.7 ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED
 
 1. Install the "Plugin Reloader" plugin.
 
@@ -902,7 +902,7 @@ If you see the following error message, please check if you're CRS has been set 
 
 *Plugins* → *Plugin Reloader* → *Configure*
 
- 1.5 From the drop down list select the "gender\_indicator\_tool" plugin and press "OK".
+ 1.5 From the drop-down list select the "gender\_indicator\_tool" plugin and press "OK".
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/3019b00e-46ac-490d-854c-5c7f61ee6a2e)
 
@@ -912,7 +912,7 @@ If you see the following error message, please check if you're CRS has been set 
 
 **OR**
 
-**If the "Plugin Reloader" does not resolve the error close QGIS and restart it again, and re-run the process you were trying to execute.**
+**If the "Plugin Reloader" does not resolve the error close QGIS, restart it again, and re-run the process you were trying to execute.**
 
 # APPENDIX A SIDS CRS
 
