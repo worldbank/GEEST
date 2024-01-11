@@ -343,7 +343,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 11. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-12. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Accessibility/WTP_Raster_output.tif*)
+12. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Accessibility/WTP_Raster_output.tif*)
 
 #### 4.4.2 Access to Public Transport
 
@@ -365,7 +365,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-9. The aggregated output raster file will be stored in the project folder set in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/PBT_Raster_output.tif*).
+9. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/PBT_Raster_output.tif*).
 
 #### 4.4.3 Access to Education and Training Facilities
 
@@ -389,7 +389,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/ETF_Raster_output.tif*).
+9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/ETF_Raster_output.tif*).
 
 #### 4.4.4 Access to Jobs in the RE sector
 
@@ -409,7 +409,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/JOB_Raster_output.tif*).
+9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/JOB_Raster_output.tif*).
 
 #### 4.4.5 Access to Health Facilities
 
@@ -431,7 +431,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder. (*Project_Folder/Accessibility/HEA_Raster_output.tif*)
+9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder. (*Project_Folder/Accessibility/HEA_Raster_output.tif*)
 
 #### 4.4.6 Access to Financial Facilities
 
@@ -453,7 +453,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/FIF_Raster_output.tif*).
+9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/FIF_Raster_output.tif*).
 
 #### 4.4.7 Aggregate
 
@@ -485,21 +485,23 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 1. Navigate to and select polyline road network shapefile.
 
-2. Click the "Set" button to extract all the fields from the polyline input layer.
+   **Input File:** *Roads/Roads.shp*
 
-3. Select the field containing the road type categorical values.
+3. Click the "Set" button to extract all the fields from the polyline input layer.
 
-4. Click the "Unique Values" button to extract all the unique road type values.
+4. Select the field containing the road type categorical values.
 
-5. Score each of the extracted road types from 1 to 5 based on local knowledge, where 5 is a road type that is very safe for walking and cycling and 1 is a road type that is unsafe.
+5. Click the "Unique Values" button to extract all the unique road type values.
 
-6. Enter alternate raster output file name if desired.
+6. Score each of the extracted road types from 1 to 5 based on local knowledge, where 5 is a road type that is very safe for walking and cycling and 1 is a road type that is unsafe.
 
-7. Click "Execute" button to run the algorithm.
+7. Enter alternate raster output file name if desired.
 
-8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+8. Click "Execute" button to run the algorithm.
 
-9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/__Place Characterization/Raster\_output.tif_).
+9. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/WLK_Raster_output.tif*).
 
 #### 4.5.2 Availability of Public Transport
 
@@ -507,7 +509,9 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 1. Navigate to and select point shapefile input for public transport stops.
 
-2. Set hexagon grid size. The default is 1km.
+   **Input File:** *PubTransportStops/Public_transportation_stops.shp*
+
+3. Set hexagon grid size. The default is 1km.
 
 The smaller size the more computationally intensive the algorithm will be.
 
@@ -517,7 +521,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/__Place Characterization/Raster\_output.tif_).
+6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/APT_Raster_output.tif*).
 
 #### 4.5.3 Safe Urban Design
 
@@ -525,13 +529,15 @@ The smaller size the more computationally intensive the algorithm will be.
 
 1. Navigate to and select night time lights raster input.
 
-2. Enter alternate raster output file name if desired.
+   **Input File:** *Electricity/Nighttime_Lights_2021.tif*
 
-3. Click "Execute" button to run the algorithm.
+3. Enter alternate raster output file name if desired.
 
-4. Status text next to the "Execute" button will appear and let you know once processing is complete.
+4. Click "Execute" button to run the algorithm.
 
-5. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/Place Characterization/Raster\_output.tif_).
+5. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+6. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/SAF_Raster_output.tif*).
 
 ### 4.5.4 Security
 
@@ -539,17 +545,21 @@ The smaller size the more computationally intensive the algorithm will be.
 
 1. Navigate to and select crime rate polygon input shapefile containing a field reporting crime rate for a specific incident.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+   **Input File:** *Security/Crime_Incidence_Serious_Assaults.shp*
 
-3. Select the field containing the numeric value representing crime rate.
+   **Input File:** *Security/Crime_Incidence_Sexual_Violence.shp*
 
-4. Enter raster output file name for the crime type.
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-5. Click "Execute" button to run the algorithm.
+4. Select the field containing the numeric value representing crime rate.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+5. Enter raster output file name for the crime type.
 
-7. The output raster file will be stored in the project folder specified in the "Setup" tab, in the "SEC" folder under the "Accessibility" folder (_Project\_ Folder/Place Characterization/SEC/Raster\_output.tif_).
+6. Click "Execute" button to run the algorithm.
+
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+8. The output raster file will be stored in the project folder specified in the "Setup" tab, in the "SEC" folder under the "Accessibility" folder (*Project_Folder/Place Characterization/SEC/Incidents_Raster_output.tif*).
 
 **Steps 1 – 8 will have to be repeated for all facility types**.
 
@@ -559,7 +569,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 10. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-11. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_Folder//Place Characterization/Raster\_output.tif_)
+11. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Place Characterization/SEC_Raster_output.tif*)
 
 #### 4.5.5 Income Level
 
@@ -567,17 +577,19 @@ The smaller size the more computationally intensive the algorithm will be.
 
 1. Navigate to and select wealth index polygon input shapefile containing a field with the wealth index.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+   **Input File:** *Income/Wealth_Index.shp*
 
-3. Select the field containing the numeric value representing wealth index.
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Enter alternate raster output file name if desired.
+4. Select the field containing the numeric value representing wealth index.
 
-5. Click "Execute" button to run the algorithm.
+5. Enter alternate raster output file name if desired.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+6. Click "Execute" button to run the algorithm.
 
-7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_Folder//Place Characterization/Raster\_output.tif_).
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/INC_Raster_output.tif*).
 
 #### 4.5.6 Electricity Access
 
@@ -585,29 +597,33 @@ The smaller size the more computationally intensive the algorithm will be.
 
 1. Navigate to and select electricity access polygon input shapefile containing a field indicating percentage individuals that have access to electricity.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+   **Input File:** *Electricity/Electrification_rate.shp*
 
-3. Select the field containing the numeric value representing percentage individuals that have access to electricity.
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Enter an alternate raster output file name if desired.
+4. Select the field containing the numeric value representing percentage individuals that have access to electricity.
 
-5. Click "Execute" button to run the algorithm.
+5. Enter an alternate raster output file name if desired.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+6. Click "Execute" button to run the algorithm.
 
-7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_Folder//Place Characterization/Raster\_output.tif_).
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/ELC_Raster_output.tif*).
 
 OR
 
 1. Navigate to and select night time lights raster input.
 
-2. Enter raster output file name.
+   **Input File:** *Electricity/Nighttime_Lights_2021.tif*
 
-3. Click "Execute" button to run the algorithm.
+3. Enter raster output file name.
 
-4. Status text next to the "Execute" button will appear and let you know once processing is complete.
+4. Click "Execute" button to run the algorithm.
 
-5. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (Project\_ Folder/Place Characterization/Raster\_output.tif).
+5. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+6. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/ELC_Raster_output.tif*).
 
 **N.B. If night time lights raster data is used for the "Safe Urban Design" factor it should not be used in the "Electrical Access" factor and vice-versa**
 
@@ -617,13 +633,15 @@ OR
 
 1. Navigate to and select GHS-SMOD raster input.
 
-2. Enter alternate raster output file name if desired.
+   **Input File:** *Urbanization/GHS_SMOD_E2020_GLOBE_R2023A_54009_1000_V1_0_R7_C12.tif*
 
-3. Click "Execute" button to run the algorithm.
+3. Enter alternate raster output file name if desired.
 
-4. Status text next to the "Execute" button will appear and let you know once processing is complete.
+4. Click "Execute" button to run the algorithm.
 
-5. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/Place Characterization/Raster\_output.tif_).
+5. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+6. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/LOU_Raster_output.tif*).
 
 #### 4.5.8 Size of Housing
 
@@ -631,7 +649,9 @@ OR
 
 1. Navigate to and select the building footprints polygon shapefile.
 
-2. Set hexagon grid size. The default is 1 km.
+   **Input File:** *Housing/Building_footprint.shp*
+
+3. Set hexagon grid size. The default is 1 km.
 
 The smaller size the more computationally intensive the algorithm will be.
 
@@ -641,25 +661,27 @@ The smaller size the more computationally intensive the algorithm will be.
 
 5. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/__Place Characterization/Raster\_output.tif_).
+6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/QUH_Raster_output.tif*).
 
 #### 4.5.9 Digital Inclusion
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/19abbdf1-9804-43c5-8fb9-6548b13b70eb)
 
-1. Navigate to and select the polygon input shapefile containing a field indicating representing the percentage of houses with Internet access
+1. Navigate to and select the polygon input shapefile containing a field indicating the percentage of houses with internet access.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+   **Input File:** *Digital/Access_to_broadband_rates_community.shp*
 
-3. Select the field containing the numeric value representing the percentage of houses with Internet access
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Enter alternate raster output file name if desired.
+4. Select the field containing the numeric value representing the percentage of houses with Internet access
 
-5. Click "Execute" button to run the algorithm.
+5. Enter alternate raster output file name if desired.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+6. Click "Execute" button to run the algorithm.
 
-7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_Folder//Place Characterization/Raster\_output.tif_).
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/DIG_Raster_output.tif*).
 
 #### 4.5.10 Natural Environment and Climatic Factors
 
@@ -667,21 +689,23 @@ The smaller size the more computationally intensive the algorithm will be.
 
 1. Navigate to and select polygon hazard shapefile.
 
-2. Click the "Set" button to extract all the fields from the polyline input layer.
+   **Input File:** *Environment/Flood_risk.shp*
 
-3. Select the field containing the descriptive risk level values.
+3. Click the "Set" button to extract all the fields from the polyline input layer.
 
-4. Click the "Unique Values" button to extract all the unique risk level values.
+4. Select the field containing the descriptive risk level values.
 
-5. Score each of the extracted risk levels from 1 to 5, where 5 is a lowest risk and 1 is highest risk.
+5. Click the "Unique Values" button to extract all the unique risk level values.
 
-6. Enter hazard type raster output file name.
+6. Score each of the extracted risk levels from 1 to 5, where 5 is a lowest risk and 1 is highest risk.
 
-7. Click "Execute" button to run the algorithm.
+7. Enter hazard type raster output file name.
 
-8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+8. Click "Execute" button to run the algorithm.
 
-9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder. (_Project\_ Folder/Place Characterization/ENV/Raster\_output.tif_)
+9. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder. (*Project_Folder/Place Characterization/ENV/Hazard_Raster_output.tif*)
 
 **Steps 1 – 9 will have to be repeated for all hazard types**.
 
@@ -691,7 +715,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 12. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-13. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_Folder//Place Characterization/Raster\_output.tif_).
+13. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/ENV_Raster_output.tif*).
 
 #### 4.5.11 Aggregate
 
@@ -703,7 +727,7 @@ _If a factor was executed in the same work session, it's file path will automati
 
 2. If factors are missing, adjust weighting percentage accordingly and ensure it totals to 100%.
 
-If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension.
+_If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension._
 
 3. Enter aggregated raster output file name.
 
@@ -713,7 +737,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
 
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_ Folder/Place Characterization/Raster\_output.tif_).
+7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/AGG_Raster_output.tif*).
 
 ### 4.6 DIMENSION AGGREGATION TAB
 
@@ -725,7 +749,7 @@ _If a dimension's factor aggregation was executed in the same work session, it's
 
 2. If dimensions are missing, adjust weighting percentage accordingly and ensure it totals up to 100%.
 
-If a dimension is missing it needs to be given a weighting of 0%.
+_If a dimension is missing it needs to be given a weighting of 0%._
 
 3. Enter aggregated dimensions raster output file name.
 
@@ -735,7 +759,7 @@ If a dimension is missing it needs to be given a weighting of 0%.
 
 6. The aggregated dimensional layer will be loaded to the QGIS and appear in the table of content.
 
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Final\_output" folder (_Project\_ Folder/Final\_Output/Raster\_output.tif_).
+7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Final\_output" folder (*Project_Folder/Final_Output/Final_AGG_Raster_output.tif_).
 
 ### 4.7 ABOUT TAB
 
@@ -747,6 +771,26 @@ Information on the tool it's framework, scoring system, and how results should o
 #### 4.8.1 Enablement
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/11389ee3-9835-4a97-a570-8f7c9efdeca1)
+
+1. Navigate to and select polygon hazard shapefile.
+
+   **Input File:** *Environment/Flood_risk.shp*
+
+3. Click the "Set" button to extract all the fields from the polyline input layer.
+
+4. Select the field containing the descriptive risk level values.
+
+5. Click the "Unique Values" button to extract all the unique risk level values.
+
+6. Score each of the extracted risk levels from 1 to 5, where 5 is a lowest risk and 1 is highest risk.
+
+7. Enter hazard type raster output file name.
+
+8. Click "Execute" button to run the algorithm.
+
+9. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder. (*Project_Folder/Place Characterization/ENV/Hazard_Raster_output.tif*)
 
 
 #### 4.8.2 RE Zone Raster Locations
