@@ -853,7 +853,7 @@ If the file is not produced you can try the following:
 ### 5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/83c37f7b-d95f-4bbe-b4a7-9040be5ddce1)
 
-This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked [here]([URL](https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d)), highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting Microsoft does indicate that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
+This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked [here]([URL](https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d), highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting Microsoft does indicate that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/d30c84da-4371-487e-b0e6-811ae76e821b)
 
