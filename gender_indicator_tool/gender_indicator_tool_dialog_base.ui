@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
+     <y>10</y>
      <width>781</width>
-     <height>581</height>
+     <height>591</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -3376,11 +3376,11 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>10</y>
        <width>761</width>
-       <height>531</height>
+       <height>551</height>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">
@@ -3755,7 +3755,7 @@ p, li { white-space: pre-wrap; }
          <x>360</x>
          <y>-10</y>
          <width>391</width>
-         <height>521</height>
+         <height>531</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -6450,7 +6450,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>10</y>
        <width>761</width>
-       <height>531</height>
+       <height>551</height>
       </rect>
      </property>
      <property name="currentIndex">
@@ -6464,7 +6464,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>110</y>
+         <y>100</y>
          <width>251</width>
          <height>16</height>
         </rect>
@@ -6477,7 +6477,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>50</y>
+         <y>40</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6487,7 +6487,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
+         <y>20</y>
          <width>231</width>
          <height>16</height>
         </rect>
@@ -6500,7 +6500,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>130</y>
+         <y>120</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6510,7 +6510,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>80</y>
+         <y>70</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6523,7 +6523,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>160</y>
+         <y>150</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6536,7 +6536,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>210</y>
+         <y>200</y>
          <width>231</width>
          <height>16</height>
         </rect>
@@ -6549,7 +6549,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>230</y>
+         <y>220</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6559,7 +6559,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>280</y>
+         <y>270</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6569,7 +6569,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>260</y>
+         <y>250</y>
          <width>251</width>
          <height>16</height>
         </rect>
@@ -6582,7 +6582,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>310</y>
+         <y>300</y>
          <width>131</width>
          <height>23</height>
         </rect>
@@ -6600,7 +6600,7 @@ p, li { white-space: pre-wrap; }
          <x>360</x>
          <y>-10</y>
          <width>391</width>
-         <height>521</height>
+         <height>531</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -6616,17 +6616,17 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Enablement&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain furthe refined insights from the results based on discrete descriptive classes from the scored raster output derived in the previous tabs. Population data can also be incorporation and combined with score dataset allow for more nuanced insights that take into account both level of enablament and population. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain further refined insights from the score rasters produced in the previous tabs based on discrete descriptive classes. Population data can also be incorporation and combined with discrete score output dataset allowing for more nuanced insights that take into account both level of enablament and population. Additionally, it provides the option to aggregate results based on specific boundaries of interest. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Step 1: Classify into discrete classes&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Enablement Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Enablement Score Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required): The output or aggregate score layer of interest (.tif). This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer. Scores are grouped into five discrete classes as defined in the 'About' Tab.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (Level of Enablment): &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The enablement score input layer classified into five discrete classes.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Population Input layer&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; (required):&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Population count layer (.tif). This should be represented as the count of women in each raster cell. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (Relative Population Count): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The population input layer classified into three discrete classes&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt; based on the lower quartile range, &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;interquartile range&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt;, and upper quartile range of data to identify areas of relatively low, medium, and high population as per region.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (Relative Population Count): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The population input layer classified into three discrete classes&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt; based on the lower quartile range, &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;interquartile range&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt;, and upper quartile range of data to identify areas of relatively low, medium, and high population per region.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Calibri','sans-serif'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Step 2: Combine score and population classifications&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Level of Enablment Input Layer: &lt;/span&gt;The level of enablement output raster layer produced in step 1.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Relative Population Count Input Layer: &lt;/span&gt;The relative population count output raster layer produced in step 1.&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Output (Combine Classification): &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A single raster layer which combines the five levels of enablement descrptive classes three population classes. This layer contains 15 classes defined in the ‘About’ tab. This output covers the entire country or region of interest. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Output (Combine Classification): &lt;/span&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A single raster layer which combines the five levels of enablement classes and three population classes. This layer contains 15 classes defined in the ‘About’ tab. This output covers the entire country or region of interest. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Step 3: Aggregation&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Combine Classification Input Layer: &lt;/span&gt;The combine classification output raster layer produced in step 2.&lt;/p&gt;
@@ -6639,7 +6639,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>480</y>
+         <y>470</y>
          <width>201</width>
          <height>21</height>
         </rect>
@@ -6655,7 +6655,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>360</y>
+         <y>350</y>
          <width>321</width>
          <height>16</height>
         </rect>
@@ -6668,7 +6668,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>430</y>
+         <y>420</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6678,7 +6678,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>380</y>
+         <y>370</y>
          <width>231</width>
          <height>31</height>
         </rect>
@@ -6687,8 +6687,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="Aggregation_Execute_PB">
        <property name="geometry">
         <rect>
-         <x>220</x>
-         <y>480</y>
+         <x>10</x>
+         <y>500</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6701,7 +6701,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>460</y>
+         <y>450</y>
          <width>291</width>
          <height>16</height>
         </rect>
@@ -6714,7 +6714,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>410</y>
+         <y>400</y>
          <width>281</width>
          <height>16</height>
         </rect>
@@ -6753,7 +6753,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>190</y>
+         <y>180</y>
          <width>311</width>
          <height>21</height>
         </rect>
@@ -6776,7 +6776,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>340</y>
+         <y>330</y>
          <width>311</width>
          <height>21</height>
         </rect>
@@ -6790,6 +6790,58 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 3: Aggregation&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="Enablement_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>70</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="Population_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>150</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="Combine_status">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>300</y>
+         <width>201</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="Aggregate_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>500</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
@@ -6806,7 +6858,7 @@ p, li { white-space: pre-wrap; }
          <x>360</x>
          <y>-10</y>
          <width>391</width>
-         <height>521</height>
+         <height>531</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -6822,10 +6874,10 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Raster Locations&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain further insights from the results based on proximity to potential RE zones. The outputs from this tab assign the combine classification score to the RE zones input  raster and extract the aggregated polygon/admin units that intersect with RE zones.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Combine Classification Input Layer:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;The combine classification output raster layer produced in step 2 of the previous tab.&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregated Combine Classification Input Layer: &lt;/span&gt;The aggregated combine classification output polygon layer produced in step 3 of the previous tab.&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Potential RE Zones Input Layer: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster layer highlighting the potetial RE zones. (Zones in the region that have no RE potential need to be represented with &amp;quot;no data&amp;quot; values in the raster file)&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain further insights from the results based on proximity to potential RE zones. The outputs from this tab assign the combine classification score to the RE zones input raster and extract the aggregated polygon/admin units that intersect with RE zones.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Combine Classification Input Layer:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;The combine classification output raster layer produced in step 2 of the &amp;quot;Enablement&amp;quot; tab.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregated Combine Classification Input Layer: &lt;/span&gt;The aggregated combine classification output polygon layer produced in step 3 of the &amp;quot;Enablement&amp;quot; tab.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Potential RE Zones Input Layer: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Raster layer highlighting the potetial RE zones. (Zones in the region that have no RE potential need to be represented with &amp;quot;no data&amp;quot; or &amp;quot;inf&amp;quot; values in the raster file)&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (RE zones): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; Raster layer of the RE zones with the combine classification scores assigned to the highlited RE zones. Additionally, the aggregated polygon/admin units that intersect with RE zones are extracted along with their majority class to a new polygon layer.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
@@ -6868,8 +6920,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="RE_Execute_PB">
        <property name="geometry">
         <rect>
-         <x>220</x>
-         <y>180</y>
+         <x>10</x>
+         <y>210</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -6940,6 +6992,19 @@ p, li { white-space: pre-wrap; }
         <string>Aggregated Combined Classification Input Layer (Polygon)</string>
        </property>
       </widget>
+      <widget class="QLabel" name="REzone_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>210</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_37">
       <attribute name="title">
@@ -6970,12 +7035,12 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Insights - Point Locations&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain further insights from the results based on proximity to RE point locations. The outputs from this tab aggregate  the combine classification score based on the majority class that fall within RE point location buffers and extract the aggregated polygon/admin units that intersect with RE point location buffers from the original combine classification raster produced in the in step 2 of the &amp;quot;Enablement&amp;quot; tab.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Combine Classification Input Layer:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;The combine classification output raster layer produced in step 2 of the previous tab.&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregated Combine Classification Input Layer: &lt;/span&gt;The aggregated combine classification output polygon layer produced in step 3 of the previous tab.&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab enables the user to obtain further insights from the results based on proximity to RE point locations. The outputs from this tab aggregat the combine classification score based on the majority class that fall within RE point location buffers and extract the aggregated polygon/admin units that intersect with RE point location buffers. The majority class extraction is conducted using the original combine classification raster produced in step 2 of the &amp;quot;Enablement&amp;quot; tab.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Combine Classification Input Layer:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;The combine classification output raster layer produced in step 2 of the &lt;span style=&quot; font-size:8pt;&quot;&gt; &amp;quot;Enablement&amp;quot;&lt;/span&gt; tab.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregated Combine Classification Input Layer: &lt;/span&gt;The aggregated combine classification output polygon layer produced in step 3 of the &lt;span style=&quot; font-size:8pt;&quot;&gt; &amp;quot;Enablement&amp;quot;&lt;/span&gt; tab.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;RE Point Location Input Layer: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Point locations of interest (.shp). These could be existing RE job locations or other points of interest.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffer Distance: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Radial distance of circular buffer from point location in meters.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (RE Point): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A polygon layer showing the 15 score-population classes aggregated to the RE point buffers scalr by identifying the majority class that fall within the buffers. Additionally, the aggregated polygon/admin units that intersect with RE point location buffers are extracted along with their majority class to a new polygon layer.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Buffer Distance: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Maximum radial distance of circular buffer from point location in meters.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output (RE Point): &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A polygon layer showing the 15 score-population classes aggregated to the RE point buffers scale by identifying the majority class that fall within the buffers. Additionally, the aggregated polygon/admin units that intersect with RE point location buffers are extracted along with their majority class to a new polygon layer.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
@@ -7057,8 +7122,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="Buffer_Execute_PB">
        <property name="geometry">
         <rect>
-         <x>220</x>
-         <y>230</y>
+         <x>10</x>
+         <y>260</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -7117,6 +7182,19 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="value">
         <number>10000</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="REpoint_status">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>260</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>

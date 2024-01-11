@@ -3434,8 +3434,8 @@ class GenderIndicatorTool:
 
     # *************************** Insights Tab Functions *********************************** #
     def scoreReclassInsights(self):
-        # self.dlg.individualAggregation_Check.setText("")
-        # self.dlg.individualAggregation_Check.repaint()
+        self.dlg.Enablement_status.setText("")
+        self.dlg.Enablement_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
 
@@ -3465,6 +3465,12 @@ class GenderIndicatorTool:
         countryUTMLayer = f"{tempDir}/countryUTMLayer.shp"
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
         ScoretempResample = f"{tempDir}/ScoretempResample.tif"
+
+        self.dlg.Enablement_status.setText("Variables Set")
+        self.dlg.Enablement_status.repaint()
+
+        self.dlg.Enablement_status.setText("Processing...")
+        self.dlg.Enablement_status.repaint()
 
         self.convertCRS(countryLayer, UTM_crs)
         shp_utm.to_file(countryUTMLayer)
@@ -3530,9 +3536,12 @@ class GenderIndicatorTool:
 
         self.dlg.Insights_ScoreReclass_Input_Field.setFilePath(f"{score_rec}")
 
+        self.dlg.Enablement_status.setText("Classification Complete!")
+        self.dlg.Enablement_status.repaint()
+
     def populationReclassInsights(self):
-        # self.dlg.individualAggregation_Check.setText("")
-        # self.dlg.individualAggregation_Check.repaint()
+        self.dlg.Population_status.setText("")
+        self.dlg.Population_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
 
@@ -3562,6 +3571,12 @@ class GenderIndicatorTool:
         countryUTMLayer = f"{tempDir}/countryUTMLayer.shp"
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
         PoptempResample = f"{tempDir}/PoptempResample.tif"
+
+        self.dlg.Population_status.setText("Variables Set")
+        self.dlg.Population_status.repaint()
+
+        self.dlg.Population_status.setText("Processing...")
+        self.dlg.Population_status.repaint()
 
         self.convertCRS(countryLayer, UTM_crs)
         shp_utm.to_file(countryUTMLayer)
@@ -3634,9 +3649,12 @@ class GenderIndicatorTool:
 
         self.dlg.Insights_PopulationReclass_Input_Field.setFilePath(f"{pop_rec}")
 
+        self.dlg.Population_status.setText("Classification Complete!")
+        self.dlg.Population_status.repaint()
+
     def combineReclassInsights(self):
-        # self.dlg.individualAggregation_Check.setText("")
-        # self.dlg.individualAggregation_Check.repaint()
+        self.dlg.Combine_status.setText("")
+        self.dlg.Combine_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
 
@@ -3665,6 +3683,12 @@ class GenderIndicatorTool:
             pass
         else:
             os.mkdir(f"{Insights_folder}/{Insights_combine}")
+
+        self.dlg.Combine_status.setText("Variables Set")
+        self.dlg.Combine_status.repaint()
+
+        self.dlg.Combine_status.setText("Processing...")
+        self.dlg.Combine_status.repaint()
     
         # Combine Population and Score Reclassify
         with rasterio.open(score_rec) as src:
@@ -3712,9 +3736,12 @@ class GenderIndicatorTool:
         layer0 = QgsRasterLayer(combined_rec, f"Enablement_&_Population_Combined_classification")
         QgsProject.instance().addMapLayer(layer0)
 
+        self.dlg.Combine_status.setText("Classification Complete!")
+        self.dlg.Combine_status.repaint()
+
     def Aggregationinsights(self):
-        # self.dlg.individualAggregation_Check.setText("")
-        # self.dlg.individualAggregation_Check.repaint()
+        self.dlg.Aggregate_status.setText("")
+        self.dlg.Aggregate_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
 
@@ -3742,6 +3769,12 @@ class GenderIndicatorTool:
 
         # TEMP OUTPUT
         aggregation_polygon_utm = f"{tempDir}/aggregation_polygon_utm.shp"
+
+        self.dlg.Aggregate_status.setText("Variables Set")
+        self.dlg.Aggregate_status.repaint()
+
+        self.dlg.Aggregate_status.setText("Processing...")
+        self.dlg.Aggregate_status.repaint()
 
         self.convertCRS(aggregation_polygon, UTM_crs)
         shp_utm.to_file(aggregation_polygon_utm)
@@ -3771,12 +3804,13 @@ class GenderIndicatorTool:
         self.dlg.Insights_AGGReclass_Input_Field.setFilePath(f"{shpOutput}")
         self.dlg.Insights_AGGReclass_Input_Field_2.setFilePath(f"{shpOutput}")
 
-        # layer = QgsVectorLayer(shpOutput, f"{self.dlg.AGG_Output_Field.text()}")
-        # QgsProject.instance().addMapLayer(layer)
+        self.dlg.Aggregate_status.setText("Aggregation Complete!")
+        self.dlg.Aggregate_status.repaint()
+
 
     def reZones(self):
-        # self.dlg.individualAggregation_Check.setText("")
-        # self.dlg.individualAggregation_Check.repaint()
+        self.dlg.REzone_status.setText("")
+        self.dlg.REzone_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
 
@@ -3811,7 +3845,11 @@ class GenderIndicatorTool:
         temp_dis = f"{tempDir}/temp_dis.shp"
         final_temp_dis = f"{tempDir}/final_temp_dis.shp"
 
+        self.dlg.REzone_status.setText("Variables Set")
+        self.dlg.REzone_status.repaint()
 
+        self.dlg.REzone_status.setText("Processing...")
+        self.dlg.REzone_status.repaint()
 
         self.convertCRS(countryLayer, UTM_crs)
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
@@ -3923,9 +3961,12 @@ class GenderIndicatorTool:
         layer3 = QgsRasterLayer(combined_RE, f"{self.dlg.RE_Output_Field.text()}Enablement_&_Population_Combined")
         QgsProject.instance().addMapLayer(layer3)
 
+        self.dlg.REzone_status.setText("RE Zones extraction complete!")
+        self.dlg.REzone_status.repaint()
+
     def Bufferinsights(self):
-        # self.dlg.individualAggregation_Check.setText("")
-        # self.dlg.individualAggregation_Check.repaint()
+        self.dlg.REpoint_status.setText("")
+        self.dlg.REpoint_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
 
@@ -3959,6 +4000,12 @@ class GenderIndicatorTool:
         location_point_utm = f"{tempDir}/aggregation_polygon_utm.shp"
         location_buffer = f"{tempDir}/location_buffer.shp"
         location_buffer_clip = f"{tempDir}/location_buffer_clip.shp"
+
+        self.dlg.REpoint_status.setText("Variables Set")
+        self.dlg.REpoint_status.repaint()
+
+        self.dlg.REpoint_status.setText("Processing...")
+        self.dlg.REpoint_status.repaint()
 
         self.convertCRS(countryLayer, UTM_crs)
         shp_utm.to_file(adminUTMLayer)
@@ -4035,3 +4082,6 @@ class GenderIndicatorTool:
 
         layer = QgsVectorLayer(shpOutput, f"{self.dlg.Buffer_Output_Field.text()}{str(bufferDistance)}m_buffer")
         QgsProject.instance().addMapLayer(layer)
+
+        self.dlg.REpoint_status.setText("RE point proximity complete!")
+        self.dlg.REpoint_status.repaint()
