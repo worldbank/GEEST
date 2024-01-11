@@ -47,7 +47,7 @@
       - [4.8.3 RE Point Locations](#re-point-locations-tab) 
 
 - [5 Troubleshooting](#5-troubleshooting)
-   - [5.1 ERROR: Accessibility Tabs permission error](#accessibility-permissions-error)
+   - [5.1 ERROR: Accessibility tabs permission error](#accessibility-permissions-error)
    - [5.2 QGIS plugin/interface widgets and text are distorted and scaled incorrectly](#distorted)
    - [5.3 Raster outputs not being loaded and displayed correctly](#raster-outputs)
    - [5.4 ERROR: Output directory not set](#output-directory)
@@ -851,9 +851,9 @@ Information on the tool its framework, scoring system, and how results should or
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/9fbabc46-48c8-49db-b8b8-a82d96a5b2db)
 
-This error occurs sometimes when some of the shapefiles produced in the temp folder of the working directory are trying to be overwritten or deleted but can't because it's still being stored in QGIS's memory. This sometimes occurs even when the layer is removed from the QGIS table of contents.
+This error occurs when some of the shapefiles produced in the temp folder of the working directory are trying to be overwritten or deleted but can't because it's still being stored in QGIS's memory. This can occurs even when the layer is removed from the QGIS table of contents.
 
-This error occurs even when the tool ran correctly so first check if the desired output file was produced in the working directory.
+**This error may also occur when the tool runs correctly so first check if the desired output file was produced in the working directory.**
 
 If the file is not produced you can try the following:
 - Delete the *temp* folder in the working directory
@@ -923,7 +923,7 @@ If you see the following error message, please check if you're CRS has been set 
 
 **If the "Plugin Reloader" does not resolve the error close QGIS, restart it again, and re-run the process you were trying to execute.**
 
-# APPENDIX A SIDS CRS
+# <a name="sids-crs"></a>SIDS CRS
 
 | **Country** | **WGS84 / UTM CRS** | **EPSG** |
 | --- | --- | --- |
