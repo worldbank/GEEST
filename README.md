@@ -9,6 +9,7 @@
 - [3 Installing Plugin on local device](#3-installing-plugin-on-local-device)
 
 - [4 Using the Plugin](#4-using-the-plugin)
+   - [4.1 SETUP TAB](#setup-tab)
 
 - [5 Troubleshooting](#5-troubleshooting)
 
@@ -133,7 +134,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 **Input File:** *Folder/file_name* --> *AccessFinance/Access_to_finance.shp*
 
-### 4.1 SETUP TAB
+### <a name="setup-tab"></a> 4.1 SETUP TAB
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/525515fd-3f45-494e-8d9a-2cb4256eee04)
 
