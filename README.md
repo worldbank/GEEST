@@ -47,6 +47,13 @@
       - [4.8.3 RE Point Locations](#re-point-locations-tab) 
 
 - [5 Troubleshooting](#5-troubleshooting)
+   - [5.1 ERROR: Accessibility Tabs permission error](#accessibility-permissions-error)
+   - [5.2 QGIS plugin/interface widgets and text are distorted and scaled incorrectly](#distorted)
+   - [5.3 Raster outputs not being loaded and displayed correctly](#raster-outputs)
+   - [5.4 ERROR: Output directory not set](#output-directory)
+   - [5.5 ERROR: Country boundary polygon not set](#country-boundary)
+   - [5.6 ERROR: Co-ordinate reference system (CRS) not set](#crs)
+   - [5.7 Alternative way to refresh the plugin if it freezes or does not run as expected](#alternative)
 
 ## 1 Install QGIS
 
@@ -850,7 +857,7 @@ If the file is not produced you can try the following:
 - Delete the *temp* folder in the working directory
 - If you cannot delete the *temp* folder you will have to close QGIS and open it again, complete the setup tab, go back to the tab where the error occurred and re-run the tab again.
 
-### <a name="distorted"></a>5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED
+### <a name="distorted"></a>5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/83c37f7b-d95f-4bbe-b4a7-9040be5ddce1)
 
 This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked [here](https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d), highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting, Microsoft indicates that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
@@ -861,7 +868,7 @@ Possible solutions to this are:
 - Adjust the scale for all monitors to 100%.
 - Ensure that the display resolution is the same for both monitors. i.e. If the smallest monitor is set to 1920 x 1080 set the 4k monitor to this display resolution as well.
 
-### <a name="raster-outputs"></a>5.3 RASTER OUTPUTS NOT DISPLAYING CORRECTLY
+### <a name="raster-outputs"></a>5.3 RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/383081b1-4b8b-41c7-8c4b-bf3fe09b5215)
 
@@ -873,13 +880,13 @@ Occasionally, some of the outputs automatically loaded to the QGIS table of cont
 
 If you see the following error message, please check if your output directory has been set in the "Setup" tab.
 
-### <a name="country-boundary"></a>5.5 ERROR: Country boundary Polygon not set 
+### <a name="country-boundary"></a>5.5 ERROR: COUNTRY BOUNDARY POLYGON NOT SET
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/8c92f6df-07b3-4953-bf7b-0a57a3c10072)
 
 If you see the following error message, please check if you're country boundary polygon layer has been set in the "Setup" tab.
 
-### <a name="crs"></a>5.6 ERROR: Co-ordinate Reference System (CRS) not set
+### <a name="crs"></a>5.6 ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/fd3baffa-6b3f-4ef7-a89a-8168b57cd7be)
 
