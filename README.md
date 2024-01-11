@@ -126,13 +126,16 @@ support@openrouteservice.heigit.org
 
 16. The plugin is now installed and you should now be able to access it in you tool bar or under the Plugin's tab as seen in the image below.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/754006a1-3fe2-4f01-9561-71bd5af2d88f)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/aba6f895-bb9a-4148-83a3-5a1fc82c5834)
 
 ## 4 Using the Plugin
+Examples of files that can be used as input at a particular step as per the Pilot Country Database will be inidcated at the end of the step. The following format will be use:
+
+**Input File:** *Folder/file_name* --> *AccessFinance/Access_to_finance.shp*
 
 ### 4.1 SETUP TAB
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/3bd49833-ed0b-4a5e-a77d-ac4159cf3b16)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/525515fd-3f45-494e-8d9a-2cb4256eee04)
 
 1. Create a project folder that will be used to store all tool outputs.
    
@@ -140,7 +143,9 @@ support@openrouteservice.heigit.org
    
 5. Set the country boundary layer by navigating to and selecting the **Admin 0** country boundary polygon shapefile for the country you want to analyze.
 
-6. Select the appropriate coordinate reference system (CRS) form the QGIS CRS database.
+   **Input File:** *AdminBoundaries/Admin0.shp*
+
+7. Select the appropriate coordinate reference system (CRS) form the QGIS CRS database.
 
 **Appendix A**  _lists the all the CRS to be used for the SIDS countries._
 
@@ -156,7 +161,7 @@ support@openrouteservice.heigit.org
 
 #### 4.2.1 Education
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/39326777-56ac-4070-9926-40a7f064758e)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/68baff0a-cf3d-4045-b62b-432d505117bf)
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have achieved a post-secondary education.
 
@@ -174,7 +179,7 @@ support@openrouteservice.heigit.org
 
 #### 4.2.2 Care Responsibilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/93de6a5b-15cb-4ca9-89a6-2bc7f4bc0537)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/4b6f1c50-96fc-4ea2-985f-e226f41ab005)
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of time women spend on care responsibilities or household activities.
 
@@ -192,7 +197,7 @@ support@openrouteservice.heigit.org
 
 #### 4.2.3 Domestic Violence
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/b7aa52c3-a1f9-4554-9754-c9ddec97c46a)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/2adef90d-03ee-48ae-a16d-d7055939f636)
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have suffered domestic violence.
 
@@ -210,7 +215,7 @@ support@openrouteservice.heigit.org
 
 #### 4.2.4 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/652149bb-9205-4b14-9f01-cb19da7e8701)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/a6cc36ed-377b-4c9d-933a-a8556832494e)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Individual Dimension.
 
@@ -234,7 +239,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### 4.3.1 Policy and Legal Protection
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/c77e07f2-2980-4294-9f70-9506c3bf7f81)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/049629e3-2a15-4701-8015-970cde23c4d3)
 
 1. Navigate to and select polygon input shapefile containing a field reporting a percentage representing the level of protective policies afforded to women.
 2. Click the "Set" button to extract all the fields from the polygon input layer.
@@ -246,7 +251,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### 4.3.2 Access to Finance
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/5644492a-99c3-41c2-a8bf-d61f68827cdf)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/1558ae32-4794-4c27-b64f-2c1872681083)
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have a bank account.
 
@@ -264,7 +269,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### 4.3.3 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/7d78a94b-076f-438a-b5f3-14bdf44edf17)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/732852d1-27bc-42b5-bfe7-6165a70cf0b6)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
 
@@ -288,7 +293,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### 4.4.1 Women's Travel Patterns
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/96b72156-45d7-4310-b959-2f17b7718e27)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/03498688-42b3-44fd-9d81-5dd0ca491c19)
 
 1. Navigate to and select point shapefile input of facilities related to women's role as caregivers. This includes:
   - Childcare facilities
@@ -323,7 +328,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### 4.4.2 Access to Public Transport
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/c3bf07a4-3a6e-4cf1-a59b-6731b5d6cbf3)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/7f02cf8a-8396-4641-80db-89f02356b37f)
 
 1. Navigate to and select point shapefile input for public transport stops.
 
@@ -343,7 +348,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### 4.4.3 Access to Education and Training Facilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/38c5ef9e-0b82-4db7-b22a-afce1e678e65)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/eceec2f6-b03e-4a18-9c02-3f9463b26492)
 
 1. Navigate to and select point shapefile input of education and training facilities.
 
@@ -363,7 +368,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### 4.4.4 Access to Jobs in the RE sector
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/3138898e-1c2a-419f-ab45-8bf1e0a025e0)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/810b7d62-3174-4b49-9495-0675a78fa8ac)
 
 1. Navigate to and select point shapefile input of jobs or job facilities.
 
@@ -383,7 +388,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### 4.4.5 Access to Health Facilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/74cab802-4d1a-42e0-a15e-0b062e308217)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/93d48ded-25b4-409a-88c5-7de4f02092dd)
 
 1. Navigate to and select point shapefile input of health care facilities.
 
@@ -403,7 +408,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### 4.4.6 Access to Financial Facilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/df5b270e-b77a-4820-af28-343088359878)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/5bd4a772-6fc2-48e7-96b9-f2967f6f4865)
 
 1. Navigate to and select point shapefile input of financial facilities.
 
@@ -423,7 +428,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### 4.4.7 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/395612a1-f2d1-4c4c-9a03-80874651ddf2)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/e9f843dd-d374-42e3-b2e3-fbaf28c4d1be)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Accessibility Dimension.
 
@@ -447,7 +452,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### 4.5.1 Active Transport
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/437ac901-0f25-4750-acf4-ee3f7f460d3f)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/288bd781-ef45-4f2f-92a5-e312d82be340)
 
 1. Navigate to and select polyline road network shapefile.
 
@@ -469,7 +474,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### 4.5.2 Availability of Public Transport
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/19f8a8bc-1868-42f5-a199-023dc6f14849)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/2a2dbb36-9f9a-42a4-8834-805969081e54)
 
 1. Navigate to and select point shapefile input for public transport stops.
 
@@ -485,9 +490,9 @@ The smaller size the more computationally intensive the algorithm will be.
 
 6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (_Project\_ Folder/__Place Characterization/Raster\_output.tif_).
 
-#### 4.5.3 Safety
+#### 4.5.3 Safe Urban Design
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/93fa284e-77ab-4f77-a15e-6886ce90623b)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/1e73b47a-1717-441d-a2db-cb6ca7683165)
 
 1. Navigate to and select night time lights raster input.
 
@@ -501,7 +506,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 ### 4.5.4 Security
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/5eed1d4f-08fb-41d7-88c9-f8c5be3555af)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b9f6c3c8-be8e-45f6-b351-cf76327b8b40)
 
 1. Navigate to and select crime rate polygon input shapefile containing a field reporting crime rate for a specific incident.
 
@@ -529,7 +534,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### 4.5.5 Income Level
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/5e244e96-ba82-4c63-a6ca-5b569d6c8d13)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/effab4d6-77fd-42b6-b27c-c674ca6a26a3)
 
 1. Navigate to and select wealth index polygon input shapefile containing a field with the wealth index.
 
@@ -547,7 +552,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### 4.5.6 Electricity Access
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/a24d2cb5-f62f-411f-9774-49b41b455d7d)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/7344c605-f7ce-4e15-bd73-2a75d84c6b69)
 
 1. Navigate to and select electricity access polygon input shapefile containing a field indicating percentage individuals that have access to electricity.
 
@@ -577,9 +582,9 @@ OR
 
 **N.B. If night time lights raster data is used for the "Safe Urban Design" factor it should not be used in the "Electrical Access" factor and vice-versa**
 
-#### 4.5.7Urbanization
+#### 4.5.7 Level of Urbanization
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/dd3e2069-b8cc-4a63-b69d-e0ec16110662)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/ac63f69e-c2c2-4176-aeb6-bfd983c8d2d1)
 
 1. Navigate to and select GHS-SMOD raster input.
 
@@ -593,7 +598,7 @@ OR
 
 #### 4.5.8 Size of Housing
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/98ade628-c27b-4103-8b19-22402d71c6b4)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b3dc8615-2d17-48e1-9f13-3f65b5dfc70e)
 
 1. Navigate to and select the building footprints polygon shapefile.
 
@@ -611,7 +616,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### 4.5.9 Digital Inclusion
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/3a31dbee-636f-48bb-bf5a-8f3aea50fed6)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/19abbdf1-9804-43c5-8fb9-6548b13b70eb)
 
 1. Navigate to and select the polygon input shapefile containing a field indicating representing the percentage of houses with Internet access
 
@@ -629,7 +634,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### 4.5.10 Natural Environment and Climatic Factors
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/503e2e4f-f4d2-46be-b941-19dd81a37e34)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/fe2db337-b616-48ee-b20e-2be5a2296f64)
 
 1. Navigate to and select polygon hazard shapefile.
 
@@ -661,7 +666,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### 4.5.11 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/86a30af0-6fe2-4711-8f2a-43ecdd854098)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/bd009d18-8a6c-4d8b-9d40-56fb38e81148)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.
 
@@ -683,7 +688,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 ### 4.6 DIMENSION AGGREGATION TAB
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/f0e52173-c037-49d3-be0f-b30b3f858ebc)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/8d2787d9-78ac-4774-9b70-6bee722bfe0a)
 
 1. Load each dimensions aggregated raster outputs.
 
@@ -703,9 +708,27 @@ If a dimension is missing it needs to be given a weighting of 0%.
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Final\_output" folder (_Project\_ Folder/Final\_Output/Raster\_output.tif_).
 
-### 4.7 INSIGHTS TAB
+### 4.7 ABOUT TAB
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/d6f7ba73-01f4-4791-b09b-7f1276811f10)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/4064c4f2-75a9-4c6c-8727-6c0674699b2c)
+
+Information on the tool it's framework, scoring system, and how results should or can be interpreted. 
+
+### 4.8 INSIGHTS TAB
+#### 4.8.1 Enablement
+
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/11389ee3-9835-4a97-a570-8f7c9efdeca1)
+
+
+#### 4.8.2 RE Zone Raster Locations
+
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b1f6b997-b126-46d5-903c-7a94b93bbf90)
+
+
+#### 4.8.3 RE Point Locations
+
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/22fd5d42-25a9-4253-9a76-2c64c53e95c4)
+
 
 ## 5 Troubleshooting
 
