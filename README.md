@@ -9,7 +9,16 @@
 - [3 Installing Plugin on local device](#3-installing-plugin-on-local-device)
 
 - [4 Using the Plugin](#4-using-the-plugin)
-   - [4.1 SETUP TAB](#setup-tab)
+   - [4.1 Setup Tab](#setup-tab)
+   - [4.2 Indivdual Tab](#indivdual-tab)
+      - [4.2.1 Education](#education-tab)
+      - [4.2.2 Care Responsibilities](#education-tab)
+      - [4.2.3 Domestic Violence](#domestic-violence-tab)
+      - [4.2.4 Aggregation](#ID-aggregation-tab)
+   - [4.3 Contextual Tab](#contextual-tab)
+      - [4.3.1 Policy and Legal Protection](#policy-and-legal-protection-tab)
+      - [4.3.2 Access to Finance](#access-to-finance-tab)
+      - [4.3.3 Aggregation](#CD-aggregation-tab)
 
 - [5 Troubleshooting](#5-troubleshooting)
 
