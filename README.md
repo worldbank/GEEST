@@ -249,9 +249,9 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/AGG_Raster_output.tif*)
 
-### 4.3 CONTEXTUAL TAB
+### <a name="contextual-tab"></a>4.3 CONTEXTUAL TAB
 
-#### 4.3.1 Policy and Legal Protection
+#### <a name="policy-and-legal-protection-tab"></a>4.3.1 Policy and Legal Protection
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/049629e3-2a15-4701-8015-970cde23c4d3)
 
@@ -271,7 +271,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/PLP_Raster_output.tif*)
 
-#### 4.3.2 Access to Finance
+#### <a name="access-to-finance-tab"></a>4.3.2 Access to Finance
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/1558ae32-4794-4c27-b64f-2c1872681083)
 
@@ -291,7 +291,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/FIN_Raster_output.tif*)
 
-#### 4.3.3 Aggregate
+#### <a name="CD-aggregation-tab"></a>4.3.3 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/732852d1-27bc-42b5-bfe7-6165a70cf0b6)
 
