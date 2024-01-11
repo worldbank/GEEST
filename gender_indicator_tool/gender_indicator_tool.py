@@ -3899,7 +3899,6 @@ class GenderIndicatorTool:
             re_zones[re_zones != src.nodata] = 1
 
         # Raster Calculation
-
         result = reclassified_layer_ras * re_zones
 
         meta1.update(dtype=rasterio.float32)
@@ -3911,7 +3910,6 @@ class GenderIndicatorTool:
         styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
         styleFile = f"{combined_RE.split('.')[0]}.qml"
-
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
         # Vectorize raster
