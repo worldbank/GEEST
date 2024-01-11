@@ -1,6 +1,6 @@
 # Gender Enabling Environments Spatial Tool (GEEST)
 
-## User Manual December 2023
+## User Manual
 
 - [1 Install QGIS](#1-install-qgis)
 
@@ -158,9 +158,9 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 7. Set your preferred out raster output resolution in meters squared.
 
-### 4.2 INDIVIDUAL TAB
+### <a name="indivdual-tab"></a>4.2 INDIVIDUAL TAB
 
-#### 4.2.1 Education
+#### <a name="education-tab"></a>4.2.1 Education
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/68baff0a-cf3d-4045-b62b-432d505117bf)
 
@@ -180,7 +180,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/EDU_Raster_output.tif*)
 
-#### 4.2.2 Care Responsibilities
+#### <a name="care-responsibilities-tab"></a>4.2.2 Care Responsibilities
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/4b6f1c50-96fc-4ea2-985f-e226f41ab005)
 
@@ -198,7 +198,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/CRE_Raster_output.tif*)
 
-#### 4.2.3 Domestic Violence
+#### 4.2.3 <a name="domestic-violence-tab"></a>Domestic Violence
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/2adef90d-03ee-48ae-a16d-d7055939f636)
 
@@ -218,7 +218,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/DOV_Raster_output.tif*)
 
-#### 4.2.4 Aggregate
+#### <a name="ID-aggregation-tab"></a>4.2.4 Aggregate
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/a6cc36ed-377b-4c9d-933a-a8556832494e)
 
