@@ -849,6 +849,8 @@ Information on the tool its framework, scoring system, and how results should or
 
 ### <a name="accessibility-permissions-error"></a>5.1 ACCESSIBILTY TABS PERMISSIONS ERROR
 
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/9fbabc46-48c8-49db-b8b8-a82d96a5b2db)
+
 This error occurs sometimes when some of the shapefiles produced in the temp folder of the working directory are trying to be overwritten or deleted but can't because it's still being stored in QGIS's memory. This sometimes occurs even when the layer is removed from the QGIS table of contents.
 
 This error occurs even when the tool ran correctly so first check if the desired output file was produced in the working directory.
