@@ -14,7 +14,7 @@
 
 ## 1 Install QGIS
 
-1. The link below will take you to the QGIS website where you will be able to download the installation file. Note that it is possible to use older versions of QGIS, e.g. Version 3.28.
+1. The link below will take you to the QGIS website where you will be able to download the QGIS installation file. Note that it is possible to use older versions of QGIS, e.g. Version 3.28.
 
 QGIS website: [https://www.qgis.org/en/site/](https://www.qgis.org/en/site/)
 
@@ -50,15 +50,16 @@ ORS Sign up: [https://openrouteservice.org/dev/#/signup](https://openrouteservic
 
 5. Fill in all the necessary fields to sign up and then log into your account.
 
-6. Requesting a standard token and provide a name for Token.
+6. Request a standard token and provide a name for Token.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/efe9f9ab-1f29-4c28-81ec-73c8268b0e5e)
 
 7. Once token has been created, navigate to the Dashboard tab and click on the API key as seen in the image below. The API key should now be copied to clipboard.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/22830db6-9703-4877-84d8-9ff169e73bb7)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/5d0e7d0d-561b-46bd-980d-d9ef7059148e)
 
-8. In the QGIS window navigate the ORS tool and select "Provider Settings".
+
+9. In the QGIS window navigate the ORS tool and select "Provider Settings".
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/7234b8ac-99a6-4668-8867-a0f4b29efb6a)
 
@@ -68,7 +69,7 @@ ORS Sign up: [https://openrouteservice.org/dev/#/signup](https://openrouteservic
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/6cdf18f4-5908-46ef-a6c7-f36fb3d07048)
 
-**N.B.** Additional credits can be requested on the ORS site by applying for the collaborative plan as described [here](https://openrouteservice.org/plans/). You will have to provide a brief motivation, however, If your application is in a humanitarian, academic, governmental, or non-for-profit organization, you should be eligible for the collaborative plan.
+**N.B.** Additional credits can be requested on the ORS site by applying for the collaborative plan as described [here](https://openrouteservice.org/plans/). You will have to provide a brief motivation, however, if your application is in a humanitarian, academic, governmental, or non-for-profit organization, you should be eligible for the collaborative plan.
 
 This email address can also be used for further assistance:
 
@@ -76,58 +77,54 @@ support@openrouteservice.heigit.org
 
 ## 3 Installing Plugin on local device
 
-1. The link below will take you to the GitHub repository where the "World Bank Gender Indicator Tool" is maintained.
+1. Click on the green "Code" button and select the "Download ZIP" option.
 
-GitHub Repository: [https://github.com/Pegasys-Resilience/WBGIT](https://github.com/Pegasys-Resilience/WBGIT)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/72d7dc34-eb53-417b-9748-462e6fcc1c0c)
 
-2. Click on the green "Code" button and select the "Download ZIP" option.
+2. Once the download has been completed extract the contents of the ZIP file.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/94fcc2fc-1041-46b8-8685-ae6391c0481b)
-
-3. Once the download has been completed extract the contents of the ZIP file.
-
-4. Navigate to your extracted ZIP folder and copy the _requirements.txt_ file.
+3. Navigate to your extracted ZIP folder and copy the _requirements.txt_ file.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/702bfc4a-388d-4da7-99fd-c7cfe30e9106)
 
-5. Navigate to the QGIS program folder and paste the _requirements.txt_ file into it. The file path would be similar to this: _C:\Program Files\QGIS 3.32.0_ as seen in the image under **step 10**.
+4. Navigate to the QGIS program folder and paste the _requirements.txt_ file into it. The file path would be similar to this: _C:\Program Files\QGIS 3.32.0_ as seen in the image under **step 5**.
 
-6. Run the _OSGeo4W_ batch file.
+5. Run the _OSGeo4W_ batch file.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/0d0c609c-0278-4dde-abb8-81a44f62a033)
 
-7. A command line pop-up window will appear as seen in the image below.
+6. A command line pop-up window will appear as seen in the image below.
 
-8. Type the following into it and press Enter.
-pip install -r requirements.txt
+7. Type the following into it and press Enter.
+```pip install -r requirements.txt```
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/506d8ec2-3d81-45c3-9234-1b95673cb9c8)
 
-9. All the Python libraries that the Plugin is dependent on will now be installed. This can take a few minutes to install.
+8. All the Python libraries that the Plugin is dependent on will now be installed. This can take a few minutes to install.
 
-10. Once the installations are complete you can close command line pop-up window.
+9. Once the installations are complete you can close command line pop-up window.
 
-11. Open QGIS, navigate to the "Plugins" tab and select "Manage and Install Plugins…" option from the drop-down menu.
+10. Open QGIS, navigate to the "Plugins" tab and select "Manage and Install Plugins…" option from the drop-down menu.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/17d610e1-c989-435c-ba10-187657d853b7)
 
-12. In the plugin pop up window navigate to the "Install from ZIP" tab.
+11. In the plugin pop up window navigate to the "Install from ZIP" tab.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/34ed8ae1-d533-43af-8dc7-17645189201a)
 
-13. From the "Install from ZIP" tab navigate back to your extracted ZIP folder and select the "gender\_indicator\_tool" compressed (zipped) folder as seen in the image bellow.
+12. From the "Install from ZIP" tab navigate back to your extracted ZIP folder and select the "gender\_indicator\_tool" compressed (zipped) folder as seen in the image bellow.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/2cc9b67e-a990-4375-953a-2131f801dfcc)
 
-14. Once ZIP file has been selected click on "Install Plugin".
+13. Once ZIP file has been selected click on "Install Plugin".
 
-15. Once plugin has been installed navigate to the "All" tab.
+14. Once plugin has been installed navigate to the "All" tab.
 
-16. In the search bar type "gender indicator tool" and click the check box next to the "World Bank Gender Indicator Tool" to install the plugin.
+15. In the search bar type "GEEST" and click the check box next to the "Gender Enabling Environments Spatial Tool (GEEST)" to install the plugin.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/eda11040-7030-46f4-b191-e94097c8e67d)
+![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/93ba70f0-1eca-48a4-aaad-cc68872d01f7)
 
-17. The plugin is now installed and you should now be able to access it in you tool bar or under the Plugin's tab as seen in the image below.
+16. The plugin is now installed and you should now be able to access it in you tool bar or under the Plugin's tab as seen in the image below.
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/754006a1-3fe2-4f01-9561-71bd5af2d88f)
 
