@@ -54,6 +54,8 @@
    - [5.5 ERROR: Country boundary polygon not set](#country-boundary)
    - [5.6 ERROR: Co-ordinate reference system (CRS) not set](#crs)
    - [5.7 Alternative way to refresh the plugin if it freezes or does not run as expected](#alternative)
+ 
+  - [List of CRSs for SIDS](#sids-crs)
 
 ## 1 Install QGIS
 
@@ -923,7 +925,7 @@ If you see the following error message, please check if you're CRS has been set 
 
 **If the "Plugin Reloader" does not resolve the error close QGIS, restart it again, and re-run the process you were trying to execute.**
 
-# <a name="sids-crs"></a>SIDS CRS
+# <a name="sids-crs"></a>List of CRSs for SIDS
 
 | **Country** | **WGS84 / UTM CRS** | **EPSG** |
 | --- | --- | --- |
