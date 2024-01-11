@@ -10,8 +10,17 @@
     <height>625</height>
    </rect>
   </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
+  </property>
   <property name="windowTitle">
    <string>Gender Enabling Environments Spatial Tool (GEEST)</string>
+  </property>
+  <property name="toolTip">
+   <string/>
+  </property>
+  <property name="accessibleName">
+   <string>GEEST</string>
   </property>
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
@@ -21,6 +30,9 @@
      <width>781</width>
      <height>591</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string/>
    </property>
    <property name="currentIndex">
     <number>1</number>
@@ -3380,7 +3392,7 @@ p, li { white-space: pre-wrap; }
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_24">
       <attribute name="title">

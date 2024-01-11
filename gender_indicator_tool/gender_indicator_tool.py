@@ -87,7 +87,7 @@ class GenderIndicatorTool:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&World Bank Gender Indicator Tool')
+        self.menu = self.tr(u'&Gender Enabling Environments Spatial Tool (GEEST)')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
