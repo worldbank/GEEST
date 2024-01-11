@@ -165,17 +165,19 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have achieved a post-secondary education.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+   **Input File:** *Education/Level_of_education*
 
-3. Select the field containing the numeric value representing the percentage of women who have achieved a post-secondary education.
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Enter an alternate raster output file name if desired.
+4. Select the field containing the numeric value representing the percentage of women who have achieved a post-secondary education.
 
-5. Click "Execute" button to run the algorithm.
+5. Enter an alternate raster output file name if desired.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+6. Click "Execute" button to run the algorithm.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/EDU_Raster_output.tif*)
 
 #### 4.2.2 Care Responsibilities
 
@@ -183,17 +185,17 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of time women spend on care responsibilities or household activities.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-3. Select the field containing the numeric value representing percentage of time women spend on care responsibilities or household activities.
+4. Select the field containing the numeric value representing percentage of time women spend on care responsibilities or household activities.
 
-4. Enter an alternate raster output file name if desired.
+5. Enter an alternate raster output file name if desired.
 
-5. Click "Execute" button to run the algorithm.
+6. Click "Execute" button to run the algorithm.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
+8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/CRE_Raster_output.tif*)
 
 #### 4.2.3 Domestic Violence
 
@@ -201,17 +203,19 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have suffered domestic violence.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+   **Input File:** *DomesticViolence/Prevalence_of_domestic_violence.shp*
+   
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-3. Select the field containing the numeric value representing the percentage of women who have suffered domestic violence.
+4. Select the field containing the numeric value representing the percentage of women who have suffered domestic violence.
 
-4. Enter an alternate raster output file name if desired.
+5. Enter an alternate raster output file name if desired.
 
-5. Click "Execute" button to run the algorithm.
+6. Click "Execute" button to run the algorithm.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
+8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/DOV_Raster_output.tif*)
 
 #### 4.2.4 Aggregate
 
@@ -233,7 +237,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (_Project\_ Folder/Individual/Raster\_output.tif_)
+7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/AGG_Raster_output.tif*)
 
 ### 4.3 CONTEXTUAL TAB
 
@@ -242,12 +246,20 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/049629e3-2a15-4701-8015-970cde23c4d3)
 
 1. Navigate to and select polygon input shapefile containing a field reporting a percentage representing the level of protective policies afforded to women.
-2. Click the "Set" button to extract all the fields from the polygon input layer.
-3. Select the field containing the numeric value representing a percentage representing the level of protective policies afforded to women.
-4. Enter an alternate raster output file name if desired.
-5. Click "Execute" button to run the algorithm.
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_ Folder/Contextual/Raster\_output.tif_)
+
+   **Input File:** *PolicyLegal/Regulatory_Framework_Law_agg.shp*
+   
+3. Click the "Set" button to extract all the fields from the polygon input layer.
+
+4. Select the field containing the numeric value representing a percentage representing the level of protective policies afforded to women.
+
+5. Enter an alternate raster output file name if desired.
+
+6. Click "Execute" button to run the algorithm.
+
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/PLP_Raster_output.tif*)
 
 #### 4.3.2 Access to Finance
 
@@ -255,17 +267,19 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have a bank account.
 
-2. Click the "Set" button to extract all the fields from the polygon input layer.
+   **Input File:** *AccessFinance/Access_to_finance.shp*
 
-3. Select the field containing the numeric value representing the percentage of women who have a bank account.
+3. Click the "Set" button to extract all the fields from the polygon input layer.
 
-4. Enter an alternate raster output file name if desired.
+4. Select the field containing the numeric value representing the percentage of women who have a bank account.
 
-5. Click "Execute" button to run the algorithm.
+5. Enter an alternate raster output file name if desired.
 
-6. Status text next to the "Execute" button will appear and let you know once processing is complete.
+6. Click "Execute" button to run the algorithm.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_ Folder/Contextual/Raster\_output.tif_)
+7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+8. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/FIN_Raster_output.tif*)
 
 #### 4.3.3 Aggregate
 
@@ -287,7 +301,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
 
-7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_ Folder/Contextual/Raster\_output.tif_)
+7. The aggregated output raster file will be store in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/AGG_Raster_output.tif*)
 
 ### 4.4 ACCESSIBILITY TAB
 
@@ -302,6 +316,10 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
   - Grocery stores
   - Recreational areas
 
+      **Input File:** *Amenities/Daycares_elementary_schools.shp*
+      
+      **Input File:** *Amenities/Grocery_stores.shp*
+
 2. Select the mode of travel (Walking OR Driving).
 
 3. Select method of measurement (Distance OR Time).
@@ -314,17 +332,17 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 7. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The output raster file will be store in the project folder specified in the "Setup" tab, in the "WTP" folder under the "Accessibility" folder. (_Project\_ Folder/Accessibility/WTP/Raster\_output.tif_)
+8. The output raster file will be store in the project folder specified in the "Setup" tab, in the "WTP" folder under the "Accessibility" folder. (*Project_Folder/Accessibility/WTP/Facility_Raster_output.tif*)
 
 **Steps 1 – 8 will have to be repeated for all facility types**.
 
-9. Once all facilities have completed the processing, Enter aggregated raster output file name.
+9. Once all facilities have completed the processing, move onto the next steo and enter aggregated raster output file name.
 
 10. Click "Aggregate" button to run the algorithm.
 
 11. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-12. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (_Project\_Foldser/Accessibility/Raster\_output.tif_)
+12. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Accessibility/WTP_Raster_output.tif*)
 
 #### 4.4.2 Access to Public Transport
 
@@ -332,19 +350,21 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 1. Navigate to and select point shapefile input for public transport stops.
 
-2. Select the mode of travel (Walking OR Driving).
+   **Input File:** *PubTransportStops/Public_transportation_stops.shp*
 
-3. Select method of measurement (Distance OR Time).
+3. Select the mode of travel (Walking OR Driving).
 
-4. Specify travel distance or time increments in meters or time respectively using comma delimitation.
+4. Select method of measurement (Distance OR Time).
 
-5. Enter an alternate raster output file name if desired.
+5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-6. Click "Execute" button to run the algorithm.
+6. Enter an alternate raster output file name if desired.
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+7. Click "Execute" button to run the algorithm.
 
-8. The aggregated output raster file will be stored in the project folder set in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
+8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+9. The aggregated output raster file will be stored in the project folder set in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/PBT_Raster_output.tif*).
 
 #### 4.4.3 Access to Education and Training Facilities
 
@@ -352,19 +372,23 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 1. Navigate to and select point shapefile input of education and training facilities.
 
-2. Select the mode of travel (Walking OR Driving).
+   **Input File:** *EducationFacilities/Techncal_schools.shp*
 
-3. Select method of measurement (Distance OR Time).
+   **Input File:** *EducationFacilities/Universities.shp*
 
-4. Specify travel distance or time increments in meters or time respectively using comma delimitation.
+3. Select the mode of travel (Walking OR Driving).
 
-5. Enter alternate raster output file name if desired.
+4. Select method of measurement (Distance OR Time).
 
-6. Click "Execute" button to run the algorithm.
+5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+6. Enter alternate raster output file name if desired.
 
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
+7. Click "Execute" button to run the algorithm.
+
+8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/ETF_Raster_output.tif*).
 
 #### 4.4.4 Access to Jobs in the RE sector
 
@@ -372,19 +396,19 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 1. Navigate to and select point shapefile input of jobs or job facilities.
 
-2. Select the mode of travel (Walking OR Driving).
+3. Select the mode of travel (Walking OR Driving).
 
-3. Select method of measurement (Distance OR Time).
+4. Select method of measurement (Distance OR Time).
 
-4. Specify travel distance or time increments in meters or time respectively using comma delamination.
+5. Specify travel distance or time increments in meters or time respectively using comma delamination.
 
-5. Enter alternate raster output file name if desired.
+6. Enter alternate raster output file name if desired.
 
-6. Click "Execute" button to run the algorithm.
+7. Click "Execute" button to run the algorithm.
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+8. Status text next to the "Execute" button will appear and let you know once processing is complete.
 
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
+9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/JOB_Raster_output.tif*).
 
 #### 4.4.5 Access to Health Facilities
 
@@ -392,19 +416,21 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 1. Navigate to and select point shapefile input of health care facilities.
 
-2. Select the mode of travel (Walking OR Driving).
+   **Input File:** *HealthFacilities/Hospitals.shp*
 
-3. Select method of measurement (Distance OR Time).
+3. Select the mode of travel (Walking OR Driving).
 
-4. Specify travel distance or time increments in meters or time respectively using comma delimitation.
+4. Select method of measurement (Distance OR Time).
 
-5. Enter alternate raster output file name if desired.
+5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-6. Click "Execute" button to run the algorithm.
+6. Enter alternate raster output file name if desired.
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+7. Click "Execute" button to run the algorithm.
 
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder. (_Project\_ Folder/Accessibility/Raster\_output.tif_)
+8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder. (*Project_Folder/Accessibility/HEA_Raster_output.tif*)
 
 #### 4.4.6 Access to Financial Facilities
 
@@ -412,19 +438,21 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 1. Navigate to and select point shapefile input of financial facilities.
 
-2. Select the mode of travel (Walking OR Driving).
+   **Input File:** *FinancialFacilities/Financial_Facilities.shp*
 
-3. Select method of measurement (Distance OR Time).
+3. Select the mode of travel (Walking OR Driving).
 
-4. Specify travel distance or time increments in meters or time respectively using comma delamination.
+4. Select method of measurement (Distance OR Time).
 
-5. Enter alternate raster output file name if desired.
+5. Specify travel distance or time increments in meters or time respectively using comma delamination.
 
-6. Click "Execute" button to run the algorithm.
+6. Enter alternate raster output file name if desired.
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+7. Click "Execute" button to run the algorithm.
 
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
+8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+
+9. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/FIF_Raster_output.tif*).
 
 #### 4.4.7 Aggregate
 
@@ -446,7 +474,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 6. The aggregated layer will be loaded to the QGIS and appear in the table of content.
 
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (_Project\_ Folder/Accessibility/Raster\_output.tif_).
+7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Accessibility/AGG_Raster_output.tif*).
 
 ### 4.5 PLACE CHARACTERIZATION TAB
 
