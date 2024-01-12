@@ -881,6 +881,19 @@ Information on the tool its framework, scoring system, and how results should or
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/22fd5d42-25a9-4253-9a76-2c64c53e95c4)
 
+1. Navigate to and select the combined classification input file produced in **step 10** of the "Enablement" tab. This file path will be automatically populated if **step 10** of the "Enablement" tab was executed in the same work session.
+
+2. Navigate to and select the aggregated combined classification input file produced in **step 15** of the "Enablement" tab. This file path will be automatically populated if **step 15** of the "Enablement" tab was executed in the same work session.
+
+3. Navigate to and select the RE point locations input shapefile of interest. (These could be existing RE job locations or other points of interest)
+
+4. Set buffer radial distance in meters.
+
+5. Enter the "RE point location" shapefiles prefix for the output file names.
+
+5. Click the "Execute" button to run the algorithm.
+
+6. The 2 output shapefiles will be stored in the project folder specified in the "Setup" tab, under the "Insights/6) RE Point Locations" folder. (*Project_Folder/Insights/6) RE Point Locations/RE_point_buffer_.shp* **&** *Project_Folder/Insights/6) RE Point Locations/RE_point_admin_units_buffer_.shp*)
 
 ## 5 Troubleshooting
 
