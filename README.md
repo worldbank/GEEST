@@ -1,5 +1,5 @@
 # Gender Enabling Environments Spatial Tool (GEEST)
-
+This tool employs a multicriteria evaluation (MCE) framework to spatially describe womens' access to formal employment and business opportunities in the renewable energy sector in Small Island Developing States (SIDS). The MCE framework allows for the incorporation and assessment of dimensions, factors, and indicators to identify where the enabling environments (or lack thereof) are located for women to secure employment opportunities in SIDS.
 ## User Manual
 
 - [1 Install QGIS](#1-install-qgis)
@@ -816,36 +816,84 @@ Information on the tool its framework, scoring system, and how results should or
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/11389ee3-9835-4a97-a570-8f7c9efdeca1)
 
-1. Navigate to and select polygon hazard shapefile.
+**Classify into discrete classes**
 
-   **Input File:** *Environment/Flood_risk.shp*
+1. Navigate to and select the enablement score input raster file. This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer.
 
-3. Click the "Set" button to extract all the fields from the polyline input layer.
+2. Click the "Classify" button under the "Enablement Score Input layer" field to run the algorithm.
 
-4. Select the field containing the descriptive risk level values.
+3. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/1) Level of Enablement Classification" folder. (*Project_Folder/Insights/1) Level of Enablement Classification/Level_of_Enablement.tif*)
 
-5. Click the "Unique Values" button to extract all the unique risk level values.
+4. Navigate to and select the population input raster file.
 
-6. Score each of the extracted risk levels from 1 to 5, where 5 is the lowest risk and 1 is the highest risk.
+   **Input File:** *Population/Female_population_35_39.tif* (**Any of the age ranges can be used as input**)
 
-7. Enter hazard type raster output file name.
+6. Click the "Classify" button under the "Population Input layer" field to run the algorithm.
 
-8. Click the "Execute" button to run the algorithm.
+7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/2) Relative Population Count Classification" folder. (*Project_Folder/Insights/2) Relative Population Count Classification/Relative_Population_Count.tif*)
 
-9. Status text next to the "Execute" button will appear and let you know once processing is complete.
+**Combine score and population classifications**
 
-10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder. (*Project_Folder/Place Characterization/ENV/Hazard_Raster_output.tif*)
+8. Navigate to and select the "Level of Enablement" output raster file produced in **step 2**. This file path will be automatically populated if **step 2** was executed in the same work session.
 
+9. Navigate to and select the "Relative Population Count" output raster file produced in **step 6**. This file path will be automatically populated if **step 6** was executed in the same work session.
+
+10. Click the "Combine Classification" button to run the algorithm combining the "Level of Enablement" and "Relative Population Count" raster layers.
+
+11. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/3) Combined Level of Enablement & Relative Population Count Classification" folder. (*Project_Folder/Insights/3) Combined Level of Enablement & Relative Population Count Classification/Enablement_&_Population_Combined_classification.tif*)
+
+**Aggregation**
+
+12. Navigate to and select the "Combine Classification" output raster file produced in **step 10**. This file path will be automatically populated if **step 10** was executed in the same work session.
+    
+13. Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer)
+
+    **Input File:** *AdminBoundaries/Admin6.shp* (**Any admin level can be used as input**)
+
+14. Enter aggregated "Combine Classification" shapefiles output file name.
+
+15.  Click the "Execute" button to run the algorithm.
+
+16.  The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/4) Aggregation" folder. (*Project_Folder/Insights/4) Aggregation/Aggregation_.tif*)
 
 #### <a name="re-zone-raster-locations-tab"></a>4.8.2 RE Zone Raster Locations
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b1f6b997-b126-46d5-903c-7a94b93bbf90)
+
+1. Navigate to and select the combined classification input file produced in **step 10** of the "Enablement" tab. This file path will be automatically populated if **step 10** of the "Enablement" tab was executed in the same work session.
+
+2. Navigate to and select the aggregated combined classification input file produced in **step 15** of the "Enablement" tab. This file path will be automatically populated if **step 15** of the "Enablement" tab was executed in the same work session.
+
+3. Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with "no data" or "inf" values in the raster file)
+
+   **Input File:** *RE/WBG_REZoning_DOM_score_wind.tif*
+
+   **Input File:** *RE/WBG_REZoning_DOM_score_solar.tif*
+
+4. Enter the "RE zones" raster file and shapefile prefix for the output file name.
+
+5. Click the "Execute" button to run the algorithm.
+
+6. The 2 output files will be stored in the project folder specified in the "Setup" tab, under the "Insights/5) RE Zone Raster Locations" folder. (*Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_.tif* **&** *Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_admin_units.shp*)
 
 
 #### <a name="re-point-locations-tab"></a>4.8.3 RE Point Locations
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/22fd5d42-25a9-4253-9a76-2c64c53e95c4)
 
+1. Navigate to and select the combined classification input file produced in **step 10** of the "Enablement" tab. This file path will be automatically populated if **step 10** of the "Enablement" tab was executed in the same work session.
+
+2. Navigate to and select the aggregated combined classification input file produced in **step 15** of the "Enablement" tab. This file path will be automatically populated if **step 15** of the "Enablement" tab was executed in the same work session.
+
+3. Navigate to and select the RE point locations input shapefile of interest. (These could be existing RE job locations or other points of interest)
+
+4. Set buffer radial distance in meters.
+
+5. Enter the "RE point location" shapefiles prefix for the output file names.
+
+5. Click the "Execute" button to run the algorithm.
+
+6. The 2 output shapefiles will be stored in the project folder specified in the "Setup" tab, under the "Insights/6) RE Point Locations" folder. (*Project_Folder/Insights/6) RE Point Locations/RE_point_buffer_.shp* **&** *Project_Folder/Insights/6) RE Point Locations/RE_point_admin_units_buffer_.shp*)
 
 ## 5 Troubleshooting
 
