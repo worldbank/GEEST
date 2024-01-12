@@ -816,26 +816,45 @@ Information on the tool its framework, scoring system, and how results should or
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/11389ee3-9835-4a97-a570-8f7c9efdeca1)
 
-1. Navigate to and select polygon hazard shapefile.
+**Classify into discrete classes**
 
-   **Input File:** *Environment/Flood_risk.shp*
+1. Navigate to and select the enablement score input raster file. This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer.
 
-3. Click the "Set" button to extract all the fields from the polyline input layer.
+2. Click the "Classify" button under the "Enablement Score Input layer" field to run the algorithm.
 
-4. Select the field containing the descriptive risk level values.
+3. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/1) Level of Enablement Classification" folder. (*Project_Folder/Insights/1) Level of Enablement Classification/Level_of_Enablement.tif*)
 
-5. Click the "Unique Values" button to extract all the unique risk level values.
+4. Navigate to and select the population input raster file.
 
-6. Score each of the extracted risk levels from 1 to 5, where 5 is the lowest risk and 1 is the highest risk.
+   **Input File:** *Population/Female_population_35_39.tif* (**Any of the age ranges can be used as input**)
 
-7. Enter hazard type raster output file name.
+6. Click the "Classify" button under the "Population Input layer" field to run the algorithm.
 
-8. Click the "Execute" button to run the algorithm.
+7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/2) Relative Population Count Classification" folder. (*Project_Folder/Insights/2) Relative Population Count Classification/Relative_Population_Count.tif*)
 
-9. Status text next to the "Execute" button will appear and let you know once processing is complete.
+**Combine score and population classifications**
 
-10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder. (*Project_Folder/Place Characterization/ENV/Hazard_Raster_output.tif*)
+8. Navigate to and select the "Level of Enablement" output raster file produced in **step 2**. This file path will be automatically populated if **step 2** what executed in the same work session.
 
+9. Navigate to and select the "Relative Population Count" output raster file produced in **step 6**. This file path will be automatically populated if **step 6** what executed in the same work session.
+
+10. Click the "Combine Classification" button to run the algorithm combining the "Level of Enablement" and "Relative Population Count" raster layers.
+
+11. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/3) Combined Level of Enablement & Relative Population Count Classification" folder. (*Project_Folder/Insights/3) Combined Level of Enablement & Relative Population Count Classification/Enablement_&_Population_Combined_classification.tif*)
+
+**Aggregation**
+
+12. Navigate to and select the "Combine Classification" output raster file produced in **step 10**. This file path will be automatically populated if **step 10** what executed in the same work session.
+    
+13. Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer)
+
+    **Input File:** *AdminBoundaries/Admin6.shp* (**Any admin level can be used as input**)
+
+14. Enter aggregated "Combine Classification" shapefiles output file name.
+
+15.  Click the "Execute" button to run the algorithm.
+
+16.  The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/4) Aggregation" folder. (*Project_Folder/Insights/4) Aggregation/Aggregation_.tif*)
 
 #### <a name="re-zone-raster-locations-tab"></a>4.8.2 RE Zone Raster Locations
 
