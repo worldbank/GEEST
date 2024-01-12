@@ -1,5 +1,5 @@
 # Gender Enabling Environments Spatial Tool (GEEST)
-
+This tool employs a multicriteria evaluation (MCE) framework to spatially describe womens' access to formal employment and business opportunities in the renewable energy sector in Small Island Developing States (SIDS). The MCE framework allows for the incorporation and assessment of dimensions, factors, and indicators to identify where the enabling environments (or lack thereof) are located for women to secure employment opportunities in SIDS.
 ## User Manual
 
 - [1 Install QGIS](#1-install-qgis)
