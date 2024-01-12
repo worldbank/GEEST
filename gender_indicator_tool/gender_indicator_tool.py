@@ -394,6 +394,12 @@ class GenderIndicatorTool:
         self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
 
     def getFile(self, button_num):
+        '''
+        Function used for all factor tabs to browse files and retrieve filepaths required to be used as input to other functions.
+
+        Factors it is applied:
+        - All
+        '''
         response = QFileDialog.getOpenFileName(
             parent=self.dlg,
             caption='Select a file',
@@ -479,6 +485,9 @@ class GenderIndicatorTool:
             self.dlg.PD_Aggregate_Field.setText(response[0])
 
     def getFolder(self, button_num):
+        '''
+        Function used to browse and retrieve filepath for project working directory selected in the setup tab
+        '''
         response = QFileDialog.getExistingDirectory(
             parent=self.dlg,
             caption='Select a folder/directory',
@@ -489,6 +498,26 @@ class GenderIndicatorTool:
             self.dlg.workingDir_Field.setText(str(response + "/"))
 
     def RasterizeSet(self, factor_no):
+        '''
+        Used in combination with tabs that use the "Rasterization" function. This function is used to extract all the attribute table's field headings
+        from the input vector layers. The extracted values are then populated in the drop-down menu allowing the user to select which fields values are to be used when
+        executing the "Rasterization" function.
+
+        Factors it is applied:
+            Individual Dimension
+                - Education
+                - Care Responsibilities
+                - Domestic Violence
+            Contextual Dimension
+                - Policy and Legal Protection
+                - Access to Finance
+            Place Characterization Dimension
+                - Security
+                - Income Level
+                - Electrical Access
+                - Digital Inclusion
+
+        '''
         if factor_no == 0:
             polygonlayer = self.dlg.EDU_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", 'ogr')
@@ -553,6 +582,15 @@ class GenderIndicatorTool:
             self.dlg.DIG_rasField_CB.addItems(fields)
 
     def TypeSet(self,factor_no):
+        '''
+        Similar to the "RasterizeSet" function this function is used to extract all the attribute table's field headings from the input vector layers. However,
+        the extracted values are then populated in the drop-down menu where the user is to select which field from which they want extract the unique values. (See uniqueValues function)
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Active Transport
+                - Natural Environment and Climatic Factors
+        '''
         if factor_no == 1:
             roadlayer = self.dlg.WLK_Input_Field.filePath()
             layer = QgsVectorLayer(roadlayer, "polygonlayer", 'ogr')
@@ -575,6 +613,21 @@ class GenderIndicatorTool:
             self.dlg.ENV_riskLevelField_CB.addItems(fields)
 
     def uniqueValues(self, factor_no):
+        '''
+        This function is used in combination with the "TypeSet" function. Once the field of interest in the polygon layer has been selected this function
+        extracts all the unique values in the selected field and populates the empty field with a list of the unique value in the following format:
+
+        [["low", 0], ["medium", 0], ["high", 0]]
+
+        The user than assigns scores according to the standardized scaling system to each unique value as seen below:
+
+        [["low", 4], ["medium", 2], ["high", 1]]
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Active Transport
+                - Natural Environment and Climatic Factors
+        '''
         if factor_no == 1:
             gdf = gpd.read_file(self.dlg.WLK_Input_Field.filePath())
             roadTypeField = self.dlg.WLK_roadTypeField_CB.currentText()
@@ -605,6 +658,12 @@ class GenderIndicatorTool:
             self.dlg.ENV_typeScore_Field.setText(str(scoreList))
 
     def convertCRS(self, vector, UTM_crs):
+        '''
+        This function is used whenever a vector file's co-ordinate reference system needs to be reprojected so that it can be used as input into an algorithm.
+
+        Factors it is applied:
+        - All
+        '''
         global shp_utm
 
         shp = gpd.read_file(vector)
@@ -613,6 +672,23 @@ class GenderIndicatorTool:
 
 # *************************** Factor Functions ********************************** #
     def Rasterize(self, factor_no):
+        '''
+        Numerous functions use this function to convert vector file type into the standardized raster file types required for aggregation.
+
+        Factors it is applied:
+            Individual Dimension
+                - Education
+                - Care Responsibilities
+                - Domestic Violence
+            Contextual Dimension
+                - Policy and Legal Protection
+                - Access to Finance
+            Place Characterization Dimension
+                - Security
+                - Income Level
+                - Electrical Access
+                - Digital Inclusion
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -724,11 +800,14 @@ class GenderIndicatorTool:
         # Convert spatial data to UTM CRS
         self.convertCRS(polygonlayer, UTM_crs)
         shp_utm[rasField] = shp_utm[rasField].astype(float)
+
+        #Set variables required to conduct standardization of values
         Rmax = 100
         Rmin = 0
         m_max = 5
         m_min = 0
         if factor_no == 0:
+            #Standardization formula
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
 
@@ -1259,6 +1338,23 @@ class GenderIndicatorTool:
             self.dlg.DIG_status.repaint()
 
     def ServiceArea(self, factor_no):
+        '''
+        This function is used to conduct a service area network analysis facilitated using Openrouteservices' (ORS) isochrones service. Isochrones are derived from the OpenStreetMap (OSM) road network
+        with the use of travel distances or times as input to estimate ease of access to the input locations at five incrementally increasing measurement intervals. The largest interval being the
+        maximum distance or time taken to reach these locations. The algorithm produces five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area
+        polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero.
+
+        Service Area Analysis is undertaken using the openrouteservice API and OpenStreetMap data. © openrouteservice.org by HeiGIT | Road network data © OpenStreetMap contributors
+
+        Factors it is applied:
+            Accessibility Dimension
+                - Women's Travel Patterns
+                - Access to Public Transport
+                - Access to Education and Training Facilities
+                - Access to RE jobs
+                - Access to Health Facilities
+                - Access to Finance Facilities
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -1602,11 +1698,6 @@ class GenderIndicatorTool:
         merge_df["rasField"] = [1,2,3,4,5]
         merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
 
-#################################
-        # merge_df.to_file(temp)
-        # # mergelayer = workingDir + mergeRasfield
-        # # finalMerge = workingDir + finalMerge
-        #
         # Convert countryLayer data to UTM CRS
         self.convertCRS(countryLayer, UTM_crs)
         shp_utm["rasField"] = [0]
@@ -1638,9 +1729,6 @@ class GenderIndicatorTool:
 
         merge_output = Merge["OUTPUT"]
 
-        # Get the width and height of the extent
-        # merge_output_df = gpd.read_file(temp_merge)
-        # merge_output = QgsVectorLayer(merge_output_df.to_json(), 'Polygon Layer', 'ogr')
         extent = merge_output.extent()
         raster_width = int(extent.width() / pixelSize)
         raster_height = int(extent.height() / pixelSize)
@@ -1709,6 +1797,14 @@ class GenderIndicatorTool:
             self.dlg.WTP_status.repaint()
 
     def wtpAggregate(self):
+        '''
+        This function is used in combination with the "ServiceArea" function. Due to women's travel patterns involving numerous locations and/or facilities a service area network analysis
+        has to be conducted numerous times. This function aggregates each of the service area analysis relating to women's travel patterns into a single standardized raster file.
+
+        Factors it is applied:
+            Accessibility Dimension
+                - Women's Travel Patterns
+        '''
         self.dlg.WTPAGG_status.setText("")
         self.dlg.WTPAGG_status.repaint()
         # OUTPUT
@@ -1760,6 +1856,14 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def secAggregate(self):
+        '''
+        This function is used in combination with the "Rasterization" function. Due to security, or lack thereof, involving numerous incident types, rasterization of each type
+        has to be conducted. This function aggregates each of the rasterized incident types relating to security into a single standardized raster file.
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Security
+        '''
         self.dlg.SECAGG_status.setText("")
         self.dlg.SECAGG_status.repaint()
         # OUTPUT
@@ -1811,6 +1915,14 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def walkability(self):
+        '''
+        This function is used in combination with the "TypeSet" and "uniqueValue" functions to execute the Active Transports rasterization algorithm.
+        It buffers the road network by 250m and rasterizes the buffer polygons according to the scoring assigned to the unique values.
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Active Transport
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -1938,6 +2050,14 @@ class GenderIndicatorTool:
         self.dlg.WLK_status.repaint()
 
     def SAFnightTimeLights(self):
+        '''
+        This function use a linearly scales the night time lights raster dataset according to the standardized scoring system.
+        How brightly lit an area is is used as a proxy for safety or safe urban design.
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Safe Urban Design
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -2054,6 +2174,14 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def ELCnightTimeLights(self):
+        '''
+        This function use a linearly scales the night time lights raster dataset according to the standardized scoring system.
+        How brightly lit an area is is used as a proxy ro electricty access.
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Electrical Access
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -2170,6 +2298,16 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def transportCount(self):
+        '''
+        This algorithm characterizes areas based on the number of public transport options available. The algorithm overlays the input point layer onto a hexagonal grid
+        and calculates the count of transport stops within each hexagonal cell. The output is standardized on a scale of 0 to 5 using a linear scaling process such that the
+        cells containing the highest count of public transport stops are assigned a score of 5, and cells with no stops are assigned a score of 0. Finally, the output is rasterized.
+        grid
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Availability of Public Transport
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -2316,6 +2454,14 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def urbanization(self):
+        '''
+        This algorithm characterizes areas based on their degree of urbanization. The algorithm reclassifies the eight
+        classes in the input data into classes ranging from 0 to 5 as per the standardized scoring system.
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Level of Urbanization
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -2464,6 +2610,19 @@ class GenderIndicatorTool:
         self.dlg.LOU_status.repaint()
 
     def housing(self):
+        '''
+        This function characterizes areas based on the size of housing and assumes that buildings with a footprint of less than 60 m2 are more likely to represent informal housing typologies.
+        algorithm calculates the area of each building footprint in the input layer. It then overlays the input layer onto a hexagonal grid and calculates the percentage
+        of buildings within each hexagonal cell with a footprint greater than 60 m2.
+
+        The output produced is a raster file containing values ranging from 0 to 5 is saved to the output directory. In this scale,
+        5 signifies areas where 100% of buildings have a footprint larger than 60 m2 (and can be interpreted as entirely formal settlements),
+        while 0 indicates areas where no buildings possess a footprint larger than 60 m2 (and can be interpreted as entirely informal settlements).
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Size of Housing
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -2660,6 +2819,14 @@ class GenderIndicatorTool:
         self.dlg.QUH_status.repaint()
 
     def natEnvironment(self):
+        '''
+        This function is used in combination with the "TypeSet" and "uniqueValues" functions to execute the Natural Environment and Climatic factors algorithm.
+        The input layers are rasterized according to the scoring assigned to the unique hazard values.
+
+        Factors it is applied:
+            Place Characterization Dimension
+                - Natural Environment and Climatic factors
+        '''
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
@@ -2785,6 +2952,15 @@ class GenderIndicatorTool:
         self.dlg.ENV_status.repaint()
 
     def envAggregate(self):
+        '''
+        This function is used in combination with the "natEnvironment" function. Due to there being numerous Natural Environment and Climatic factors that could
+        influence place characterization the rasterization and standardization has to be conducted for each hazard. This function aggregates each of the hazards
+        relating to Natural Environment and Climatic factors into a single standardized raster file.
+
+        Factors it is applied:
+            Accessibility Dimension
+                - Natural Environment and Climatic factors
+        '''
         # OUTPUT
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
@@ -2839,6 +3015,9 @@ class GenderIndicatorTool:
 
     # *************************** Factor Aggregation Functions ************************************ #
     def indivdualAggregation(self):
+        '''
+        This function performs a raster calculation aggregating all the individual dimension factors according to their weightings
+        '''
         self.dlg.individualAggregation_Check.setText("")
         self.dlg.individualAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -2942,6 +3121,9 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def contextualAggregation(self):
+        '''
+        This function performs a raster calculation aggregating all the contextual dimension factors according to their weightings
+        '''
         self.dlg.contextualAggregation_Check.setText("")
         self.dlg.contextualAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3042,6 +3224,9 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def accessibiltyAggregation(self):
+        '''
+        This function performs a raster calculation aggregating all the accessibilty dimension factors according to their weightings
+        '''
         self.dlg.accessibilityAggregation_Check.setText("")
         self.dlg.accessibilityAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3162,6 +3347,9 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def placeCharacterizationAggregation(self):
+        '''
+        This function performs a raster calculation aggregating all the place characterization dimension factors according to their weightings
+        '''
         self.dlg.placeCharacterizationAggregation_Check.setText("")
         self.dlg.placeCharacterizationAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3312,6 +3500,9 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def dimesnionsAggregation(self):
+        '''
+        This function performs a final raster calculation aggregating all the dimension aggregation output raster according to their weightings
+        '''
         self.dlg.dimensionAggregation_Check.setText("")
         self.dlg.dimensionAggregation_Check.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3434,6 +3625,9 @@ class GenderIndicatorTool:
 
     # *************************** Insights Tab Functions *********************************** #
     def scoreReclassInsights(self):
+        '''
+        This function takes the final aggregate score, a dimension aggregate score, or even a single factor output raster and classifies it into five discrete classes of enablement.
+        '''
         self.dlg.Enablement_status.setText("")
         self.dlg.Enablement_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3540,6 +3734,11 @@ class GenderIndicatorTool:
         self.dlg.Enablement_status.repaint()
 
     def populationReclassInsights(self):
+        '''
+        This function takes a population count raster as input and classifies it into 3 discrete classes based on
+        the lower quartile range, interquartile range, and upper quartile range of data to identify
+        areas of relatively low, medium, and high population per region.
+        '''
         self.dlg.Population_status.setText("")
         self.dlg.Population_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3653,6 +3852,11 @@ class GenderIndicatorTool:
         self.dlg.Population_status.repaint()
 
     def combineReclassInsights(self):
+        '''
+        Through the use of raster calculation this function combines the discrete level of enablement raster produced by the "scoreReclassInsights"
+        function and the relative population count raster produced by the "populationReclassInsights" function. A single raster layer is produced
+        contains 15 classes.
+        '''
         self.dlg.Combine_status.setText("")
         self.dlg.Combine_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3740,6 +3944,10 @@ class GenderIndicatorTool:
         self.dlg.Combine_status.repaint()
 
     def Aggregationinsights(self):
+        '''
+        this function takes the combine raster output produced by the "combineReclassInsights" function and aggregates, by extracting
+        the to the majority class to a polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer).
+        '''
         self.dlg.Aggregate_status.setText("")
         self.dlg.Aggregate_status.repaint()
         current_script_path = os.path.dirname(os.path.abspath(__file__))
