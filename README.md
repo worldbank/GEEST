@@ -834,9 +834,9 @@ Information on the tool its framework, scoring system, and how results should or
 
 **Combine score and population classifications**
 
-8. Navigate to and select the "Level of Enablement" output raster file produced in **step 2**. This file path will be automatically populated if **step 2** what executed in the same work session.
+8. Navigate to and select the "Level of Enablement" output raster file produced in **step 2**. This file path will be automatically populated if **step 2** was executed in the same work session.
 
-9. Navigate to and select the "Relative Population Count" output raster file produced in **step 6**. This file path will be automatically populated if **step 6** what executed in the same work session.
+9. Navigate to and select the "Relative Population Count" output raster file produced in **step 6**. This file path will be automatically populated if **step 6** was executed in the same work session.
 
 10. Click the "Combine Classification" button to run the algorithm combining the "Level of Enablement" and "Relative Population Count" raster layers.
 
@@ -844,7 +844,7 @@ Information on the tool its framework, scoring system, and how results should or
 
 **Aggregation**
 
-12. Navigate to and select the "Combine Classification" output raster file produced in **step 10**. This file path will be automatically populated if **step 10** what executed in the same work session.
+12. Navigate to and select the "Combine Classification" output raster file produced in **step 10**. This file path will be automatically populated if **step 10** was executed in the same work session.
     
 13. Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer)
 
@@ -859,6 +859,22 @@ Information on the tool its framework, scoring system, and how results should or
 #### <a name="re-zone-raster-locations-tab"></a>4.8.2 RE Zone Raster Locations
 
 ![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b1f6b997-b126-46d5-903c-7a94b93bbf90)
+
+1. Navigate to and select the combined classification input file produced in **step 10** of the "Enablement" tab. This file path will be automatically populated if **step 10** of the "Enablement" tab was executed in the same work session.
+
+2. Navigate to and select the aggregated combined classification input file produced in **step 15** of the "Enablement" tab. This file path will be automatically populated if **step 15** of the "Enablement" tab was executed in the same work session.
+
+3. Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with "no data" or "inf" values in the raster file)
+
+   **Input File:** *RE/WBG_REZoning_DOM_score_wind.tif*
+
+   **Input File:** *RE/WBG_REZoning_DOM_score_solar.tif*
+
+4. Enter the "RE zones" raster file and shapefile prefix for the output file name.
+
+5. Click the "Execute" button to run the algorithm.
+
+6. The 2 output files will be stored in the project folder specified in the "Setup" tab, under the "Insights/5) RE Zone Raster Locations" folder. (*Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_.tif* **&** *Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_admin_units.shp*)
 
 
 #### <a name="re-point-locations-tab"></a>4.8.3 RE Point Locations
