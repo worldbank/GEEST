@@ -122,26 +122,26 @@ support@openrouteservice.heigit.org
 
 1. Click on the green "Code" button and select the "Download ZIP" option.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/72d7dc34-eb53-417b-9748-462e6fcc1c0c)
+![image](https://github.com/worldbank/GEEST/assets/120469484/af517d0b-8b32-43b6-a664-0bb250a1d620)
 
 2. Once the download has been completed extract the contents of the ZIP file.
 
 3. Navigate to your extracted ZIP folder and copy the _requirements.txt_ file.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/702bfc4a-388d-4da7-99fd-c7cfe30e9106)
+![image](https://github.com/worldbank/GEEST/assets/120469484/6adea1a2-e63c-4067-9052-346811697828)
 
 4. Navigate to the QGIS program folder and paste the _requirements.txt_ file into it. The file path would be similar to this: _C:\Program Files\QGIS 3.32.0_ as seen in the image under **step 5**.
 
 5. Run the _OSGeo4W_ batch file.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/0d0c609c-0278-4dde-abb8-81a44f62a033)
+![image](https://github.com/worldbank/GEEST/assets/120469484/9a8376bb-dc50-41fa-a3fd-f3e0757a3850)
 
 6. A command line pop-up window will appear as seen in the image below.
 
 7. Type the following into it and press Enter.
 ```pip install -r requirements.txt```
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/506d8ec2-3d81-45c3-9234-1b95673cb9c8)
+![image](https://github.com/worldbank/GEEST/assets/120469484/ed373467-0f80-4b75-8931-9c9e2d03d013)
 
 8. All the Python libraries that the Plugin is dependent on will now be installed. This can take a few minutes to install.
 
@@ -149,15 +149,15 @@ support@openrouteservice.heigit.org
 
 10. Open QGIS, navigate to the "Plugins" tab and select the "Manage and Install Plugins…" option from the drop-down menu.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/17d610e1-c989-435c-ba10-187657d853b7)
+![image](https://github.com/worldbank/GEEST/assets/120469484/39e233a5-15de-4471-9560-028cd8cde839)
 
 11. In the plugin pop-up window navigate to the "Install from ZIP" tab.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/34ed8ae1-d533-43af-8dc7-17645189201a)
+![image](https://github.com/worldbank/GEEST/assets/120469484/9ed559bc-5672-4631-a33d-714710440819)
 
 12. From the "Install from ZIP" tab navigate back to your extracted ZIP folder and select the "gender\_indicator\_tool" compressed (zipped) folder as seen in the image below.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/2cc9b67e-a990-4375-953a-2131f801dfcc)
+![image](https://github.com/worldbank/GEEST/assets/120469484/f2e81343-1bb4-4dc1-b593-38c26726f767)
 
 13. Once the ZIP file has been selected click on "Install Plugin".
 
@@ -165,11 +165,11 @@ support@openrouteservice.heigit.org
 
 15. In the search bar type "GEEST" and click the check box next to the "Gender Enabling Environments Spatial Tool (GEEST)" to install the plugin.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/93ba70f0-1eca-48a4-aaad-cc68872d01f7)
+![image](https://github.com/worldbank/GEEST/assets/120469484/aac4db6e-3585-40dc-9e73-d0eb3a8bc247)
 
 16. The plugin is now installed and you should now be able to access it in your toolbar or under the Plugin's tab as seen in the image below.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/aba6f895-bb9a-4148-83a3-5a1fc82c5834)
+![image](https://github.com/worldbank/GEEST/assets/120469484/eceaf443-ff8b-4be0-9282-a1236a03bb86)
 
 ## 4 Using the Plugin
 Examples of files that can be used as input at a particular step as per the Pilot Country Database will be indicated at the end of the step. The following format will be used:
