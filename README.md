@@ -63,27 +63,26 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 
 QGIS website: [https://www.qgis.org/en/site/](https://www.qgis.org/en/site/)
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/7a171161-f091-4b53-a7eb-3d644b241bd8)
-
+![image](https://github.com/worldbank/GEEST/assets/120469484/e0448baf-9a0b-475e-9bc2-c883868318d2)
 
 2. Once the installation file is downloaded run the installation file.
 
 3. A pop-up window as seen in the image below should show up. Follow the prompts and leave all settings on default.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/9cf1103d-c112-46ef-8c83-b866b25796e0)
+![image](https://github.com/worldbank/GEEST/assets/120469484/52464df3-b408-4d05-af88-c6ef4a55c599)
 
 
 ## 2 Install Open Route Service (ORS) plugin
 
 1. Open QGIS, navigate to the "Plugins" tab and select the "Manage and Install Plugins…" option from the drop-down menu.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/8bb04beb-4649-49a7-ad2a-c062cd818692)
+![image](https://github.com/worldbank/GEEST/assets/120469484/1a2b1b0c-2a6f-49a6-b3d3-6e48386b7b22)
 
 2. The "Plugins" pop-up window should appear as seen in the image below.
 
 3. In the search bar type "ORS", select the "ORS Tool" from the list of plugins, and select the install button to install the plugin.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/d0e22d26-4dfa-47a7-89a7-fab42ecea2a6)
+![image](https://github.com/worldbank/GEEST/assets/120469484/6274c002-9b56-4374-8fd4-9278d2246afb)
 
 4. You will now have to set up an account on the Open Route Service website which can be accessed by clicking the link below.
 
@@ -91,28 +90,27 @@ ORS website: [https://openrouteservice.org/](https://openrouteservice.org/)
 
 ORS Sign up: [https://openrouteservice.org/dev/#/signup](https://openrouteservice.org/dev/#/signup)
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/0cdb2ccd-8a19-46ba-9afa-1406074a222f)
+![image](https://github.com/worldbank/GEEST/assets/120469484/79728902-e5ba-49c1-a262-32cd9df628a6)
 
 5. Fill in all the necessary fields to sign up and then log into your account.
 
 6. Request a standard token and provide a name for the Token.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/efe9f9ab-1f29-4c28-81ec-73c8268b0e5e)
+![image](https://github.com/worldbank/GEEST/assets/120469484/72eb8f24-84b5-42e9-8da7-e19bf96d410a)
 
 7. Once the token has been created, navigate to the Dashboard tab and click on the API key as seen in the image below. The API key should now be copied to the clipboard.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/5d0e7d0d-561b-46bd-980d-d9ef7059148e)
+![image](https://github.com/worldbank/GEEST/assets/120469484/26564e04-4520-4022-9930-4b791df8e63f)
 
+8. In the QGIS window navigate the ORS tool and select "Provider Settings".
 
-9. In the QGIS window navigate the ORS tool and select "Provider Settings".
-
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/7234b8ac-99a6-4668-8867-a0f4b29efb6a)
+![image](https://github.com/worldbank/GEEST/assets/120469484/45a45354-8478-45df-b212-c477a99b2c9a)
 
 9. The provider settings pop-up window should now appear as seen in the image below.
 
 10. Past the API key that has been copied to the clipboard into the API Key field and press "OK".
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/6cdf18f4-5908-46ef-a6c7-f36fb3d07048)
+![image](https://github.com/worldbank/GEEST/assets/120469484/b255a792-4d46-42ef-a0ff-79edb1e2fd19)
 
 **N.B.** Additional credits can be requested on the ORS site by applying for the collaborative plan as described [here](https://openrouteservice.org/plans/). You will have to provide a brief motivation, however, if your application is in a humanitarian, academic, governmental, or not-for-profit organization, you should be eligible for the collaborative plan.
 
