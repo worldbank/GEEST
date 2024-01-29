@@ -178,7 +178,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 ### <a name="setup-tab"></a> 4.1 SETUP TAB
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/525515fd-3f45-494e-8d9a-2cb4256eee04)
+![image](https://github.com/worldbank/GEEST/assets/120469484/6ff06edc-198a-4807-a59f-038f1b401d43)
 
 1. Create a project folder that will be used to store all tool outputs.
    
@@ -194,7 +194,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 5. Copy and paste the EPSG code for your specific country and paste it in the Filter bar as seen in the image below.
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/2a318f46-e78d-4f89-b6ee-cb291ad07e18)
+![image](https://github.com/worldbank/GEEST/assets/120469484/5e9d2066-c641-4129-8e4c-a876b19da8a2)
 
 6. Select the CRS from the list and click "OK".
 
@@ -204,7 +204,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 #### <a name="education-tab"></a>4.2.1 Education
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/68baff0a-cf3d-4045-b62b-432d505117bf)
+![image](https://github.com/worldbank/GEEST/assets/120469484/783752ba-77a9-4c37-95ad-d5ffb34b9bf7)
 
 1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of women who have achieved a post-secondary education.
 
@@ -224,7 +224,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 #### <a name="care-responsibilities-tab"></a>4.2.2 Care Responsibilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/4b6f1c50-96fc-4ea2-985f-e226f41ab005)
+![image](https://github.com/worldbank/GEEST/assets/120469484/a22a693d-7979-442a-9e6d-b485417d8fad)
 
 1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of time women spend on care responsibilities or household activities.
 
@@ -242,7 +242,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 #### <a name="domestic-violence-tab"></a>4.2.3 Domestic Violence
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/2adef90d-03ee-48ae-a16d-d7055939f636)
+![image](https://github.com/worldbank/GEEST/assets/120469484/b2b9e9e9-cb5c-4251-b495-2ee10ea8f404)
 
 1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of women who have suffered domestic violence.
 
@@ -262,7 +262,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 #### <a name="id-aggregation-tab"></a>4.2.4 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/a6cc36ed-377b-4c9d-933a-a8556832494e)
+![image](https://github.com/worldbank/GEEST/assets/120469484/e9e14c68-2111-4377-9ea2-bc73c6241fc1)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Individual Dimension.
 
@@ -286,7 +286,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### <a name="policy-and-legal-protection-tab"></a>4.3.1 Policy and Legal Protection
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/049629e3-2a15-4701-8015-970cde23c4d3)
+![image](https://github.com/worldbank/GEEST/assets/120469484/ab6797a8-b09e-4a6e-92c8-6e2b664d17c0)
 
 1. Navigate to and select polygon input shapefile containing a field reporting a percentage representing the level of protective policies afforded to women.
 
@@ -306,7 +306,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### <a name="access-to-finance-tab"></a>4.3.2 Access to Finance
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/1558ae32-4794-4c27-b64f-2c1872681083)
+![image](https://github.com/worldbank/GEEST/assets/120469484/2e4050cd-d458-4b19-9876-b434431b68c7)
 
 1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have a bank account.
 
@@ -326,7 +326,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### <a name="cd-aggregation-tab"></a>4.3.3 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/732852d1-27bc-42b5-bfe7-6165a70cf0b6)
+![image](https://github.com/worldbank/GEEST/assets/120469484/bcf2260d-5db0-4be5-a583-ac9d0537e35c)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
 
@@ -350,7 +350,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### <a name="womens-travel-patterns-tab"></a>4.4.1 Women's Travel Patterns
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/03498688-42b3-44fd-9d81-5dd0ca491c19)
+![image](https://github.com/worldbank/GEEST/assets/120469484/6541477e-2ff8-4878-8962-3abb48e4ce43)
 
 1. Navigate to and select point shapefile input of facilities related to women's role as caregivers. This includes:
   - Childcare facilities
@@ -389,7 +389,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### <a name="access-to-public-transport-tab"></a>4.4.2 Access to Public Transport
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/7f02cf8a-8396-4641-80db-89f02356b37f)
+![image](https://github.com/worldbank/GEEST/assets/120469484/ade68b40-f9f4-477c-a631-3ed137b71e27)
 
 1. Navigate to and select point shapefile input for public transport stops.
 
@@ -411,7 +411,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### <a name="education-and-training-facilities-tab"></a>4.4.3 Access to Education and Training Facilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/eceec2f6-b03e-4a18-9c02-3f9463b26492)
+![image](https://github.com/worldbank/GEEST/assets/120469484/0899eb4e-9547-4d7a-9a30-95082ebb71dc)
 
 1. Navigate to and select point shapefile input of education and training facilities.
 
@@ -435,7 +435,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### <a name="jobs-tab"></a>4.4.4 Access to Jobs in the RE sector
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/810b7d62-3174-4b49-9495-0675a78fa8ac)
+![image](https://github.com/worldbank/GEEST/assets/120469484/572b704c-830a-40c4-96f0-6dceb7e6100d)
 
 1. Navigate to and select point shapefile input of jobs or job facilities.
 
@@ -455,7 +455,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### <a name="health-facilities-tab"></a>4.4.5 Access to Health Facilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/93d48ded-25b4-409a-88c5-7de4f02092dd)
+![image](https://github.com/worldbank/GEEST/assets/120469484/c38e5cb6-2264-4bd3-8e53-56c19d8213e4)
 
 1. Navigate to and select point shapefile input of health care facilities.
 
@@ -477,7 +477,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### <a name="financial-facilities-tab"></a>4.4.6 Access to Financial Facilities
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/5bd4a772-6fc2-48e7-96b9-f2967f6f4865)
+![image](https://github.com/worldbank/GEEST/assets/120469484/bd2bace8-e569-4b23-a4c0-a6024fe2adf6)
 
 1. Navigate to and select point shapefile input of financial facilities.
 
@@ -499,7 +499,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 #### <a name="ad-aggregation-tab"></a>4.4.7 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/e9f843dd-d374-42e3-b2e3-fbaf28c4d1be)
+![image](https://github.com/worldbank/GEEST/assets/120469484/ba3c884c-5940-4255-9ca5-9e202ae106b8)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Accessibility Dimension.
 
