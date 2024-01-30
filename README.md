@@ -523,7 +523,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### <a name="active-transport-tab"></a>4.5.1 Active Transport
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/288bd781-ef45-4f2f-92a5-e312d82be340)
+![image](https://github.com/worldbank/GEEST/assets/120469484/bf89b9ad-7ecc-460c-a7d9-38f1a894176a)
 
 1. Navigate to and select polyline road network shapefile.
 
@@ -547,7 +547,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 #### <a name="availability-of-public-transport-tab"></a>4.5.2 Availability of Public Transport
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/2a2dbb36-9f9a-42a4-8834-805969081e54)
+!![image](https://github.com/worldbank/GEEST/assets/120469484/8dd068ae-b4dd-447c-bef0-0e57c8f4db17)
 
 1. Navigate to and select point shapefile input for public transport stops.
 
@@ -567,7 +567,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### <a name="safe-urban-design-tab"></a>4.5.3 Safe Urban Design
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/1e73b47a-1717-441d-a2db-cb6ca7683165)
+![image](https://github.com/worldbank/GEEST/assets/120469484/2ab8874d-50cb-4445-9bac-3231b8328fb7)
 
 1. Navigate to and select nighttime lights raster input.
 
@@ -583,7 +583,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 ### <a name="security-tab"></a>4.5.4 Security
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b9f6c3c8-be8e-45f6-b351-cf76327b8b40)
+![image](https://github.com/worldbank/GEEST/assets/120469484/10d4eb39-51b9-421d-b105-46466f4b3ba9)
 
 1. Navigate to and select the crime rate polygon input shapefile containing a field reporting the crime rate for a specific incident.
 
@@ -615,7 +615,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### <a name="income-level-tab"></a>4.5.5 Income Level
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/effab4d6-77fd-42b6-b27c-c674ca6a26a3)
+![image](https://github.com/worldbank/GEEST/assets/120469484/c1a88898-25a9-47ba-83a3-567bbf525f1a)
 
 1. Navigate to and select the wealth index polygon input shapefile containing a field with the wealth index.
 
@@ -635,7 +635,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### <a name="electricity-access-tab"></a>4.5.6 Electricity Access
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/7344c605-f7ce-4e15-bd73-2a75d84c6b69)
+![image](https://github.com/worldbank/GEEST/assets/120469484/1a37676f-d82f-44bd-a554-9fcb854ce42d)
 
 1. Navigate to and select electricity access polygon input shapefile containing a field indicating the percentage of individuals that have access to electricity.
 
@@ -671,7 +671,7 @@ OR
 
 #### <a name="level-of-urbanization-tab"></a>4.5.7 Level of Urbanization
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/ac63f69e-c2c2-4176-aeb6-bfd983c8d2d1)
+![image](https://github.com/worldbank/GEEST/assets/120469484/8776fd6c-8f40-4584-b517-a8610b867dd6)
 
 1. Navigate to and select GHS-SMOD raster input.
 
@@ -687,7 +687,7 @@ OR
 
 #### <a name="size-of-housing-tab"></a>4.5.8 Size of Housing
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b3dc8615-2d17-48e1-9f13-3f65b5dfc70e)
+![image](https://github.com/worldbank/GEEST/assets/120469484/b50b4538-6610-438b-b90a-4ee0c9462dc4)
 
 1. Navigate to and select the building footprints polygon shapefile.
 
@@ -707,7 +707,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### <a name="digital-inculsion-tab"></a>4.5.9 Digital Inclusion
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/19abbdf1-9804-43c5-8fb9-6548b13b70eb)
+![image](https://github.com/worldbank/GEEST/assets/120469484/de34e9da-6e68-4d09-bec5-84755bb35545)
 
 1. Navigate to and select the polygon input shapefile containing a field indicating the percentage of houses with internet access.
 
@@ -727,7 +727,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### <a name="natural-environment-and-climatic-factors-tab"></a>4.5.10 Natural Environment and Climatic Factors
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/fe2db337-b616-48ee-b20e-2be5a2296f64)
+![image](https://github.com/worldbank/GEEST/assets/120469484/2b0a1b43-6f34-436e-a790-5516027d291a)
 
 1. Navigate to and select polygon hazard shapefile.
 
@@ -761,7 +761,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 #### <a name="pd-aggregation-tab"></a>4.5.11 Aggregate
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/bd009d18-8a6c-4d8b-9d40-56fb38e81148)
+![image](https://github.com/worldbank/GEEST/assets/120469484/bedf9d85-63c5-4cd9-857a-c726ef77a89a)
 
 1. Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.
 
@@ -783,7 +783,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 ### <a name="dimension-aggregation-tab"></a>4.6 DIMENSION AGGREGATION TAB
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/8d2787d9-78ac-4774-9b70-6bee722bfe0a)
+![image](https://github.com/worldbank/GEEST/assets/120469484/651ed053-e36a-4fa1-b44d-6759fc5b60d8)
 
 1. Load each dimension's aggregated raster outputs.
 
@@ -805,14 +805,14 @@ _If a dimension is missing it needs to be given a weighting of 0%._
 
 ### <a name="about-tab"></a>4.7 ABOUT TAB
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/4064c4f2-75a9-4c6c-8727-6c0674699b2c)
+![image](https://github.com/worldbank/GEEST/assets/120469484/a949054b-1b8e-46f6-9279-fdd2b54212de)
 
 Information on the tool its framework, scoring system, and how results should or can be interpreted. 
 
 ### <a name="insights-tab"></a>4.8 INSIGHTS TAB
 #### <a name="enablement-tab"></a>4.8.1 Enablement
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/11389ee3-9835-4a97-a570-8f7c9efdeca1)
+![image](https://github.com/worldbank/GEEST/assets/120469484/e0e94c47-bf17-462c-a41c-5023f96ab642)
 
 **Classify into discrete classes**
 
@@ -856,7 +856,7 @@ Information on the tool its framework, scoring system, and how results should or
 
 #### <a name="re-zone-raster-locations-tab"></a>4.8.2 RE Zone Raster Locations
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/b1f6b997-b126-46d5-903c-7a94b93bbf90)
+![image](https://github.com/worldbank/GEEST/assets/120469484/612670ce-b60f-48a1-b085-7c6478c5b5f8)
 
 1. Navigate to and select the combined classification input file produced in **step 10** of the "Enablement" tab. This file path will be automatically populated if **step 10** of the "Enablement" tab was executed in the same work session.
 
@@ -877,7 +877,7 @@ Information on the tool its framework, scoring system, and how results should or
 
 #### <a name="re-point-locations-tab"></a>4.8.3 RE Point Locations
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/22fd5d42-25a9-4253-9a76-2c64c53e95c4)
+![image](https://github.com/worldbank/GEEST/assets/120469484/55ae3e3a-2b0a-463c-a2d1-c76d37605e17)
 
 1. Navigate to and select the combined classification input file produced in **step 10** of the "Enablement" tab. This file path will be automatically populated if **step 10** of the "Enablement" tab was executed in the same work session.
 
