@@ -953,7 +953,7 @@ If you see the following error message, please check if you're CRS has been set 
    1.3 Select the “Plugin Reloader” plugin and click on the install button. 
    
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/da85a4b2-f16c-4fb0-a9a5-3acaa42b768f)
+![image](https://github.com/worldbank/GEEST/assets/120469484/801db189-92ca-4755-a79f-8898b2e43a2f)
 
  1.4 Navigate to the "Plugin Reloader" configuration window under the Plugins tab.
 
@@ -961,11 +961,11 @@ If you see the following error message, please check if you're CRS has been set 
 
  1.5 From the drop-down list select the "gender\_indicator\_tool" plugin and press "OK".
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/3019b00e-46ac-490d-854c-5c7f61ee6a2e)
+![image](https://github.com/worldbank/GEEST/assets/120469484/3dc21c04-2ebe-4b33-92bc-1020746ee9e3)
 
-  1.6 If you encounter an unexpected error in the tool that has not…
+  1.6 If you encounter an unexpected error in the tool that has not been mentioned in any of the previous troubleshooting sections you can try runing the "plugin reload" tool
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/b3b0f393-d4ff-4d92-8ea5-d54540070ae9)
+![image](https://github.com/worldbank/GEEST/assets/120469484/80e1ae57-8608-4392-8df2-46e5b5d4789e)
 
 **OR**
 
