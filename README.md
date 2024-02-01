@@ -908,11 +908,11 @@ If the file is not produced you can try the following:
 - If you cannot delete the *temp* folder you will have to close QGIS and open it again, complete the setup tab, go back to the tab where the error occurred and re-run the tab again.
 
 ### <a name="distorted"></a>5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/83c37f7b-d95f-4bbe-b4a7-9040be5ddce1)
+![image](https://github.com/worldbank/GEEST/assets/120469484/e195416b-ee86-4998-9ca5-a4784f7c724e)
 
 This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked [here](https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d), highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting, Microsoft indicates that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/120469484/d30c84da-4371-487e-b0e6-811ae76e821b)
+![image](https://github.com/worldbank/GEEST/assets/120469484/248fde5c-dd1a-41d0-94ad-2ace20a74f95)
 
 Possible solutions to this are:
 - Adjust the scale for all monitors to 100%.
@@ -920,25 +920,25 @@ Possible solutions to this are:
 
 ### <a name="raster-outputs"></a>5.3 RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/383081b1-4b8b-41c7-8c4b-bf3fe09b5215)
+![image](https://github.com/worldbank/GEEST/assets/120469484/10de6c72-f8f6-47b8-adb3-930f5c625f66)
 
 Occasionally, some of the outputs automatically loaded to the QGIS table of contents do not display correctly. To correct this, try removing the layer that is displayed incorrectly and add it again to QGIS.
 
 ## <a name="output-directory"></a>5.4 ERROR: OUTPUT DIRECTORY NOT SET
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/9ae44237-e6f8-4bb9-ac4d-ba9081cc83b9)
+![image](https://github.com/worldbank/GEEST/assets/120469484/b2f2959e-85c4-4e89-8493-dac2b9a20f07)
 
 If you see the following error message, please check if your output directory has been set in the "Setup" tab.
 
 ### <a name="country-boundary"></a>5.5 ERROR: COUNTRY BOUNDARY POLYGON NOT SET
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/8c92f6df-07b3-4953-bf7b-0a57a3c10072)
+![image](https://github.com/worldbank/GEEST/assets/120469484/75882e9d-a9af-43fc-9f68-0293c75b49b3)
 
 If you see the following error message, please check if you're country boundary polygon layer has been set in the "Setup" tab.
 
 ### <a name="crs"></a>5.6 ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET
 
-![image](https://github.com/Pegasys-Resilience/WBGIT/assets/145646474/fd3baffa-6b3f-4ef7-a89a-8168b57cd7be)
+![image](https://github.com/worldbank/GEEST/assets/120469484/120c0cf9-e526-4d8b-adff-de3a9d2f7fb8)
 
 If you see the following error message, please check if you're CRS has been set in the "Setup" tab.
 
