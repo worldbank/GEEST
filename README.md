@@ -6,60 +6,58 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 
 ## User Manual
 
-- [1 Install QGIS](#1-install-qgis)
-
-- [2 Install Open Route Service (ORS) plugin](#2-install-open-route-service-ors-plugin)
-
-- [3 Installing Plugin on local device](#3-installing-plugin-on-local-device)
-
-- [4 Using the Plugin](#4-using-the-plugin)
-   - [4.1 Setup Tab](#setup-tab)
-   - [4.2 Indivdual Tab](#indivdual-tab)
-      - [4.2.1 Education](#education-tab)
-      - [4.2.2 Care Responsibilities](#care-responsibilities-tab)
-      - [4.2.3 Domestic Violence](#domestic-violence-tab)
-      - [4.2.4 Aggregation](#id-aggregation-tab)
-   - [4.3 Contextual Tab](#contextual-tab)
-      - [4.3.1 Policy and Legal Protection](#policy-and-legal-protection-tab)
-      - [4.3.2 Access to Finance](#access-to-finance-tab)
-      - [4.3.3 Aggregation](#cd-aggregation-tab)
-   - [4.4 Accessibility Tab](#accessibility-tab)
-      - [4.4.1 Women's Travel Patterns](#womens-travel-patterns-tab)
-      - [4.4.2 Access to Public Transport](#access-to-public-transport-tab)
-      - [4.4.3 Education and Training Facilities](#education-and-training-facilities-tab)
-      - [4.4.4 Jobs](#jobs-tab)
-      - [4.4.5 Health Facilites](#health-facilities-tab)
-      - [4.4.6 Financial Facilities](#financial-facilities-tab)
-      - [4.4.7 Aggregation](#ad-aggregation-tab)
-   - [4.5 Place Characterization Tab](#place-charaterization-tab)
-      - [4.5.1 Active Transport](#active-transport-tab)
-      - [4.5.2 Availability of Public Transport](#availability-of-public-transport-tab)
-      - [4.5.3 Safe Urban Design](#safe-urban-design-tab)
-      - [4.5.4 Security](#security-tab)
-      - [4.5.5 Income Level](#income-level-tab)
-      - [4.5.6 Electricity Access](#electricity-access-tab)
-      - [4.5.7 Level of Urbanization](#level-of-urbanization-tab)
-      - [4.5.8 Size of Housing](#size-of-housing-tab)
-      - [4.5.9 Digital Inclusion](#digital-inculsion-tab)
-      - [4.5.10 Natural Environment and Climatic Factors](#natural-environment-and-climatic-factors-tab)
-      - [4.5.11 Aggregation](#pd-aggregation-tab)
-   - [4.6 Dimension Aggregation Tab](#dimension-aggregation-tab)
-   - [4.7 About Tab](#about-tab)
-   - [4.8 Insights Tab](#insights-tab)
-      - [4.8.1 Enablement](#enablement-tab)
-      - [4.8.2 RE Zone Raster Locations](#re-zone-raster-locations-tab)
-      - [4.8.3 RE Point Locations](#re-point-locations-tab) 
-
-- [5 Troubleshooting](#5-troubleshooting)
-   - [5.1 ERROR: Accessibility tabs permission error](#accessibility-permissions-error)
-   - [5.2 QGIS plugin/interface widgets and text are distorted and scaled incorrectly](#distorted)
-   - [5.3 Raster outputs not being loaded and displayed correctly](#raster-outputs)
-   - [5.4 ERROR: Output directory not set](#output-directory)
-   - [5.5 ERROR: Country boundary polygon not set](#country-boundary)
-   - [5.6 ERROR: Co-ordinate reference system (CRS) not set](#crs)
-   - [5.7 Alternative way to refresh the plugin if it freezes or does not run as expected](#alternative)
-     
-- [List of CRSs for SIDS](#sids-crs)
+- [Gender Enabling Environments Spatial Tool (GEEST)](#gender-enabling-environments-spatial-tool-geest)
+  - [User Manual](#user-manual)
+  - [1 Install QGIS](#1-install-qgis)
+  - [2 Install Open Route Service (ORS) plugin](#2-install-open-route-service-ors-plugin)
+  - [3 Installing Plugin on local device](#3-installing-plugin-on-local-device)
+  - [4 Using the Plugin](#4-using-the-plugin)
+    - [ 4.1 SETUP TAB](#-41-setup-tab)
+    - [4.2 INDIVIDUAL TAB](#42-individual-tab)
+      - [4.2.1 Education](#421-education)
+      - [4.2.2 Care Responsibilities](#422-care-responsibilities)
+      - [4.2.3 Domestic Violence](#423-domestic-violence)
+      - [4.2.4 Aggregate](#424-aggregate)
+    - [4.3 CONTEXTUAL TAB](#43-contextual-tab)
+      - [4.3.1 Policy and Legal Protection](#431-policy-and-legal-protection)
+      - [4.3.2 Access to Finance](#432-access-to-finance)
+      - [4.3.3 Aggregate](#433-aggregate)
+    - [4.4 ACCESSIBILITY TAB](#44-accessibility-tab)
+      - [4.4.1 Women's Travel Patterns](#441-womens-travel-patterns)
+      - [4.4.2 Access to Public Transport](#442-access-to-public-transport)
+      - [4.4.3 Access to Education and Training Facilities](#443-access-to-education-and-training-facilities)
+      - [4.4.4 Access to Jobs in the RE sector](#444-access-to-jobs-in-the-re-sector)
+      - [4.4.5 Access to Health Facilities](#445-access-to-health-facilities)
+      - [4.4.6 Access to Financial Facilities](#446-access-to-financial-facilities)
+      - [4.4.7 Aggregate](#447-aggregate)
+    - [4.5 PLACE CHARACTERIZATION TAB](#45-place-characterization-tab)
+      - [4.5.1 Active Transport](#451-active-transport)
+      - [4.5.2 Availability of Public Transport](#452-availability-of-public-transport)
+      - [4.5.3 Safe Urban Design](#453-safe-urban-design)
+    - [4.5.4 Security](#454-security)
+      - [4.5.5 Income Level](#455-income-level)
+      - [4.5.6 Electricity Access](#456-electricity-access)
+      - [4.5.7 Level of Urbanization](#457-level-of-urbanization)
+      - [4.5.8 Size of Housing](#458-size-of-housing)
+      - [4.5.9 Digital Inclusion](#459-digital-inclusion)
+      - [4.5.10 Natural Environment and Climatic Factors](#4510-natural-environment-and-climatic-factors)
+      - [4.5.11 Aggregate](#4511-aggregate)
+    - [4.6 DIMENSION AGGREGATION TAB](#46-dimension-aggregation-tab)
+    - [4.7 ABOUT TAB](#47-about-tab)
+    - [4.8 INSIGHTS TAB](#48-insights-tab)
+      - [4.8.1 Enablement](#481-enablement)
+      - [4.8.2 RE Zone Raster Locations](#482-re-zone-raster-locations)
+      - [4.8.3 RE Point Locations](#483-re-point-locations)
+  - [5 Troubleshooting](#5-troubleshooting)
+    - [5.1 ACCESSIBILTY TABS PERMISSIONS ERROR](#51-accessibilty-tabs-permissions-error)
+    - [5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY](#52-qgis-plugininterface-widgets-and-text-are-distorted-and-scaled-incorrectly)
+    - [5.3 RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY](#53-raster-outputs-not-being-loaded-and-displaying-correctly)
+  - [5.4 ERROR: OUTPUT DIRECTORY NOT SET](#54-error-output-directory-not-set)
+    - [5.5 ERROR: COUNTRY BOUNDARY POLYGON NOT SET](#55-error-country-boundary-polygon-not-set)
+    - [5.6 ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET](#56-error-co-ordinate-reference-system-crs-not-set)
+    - [5.7 ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED](#57-alternative-way-to-refresh-the-plugin-if-it-freezes-or-does-not-run-as-expected)
+- [List of CRSs for SIDS](#list-of-crss-for-sids)
+- [License](#license)
 
 ## 1 Install QGIS
 
@@ -185,9 +183,9 @@ Examples of files that can be used as input at a particular step as per the Pilo
 ![image](https://github.com/worldbank/GEEST/assets/120469484/6ff06edc-198a-4807-a59f-038f1b401d43)
 
 1. Create a project folder that will be used to store all tool outputs.
-   
+
 3. Set the output directory to the project folder created in the previous step.
-   
+
 5. Set the country boundary layer by navigating to and selecting the **Admin 0** country boundary polygon shapefile for the country you want to analyze.
 
    **Input File:** *AdminBoundaries/Admin0.shp*
@@ -251,7 +249,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of women who have suffered domestic violence.
 
    **Input File:** *DomesticViolence/Prevalence_of_domestic_violence.shp*
-   
+
 3. Click the "Set" button to extract all the fields from the polygon input layer.
 
 4. Select the field containing the numeric value representing the percentage of women who have suffered domestic violence.
@@ -295,7 +293,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 1. Navigate to and select polygon input shapefile containing a field reporting a percentage representing the level of protective policies afforded to women.
 
    **Input File:** *PolicyLegal/Regulatory_Framework_Law_agg.shp*
-   
+
 3. Click the "Set" button to extract all the fields from the polygon input layer.
 
 4. Select the field containing the numeric value representing a percentage representing the level of protective policies afforded to women.
@@ -364,7 +362,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
   - Recreational areas
 
       **Input File:** *Amenities/Daycares_elementary_schools.shp*
-      
+
       **Input File:** *Amenities/Grocery_stores.shp*
 
 2. Select the mode of travel (Walking OR Driving).
@@ -811,7 +809,7 @@ _If a dimension is missing it needs to be given a weighting of 0%._
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/a949054b-1b8e-46f6-9279-fdd2b54212de)
 
-Information on the tool its framework, scoring system, and how results should or can be interpreted. 
+Information on the tool its framework, scoring system, and how results should or can be interpreted.
 
 ### <a name="insights-tab"></a>4.8 INSIGHTS TAB
 #### <a name="enablement-tab"></a>4.8.1 Enablement
@@ -847,7 +845,7 @@ Information on the tool its framework, scoring system, and how results should or
 **Aggregation**
 
 12. Navigate to and select the "Combine Classification" output raster file produced in **step 10**. This file path will be automatically populated if **step 10** was executed in the same work session.
-    
+
 13. Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer)
 
     **Input File:** *AdminBoundaries/Admin6.shp* (**Any admin level can be used as input**)
@@ -954,8 +952,8 @@ If you see the following error message, please check if you're CRS has been set 
 
    1.2 In the search bar type “plugin reloader”.
 
-   1.3 Select the “Plugin Reloader” plugin and click on the install button. 
-   
+   1.3 Select the “Plugin Reloader” plugin and click on the install button.
+
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/801db189-92ca-4755-a79f-8898b2e43a2f)
 
@@ -1011,3 +1009,5 @@ If you see the following error message, please check if you're CRS has been set 
 | Tuvalu | WGS 84 / UTM zone 60S | 32760 |
 | Vanuatu | WGS 84 / UTM zone 59S | 32759 |
 
+# License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
