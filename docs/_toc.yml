@@ -2,6 +2,9 @@ format: jb-book
 root: README
 
 parts:
+  - caption: GEEST
+    chapters:
+      - file: docs/user_guide
   - caption: Additional Resources
     chapters:
       - url: https://datacatalog.worldbank.org/search/collections/genderspatial
