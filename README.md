@@ -1,12 +1,14 @@
 # Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
 
-With support from the Canada Clean Energy and Forest Climate Facility (CCEFCFy), the Geospatial Operational Support Team (GOST, DECSC) launched the project "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector." The project aims to propose a novel methodology and generate a l geospatial open-source tool for mapping the enabling environments for women in a country that can inform new energy projects to support the advancement of women's economic empowerment in SIDS while contributing to closing gender gaps in employment in the RE sector. 
+With support from the Canada Clean Energy and Forest Climate Facility (CCEFCFy), the Geospatial Operational Support Team (GOST, DECSC) launched the project "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector." The project aims to propose a novel methodology and generate a geospatial open-source tool for mapping the enabling environments for women in a country that can inform new energy projects to support the advancement of women's economic empowerment in SIDS while contributing to closing gender gaps in employment in the RE sector. 
 
 ![image](docs/images/img01.png)
 
 ![image](docs/images/img02.png)
 
 Countries included in the project:
+
+<font size="2">
 
 | AFRICA | LATIN AMERICA AND CARIBBEAN | EAST ASIA AND PACIFIC | SOUTH ASIA |
 | --- | --- | --- | --- |
@@ -23,9 +25,20 @@ Countries included in the project:
 | | Suriname | Timor-Leste | |  
 | | | Tonga | |  
 | | | Tuvalu | |  
-| | | Vanuatu | |   
+| | | Vanuatu | | 
   
+</font>
+
 ## Project Components
+
+The project is divided into six main components:
+
+  1. [Gender Spatial Data Gap Assessment](#gender-spatial-data-gap-assessment)
+  2. [Geospatial Databases](#geospatial-databases)
+  3. [Novel Analytical Framework](#novel-analytical-framework)
+  4. [Gender Enabling Environments Tool (GEEST)](#gender-enabling-environments-tool-geest)
+  5. [Implementation](#implementation)
+  6. [GEEST Main Limitations](#geest-main-limitations)
 
 ### 1. Gender Spatial Data Gap Assessment:
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women's development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 59 data layers within each country, organized into 12 thematic categories. The table below presents the 59 layers identified during the desk research,  grouped into 12 categories, as outlined below
@@ -33,6 +46,8 @@ This undertaking involved the identification and compilation of essential open-s
 <br>
 
 This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS included in the project. The report for each country provides a comprehensive overview of the findings derived from an extensive data gap analysis, specifically centered on women in SIDS and their access (or lack thereof) to employment opportunities within the RE sector. This endeavor entailed thorough desk-based research, necessitating a detailed exploration of both spatial and non-spatial data sources that are publicly available. The focus was on identifying critical open sources, evaluating the resolution and quality of the data, and specifying any pertinent gaps or missing information in each country. The reports are available here: https://datacatalog.worldbank.org/search/collections/genderspatial
+
+<font size="2">
 
 | **Reference Data** |
 | --- |
@@ -110,6 +125,8 @@ This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS inclu
 | National Parliament Seats Held by Women (%) | 
 | Missing Data from SDGs | 
 
+</font>
+
 The following figure summarizes the data availability concerning the 59 datasets examined for each country:
 
 
@@ -177,11 +194,11 @@ The interpretation of these scores is thoroughly detailed in the Methodology Rep
    - Highly enabling
 ```
 
-To access the User Manual for GEEST and the necessary installation files for QGIS, please visit the GitHub repository via the following link: [insert link].
+To access the User Manual for GEEST and the necessary installation files for QGIS, please visit the GitHub repository via the following link: https://github.com/worldbank/GEEST.
 
 ### 5. Implementation
 
-The GEEST was tested in three pilot countries – Comoros, Dominican Republic, and Papua New Guinea (PNG) – to assess its functionality. The selection of these countries was strategic, considering their varied geographic regions, income levels, sizes, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link [insert link].
+The GEEST was tested in three pilot countries – Comoros, Dominican Republic, and Papua New Guinea (PNG) – to assess its functionality. The selection of these countries was strategic, considering their varied geographic regions, income levels, sizes, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: [insert link].
 
 #### INDIVIDUAL DIMENSION RESULTS IN PILOT COUNTRIES
 
