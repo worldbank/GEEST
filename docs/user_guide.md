@@ -6,55 +6,56 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 
 ## User Manual
 
-[**Gender Enabling Environments Spatial Tool (GEEST) User Manual**](#gender-enabling-environments-spatial-tool-geest-user-manual)
-- 1. [Install QGIS](#install-qgis)
-- 2. [Install Open Route Service (ORS) plugin](#install-open-route-service-ors-plugin)
-- 3. [Installing Plugin on local device](#installing-plugin-on-local-device)
-- 4. [Using the Plugin](#using-the-plugin)
-  - 4.1. [SETUP TAB](#setup-tab)
-  - 4.2. [INDIVIDUAL TAB](#individual-tab)
-    - 4.2.1. [Education](#education)
-    - 4.2.2. [Care Responsibilities](#care-responsibilities)
-    - 4.2.3. [Domestic Violence](#domestic-violence)
-    - 4.2.4. [Aggregate](#id-aggregation-tab)
-  - 4.3. [CONTEXTUAL TAB](#contextual-tab)
-    - 4.3.1. [Policy and Legal Protection](#policy-and-legal-protection)
-    - 4.3.2. [Access to Finance](#access-to-finance)
-    - 4.3.3. [Aggregate](#cd-aggregation-tab)
-  - 4.4. [ACCESSIBILITY TAB](#accessibility-tab)
-    - 4.4.1. [Women's Travel Patterns](#women-s-travel-patterns)
-    - 4.4.2. [Access to Public Transport](#access-to-public-transport)
-    - 4.4.3. [Access to Education and Training Facilities](#access-to-education-and-training-facilities)
-    - 4.4.4. [Access to Jobs in the RE sector](#access-to-jobs-in-the-re-sector)
-    - 4.4.5. [Access to Health Facilities](#access-to-health-facilities)
-    - 4.4.6. [Access to Financial Facilities](#access-to-financial-facilities)
-    - 4.4.7. [Aggregate](#ad-aggregation-tab)
-  - 4.5. [PLACE CHARACTERIZATION TAB](#place-characterization-tab)
-    - 4.5.1. [Active Transport](#active-transport)
-    - 4.5.2. [Availability of Public Transport](#availability-of-public-transport)
-    - 4.5.3. [Safe Urban Design](#safe-urban-design)
-  - 4.5.4. [Security](#security)
-    - 4.5.5. [Income Level](#income-level)
-    - 4.5.6. [Electricity Access](#electricity-access)
-    - 4.5.7. [Level of Urbanization](#level-of-urbanization)
-    - 4.5.8. [Size of Housing](#size-of-housing)
-    - 4.5.9. [Digital Inclusion](#digital-inclusion)
-    - 4.5.10. [Natural Environment and Climatic Factors](#natural-environment-and-climatic-factors)
-    - 4.5.11. [Aggregate](#pd-aggregation-tab)
-  - 4.6. [DIMENSION AGGREGATION TAB](#dimension-aggregation-tab)
-  - 4.7. [ABOUT TAB](#about-tab)
-  - 4.8. [INSIGHTS TAB](#insights-tab)
-    - 4.8.1. [Enablement](#enablement)
-    - 4.8.2. [RE Zone Raster Locations](#re-zone-raster-locations)
-    - 4.8.3. [RE Point Locations](#re-point-locations)
-- 5. [Troubleshooting](#troubleshooting)
-  - 5.1. [ACCESSIBILTY TABS PERMISSIONS ERROR](#accessibilty-permissions-error)
-  - 5.2. [QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY](#distorted)
-  - 5.3. [RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY](#raster-outputs)
-  - 5.4. [ERROR: OUTPUT DIRECTORY NOT SET](#output-directory)
-  - 5.5. [ERROR: COUNTRY BOUNDARY POLYGON NOT SET](#country-boundary)
-  - 5.6. [ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET](#crs)
-  - 5.7. [ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED](#alternative)
+- [Gender Enabling Environments Spatial Tool (GEEST) User Manual](#gender-enabling-environments-spatial-tool-geest-user-manual)
+  - [User Manual](#user-manual)
+  - [1 Install QGIS](#1-install-qgis)
+  - [2 Install Open Route Service (ORS) plugin](#2-install-open-route-service-ors-plugin)
+  - [3 Installing Plugin on local device](#3-installing-plugin-on-local-device)
+  - [4 Using the Plugin](#4-using-the-plugin)
+    - [ 4.1 SETUP TAB](#-41-setup-tab)
+    - [4.2 INDIVIDUAL TAB](#42-individual-tab)
+      - [4.2.1 Education](#421-education)
+      - [4.2.2 Care Responsibilities](#422-care-responsibilities)
+      - [4.2.3 Domestic Violence](#423-domestic-violence)
+      - [4.2.4 Aggregate](#424-aggregate)
+    - [4.3 CONTEXTUAL TAB](#43-contextual-tab)
+      - [4.3.1 Policy and Legal Protection](#431-policy-and-legal-protection)
+      - [4.3.2 Access to Finance](#432-access-to-finance)
+      - [4.3.3 Aggregate](#433-aggregate)
+    - [4.4 ACCESSIBILITY TAB](#44-accessibility-tab)
+      - [4.4.1 Women's Travel Patterns](#441-womens-travel-patterns)
+      - [4.4.2 Access to Public Transport](#442-access-to-public-transport)
+      - [4.4.3 Access to Education and Training Facilities](#443-access-to-education-and-training-facilities)
+      - [4.4.4 Access to Jobs in the RE sector](#444-access-to-jobs-in-the-re-sector)
+      - [4.4.5 Access to Health Facilities](#445-access-to-health-facilities)
+      - [4.4.6 Access to Financial Facilities](#446-access-to-financial-facilities)
+      - [4.4.7 Aggregate](#447-aggregate)
+    - [4.5 PLACE CHARACTERIZATION TAB](#45-place-characterization-tab)
+      - [4.5.1 Active Transport](#451-active-transport)
+      - [4.5.2 Availability of Public Transport](#452-availability-of-public-transport)
+      - [4.5.3 Safe Urban Design](#453-safe-urban-design)
+    - [4.5.4 Security](#454-security)
+      - [4.5.5 Income Level](#455-income-level)
+      - [4.5.6 Electricity Access](#456-electricity-access)
+      - [4.5.7 Level of Urbanization](#457-level-of-urbanization)
+      - [4.5.8 Size of Housing](#458-size-of-housing)
+      - [4.5.9 Digital Inclusion](#459-digital-inclusion)
+      - [4.5.10 Natural Environment and Climatic Factors](#4510-natural-environment-and-climatic-factors)
+      - [4.5.11 Aggregate](#4511-aggregate)
+    - [4.6 DIMENSION AGGREGATION TAB](#46-dimension-aggregation-tab)
+    - [4.7 ABOUT TAB](#47-about-tab)
+    - [4.8 INSIGHTS TAB](#48-insights-tab)
+      - [4.8.1 Enablement](#481-enablement)
+      - [4.8.2 RE Zone Raster Locations](#482-re-zone-raster-locations)
+      - [4.8.3 RE Point Locations](#483-re-point-locations)
+  - [5 Troubleshooting](#5-troubleshooting)
+    - [5.1 ACCESSIBILTY TABS PERMISSIONS ERROR](#51-accessibilty-tabs-permissions-error)
+    - [5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY](#52-qgis-plugininterface-widgets-and-text-are-distorted-and-scaled-incorrectly)
+    - [5.3 RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY](#53-raster-outputs-not-being-loaded-and-displaying-correctly)
+  - [5.4 ERROR: OUTPUT DIRECTORY NOT SET](#54-error-output-directory-not-set)
+    - [5.5 ERROR: COUNTRY BOUNDARY POLYGON NOT SET](#55-error-country-boundary-polygon-not-set)
+    - [5.6 ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET](#56-error-co-ordinate-reference-system-crs-not-set)
+    - [5.7 ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED](#57-alternative-way-to-refresh-the-plugin-if-it-freezes-or-does-not-run-as-expected)
 - [List of CRSs for SIDS](#list-of-crss-for-sids)
 - [License](#license)
 
@@ -177,7 +178,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 **Input File:** *Folder/file_name* --> *AccessFinance/Access_to_finance.shp*
 
-### 4.1 SETUP TAB
+### <a name="setup-tab"></a> 4.1 SETUP TAB
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/6ff06edc-198a-4807-a59f-038f1b401d43)
 
@@ -201,9 +202,9 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 7. Set your preferred output raster output resolution in meters squared.
 
-### 4.2 INDIVIDUAL TAB
+### <a name="indivdual-tab"></a>4.2 INDIVIDUAL TAB
 
-#### 4.2.1 Education
+#### <a name="education-tab"></a>4.2.1 Education
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/783752ba-77a9-4c37-95ad-d5ffb34b9bf7)
 
@@ -223,7 +224,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/EDU_Raster_output.tif*)
 
-#### 4.2.2 Care Responsibilities
+#### <a name="care-responsibilities-tab"></a>4.2.2 Care Responsibilities
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/a22a693d-7979-442a-9e6d-b485417d8fad)
 
@@ -241,7 +242,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/CRE_Raster_output.tif*)
 
-#### 4.2.3 Domestic Violence
+#### <a name="domestic-violence-tab"></a>4.2.3 Domestic Violence
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/b2b9e9e9-cb5c-4251-b495-2ee10ea8f404)
 
@@ -261,8 +262,7 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/DOV_Raster_output.tif*)
 
-(id-aggregation-tab)=
-#### 4.2.4 Aggregate
+#### <a name="id-aggregation-tab"></a>4.2.4 Aggregate
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/e9e14c68-2111-4377-9ea2-bc73c6241fc1)
 
@@ -284,9 +284,9 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/AGG_Raster_output.tif*)
 
-### 4.3 CONTEXTUAL TAB
+### <a name="contextual-tab"></a>4.3 CONTEXTUAL TAB
 
-#### 4.3.1 Policy and Legal Protection
+#### <a name="policy-and-legal-protection-tab"></a>4.3.1 Policy and Legal Protection
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/ab6797a8-b09e-4a6e-92c8-6e2b664d17c0)
 
@@ -306,7 +306,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/PLP_Raster_output.tif*)
 
-#### 4.3.2 Access to Finance
+#### <a name="access-to-finance-tab"></a>4.3.2 Access to Finance
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/2e4050cd-d458-4b19-9876-b434431b68c7)
 
@@ -326,8 +326,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/FIN_Raster_output.tif*)
 
-(cd-aggregation-tab)=
-#### 4.3.3 Aggregate
+#### <a name="cd-aggregation-tab"></a>4.3.3 Aggregate
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/bcf2260d-5db0-4be5-a583-ac9d0537e35c)
 
@@ -349,9 +348,9 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/AGG_Raster_output.tif*)
 
-### 4.4 ACCESSIBILITY TAB
+### <a name="accessibility-tab"></a>4.4 ACCESSIBILITY TAB
 
-#### 4.4.1 Women's Travel Patterns
+#### <a name="womens-travel-patterns-tab"></a>4.4.1 Women's Travel Patterns
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/6541477e-2ff8-4878-8962-3abb48e4ce43)
 
@@ -390,7 +389,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 12. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Accessibility/WTP_Raster_output.tif*)
 
-#### 4.4.2 Access to Public Transport
+#### <a name="access-to-public-transport-tab"></a>4.4.2 Access to Public Transport
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/ade68b40-f9f4-477c-a631-3ed137b71e27)
 
@@ -412,7 +411,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 9. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/PBT_Raster_output.tif*).
 
-#### 4.4.3 Access to Education and Training Facilities
+#### <a name="education-and-training-facilities-tab"></a>4.4.3 Access to Education and Training Facilities
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/0899eb4e-9547-4d7a-9a30-95082ebb71dc)
 
@@ -436,7 +435,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/ETF_Raster_output.tif*).
 
-#### 4.4.4 Access to Jobs in the RE sector
+#### <a name="jobs-tab"></a>4.4.4 Access to Jobs in the RE sector
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/572b704c-830a-40c4-96f0-6dceb7e6100d)
 
@@ -456,7 +455,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/JOB_Raster_output.tif*).
 
-#### 4.4.5 Access to Health Facilities
+#### <a name="health-facilities-tab"></a>4.4.5 Access to Health Facilities
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/c38e5cb6-2264-4bd3-8e53-56c19d8213e4)
 
@@ -478,7 +477,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder. (*Project_Folder/Accessibility/HEA_Raster_output.tif*)
 
-#### 4.4.6 Access to Financial Facilities
+#### <a name="financial-facilities-tab"></a>4.4.6 Access to Financial Facilities
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/bd2bace8-e569-4b23-a4c0-a6024fe2adf6)
 
@@ -500,8 +499,7 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
 
 9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/FIF_Raster_output.tif*).
 
-(ad-aggregation-tab)=
-#### 4.4.7 Aggregate
+#### <a name="ad-aggregation-tab"></a>4.4.7 Aggregate
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/ba3c884c-5940-4255-9ca5-9e202ae106b8)
 
@@ -523,9 +521,9 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Accessibility/AGG_Raster_output.tif*).
 
-### 4.5 PLACE CHARACTERIZATION TAB
+### <a name="place-charaterization-tab"></a>4.5 PLACE CHARACTERIZATION TAB
 
-#### 4.5.1 Active Transport
+#### <a name="active-transport-tab"></a>4.5.1 Active Transport
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/bf89b9ad-7ecc-460c-a7d9-38f1a894176a)
 
@@ -549,7 +547,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/WLK_Raster_output.tif*).
 
-#### 4.5.2 Availability of Public Transport
+#### <a name="availability-of-public-transport-tab"></a>4.5.2 Availability of Public Transport
 
 !![image](https://github.com/worldbank/GEEST/assets/120469484/8dd068ae-b4dd-447c-bef0-0e57c8f4db17)
 
@@ -569,7 +567,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/APT_Raster_output.tif*).
 
-#### 4.5.3 Safe Urban Design
+#### <a name="safe-urban-design-tab"></a>4.5.3 Safe Urban Design
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/2ab8874d-50cb-4445-9bac-3231b8328fb7)
 
@@ -585,7 +583,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 6. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/SAF_Raster_output.tif*).
 
-### 4.5.4 Security
+### <a name="security-tab"></a>4.5.4 Security
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/10d4eb39-51b9-421d-b105-46466f4b3ba9)
 
@@ -617,7 +615,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 11. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Place Characterization/SEC_Raster_output.tif*)
 
-#### 4.5.5 Income Level
+#### <a name="income-level-tab"></a>4.5.5 Income Level
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/c1a88898-25a9-47ba-83a3-567bbf525f1a)
 
@@ -637,7 +635,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/INC_Raster_output.tif*).
 
-#### 4.5.6 Electricity Access
+#### <a name="electricity-access-tab"></a>4.5.6 Electricity Access
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/1a37676f-d82f-44bd-a554-9fcb854ce42d)
 
@@ -673,7 +671,7 @@ OR
 
 **N.B. If nighttime lights raster data is used for the "Safe Urban Design" factor it should not be used in the "Electrical Access" factor and vice-versa**
 
-#### 4.5.7 Level of Urbanization
+#### <a name="level-of-urbanization-tab"></a>4.5.7 Level of Urbanization
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/8776fd6c-8f40-4584-b517-a8610b867dd6)
 
@@ -689,7 +687,7 @@ OR
 
 6. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/LOU_Raster_output.tif*).
 
-#### 4.5.8 Size of Housing
+#### <a name="size-of-housing-tab"></a>4.5.8 Size of Housing
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/b50b4538-6610-438b-b90a-4ee0c9462dc4)
 
@@ -709,7 +707,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/QUH_Raster_output.tif*).
 
-#### 4.5.9 Digital Inclusion
+#### <a name="digital-inculsion-tab"></a>4.5.9 Digital Inclusion
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/de34e9da-6e68-4d09-bec5-84755bb35545)
 
@@ -729,7 +727,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/DIG_Raster_output.tif*).
 
-#### 4.5.10 Natural Environment and Climatic Factors
+#### <a name="natural-environment-and-climatic-factors-tab"></a>4.5.10 Natural Environment and Climatic Factors
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/2b0a1b43-6f34-436e-a790-5516027d291a)
 
@@ -763,8 +761,7 @@ The smaller size the more computationally intensive the algorithm will be.
 
 13. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/ENV_Raster_output.tif*).
 
-(pd-aggregation-tab)=
-#### 4.5.11 Aggregate
+#### <a name="pd-aggregation-tab"></a>4.5.11 Aggregate
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/bedf9d85-63c5-4cd9-857a-c726ef77a89a)
 
@@ -786,7 +783,7 @@ _If a factor is missing it needs to be given a weighting of 0%. All factors shou
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/AGG_Raster_output.tif*).
 
-### 4.6 DIMENSION AGGREGATION TAB
+### <a name="dimension-aggregation-tab"></a>4.6 DIMENSION AGGREGATION TAB
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/651ed053-e36a-4fa1-b44d-6759fc5b60d8)
 
@@ -808,14 +805,14 @@ _If a dimension is missing it needs to be given a weighting of 0%._
 
 7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Final\_output" folder (*Project_Folder/Final_Output/Final_AGG_Raster_output.tif_).
 
-### 4.7 ABOUT TAB
+### <a name="about-tab"></a>4.7 ABOUT TAB
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/a949054b-1b8e-46f6-9279-fdd2b54212de)
 
 Information on the tool its framework, scoring system, and how results should or can be interpreted.
 
-### 4.8 INSIGHTS TAB
-#### 4.8.1 Enablement
+### <a name="insights-tab"></a>4.8 INSIGHTS TAB
+#### <a name="enablement-tab"></a>4.8.1 Enablement
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/e0e94c47-bf17-462c-a41c-5023f96ab642)
 
@@ -859,7 +856,7 @@ Information on the tool its framework, scoring system, and how results should or
 
 16.  The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/4) Aggregation" folder. (*Project_Folder/Insights/4) Aggregation/Aggregation_.tif*)
 
-#### 4.8.2 RE Zone Raster Locations
+#### <a name="re-zone-raster-locations-tab"></a>4.8.2 RE Zone Raster Locations
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/612670ce-b60f-48a1-b085-7c6478c5b5f8)
 
@@ -880,7 +877,7 @@ Information on the tool its framework, scoring system, and how results should or
 6. The 2 output files will be stored in the project folder specified in the "Setup" tab, under the "Insights/5) RE Zone Raster Locations" folder. (*Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_.tif* **&** *Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_admin_units.shp*)
 
 
-#### 4.8.3 RE Point Locations
+#### <a name="re-point-locations-tab"></a>4.8.3 RE Point Locations
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/55ae3e3a-2b0a-463c-a2d1-c76d37605e17)
 
@@ -900,7 +897,7 @@ Information on the tool its framework, scoring system, and how results should or
 
 ## 5 Troubleshooting
 
-### 5.1 ACCESSIBILTY TABS PERMISSIONS ERROR
+### <a name="accessibility-permissions-error"></a>5.1 ACCESSIBILTY TABS PERMISSIONS ERROR
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/63edfc18-8294-478c-bcc5-1a4f28c07711)
 
@@ -912,7 +909,7 @@ If the file is not produced you can try the following:
 - Delete the *temp* folder in the working directory
 - If you cannot delete the *temp* folder you will have to close QGIS and open it again, complete the setup tab, go back to the tab where the error occurred and re-run the tab again.
 
-### 5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY
+### <a name="distorted"></a>5.2 QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY
 ![image](https://github.com/worldbank/GEEST/assets/120469484/e195416b-ee86-4998-9ca5-a4784f7c724e)
 
 This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked [here](https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d), highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting, Microsoft indicates that entering a custom scaling size between 100% - 500% is not recommended as "...it can cause text and apps to become unreadable."
@@ -923,31 +920,31 @@ Possible solutions to this are:
 - Adjust the scale for all monitors to 100%.
 - Ensure that the display resolution is the same for both monitors. i.e. If the smallest monitor is set to 1920 x 1080 set the 4k monitor to this display resolution as well.
 
-### 5.3 RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY
+### <a name="raster-outputs"></a>5.3 RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/10de6c72-f8f6-47b8-adb3-930f5c625f66)
 
 Occasionally, some of the outputs automatically loaded to the QGIS table of contents do not display correctly. To correct this, try removing the layer that is displayed incorrectly and add it again to QGIS.
 
-### 5.4 ERROR: OUTPUT DIRECTORY NOT SET
+## <a name="output-directory"></a>5.4 ERROR: OUTPUT DIRECTORY NOT SET
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/b2f2959e-85c4-4e89-8493-dac2b9a20f07)
 
 If you see the following error message, please check if your output directory has been set in the "Setup" tab.
 
-### 5.5 ERROR: COUNTRY BOUNDARY POLYGON NOT SET
+### <a name="country-boundary"></a>5.5 ERROR: COUNTRY BOUNDARY POLYGON NOT SET
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/75882e9d-a9af-43fc-9f68-0293c75b49b3)
 
 If you see the following error message, please check if you're country boundary polygon layer has been set in the "Setup" tab.
 
-### 5.6 ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET
+### <a name="crs"></a>5.6 ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/120c0cf9-e526-4d8b-adff-de3a9d2f7fb8)
 
 If you see the following error message, please check if you're CRS has been set in the "Setup" tab.
 
-### 5.7 ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED
+### <a name="alternative"></a>5.7 ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED
 
 1. Install the "Plugin Reloader" plugin.
 
@@ -976,7 +973,7 @@ If you see the following error message, please check if you're CRS has been set 
 
 **If the "Plugin Reloader" does not resolve the error close QGIS, restart it again, and re-run the process you were trying to execute.**
 
-# List of CRSs for SIDS
+# <a name="sids-crs"></a>List of CRSs for SIDS
 
 | **Country** | **WGS84 / UTM CRS** | **EPSG** |
 | --- | --- | --- |

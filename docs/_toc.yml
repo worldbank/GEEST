@@ -8,7 +8,7 @@ parts:
   - caption: Additional Resources
     chapters:
       - url: https://datacatalog.worldbank.org/search/collections/genderspatial
-        title: Data Gap Analysis
+        title: Gender Spatial Data
       - url: https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42
         title: Methodology Report
       - url: https://www.qgis.org/en/site/
