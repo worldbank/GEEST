@@ -189,7 +189,7 @@ class GenderIndicatorTool:
         icon_path = ':/plugins/gender_indicator_tool/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u''),
+            text=self.tr(u'GEEST'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -1590,11 +1590,14 @@ class GenderIndicatorTool:
                                                                               'INPUT_FIELD': '',
                                                                               'INPUT_METRIC': measurement,
                                                                               'INPUT_RANGES': ranges,
+                                                                              'INPUT_SMOOTHING': None,
+                                                                              'LOCATION_TYPE': 0,
                                                                               'INPUT_AVOID_FEATURES': [],
                                                                               'INPUT_AVOID_BORDERS': None,
                                                                               'INPUT_AVOID_COUNTRIES': '',
                                                                               'INPUT_AVOID_POLYGONS': None,
                                                                               'OUTPUT': subset_outfile})
+
             subsets.append(subset_outfile)
 
             batch = i + subset_size
@@ -2739,6 +2742,9 @@ class GenderIndicatorTool:
                                               'OUTPUT': adminUTMLayer})
 
         BF_gdf = gpd.read_file(zonalOutput)
+        Admin_gdf = gpd.read_file(adminUTMLayer)
+        BF_gdf = gpd.overlay(Admin_gdf, BF_gdf, how='intersection')
+
         building_geometries = BF_gdf['geometry']
         BF_gdf['Area'] = building_geometries.area
         BF_gdf['more_60'] = 0
