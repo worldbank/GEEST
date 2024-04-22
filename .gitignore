@@ -1,2 +1,6 @@
 # ignore the _build directory
 _build/
+.venv/
+data/
+__pycache__
+.direnv

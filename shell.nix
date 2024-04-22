@@ -1,6 +1,3 @@
-{ pkgs
-, extraPythonPackages ? ps: []
-}:
 with import <nixpkgs> { };
 let
   # For packages pinned to a specific version
@@ -26,7 +23,8 @@ in pkgs.mkShell rec {
     pythonPackages.geopandas
     pythonPackages.rasterio
     pinnedPkgs.vim
-    #pinnedPkgs.qgis.override { extraPythonPackages = ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ];}
+    qgis
+    #qgis.override { extraPythonPackages = ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ];}
   ];
   # Run this command, only after creating the virtual environment
   PROJECT_ROOT = builtins.getEnv "PWD";
