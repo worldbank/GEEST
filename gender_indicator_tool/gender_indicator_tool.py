@@ -495,6 +495,8 @@ class GenderIndicatorTool:
         )
 
         if button_num == 0:
+            # Clear the field before setting its text
+            self.dlg.workingDir_Field.clear()
             self.dlg.workingDir_Field.setText(str(response + ""))
 
     def RasterizeSet(self, factor_no):
