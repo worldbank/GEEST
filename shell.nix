@@ -18,6 +18,7 @@ in pkgs.mkShell rec {
     pinnedPkgs.virtualenv
     # Those are dependencies that we would like to use from nixpkgs, which will
     # add them to PYTHONPATH and thus make them accessible from within the venv.
+    pythonPackages.debugpy
     pythonPackages.numpy
     pythonPackages.pip
     pythonPackages.geopandas

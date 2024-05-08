@@ -10,5 +10,5 @@ echo "| |_| | |_| || | ___) | |_____| | |_| | |___| |___ ___) || |  "
 echo " \__\_\\____|___|____/           \____|_____|_____|____/ |_|  "
                                                               
 nix-shell -p \
-  'qgis.override { extraPythonPackages = (ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ]);}' \
-  --command "qgis --profile GEEST"
+  'qgis.override { extraPythonPackages = (ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ps.debugpy ]);}' \
+  --command "GEEST_DEBUG=1 qgis --profile GEEST"

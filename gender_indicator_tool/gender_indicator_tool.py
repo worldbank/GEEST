@@ -79,6 +79,22 @@ class GenderIndicatorTool:
         self.iface = iface
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
+        
+        # Show commands button only shown in debug mode
+        # Fetch the value of GEEST_DEBUG from an environment variable
+        debug_mode = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_mode:
+            import multiprocessing  # pylint: disable=import-outside-toplevel
+            if multiprocessing.current_process().pid > 1:
+                import debugpy  # pylint: disable=import-outside-toplevel
+
+                debugpy.listen(("0.0.0.0", 9000))
+                debugpy.wait_for_client()
+                #self.display_information_message_bar(
+                #     title="Animation Workbench",
+                #     message="Visual Studio Code debugger is now attached on port 9000",
+                #)
+                    
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
         locale_path = os.path.join(
@@ -98,6 +114,7 @@ class GenderIndicatorTool:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -1638,7 +1655,8 @@ class GenderIndicatorTool:
 
         print(f"Subsets debugging: {subsets}")
 
-        Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
+        Merge = processing.run(
+            "native:mergevectorlayers", {'LAYERS': subsets,
                                                             'CRS': QgsCoordinateReferenceSystem(UTM_crs),
                                                             'OUTPUT': SAOutput_utm})
 
