@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/usr/bin/env bash
 echo "🪛 Running QGIS with the GEEST profile:"
 echo "--------------------------------"
@@ -10,4 +11,4 @@ echo " \__\_\\____|___|____/           \____|_____|_____|____/ |_|  "
                                                               
 nix-shell -p \
   'qgis.override { extraPythonPackages = (ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ]);}' \
-  --command "qgis --profile=${HOME}/.local/share/QGIS/QGIS3/profiles/GEEST"
+  --command "qgis --profile GEEST"

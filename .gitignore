@@ -1,6 +1,8 @@
 # ignore the _build directory
+__pycache__
+.direnv
 _build/
 .venv/
 data/
-__pycache__
 .direnv
+.vscode-extensions

@@ -45,12 +45,18 @@ from rasterio.mask import mask
 from rasterio.features import geometry_mask
 
 # Prepare processing framework
-sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
+# sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
 from processing.core.Processing import Processing
 Processing.initialize()
 import processing
 import sys
 from qgis.PyQt import QtWidgets
+
+# Use pdb for debugging
+import pdb
+# also import pyqtRemoveInputHook
+from qgis.PyQt.QtCore import pyqtRemoveInputHook
+from qgis.core import QgsMessageLog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -495,6 +501,8 @@ class GenderIndicatorTool:
         )
 
         if button_num == 0:
+            # Clear the field before setting its text
+            self.dlg.workingDir_Field.clear()
             self.dlg.workingDir_Field.setText(str(response + "/"))
 
     def RasterizeSet(self, factor_no):
@@ -856,7 +864,7 @@ class GenderIndicatorTool:
 
             self.dlg.EDU_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -914,7 +922,7 @@ class GenderIndicatorTool:
 
             self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -972,7 +980,7 @@ class GenderIndicatorTool:
 
             self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1030,7 +1038,7 @@ class GenderIndicatorTool:
 
             self.dlg.PLP_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1088,7 +1096,7 @@ class GenderIndicatorTool:
 
             self.dlg.FIN_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1146,7 +1154,7 @@ class GenderIndicatorTool:
 
             self.dlg.INC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1212,7 +1220,7 @@ class GenderIndicatorTool:
 
             self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1270,7 +1278,7 @@ class GenderIndicatorTool:
 
             self.dlg.ELC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1328,7 +1336,7 @@ class GenderIndicatorTool:
 
             self.dlg.DIG_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1388,7 +1396,7 @@ class GenderIndicatorTool:
             rasOutput = f"{self.dlg.PBT_Output_Field.text()[:-4]}{self.dlg.PBT_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1421,7 +1429,7 @@ class GenderIndicatorTool:
             rasOutput = f"{self.dlg.ETF_Output_Field.text()[:-4]}{self.dlg.ETF_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1454,7 +1462,7 @@ class GenderIndicatorTool:
             rasOutput = f"{self.dlg.JOB_Output_Field.text()[:-4]}{self.dlg.JOB_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1486,7 +1494,7 @@ class GenderIndicatorTool:
             rasOutput = f"{self.dlg.HEA_Output_Field.text()[:-4]}{self.dlg.HEA_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1518,7 +1526,7 @@ class GenderIndicatorTool:
             rasOutput = f"{self.dlg.FIF_Output_Field.text()[:-4]}{self.dlg.FIF_mode_CB.currentText()}.tif"
             mergeOutput = f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1575,11 +1583,12 @@ class GenderIndicatorTool:
 
         gdf = gpd.read_file(FaciltyPointlayer)
 
-        subset_size = 5
+        subset_size = 1
         subsets = []
 
         for i in range(0, len(gdf), subset_size):
             subset = gdf.iloc[i:i + subset_size]
+            print(f"subset:{subset}")
             subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
             subset_outfile = f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
 
@@ -1604,6 +1613,8 @@ class GenderIndicatorTool:
 
             if batch > len(gdf):
                 batch = len(gdf)
+                
+            print(f"Batch: {batch}")
 
             if factor_no == 0:
                 self.dlg.PBT_status.setText(f"Processing... {batch} of {len(gdf)}")
@@ -1625,12 +1636,11 @@ class GenderIndicatorTool:
                 self.dlg.WTP_status.repaint()
 
 
-
+        print(f"Subsets debugging: {subsets}")
 
         Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
                                                             'CRS': QgsCoordinateReferenceSystem(UTM_crs),
                                                             'OUTPUT': SAOutput_utm})
-
 
         time.sleep(0.5)
 
@@ -1751,7 +1761,7 @@ class GenderIndicatorTool:
                 os.mkdir(Output_Folder)
                 os.chdir(Output_Folder)
 
-            styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
             styleFile = f"{rasOutput.split('.')[0]}.qml"
         else:
@@ -1824,7 +1834,7 @@ class GenderIndicatorTool:
 
         rasOutput = self.dlg.WTP_AGGOutput_Field.text()
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -1883,7 +1893,7 @@ class GenderIndicatorTool:
 
         rasOutput = self.dlg.SEC_AGGOutput_Field.text()
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2043,7 +2053,7 @@ class GenderIndicatorTool:
 
         self.dlg.WLK_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2091,7 +2101,7 @@ class GenderIndicatorTool:
         tempResample = f"{tempDir}/tempResample.tif"
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2215,7 +2225,7 @@ class GenderIndicatorTool:
         tempResample = f"{tempDir}/tempResample.tif"
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2445,7 +2455,7 @@ class GenderIndicatorTool:
 
         self.dlg.APT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2498,7 +2508,7 @@ class GenderIndicatorTool:
         Dissolve = f"{tempDir}/Dissolve.shp"
         DisReclass = f"{tempDir}/DisReclass.shp"
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2815,7 +2825,7 @@ class GenderIndicatorTool:
 
         self.dlg.QUH_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2948,7 +2958,7 @@ class GenderIndicatorTool:
 
         self.dlg.ENV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -2981,7 +2991,7 @@ class GenderIndicatorTool:
 
         rasOutput = self.dlg.ENV_AGGOutput_Field.text()
 
-        styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
 
@@ -3105,7 +3115,7 @@ class GenderIndicatorTool:
                 loggerID.info(f"Factors: {non_empty_count}/3 - {non_empty_count/3 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+                styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
                 styleFile = f"{aggregation.split('.')[0]}.qml"
 
@@ -3205,7 +3215,7 @@ class GenderIndicatorTool:
                 loggerCD.info(f"Factors: {non_empty_count}/2 - {non_empty_count/2 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+                styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
                 styleFile = f"{aggregation.split('.')[0]}.qml"
 
@@ -3331,7 +3341,7 @@ class GenderIndicatorTool:
                 loggerAD.info(f"Factors: {non_empty_count}/6 - {non_empty_count/6 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+                styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
                 styleFile = f"{aggregation.split('.')[0]}.qml"
 
@@ -3484,7 +3494,7 @@ class GenderIndicatorTool:
                 loggerPD.info(f"Factors: {non_empty_count}/10 - {non_empty_count / 10 * 100} % - {non_empty_count}")
                 logging.shutdown()
 
-                styleTemplate = f"{current_script_path}\Style\{Dimension}.qml"
+                styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
                 styleFile = f"{aggregation.split('.')[0]}.qml"
 
@@ -3585,7 +3595,7 @@ class GenderIndicatorTool:
                 with rasterio.open(aggregation, 'w', **meta1) as dst:
                     dst.write(result, 1)
 
-                styleTemplate = f"{current_script_path}\Style\Final.qml"
+                styleTemplate = f"{current_script_path}/Style/Final.qml"
                 styleFileDestination = f"{workingDir}{Final_output}/"
                 styleFile = f"{aggregation.split('.')[0]}.qml"
 
@@ -3728,7 +3738,7 @@ class GenderIndicatorTool:
         with rasterio.open(score_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
-        styleTemplate = f"{current_script_path}\Style\Insights Score.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Score.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_enablement}"
         styleFile = f"{score_rec.split('.')[0]}.qml"
 
@@ -3846,7 +3856,7 @@ class GenderIndicatorTool:
         with rasterio.open(pop_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
-        styleTemplate = f"{current_script_path}\Style\Insights Population.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Population.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_population}/"
         styleFile = f"{pop_rec.split('.')[0]}.qml"
 
@@ -3933,7 +3943,7 @@ class GenderIndicatorTool:
         with rasterio.open(combined_rec, 'w', **meta1) as dst:
             dst.write(result, 1)
 
-        styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Combined.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_combine}/"
         styleFile = f"{combined_rec.split('.')[0]}.qml"
 
@@ -4009,7 +4019,7 @@ class GenderIndicatorTool:
                                                     'RASTER_BAND': 1, 'COLUMN_PREFIX': '_', 'STATISTICS': [9],
                                                     'OUTPUT': shpOutput})
 
-        styleTemplate = f"{current_script_path}\Style\Insights Aggregation.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Aggregation.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_aggregation}/"
         styleFile = f"{self.dlg.AGG_Output_Field.text()}.qml"
 
@@ -4121,7 +4131,7 @@ class GenderIndicatorTool:
         with rasterio.open(combined_RE, 'w', **meta1) as dst:
             dst.write(result, 1)
 
-        styleTemplate = f"{current_script_path}\Style\Insights Combined.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Combined.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
         styleFile = f"{combined_RE.split('.')[0]}.qml"
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
@@ -4160,7 +4170,7 @@ class GenderIndicatorTool:
         intersecting_polygons.to_file(admin_RE)
 
 
-        styleTemplate = f"{current_script_path}\Style\Insights Aggregation.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Aggregation.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
         styleFile = f"{admin_RE.split('.')[0]}.qml"
 
@@ -4261,7 +4271,7 @@ class GenderIndicatorTool:
                                                     'STATISTICS': [9],
                                                     'OUTPUT': shpOutput})
 
-        styleTemplate = f"{current_script_path}\Style\Insights Buffer Aggregation.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Buffer Aggregation.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_re_point}/"
         styleFile = f"{self.dlg.Buffer_Output_Field.text()}{str(bufferDistance)}m_buffer.qml"
 
@@ -4283,7 +4293,7 @@ class GenderIndicatorTool:
         admin_RE = f"{workingDir}{Insights_folder}/{Insights_re_point}/" + self.dlg.Buffer_Output_Field.text() + f"admin_unit_{str(bufferDistance)}m_buffer_intersection.shp"
         intersecting_polygons.to_file(admin_RE)
 
-        styleTemplate = f"{current_script_path}\Style\Insights Aggregation.qml"
+        styleTemplate = f"{current_script_path}/Style/Insights Aggregation.qml"
         styleFileDestination = f"{workingDir}{Insights_folder}/{Insights_re_point}/"
         styleFile = f"{admin_RE.split('.')[0]}.qml"
 
