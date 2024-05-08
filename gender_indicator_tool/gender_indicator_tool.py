@@ -52,6 +52,12 @@ import processing
 import sys
 from qgis.PyQt import QtWidgets
 
+# Use pdb for debugging
+import pdb
+# also import pyqtRemoveInputHook
+from qgis.PyQt.QtCore import pyqtRemoveInputHook
+from qgis.core import QgsMessageLog
+
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
@@ -497,7 +503,7 @@ class GenderIndicatorTool:
         if button_num == 0:
             # Clear the field before setting its text
             self.dlg.workingDir_Field.clear()
-            self.dlg.workingDir_Field.setText(str(response + ""))
+            self.dlg.workingDir_Field.setText(str(response + "/"))
 
     def RasterizeSet(self, factor_no):
         '''
@@ -1577,11 +1583,12 @@ class GenderIndicatorTool:
 
         gdf = gpd.read_file(FaciltyPointlayer)
 
-        subset_size = 5
+        subset_size = 1
         subsets = []
 
         for i in range(0, len(gdf), subset_size):
             subset = gdf.iloc[i:i + subset_size]
+            print(f"subset:{subset}")
             subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
             subset_outfile = f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
 
@@ -1606,6 +1613,8 @@ class GenderIndicatorTool:
 
             if batch > len(gdf):
                 batch = len(gdf)
+                
+            print(f"Batch: {batch}")
 
             if factor_no == 0:
                 self.dlg.PBT_status.setText(f"Processing... {batch} of {len(gdf)}")
@@ -1627,12 +1636,11 @@ class GenderIndicatorTool:
                 self.dlg.WTP_status.repaint()
 
 
-
+        print(f"Subsets debugging: {subsets}")
 
         Merge = processing.run("native:mergevectorlayers", {'LAYERS': subsets,
                                                             'CRS': QgsCoordinateReferenceSystem(UTM_crs),
                                                             'OUTPUT': SAOutput_utm})
-
 
         time.sleep(0.5)
 
