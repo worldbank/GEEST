@@ -33,4 +33,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from .gender_indicator_tool import GenderIndicatorTool
+
     return GenderIndicatorTool(iface)
