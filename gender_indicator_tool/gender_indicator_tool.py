@@ -52,8 +52,6 @@ import processing
 import sys
 from qgis.PyQt import QtWidgets
 
-# Use pdb for debugging
-import pdb
 # also import pyqtRemoveInputHook
 from qgis.PyQt.QtCore import pyqtRemoveInputHook
 from qgis.core import QgsMessageLog
