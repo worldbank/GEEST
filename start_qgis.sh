@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 echo "🪛 Running QGIS with the GEEST profile:"
 echo "--------------------------------"
-
-echo "  ___   ____ ___ ____             ____ _____ _____ ____ _____ "
-echo " / _ \ / ___|_ _/ ___|           / ___| ____| ____/ ___|_   _|"
-echo "| | | | |  _ | |\___ \   _____  | |  _|  _| |  _| \___ \ | |  "
-echo "| |_| | |_| || | ___) | |_____| | |_| | |___| |___ ___) || |  "
-echo " \__\_\\____|___|____/           \____|_____|_____|____/ |_|  "
-                                                              
+echo "Do you want to enable debug mode?"
+choice=$(gum choose "🪲 Yes" "🐞 No" )
+case $choice in
+	"🪲 Yes") DEBUG_MODE=1 ;;
+	"🐞 No") DEBUG_MODE=0 ;;
+esac
 nix-shell -p \
-  'qgis.override { extraPythonPackages = (ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ]);}' \
-  --command "qgis --profile GEEST"
+  'qgis.override { extraPythonPackages = (ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ps.debugpy ]);}' \
+  --command "GEEST_DEBUG=${DEBUG_MODE} qgis --profile GEEST"
