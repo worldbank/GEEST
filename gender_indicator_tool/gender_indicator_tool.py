@@ -837,6 +837,17 @@ class GenderIndicatorTool:
             # Standardization formula
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -906,6 +917,17 @@ class GenderIndicatorTool:
         elif factor_no == 1:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -975,6 +997,17 @@ class GenderIndicatorTool:
         elif factor_no == 2:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -1044,6 +1077,17 @@ class GenderIndicatorTool:
         elif factor_no == 3:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -1113,6 +1157,17 @@ class GenderIndicatorTool:
         elif factor_no == 4:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -1182,6 +1237,17 @@ class GenderIndicatorTool:
         elif factor_no == 5:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -1251,6 +1317,17 @@ class GenderIndicatorTool:
         elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -1327,6 +1404,17 @@ class GenderIndicatorTool:
         elif factor_no == 7:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -1396,6 +1484,17 @@ class GenderIndicatorTool:
         elif factor_no == 8:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
@@ -1708,7 +1807,7 @@ class GenderIndicatorTool:
 
         gdf = gpd.read_file(FaciltyPointlayer)
 
-        subset_size = 1
+        subset_size = 5
         subsets = []
 
         for i in range(0, len(gdf), subset_size):
@@ -1888,6 +1987,17 @@ class GenderIndicatorTool:
         )
 
         buffer_output = buffer["OUTPUT"]
+        
+        clipAOI = processing.run(
+                "native:clip",
+                {
+                   "INPUT": merge_SA_UTM,
+                   "OVERLAY": buffer_output,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+        merge_SA_UTM = clipAOI["OUTPUT"]
 
         Difference = processing.run(
             "native:difference",
