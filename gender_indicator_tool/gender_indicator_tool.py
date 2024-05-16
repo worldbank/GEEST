@@ -1844,8 +1844,6 @@ class GenderIndicatorTool:
             if batch > len(gdf):
                 batch = len(gdf)
 
-            print(f"Batch: {batch}")
-
             if factor_no == 0:
                 self.dlg.PBT_status.setText(f"Processing... {batch} of {len(gdf)}")
                 self.dlg.PBT_status.repaint()
@@ -1864,8 +1862,6 @@ class GenderIndicatorTool:
             elif factor_no == 5:
                 self.dlg.WTP_status.setText(f"Processing... {batch} of {len(gdf)}")
                 self.dlg.WTP_status.repaint()
-
-        print(f"Subsets debugging: {subsets}")
 
         Merge = processing.run(
             "native:mergevectorlayers",
