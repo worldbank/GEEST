@@ -3223,6 +3223,16 @@ class GenderIndicatorTool:
         )
 
         difference = Difference["OUTPUT"]
+        
+        diff = processing.run(
+            "native:polygonstolines",
+            {
+                "INPUT": difference,
+                "OUTPUT": "memory:"
+            }
+        )
+        
+        difference = diff["OUTPUT"]
 
         Merge = processing.run(
             "native:mergevectorlayers",
