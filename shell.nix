@@ -18,13 +18,18 @@ in pkgs.mkShell rec {
     pinnedPkgs.virtualenv
     # Those are dependencies that we would like to use from nixpkgs, which will
     # add them to PYTHONPATH and thus make them accessible from within the venv.
+    pythonPackages.debugpy
     pythonPackages.numpy
     pythonPackages.pip
     pythonPackages.geopandas
     pythonPackages.rasterio
     pinnedPkgs.vim
     qgis
+    # Would be nice if this worked, we could replace the same logic in the QGIS start script
     #qgis.override { extraPythonPackages = ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ];}
+    gum # UX for TUIs
+    skate # Distributed key/value store
+    glow # terminal markdown viewer 
   ];
   # Run this command, only after creating the virtual environment
   PROJECT_ROOT = builtins.getEnv "PWD";
