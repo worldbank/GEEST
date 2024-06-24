@@ -246,18 +246,8 @@ class GenderIndicatorTool:
         self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
 
-        ###### TAB 2.2 - Care Responsibilities
-        self.dlg.CRE_Set_PB.clicked.connect(lambda: self.RasterizeSet(1))
-        self.dlg.CRE_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
-
-        ###### TAB 2.3 - Domestic Violence
-        self.dlg.DOV_Set_PB.clicked.connect(lambda: self.RasterizeSet(2))
-        self.dlg.DOV_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
-
         ###### TAB 2.4 - Aggregate
         self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
-        self.dlg.CRE_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
-        self.dlg.DOV_Aggregate_TB.clicked.connect(lambda: self.getFile(2))
 
         self.dlg.Indivdual_AggregateExecute_PB.clicked.connect(
             self.indivdualAggregation
@@ -549,55 +539,41 @@ class GenderIndicatorTool:
             self.dlg.EDU_rasField_CB.addItems(fields)
 
         elif factor_no == 1:
-            polygonlayer = self.dlg.CRE_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.CRE_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.CRE_rasField_CB.addItems(fields)
-
-        elif factor_no == 2:
-            polygonlayer = self.dlg.DOV_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.DOV_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.DOV_rasField_CB.addItems(fields)
-
-        elif factor_no == 3:
             polygonlayer = self.dlg.PLP_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.PLP_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.PLP_rasField_CB.addItems(fields)
 
-        elif factor_no == 4:
+        elif factor_no == 2:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.FIN_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.FIN_rasField_CB.addItems(fields)
 
-        elif factor_no == 5:
+        elif factor_no == 3:
             polygonlayer = self.dlg.INC_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.INC_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.INC_rasField_CB.addItems(fields)
 
-        elif factor_no == 6:
+        elif factor_no == 4:
             polygonlayer = self.dlg.SEC_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.SEC_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.SEC_rasField_CB.addItems(fields)
 
-        elif factor_no == 7:
+        elif factor_no == 5:
             polygonlayer = self.dlg.ELC_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.ELC_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.ELC_rasField_CB.addItems(fields)
 
-        elif factor_no == 8:
+        elif factor_no == 6:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.DIG_rasField_CB.clear()
@@ -731,24 +707,6 @@ class GenderIndicatorTool:
             self.dlg.EDU_status.repaint()
 
         elif factor_no == 1:
-            polygonlayer = self.dlg.CRE_Input_Field.filePath()
-            rasField = self.dlg.CRE_rasField_CB.currentText()
-            self.dlg.CRE_status.setText("Variables Set")
-            self.dlg.CRE_status.repaint()
-            time.sleep(0.5)
-            self.dlg.CRE_status.setText("Processing...")
-            self.dlg.CRE_status.repaint()
-
-        elif factor_no == 2:
-            polygonlayer = self.dlg.DOV_Input_Field.filePath()
-            rasField = self.dlg.DOV_rasField_CB.currentText()
-            self.dlg.DOV_status.setText("Variables Set")
-            self.dlg.DOV_status.repaint()
-            time.sleep(0.5)
-            self.dlg.DOV_status.setText("Processing...")
-            self.dlg.DOV_status.repaint()
-
-        elif factor_no == 3:
             polygonlayer = self.dlg.PLP_Input_Field.filePath()
             rasField = self.dlg.PLP_rasField_CB.currentText()
             self.dlg.PLP_status.setText("Variables Set")
@@ -757,7 +715,7 @@ class GenderIndicatorTool:
             self.dlg.PLP_status.setText("Processing...")
             self.dlg.PLP_status.repaint()
 
-        elif factor_no == 4:
+        elif factor_no == 2:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = self.dlg.FIN_rasField_CB.currentText()
             self.dlg.FIN_status.setText("Variables Set")
@@ -766,7 +724,7 @@ class GenderIndicatorTool:
             self.dlg.FIN_status.setText("Processing...")
             self.dlg.FIN_status.repaint()
 
-        elif factor_no == 5:
+        elif factor_no == 3:
             polygonlayer = self.dlg.INC_Input_Field.filePath()
             rasField = self.dlg.INC_rasField_CB.currentText()
             self.dlg.INC_status.setText("Variables Set")
@@ -775,7 +733,7 @@ class GenderIndicatorTool:
             self.dlg.INC_status.setText("Processing...")
             self.dlg.INC_status.repaint()
 
-        elif factor_no == 6:
+        elif factor_no == 4:
             polygonlayer = self.dlg.SEC_Input_Field.filePath()
             rasField = self.dlg.SEC_rasField_CB.currentText()
             self.dlg.SEC_status.setText("Variables Set")
@@ -784,7 +742,7 @@ class GenderIndicatorTool:
             self.dlg.SEC_status.setText("Processing...")
             self.dlg.SEC_status.repaint()
 
-        elif factor_no == 7:
+        elif factor_no == 5:
             polygonlayer = self.dlg.ELC_Input_Field.filePath()
             rasField = self.dlg.ELC_rasField_CB.currentText()
             self.dlg.ELC_status.setText("Variables Set")
@@ -793,7 +751,7 @@ class GenderIndicatorTool:
             self.dlg.ELC_status.setText("Processing...")
             self.dlg.ELC_status.repaint()
 
-        elif factor_no == 8:
+        elif factor_no == 6:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             rasField = self.dlg.DIG_rasField_CB.currentText()
             self.dlg.DIG_status.setText("Variables Set")
@@ -915,166 +873,6 @@ class GenderIndicatorTool:
             self.dlg.EDU_status.repaint()
 
         elif factor_no == 1:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Individual"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            rasOutput = self.dlg.CRE_Output_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.CRE_status.setText("Processing has been completed!")
-            self.dlg.CRE_status.repaint()
-
-        elif factor_no == 2:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Individual"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            rasOutput = self.dlg.DOV_Output_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.DOV_status.setText("Processing has been completed!")
-            self.dlg.DOV_status.repaint()
-
-        elif factor_no == 3:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1154,7 +952,7 @@ class GenderIndicatorTool:
             self.dlg.PLP_status.setText("Processing has been completed!")
             self.dlg.PLP_status.repaint()
 
-        elif factor_no == 4:
+        elif factor_no == 2:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1234,7 +1032,7 @@ class GenderIndicatorTool:
             self.dlg.FIN_status.setText("Processing has been completed!")
             self.dlg.FIN_status.repaint()
 
-        elif factor_no == 5:
+        elif factor_no == 3:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1314,7 +1112,7 @@ class GenderIndicatorTool:
             self.dlg.INC_status.setText("Processing has been completed!")
             self.dlg.INC_status.repaint()
 
-        elif factor_no == 6:
+        elif factor_no == 4:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1401,7 +1199,7 @@ class GenderIndicatorTool:
             self.dlg.SEC_status.setText("Processing has been completed!")
             self.dlg.SEC_status.repaint()
 
-        elif factor_no == 7:
+        elif factor_no == 5:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1481,7 +1279,7 @@ class GenderIndicatorTool:
             self.dlg.ELC_status.setText("Processing has been completed!")
             self.dlg.ELC_status.repaint()
 
-        elif factor_no == 8:
+        elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -3509,18 +3307,14 @@ class GenderIndicatorTool:
         # INPUT
 
         EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
-        CRE_ras = self.dlg.CRE_Aggregate_Field.text().strip(" ")
-        DOV_ras = self.dlg.DOV_Aggregate_Field.text().strip(" ")
 
         EDU_weight = self.dlg.EDU_Aggregate_SB.value()
-        CRE_weight = self.dlg.CRE_Aggregate_SB.value()
-        DOV_weight = self.dlg.DOV_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.Indivdual_AggregateOutput_Field.text()
 
-        rasLayers = [EDU_ras, CRE_ras, DOV_ras]
-        factorWeighting = [EDU_weight, CRE_weight, DOV_weight]
+        rasLayers = [EDU_ras]
+        factorWeighting = [EDU_weight]
 
         non_empty_count = sum(1 for item in rasLayers if item != "")
 
@@ -3549,20 +3343,10 @@ class GenderIndicatorTool:
                     EDU_weight = factorWeighting[0]
                     meta1 = src.meta
 
-                with rasterio.open(rasLayers[1]) as src:
-                    CRE_ras = src.read(1)
-                    CRE_weight = factorWeighting[1]
-
-                with rasterio.open(rasLayers[2]) as src:
-                    DOV_ras = src.read(1)
-                    DOV_weight = factorWeighting[2]
-
                 # Raster Calculation
 
                 result = (
                     (EDU_ras * EDU_weight / 100)
-                    + (CRE_ras * CRE_weight / 100)
-                    + (DOV_ras * DOV_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
