@@ -25,6 +25,7 @@ in pkgs.mkShell rec {
     pythonPackages.rasterio
     pinnedPkgs.vim
     qgis
+    libsForQt5.qt5.qttools
     # Would be nice if this worked, we could replace the same logic in the QGIS start script
     #qgis.override { extraPythonPackages = ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ];}
     gum # UX for TUIs

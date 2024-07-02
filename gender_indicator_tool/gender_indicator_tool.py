@@ -241,29 +241,17 @@ class GenderIndicatorTool:
         ## TAB 1 - Analysis Setup ***********************************************************************
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(0))
 
-        ## TAB 2 - Individual ***************************************************************************
-        ###### TAB 2.1 - Education
-        self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
-        self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
-
-        ###### TAB 2.4 - Aggregate
-        self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
-
-        self.dlg.Indivdual_AggregateExecute_PB.clicked.connect(
-            self.indivdualAggregation
-        )
-
         ## TAB 3 - Contextual ***************************************************************************
-        ###### TAB 3.1 - Policy and Legal Protection
-        self.dlg.PLP_Set_PB.clicked.connect(lambda: self.RasterizeSet(3))
-        self.dlg.PLP_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
+        ###### TAB 3.1 - Regulatory Frameworks
+        self.dlg.RF_Set_PB.clicked.connect(lambda: self.RasterizeSet(3))
+        self.dlg.RF_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
 
         ###### TAB 3.2 - Access to Finance
         self.dlg.FIN_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
         self.dlg.FIN_Execute_PB.clicked.connect(lambda: self.Rasterize(4))
 
         ###### TAB 3.2 - Aggregate
-        self.dlg.PLP_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
+        self.dlg.RF_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
         self.dlg.FIN_Aggregate_TB.clicked.connect(lambda: self.getFile(4))
 
         self.dlg.Contextual_AggregateExecute_PB.clicked.connect(
@@ -290,19 +278,12 @@ class GenderIndicatorTool:
         self.dlg.PBT_measurement_CB.addItems(Measurement)
         self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
 
-        ###### TAB 4.3 - Ediucation & Training
+        ###### TAB 4.3 - Education & Training
         self.dlg.ETF_mode_CB.clear()
         self.dlg.ETF_mode_CB.addItems(Modes)
         self.dlg.ETF_measurement_CB.clear()
         self.dlg.ETF_measurement_CB.addItems(Measurement)
         self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
-
-        ###### TAB 4.4 - Jobs
-        self.dlg.JOB_mode_CB.clear()
-        self.dlg.JOB_mode_CB.addItems(Modes)
-        self.dlg.JOB_measurement_CB.clear()
-        self.dlg.JOB_measurement_CB.addItems(Measurement)
-        self.dlg.JOB_Execute_PB.clicked.connect(lambda: self.ServiceArea(2))
 
         ###### TAB 4.5 - Health Facilities
         self.dlg.HEA_mode_CB.clear()
@@ -322,7 +303,6 @@ class GenderIndicatorTool:
         self.dlg.WTP_Aggregate_TB.clicked.connect(lambda: self.getFile(5))
         self.dlg.PBT_Aggregate_TB.clicked.connect(lambda: self.getFile(6))
         self.dlg.ETF_Aggregate_TB.clicked.connect(lambda: self.getFile(7))
-        self.dlg.JOB_Aggregate_TB.clicked.connect(lambda: self.getFile(8))
         self.dlg.HEA_Aggregate_TB.clicked.connect(lambda: self.getFile(9))
         self.dlg.FIF_Aggregate_TB.clicked.connect(lambda: self.getFile(10))
         self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(
@@ -370,6 +350,10 @@ class GenderIndicatorTool:
         self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
+        
+        ###### TAB 5.12 - Education
+        self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
+        self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
 
         ###### TAB 5.11 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
@@ -382,6 +366,7 @@ class GenderIndicatorTool:
         self.dlg.QUH_Aggregate_TB.clicked.connect(lambda: self.getFile(19))
         self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
         self.dlg.ENV_Aggregate_TB.clicked.connect(lambda: self.getFile(21))
+        self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
         self.dlg.PlaceCharacterization_AggregateExecute_PB.clicked.connect(
             self.placeCharacterizationAggregation
         )
@@ -422,14 +407,8 @@ class GenderIndicatorTool:
         if button_num == 0:
             self.dlg.EDU_Aggregate_Field.setText(response[0])
 
-        elif button_num == 1:
-            self.dlg.CRE_Aggregate_Field.setText(response[0])
-
-        elif button_num == 2:
-            self.dlg.DOV_Aggregate_Field.setText(response[0])
-
         elif button_num == 3:
-            self.dlg.PLP_Aggregate_Field.setText(response[0])
+            self.dlg.RF_Aggregate_Field.setText(response[0])
 
         elif button_num == 4:
             self.dlg.FIN_Aggregate_Field.setText(response[0])
@@ -442,9 +421,6 @@ class GenderIndicatorTool:
 
         elif button_num == 7:
             self.dlg.ETF_Aggregate_Field.setText(response[0])
-
-        elif button_num == 8:
-            self.dlg.JOB_Aggregate_Field.setText(response[0])
 
         elif button_num == 9:
             self.dlg.HEA_Aggregate_Field.setText(response[0])
@@ -517,14 +493,11 @@ class GenderIndicatorTool:
         executing the "Rasterization" function.
 
         Factors it is applied:
-            Individual Dimension
-                - Education
-                - Care Responsibilities
-                - Domestic Violence
             Contextual Dimension
-                - Policy and Legal Protection
+                - Regulatory Frameworks(RF)
                 - Access to Finance
             Place Characterization Dimension
+                - Education
                 - Security
                 - Income Level
                 - Electrical Access
@@ -539,11 +512,11 @@ class GenderIndicatorTool:
             self.dlg.EDU_rasField_CB.addItems(fields)
 
         elif factor_no == 1:
-            polygonlayer = self.dlg.PLP_Input_Field.filePath()
+            polygonlayer = self.dlg.RF_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.PLP_rasField_CB.clear()
+            self.dlg.RF_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
-            self.dlg.PLP_rasField_CB.addItems(fields)
+            self.dlg.RF_rasField_CB.addItems(fields)
 
         elif factor_no == 2:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
@@ -675,14 +648,11 @@ class GenderIndicatorTool:
         Numerous functions use this function to convert vector file type into the standardized raster file types required for aggregation.
 
         Factors it is applied:
-            Individual Dimension
-                - Education
-                - Care Responsibilities
-                - Domestic Violence
             Contextual Dimension
-                - Policy and Legal Protection
+                - Regulatory Frameworks(RF)
                 - Access to Finance
             Place Characterization Dimension
+                - Education
                 - Security
                 - Income Level
                 - Electrical Access
@@ -707,13 +677,13 @@ class GenderIndicatorTool:
             self.dlg.EDU_status.repaint()
 
         elif factor_no == 1:
-            polygonlayer = self.dlg.PLP_Input_Field.filePath()
-            rasField = self.dlg.PLP_rasField_CB.currentText()
-            self.dlg.PLP_status.setText("Variables Set")
-            self.dlg.PLP_status.repaint()
+            polygonlayer = self.dlg.RF_Input_Field.filePath()
+            rasField = self.dlg.RF_rasField_CB.currentText()
+            self.dlg.RF_status.setText("Variables Set")
+            self.dlg.RF_status.repaint()
             time.sleep(0.5)
-            self.dlg.PLP_status.setText("Processing...")
-            self.dlg.PLP_status.repaint()
+            self.dlg.RF_status.setText("Processing...")
+            self.dlg.RF_status.repaint()
 
         elif factor_no == 2:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
@@ -831,7 +801,7 @@ class GenderIndicatorTool:
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
 
-            Dimension = "Individual"
+            Dimension = "Place Characterization"
             if os.path.exists(Dimension):
                 os.chdir(Dimension)
             else:
@@ -918,7 +888,7 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = self.dlg.PLP_Output_Field.text()
+            rasOutput = self.dlg.RF_Output_Field.text()
 
             rasterize = processing.run(
                 "gdal:rasterize",
@@ -941,7 +911,7 @@ class GenderIndicatorTool:
                 },
             )
 
-            self.dlg.PLP_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            self.dlg.RF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
             styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
@@ -949,8 +919,8 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-            self.dlg.PLP_status.setText("Processing has been completed!")
-            self.dlg.PLP_status.repaint()
+            self.dlg.RF_status.setText("Processing has been completed!")
+            self.dlg.RF_status.repaint()
 
         elif factor_no == 2:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
@@ -1373,7 +1343,6 @@ class GenderIndicatorTool:
                 - Women's Travel Patterns
                 - Access to Public Transport
                 - Access to Education and Training Facilities
-                - Access to RE jobs
                 - Access to Health Facilities
                 - Access to Finance Facilities
         """
@@ -1470,40 +1439,6 @@ class GenderIndicatorTool:
             self.dlg.ETF_status.repaint()
 
         elif factor_no == 2:
-            self.dlg.JOB_status.setText("")
-            self.dlg.JOB_status.repaint()
-            FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
-            ranges = self.dlg.JOB_Ranges_Field.text()
-            rasOutput = f"{self.dlg.JOB_Output_Field.text()[:-4]}{self.dlg.JOB_mode_CB.currentText()}.tif"
-            mergeOutput = (
-                f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
-            )
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            if self.dlg.JOB_mode_CB.currentText() == "Driving":
-                mode = 0
-            elif self.dlg.JOB_mode_CB.currentText() == "Walking":
-                mode = 6
-
-            if self.dlg.JOB_measurement_CB.currentText() == "Time":
-                measurement = 0
-                ranges_field = "AA_MINS"
-            elif self.dlg.JOB_measurement_CB.currentText() == "Distance":
-                measurement = 1
-                ranges_field = "AA_METERS"
-
-            self.dlg.JOB_status.setText("Variables Set")
-            self.dlg.JOB_status.repaint()
-            time.sleep(0.5)
-            self.dlg.JOB_status.setText("Processing...")
-            self.dlg.JOB_status.repaint()
-
-        elif factor_no == 3:
             self.dlg.HEA_status.setText("")
             self.dlg.HEA_status.repaint()
             FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
@@ -1537,7 +1472,7 @@ class GenderIndicatorTool:
             self.dlg.HEA_status.setText("Processing...")
             self.dlg.HEA_status.repaint()
 
-        elif factor_no == 4:
+        elif factor_no == 3:
             self.dlg.FIF_status.setText("")
             self.dlg.FIF_status.repaint()
             FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
@@ -1571,7 +1506,7 @@ class GenderIndicatorTool:
             self.dlg.FIF_status.setText("Processing...")
             self.dlg.FIF_status.repaint()
 
-        elif factor_no == 5:
+        elif factor_no == 4:
             self.dlg.WTP_status.setText("")
             self.dlg.WTP_status.repaint()
             FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
@@ -1648,9 +1583,6 @@ class GenderIndicatorTool:
             elif factor_no == 1:
                 self.dlg.ETF_status.setText(f"Processing... {batch} of {len(gdf)}")
                 self.dlg.ETF_status.repaint()
-            elif factor_no == 2:
-                self.dlg.JOB_status.setText(f"Processing... {batch} of {len(gdf)}")
-                self.dlg.JOB_status.repaint()
             elif factor_no == 3:
                 self.dlg.HEA_status.setText(f"Processing... {batch} of {len(gdf)}")
                 self.dlg.HEA_status.repaint()
@@ -1866,10 +1798,6 @@ class GenderIndicatorTool:
         elif factor_no == 1:
             self.dlg.ETF_status.setText("Processing Complete!")
             self.dlg.ETF_status.repaint()
-
-        elif factor_no == 2:
-            self.dlg.JOB_status.setText("Processing Complete!")
-            self.dlg.JOB_status.repaint()
 
         elif factor_no == 3:
             self.dlg.HEA_status.setText("Processing Complete!")
@@ -3294,117 +3222,6 @@ class GenderIndicatorTool:
         self.dlg.ENVAGG_status.repaint()
 
     # *************************** Factor Aggregation Functions ************************************ #
-    def indivdualAggregation(self):
-        """
-        This function performs a raster calculation aggregating all the individual dimension factors according to their weightings
-        """
-        self.dlg.individualAggregation_Check.setText("")
-        self.dlg.individualAggregation_Check.repaint()
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-
-        # INPUT
-
-        EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
-
-        EDU_weight = self.dlg.EDU_Aggregate_SB.value()
-
-        # OUTPUT
-        aggregation = self.dlg.Indivdual_AggregateOutput_Field.text()
-
-        rasLayers = [EDU_ras]
-        factorWeighting = [EDU_weight]
-
-        non_empty_count = sum(1 for item in rasLayers if item != "")
-
-        weightingSum = round(sum(factorWeighting))
-
-        if weightingSum == 100:
-            if "" in rasLayers:
-                missingLayers = [
-                    index for index, item in enumerate(rasLayers) if item == ""
-                ]
-                presentLayers = [
-                    index for index, item in enumerate(rasLayers) if item != ""
-                ]
-
-                for i in missingLayers:
-                    rasLayers[i] = rasLayers[presentLayers[0]]
-                    factorWeighting[i] = 0
-
-            else:
-                pass
-
-            weightingSum = round(sum(factorWeighting))
-            if weightingSum == 100:
-                with rasterio.open(rasLayers[0]) as src:
-                    EDU_ras = src.read(1)
-                    EDU_weight = factorWeighting[0]
-                    meta1 = src.meta
-
-                # Raster Calculation
-
-                result = (
-                    (EDU_ras * EDU_weight / 100)
-                )
-
-                meta1.update(dtype=rasterio.float32)
-
-                Dimension = "Individual"
-                if os.path.exists(Dimension):
-                    os.chdir(Dimension)
-                else:
-                    os.mkdir(Dimension)
-                    os.chdir(Dimension)
-
-                with rasterio.open(aggregation, "w", **meta1) as dst:
-                    dst.write(result, 1)
-
-                self.dlg.ID_Aggregate_Field.setText(
-                    f"{workingDir}{Dimension}/{aggregation}"
-                )
-
-                loggerID = logging.getLogger("loggerID")
-                loggerID.setLevel(logging.INFO)
-                handlerID = logging.FileHandler("Individual.log")
-                formatterID = logging.Formatter("%(asctime)s - %(message)s")
-                handlerID.setFormatter(formatterID)
-                loggerID.addHandler(handlerID)
-
-                loggerID.info(
-                    f"Factors: {non_empty_count}/3 - {non_empty_count/3 * 100} % - {non_empty_count}"
-                )
-                logging.shutdown()
-
-                styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/"
-                styleFile = f"{aggregation.split('.')[0]}.qml"
-
-                shutil.copy(
-                    styleTemplate, os.path.join(styleFileDestination, styleFile)
-                )
-
-                layer = QgsRasterLayer(aggregation, f"{aggregation}")
-
-                if not layer.isValid():
-                    print("Layer failed to load!")
-
-                QgsProject.instance().addMapLayer(layer)
-
-                self.dlg.individualAggregation_Check.setText(
-                    "Individual dimension aggregation complete!"
-                )
-            else:
-                self.dlg.individualAggregation_Check.setText(
-                    "Weighting % does not add up to 100 %"
-                )
-        else:
-            self.dlg.individualAggregation_Check.setText(
-                "Weighting % does not add up to 100 %"
-            )
-
-        os.chdir(workingDir)
 
     def contextualAggregation(self):
         """
@@ -3417,17 +3234,17 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
         # INPUT
-        PLP_ras = self.dlg.PLP_Aggregate_Field.text().strip(" ")
+        RF_ras = self.dlg.RF_Aggregate_Field.text().strip(" ")
         FIN_ras = self.dlg.FIN_Aggregate_Field.text().strip(" ")
 
-        PLP_weight = self.dlg.PLP_Aggregate_SB.value()
+        RF_weight = self.dlg.RF_Aggregate_SB.value()
         FIN_weight = self.dlg.FIN_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.Contextual_AggregateOutput_Field.text()
 
-        rasLayers = [PLP_ras, FIN_ras]
-        factorWeighting = [PLP_weight, FIN_weight]
+        rasLayers = [RF_ras, FIN_ras]
+        factorWeighting = [RF_weight, FIN_weight]
         non_empty_count = sum(1 for item in rasLayers if item != "")
 
         weightingSum = round(sum(factorWeighting))
@@ -3452,8 +3269,8 @@ class GenderIndicatorTool:
             if weightingSum == 100:
 
                 with rasterio.open(rasLayers[0]) as src:
-                    PLP_ras = src.read(1)
-                    PLP_weight = factorWeighting[0]
+                    RF_ras = src.read(1)
+                    RF_weight = factorWeighting[0]
                     meta1 = src.meta
 
                 with rasterio.open(rasLayers[1]) as src:
@@ -3462,7 +3279,7 @@ class GenderIndicatorTool:
 
                 # Raster Calculation
 
-                result = (PLP_ras * PLP_weight / 100) + (FIN_ras * FIN_weight / 100)
+                result = (RF_ras * RF_weight / 100) + (FIN_ras * FIN_weight / 100)
 
                 meta1.update(dtype=rasterio.float32)
 
@@ -3538,26 +3355,23 @@ class GenderIndicatorTool:
         WTP_ras = self.dlg.WTP_Aggregate_Field.text().strip(" ")
         PBT_ras = self.dlg.PBT_Aggregate_Field.text().strip(" ")
         ETF_ras = self.dlg.ETF_Aggregate_Field.text().strip(" ")
-        JOB_ras = self.dlg.JOB_Aggregate_Field.text().strip(" ")
         HEA_ras = self.dlg.HEA_Aggregate_Field.text().strip(" ")
         FIF_ras = self.dlg.FIF_Aggregate_Field.text().strip(" ")
 
         WTP_weight = self.dlg.WTP_Aggregate_SB.value()
         PBT_weight = self.dlg.PBT_Aggregate_SB.value()
         ETF_weight = self.dlg.ETF_Aggregate_SB.value()
-        JOB_weight = self.dlg.JOB_Aggregate_SB.value()
         HEA_weight = self.dlg.HEA_Aggregate_SB.value()
         FIF_weight = self.dlg.FIF_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.Accessibility_AggregateOutput_Field.text()
 
-        rasLayers = [WTP_ras, PBT_ras, ETF_ras, JOB_ras, HEA_ras, FIF_ras]
+        rasLayers = [WTP_ras, PBT_ras, ETF_ras, HEA_ras, FIF_ras]
         factorWeighting = [
             WTP_weight,
             PBT_weight,
             ETF_weight,
-            JOB_weight,
             HEA_weight,
             FIF_weight,
         ]
@@ -3596,10 +3410,6 @@ class GenderIndicatorTool:
                     ETF_ras = src.read(1)
                     ETF_weight = factorWeighting[2]
 
-                with rasterio.open(rasLayers[3]) as src:
-                    JOB_ras = src.read(1)
-                    JOB_weight = factorWeighting[3]
-
                 with rasterio.open(rasLayers[4]) as src:
                     HEA_ras = src.read(1)
                     HEA_weight = factorWeighting[4]
@@ -3614,7 +3424,6 @@ class GenderIndicatorTool:
                     (WTP_ras * WTP_weight / 100)
                     + (PBT_ras * PBT_weight / 100)
                     + (ETF_ras * ETF_weight / 100)
-                    + (JOB_ras * JOB_weight / 100)
                     + (HEA_ras * HEA_weight / 100)
                     + (FIF_ras * FIF_weight / 100)
                 )
@@ -3691,25 +3500,17 @@ class GenderIndicatorTool:
         # CYC_ras = self.dlg.CYC_Aggregate_Field.text().strip(" ")
         APT_ras = self.dlg.APT_Aggregate_Field.text().strip(" ")
         SAF_ras = self.dlg.SAF_Aggregate_Field.text().strip(" ")
-        SEC_ras = self.dlg.SEC_Aggregate_Field.text().strip(" ")
-        INC_ras = self.dlg.INC_Aggregate_Field.text().strip(" ")
-        ELC_ras = self.dlg.ELC_Aggregate_Field.text().strip(" ")
-        LOU_ras = self.dlg.LOU_Aggregate_Field.text().strip(" ")
-        QUH_ras = self.dlg.QUH_Aggregate_Field.text().strip(" ")
         DIG_ras = self.dlg.DIG_Aggregate_Field.text().strip(" ")
         ENV_ras = self.dlg.ENV_Aggregate_Field.text().strip(" ")
+        EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
 
         WLK_weight = self.dlg.WLK_Aggregate_SB.value()
         # CYC_weight = self.dlg.CYC_Aggregate_SB.value()
         APT_weight = self.dlg.APT_Aggregate_SB.value()
         SAF_weight = self.dlg.SAF_Aggregate_SB.value()
-        SEC_weight = self.dlg.SEC_Aggregate_SB.value()
-        INC_weight = self.dlg.INC_Aggregate_SB.value()
-        ELC_weight = self.dlg.ELC_Aggregate_SB.value()
-        LOU_weight = self.dlg.LOU_Aggregate_SB.value()
-        QUH_weight = self.dlg.QUH_Aggregate_SB.value()
         DIG_weight = self.dlg.DIG_Aggregate_SB.value()
         ENV_weight = self.dlg.ENV_Aggregate_SB.value()
+        EDU_weight = self.dlg.EDU_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.PlaceCharacterization_AggregateOutput_Field.text()
@@ -3718,25 +3519,17 @@ class GenderIndicatorTool:
             WLK_ras,
             APT_ras,
             SAF_ras,
-            SEC_ras,
-            INC_ras,
-            ELC_ras,
-            LOU_ras,
-            QUH_ras,
             DIG_ras,
             ENV_ras,
+            EDU_ras,
         ]
         factorWeighting = [
             WLK_weight,
             APT_weight,
             SAF_weight,
-            SEC_weight,
-            INC_weight,
-            ELC_weight,
-            LOU_weight,
-            QUH_weight,
             DIG_weight,
             ENV_weight,
+            EDU_weight,
         ]
         non_empty_count = sum(1 for item in rasLayers if item != "")
 
@@ -3774,26 +3567,6 @@ class GenderIndicatorTool:
                     SAF_ras = src.read(1)
                     SAF_weight = factorWeighting[2]
 
-                with rasterio.open(rasLayers[3]) as src:
-                    SEC_ras = src.read(1)
-                    SEC_weight = factorWeighting[3]
-
-                with rasterio.open(rasLayers[4]) as src:
-                    INC_ras = src.read(1)
-                    INC_weight = factorWeighting[4]
-
-                with rasterio.open(rasLayers[5]) as src:
-                    ELC_ras = src.read(1)
-                    ELC_weight = factorWeighting[5]
-
-                with rasterio.open(rasLayers[6]) as src:
-                    LOU_ras = src.read(1)
-                    LOU_weight = factorWeighting[6]
-
-                with rasterio.open(rasLayers[7]) as src:
-                    QUH_ras = src.read(1)
-                    QUH_weight = factorWeighting[7]
-
                 with rasterio.open(rasLayers[8]) as src:
                     DIG_ras = src.read(1)
                     DIG_weight = factorWeighting[8]
@@ -3801,6 +3574,10 @@ class GenderIndicatorTool:
                 with rasterio.open(rasLayers[9]) as src:
                     ENV_ras = src.read(1)
                     ENV_weight = factorWeighting[9]
+                    
+                with rasterio.open(rasLayers[10]) as src:
+                    EDU_ras = src.read(1)
+                    EDU_weight = factorWeighting[10]
 
                 # Raster Calculation
 
@@ -3808,13 +3585,9 @@ class GenderIndicatorTool:
                     (WLK_ras * WLK_weight / 100)
                     + (APT_ras * APT_weight / 100)
                     + (SAF_ras * SAF_weight / 100)
-                    + (SEC_ras * SEC_weight / 100)
-                    + (INC_ras * INC_weight / 100)
-                    + (ELC_ras * ELC_weight / 100)
-                    + (LOU_ras * LOU_weight / 100)
-                    + (QUH_ras * QUH_weight / 100)
                     + (DIG_ras * DIG_weight / 100)
                     + (ENV_ras * ENV_weight / 100)
+                    + (EDU_ras * EDU_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
@@ -3970,7 +3743,6 @@ class GenderIndicatorTool:
                 )
 
                 log_list = [
-                    "Individual",
                     "Contextual",
                     "Accessibility",
                     "Place Characterization",
