@@ -1391,7 +1391,7 @@ class GenderIndicatorTool:
             self.dlg.ETF_status.setText("Processing...")
             self.dlg.ETF_status.repaint()
 
-        elif factor_no == 2:
+        elif factor_no == 3:
             self.dlg.HEA_status.setText("")
             self.dlg.HEA_status.repaint()
             FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
@@ -1425,7 +1425,7 @@ class GenderIndicatorTool:
             self.dlg.HEA_status.setText("Processing...")
             self.dlg.HEA_status.repaint()
 
-        elif factor_no == 3:
+        elif factor_no == 4:
             self.dlg.FIF_status.setText("")
             self.dlg.FIF_status.repaint()
             FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
@@ -1459,7 +1459,7 @@ class GenderIndicatorTool:
             self.dlg.FIF_status.setText("Processing...")
             self.dlg.FIF_status.repaint()
 
-        elif factor_no == 4:
+        elif factor_no == 5:
             self.dlg.WTP_status.setText("")
             self.dlg.WTP_status.repaint()
             FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
@@ -3176,13 +3176,13 @@ class GenderIndicatorTool:
                     ETF_ras = src.read(1)
                     ETF_weight = factorWeighting[2]
 
-                with rasterio.open(rasLayers[4]) as src:
+                with rasterio.open(rasLayers[3]) as src:
                     HEA_ras = src.read(1)
-                    HEA_weight = factorWeighting[4]
+                    HEA_weight = factorWeighting[3]
 
-                with rasterio.open(rasLayers[5]) as src:
+                with rasterio.open(rasLayers[4]) as src:
                     FIF_ras = src.read(1)
-                    FIF_weight = factorWeighting[5]
+                    FIF_weight = factorWeighting[4]
 
                 # Raster Calculation
 
