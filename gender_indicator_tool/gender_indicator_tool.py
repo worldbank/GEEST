@@ -315,31 +315,8 @@ class GenderIndicatorTool:
         self.dlg.WLK_unique_PB.clicked.connect(lambda: self.uniqueValues(1))
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
-        ###### TAB 5.2 - Public Transport
-        self.dlg.APT_Execute_PB.clicked.connect(self.transportCount)
-
         ###### TAB 5.3 - Safe Urban Design
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
-
-        ###### TAB 5.4 - Security
-        self.dlg.SEC_Set_PB.clicked.connect(lambda: self.RasterizeSet(6))
-        self.dlg.SEC_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
-        self.dlg.SEC_Aggregate_PB.clicked.connect(self.secAggregate)
-
-        ###### TAB 5.5 - Income Level
-        self.dlg.INC_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
-        self.dlg.INC_Execute_PB.clicked.connect(lambda: self.Rasterize(5))
-
-        ###### TAB 5.6 - Electrical Access
-        self.dlg.ELC_Set_PB.clicked.connect(lambda: self.RasterizeSet(7))
-        self.dlg.ELC_Execute_PB.clicked.connect(lambda: self.Rasterize(7))
-        self.dlg.ELC_NTLExecute_PB.clicked.connect(self.ELCnightTimeLights)
-
-        ###### TAB 5.7 - Urbanization
-        self.dlg.LOU_Execute_PB.clicked.connect(self.urbanization)
-
-        ###### TAB 5.8 - Housing
-        self.dlg.QUH_Execute_PB.clicked.connect(self.housing)
 
         ###### TAB 5.9 - Digital Inclusion
         self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
@@ -357,13 +334,7 @@ class GenderIndicatorTool:
 
         ###### TAB 5.11 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
-        self.dlg.APT_Aggregate_TB.clicked.connect(lambda: self.getFile(13))
         self.dlg.SAF_Aggregate_TB.clicked.connect(lambda: self.getFile(14))
-        self.dlg.SEC_Aggregate_TB.clicked.connect(lambda: self.getFile(15))
-        self.dlg.INC_Aggregate_TB.clicked.connect(lambda: self.getFile(16))
-        self.dlg.ELC_Aggregate_TB.clicked.connect(lambda: self.getFile(17))
-        self.dlg.LOU_Aggregate_TB.clicked.connect(lambda: self.getFile(18))
-        self.dlg.QUH_Aggregate_TB.clicked.connect(lambda: self.getFile(19))
         self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
         self.dlg.ENV_Aggregate_TB.clicked.connect(lambda: self.getFile(21))
         self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
