@@ -405,26 +405,8 @@ class GenderIndicatorTool:
         elif button_num == 12:
             self.dlg.CYC_Aggregate_Field.setText(response[0])
 
-        elif button_num == 13:
-            self.dlg.APT_Aggregate_Field.setText(response[0])
-
         elif button_num == 14:
             self.dlg.SAF_Aggregate_Field.setText(response[0])
-
-        elif button_num == 15:
-            self.dlg.SEC_Aggregate_Field.setText(response[0])
-
-        elif button_num == 16:
-            self.dlg.INC_Aggregate_Field.setText(response[0])
-
-        elif button_num == 17:
-            self.dlg.ELC_Aggregate_Field.setText(response[0])
-
-        elif button_num == 18:
-            self.dlg.LOU_Aggregate_Field.setText(response[0])
-
-        elif button_num == 19:
-            self.dlg.QUH_Aggregate_Field.setText(response[0])
 
         elif button_num == 20:
             self.dlg.DIG_Aggregate_Field.setText(response[0])
@@ -2349,193 +2331,6 @@ class GenderIndicatorTool:
 
         os.chdir(workingDir)
 
-    def transportCount(self):
-        """
-        This algorithm characterizes areas based on the number of public transport options available. The algorithm overlays the input point layer onto a hexagonal grid
-        and calculates the count of transport stops within each hexagonal cell. The output is standardized on a scale of 0 to 5 using a linear scaling process such that the
-        cells containing the highest count of public transport stops are assigned a score of 5, and cells with no stops are assigned a score of 0. Finally, the output is rasterized.
-        grid
-
-        Factors it is applied:
-            Place Characterization Dimension
-                - Availability of Public Transport
-        """
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-        tempDir = "temp"
-        Dimension = "Place Characterization"
-
-        if os.path.exists(Dimension):
-            pass
-        else:
-            os.mkdir(Dimension)
-
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-        else:
-            pass
-
-        time.sleep(0.5)
-        os.mkdir(tempDir)
-
-        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
-        countryLayer = self.dlg.countryLayer_Field.filePath()
-        pixelSize = self.dlg.pixelSize_SB.value()
-        hexSize = self.dlg.APT_hexSize_SB.value()
-        pointLayer = self.dlg.APT_pointInput_Field.filePath()
-
-        rasField = "Score"
-
-        # TempOutput
-        pointCount_out = f"{tempDir}/pointCountPoly.shp"
-        adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
-        pointUTMLayer = f"{tempDir}/pointUTMLayer.shp"
-        pointCount_std = f"{tempDir}/pointCount_std.shp"
-
-        self.dlg.APT_status.setText("Variables Set")
-        self.dlg.APT_status.repaint()
-        time.sleep(0.5)
-        self.dlg.APT_status.setText("Processing...")
-        self.dlg.APT_status.repaint()
-
-        self.convertCRS(countryLayer, UTM_crs)
-        shp_utm[rasField] = [0]
-        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
-
-        buffer = processing.run(
-            "native:buffer",
-            {
-                "INPUT": countryUTMLayer,
-                "DISTANCE": 2000,
-                "SEGMENTS": 5,
-                "END_CAP_STYLE": 0,
-                "JOIN_STYLE": 0,
-                "MITER_LIMIT": 2,
-                "DISSOLVE": True,
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": "memory:",
-            },
-        )
-
-        countryUTMLayerBuf = buffer["OUTPUT"]
-
-        country_extent = shp_utm.total_bounds
-
-        Grid = processing.run(
-            "native:creategrid",
-            {
-                "TYPE": 4,
-                "EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
-                "HSPACING": hexSize,
-                "VSPACING": hexSize,
-                "HOVERLAY": 0,
-                "VOVERLAY": 0,
-                "CRS": QgsCoordinateReferenceSystem(f"{UTM_crs}"),
-                "OUTPUT": "memory:",
-            },
-        )
-        grid_out = Grid["OUTPUT"]
-
-        Clip = processing.run(
-            "native:clip",
-            {"INPUT": grid_out, "OVERLAY": countryUTMLayer, "OUTPUT": adminUTMLayer},
-        )
-
-        self.convertCRS(pointLayer, UTM_crs)
-        shp_utm.to_file(pointUTMLayer)
-
-        pointCount = processing.run(
-            "native:countpointsinpolygon",
-            {
-                "POLYGONS": QgsProcessingFeatureSourceDefinition(
-                    adminUTMLayer,
-                    selectedFeaturesOnly=False,
-                    featureLimit=-1,
-                    flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
-                    geometryCheck=QgsFeatureRequest.GeometrySkipInvalid,
-                ),
-                "POINTS": pointUTMLayer,
-                "WEIGHT": "",
-                "CLASSFIELD": "",
-                "FIELD": rasField,
-                "OUTPUT": pointCount_out,
-            },
-        )
-
-        pointCount_out_df = gpd.read_file(pointCount_out)
-
-        Rmax = pointCount_out_df[rasField].max()
-        Rmin = pointCount_out_df[rasField].min()
-        m_max = 5
-        m_min = 0
-
-        pointCount_out_df[rasField] = (
-            (pointCount_out_df[rasField] - Rmin) / (Rmax - Rmin) * m_max
-        )
-        pointCount_out_df.to_file(pointCount_std)
-
-        Difference = processing.run(
-            "native:difference",
-            {
-                "INPUT": countryUTMLayerBuf,
-                "OVERLAY": pointCount_std,
-                "OUTPUT": "memory:",
-                "GRID_SIZE": None,
-            },
-        )
-
-        difference = Difference["OUTPUT"]
-
-        Merge = processing.run(
-            "native:mergevectorlayers",
-            {"LAYERS": [pointCount_std, difference], "CRS": None, "OUTPUT": "memory:"},
-        )
-
-        mergeOutput = Merge["OUTPUT"]
-
-        extent = mergeOutput.extent()
-        raster_width = int(extent.width() / pixelSize)
-        raster_height = int(extent.height() / pixelSize)
-
-        os.chdir(Dimension)
-
-        rasOutput = self.dlg.APT_Output_Field.text()
-
-        rasterize = processing.run(
-            "gdal:rasterize",
-            {
-                "INPUT": mergeOutput,
-                "FIELD": rasField,
-                "BURN": 0,
-                "USE_Z": False,
-                "UNITS": 0,
-                "WIDTH": raster_width,
-                "HEIGHT": raster_height,
-                "EXTENT": None,
-                "NODATA": None,
-                "OPTIONS": "",
-                "DATA_TYPE": 5,
-                "INIT": None,
-                "INVERT": False,
-                "EXTRA": "",
-                "OUTPUT": rasOutput,
-            },
-        )
-
-        self.dlg.APT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-        styleFileDestination = f"{workingDir}{Dimension}/"
-        styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        self.dlg.APT_status.setText("Processing Complete!")
-        self.dlg.APT_status.repaint()
-
-        os.chdir(workingDir)
-
     def urbanization(self):
         """
         This algorithm characterizes areas based on their degree of urbanization. The algorithm reclassifies the eight
@@ -3469,7 +3264,6 @@ class GenderIndicatorTool:
         # INPUT
         WLK_ras = self.dlg.WLK_Aggregate_Field.text().strip(" ")
         # CYC_ras = self.dlg.CYC_Aggregate_Field.text().strip(" ")
-        APT_ras = self.dlg.APT_Aggregate_Field.text().strip(" ")
         SAF_ras = self.dlg.SAF_Aggregate_Field.text().strip(" ")
         DIG_ras = self.dlg.DIG_Aggregate_Field.text().strip(" ")
         ENV_ras = self.dlg.ENV_Aggregate_Field.text().strip(" ")
@@ -3477,7 +3271,6 @@ class GenderIndicatorTool:
 
         WLK_weight = self.dlg.WLK_Aggregate_SB.value()
         # CYC_weight = self.dlg.CYC_Aggregate_SB.value()
-        APT_weight = self.dlg.APT_Aggregate_SB.value()
         SAF_weight = self.dlg.SAF_Aggregate_SB.value()
         DIG_weight = self.dlg.DIG_Aggregate_SB.value()
         ENV_weight = self.dlg.ENV_Aggregate_SB.value()
@@ -3488,7 +3281,6 @@ class GenderIndicatorTool:
 
         rasLayers = [
             WLK_ras,
-            APT_ras,
             SAF_ras,
             DIG_ras,
             ENV_ras,
@@ -3496,7 +3288,6 @@ class GenderIndicatorTool:
         ]
         factorWeighting = [
             WLK_weight,
-            APT_weight,
             SAF_weight,
             DIG_weight,
             ENV_weight,
@@ -3531,30 +3322,25 @@ class GenderIndicatorTool:
                     meta1 = src.meta
 
                 with rasterio.open(rasLayers[1]) as src:
-                    APT_ras = src.read(1)
-                    APT_weight = factorWeighting[1]
+                    SAF_ras = src.read(1)
+                    SAF_weight = factorWeighting[1]
 
                 with rasterio.open(rasLayers[2]) as src:
-                    SAF_ras = src.read(1)
-                    SAF_weight = factorWeighting[2]
-
-                with rasterio.open(rasLayers[8]) as src:
                     DIG_ras = src.read(1)
-                    DIG_weight = factorWeighting[8]
+                    DIG_weight = factorWeighting[2]
 
-                with rasterio.open(rasLayers[9]) as src:
+                with rasterio.open(rasLayers[3]) as src:
                     ENV_ras = src.read(1)
-                    ENV_weight = factorWeighting[9]
+                    ENV_weight = factorWeighting[3]
                     
-                with rasterio.open(rasLayers[10]) as src:
+                with rasterio.open(rasLayers[4]) as src:
                     EDU_ras = src.read(1)
-                    EDU_weight = factorWeighting[10]
+                    EDU_weight = factorWeighting[4]
 
                 # Raster Calculation
 
                 result = (
                     (WLK_ras * WLK_weight / 100)
-                    + (APT_ras * APT_weight / 100)
                     + (SAF_ras * SAF_weight / 100)
                     + (DIG_ras * DIG_weight / 100)
                     + (ENV_ras * ENV_weight / 100)
