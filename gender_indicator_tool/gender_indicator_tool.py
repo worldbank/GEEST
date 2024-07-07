@@ -242,17 +242,23 @@ class GenderIndicatorTool:
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(0))
 
         ## TAB 3 - Contextual ***************************************************************************
+        
         ###### TAB 3.1 - Regulatory Frameworks
-        self.dlg.RF_Set_PB.clicked.connect(lambda: self.RasterizeSet(3))
-        self.dlg.RF_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
+        self.dlg.WD_Set_PB.clicked.connect(lambda: self.RasterizeSet(1))
+        self.dlg.WD_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
+        
+        ###### TAB 3.2 - Regulatory Frameworks
+        self.dlg.RF_Set_PB.clicked.connect(lambda: self.RasterizeSet(2))
+        self.dlg.RF_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
-        ###### TAB 3.2 - Access to Finance
+        ###### TAB 3.3 - Access to Finance
         self.dlg.FIN_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
         self.dlg.FIN_Execute_PB.clicked.connect(lambda: self.Rasterize(4))
 
         ###### TAB 3.2 - Aggregate
-        self.dlg.RF_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
-        self.dlg.FIN_Aggregate_TB.clicked.connect(lambda: self.getFile(4))
+        self.dlg.WD_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
+        self.dlg.RF_Aggregate_TB.clicked.connect(lambda: self.getFile(4))
+        self.dlg.FIN_Aggregate_TB.clicked.connect(lambda: self.getFile(5))
 
         self.dlg.Contextual_AggregateExecute_PB.clicked.connect(
             self.contextualAggregation
@@ -377,6 +383,9 @@ class GenderIndicatorTool:
 
         if button_num == 0:
             self.dlg.EDU_Aggregate_Field.setText(response[0])
+            
+        elif button_num == 1:
+            self.dlg.WD_Aggregate_Field.setText(response[0])
 
         elif button_num == 3:
             self.dlg.RF_Aggregate_Field.setText(response[0])
@@ -447,6 +456,7 @@ class GenderIndicatorTool:
 
         Factors it is applied:
             Contextual Dimension
+                - Workplace Discrimination
                 - Regulatory Frameworks(RF)
                 - Access to Finance
             Place Characterization Dimension
@@ -463,43 +473,29 @@ class GenderIndicatorTool:
             self.dlg.EDU_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.EDU_rasField_CB.addItems(fields)
-
+            
         elif factor_no == 1:
+            polygonlayer = self.dlg.WD_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
+            self.dlg.WD_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.WD_rasField_CB.addItems(fields)
+
+        elif factor_no == 2:
             polygonlayer = self.dlg.RF_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.RF_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.RF_rasField_CB.addItems(fields)
 
-        elif factor_no == 2:
+        elif factor_no == 3:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.FIN_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.FIN_rasField_CB.addItems(fields)
 
-        elif factor_no == 3:
-            polygonlayer = self.dlg.INC_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.INC_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.INC_rasField_CB.addItems(fields)
-
         elif factor_no == 4:
-            polygonlayer = self.dlg.SEC_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.SEC_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.SEC_rasField_CB.addItems(fields)
-
-        elif factor_no == 5:
-            polygonlayer = self.dlg.ELC_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.ELC_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.ELC_rasField_CB.addItems(fields)
-
-        elif factor_no == 6:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.DIG_rasField_CB.clear()
@@ -602,6 +598,7 @@ class GenderIndicatorTool:
 
         Factors it is applied:
             Contextual Dimension
+                - Workplace Discrimination
                 - Regulatory Frameworks(RF)
                 - Access to Finance
             Place Characterization Dimension
@@ -628,8 +625,17 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.EDU_status.setText("Processing...")
             self.dlg.EDU_status.repaint()
-
+            
         elif factor_no == 1:
+            polygonlayer = self.dlg.WD_Input_Field.filePath()
+            rasField = self.dlg.WD_rasField_CB.currentText()
+            self.dlg.WD_status.setText("Variables Set")
+            self.dlg.WD_status.repaint()
+            time.sleep(0.5)
+            self.dlg.WD_status.setText("Processing...")
+            self.dlg.WD_status.repaint()
+
+        elif factor_no == 2:
             polygonlayer = self.dlg.RF_Input_Field.filePath()
             rasField = self.dlg.RF_rasField_CB.currentText()
             self.dlg.RF_status.setText("Variables Set")
@@ -638,7 +644,7 @@ class GenderIndicatorTool:
             self.dlg.RF_status.setText("Processing...")
             self.dlg.RF_status.repaint()
 
-        elif factor_no == 2:
+        elif factor_no == 3:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = self.dlg.FIN_rasField_CB.currentText()
             self.dlg.FIN_status.setText("Variables Set")
@@ -646,15 +652,6 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.FIN_status.setText("Processing...")
             self.dlg.FIN_status.repaint()
-
-        elif factor_no == 3:
-            polygonlayer = self.dlg.INC_Input_Field.filePath()
-            rasField = self.dlg.INC_rasField_CB.currentText()
-            self.dlg.INC_status.setText("Variables Set")
-            self.dlg.INC_status.repaint()
-            time.sleep(0.5)
-            self.dlg.INC_status.setText("Processing...")
-            self.dlg.INC_status.repaint()
 
         elif factor_no == 4:
             polygonlayer = self.dlg.SEC_Input_Field.filePath()
@@ -874,8 +871,88 @@ class GenderIndicatorTool:
 
             self.dlg.RF_status.setText("Processing has been completed!")
             self.dlg.RF_status.repaint()
-
+            
         elif factor_no == 2:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
+
+            Difference = processing.run(
+                "native:difference",
+                {
+                    "INPUT": countryUTMLayerBuf,
+                    "OVERLAY": polygonUTM,
+                    "OUTPUT": "memory:",
+                    "GRID_SIZE": None,
+                },
+            )
+
+            difference = Difference["OUTPUT"]
+
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
+            )
+
+            mergeOutput = Merge["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Contextual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = self.dlg.WD_Output_Field.text()
+
+            rasterize = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": mergeOutput,
+                    "FIELD": rasField,
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 0,
+                    "WIDTH": raster_width,
+                    "HEIGHT": raster_height,
+                    "EXTENT": None,
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput,
+                },
+            )
+
+            self.dlg.WD_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.WD_status.setText("Processing has been completed!")
+            self.dlg.WD_status.repaint()
+
+        elif factor_no == 3:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -955,7 +1032,7 @@ class GenderIndicatorTool:
             self.dlg.FIN_status.setText("Processing has been completed!")
             self.dlg.FIN_status.repaint()
 
-        elif factor_no == 3:
+        elif factor_no == 4:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1035,7 +1112,7 @@ class GenderIndicatorTool:
             self.dlg.INC_status.setText("Processing has been completed!")
             self.dlg.INC_status.repaint()
 
-        elif factor_no == 4:
+        elif factor_no == 5:
             shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1122,7 +1199,7 @@ class GenderIndicatorTool:
             self.dlg.SEC_status.setText("Processing has been completed!")
             self.dlg.SEC_status.repaint()
 
-        elif factor_no == 5:
+        elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1202,7 +1279,7 @@ class GenderIndicatorTool:
             self.dlg.ELC_status.setText("Processing has been completed!")
             self.dlg.ELC_status.repaint()
 
-        elif factor_no == 6:
+        elif factor_no == 7:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
