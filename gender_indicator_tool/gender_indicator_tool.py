@@ -461,11 +461,10 @@ class GenderIndicatorTool:
                 - Access to Finance
             Place Characterization Dimension
                 - Education
-                - Security
+                - Safety
                 - Income Level
-                - Electrical Access
                 - Digital Inclusion
-
+                - Fragility, conflict, and violence(FCV)
         """
         if factor_no == 0:
             polygonlayer = self.dlg.EDU_Input_Field.filePath()
@@ -501,6 +500,13 @@ class GenderIndicatorTool:
             self.dlg.DIG_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.DIG_rasField_CB.addItems(fields)
+            
+        elif factor_no == 5:
+            polygonlayer = self.dlg.FCV_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
+            self.dlg.FCV_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.FCV_rasField_CB.addItems(fields)
 
     def TypeSet(self, factor_no):
         """
@@ -600,12 +606,12 @@ class GenderIndicatorTool:
             Contextual Dimension
                 - Workplace Discrimination
                 - Regulatory Frameworks(RF)
-                - Access to Finance
+                - Financial Inclusion
             Place Characterization Dimension
                 - Education
                 - Security
                 - Income Level
-                - Electrical Access
+                - Fragility, conflict, and violence(FCV)
                 - Digital Inclusion
         """
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -679,6 +685,15 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.DIG_status.setText("Processing...")
             self.dlg.DIG_status.repaint()
+            
+        elif factor_no == 7:
+            polygonlayer = self.dlg.FCV_Input_Field.filePath()
+            rasField = self.dlg.FCV_rasField_CB.currentText()
+            self.dlg.FCV_status.setText("Variables Set")
+            self.dlg.FCV_status.repaint()
+            time.sleep(0.5)
+            self.dlg.FCV_status.setText("Processing...")
+            self.dlg.FCV_status.repaint()
 
         # Convert countryLayer data to UTM CRS
         self.convertCRS(countryLayer, UTM_crs)
@@ -1358,6 +1373,86 @@ class GenderIndicatorTool:
 
             self.dlg.DIG_status.setText("Processing has been completed!")
             self.dlg.DIG_status.repaint()
+            
+        elif factor_no == 8:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
+
+            Difference = processing.run(
+                "native:difference",
+                {
+                    "INPUT": countryUTMLayerBuf,
+                    "OVERLAY": polygonUTM,
+                    "OUTPUT": "memory:",
+                    "GRID_SIZE": None,
+                },
+            )
+
+            difference = Difference["OUTPUT"]
+
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
+            )
+
+            mergeOutput = Merge["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Place Characterization"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = self.dlg.FCV_Output_Field.text()
+
+            rasterize = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": mergeOutput,
+                    "FIELD": rasField,
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 0,
+                    "WIDTH": raster_width,
+                    "HEIGHT": raster_height,
+                    "EXTENT": None,
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput,
+                },
+            )
+
+            self.dlg.FCV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.FCV_status.setText("Processing has been completed!")
+            self.dlg.FCV_status.repaint()
 
     def ServiceArea(self, factor_no):
         """
@@ -3345,6 +3440,7 @@ class GenderIndicatorTool:
         DIG_ras = self.dlg.DIG_Aggregate_Field.text().strip(" ")
         ENV_ras = self.dlg.ENV_Aggregate_Field.text().strip(" ")
         EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
+        FCV_ras = self.dlg.FCV_Aggregate_Field.text().strip(" ")
 
         WLK_weight = self.dlg.WLK_Aggregate_SB.value()
         # CYC_weight = self.dlg.CYC_Aggregate_SB.value()
@@ -3352,6 +3448,7 @@ class GenderIndicatorTool:
         DIG_weight = self.dlg.DIG_Aggregate_SB.value()
         ENV_weight = self.dlg.ENV_Aggregate_SB.value()
         EDU_weight = self.dlg.EDU_Aggregate_SB.value()
+        FCV_weight = self.dlg.FCV_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.PlaceCharacterization_AggregateOutput_Field.text()
@@ -3362,6 +3459,7 @@ class GenderIndicatorTool:
             DIG_ras,
             ENV_ras,
             EDU_ras,
+            FCV_ras,
         ]
         factorWeighting = [
             WLK_weight,
@@ -3369,6 +3467,7 @@ class GenderIndicatorTool:
             DIG_weight,
             ENV_weight,
             EDU_weight,
+            FCV_weight,
         ]
         non_empty_count = sum(1 for item in rasLayers if item != "")
 
@@ -3413,6 +3512,10 @@ class GenderIndicatorTool:
                 with rasterio.open(rasLayers[4]) as src:
                     EDU_ras = src.read(1)
                     EDU_weight = factorWeighting[4]
+                    
+                with rasterio.open(rasLayers[5]) as src:
+                    EDU_ras = src.read(1)
+                    EDU_weight = factorWeighting[5]
 
                 # Raster Calculation
 
@@ -3422,6 +3525,7 @@ class GenderIndicatorTool:
                     + (DIG_ras * DIG_weight / 100)
                     + (ENV_ras * ENV_weight / 100)
                     + (EDU_ras * EDU_weight / 100)
+                    + (FCV_ras * FCV_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
