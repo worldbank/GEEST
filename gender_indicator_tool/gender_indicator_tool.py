@@ -337,6 +337,11 @@ class GenderIndicatorTool:
         ###### TAB 5.12 - Education
         self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
+        
+        ###### TAB 5.13 - Facility, conflict, and violence
+        self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
+        self.dlg.FCV_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
+
 
         ###### TAB 5.11 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
@@ -344,6 +349,7 @@ class GenderIndicatorTool:
         self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
         self.dlg.ENV_Aggregate_TB.clicked.connect(lambda: self.getFile(21))
         self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
+        self.dlg.FCV_Aggregate_TB.clicked.connect(lambda: self.getFile(26))
         self.dlg.PlaceCharacterization_AggregateExecute_PB.clicked.connect(
             self.placeCharacterizationAggregation
         )
@@ -434,6 +440,9 @@ class GenderIndicatorTool:
 
         elif button_num == 25:
             self.dlg.PD_Aggregate_Field.setText(response[0])
+            
+        elif button_num == 26:
+            self.dlg.FCV_Aggregate_Field.setText(response[0])
 
     def getFolder(self, button_num):
         """
@@ -669,15 +678,6 @@ class GenderIndicatorTool:
             self.dlg.SEC_status.repaint()
 
         elif factor_no == 5:
-            polygonlayer = self.dlg.ELC_Input_Field.filePath()
-            rasField = self.dlg.ELC_rasField_CB.currentText()
-            self.dlg.ELC_status.setText("Variables Set")
-            self.dlg.ELC_status.repaint()
-            time.sleep(0.5)
-            self.dlg.ELC_status.setText("Processing...")
-            self.dlg.ELC_status.repaint()
-
-        elif factor_no == 6:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             rasField = self.dlg.DIG_rasField_CB.currentText()
             self.dlg.DIG_status.setText("Variables Set")
@@ -686,7 +686,7 @@ class GenderIndicatorTool:
             self.dlg.DIG_status.setText("Processing...")
             self.dlg.DIG_status.repaint()
             
-        elif factor_no == 7:
+        elif factor_no == 6:
             polygonlayer = self.dlg.FCV_Input_Field.filePath()
             rasField = self.dlg.FCV_rasField_CB.currentText()
             self.dlg.FCV_status.setText("Variables Set")
@@ -1127,174 +1127,8 @@ class GenderIndicatorTool:
             self.dlg.INC_status.setText("Processing has been completed!")
             self.dlg.INC_status.repaint()
 
+
         elif factor_no == 5:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Place Characterization"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            Output_Folder = "SEC"
-            if os.path.exists(Output_Folder):
-                os.chdir(Output_Folder)
-            else:
-                os.mkdir(Output_Folder)
-                os.chdir(Output_Folder)
-
-            rasOutput = self.dlg.SEC_incidentOutput_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.SEC_status.setText("Processing has been completed!")
-            self.dlg.SEC_status.repaint()
-
-        elif factor_no == 6:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Place Characterization"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            rasOutput = self.dlg.ELC_Output_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.ELC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.ELC_status.setText("Processing has been completed!")
-            self.dlg.ELC_status.repaint()
-
-        elif factor_no == 7:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1374,7 +1208,7 @@ class GenderIndicatorTool:
             self.dlg.DIG_status.setText("Processing has been completed!")
             self.dlg.DIG_status.repaint()
             
-        elif factor_no == 8:
+        elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             

@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -832,7 +832,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -935,7 +935,7 @@ p, li { white-space: pre-wrap; }
            <item row="8" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WTP_Ranges_Field">
              <property name="text">
-              <string>300, 600, 800, 1200, 1500</string>
+              <string>400, 800, 1200, 1600, 2000</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1135,7 +1135,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="PBT_Ranges_Field">
              <property name="text">
-              <string>200, 400, 600, 800, 1000</string>
+              <string>250, 500, 750, 1000, 1250</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1287,7 +1287,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="ETF_Ranges_Field">
              <property name="text">
-              <string>1000, 2000, 3000, 4000, 5000</string>
+              <string>2000, 4000, 6000, 8000, 10000</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1439,7 +1439,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="HEA_Ranges_Field">
              <property name="text">
-              <string>2000, 4000, 6000, 8000, 10000</string>
+              <string>1000, 2000, 3000, 4000, 5000</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1591,7 +1591,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="FIF_Ranges_Field">
              <property name="text">
-              <string>1000, 2000, 3000, 4000, 5000</string>
+              <string>400, 800, 1200, 2000, 3000</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1884,7 +1884,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>6</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
