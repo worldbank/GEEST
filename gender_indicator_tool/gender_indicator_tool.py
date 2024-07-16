@@ -241,18 +241,18 @@ class GenderIndicatorTool:
         ## TAB 1 - Analysis Setup ***********************************************************************
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(0))
 
-        ## TAB 3 - Contextual ***************************************************************************
+        ## TAB 2 - Contextual ***************************************************************************
         
-        ###### TAB 3.1 - Workplace Discrimination
+        ###### TAB 2.1 - Workplace Discrimination
         self.dlg.WD_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
         
-        ###### TAB 3.2 - Regulatory Frameworks
+        ###### TAB 2.2 - Regulatory Frameworks
         self.dlg.RF_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
-        ###### TAB 3.3 - Financial Inclusion
+        ###### TAB 2.3 - Financial Inclusion
         self.dlg.FIN_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
 
-        ###### TAB 3.2 - Aggregate
+        ###### TAB 2.2 - Aggregate
         self.dlg.WD_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
         self.dlg.RF_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
         self.dlg.FIN_Aggregate_TB.clicked.connect(lambda: self.getFile(4))
@@ -261,11 +261,11 @@ class GenderIndicatorTool:
             self.contextualAggregation
         )
 
-        ## TAB 4 - Accessibility ************************************************************************
+        ## TAB 3 - Accessibility ************************************************************************
         Modes = ["Walking", "Driving"]
         Measurement = ["Distance", "Time"]
 
-        ###### TAB 4.1 - Women's Travel Patterns
+        ###### TAB 3.1 - Women's Travel Patterns
         self.dlg.WTP_mode_CB.clear()
         self.dlg.WTP_mode_CB.addItems(Modes)
         self.dlg.WTP_measurement_CB.clear()
@@ -274,35 +274,35 @@ class GenderIndicatorTool:
 
         self.dlg.WTP_Aggregate_PB.clicked.connect(self.wtpAggregate)
 
-        ###### TAB 4.2 - Public Transport
+        ###### TAB 3.2 - Public Transport
         self.dlg.PBT_mode_CB.clear()
         self.dlg.PBT_mode_CB.addItems(Modes)
         self.dlg.PBT_measurement_CB.clear()
         self.dlg.PBT_measurement_CB.addItems(Measurement)
         self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
 
-        ###### TAB 4.3 - Education & Training
+        ###### TAB 3.3 - Education & Training
         self.dlg.ETF_mode_CB.clear()
         self.dlg.ETF_mode_CB.addItems(Modes)
         self.dlg.ETF_measurement_CB.clear()
         self.dlg.ETF_measurement_CB.addItems(Measurement)
         self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
 
-        ###### TAB 4.5 - Health Facilities
+        ###### TAB 3.4 - Health Facilities
         self.dlg.HEA_mode_CB.clear()
         self.dlg.HEA_mode_CB.addItems(Modes)
         self.dlg.HEA_measurement_CB.clear()
         self.dlg.HEA_measurement_CB.addItems(Measurement)
         self.dlg.HEA_Execute_PB.clicked.connect(lambda: self.ServiceArea(3))
 
-        ###### TAB 4.6 - Financial Facilities
+        ###### TAB 3.5 - Financial Facilities
         self.dlg.FIF_mode_CB.clear()
         self.dlg.FIF_mode_CB.addItems(Modes)
         self.dlg.FIF_measurement_CB.clear()
         self.dlg.FIF_measurement_CB.addItems(Measurement)
         self.dlg.FIF_Execute_PB.clicked.connect(lambda: self.ServiceArea(4))
 
-        ###### TAB 4.7 - Aggregate
+        ###### TAB 3.6 - Aggregate
         self.dlg.WTP_Aggregate_TB.clicked.connect(lambda: self.getFile(5))
         self.dlg.PBT_Aggregate_TB.clicked.connect(lambda: self.getFile(6))
         self.dlg.ETF_Aggregate_TB.clicked.connect(lambda: self.getFile(7))
@@ -312,35 +312,35 @@ class GenderIndicatorTool:
             self.accessibiltyAggregation
         )
 
-        ## TAB 5 - Place Charqacterization **************************************************************
-        ###### TAB 5.1 - Walkability / Active Transport
+        ## TAB 4 - Place Charqacterization **************************************************************
+        ###### TAB 4.1 - Walkability / Active Transport
         self.dlg.WLK_Set_PB.clicked.connect(lambda: self.TypeSet(1))
         self.dlg.WLK_unique_PB.clicked.connect(lambda: self.uniqueValues(1))
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
-        ###### TAB 5.3 - Safe Urban Design
+        ###### TAB 4.2 - Safe Urban Design
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
-        ###### TAB 5.9 - Digital Inclusion
+        ###### TAB 4.3 - Digital Inclusion
         self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
         self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(8))
 
-        ###### TAB 5.10 - Natural Environment
+        ###### TAB 4.4 - Natural Environment
         self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
         self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
         
-        ###### TAB 5.12 - Education
+        ###### TAB 4.5- Education
         self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
         
-        ###### TAB 5.13 - Facility, conflict, and violence
+        ###### TAB 4.6 - Facility, conflict, and violence
         self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
         self.dlg.FCV_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
 
 
-        ###### TAB 5.11 - Aggregate
+        ###### TAB 4.7 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
         self.dlg.SAF_Aggregate_TB.clicked.connect(lambda: self.getFile(14))
         self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
@@ -351,7 +351,7 @@ class GenderIndicatorTool:
             self.placeCharacterizationAggregation
         )
 
-        ## TAB 6 - Dimension Aggregation ************************************************************************
+        ## TAB 5 - Dimension Aggregation ************************************************************************
         self.dlg.ID_Aggregate_TB.clicked.connect(lambda: self.getFile(22))
         self.dlg.CD_Aggregate_TB.clicked.connect(lambda: self.getFile(23))
         self.dlg.AD_Aggregate_TB.clicked.connect(lambda: self.getFile(24))
@@ -360,17 +360,17 @@ class GenderIndicatorTool:
             self.dimesnionsAggregation
         )
 
-        ## TAB 7 - Insights ************************************************************************
-        ###### TAB 7.1 - Enablement
+        ## TAB 6 - Insights ************************************************************************
+        ###### TAB 6.1 - Enablement
         self.dlg.Score_reclassify.clicked.connect(self.scoreReclassInsights)
         self.dlg.Pop_reclassify.clicked.connect(self.populationReclassInsights)
         self.dlg.Combine_reclassify.clicked.connect(self.combineReclassInsights)
         self.dlg.Aggregation_Execute_PB.clicked.connect(self.Aggregationinsights)
 
-        ###### TAB 7.2 - Raster Locations
+        ###### TAB 6.2 - Raster Locations
         self.dlg.RE_Execute_PB.clicked.connect(self.reZones)
 
-        ###### TAB 7.3 - Point Locations
+        ###### TAB 6.3 - Point Locations
         self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
 
     def getFile(self, button_num):
