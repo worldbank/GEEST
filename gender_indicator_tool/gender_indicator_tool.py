@@ -1656,6 +1656,9 @@ class GenderIndicatorTool:
             "native:mergevectorlayers",
             {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
         )
+        
+        
+        time.sleep(0.5)
 
         merge_df = gpd.read_file(f"{mergeOutput}")
         merge_df["rasField"] = [1, 2, 3, 4, 5]
