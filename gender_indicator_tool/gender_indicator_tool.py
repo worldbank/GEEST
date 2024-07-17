@@ -639,7 +639,7 @@ class GenderIndicatorTool:
             self.dlg.EDU_status.repaint()
             
         elif factor_no == 1:
-            polygonlayer = self.dlg.WD_Input_Field.filePath()
+            #polygonlayer = self.dlg.WD_Input_Field.filePath()
             rasField = "rasField"
             WD_Value_SB = self.dlg.WD_User_Value_Input.value()
             self.dlg.WD_status.setText("Variables Set")
@@ -649,7 +649,7 @@ class GenderIndicatorTool:
             self.dlg.WD_status.repaint()
 
         elif factor_no == 2:
-            polygonlayer = self.dlg.RF_Input_Field.filePath()
+            #polygonlayer = self.dlg.RF_Input_Field.filePath()
             rasField = "rasField"
             RF_Value_SB = self.dlg.RF_User_Value_Input.value()
             RF_Value_SB_2 = self.dlg.RF_User_Value_Input_2.value()
@@ -661,7 +661,7 @@ class GenderIndicatorTool:
             self.dlg.RF_status.repaint()
 
         elif factor_no == 3:
-            polygonlayer = self.dlg.FIN_Input_Field.filePath()
+            #polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = "rasField"
             FIN_Value_SB = self.dlg.FIN_User_Value_Input.value()
             self.dlg.FIN_status.setText("Variables Set")
@@ -720,7 +720,10 @@ class GenderIndicatorTool:
         countryUTMLayerBuf = buffer["OUTPUT"]
 
         # Convert spatial data to UTM CRS
-        self.convertCRS(polygonlayer, UTM_crs)
+        if factor_no in [1, 2, 3]:
+            pass
+        else:
+            self.convertCRS(polygonlayer, UTM_crs)
         
         if rasField not in shp_utm.columns:
             shp_utm[rasField] = [0]

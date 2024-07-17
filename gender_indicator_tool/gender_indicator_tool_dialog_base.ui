@@ -329,7 +329,7 @@ p, li { white-space: pre-wrap; }
            <string>Workplace Discrimination</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="2" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="wd_label">
              <property name="maximumSize">
               <size>
@@ -338,24 +338,11 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>User Input(WBL index score)</string>
+              <string>User Input (WBL Index Score)</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_41">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Polygon Input Layer</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0" colspan="2">
+           <item row="4" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WD_Output_Field">
              <property name="text">
               <string>WD_.tif</string>
@@ -365,7 +352,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
+           <item row="3" column="0" colspan="2">
             <widget class="QLabel" name="label_44">
              <property name="maximumSize">
               <size>
@@ -378,7 +365,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="0" column="3" rowspan="7">
+           <item row="0" column="3" rowspan="6">
             <widget class="QTextEdit" name="textEdit_9">
              <property name="enabled">
               <bool>true</bool>
@@ -402,34 +389,24 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
+           <item row="2" column="0" colspan="2">
+            <widget class="QDoubleSpinBox" name="WD_User_Value_Input">
+             <property name="maximum">
+              <double>100.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
             <widget class="QPushButton" name="WD_Execute_PB">
              <property name="text">
               <string>Execute</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="1" colspan="2">
+           <item row="5" column="1" colspan="2">
             <widget class="QLabel" name="WD_status">
              <property name="text">
               <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WD_Input_Field" native="true">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QDoubleSpinBox" name="WD_User_Value_Input">
-             <property name="maximum">
-              <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -440,7 +417,7 @@ p, li { white-space: pre-wrap; }
            <string>Regulatory Frameworks</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_6">
-           <item row="0" column="3" rowspan="9">
+           <item row="0" column="3" rowspan="8">
             <widget class="QTextEdit" name="textEdit_6">
              <property name="enabled">
               <bool>true</bool>
@@ -464,17 +441,14 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="RF_Input_Field" native="true">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
+           <item row="4" column="0">
+            <widget class="QDoubleSpinBox" name="RF_User_Value_Input_2">
+             <property name="maximum">
+              <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="label">
              <property name="maximumSize">
               <size>
@@ -483,18 +457,18 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>User Input(WBL Pay)</string>
+              <string>User Input (WBL Pay)</string>
              </property>
             </widget>
            </item>
-           <item row="8" column="1" colspan="2">
+           <item row="7" column="1" colspan="2">
             <widget class="QLabel" name="RF_status">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
+           <item row="3" column="0">
             <widget class="QLabel" name="label_4">
              <property name="maximumSize">
               <size>
@@ -503,24 +477,11 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>User Input(Parenthood Index Score)</string>
+              <string>User Input (Parenthood Index Score)</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_22">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Polygon Input Layer</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0" colspan="2">
+           <item row="5" column="0" colspan="2">
             <widget class="QLabel" name="label_24">
              <property name="maximumSize">
               <size>
@@ -533,34 +494,27 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="2">
+           <item row="2" column="0" colspan="2">
             <widget class="QDoubleSpinBox" name="RF_User_Value_Input">
              <property name="maximum">
               <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
+           <item row="7" column="0">
             <widget class="QPushButton" name="RF_Execute_PB">
              <property name="text">
               <string>Execute</string>
              </property>
             </widget>
            </item>
-           <item row="7" column="0" colspan="2">
+           <item row="6" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="RF_Output_Field">
              <property name="text">
               <string>RF_.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QDoubleSpinBox" name="RF_User_Value_Input_2">
-             <property name="maximum">
-              <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -571,20 +525,14 @@ p, li { white-space: pre-wrap; }
            <string>Financial Inclusion</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_7">
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_17">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Polygon Input Layer</string>
+           <item row="2" column="0" colspan="2">
+            <widget class="QDoubleSpinBox" name="FIN_User_Value_Input">
+             <property name="maximum">
+              <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
-           <item row="5" column="0" colspan="2">
+           <item row="4" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="FIN_Output_Field">
              <property name="text">
               <string>FIN_.tif</string>
@@ -594,14 +542,14 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="6" column="1" colspan="2">
+           <item row="5" column="1" colspan="2">
             <widget class="QLabel" name="FIN_status">
              <property name="text">
               <string/>
              </property>
             </widget>
            </item>
-           <item row="0" column="3" rowspan="7">
+           <item row="0" column="3" rowspan="6">
             <widget class="QTextEdit" name="textEdit_7">
              <property name="enabled">
               <bool>true</bool>
@@ -625,7 +573,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
+           <item row="3" column="0" colspan="2">
             <widget class="QLabel" name="label_10">
              <property name="maximumSize">
               <size>
@@ -638,17 +586,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="FIN_Input_Field" native="true">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="label_2">
              <property name="maximumSize">
               <size>
@@ -657,21 +595,14 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>User Input</string>
+              <string>User Input (WBL Entrepeneurship Index Score)</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
+           <item row="5" column="0">
             <widget class="QPushButton" name="FIN_Execute_PB">
              <property name="text">
               <string>Execute</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QDoubleSpinBox" name="FIN_User_Value_Input">
-             <property name="maximum">
-              <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
