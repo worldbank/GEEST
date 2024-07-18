@@ -241,50 +241,31 @@ class GenderIndicatorTool:
         ## TAB 1 - Analysis Setup ***********************************************************************
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(0))
 
-        ## TAB 2 - Individual ***************************************************************************
-        ###### TAB 2.1 - Education
-        self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
-        self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
+        ## TAB 2 - Contextual ***************************************************************************
+        
+        ###### TAB 2.1 - Workplace Discrimination
+        self.dlg.WD_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
+        
+        ###### TAB 2.2 - Regulatory Frameworks
+        self.dlg.RF_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
-        ###### TAB 2.2 - Care Responsibilities
-        self.dlg.CRE_Set_PB.clicked.connect(lambda: self.RasterizeSet(1))
-        self.dlg.CRE_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
+        ###### TAB 2.3 - Financial Inclusion
+        self.dlg.FIN_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
 
-        ###### TAB 2.3 - Domestic Violence
-        self.dlg.DOV_Set_PB.clicked.connect(lambda: self.RasterizeSet(2))
-        self.dlg.DOV_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
-
-        ###### TAB 2.4 - Aggregate
-        self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
-        self.dlg.CRE_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
-        self.dlg.DOV_Aggregate_TB.clicked.connect(lambda: self.getFile(2))
-
-        self.dlg.Indivdual_AggregateExecute_PB.clicked.connect(
-            self.indivdualAggregation
-        )
-
-        ## TAB 3 - Contextual ***************************************************************************
-        ###### TAB 3.1 - Policy and Legal Protection
-        self.dlg.PLP_Set_PB.clicked.connect(lambda: self.RasterizeSet(3))
-        self.dlg.PLP_Execute_PB.clicked.connect(lambda: self.Rasterize(3))
-
-        ###### TAB 3.2 - Access to Finance
-        self.dlg.FIN_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
-        self.dlg.FIN_Execute_PB.clicked.connect(lambda: self.Rasterize(4))
-
-        ###### TAB 3.2 - Aggregate
-        self.dlg.PLP_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
+        ###### TAB 2.2 - Aggregate
+        self.dlg.WD_Aggregate_TB.clicked.connect(lambda: self.getFile(1))
+        self.dlg.RF_Aggregate_TB.clicked.connect(lambda: self.getFile(3))
         self.dlg.FIN_Aggregate_TB.clicked.connect(lambda: self.getFile(4))
 
         self.dlg.Contextual_AggregateExecute_PB.clicked.connect(
             self.contextualAggregation
         )
 
-        ## TAB 4 - Accessibility ************************************************************************
+        ## TAB 3 - Accessibility ************************************************************************
         Modes = ["Walking", "Driving"]
         Measurement = ["Distance", "Time"]
 
-        ###### TAB 4.1 - Women's Travel Patterns
+        ###### TAB 3.1 - Women's Travel Patterns
         self.dlg.WTP_mode_CB.clear()
         self.dlg.WTP_mode_CB.addItems(Modes)
         self.dlg.WTP_measurement_CB.clear()
@@ -293,110 +274,84 @@ class GenderIndicatorTool:
 
         self.dlg.WTP_Aggregate_PB.clicked.connect(self.wtpAggregate)
 
-        ###### TAB 4.2 - Public Transport
+        ###### TAB 3.2 - Public Transport
         self.dlg.PBT_mode_CB.clear()
         self.dlg.PBT_mode_CB.addItems(Modes)
         self.dlg.PBT_measurement_CB.clear()
         self.dlg.PBT_measurement_CB.addItems(Measurement)
         self.dlg.PBT_Execute_PB.clicked.connect(lambda: self.ServiceArea(0))
 
-        ###### TAB 4.3 - Ediucation & Training
+        ###### TAB 3.3 - Education & Training
         self.dlg.ETF_mode_CB.clear()
         self.dlg.ETF_mode_CB.addItems(Modes)
         self.dlg.ETF_measurement_CB.clear()
         self.dlg.ETF_measurement_CB.addItems(Measurement)
         self.dlg.ETF_Execute_PB.clicked.connect(lambda: self.ServiceArea(1))
 
-        ###### TAB 4.4 - Jobs
-        self.dlg.JOB_mode_CB.clear()
-        self.dlg.JOB_mode_CB.addItems(Modes)
-        self.dlg.JOB_measurement_CB.clear()
-        self.dlg.JOB_measurement_CB.addItems(Measurement)
-        self.dlg.JOB_Execute_PB.clicked.connect(lambda: self.ServiceArea(2))
-
-        ###### TAB 4.5 - Health Facilities
+        ###### TAB 3.4 - Health Facilities
         self.dlg.HEA_mode_CB.clear()
         self.dlg.HEA_mode_CB.addItems(Modes)
         self.dlg.HEA_measurement_CB.clear()
         self.dlg.HEA_measurement_CB.addItems(Measurement)
         self.dlg.HEA_Execute_PB.clicked.connect(lambda: self.ServiceArea(3))
 
-        ###### TAB 4.6 - Financial Facilities
+        ###### TAB 3.5 - Financial Facilities
         self.dlg.FIF_mode_CB.clear()
         self.dlg.FIF_mode_CB.addItems(Modes)
         self.dlg.FIF_measurement_CB.clear()
         self.dlg.FIF_measurement_CB.addItems(Measurement)
         self.dlg.FIF_Execute_PB.clicked.connect(lambda: self.ServiceArea(4))
 
-        ###### TAB 4.7 - Aggregate
+        ###### TAB 3.6 - Aggregate
         self.dlg.WTP_Aggregate_TB.clicked.connect(lambda: self.getFile(5))
         self.dlg.PBT_Aggregate_TB.clicked.connect(lambda: self.getFile(6))
         self.dlg.ETF_Aggregate_TB.clicked.connect(lambda: self.getFile(7))
-        self.dlg.JOB_Aggregate_TB.clicked.connect(lambda: self.getFile(8))
         self.dlg.HEA_Aggregate_TB.clicked.connect(lambda: self.getFile(9))
         self.dlg.FIF_Aggregate_TB.clicked.connect(lambda: self.getFile(10))
         self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(
             self.accessibiltyAggregation
         )
 
-        ## TAB 5 - Place Charqacterization **************************************************************
-        ###### TAB 5.1 - Walkability / Active Transport
+        ## TAB 4 - Place Charqacterization **************************************************************
+        ###### TAB 4.1 - Walkability / Active Transport
         self.dlg.WLK_Set_PB.clicked.connect(lambda: self.TypeSet(1))
         self.dlg.WLK_unique_PB.clicked.connect(lambda: self.uniqueValues(1))
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
-        ###### TAB 5.2 - Public Transport
-        self.dlg.APT_Execute_PB.clicked.connect(self.transportCount)
-
-        ###### TAB 5.3 - Safe Urban Design
+        ###### TAB 4.2 - Safe Urban Design
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
-        ###### TAB 5.4 - Security
-        self.dlg.SEC_Set_PB.clicked.connect(lambda: self.RasterizeSet(6))
-        self.dlg.SEC_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
-        self.dlg.SEC_Aggregate_PB.clicked.connect(self.secAggregate)
-
-        ###### TAB 5.5 - Income Level
-        self.dlg.INC_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
-        self.dlg.INC_Execute_PB.clicked.connect(lambda: self.Rasterize(5))
-
-        ###### TAB 5.6 - Electrical Access
-        self.dlg.ELC_Set_PB.clicked.connect(lambda: self.RasterizeSet(7))
-        self.dlg.ELC_Execute_PB.clicked.connect(lambda: self.Rasterize(7))
-        self.dlg.ELC_NTLExecute_PB.clicked.connect(self.ELCnightTimeLights)
-
-        ###### TAB 5.7 - Urbanization
-        self.dlg.LOU_Execute_PB.clicked.connect(self.urbanization)
-
-        ###### TAB 5.8 - Housing
-        self.dlg.QUH_Execute_PB.clicked.connect(self.housing)
-
-        ###### TAB 5.9 - Digital Inclusion
+        ###### TAB 4.3 - Digital Inclusion
         self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
         self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(8))
 
-        ###### TAB 5.10 - Natural Environment
+        ###### TAB 4.4 - Natural Environment
         self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
         self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
+        
+        ###### TAB 4.5- Education
+        self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
+        self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
+        
+        ###### TAB 4.6 - Facility, conflict, and violence
+        self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
+        self.dlg.FCV_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
 
-        ###### TAB 5.11 - Aggregate
+
+        ###### TAB 4.7 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
-        self.dlg.APT_Aggregate_TB.clicked.connect(lambda: self.getFile(13))
         self.dlg.SAF_Aggregate_TB.clicked.connect(lambda: self.getFile(14))
-        self.dlg.SEC_Aggregate_TB.clicked.connect(lambda: self.getFile(15))
-        self.dlg.INC_Aggregate_TB.clicked.connect(lambda: self.getFile(16))
-        self.dlg.ELC_Aggregate_TB.clicked.connect(lambda: self.getFile(17))
-        self.dlg.LOU_Aggregate_TB.clicked.connect(lambda: self.getFile(18))
-        self.dlg.QUH_Aggregate_TB.clicked.connect(lambda: self.getFile(19))
         self.dlg.DIG_Aggregate_TB.clicked.connect(lambda: self.getFile(20))
         self.dlg.ENV_Aggregate_TB.clicked.connect(lambda: self.getFile(21))
+        self.dlg.EDU_Aggregate_TB.clicked.connect(lambda: self.getFile(0))
+        self.dlg.FCV_Aggregate_TB.clicked.connect(lambda: self.getFile(26))
         self.dlg.PlaceCharacterization_AggregateExecute_PB.clicked.connect(
             self.placeCharacterizationAggregation
         )
 
-        ## TAB 6 - Dimension Aggregation ************************************************************************
+        ## TAB 5 - Dimension Aggregation ************************************************************************
         self.dlg.ID_Aggregate_TB.clicked.connect(lambda: self.getFile(22))
         self.dlg.CD_Aggregate_TB.clicked.connect(lambda: self.getFile(23))
         self.dlg.AD_Aggregate_TB.clicked.connect(lambda: self.getFile(24))
@@ -405,17 +360,17 @@ class GenderIndicatorTool:
             self.dimesnionsAggregation
         )
 
-        ## TAB 7 - Insights ************************************************************************
-        ###### TAB 7.1 - Enablement
+        ## TAB 6 - Insights ************************************************************************
+        ###### TAB 6.1 - Enablement
         self.dlg.Score_reclassify.clicked.connect(self.scoreReclassInsights)
         self.dlg.Pop_reclassify.clicked.connect(self.populationReclassInsights)
         self.dlg.Combine_reclassify.clicked.connect(self.combineReclassInsights)
         self.dlg.Aggregation_Execute_PB.clicked.connect(self.Aggregationinsights)
 
-        ###### TAB 7.2 - Raster Locations
+        ###### TAB 6.2 - Raster Locations
         self.dlg.RE_Execute_PB.clicked.connect(self.reZones)
 
-        ###### TAB 7.3 - Point Locations
+        ###### TAB 6.3 - Point Locations
         self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
 
     def getFile(self, button_num):
@@ -431,15 +386,12 @@ class GenderIndicatorTool:
 
         if button_num == 0:
             self.dlg.EDU_Aggregate_Field.setText(response[0])
-
+            
         elif button_num == 1:
-            self.dlg.CRE_Aggregate_Field.setText(response[0])
-
-        elif button_num == 2:
-            self.dlg.DOV_Aggregate_Field.setText(response[0])
+            self.dlg.WD_Aggregate_Field.setText(response[0])
 
         elif button_num == 3:
-            self.dlg.PLP_Aggregate_Field.setText(response[0])
+            self.dlg.RF_Aggregate_Field.setText(response[0])
 
         elif button_num == 4:
             self.dlg.FIN_Aggregate_Field.setText(response[0])
@@ -453,9 +405,6 @@ class GenderIndicatorTool:
         elif button_num == 7:
             self.dlg.ETF_Aggregate_Field.setText(response[0])
 
-        elif button_num == 8:
-            self.dlg.JOB_Aggregate_Field.setText(response[0])
-
         elif button_num == 9:
             self.dlg.HEA_Aggregate_Field.setText(response[0])
 
@@ -468,26 +417,8 @@ class GenderIndicatorTool:
         elif button_num == 12:
             self.dlg.CYC_Aggregate_Field.setText(response[0])
 
-        elif button_num == 13:
-            self.dlg.APT_Aggregate_Field.setText(response[0])
-
         elif button_num == 14:
             self.dlg.SAF_Aggregate_Field.setText(response[0])
-
-        elif button_num == 15:
-            self.dlg.SEC_Aggregate_Field.setText(response[0])
-
-        elif button_num == 16:
-            self.dlg.INC_Aggregate_Field.setText(response[0])
-
-        elif button_num == 17:
-            self.dlg.ELC_Aggregate_Field.setText(response[0])
-
-        elif button_num == 18:
-            self.dlg.LOU_Aggregate_Field.setText(response[0])
-
-        elif button_num == 19:
-            self.dlg.QUH_Aggregate_Field.setText(response[0])
 
         elif button_num == 20:
             self.dlg.DIG_Aggregate_Field.setText(response[0])
@@ -506,6 +437,9 @@ class GenderIndicatorTool:
 
         elif button_num == 25:
             self.dlg.PD_Aggregate_Field.setText(response[0])
+            
+        elif button_num == 26:
+            self.dlg.FCV_Aggregate_Field.setText(response[0])
 
     def getFolder(self, button_num):
         """
@@ -527,19 +461,16 @@ class GenderIndicatorTool:
         executing the "Rasterization" function.
 
         Factors it is applied:
-            Individual Dimension
-                - Education
-                - Care Responsibilities
-                - Domestic Violence
             Contextual Dimension
-                - Policy and Legal Protection
+                - Workplace Discrimination
+                - Regulatory Frameworks(RF)
                 - Access to Finance
             Place Characterization Dimension
-                - Security
+                - Education
+                - Safety
                 - Income Level
-                - Electrical Access
                 - Digital Inclusion
-
+                - Fragility, conflict, and violence(FCV)
         """
         if factor_no == 0:
             polygonlayer = self.dlg.EDU_Input_Field.filePath()
@@ -547,62 +478,41 @@ class GenderIndicatorTool:
             self.dlg.EDU_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.EDU_rasField_CB.addItems(fields)
-
+            
         elif factor_no == 1:
-            polygonlayer = self.dlg.CRE_Input_Field.filePath()
+            polygonlayer = self.dlg.WD_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.CRE_rasField_CB.clear()
+            self.dlg.WD_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
-            self.dlg.CRE_rasField_CB.addItems(fields)
+            self.dlg.WD_rasField_CB.addItems(fields)
 
         elif factor_no == 2:
-            polygonlayer = self.dlg.DOV_Input_Field.filePath()
+            polygonlayer = self.dlg.RF_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.DOV_rasField_CB.clear()
+            self.dlg.RF_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
-            self.dlg.DOV_rasField_CB.addItems(fields)
+            self.dlg.RF_rasField_CB.addItems(fields)
 
         elif factor_no == 3:
-            polygonlayer = self.dlg.PLP_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.PLP_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.PLP_rasField_CB.addItems(fields)
-
-        elif factor_no == 4:
             polygonlayer = self.dlg.FIN_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.FIN_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.FIN_rasField_CB.addItems(fields)
 
-        elif factor_no == 5:
-            polygonlayer = self.dlg.INC_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.INC_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.INC_rasField_CB.addItems(fields)
-
-        elif factor_no == 6:
-            polygonlayer = self.dlg.SEC_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.SEC_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.SEC_rasField_CB.addItems(fields)
-
-        elif factor_no == 7:
-            polygonlayer = self.dlg.ELC_Input_Field.filePath()
-            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.ELC_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.ELC_rasField_CB.addItems(fields)
-
-        elif factor_no == 8:
+        elif factor_no == 4:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.DIG_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.DIG_rasField_CB.addItems(fields)
+            
+        elif factor_no == 5:
+            polygonlayer = self.dlg.FCV_Input_Field.filePath()
+            layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
+            self.dlg.FCV_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.FCV_rasField_CB.addItems(fields)
 
     def TypeSet(self, factor_no):
         """
@@ -699,17 +609,15 @@ class GenderIndicatorTool:
         Numerous functions use this function to convert vector file type into the standardized raster file types required for aggregation.
 
         Factors it is applied:
-            Individual Dimension
-                - Education
-                - Care Responsibilities
-                - Domestic Violence
             Contextual Dimension
-                - Policy and Legal Protection
-                - Access to Finance
+                - Workplace Discrimination
+                - Regulatory Frameworks(RF)
+                - Financial Inclusion
             Place Characterization Dimension
+                - Education
                 - Security
                 - Income Level
-                - Electrical Access
+                - Fragility, conflict, and violence(FCV)
                 - Digital Inclusion
         """
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -729,53 +637,40 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.EDU_status.setText("Processing...")
             self.dlg.EDU_status.repaint()
-
+            
         elif factor_no == 1:
-            polygonlayer = self.dlg.CRE_Input_Field.filePath()
-            rasField = self.dlg.CRE_rasField_CB.currentText()
-            self.dlg.CRE_status.setText("Variables Set")
-            self.dlg.CRE_status.repaint()
+            #polygonlayer = self.dlg.WD_Input_Field.filePath()
+            rasField = "rasField"
+            WD_Value_SB = self.dlg.WD_User_Value_Input.value()
+            self.dlg.WD_status.setText("Variables Set")
+            self.dlg.WD_status.repaint()
             time.sleep(0.5)
-            self.dlg.CRE_status.setText("Processing...")
-            self.dlg.CRE_status.repaint()
+            self.dlg.WD_status.setText("Processing...")
+            self.dlg.WD_status.repaint()
 
         elif factor_no == 2:
-            polygonlayer = self.dlg.DOV_Input_Field.filePath()
-            rasField = self.dlg.DOV_rasField_CB.currentText()
-            self.dlg.DOV_status.setText("Variables Set")
-            self.dlg.DOV_status.repaint()
+            #polygonlayer = self.dlg.RF_Input_Field.filePath()
+            rasField = "rasField"
+            RF_Value_SB = self.dlg.RF_User_Value_Input.value()
+            RF_Value_SB_2 = self.dlg.RF_User_Value_Input_2.value()
+            RF_Value_Average = (RF_Value_SB + RF_Value_SB_2) / 2
+            self.dlg.RF_status.setText("Variables Set")
+            self.dlg.RF_status.repaint()
             time.sleep(0.5)
-            self.dlg.DOV_status.setText("Processing...")
-            self.dlg.DOV_status.repaint()
+            self.dlg.RF_status.setText("Processing...")
+            self.dlg.RF_status.repaint()
 
         elif factor_no == 3:
-            polygonlayer = self.dlg.PLP_Input_Field.filePath()
-            rasField = self.dlg.PLP_rasField_CB.currentText()
-            self.dlg.PLP_status.setText("Variables Set")
-            self.dlg.PLP_status.repaint()
-            time.sleep(0.5)
-            self.dlg.PLP_status.setText("Processing...")
-            self.dlg.PLP_status.repaint()
-
-        elif factor_no == 4:
-            polygonlayer = self.dlg.FIN_Input_Field.filePath()
-            rasField = self.dlg.FIN_rasField_CB.currentText()
+            #polygonlayer = self.dlg.FIN_Input_Field.filePath()
+            rasField = "rasField"
+            FIN_Value_SB = self.dlg.FIN_User_Value_Input.value()
             self.dlg.FIN_status.setText("Variables Set")
             self.dlg.FIN_status.repaint()
             time.sleep(0.5)
             self.dlg.FIN_status.setText("Processing...")
             self.dlg.FIN_status.repaint()
 
-        elif factor_no == 5:
-            polygonlayer = self.dlg.INC_Input_Field.filePath()
-            rasField = self.dlg.INC_rasField_CB.currentText()
-            self.dlg.INC_status.setText("Variables Set")
-            self.dlg.INC_status.repaint()
-            time.sleep(0.5)
-            self.dlg.INC_status.setText("Processing...")
-            self.dlg.INC_status.repaint()
-
-        elif factor_no == 6:
+        elif factor_no == 4:
             polygonlayer = self.dlg.SEC_Input_Field.filePath()
             rasField = self.dlg.SEC_rasField_CB.currentText()
             self.dlg.SEC_status.setText("Variables Set")
@@ -784,16 +679,7 @@ class GenderIndicatorTool:
             self.dlg.SEC_status.setText("Processing...")
             self.dlg.SEC_status.repaint()
 
-        elif factor_no == 7:
-            polygonlayer = self.dlg.ELC_Input_Field.filePath()
-            rasField = self.dlg.ELC_rasField_CB.currentText()
-            self.dlg.ELC_status.setText("Variables Set")
-            self.dlg.ELC_status.repaint()
-            time.sleep(0.5)
-            self.dlg.ELC_status.setText("Processing...")
-            self.dlg.ELC_status.repaint()
-
-        elif factor_no == 8:
+        elif factor_no == 5:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             rasField = self.dlg.DIG_rasField_CB.currentText()
             self.dlg.DIG_status.setText("Variables Set")
@@ -801,6 +687,15 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.DIG_status.setText("Processing...")
             self.dlg.DIG_status.repaint()
+            
+        elif factor_no == 6:
+            polygonlayer = self.dlg.FCV_Input_Field.filePath()
+            rasField = self.dlg.FCV_rasField_CB.currentText()
+            self.dlg.FCV_status.setText("Variables Set")
+            self.dlg.FCV_status.repaint()
+            time.sleep(0.5)
+            self.dlg.FCV_status.setText("Processing...")
+            self.dlg.FCV_status.repaint()
 
         # Convert countryLayer data to UTM CRS
         self.convertCRS(countryLayer, UTM_crs)
@@ -825,7 +720,13 @@ class GenderIndicatorTool:
         countryUTMLayerBuf = buffer["OUTPUT"]
 
         # Convert spatial data to UTM CRS
-        self.convertCRS(polygonlayer, UTM_crs)
+        if factor_no in [1, 2, 3]:
+            pass
+        else:
+            self.convertCRS(polygonlayer, UTM_crs)
+        
+        if rasField not in shp_utm.columns:
+            shp_utm[rasField] = [0]
         shp_utm[rasField] = shp_utm[rasField].astype(float)
 
         # Set variables required to conduct standardization of values
@@ -873,7 +774,7 @@ class GenderIndicatorTool:
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
 
-            Dimension = "Individual"
+            Dimension = "Place Characterization"
             if os.path.exists(Dimension):
                 os.chdir(Dimension)
             else:
@@ -915,166 +816,7 @@ class GenderIndicatorTool:
             self.dlg.EDU_status.repaint()
 
         elif factor_no == 1:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Individual"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            rasOutput = self.dlg.CRE_Output_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.CRE_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.CRE_status.setText("Processing has been completed!")
-            self.dlg.CRE_status.repaint()
-
-        elif factor_no == 2:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Individual"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            rasOutput = self.dlg.DOV_Output_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.DOV_status.setText("Processing has been completed!")
-            self.dlg.DOV_status.repaint()
-
-        elif factor_no == 3:
+            shp_utm[rasField] = WD_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1120,7 +862,7 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
 
-            rasOutput = self.dlg.PLP_Output_Field.text()
+            rasOutput = self.dlg.WD_Output_Field.text()
 
             rasterize = processing.run(
                 "gdal:rasterize",
@@ -1143,7 +885,7 @@ class GenderIndicatorTool:
                 },
             )
 
-            self.dlg.PLP_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            self.dlg.WD_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
             styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
@@ -1151,10 +893,92 @@ class GenderIndicatorTool:
 
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-            self.dlg.PLP_status.setText("Processing has been completed!")
-            self.dlg.PLP_status.repaint()
+            self.dlg.WD_status.setText("Processing has been completed!")
+            self.dlg.WD_status.repaint()
+            
+        elif factor_no == 2:
+            shp_utm[rasField] = RF_Value_Average
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
 
-        elif factor_no == 4:
+            Difference = processing.run(
+                "native:difference",
+                {
+                    "INPUT": countryUTMLayerBuf,
+                    "OVERLAY": polygonUTM,
+                    "OUTPUT": "memory:",
+                    "GRID_SIZE": None,
+                },
+            )
+
+            difference = Difference["OUTPUT"]
+
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
+            )
+
+            mergeOutput = Merge["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Contextual"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = self.dlg.RF_Output_Field.text()
+
+            rasterize = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": mergeOutput,
+                    "FIELD": rasField,
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 0,
+                    "WIDTH": raster_width,
+                    "HEIGHT": raster_height,
+                    "EXTENT": None,
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput,
+                },
+            )
+
+            self.dlg.RF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.RF_status.setText("Processing has been completed!")
+            self.dlg.RF_status.repaint()
+
+        elif factor_no == 3:
+            shp_utm[rasField] = FIN_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1234,7 +1058,7 @@ class GenderIndicatorTool:
             self.dlg.FIN_status.setText("Processing has been completed!")
             self.dlg.FIN_status.repaint()
 
-        elif factor_no == 5:
+        elif factor_no == 4:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1314,174 +1138,8 @@ class GenderIndicatorTool:
             self.dlg.INC_status.setText("Processing has been completed!")
             self.dlg.INC_status.repaint()
 
-        elif factor_no == 6:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmax) / (Rmin - Rmax) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
 
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Place Characterization"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            Output_Folder = "SEC"
-            if os.path.exists(Output_Folder):
-                os.chdir(Output_Folder)
-            else:
-                os.mkdir(Output_Folder)
-                os.chdir(Output_Folder)
-
-            rasOutput = self.dlg.SEC_incidentOutput_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.DOV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.SEC_status.setText("Processing has been completed!")
-            self.dlg.SEC_status.repaint()
-
-        elif factor_no == 7:
-            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
-                "native:clip",
-                {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
-                }
-            )
-            
-            polygonUTM = clipPolygonUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            mergeOutput = Merge["OUTPUT"]
-
-            # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
-
-            Dimension = "Place Characterization"
-            if os.path.exists(Dimension):
-                os.chdir(Dimension)
-            else:
-                os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-            rasOutput = self.dlg.ELC_Output_Field.text()
-
-            rasterize = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": mergeOutput,
-                    "FIELD": rasField,
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
-                    "NODATA": None,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            self.dlg.ELC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-            self.dlg.ELC_status.setText("Processing has been completed!")
-            self.dlg.ELC_status.repaint()
-
-        elif factor_no == 8:
+        elif factor_no == 5:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
@@ -1560,6 +1218,86 @@ class GenderIndicatorTool:
 
             self.dlg.DIG_status.setText("Processing has been completed!")
             self.dlg.DIG_status.repaint()
+            
+        elif factor_no == 6:
+            shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
+            
+            clipPolygonUTM = processing.run(
+                "native:clip",
+                {
+                   "INPUT": polygonUTM,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": "memory",
+                }
+            )
+            
+            polygonUTM = clipPolygonUTM["OUTPUT"]
+
+            Difference = processing.run(
+                "native:difference",
+                {
+                    "INPUT": countryUTMLayerBuf,
+                    "OVERLAY": polygonUTM,
+                    "OUTPUT": "memory:",
+                    "GRID_SIZE": None,
+                },
+            )
+
+            difference = Difference["OUTPUT"]
+
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
+            )
+
+            mergeOutput = Merge["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            Dimension = "Place Characterization"
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
+            else:
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+            rasOutput = self.dlg.FCV_Output_Field.text()
+
+            rasterize = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": mergeOutput,
+                    "FIELD": rasField,
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 0,
+                    "WIDTH": raster_width,
+                    "HEIGHT": raster_height,
+                    "EXTENT": None,
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput,
+                },
+            )
+
+            self.dlg.FCV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.FCV_status.setText("Processing has been completed!")
+            self.dlg.FCV_status.repaint()
 
     def ServiceArea(self, factor_no):
         """
@@ -1575,7 +1313,6 @@ class GenderIndicatorTool:
                 - Women's Travel Patterns
                 - Access to Public Transport
                 - Access to Education and Training Facilities
-                - Access to RE jobs
                 - Access to Health Facilities
                 - Access to Finance Facilities
         """
@@ -1670,40 +1407,6 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.ETF_status.setText("Processing...")
             self.dlg.ETF_status.repaint()
-
-        elif factor_no == 2:
-            self.dlg.JOB_status.setText("")
-            self.dlg.JOB_status.repaint()
-            FaciltyPointlayer = self.dlg.JOB_Input_Field.filePath()
-            ranges = self.dlg.JOB_Ranges_Field.text()
-            rasOutput = f"{self.dlg.JOB_Output_Field.text()[:-4]}{self.dlg.JOB_mode_CB.currentText()}.tif"
-            mergeOutput = (
-                f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
-            )
-
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-            self.dlg.JOB_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-            if self.dlg.JOB_mode_CB.currentText() == "Driving":
-                mode = 0
-            elif self.dlg.JOB_mode_CB.currentText() == "Walking":
-                mode = 6
-
-            if self.dlg.JOB_measurement_CB.currentText() == "Time":
-                measurement = 0
-                ranges_field = "AA_MINS"
-            elif self.dlg.JOB_measurement_CB.currentText() == "Distance":
-                measurement = 1
-                ranges_field = "AA_METERS"
-
-            self.dlg.JOB_status.setText("Variables Set")
-            self.dlg.JOB_status.repaint()
-            time.sleep(0.5)
-            self.dlg.JOB_status.setText("Processing...")
-            self.dlg.JOB_status.repaint()
 
         elif factor_no == 3:
             self.dlg.HEA_status.setText("")
@@ -1850,9 +1553,6 @@ class GenderIndicatorTool:
             elif factor_no == 1:
                 self.dlg.ETF_status.setText(f"Processing... {batch} of {len(gdf)}")
                 self.dlg.ETF_status.repaint()
-            elif factor_no == 2:
-                self.dlg.JOB_status.setText(f"Processing... {batch} of {len(gdf)}")
-                self.dlg.JOB_status.repaint()
             elif factor_no == 3:
                 self.dlg.HEA_status.setText(f"Processing... {batch} of {len(gdf)}")
                 self.dlg.HEA_status.repaint()
@@ -1956,6 +1656,9 @@ class GenderIndicatorTool:
             "native:mergevectorlayers",
             {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
         )
+        
+        
+        time.sleep(0.5)
 
         merge_df = gpd.read_file(f"{mergeOutput}")
         merge_df["rasField"] = [1, 2, 3, 4, 5]
@@ -2068,10 +1771,6 @@ class GenderIndicatorTool:
         elif factor_no == 1:
             self.dlg.ETF_status.setText("Processing Complete!")
             self.dlg.ETF_status.repaint()
-
-        elif factor_no == 2:
-            self.dlg.JOB_status.setText("Processing Complete!")
-            self.dlg.JOB_status.repaint()
 
         elif factor_no == 3:
             self.dlg.HEA_status.setText("Processing Complete!")
@@ -2649,193 +2348,6 @@ class GenderIndicatorTool:
 
         self.dlg.ELCNTL_status.setText("Processing Complete!")
         self.dlg.ELCNTL_status.repaint()
-
-        os.chdir(workingDir)
-
-    def transportCount(self):
-        """
-        This algorithm characterizes areas based on the number of public transport options available. The algorithm overlays the input point layer onto a hexagonal grid
-        and calculates the count of transport stops within each hexagonal cell. The output is standardized on a scale of 0 to 5 using a linear scaling process such that the
-        cells containing the highest count of public transport stops are assigned a score of 5, and cells with no stops are assigned a score of 0. Finally, the output is rasterized.
-        grid
-
-        Factors it is applied:
-            Place Characterization Dimension
-                - Availability of Public Transport
-        """
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-        tempDir = "temp"
-        Dimension = "Place Characterization"
-
-        if os.path.exists(Dimension):
-            pass
-        else:
-            os.mkdir(Dimension)
-
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-        else:
-            pass
-
-        time.sleep(0.5)
-        os.mkdir(tempDir)
-
-        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
-        countryLayer = self.dlg.countryLayer_Field.filePath()
-        pixelSize = self.dlg.pixelSize_SB.value()
-        hexSize = self.dlg.APT_hexSize_SB.value()
-        pointLayer = self.dlg.APT_pointInput_Field.filePath()
-
-        rasField = "Score"
-
-        # TempOutput
-        pointCount_out = f"{tempDir}/pointCountPoly.shp"
-        adminUTMLayer = f"{tempDir}/adminUTMLayer.shp"
-        pointUTMLayer = f"{tempDir}/pointUTMLayer.shp"
-        pointCount_std = f"{tempDir}/pointCount_std.shp"
-
-        self.dlg.APT_status.setText("Variables Set")
-        self.dlg.APT_status.repaint()
-        time.sleep(0.5)
-        self.dlg.APT_status.setText("Processing...")
-        self.dlg.APT_status.repaint()
-
-        self.convertCRS(countryLayer, UTM_crs)
-        shp_utm[rasField] = [0]
-        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
-
-        buffer = processing.run(
-            "native:buffer",
-            {
-                "INPUT": countryUTMLayer,
-                "DISTANCE": 2000,
-                "SEGMENTS": 5,
-                "END_CAP_STYLE": 0,
-                "JOIN_STYLE": 0,
-                "MITER_LIMIT": 2,
-                "DISSOLVE": True,
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": "memory:",
-            },
-        )
-
-        countryUTMLayerBuf = buffer["OUTPUT"]
-
-        country_extent = shp_utm.total_bounds
-
-        Grid = processing.run(
-            "native:creategrid",
-            {
-                "TYPE": 4,
-                "EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
-                "HSPACING": hexSize,
-                "VSPACING": hexSize,
-                "HOVERLAY": 0,
-                "VOVERLAY": 0,
-                "CRS": QgsCoordinateReferenceSystem(f"{UTM_crs}"),
-                "OUTPUT": "memory:",
-            },
-        )
-        grid_out = Grid["OUTPUT"]
-
-        Clip = processing.run(
-            "native:clip",
-            {"INPUT": grid_out, "OVERLAY": countryUTMLayer, "OUTPUT": adminUTMLayer},
-        )
-
-        self.convertCRS(pointLayer, UTM_crs)
-        shp_utm.to_file(pointUTMLayer)
-
-        pointCount = processing.run(
-            "native:countpointsinpolygon",
-            {
-                "POLYGONS": QgsProcessingFeatureSourceDefinition(
-                    adminUTMLayer,
-                    selectedFeaturesOnly=False,
-                    featureLimit=-1,
-                    flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
-                    geometryCheck=QgsFeatureRequest.GeometrySkipInvalid,
-                ),
-                "POINTS": pointUTMLayer,
-                "WEIGHT": "",
-                "CLASSFIELD": "",
-                "FIELD": rasField,
-                "OUTPUT": pointCount_out,
-            },
-        )
-
-        pointCount_out_df = gpd.read_file(pointCount_out)
-
-        Rmax = pointCount_out_df[rasField].max()
-        Rmin = pointCount_out_df[rasField].min()
-        m_max = 5
-        m_min = 0
-
-        pointCount_out_df[rasField] = (
-            (pointCount_out_df[rasField] - Rmin) / (Rmax - Rmin) * m_max
-        )
-        pointCount_out_df.to_file(pointCount_std)
-
-        Difference = processing.run(
-            "native:difference",
-            {
-                "INPUT": countryUTMLayerBuf,
-                "OVERLAY": pointCount_std,
-                "OUTPUT": "memory:",
-                "GRID_SIZE": None,
-            },
-        )
-
-        difference = Difference["OUTPUT"]
-
-        Merge = processing.run(
-            "native:mergevectorlayers",
-            {"LAYERS": [pointCount_std, difference], "CRS": None, "OUTPUT": "memory:"},
-        )
-
-        mergeOutput = Merge["OUTPUT"]
-
-        extent = mergeOutput.extent()
-        raster_width = int(extent.width() / pixelSize)
-        raster_height = int(extent.height() / pixelSize)
-
-        os.chdir(Dimension)
-
-        rasOutput = self.dlg.APT_Output_Field.text()
-
-        rasterize = processing.run(
-            "gdal:rasterize",
-            {
-                "INPUT": mergeOutput,
-                "FIELD": rasField,
-                "BURN": 0,
-                "USE_Z": False,
-                "UNITS": 0,
-                "WIDTH": raster_width,
-                "HEIGHT": raster_height,
-                "EXTENT": None,
-                "NODATA": None,
-                "OPTIONS": "",
-                "DATA_TYPE": 5,
-                "INIT": None,
-                "INVERT": False,
-                "EXTRA": "",
-                "OUTPUT": rasOutput,
-            },
-        )
-
-        self.dlg.APT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
-        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-        styleFileDestination = f"{workingDir}{Dimension}/"
-        styleFile = f"{rasOutput.split('.')[0]}.qml"
-
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        self.dlg.APT_status.setText("Processing Complete!")
-        self.dlg.APT_status.repaint()
 
         os.chdir(workingDir)
 
@@ -3496,131 +3008,6 @@ class GenderIndicatorTool:
         self.dlg.ENVAGG_status.repaint()
 
     # *************************** Factor Aggregation Functions ************************************ #
-    def indivdualAggregation(self):
-        """
-        This function performs a raster calculation aggregating all the individual dimension factors according to their weightings
-        """
-        self.dlg.individualAggregation_Check.setText("")
-        self.dlg.individualAggregation_Check.repaint()
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-
-        # INPUT
-
-        EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
-        CRE_ras = self.dlg.CRE_Aggregate_Field.text().strip(" ")
-        DOV_ras = self.dlg.DOV_Aggregate_Field.text().strip(" ")
-
-        EDU_weight = self.dlg.EDU_Aggregate_SB.value()
-        CRE_weight = self.dlg.CRE_Aggregate_SB.value()
-        DOV_weight = self.dlg.DOV_Aggregate_SB.value()
-
-        # OUTPUT
-        aggregation = self.dlg.Indivdual_AggregateOutput_Field.text()
-
-        rasLayers = [EDU_ras, CRE_ras, DOV_ras]
-        factorWeighting = [EDU_weight, CRE_weight, DOV_weight]
-
-        non_empty_count = sum(1 for item in rasLayers if item != "")
-
-        weightingSum = round(sum(factorWeighting))
-
-        if weightingSum == 100:
-            if "" in rasLayers:
-                missingLayers = [
-                    index for index, item in enumerate(rasLayers) if item == ""
-                ]
-                presentLayers = [
-                    index for index, item in enumerate(rasLayers) if item != ""
-                ]
-
-                for i in missingLayers:
-                    rasLayers[i] = rasLayers[presentLayers[0]]
-                    factorWeighting[i] = 0
-
-            else:
-                pass
-
-            weightingSum = round(sum(factorWeighting))
-            if weightingSum == 100:
-                with rasterio.open(rasLayers[0]) as src:
-                    EDU_ras = src.read(1)
-                    EDU_weight = factorWeighting[0]
-                    meta1 = src.meta
-
-                with rasterio.open(rasLayers[1]) as src:
-                    CRE_ras = src.read(1)
-                    CRE_weight = factorWeighting[1]
-
-                with rasterio.open(rasLayers[2]) as src:
-                    DOV_ras = src.read(1)
-                    DOV_weight = factorWeighting[2]
-
-                # Raster Calculation
-
-                result = (
-                    (EDU_ras * EDU_weight / 100)
-                    + (CRE_ras * CRE_weight / 100)
-                    + (DOV_ras * DOV_weight / 100)
-                )
-
-                meta1.update(dtype=rasterio.float32)
-
-                Dimension = "Individual"
-                if os.path.exists(Dimension):
-                    os.chdir(Dimension)
-                else:
-                    os.mkdir(Dimension)
-                    os.chdir(Dimension)
-
-                with rasterio.open(aggregation, "w", **meta1) as dst:
-                    dst.write(result, 1)
-
-                self.dlg.ID_Aggregate_Field.setText(
-                    f"{workingDir}{Dimension}/{aggregation}"
-                )
-
-                loggerID = logging.getLogger("loggerID")
-                loggerID.setLevel(logging.INFO)
-                handlerID = logging.FileHandler("Individual.log")
-                formatterID = logging.Formatter("%(asctime)s - %(message)s")
-                handlerID.setFormatter(formatterID)
-                loggerID.addHandler(handlerID)
-
-                loggerID.info(
-                    f"Factors: {non_empty_count}/3 - {non_empty_count/3 * 100} % - {non_empty_count}"
-                )
-                logging.shutdown()
-
-                styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-                styleFileDestination = f"{workingDir}{Dimension}/"
-                styleFile = f"{aggregation.split('.')[0]}.qml"
-
-                shutil.copy(
-                    styleTemplate, os.path.join(styleFileDestination, styleFile)
-                )
-
-                layer = QgsRasterLayer(aggregation, f"{aggregation}")
-
-                if not layer.isValid():
-                    print("Layer failed to load!")
-
-                QgsProject.instance().addMapLayer(layer)
-
-                self.dlg.individualAggregation_Check.setText(
-                    "Individual dimension aggregation complete!"
-                )
-            else:
-                self.dlg.individualAggregation_Check.setText(
-                    "Weighting % does not add up to 100 %"
-                )
-        else:
-            self.dlg.individualAggregation_Check.setText(
-                "Weighting % does not add up to 100 %"
-            )
-
-        os.chdir(workingDir)
 
     def contextualAggregation(self):
         """
@@ -3633,17 +3020,19 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
         # INPUT
-        PLP_ras = self.dlg.PLP_Aggregate_Field.text().strip(" ")
+        WD_ras = self.dlg.WD_Aggregate_Field.text().strip(" ")
+        RF_ras = self.dlg.RF_Aggregate_Field.text().strip(" ")
         FIN_ras = self.dlg.FIN_Aggregate_Field.text().strip(" ")
 
-        PLP_weight = self.dlg.PLP_Aggregate_SB.value()
+        WD_weight = self.dlg.WD_Aggregate_SB.value()
+        RF_weight = self.dlg.RF_Aggregate_SB.value()
         FIN_weight = self.dlg.FIN_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.Contextual_AggregateOutput_Field.text()
 
-        rasLayers = [PLP_ras, FIN_ras]
-        factorWeighting = [PLP_weight, FIN_weight]
+        rasLayers = [WD_ras, RF_ras, FIN_ras]
+        factorWeighting = [WD_weight, RF_weight, FIN_weight]
         non_empty_count = sum(1 for item in rasLayers if item != "")
 
         weightingSum = round(sum(factorWeighting))
@@ -3668,8 +3057,8 @@ class GenderIndicatorTool:
             if weightingSum == 100:
 
                 with rasterio.open(rasLayers[0]) as src:
-                    PLP_ras = src.read(1)
-                    PLP_weight = factorWeighting[0]
+                    RF_ras = src.read(1)
+                    RF_weight = factorWeighting[0]
                     meta1 = src.meta
 
                 with rasterio.open(rasLayers[1]) as src:
@@ -3678,7 +3067,7 @@ class GenderIndicatorTool:
 
                 # Raster Calculation
 
-                result = (PLP_ras * PLP_weight / 100) + (FIN_ras * FIN_weight / 100)
+                result = (RF_ras * RF_weight / 100) + (FIN_ras * FIN_weight / 100)
 
                 meta1.update(dtype=rasterio.float32)
 
@@ -3754,26 +3143,23 @@ class GenderIndicatorTool:
         WTP_ras = self.dlg.WTP_Aggregate_Field.text().strip(" ")
         PBT_ras = self.dlg.PBT_Aggregate_Field.text().strip(" ")
         ETF_ras = self.dlg.ETF_Aggregate_Field.text().strip(" ")
-        JOB_ras = self.dlg.JOB_Aggregate_Field.text().strip(" ")
         HEA_ras = self.dlg.HEA_Aggregate_Field.text().strip(" ")
         FIF_ras = self.dlg.FIF_Aggregate_Field.text().strip(" ")
 
         WTP_weight = self.dlg.WTP_Aggregate_SB.value()
         PBT_weight = self.dlg.PBT_Aggregate_SB.value()
         ETF_weight = self.dlg.ETF_Aggregate_SB.value()
-        JOB_weight = self.dlg.JOB_Aggregate_SB.value()
         HEA_weight = self.dlg.HEA_Aggregate_SB.value()
         FIF_weight = self.dlg.FIF_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.Accessibility_AggregateOutput_Field.text()
 
-        rasLayers = [WTP_ras, PBT_ras, ETF_ras, JOB_ras, HEA_ras, FIF_ras]
+        rasLayers = [WTP_ras, PBT_ras, ETF_ras, HEA_ras, FIF_ras]
         factorWeighting = [
             WTP_weight,
             PBT_weight,
             ETF_weight,
-            JOB_weight,
             HEA_weight,
             FIF_weight,
         ]
@@ -3813,16 +3199,12 @@ class GenderIndicatorTool:
                     ETF_weight = factorWeighting[2]
 
                 with rasterio.open(rasLayers[3]) as src:
-                    JOB_ras = src.read(1)
-                    JOB_weight = factorWeighting[3]
+                    HEA_ras = src.read(1)
+                    HEA_weight = factorWeighting[3]
 
                 with rasterio.open(rasLayers[4]) as src:
-                    HEA_ras = src.read(1)
-                    HEA_weight = factorWeighting[4]
-
-                with rasterio.open(rasLayers[5]) as src:
                     FIF_ras = src.read(1)
-                    FIF_weight = factorWeighting[5]
+                    FIF_weight = factorWeighting[4]
 
                 # Raster Calculation
 
@@ -3830,7 +3212,6 @@ class GenderIndicatorTool:
                     (WTP_ras * WTP_weight / 100)
                     + (PBT_ras * PBT_weight / 100)
                     + (ETF_ras * ETF_weight / 100)
-                    + (JOB_ras * JOB_weight / 100)
                     + (HEA_ras * HEA_weight / 100)
                     + (FIF_ras * FIF_weight / 100)
                 )
@@ -3905,54 +3286,38 @@ class GenderIndicatorTool:
         # INPUT
         WLK_ras = self.dlg.WLK_Aggregate_Field.text().strip(" ")
         # CYC_ras = self.dlg.CYC_Aggregate_Field.text().strip(" ")
-        APT_ras = self.dlg.APT_Aggregate_Field.text().strip(" ")
         SAF_ras = self.dlg.SAF_Aggregate_Field.text().strip(" ")
-        SEC_ras = self.dlg.SEC_Aggregate_Field.text().strip(" ")
-        INC_ras = self.dlg.INC_Aggregate_Field.text().strip(" ")
-        ELC_ras = self.dlg.ELC_Aggregate_Field.text().strip(" ")
-        LOU_ras = self.dlg.LOU_Aggregate_Field.text().strip(" ")
-        QUH_ras = self.dlg.QUH_Aggregate_Field.text().strip(" ")
         DIG_ras = self.dlg.DIG_Aggregate_Field.text().strip(" ")
         ENV_ras = self.dlg.ENV_Aggregate_Field.text().strip(" ")
+        EDU_ras = self.dlg.EDU_Aggregate_Field.text().strip(" ")
+        FCV_ras = self.dlg.FCV_Aggregate_Field.text().strip(" ")
 
         WLK_weight = self.dlg.WLK_Aggregate_SB.value()
         # CYC_weight = self.dlg.CYC_Aggregate_SB.value()
-        APT_weight = self.dlg.APT_Aggregate_SB.value()
         SAF_weight = self.dlg.SAF_Aggregate_SB.value()
-        SEC_weight = self.dlg.SEC_Aggregate_SB.value()
-        INC_weight = self.dlg.INC_Aggregate_SB.value()
-        ELC_weight = self.dlg.ELC_Aggregate_SB.value()
-        LOU_weight = self.dlg.LOU_Aggregate_SB.value()
-        QUH_weight = self.dlg.QUH_Aggregate_SB.value()
         DIG_weight = self.dlg.DIG_Aggregate_SB.value()
         ENV_weight = self.dlg.ENV_Aggregate_SB.value()
+        EDU_weight = self.dlg.EDU_Aggregate_SB.value()
+        FCV_weight = self.dlg.FCV_Aggregate_SB.value()
 
         # OUTPUT
         aggregation = self.dlg.PlaceCharacterization_AggregateOutput_Field.text()
 
         rasLayers = [
             WLK_ras,
-            APT_ras,
             SAF_ras,
-            SEC_ras,
-            INC_ras,
-            ELC_ras,
-            LOU_ras,
-            QUH_ras,
             DIG_ras,
             ENV_ras,
+            EDU_ras,
+            FCV_ras,
         ]
         factorWeighting = [
             WLK_weight,
-            APT_weight,
             SAF_weight,
-            SEC_weight,
-            INC_weight,
-            ELC_weight,
-            LOU_weight,
-            QUH_weight,
             DIG_weight,
             ENV_weight,
+            EDU_weight,
+            FCV_weight,
         ]
         non_empty_count = sum(1 for item in rasLayers if item != "")
 
@@ -3983,54 +3348,34 @@ class GenderIndicatorTool:
                     meta1 = src.meta
 
                 with rasterio.open(rasLayers[1]) as src:
-                    APT_ras = src.read(1)
-                    APT_weight = factorWeighting[1]
+                    SAF_ras = src.read(1)
+                    SAF_weight = factorWeighting[1]
 
                 with rasterio.open(rasLayers[2]) as src:
-                    SAF_ras = src.read(1)
-                    SAF_weight = factorWeighting[2]
+                    DIG_ras = src.read(1)
+                    DIG_weight = factorWeighting[2]
 
                 with rasterio.open(rasLayers[3]) as src:
-                    SEC_ras = src.read(1)
-                    SEC_weight = factorWeighting[3]
-
-                with rasterio.open(rasLayers[4]) as src:
-                    INC_ras = src.read(1)
-                    INC_weight = factorWeighting[4]
-
-                with rasterio.open(rasLayers[5]) as src:
-                    ELC_ras = src.read(1)
-                    ELC_weight = factorWeighting[5]
-
-                with rasterio.open(rasLayers[6]) as src:
-                    LOU_ras = src.read(1)
-                    LOU_weight = factorWeighting[6]
-
-                with rasterio.open(rasLayers[7]) as src:
-                    QUH_ras = src.read(1)
-                    QUH_weight = factorWeighting[7]
-
-                with rasterio.open(rasLayers[8]) as src:
-                    DIG_ras = src.read(1)
-                    DIG_weight = factorWeighting[8]
-
-                with rasterio.open(rasLayers[9]) as src:
                     ENV_ras = src.read(1)
-                    ENV_weight = factorWeighting[9]
+                    ENV_weight = factorWeighting[3]
+                    
+                with rasterio.open(rasLayers[4]) as src:
+                    EDU_ras = src.read(1)
+                    EDU_weight = factorWeighting[4]
+                    
+                with rasterio.open(rasLayers[5]) as src:
+                    EDU_ras = src.read(1)
+                    EDU_weight = factorWeighting[5]
 
                 # Raster Calculation
 
                 result = (
                     (WLK_ras * WLK_weight / 100)
-                    + (APT_ras * APT_weight / 100)
                     + (SAF_ras * SAF_weight / 100)
-                    + (SEC_ras * SEC_weight / 100)
-                    + (INC_ras * INC_weight / 100)
-                    + (ELC_ras * ELC_weight / 100)
-                    + (LOU_ras * LOU_weight / 100)
-                    + (QUH_ras * QUH_weight / 100)
                     + (DIG_ras * DIG_weight / 100)
                     + (ENV_ras * ENV_weight / 100)
+                    + (EDU_ras * EDU_weight / 100)
+                    + (FCV_ras * FCV_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
@@ -4186,7 +3531,6 @@ class GenderIndicatorTool:
                 )
 
                 log_list = [
-                    "Individual",
                     "Contextual",
                     "Accessibility",
                     "Place Characterization",
