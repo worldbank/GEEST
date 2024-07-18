@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
-    <height>712</height>
+    <width>788</width>
+    <height>775</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>900</width>
-    <height>712</height>
+    <height>900</height>
    </size>
   </property>
   <property name="contextMenuPolicy">
@@ -40,14 +40,14 @@
      <property name="maximumSize">
       <size>
        <width>900</width>
-       <height>700</height>
+       <height>900</height>
       </size>
      </property>
      <property name="toolTip">
       <string/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -802,8 +802,79 @@ p, li { white-space: pre-wrap; }
            <string>Women's Travel Patterns</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_10">
-           <item row="0" column="0" colspan="2">
-            <widget class="QTextEdit" name="textEdit_35">
+           <item row="10" column="0" colspan="2">
+            <widget class="QComboBox" name="WTP_mode_CB"/>
+           </item>
+           <item row="17" column="0">
+            <widget class="QPushButton" name="WTP_Execute_PB">
+             <property name="text">
+              <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_153">
+             <property name="text">
+              <string>Facilty Point Layer Input (Green Spaces)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="WTP_Input_Field" native="true"/>
+           </item>
+           <item row="20" column="0" colspan="2">
+            <widget class="QgsFilterLineEdit" name="WTP_AGGOutput_Field">
+             <property name="text">
+              <string>WTP_.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="0" colspan="2">
+            <widget class="QLabel" name="label_39">
+             <property name="text">
+              <string>Facility Output Raster Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="21" column="1">
+            <widget class="QLabel" name="WTPAGG_status">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="0" colspan="2">
+            <widget class="QLabel" name="label_35">
+             <property name="text">
+              <string>Travel distance or time increments [meters OR min]</string>
+             </property>
+            </widget>
+           </item>
+           <item row="16" column="0" colspan="2">
+            <widget class="QgsFilterLineEdit" name="WTP_FacilityOutput_Field">
+             <property name="text">
+              <string>Facility_.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0" colspan="2">
+            <widget class="QgsFilterLineEdit" name="WTP_Ranges_Field">
+             <property name="text">
+              <string>400, 800, 1200, 1600, 2000</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="18" column="0" colspan="2">
+            <widget class="QTextEdit" name="textEdit_11">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -821,11 +892,11 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Step 1: Repeat for all facility types&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Step 2: Aggregate Facility Outputs&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2" rowspan="16">
+           <item row="0" column="2" rowspan="22">
             <widget class="QTextEdit" name="textEdit_10">
              <property name="enabled">
               <bool>true</bool>
@@ -858,86 +929,46 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QLabel" name="label_37">
-             <property name="text">
-              <string>Facilty Point Layer Input</string>
-             </property>
-            </widget>
+           <item row="12" column="0" colspan="2">
+            <widget class="QComboBox" name="WTP_measurement_CB"/>
            </item>
-           <item row="2" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WTP_Input_Field" native="true"/>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QLabel" name="label_36">
-             <property name="text">
-              <string>Select mode of travel</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QComboBox" name="WTP_mode_CB"/>
-           </item>
-           <item row="5" column="0" colspan="2">
+           <item row="11" column="0" colspan="2">
             <widget class="QLabel" name="label_38">
              <property name="text">
               <string>Select measurement</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="0" colspan="2">
-            <widget class="QComboBox" name="WTP_measurement_CB"/>
-           </item>
-           <item row="7" column="0" colspan="2">
-            <widget class="QLabel" name="label_35">
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_152">
              <property name="text">
-              <string>Travel distance or time increments [meters OR min]</string>
+              <string>Facilty Point Layer Input (Grocery Stores)</string>
              </property>
             </widget>
            </item>
-           <item row="8" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="WTP_Ranges_Field">
+           <item row="7" column="0" colspan="2">
+            <widget class="QLabel" name="label_37">
              <property name="text">
-              <string>400, 800, 1200, 1600, 2000</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
+              <string>Facilty Point Layer Input (Kindergarten or PrimarySchools)</string>
              </property>
             </widget>
            </item>
            <item row="9" column="0" colspan="2">
-            <widget class="QLabel" name="label_39">
+            <widget class="QLabel" name="label_36">
              <property name="text">
-              <string>Facility Output Raster Filename</string>
+              <string>Select mode of travel</string>
              </property>
             </widget>
            </item>
-           <item row="10" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="WTP_FacilityOutput_Field">
+           <item row="21" column="0">
+            <widget class="QPushButton" name="WTP_Aggregate_PB">
              <property name="text">
-              <string>Facility_.tif</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
+              <string>Aggregate</string>
              </property>
             </widget>
            </item>
-           <item row="11" column="0">
-            <widget class="QPushButton" name="WTP_Execute_PB">
-             <property name="text">
-              <string>Execute</string>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="1">
-            <widget class="QLabel" name="WTP_status">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="0" colspan="2">
-            <widget class="QTextEdit" name="textEdit_11">
+           <item row="0" column="0" colspan="2">
+            <widget class="QTextEdit" name="textEdit_35">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -955,40 +986,39 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Step 2: Aggregate Facility Outputs&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Step 1: Repeat for all facility types&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
-           <item row="13" column="0" colspan="2">
+           <item row="17" column="1">
+            <widget class="QLabel" name="WTP_status">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="19" column="0" colspan="2">
             <widget class="QLabel" name="label_40">
              <property name="text">
               <string>WTP Raster Output Filename</string>
              </property>
             </widget>
            </item>
-           <item row="14" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="WTP_AGGOutput_Field">
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_41">
              <property name="text">
-              <string>WTP_.tif</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
+              <string>Facilty Point Layer Input (Pharmacies)</string>
              </property>
             </widget>
            </item>
-           <item row="15" column="0">
-            <widget class="QPushButton" name="WTP_Aggregate_PB">
-             <property name="text">
-              <string>Aggregate</string>
-             </property>
-            </widget>
+           <item row="6" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="WTP_Input_Field_4" native="true"/>
            </item>
-           <item row="15" column="1">
-            <widget class="QLabel" name="WTPAGG_status">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
+           <item row="4" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="WTP_Input_Field_3" native="true"/>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="WTP_Input_Field_2" native="true"/>
            </item>
           </layout>
          </widget>
@@ -1847,7 +1877,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>3</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -2670,8 +2700,8 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Fragility, conflict, and violence&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the percentage of women who have achieved a post-secondary education in the country of interest.   &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;_Hlk146891458&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;I&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;nput&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A Polygon layer (.shp) &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;   &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;_Hlk146891458&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;I&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;nput&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A Point layer (.shp) &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>

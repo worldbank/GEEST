@@ -1479,7 +1479,20 @@ class GenderIndicatorTool:
         elif factor_no == 5:
             self.dlg.WTP_status.setText("")
             self.dlg.WTP_status.repaint()
-            FaciltyPointlayer = self.dlg.WTP_Input_Field.filePath()
+            input_fields = [
+                self.dlg.WTP_Input_Field,
+                self.dlg.WTP_Input_Field_2,
+                self.dlg.WTP_Input_Field_3,
+                self.dlg.WTP_Input_Field_4
+            ]
+
+            FaciltyPointlayerList = []
+
+            for input_field in input_fields:
+                file_path = input_field.filePath()
+                if file_path:
+                    FaciltyPointlayerList.append(file_path)
+            
             ranges = self.dlg.WTP_Ranges_Field.text()
             rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}.tif"
             mergeOutput = (
@@ -1507,124 +1520,425 @@ class GenderIndicatorTool:
         # OUTPUT
         SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
         temp_merge = f"{tempDir}/temp_merge.shp"
+        
+        if factor_no == 5:
+            # Do stuff
+            facility_data = 0
+            for FaciltyPointlayer in FaciltyPointlayerList:
+                os.chdir(workingDir)
+                gdf = gpd.read_file(FaciltyPointlayer)
 
-        gdf = gpd.read_file(FaciltyPointlayer)
+                subset_size = 5
+                subsets = []
 
-        subset_size = 5
-        subsets = []
+                for i in range(0, len(gdf), subset_size):
+                    subset = gdf.iloc[i : i + subset_size]
+                    subset = QgsVectorLayer(subset.to_json(),   "mygeojson", "ogr")
+                    subset_outfile = (
+                        f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
+                    )
 
-        for i in range(0, len(gdf), subset_size):
-            subset = gdf.iloc[i : i + subset_size]
-            print(f"subset:{subset}")
-            subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
-            subset_outfile = (
-                f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
-            )
+                    Service_Area = processing.run(
+                        "ORS Tools:isochrones_from_layer",
+                        {
+                            "INPUT_PROVIDER": 0,
+                            "INPUT_PROFILE": mode,
+                            "INPUT_POINT_LAYER": subset,
+                            "INPUT_FIELD": "",
+                            "INPUT_METRIC": measurement,
+                            "INPUT_RANGES": ranges,
+                            "INPUT_SMOOTHING": None,
+                            "LOCATION_TYPE": 0,
+                            "INPUT_AVOID_FEATURES": [],
+                            "INPUT_AVOID_BORDERS": None,
+                            "INPUT_AVOID_COUNTRIES": "",
+                            "INPUT_AVOID_POLYGONS": None,
+                            "OUTPUT": subset_outfile,
+                        },
+                    )
 
-            Service_Area = processing.run(
-                "ORS Tools:isochrones_from_layer",
+                    subsets.append(subset_outfile)
+
+                    batch = i + subset_size
+
+                    if batch > len(gdf):
+                        batch = len(gdf)
+
+                    if factor_no == 0:
+                        self.dlg.PBT_status.setText(f"Processing... {batch} of {len(gdf)}")
+                        self.dlg.PBT_status.repaint()
+                    elif factor_no == 1:
+                        self.dlg.ETF_status.setText(f"Processing... {batch} of {len(gdf)}")
+                        self.dlg.ETF_status.repaint()
+                    elif factor_no == 3:
+                        self.dlg.HEA_status.setText(f"Processing... {batch} of {len(gdf)}")
+                        self.dlg.HEA_status.repaint()
+                    elif factor_no == 4:
+                        self.dlg.FIF_status.setText(f"Processing... {batch} of {len(gdf)}")
+                        self.dlg.FIF_status.repaint()
+                    elif factor_no == 5:
+                        self.dlg.WTP_status.setText(f"Processing... {batch} of {len(gdf)}")
+                        self.dlg.WTP_status.repaint()
+
+                Merge = processing.run(
+                    "native:mergevectorlayers",
+                    {
+                        "LAYERS": subsets,
+                        "CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "OUTPUT": SAOutput_utm,
+                    },
+                )
+
+                time.sleep(0.5)
+
+                # self.convertCRS(SAOutput_utm, UTM_crs)
+                # SA_df = shp_utm
+                SA_df = gpd.read_file(SAOutput_utm)
+                no_spaces_string = "".join(ranges.split())
+                ranges_list = no_spaces_string.split(",")
+                int_ranges_list = [int(x) for x in ranges_list]
+                int_ranges_list.sort()
+
+                range_subsets = []
+
+                for i in int_ranges_list:
+                    range_subset = SA_df[SA_df[ranges_field] == i]
+                    range_subset = QgsVectorLayer(range_subset.to_json(), f"range_{i}", "ogr")
+                    temp_out = f"{tempDir}/{rasOutput[:-4]}Range_dis_{i}.shp"
+
+                    dissolve = processing.run(
+                        "native:dissolve",
+                        {
+                            "INPUT": range_subset,
+                            "FIELD": [],
+                            "SEPARATE_DISJOINT": False,
+                            "OUTPUT": temp_out,
+                        },
+                    )
+
+                    Range_output = dissolve["OUTPUT"]
+
+                    range_subsets.append(range_subset)
+
+                Merge_list = []
+
+                for i in range(-1, -len(range_subsets), -1):
+                    output = (
+                        f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                    )
+                    # Merge_list.append(output)
+                    difference = processing.run(
+                        "native:difference",
+                        {
+                            "INPUT": range_subsets[i],
+                            "OVERLAY": range_subsets[i - 1],
+                            "OUTPUT": "memory:",
+                            "GRID_SIZE": None,
+                        },
+                    )
+                    diff_output = difference["OUTPUT"]
+
+                    dissolve = processing.run(
+                        "native:dissolve",
+                        {
+                            "INPUT": diff_output,
+                            "FIELD": [],
+                            "SEPARATE_DISJOINT": False,
+                            "OUTPUT": "memory:",
+                        },
+                    )
+
+                    dis_output = dissolve["OUTPUT"]
+                    Merge_list.append(dis_output)
+
+                dissolve = processing.run(
+                    "native:dissolve",
+                    {
+                        "INPUT": range_subsets[0],
+                        "FIELD": [],
+                        "SEPARATE_DISJOINT": False,
+                        "OUTPUT": "memory:",
+                    },
+                )
+
+                dis_output = dissolve["OUTPUT"]
+                Merge_list.append(dis_output)
+                
+                print(f"Path: {os.getcwd()}")
+
+                if os.path.exists(f"{Dimension}/SA_SHP"):
+                    pass
+                else:
+                    os.mkdir(f"{Dimension}/SA_SHP")
+
+                Merge = processing.run(
+                    "native:mergevectorlayers",
+                    {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
+                )
+        
+        
+                time.sleep(0.5)
+
+                merge_df = gpd.read_file(f"{mergeOutput}")
+                merge_df["rasField"] = [1, 2, 3, 4, 5]
+                merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
+
+                # Convert countryLayer data to UTM CRS
+                self.convertCRS(countryLayer, UTM_crs)
+                shp_utm["rasField"] = [0]
+                shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
+                # shp_utm.to_file(countryUTMLayer)
+
+                buffer = processing.run(
+                    "native:buffer",
+                    {
+                        "INPUT": shp_utm_,
+                        "DISTANCE": 2000,
+                        "SEGMENTS": 5,
+                        "END_CAP_STYLE": 0,
+                        "JOIN_STYLE": 0,
+                        "MITER_LIMIT": 2,
+                        "DISSOLVE": True,
+                        "SEPARATE_DISJOINT": False,
+                        "OUTPUT": "memory:",
+                    },
+                )
+
+                buffer_output = buffer["OUTPUT"]
+        
+                clipAOI = processing.run(
+                    "native:clip",
+                    {
+                    "INPUT": merge_SA_UTM,
+                    "OVERLAY": buffer_output,
+                    "OUTPUT": "memory",
+                    }
+                )
+            
+                merge_SA_UTM = clipAOI["OUTPUT"]
+
+                Difference = processing.run(
+                    "native:difference",
+                    {
+                        "INPUT": buffer_output,
+                        "OVERLAY": merge_SA_UTM,
+                        "OUTPUT": "memory:",
+                        "GRID_SIZE": None,
+                    },
+                )
+
+                diff_output = Difference["OUTPUT"]
+
+                Merge = processing.run(
+                    "native:mergevectorlayers",
+                    {"LAYERS": [merge_SA_UTM, diff_output], "CRS": None, "OUTPUT": "memory:"},
+                )
+
+                merge_output = Merge["OUTPUT"]
+
+                extent = merge_output.extent()
+                raster_width = int(extent.width() / pixelSize)
+                raster_height = int(extent.height() / pixelSize)
+
+                if os.path.exists(Dimension):
+                    os.chdir(Dimension)
+                else:
+                    os.mkdir(Dimension)
+                    os.chdir(Dimension)
+
+                if factor_no == 5:
+                    Output_Folder = "WTP"
+                    if os.path.exists(Output_Folder):
+                        os.chdir(Output_Folder)
+                    else:
+                        os.mkdir(Output_Folder)
+                        os.chdir(Output_Folder)
+
+                    styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+                    styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
+                    styleFile = f"{rasOutput.split('.')[0]}.qml"
+                else:
+                    pass
+                
+                rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{facility_data}.tif"
+
+                rasterize = processing.run(
+                    "gdal:rasterize",
+                    {
+                        "INPUT": merge_output,
+                        "FIELD": "rasField",
+                        "BURN": 0,
+                        "USE_Z": False,
+                        "UNITS": 0,
+                        "WIDTH": raster_width,
+                        "HEIGHT": raster_height,
+                        "EXTENT": None,
+                        "NODATA": None,
+                        "OPTIONS": "",
+                        "DATA_TYPE": 5,
+                        "INIT": None,
+                        "INVERT": False,
+                        "EXTRA": "",
+                        "OUTPUT": rasOutput,
+                    },
+                )
+                
+                facility_data = facility_data + 1
+
+                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                if factor_no == 0:
+                    self.dlg.PBT_status.setText("Processing Complete!")
+                    self.dlg.PBT_status.repaint()
+
+                elif factor_no == 1:
+                    self.dlg.ETF_status.setText("Processing Complete!")
+                    self.dlg.ETF_status.repaint()
+
+                elif factor_no == 3:
+                    self.dlg.HEA_status.setText("Processing Complete!")
+                    self.dlg.HEA_status.repaint()
+
+                elif factor_no == 4:
+                    self.dlg.FIF_status.setText("Processing Complete!")
+                    self.dlg.FIF_status.repaint()
+
+                elif factor_no == 5:
+                    self.dlg.WTP_status.setText("Processing Complete!")
+                    self.dlg.WTP_status.repaint()
+        else:
+            # Do more stuff
+
+            gdf = gpd.read_file(FaciltyPointlayer)
+
+            subset_size = 5
+            subsets = []
+
+            for i in range(0, len(gdf), subset_size):
+                subset = gdf.iloc[i : i + subset_size]
+                print(f"subset:{subset}")
+                subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
+                subset_outfile = (
+                    f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
+                )
+
+                Service_Area = processing.run(
+                    "ORS Tools:isochrones_from_layer",
+                    {
+                        "INPUT_PROVIDER": 0,
+                        "INPUT_PROFILE": mode,
+                        "INPUT_POINT_LAYER": subset,
+                        "INPUT_FIELD": "",
+                        "INPUT_METRIC": measurement,
+                        "INPUT_RANGES": ranges,
+                        "INPUT_SMOOTHING": None,
+                        "LOCATION_TYPE": 0,
+                        "INPUT_AVOID_FEATURES": [],
+                        "INPUT_AVOID_BORDERS": None,
+                        "INPUT_AVOID_COUNTRIES": "",
+                        "INPUT_AVOID_POLYGONS": None,
+                        "OUTPUT": subset_outfile,
+                    },
+                )
+
+                subsets.append(subset_outfile)
+
+                batch = i + subset_size
+
+                if batch > len(gdf):
+                    batch = len(gdf)
+
+                if factor_no == 0:
+                    self.dlg.PBT_status.setText(f"Processing... {batch} of {len(gdf)}")
+                    self.dlg.PBT_status.repaint()
+                elif factor_no == 1:
+                    self.dlg.ETF_status.setText(f"Processing... {batch} of {len(gdf)}")
+                    self.dlg.ETF_status.repaint()
+                elif factor_no == 3:
+                    self.dlg.HEA_status.setText(f"Processing... {batch} of {len(gdf)}")
+                    self.dlg.HEA_status.repaint()
+                elif factor_no == 4:
+                    self.dlg.FIF_status.setText(f"Processing... {batch} of {len(gdf)}")
+                    self.dlg.FIF_status.repaint()
+                elif factor_no == 5:
+                    self.dlg.WTP_status.setText(f"Processing... {batch} of {len(gdf)}")
+                    self.dlg.WTP_status.repaint()
+
+            Merge = processing.run(
+                "native:mergevectorlayers",
                 {
-                    "INPUT_PROVIDER": 0,
-                    "INPUT_PROFILE": mode,
-                    "INPUT_POINT_LAYER": subset,
-                    "INPUT_FIELD": "",
-                    "INPUT_METRIC": measurement,
-                    "INPUT_RANGES": ranges,
-                    "INPUT_SMOOTHING": None,
-                    "LOCATION_TYPE": 0,
-                    "INPUT_AVOID_FEATURES": [],
-                    "INPUT_AVOID_BORDERS": None,
-                    "INPUT_AVOID_COUNTRIES": "",
-                    "INPUT_AVOID_POLYGONS": None,
-                    "OUTPUT": subset_outfile,
+                    "LAYERS": subsets,
+                    "CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "OUTPUT": SAOutput_utm,
                 },
             )
 
-            subsets.append(subset_outfile)
+            time.sleep(0.5)
 
-            batch = i + subset_size
+            # self.convertCRS(SAOutput_utm, UTM_crs)
+            # SA_df = shp_utm
+            SA_df = gpd.read_file(SAOutput_utm)
+            no_spaces_string = "".join(ranges.split())
+            ranges_list = no_spaces_string.split(",")
+            int_ranges_list = [int(x) for x in ranges_list]
+            int_ranges_list.sort()
 
-            if batch > len(gdf):
-                batch = len(gdf)
+            range_subsets = []
 
-            if factor_no == 0:
-                self.dlg.PBT_status.setText(f"Processing... {batch} of {len(gdf)}")
-                self.dlg.PBT_status.repaint()
-            elif factor_no == 1:
-                self.dlg.ETF_status.setText(f"Processing... {batch} of {len(gdf)}")
-                self.dlg.ETF_status.repaint()
-            elif factor_no == 3:
-                self.dlg.HEA_status.setText(f"Processing... {batch} of {len(gdf)}")
-                self.dlg.HEA_status.repaint()
-            elif factor_no == 4:
-                self.dlg.FIF_status.setText(f"Processing... {batch} of {len(gdf)}")
-                self.dlg.FIF_status.repaint()
-            elif factor_no == 5:
-                self.dlg.WTP_status.setText(f"Processing... {batch} of {len(gdf)}")
-                self.dlg.WTP_status.repaint()
+            for i in int_ranges_list:
+                range_subset = SA_df[SA_df[ranges_field] == i]
+                range_subset = QgsVectorLayer(range_subset.to_json(), f"range_{i}", "ogr")
+                temp_out = f"{tempDir}/{rasOutput[:-4]}Range_dis_{i}.shp"
 
-        Merge = processing.run(
-            "native:mergevectorlayers",
-            {
-                "LAYERS": subsets,
-                "CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                "OUTPUT": SAOutput_utm,
-            },
-        )
+                dissolve = processing.run(
+                    "native:dissolve",
+                    {
+                        "INPUT": range_subset,
+                        "FIELD": [],
+                        "SEPARATE_DISJOINT": False,
+                        "OUTPUT": temp_out,
+                    },
+                )
 
-        time.sleep(0.5)
+                Range_output = dissolve["OUTPUT"]
 
-        # self.convertCRS(SAOutput_utm, UTM_crs)
-        # SA_df = shp_utm
-        SA_df = gpd.read_file(SAOutput_utm)
-        no_spaces_string = "".join(ranges.split())
-        ranges_list = no_spaces_string.split(",")
-        int_ranges_list = [int(x) for x in ranges_list]
-        int_ranges_list.sort()
+                range_subsets.append(range_subset)
 
-        range_subsets = []
+            Merge_list = []
 
-        for i in int_ranges_list:
-            range_subset = SA_df[SA_df[ranges_field] == i]
-            range_subset = QgsVectorLayer(range_subset.to_json(), f"range_{i}", "ogr")
-            temp_out = f"{tempDir}/{rasOutput[:-4]}Range_dis_{i}.shp"
+            for i in range(-1, -len(range_subsets), -1):
+                output = (
+                    f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                )
+                # Merge_list.append(output)
+                difference = processing.run(
+                    "native:difference",
+                    {
+                        "INPUT": range_subsets[i],
+                        "OVERLAY": range_subsets[i - 1],
+                        "OUTPUT": "memory:",
+                        "GRID_SIZE": None,
+                    },
+                )
+                diff_output = difference["OUTPUT"]
+
+                dissolve = processing.run(
+                    "native:dissolve",
+                    {
+                        "INPUT": diff_output,
+                        "FIELD": [],
+                        "SEPARATE_DISJOINT": False,
+                        "OUTPUT": "memory:",
+                    },
+                )
+
+                dis_output = dissolve["OUTPUT"]
+                Merge_list.append(dis_output)
 
             dissolve = processing.run(
                 "native:dissolve",
                 {
-                    "INPUT": range_subset,
-                    "FIELD": [],
-                    "SEPARATE_DISJOINT": False,
-                    "OUTPUT": temp_out,
-                },
-            )
-
-            Range_output = dissolve["OUTPUT"]
-
-            range_subsets.append(range_subset)
-
-        Merge_list = []
-
-        for i in range(-1, -len(range_subsets), -1):
-            output = (
-                f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
-            )
-            # Merge_list.append(output)
-            difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": range_subsets[i],
-                    "OVERLAY": range_subsets[i - 1],
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-            diff_output = difference["OUTPUT"]
-
-            dissolve = processing.run(
-                "native:dissolve",
-                {
-                    "INPUT": diff_output,
+                    "INPUT": range_subsets[0],
                     "FIELD": [],
                     "SEPARATE_DISJOINT": False,
                     "OUTPUT": "memory:",
@@ -1634,60 +1948,47 @@ class GenderIndicatorTool:
             dis_output = dissolve["OUTPUT"]
             Merge_list.append(dis_output)
 
-        dissolve = processing.run(
-            "native:dissolve",
-            {
-                "INPUT": range_subsets[0],
-                "FIELD": [],
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": "memory:",
-            },
-        )
+            if os.path.exists(f"{Dimension}/SA_SHP"):
+                pass
+            else:
+                os.mkdir(f"{Dimension}/SA_SHP")
 
-        dis_output = dissolve["OUTPUT"]
-        Merge_list.append(dis_output)
-
-        if os.path.exists(f"{Dimension}/SA_SHP"):
-            pass
-        else:
-            os.mkdir(f"{Dimension}/SA_SHP")
-
-        Merge = processing.run(
-            "native:mergevectorlayers",
-            {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
-        )
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
+            )
         
         
-        time.sleep(0.5)
+            time.sleep(0.5)
 
-        merge_df = gpd.read_file(f"{mergeOutput}")
-        merge_df["rasField"] = [1, 2, 3, 4, 5]
-        merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
+            merge_df = gpd.read_file(f"{mergeOutput}")
+            merge_df["rasField"] = [1, 2, 3, 4, 5]
+            merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
 
-        # Convert countryLayer data to UTM CRS
-        self.convertCRS(countryLayer, UTM_crs)
-        shp_utm["rasField"] = [0]
-        shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
-        # shp_utm.to_file(countryUTMLayer)
+            # Convert countryLayer data to UTM CRS
+            self.convertCRS(countryLayer, UTM_crs)
+            shp_utm["rasField"] = [0]
+            shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
+            # shp_utm.to_file(countryUTMLayer)
 
-        buffer = processing.run(
-            "native:buffer",
-            {
-                "INPUT": shp_utm_,
-                "DISTANCE": 2000,
-                "SEGMENTS": 5,
-                "END_CAP_STYLE": 0,
-                "JOIN_STYLE": 0,
-                "MITER_LIMIT": 2,
-                "DISSOLVE": True,
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": "memory:",
-            },
-        )
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": shp_utm_,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": "memory:",
+                },
+            )
 
-        buffer_output = buffer["OUTPUT"]
+            buffer_output = buffer["OUTPUT"]
         
-        clipAOI = processing.run(
+            clipAOI = processing.run(
                 "native:clip",
                 {
                    "INPUT": merge_SA_UTM,
@@ -1696,93 +1997,93 @@ class GenderIndicatorTool:
                 }
             )
             
-        merge_SA_UTM = clipAOI["OUTPUT"]
+            merge_SA_UTM = clipAOI["OUTPUT"]
 
-        Difference = processing.run(
-            "native:difference",
-            {
-                "INPUT": buffer_output,
-                "OVERLAY": merge_SA_UTM,
-                "OUTPUT": "memory:",
-                "GRID_SIZE": None,
-            },
-        )
+            Difference = processing.run(
+                "native:difference",
+                {
+                    "INPUT": buffer_output,
+                    "OVERLAY": merge_SA_UTM,
+                    "OUTPUT": "memory:",
+                    "GRID_SIZE": None,
+                },
+            )
 
-        diff_output = Difference["OUTPUT"]
+            diff_output = Difference["OUTPUT"]
 
-        Merge = processing.run(
-            "native:mergevectorlayers",
-            {"LAYERS": [merge_SA_UTM, diff_output], "CRS": None, "OUTPUT": "memory:"},
-        )
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": [merge_SA_UTM, diff_output], "CRS": None, "OUTPUT": "memory:"},
+            )
 
-        merge_output = Merge["OUTPUT"]
+            merge_output = Merge["OUTPUT"]
 
-        extent = merge_output.extent()
-        raster_width = int(extent.width() / pixelSize)
-        raster_height = int(extent.height() / pixelSize)
+            extent = merge_output.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
 
-        if os.path.exists(Dimension):
-            os.chdir(Dimension)
-        else:
-            os.mkdir(Dimension)
-            os.chdir(Dimension)
-
-        if factor_no == 5:
-            Output_Folder = "WTP"
-            if os.path.exists(Output_Folder):
-                os.chdir(Output_Folder)
+            if os.path.exists(Dimension):
+                os.chdir(Dimension)
             else:
-                os.mkdir(Output_Folder)
-                os.chdir(Output_Folder)
+                os.mkdir(Dimension)
+                os.chdir(Dimension)
 
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-        else:
-            pass
+            if factor_no == 5:
+                Output_Folder = "WTP"
+                if os.path.exists(Output_Folder):
+                    os.chdir(Output_Folder)
+                else:
+                    os.mkdir(Output_Folder)
+                    os.chdir(Output_Folder)
 
-        rasterize = processing.run(
-            "gdal:rasterize",
-            {
-                "INPUT": merge_output,
-                "FIELD": "rasField",
-                "BURN": 0,
-                "USE_Z": False,
-                "UNITS": 0,
-                "WIDTH": raster_width,
-                "HEIGHT": raster_height,
-                "EXTENT": None,
-                "NODATA": None,
-                "OPTIONS": "",
-                "DATA_TYPE": 5,
-                "INIT": None,
-                "INVERT": False,
-                "EXTRA": "",
-                "OUTPUT": rasOutput,
-            },
-        )
+                styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+                styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
+                styleFile = f"{rasOutput.split('.')[0]}.qml"
+            else:
+                pass
 
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+            rasterize = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": merge_output,
+                    "FIELD": "rasField",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 0,
+                    "WIDTH": raster_width,
+                    "HEIGHT": raster_height,
+                    "EXTENT": None,
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput,
+                },
+            )
 
-        if factor_no == 0:
-            self.dlg.PBT_status.setText("Processing Complete!")
-            self.dlg.PBT_status.repaint()
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        elif factor_no == 1:
-            self.dlg.ETF_status.setText("Processing Complete!")
-            self.dlg.ETF_status.repaint()
+            if factor_no == 0:
+                self.dlg.PBT_status.setText("Processing Complete!")
+                self.dlg.PBT_status.repaint()
 
-        elif factor_no == 3:
-            self.dlg.HEA_status.setText("Processing Complete!")
-            self.dlg.HEA_status.repaint()
+            elif factor_no == 1:
+                self.dlg.ETF_status.setText("Processing Complete!")
+                self.dlg.ETF_status.repaint()
 
-        elif factor_no == 4:
-            self.dlg.FIF_status.setText("Processing Complete!")
-            self.dlg.FIF_status.repaint()
+            elif factor_no == 3:
+                self.dlg.HEA_status.setText("Processing Complete!")
+                self.dlg.HEA_status.repaint()
 
-        elif factor_no == 5:
-            self.dlg.WTP_status.setText("Processing Complete!")
-            self.dlg.WTP_status.repaint()
+            elif factor_no == 4:
+                self.dlg.FIF_status.setText("Processing Complete!")
+                self.dlg.FIF_status.repaint()
+
+            elif factor_no == 5:
+                self.dlg.WTP_status.setText("Processing Complete!")
+                self.dlg.WTP_status.repaint()
 
     def wtpAggregate(self):
         """
@@ -1828,7 +2129,7 @@ class GenderIndicatorTool:
             value = raster_list[i]
             cumulative_sum += value
 
-        aggregation = cumulative_sum / len_raster_list
+        aggregation = cumulative_sum / 4
         os.chdir("..")
 
         with rasterio.open(rasOutput, "w", **meta1) as dst:
