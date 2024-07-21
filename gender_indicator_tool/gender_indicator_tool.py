@@ -744,7 +744,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": polygonUTM,
                    "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -825,7 +825,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": polygonUTM,
                    "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -906,7 +906,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": polygonUTM,
                    "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -987,7 +987,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": polygonUTM,
                    "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -1067,7 +1067,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": polygonUTM,
                    "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -1148,7 +1148,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": polygonUTM,
                    "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -1228,7 +1228,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": polygonUTM,
                    "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -1670,142 +1670,148 @@ class GenderIndicatorTool:
                     pass
                 else:
                     os.mkdir(f"{Dimension}/SA_SHP")
+                    
+                feedback = QgsProcessingFeedback()
 
                 Merge = processing.run(
                     "native:mergevectorlayers",
                     {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
                 )
+                
+                if Merge is not None and "OUTPUT" in Merge:
+                    print(f"Processing completed successfully")
+                    
+                    # Do something
+
+                    merge_df = gpd.read_file(f"{mergeOutput}")
+                    merge_df["rasField"] = [1, 2, 3, 4, 5]
+                    merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
+
+                    # Convert countryLayer data to UTM CRS
+                    self.convertCRS(countryLayer, UTM_crs)
+                    shp_utm["rasField"] = [0]
+                    shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
+                    # shp_utm.to_file(countryUTMLayer)
+
+                    buffer = processing.run(
+                        "native:buffer",
+                        {
+                            "INPUT": shp_utm_,
+                            "DISTANCE": 2000,
+                            "SEGMENTS": 5,
+                            "END_CAP_STYLE": 0,
+                            "JOIN_STYLE": 0,
+                            "MITER_LIMIT": 2,
+                            "DISSOLVE": True,
+                            "SEPARATE_DISJOINT": False,
+                            "OUTPUT": "memory:",
+                        },
+                    )
+
+                    buffer_output = buffer["OUTPUT"]
         
-        
-                time.sleep(0.5)
-
-                merge_df = gpd.read_file(f"{mergeOutput}")
-                merge_df["rasField"] = [1, 2, 3, 4, 5]
-                merge_SA_UTM = QgsVectorLayer(merge_df.to_json(), "merge_SA_utm", "ogr")
-
-                # Convert countryLayer data to UTM CRS
-                self.convertCRS(countryLayer, UTM_crs)
-                shp_utm["rasField"] = [0]
-                shp_utm_ = QgsVectorLayer(shp_utm.to_json(), "shp_utm", "ogr")
-                # shp_utm.to_file(countryUTMLayer)
-
-                buffer = processing.run(
-                    "native:buffer",
-                    {
-                        "INPUT": shp_utm_,
-                        "DISTANCE": 2000,
-                        "SEGMENTS": 5,
-                        "END_CAP_STYLE": 0,
-                        "JOIN_STYLE": 0,
-                        "MITER_LIMIT": 2,
-                        "DISSOLVE": True,
-                        "SEPARATE_DISJOINT": False,
-                        "OUTPUT": "memory:",
-                    },
-                )
-
-                buffer_output = buffer["OUTPUT"]
-        
-                clipAOI = processing.run(
-                    "native:clip",
-                    {
-                    "INPUT": merge_SA_UTM,
-                    "OVERLAY": buffer_output,
-                    "OUTPUT": "memory",
-                    }
-                )
+                    clipAOI = processing.run(
+                        "native:clip",
+                        {
+                            "INPUT": merge_SA_UTM,
+                            "OVERLAY": buffer_output,
+                            "OUTPUT": "memory:",
+                        }
+                    )
             
-                merge_SA_UTM = clipAOI["OUTPUT"]
+                    merge_SA_UTM = clipAOI["OUTPUT"]
 
-                Difference = processing.run(
-                    "native:difference",
-                    {
-                        "INPUT": buffer_output,
-                        "OVERLAY": merge_SA_UTM,
-                        "OUTPUT": "memory:",
-                        "GRID_SIZE": None,
-                    },
-                )
+                    Difference = processing.run(
+                        "native:difference",
+                        {
+                            "INPUT": buffer_output,
+                            "OVERLAY": merge_SA_UTM,
+                            "OUTPUT": "memory:",
+                            "GRID_SIZE": None,
+                        },
+                    )
 
-                diff_output = Difference["OUTPUT"]
+                    diff_output = Difference["OUTPUT"]
 
-                Merge = processing.run(
-                    "native:mergevectorlayers",
-                    {"LAYERS": [merge_SA_UTM, diff_output], "CRS": None, "OUTPUT": "memory:"},
-                )
+                    Merge = processing.run(
+                        "native:mergevectorlayers",
+                        {"LAYERS": [merge_SA_UTM, diff_output], "CRS": None, "OUTPUT": "memory:"},
+                    )
 
-                merge_output = Merge["OUTPUT"]
+                    merge_output = Merge["OUTPUT"]
 
-                extent = merge_output.extent()
-                raster_width = int(extent.width() / pixelSize)
-                raster_height = int(extent.height() / pixelSize)
+                    extent = merge_output.extent()
+                    raster_width = int(extent.width() / pixelSize)
+                    raster_height = int(extent.height() / pixelSize)
 
-                if os.path.exists(Dimension):
-                    os.chdir(Dimension)
-                else:
-                    os.mkdir(Dimension)
-                    os.chdir(Dimension)
-
-                if factor_no == 5:
-                    Output_Folder = "WTP"
-                    if os.path.exists(Output_Folder):
-                        os.chdir(Output_Folder)
+                    if os.path.exists(Dimension):
+                        os.chdir(Dimension)
                     else:
-                        os.mkdir(Output_Folder)
-                        os.chdir(Output_Folder)
+                        os.mkdir(Dimension)
+                        os.chdir(Dimension)
 
-                    styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-                    styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
-                    styleFile = f"{rasOutput.split('.')[0]}.qml"
+                    if factor_no == 5:
+                        Output_Folder = "WTP"
+                        if os.path.exists(Output_Folder):
+                            os.chdir(Output_Folder)
+                        else:
+                            os.mkdir(Output_Folder)
+                            os.chdir(Output_Folder)
+
+                        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+                        styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
+                        styleFile = f"{rasOutput.split('.')[0]}.qml"
+                    else:
+                        pass
+                
+                    rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{facility_data}.tif"
+
+                    rasterize = processing.run(
+                        "gdal:rasterize",
+                        {
+                            "INPUT": merge_output,
+                            "FIELD": "rasField",
+                            "BURN": 0,
+                            "USE_Z": False,
+                            "UNITS": 0,
+                            "WIDTH": raster_width,
+                            "HEIGHT": raster_height,
+                            "EXTENT": None,
+                            "NODATA": None,
+                            "OPTIONS": "",
+                            "DATA_TYPE": 5,
+                            "INIT": None,
+                            "INVERT": False,
+                            "EXTRA": "",
+                            "OUTPUT": rasOutput,
+                        },
+                    )
+                
+                    facility_data = facility_data + 1
+
+                    shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                    if factor_no == 0:
+                        self.dlg.PBT_status.setText("Processing Complete!")
+                        self.dlg.PBT_status.repaint()
+
+                    elif factor_no == 1:
+                        self.dlg.ETF_status.setText("Processing Complete!")
+                        self.dlg.ETF_status.repaint()
+
+                    elif factor_no == 3:
+                        self.dlg.HEA_status.setText("Processing Complete!")
+                        self.dlg.HEA_status.repaint()
+
+                    elif factor_no == 4:
+                        self.dlg.FIF_status.setText("Processing Complete!")
+                        self.dlg.FIF_status.repaint()
+
+                    elif factor_no == 5:
+                        self.dlg.WTP_status.setText("Processing Complete!")
+                        self.dlg.WTP_status.repaint()
                 else:
-                    pass
-                
-                rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{facility_data}.tif"
-
-                rasterize = processing.run(
-                    "gdal:rasterize",
-                    {
-                        "INPUT": merge_output,
-                        "FIELD": "rasField",
-                        "BURN": 0,
-                        "USE_Z": False,
-                        "UNITS": 0,
-                        "WIDTH": raster_width,
-                        "HEIGHT": raster_height,
-                        "EXTENT": None,
-                        "NODATA": None,
-                        "OPTIONS": "",
-                        "DATA_TYPE": 5,
-                        "INIT": None,
-                        "INVERT": False,
-                        "EXTRA": "",
-                        "OUTPUT": rasOutput,
-                    },
-                )
-                
-                facility_data = facility_data + 1
-
-                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-                if factor_no == 0:
-                    self.dlg.PBT_status.setText("Processing Complete!")
-                    self.dlg.PBT_status.repaint()
-
-                elif factor_no == 1:
-                    self.dlg.ETF_status.setText("Processing Complete!")
-                    self.dlg.ETF_status.repaint()
-
-                elif factor_no == 3:
-                    self.dlg.HEA_status.setText("Processing Complete!")
-                    self.dlg.HEA_status.repaint()
-
-                elif factor_no == 4:
-                    self.dlg.FIF_status.setText("Processing Complete!")
-                    self.dlg.FIF_status.repaint()
-
-                elif factor_no == 5:
-                    self.dlg.WTP_status.setText("Processing Complete!")
-                    self.dlg.WTP_status.repaint()
+                    print(f"Processing failed")
         else:
             # Do more stuff
 
@@ -1993,7 +1999,7 @@ class GenderIndicatorTool:
                 {
                    "INPUT": merge_SA_UTM,
                    "OVERLAY": buffer_output,
-                   "OUTPUT": "memory",
+                   "OUTPUT": "memory:",
                 }
             )
             
@@ -4662,3 +4668,6 @@ class GenderIndicatorTool:
 
         self.dlg.REpoint_status.setText("RE point proximity complete!")
         self.dlg.REpoint_status.repaint()
+        
+    def processCallback(self):
+        print("Call back")
