@@ -6,3 +6,5 @@ _build/
 data/
 .direnv
 .vscode-extensions
+/zippit.py
+/docs/reviews/
