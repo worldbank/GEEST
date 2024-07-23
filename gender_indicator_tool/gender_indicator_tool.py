@@ -2364,7 +2364,8 @@ class GenderIndicatorTool:
 
     def SAFnightTimeLights(self):
         """
-        This function linearly scales the night-time lights raster dataset according to the standardized scoring system.
+        This function processes night-time lights data for safety assessment.
+        It can handle both raster (existing functionality) and vector (to be implemented) inputs.
         How brightly lit an area is used as a proxy for safety or safe urban design.
         """
 
@@ -2388,124 +2389,144 @@ class GenderIndicatorTool:
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
-        NTL_input = self.dlg.SAF_Input_Field.filePath()
+        input_file = self.dlg.SAF_Input_Field.filePath()
         rasOutput = self.dlg.SAF_Output_Field.text()
 
-        # Define temporary file paths
-        tempCalc = f"{tempDir}/tempCalc.tif"
-        tempResample = f"{tempDir}/tempResample.tif"
-        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+        # Detect input file type, assuming it's raster
+        input_layer = QgsRasterLayer(input_file, "input")
 
-        # Copy style file
-        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-        styleFileDestination = f"{workingDir}{Dimension}/"
-        styleFile = f"{rasOutput.split('.')[0]}.qml"
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+        # Handle raster input layer
+        if input_layer.isValid():
+            # Raster input detected - proceed with existing functionality
+            NTL_input = input_file
 
-        # Update UI status
-        self.dlg.SAF_status.setText("Variables Set")
-        self.dlg.SAF_status.repaint()
-        time.sleep(0.5)
-        self.dlg.SAF_status.setText("Processing...")
-        self.dlg.SAF_status.repaint()
+            # Define temporary file paths
+            tempCalc = f"{tempDir}/tempCalc.tif"
+            tempResample = f"{tempDir}/tempResample.tif"
+            countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
 
-        # Convert CRS of country layer
-        self.convertCRS(countryLayer, UTM_crs)
-        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+            # Copy style file
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        # Buffer the country layer
-        buffer = processing.run(
-            "native:buffer",
-            {
-                "INPUT": countryUTMLayer,
-                "DISTANCE": 2000,
-                "SEGMENTS": 5,
-                "END_CAP_STYLE": 0,
-                "JOIN_STYLE": 0,
-                "MITER_LIMIT": 2,
-                "DISSOLVE": True,
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": countryUTMLayerBuf,
-            },
-        )
-
-        # Get the extent of the buffered country layer
-        CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
-        country_extent = CountryBuf_df.total_bounds
-
-        # Reproject and resample the night-time lights raster
-        processing.run(
-            "gdal:warpreproject",
-            {
-                "INPUT": NTL_input,
-                "SOURCE_CRS": None,
-                "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                "RESAMPLING": 0,
-                "NODATA": None,
-                "TARGET_RESOLUTION": pixelSize,
-                "OPTIONS": "",
-                "DATA_TYPE": 0,
-                "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
-                "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                "MULTITHREADING": False,
-                "EXTRA": "",
-                "OUTPUT": tempResample,
-            },
-        )
-
-        # Perform raster calculation
-        processing.run(
-            "gdal:rastercalculator",
-            {
-                "INPUT_A": tempResample,
-                "BAND_A": 1,
-                "FORMULA": "A*1000",
-                "NO_DATA": None,
-                "RTYPE": 4,
-                "OPTIONS": "",
-                "EXTRA": "",
-                "OUTPUT": tempCalc,
-            },
-        )
-
-        # Normalize raster values
-        with rasterio.open(tempCalc, "r+") as src:
-            SAF_ras = src.read(1)
-            meta1 = src.meta
-            Rmax = SAF_ras.max()
-            Rmin = SAF_ras.min()
-            m_max = 5
-            m_min = 0
-            result = ((SAF_ras - Rmin) / (Rmax - Rmin)) * m_max
-            meta1.update(dtype=rasterio.float32)
-
-        try:
-            # Create output directory if it does not exist
-            if not os.path.exists(Dimension):
-                os.mkdir(Dimension)
-            os.chdir(Dimension)
-
-            # Write the final output raster
-            with rasterio.open(rasOutput, "w", **meta1) as dst:
-                dst.write(result, 1)
-
-            # Update UI with the output path
-            self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-            self.dlg.SAF_status.setText("Processing Complete!")
+            # Update UI status
+            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.SAF_status.setText("Processing...")
             self.dlg.SAF_status.repaint()
 
-            # Return to the original working directory
-            os.chdir(workingDir)
+            # Convert CRS of country layer
+            self.convertCRS(countryLayer, UTM_crs)
+            countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
-        except Exception as e:
-            # Something went awry, inform the user
-            error_message = f"Processing failed: {str(e)}"
-            self.dlg.SAF_status.setText(error_message)
-            self.dlg.SAF_status.repaint()
+            # Buffer the country layer
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryUTMLayer,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": countryUTMLayerBuf,
+                },
+            )
 
-            # Ensure we return to the original working directory even if an error occurs
-            if os.getcwd() != workingDir:
+            # Get the extent of the buffered country layer
+            CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+            country_extent = CountryBuf_df.total_bounds
+
+            # Reproject and resample the night-time lights raster
+            processing.run(
+                "gdal:warpreproject",
+                {
+                    "INPUT": NTL_input,
+                    "SOURCE_CRS": None,
+                    "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "RESAMPLING": 0,
+                    "NODATA": None,
+                    "TARGET_RESOLUTION": pixelSize,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 0,
+                    "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                    "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "MULTITHREADING": False,
+                    "EXTRA": "",
+                    "OUTPUT": tempResample,
+                },
+            )
+
+            # Perform raster calculation
+            processing.run(
+                "gdal:rastercalculator",
+                {
+                    "INPUT_A": tempResample,
+                    "BAND_A": 1,
+                    "FORMULA": "A*1000",
+                    "NO_DATA": None,
+                    "RTYPE": 4,
+                    "OPTIONS": "",
+                    "EXTRA": "",
+                    "OUTPUT": tempCalc,
+                },
+            )
+
+            # Normalize raster values
+            with rasterio.open(tempCalc, "r+") as src:
+                SAF_ras = src.read(1)
+                meta1 = src.meta
+                Rmax = SAF_ras.max()
+                Rmin = SAF_ras.min()
+                m_max = 5
+                m_min = 0
+                result = ((SAF_ras - Rmin) / (Rmax - Rmin)) * m_max
+                meta1.update(dtype=rasterio.float32)
+
+            try:
+                # Create output directory if it does not exist
+                if not os.path.exists(Dimension):
+                    os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+                # Write the final output raster
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(result, 1)
+
+                # Update UI with the output path
+                self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+                self.dlg.SAF_status.setText("Processing Complete!")
+                self.dlg.SAF_status.repaint()
+
+                # Return to the original working directory
                 os.chdir(workingDir)
+
+            except Exception as e:
+                # Something went awry, inform the user
+                error_message = f"Processing failed: {str(e)}"
+                self.dlg.SAF_status.setText(error_message)
+                self.dlg.SAF_status.repaint()
+
+                # Ensure we return to the original working directory even if an error occurs
+                if os.getcwd() != workingDir:
+                    os.chdir(workingDir)
+
+        else: # Handle non-raster (assumed to be vector) layer
+            # Vector input assumed
+            # TODO: Implement vector processing for streetlight data=
+            # 1. Creating buffers around streetlight points (20m radius)
+            # 2. Rasterizing the buffers
+            # 3. Calculating the percentage of each cell covered by buffers
+            # 4. Assigning scores based on coverage percentages:
+            #    80-100% -> 5, 60-79% -> 4, 40-59% -> 3, 20-39% -> 2, 1-19% -> 1, 0% -> 0
+            self.dlg.SAF_status.setText("Vector input detected. Processing not yet implemented.")
+            self.dlg.SAF_status.repaint()
+            return  # Exit the method early for now
 
     def ELCnightTimeLights(self):
         """

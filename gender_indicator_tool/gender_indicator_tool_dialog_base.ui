@@ -2096,7 +2096,7 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Nighttime Lights Input Layer (Raster)</string>
+              <string>Nighttime Lights Input Layer (Raster or Points)</string>
              </property>
             </widget>
            </item>
