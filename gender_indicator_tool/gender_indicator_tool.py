@@ -2479,22 +2479,33 @@ class GenderIndicatorTool:
             result = ((SAF_ras - Rmin) / (Rmax - Rmin)) * m_max
             meta1.update(dtype=rasterio.float32)
 
-        # Create output directory if it does not exist
-        if not os.path.exists(Dimension):
-            os.mkdir(Dimension)
-        os.chdir(Dimension)
+        try:
+            # Create output directory if it does not exist
+            if not os.path.exists(Dimension):
+                os.mkdir(Dimension)
+            os.chdir(Dimension)
 
-        # Write the final output raster
-        with rasterio.open(rasOutput, "w", **meta1) as dst:
-            dst.write(result, 1)
+            # Write the final output raster
+            with rasterio.open(rasOutput, "w", **meta1) as dst:
+                dst.write(result, 1)
 
-        # Update UI with the output path
-        self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-        self.dlg.SAF_status.setText("Processing Complete!")
-        self.dlg.SAF_status.repaint()
+            # Update UI with the output path
+            self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            self.dlg.SAF_status.setText("Processing Complete!")
+            self.dlg.SAF_status.repaint()
 
-        # Return to the original working directory
-        os.chdir(workingDir)
+            # Return to the original working directory
+            os.chdir(workingDir)
+
+        except Exception as e:
+            # Something went awry, inform the user
+            error_message = f"Processing failed: {str(e)}"
+            self.dlg.SAF_status.setText(error_message)
+            self.dlg.SAF_status.repaint()
+
+            # Ensure we return to the original working directory even if an error occurs
+            if os.getcwd() != workingDir:
+                os.chdir(workingDir)
 
     def ELCnightTimeLights(self):
         """
