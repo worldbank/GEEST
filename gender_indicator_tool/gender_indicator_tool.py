@@ -132,16 +132,16 @@ class GenderIndicatorTool:
         return QCoreApplication.translate("GenderIndicatorTool", message)
 
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None,
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None,
     ):
         """Add a toolbar icon to the toolbar.
 
@@ -242,10 +242,10 @@ class GenderIndicatorTool:
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(0))
 
         ## TAB 2 - Contextual ***************************************************************************
-        
+
         ###### TAB 2.1 - Workplace Discrimination
         self.dlg.WD_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
-        
+
         ###### TAB 2.2 - Regulatory Frameworks
         self.dlg.RF_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
@@ -330,15 +330,14 @@ class GenderIndicatorTool:
         self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
-        
+
         ###### TAB 4.5- Education
         self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
-        
+
         ###### TAB 4.6 - Facility, conflict, and violence
         self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
         self.dlg.FCV_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
-
 
         ###### TAB 4.7 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
@@ -386,7 +385,7 @@ class GenderIndicatorTool:
 
         if button_num == 0:
             self.dlg.EDU_Aggregate_Field.setText(response[0])
-            
+
         elif button_num == 1:
             self.dlg.WD_Aggregate_Field.setText(response[0])
 
@@ -437,7 +436,7 @@ class GenderIndicatorTool:
 
         elif button_num == 25:
             self.dlg.PD_Aggregate_Field.setText(response[0])
-            
+
         elif button_num == 26:
             self.dlg.FCV_Aggregate_Field.setText(response[0])
 
@@ -478,7 +477,7 @@ class GenderIndicatorTool:
             self.dlg.EDU_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.EDU_rasField_CB.addItems(fields)
-            
+
         elif factor_no == 1:
             polygonlayer = self.dlg.WD_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
@@ -506,7 +505,7 @@ class GenderIndicatorTool:
             self.dlg.DIG_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.DIG_rasField_CB.addItems(fields)
-            
+
         elif factor_no == 5:
             polygonlayer = self.dlg.FCV_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
@@ -637,9 +636,9 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.EDU_status.setText("Processing...")
             self.dlg.EDU_status.repaint()
-            
+
         elif factor_no == 1:
-            #polygonlayer = self.dlg.WD_Input_Field.filePath()
+            # polygonlayer = self.dlg.WD_Input_Field.filePath()
             rasField = "rasField"
             WD_Value_SB = self.dlg.WD_User_Value_Input.value()
             self.dlg.WD_status.setText("Variables Set")
@@ -649,7 +648,7 @@ class GenderIndicatorTool:
             self.dlg.WD_status.repaint()
 
         elif factor_no == 2:
-            #polygonlayer = self.dlg.RF_Input_Field.filePath()
+            # polygonlayer = self.dlg.RF_Input_Field.filePath()
             rasField = "rasField"
             RF_Value_SB = self.dlg.RF_User_Value_Input.value()
             RF_Value_SB_2 = self.dlg.RF_User_Value_Input_2.value()
@@ -661,7 +660,7 @@ class GenderIndicatorTool:
             self.dlg.RF_status.repaint()
 
         elif factor_no == 3:
-            #polygonlayer = self.dlg.FIN_Input_Field.filePath()
+            # polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = "rasField"
             FIN_Value_SB = self.dlg.FIN_User_Value_Input.value()
             self.dlg.FIN_status.setText("Variables Set")
@@ -687,7 +686,7 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.DIG_status.setText("Processing...")
             self.dlg.DIG_status.repaint()
-            
+
         elif factor_no == 6:
             polygonlayer = self.dlg.FCV_Input_Field.filePath()
             rasField = self.dlg.FCV_rasField_CB.currentText()
@@ -724,7 +723,7 @@ class GenderIndicatorTool:
             pass
         else:
             self.convertCRS(polygonlayer, UTM_crs)
-        
+
         if rasField not in shp_utm.columns:
             shp_utm[rasField] = [0]
         shp_utm[rasField] = shp_utm[rasField].astype(float)
@@ -738,16 +737,16 @@ class GenderIndicatorTool:
             # Standardization formula
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -819,16 +818,16 @@ class GenderIndicatorTool:
             shp_utm[rasField] = WD_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -895,21 +894,21 @@ class GenderIndicatorTool:
 
             self.dlg.WD_status.setText("Processing has been completed!")
             self.dlg.WD_status.repaint()
-            
+
         elif factor_no == 2:
             shp_utm[rasField] = RF_Value_Average
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -981,16 +980,16 @@ class GenderIndicatorTool:
             shp_utm[rasField] = FIN_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -1061,16 +1060,16 @@ class GenderIndicatorTool:
         elif factor_no == 4:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -1142,16 +1141,16 @@ class GenderIndicatorTool:
         elif factor_no == 5:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -1218,20 +1217,20 @@ class GenderIndicatorTool:
 
             self.dlg.DIG_status.setText("Processing has been completed!")
             self.dlg.DIG_status.repaint()
-            
+
         elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -1492,7 +1491,7 @@ class GenderIndicatorTool:
                 file_path = input_field.filePath()
                 if file_path:
                     FaciltyPointlayerList.append(file_path)
-            
+
             ranges = self.dlg.WTP_Ranges_Field.text()
             rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}.tif"
             mergeOutput = (
@@ -1520,7 +1519,7 @@ class GenderIndicatorTool:
         # OUTPUT
         SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
         temp_merge = f"{tempDir}/temp_merge.shp"
-        
+
         if factor_no == 5:
             # Do stuff
             facility_data = 0
@@ -1532,8 +1531,8 @@ class GenderIndicatorTool:
                 subsets = []
 
                 for i in range(0, len(gdf), subset_size):
-                    subset = gdf.iloc[i : i + subset_size]
-                    subset = QgsVectorLayer(subset.to_json(),   "mygeojson", "ogr")
+                    subset = gdf.iloc[i: i + subset_size]
+                    subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
                     subset_outfile = (
                         f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
                     )
@@ -1624,7 +1623,7 @@ class GenderIndicatorTool:
 
                 for i in range(-1, -len(range_subsets), -1):
                     output = (
-                        f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                        f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i - 1]}.shp"
                     )
                     # Merge_list.append(output)
                     difference = processing.run(
@@ -1663,24 +1662,24 @@ class GenderIndicatorTool:
 
                 dis_output = dissolve["OUTPUT"]
                 Merge_list.append(dis_output)
-                
+
                 print(f"Path: {os.getcwd()}")
 
                 if os.path.exists(f"{Dimension}/SA_SHP"):
                     pass
                 else:
                     os.mkdir(f"{Dimension}/SA_SHP")
-                    
+
                 feedback = QgsProcessingFeedback()
 
                 Merge = processing.run(
                     "native:mergevectorlayers",
                     {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
                 )
-                
+
                 if Merge is not None and "OUTPUT" in Merge:
                     print(f"Processing completed successfully")
-                    
+
                     # Do something
 
                     merge_df = gpd.read_file(f"{mergeOutput}")
@@ -1709,7 +1708,7 @@ class GenderIndicatorTool:
                     )
 
                     buffer_output = buffer["OUTPUT"]
-        
+
                     clipAOI = processing.run(
                         "native:clip",
                         {
@@ -1718,7 +1717,7 @@ class GenderIndicatorTool:
                             "OUTPUT": "memory:",
                         }
                     )
-            
+
                     merge_SA_UTM = clipAOI["OUTPUT"]
 
                     Difference = processing.run(
@@ -1763,7 +1762,7 @@ class GenderIndicatorTool:
                         styleFile = f"{rasOutput.split('.')[0]}.qml"
                     else:
                         pass
-                
+
                     rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{facility_data}.tif"
 
                     rasterize = processing.run(
@@ -1786,7 +1785,7 @@ class GenderIndicatorTool:
                             "OUTPUT": rasOutput,
                         },
                     )
-                
+
                     facility_data = facility_data + 1
 
                     shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
@@ -1821,7 +1820,7 @@ class GenderIndicatorTool:
             subsets = []
 
             for i in range(0, len(gdf), subset_size):
-                subset = gdf.iloc[i : i + subset_size]
+                subset = gdf.iloc[i: i + subset_size]
                 print(f"subset:{subset}")
                 subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
                 subset_outfile = (
@@ -1914,7 +1913,7 @@ class GenderIndicatorTool:
 
             for i in range(-1, -len(range_subsets), -1):
                 output = (
-                    f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                    f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i - 1]}.shp"
                 )
                 # Merge_list.append(output)
                 difference = processing.run(
@@ -1963,8 +1962,7 @@ class GenderIndicatorTool:
                 "native:mergevectorlayers",
                 {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
             )
-        
-        
+
             time.sleep(0.5)
 
             merge_df = gpd.read_file(f"{mergeOutput}")
@@ -1993,16 +1991,16 @@ class GenderIndicatorTool:
             )
 
             buffer_output = buffer["OUTPUT"]
-        
+
             clipAOI = processing.run(
                 "native:clip",
                 {
-                   "INPUT": merge_SA_UTM,
-                   "OVERLAY": buffer_output,
-                   "OUTPUT": "memory:",
+                    "INPUT": merge_SA_UTM,
+                    "OVERLAY": buffer_output,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             merge_SA_UTM = clipAOI["OUTPUT"]
 
             Difference = processing.run(
@@ -2366,58 +2364,56 @@ class GenderIndicatorTool:
 
     def SAFnightTimeLights(self):
         """
-        This function use a linearly scales the night time lights raster dataset according to the standardized scoring system.
-        How brightly lit an area is is used as a proxy for safety or safe urban design.
-
-        Factors it is applied:
-            Place Characterization Dimension
-                - Safe Urban Design
+        This function linearly scales the night-time lights raster dataset according to the standardized scoring system.
+        How brightly lit an area is used as a proxy for safety or safe urban design.
         """
+
+        # Set up directories
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
         tempDir = "temp"
         Dimension = "Place Characterization"
 
-        if os.path.exists(Dimension):
-            pass
-        else:
+        # Create necessary directories
+        if not os.path.exists(Dimension):
             os.mkdir(Dimension)
 
         if os.path.exists(tempDir):
             shutil.rmtree(tempDir)
-        else:
-            pass
-
         time.sleep(0.5)
         os.mkdir(tempDir)
 
+        # Set CRS and input/output paths
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
         NTL_input = self.dlg.SAF_Input_Field.filePath()
         rasOutput = self.dlg.SAF_Output_Field.text()
 
-        # Temp files
+        # Define temporary file paths
         tempCalc = f"{tempDir}/tempCalc.tif"
         tempResample = f"{tempDir}/tempResample.tif"
         countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
 
+        # Copy style file
         styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
         styleFileDestination = f"{workingDir}{Dimension}/"
         styleFile = f"{rasOutput.split('.')[0]}.qml"
-
         shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
+        # Update UI status
         self.dlg.SAF_status.setText("Variables Set")
         self.dlg.SAF_status.repaint()
         time.sleep(0.5)
         self.dlg.SAF_status.setText("Processing...")
         self.dlg.SAF_status.repaint()
 
+        # Convert CRS of country layer
         self.convertCRS(countryLayer, UTM_crs)
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
+        # Buffer the country layer
         buffer = processing.run(
             "native:buffer",
             {
@@ -2433,11 +2429,11 @@ class GenderIndicatorTool:
             },
         )
 
-        # countryUTMLayerBuf = buffer["OUTPUT"]
-
+        # Get the extent of the buffered country layer
         CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
         country_extent = CountryBuf_df.total_bounds
 
+        # Reproject and resample the night-time lights raster
         processing.run(
             "gdal:warpreproject",
             {
@@ -2457,25 +2453,14 @@ class GenderIndicatorTool:
             },
         )
 
+        # Perform raster calculation
         processing.run(
             "gdal:rastercalculator",
             {
                 "INPUT_A": tempResample,
                 "BAND_A": 1,
-                "INPUT_B": None,
-                "BAND_B": None,
-                "INPUT_C": None,
-                "BAND_C": None,
-                "INPUT_D": None,
-                "BAND_D": None,
-                "INPUT_E": None,
-                "BAND_E": None,
-                "INPUT_F": None,
-                "BAND_F": None,
                 "FORMULA": "A*1000",
                 "NO_DATA": None,
-                "EXTENT_OPT": 0,
-                "PROJWIN": None,
                 "RTYPE": 4,
                 "OPTIONS": "",
                 "EXTRA": "",
@@ -2483,32 +2468,32 @@ class GenderIndicatorTool:
             },
         )
 
+        # Normalize raster values
         with rasterio.open(tempCalc, "r+") as src:
             SAF_ras = src.read(1)
             meta1 = src.meta
-
             Rmax = SAF_ras.max()
             Rmin = SAF_ras.min()
             m_max = 5
             m_min = 0
+            result = ((SAF_ras - Rmin) / (Rmax - Rmin)) * m_max
+            meta1.update(dtype=rasterio.float32)
 
-        result = ((SAF_ras - Rmin) / (Rmax - Rmin)) * m_max
-        meta1.update(dtype=rasterio.float32)
-
-        if os.path.exists(Dimension):
-            os.chdir(Dimension)
-        else:
+        # Create output directory if it does not exist
+        if not os.path.exists(Dimension):
             os.mkdir(Dimension)
-            os.chdir(Dimension)
+        os.chdir(Dimension)
 
+        # Write the final output raster
         with rasterio.open(rasOutput, "w", **meta1) as dst:
             dst.write(result, 1)
 
+        # Update UI with the output path
         self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
-
         self.dlg.SAF_status.setText("Processing Complete!")
         self.dlg.SAF_status.repaint()
 
+        # Return to the original working directory
         os.chdir(workingDir)
 
     def ELCnightTimeLights(self):
@@ -3012,7 +2997,7 @@ class GenderIndicatorTool:
         merged = pd.merge(grouped, grouped2, on=["id"], how="outer")
         merged_length_gdf = pd.DataFrame(merged)
         merged_length_gdf[rasField] = (
-            merged_length_gdf["More60_Count"] / merged_length_gdf["Total_Count"] * 100
+                merged_length_gdf["More60_Count"] / merged_length_gdf["Total_Count"] * 100
         )
 
         hex_gdf = gpd.read_file(adminUTMLayer)
@@ -3027,7 +3012,7 @@ class GenderIndicatorTool:
         m_min = 0
 
         merge_hex_gdf[rasField] = (
-            (merge_hex_gdf[rasField] - Rmin) / (Rmax - Rmin) * m_max
+                (merge_hex_gdf[rasField] - Rmin) / (Rmax - Rmin) * m_max
         )
         merge_hex_gdf.to_file(hexPercOutput)
 
@@ -3042,7 +3027,7 @@ class GenderIndicatorTool:
         )
 
         difference = Difference["OUTPUT"]
-        
+
         diff = processing.run(
             "native:polygonstolines",
             {
@@ -3050,7 +3035,7 @@ class GenderIndicatorTool:
                 "OUTPUT": "memory:"
             }
         )
-        
+
         difference = diff["OUTPUT"]
 
         Merge = processing.run(
@@ -3400,7 +3385,7 @@ class GenderIndicatorTool:
                 loggerCD.addHandler(handlerCD)
 
                 loggerCD.info(
-                    f"Factors: {non_empty_count}/2 - {non_empty_count/2 * 100} % - {non_empty_count}"
+                    f"Factors: {non_empty_count}/2 - {non_empty_count / 2 * 100} % - {non_empty_count}"
                 )
                 logging.shutdown()
 
@@ -3516,11 +3501,11 @@ class GenderIndicatorTool:
                 # Raster Calculation
 
                 result = (
-                    (WTP_ras * WTP_weight / 100)
-                    + (PBT_ras * PBT_weight / 100)
-                    + (ETF_ras * ETF_weight / 100)
-                    + (HEA_ras * HEA_weight / 100)
-                    + (FIF_ras * FIF_weight / 100)
+                        (WTP_ras * WTP_weight / 100)
+                        + (PBT_ras * PBT_weight / 100)
+                        + (ETF_ras * ETF_weight / 100)
+                        + (HEA_ras * HEA_weight / 100)
+                        + (FIF_ras * FIF_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
@@ -3547,7 +3532,7 @@ class GenderIndicatorTool:
                 loggerAD.addHandler(handlerAD)
 
                 loggerAD.info(
-                    f"Factors: {non_empty_count}/6 - {non_empty_count/6 * 100} % - {non_empty_count}"
+                    f"Factors: {non_empty_count}/6 - {non_empty_count / 6 * 100} % - {non_empty_count}"
                 )
                 logging.shutdown()
 
@@ -3665,11 +3650,11 @@ class GenderIndicatorTool:
                 with rasterio.open(rasLayers[3]) as src:
                     ENV_ras = src.read(1)
                     ENV_weight = factorWeighting[3]
-                    
+
                 with rasterio.open(rasLayers[4]) as src:
                     EDU_ras = src.read(1)
                     EDU_weight = factorWeighting[4]
-                    
+
                 with rasterio.open(rasLayers[5]) as src:
                     EDU_ras = src.read(1)
                     EDU_weight = factorWeighting[5]
@@ -3677,12 +3662,12 @@ class GenderIndicatorTool:
                 # Raster Calculation
 
                 result = (
-                    (WLK_ras * WLK_weight / 100)
-                    + (SAF_ras * SAF_weight / 100)
-                    + (DIG_ras * DIG_weight / 100)
-                    + (ENV_ras * ENV_weight / 100)
-                    + (EDU_ras * EDU_weight / 100)
-                    + (FCV_ras * FCV_weight / 100)
+                        (WLK_ras * WLK_weight / 100)
+                        + (SAF_ras * SAF_weight / 100)
+                        + (DIG_ras * DIG_weight / 100)
+                        + (ENV_ras * ENV_weight / 100)
+                        + (EDU_ras * EDU_weight / 100)
+                        + (FCV_ras * FCV_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
@@ -3810,10 +3795,10 @@ class GenderIndicatorTool:
                 # Raster Calculation
 
                 result = (
-                    (ID_ras * ID_weight / 100)
-                    + (CD_ras * CD_weight / 100)
-                    + (AD_ras * AD_weight / 100)
-                    + (PD_ras * PD_weight / 100)
+                        (ID_ras * ID_weight / 100)
+                        + (CD_ras * CD_weight / 100)
+                        + (AD_ras * AD_weight / 100)
+                        + (PD_ras * PD_weight / 100)
                 )
                 result[result == 0] = src.nodata
 
@@ -3982,12 +3967,12 @@ class GenderIndicatorTool:
         # Raster Calculation
 
         result = (
-            0 * (score_ras <= 0.5)
-            + 1 * (score_ras > 0.5) * (score_ras <= 1.5)
-            + 2 * (score_ras > 1.5) * (score_ras <= 2.5)
-            + 3 * (score_ras > 2.5) * (score_ras <= 3.5)
-            + 4 * (score_ras > 3.5) * (score_ras <= 4.5)
-            + 5 * (score_ras > 4.5)
+                0 * (score_ras <= 0.5)
+                + 1 * (score_ras > 0.5) * (score_ras <= 1.5)
+                + 2 * (score_ras > 1.5) * (score_ras <= 2.5)
+                + 3 * (score_ras > 2.5) * (score_ras <= 3.5)
+                + 4 * (score_ras > 3.5) * (score_ras <= 4.5)
+                + 5 * (score_ras > 4.5)
         )
 
         meta1.update(dtype=rasterio.float32)
@@ -4113,10 +4098,10 @@ class GenderIndicatorTool:
         # # Raster Calculation
         #
         result = (
-            0 * (pop_ras == -1)
-            + 1 * (pop_ras > -1) * (pop_ras <= percentile_25)
-            + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75)
-            + 3 * (pop_ras > percentile_75)
+                0 * (pop_ras == -1)
+                + 1 * (pop_ras > -1) * (pop_ras <= percentile_25)
+                + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75)
+                + 3 * (pop_ras > percentile_75)
         )
 
         # result = pop_ras
@@ -4194,21 +4179,21 @@ class GenderIndicatorTool:
         # Raster Calculation
 
         result = (
-            1 * (score_rec_ras == 1) * (pop_rec_ras == 1)
-            + 2 * (score_rec_ras == 1) * (pop_rec_ras == 2)
-            + 3 * (score_rec_ras == 1) * (pop_rec_ras == 3)
-            + 4 * (score_rec_ras == 2) * (pop_rec_ras == 1)
-            + 5 * (score_rec_ras == 2) * (pop_rec_ras == 2)
-            + 6 * (score_rec_ras == 2) * (pop_rec_ras == 3)
-            + 7 * (score_rec_ras == 3) * (pop_rec_ras == 1)
-            + 8 * (score_rec_ras == 3) * (pop_rec_ras == 2)
-            + 9 * (score_rec_ras == 3) * (pop_rec_ras == 3)
-            + 10 * (score_rec_ras == 4) * (pop_rec_ras == 1)
-            + 11 * (score_rec_ras == 4) * (pop_rec_ras == 2)
-            + 12 * (score_rec_ras == 4) * (pop_rec_ras == 3)
-            + 13 * (score_rec_ras == 5) * (pop_rec_ras == 1)
-            + 14 * (score_rec_ras == 5) * (pop_rec_ras == 2)
-            + 15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
+                1 * (score_rec_ras == 1) * (pop_rec_ras == 1)
+                + 2 * (score_rec_ras == 1) * (pop_rec_ras == 2)
+                + 3 * (score_rec_ras == 1) * (pop_rec_ras == 3)
+                + 4 * (score_rec_ras == 2) * (pop_rec_ras == 1)
+                + 5 * (score_rec_ras == 2) * (pop_rec_ras == 2)
+                + 6 * (score_rec_ras == 2) * (pop_rec_ras == 3)
+                + 7 * (score_rec_ras == 3) * (pop_rec_ras == 1)
+                + 8 * (score_rec_ras == 3) * (pop_rec_ras == 2)
+                + 9 * (score_rec_ras == 3) * (pop_rec_ras == 3)
+                + 10 * (score_rec_ras == 4) * (pop_rec_ras == 1)
+                + 11 * (score_rec_ras == 4) * (pop_rec_ras == 2)
+                + 12 * (score_rec_ras == 4) * (pop_rec_ras == 3)
+                + 13 * (score_rec_ras == 5) * (pop_rec_ras == 1)
+                + 14 * (score_rec_ras == 5) * (pop_rec_ras == 2)
+                + 15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
         )
 
         meta1.update(dtype=rasterio.float32)
@@ -4286,9 +4271,9 @@ class GenderIndicatorTool:
             os.mkdir(f"{Insights_folder}/{Insights_aggregation}")
 
         shpOutput = (
-            f"{workingDir}{Insights_folder}/{Insights_aggregation}/"
-            + self.dlg.AGG_Output_Field.text()
-            + ".shp"
+                f"{workingDir}{Insights_folder}/{Insights_aggregation}/"
+                + self.dlg.AGG_Output_Field.text()
+                + ".shp"
         )
 
         processing.run(
@@ -4426,9 +4411,9 @@ class GenderIndicatorTool:
         meta1.update(dtype=rasterio.float32)
 
         combined_RE = (
-            f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
-            + self.dlg.RE_Output_Field.text()
-            + "Enablement_&_Population_Combined.tif"
+                f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
+                + self.dlg.RE_Output_Field.text()
+                + "Enablement_&_Population_Combined.tif"
         )
         with rasterio.open(combined_RE, "w", **meta1) as dst:
             dst.write(result, 1)
@@ -4481,9 +4466,9 @@ class GenderIndicatorTool:
 
         # Save to a new shapefile
         admin_RE = (
-            f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
-            + self.dlg.RE_Output_Field.text()
-            + "admin_units_intersection.shp"
+                f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
+                + self.dlg.RE_Output_Field.text()
+                + "admin_units_intersection.shp"
         )
         intersecting_polygons.to_file(admin_RE)
 
@@ -4595,9 +4580,9 @@ class GenderIndicatorTool:
             os.mkdir(f"{Insights_folder}/{Insights_re_point}")
 
         shpOutput = (
-            f"{workingDir}{Insights_folder}/{Insights_re_point}/"
-            + self.dlg.Buffer_Output_Field.text()
-            + f"{str(bufferDistance)}m_buffer.shp"
+                f"{workingDir}{Insights_folder}/{Insights_re_point}/"
+                + self.dlg.Buffer_Output_Field.text()
+                + f"{str(bufferDistance)}m_buffer.shp"
         )
 
         processing.run(
@@ -4642,9 +4627,9 @@ class GenderIndicatorTool:
 
         # Save to a new shapefile
         admin_RE = (
-            f"{workingDir}{Insights_folder}/{Insights_re_point}/"
-            + self.dlg.Buffer_Output_Field.text()
-            + f"admin_unit_{str(bufferDistance)}m_buffer_intersection.shp"
+                f"{workingDir}{Insights_folder}/{Insights_re_point}/"
+                + self.dlg.Buffer_Output_Field.text()
+                + f"admin_unit_{str(bufferDistance)}m_buffer_intersection.shp"
         )
         intersecting_polygons.to_file(admin_RE)
 
@@ -4668,6 +4653,6 @@ class GenderIndicatorTool:
 
         self.dlg.REpoint_status.setText("RE point proximity complete!")
         self.dlg.REpoint_status.repaint()
-        
+
     def processCallback(self):
         print("Call back")
