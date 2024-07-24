@@ -27,6 +27,8 @@ from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog, QApplication
 from qgis.core import *
+from qgis.core import QgsVectorLayer, QgsProject, QgsCoordinateReferenceSystem, QgsCoordinateTransformContext, \
+    QgsCoordinateTransform, QgsMessageLog, Qgis
 
 # Auxiliary libraries
 import os
@@ -2517,16 +2519,127 @@ class GenderIndicatorTool:
                     os.chdir(workingDir)
 
         else: # Handle non-raster (assumed to be vector) layer
-            # Vector input assumed
-            # TODO: Implement vector processing for streetlight data=
-            # 1. Creating buffers around streetlight points (20m radius)
-            # 2. Rasterizing the buffers
-            # 3. Calculating the percentage of each cell covered by buffers
-            # 4. Assigning scores based on coverage percentages:
-            #    80-100% -> 5, 60-79% -> 4, 40-59% -> 3, 20-39% -> 2, 1-19% -> 1, 0% -> 0
-            self.dlg.SAF_status.setText("Vector input detected. Processing not yet implemented.")
+            self.SAFstreetLights()
+
+    def SAFstreetLights(self):
+        """
+        This function processes streetlight vector data for safety assessment.
+        It creates 20-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
+        """
+
+        # Some values thtat will be used...
+        LIGHT_AREA_RADIUS = 20
+
+        # Set up directories
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        # Create necessary directories
+        if not os.path.exists(Dimension):
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # Set CRS and input/output paths
+        project_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        input_file = self.dlg.SAF_Input_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        output_raster = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
+
+        # Load input vector layer
+        vector_layer = QgsVectorLayer(input_file, "streetlights", "ogr")
+        if not vector_layer.isValid():
+            self.dlg.SAF_status.setText("Invalid vector input. Please check the file.")
             self.dlg.SAF_status.repaint()
-            return  # Exit the method early for now
+            QgsMessageLog.logMessage("Invalid vector input: " + input_file, "SAFstreetLights", Qgis.Critical)
+            return
+
+        # Buffer the vector layer
+        buffered_layer = os.path.join(tempDir, "streetlights_buffer.shp")
+        processing.run("native:buffer", {
+            'INPUT': vector_layer,
+            'DISTANCE': LIGHT_AREA_RADIUS,
+            'SEGMENTS': 5,
+            'END_CAP_STYLE': 0,
+            'JOIN_STYLE': 0,
+            'MITER_LIMIT': 2,
+            'DISSOLVE': False,
+            'OUTPUT': buffered_layer
+        })
+
+        # Get the extent of the buffered layer
+        buffered_gdf = gpd.read_file(buffered_layer)
+        extent = buffered_gdf.total_bounds
+        xmin, ymin, xmax, ymax = extent
+
+        # Rasterize the buffered layer
+        rasterized_layer = os.path.join(tempDir, "streetlights_raster.tif")
+        width = max(1, int((xmax - xmin) / pixelSize))
+        height = max(1, int((ymax - ymin) / pixelSize))
+        processing.run("gdal:rasterize", {
+            'INPUT': buffered_layer,
+            'FIELD': '',
+            'BURN': 1,
+            'USE_Z': False,
+            'UNITS': 1,  # Pixels
+            'WIDTH': width,
+            'HEIGHT': height,
+            'EXTENT': f'{xmin},{xmax},{ymin},{ymax}',
+            'NODATA': 0,
+            'OUTPUT': rasterized_layer
+        })
+
+        # Calculate percentage coverage and assign scores
+        with rasterio.open(rasterized_layer) as src:
+            streetlight_raster = src.read(1)
+            meta = src.meta
+
+        # Calculate the number of pixels that represent 20 meters
+        pixels_light_radius = int(LIGHT_AREA_RADIUS / pixelSize)
+
+        # Create a circular kernel representing the light radius buffer
+        y, x = np.ogrid[-pixels_light_radius:pixels_light_radius + 1, -pixels_light_radius:pixels_light_radius + 1]
+        kernel = x * x + y * y <= pixels_light_radius * pixels_light_radius
+        kernel = kernel.astype(np.float32)
+        kernel_sum = kernel.sum()
+
+        # Perform the convolution
+        coverage = np.zeros_like(streetlight_raster, dtype=np.float32)
+        for i in range(pixels_light_radius, streetlight_raster.shape[0] - pixels_light_radius):
+            for j in range(pixels_light_radius, streetlight_raster.shape[1] - pixels_light_radius):
+                sub_array = streetlight_raster[i - pixels_light_radius:i + pixels_light_radius + 1, j - pixels_light_radius:j + pixels_light_radius + 1]
+                coverage[i, j] = (sub_array * kernel).sum()
+
+        # Calculate the percentage of coverage
+        coverage_percentage = (coverage / kernel_sum) * 100
+
+        # Assign scores based on coverage percentages
+        result = np.zeros_like(coverage_percentage, dtype=np.float32)
+        result[coverage_percentage >= 80] = 5
+        result[(coverage_percentage >= 60) & (coverage_percentage < 80)] = 4
+        result[(coverage_percentage >= 40) & (coverage_percentage < 60)] = 3
+        result[(coverage_percentage >= 20) & (coverage_percentage < 40)] = 2
+        result[(coverage_percentage >= 1) & (coverage_percentage < 20)] = 1
+
+        # Save the final raster
+        meta.update(dtype=rasterio.float32)
+        os.makedirs(os.path.dirname(output_raster), exist_ok=True)
+        with rasterio.open(output_raster, 'w', **meta) as dst:
+            dst.write(result, 1)
+
+        # Update UI
+        self.dlg.SAF_Aggregate_Field.setText(output_raster)
+        self.dlg.SAF_status.setText("Streetlight processing complete!")
+        self.dlg.SAF_status.repaint()
+
+        # Clean up temporary files
+        shutil.rmtree(tempDir)
 
     def ELCnightTimeLights(self):
         """
