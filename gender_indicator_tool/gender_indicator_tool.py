@@ -2573,6 +2573,8 @@ class GenderIndicatorTool:
         # Reproject vector layer if necessary
         input_crs = vector_layer.crs()
         if input_crs.authid() != project_crs:
+            self.dlg.SAF_status.setText("Reprojecting...")
+            self.dlg.SAF_status.repaint()
             reprojected_layer = os.path.join(tempDir, "streetlights_reprojected.shp")
             processing.run("native:reprojectlayer", {
                 'INPUT': vector_layer,
@@ -2582,6 +2584,8 @@ class GenderIndicatorTool:
             vector_layer = QgsVectorLayer(reprojected_layer, "streetlights_reprojected", "ogr")
 
         # Buffer the vector layer
+        self.dlg.SAF_status.setText("Buffering layer...")
+        self.dlg.SAF_status.repaint()
         buffered_layer = os.path.join(tempDir, "streetlights_buffer.shp")
         processing.run("native:buffer", {
             'INPUT': vector_layer,
@@ -2593,6 +2597,9 @@ class GenderIndicatorTool:
             'DISSOLVE': BUFFER_DISSOLVE,
             'OUTPUT': buffered_layer
         })
+
+        self.dlg.SAF_status.setText("Starting calculations...")
+        self.dlg.SAF_status.repaint()
 
         # Calculate the extent of the buffered layer
         buffered_gdf = gpd.read_file(buffered_layer)
@@ -2620,6 +2627,9 @@ class GenderIndicatorTool:
         # Log the calculated raster dimensions
         print(f"Raster Dimensions: width={width}, height={height}")
 
+        self.dlg.SAF_status.setText("Rasterizing...")
+        self.dlg.SAF_status.repaint()
+
         processing.run("gdal:rasterize", {
             'INPUT': buffered_layer,
             'FIELD': '',
@@ -2632,6 +2642,9 @@ class GenderIndicatorTool:
             'NODATA': RASTER_NODATA_VALUE,
             'OUTPUT': rasterized_layer
         })
+
+        self.dlg.SAF_status.setText("Calculating coverage scores...")
+        self.dlg.SAF_status.repaint()
 
         # Calculate percentage coverage and assign scores
         with rasterio.open(rasterized_layer) as src:
@@ -2664,6 +2677,9 @@ class GenderIndicatorTool:
         # Ensure areas with no coverage map to 0
         result[coverage_percentage == 0] = 0
 
+        self.dlg.SAF_status.setText("Saving raster...")
+        self.dlg.SAF_status.repaint()
+
         # Save the final raster
         meta.update(dtype=rasterio.float32)
         os.makedirs(os.path.dirname(output_raster), exist_ok=True)
@@ -2672,7 +2688,7 @@ class GenderIndicatorTool:
 
         # Update UI
         self.dlg.SAF_Aggregate_Field.setText(output_raster)
-        self.dlg.SAF_status.setText("Streetlight processing complete!")
+        self.dlg.SAF_status.setText("Processing complete!")
         self.dlg.SAF_status.repaint()
 
         # Clean up temporary files
