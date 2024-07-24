@@ -61,15 +61,6 @@ Uses numpy operations:
 1. Digitize coverage percentage into bins
 2. Map bin indices to scores
 
-## Future Development Considerations
-
-1. Input Validation: Ensure vector layer contains point geometries
-2. Parameterization: Make light area radius and scoring system configurable
-3. Performance Optimization: Investigate parallel processing for convolution
-4. Multi-band Support: Extend for multi-band data if needed
-
-[Previous content remains unchanged]
-
 ## Substitute Streetlights Data Generation
 
 Due to the unavailability of actual streetlight location data in the sample dataset and limited time for sourcing, a method was devised to generate substitute data based on available road network information.
