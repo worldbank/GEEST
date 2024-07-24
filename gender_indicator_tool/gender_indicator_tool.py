@@ -2518,17 +2518,27 @@ class GenderIndicatorTool:
                 if os.getcwd() != workingDir:
                     os.chdir(workingDir)
 
-        else: # Handle non-raster (assumed to be vector) layer
+        else:  # Handle non-raster (assumed to be vector) layer
             self.SAFstreetLights()
 
     def SAFstreetLights(self):
         """
         This function processes streetlight vector data for safety assessment.
-        It creates 20-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
+        It creates 200-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
         """
 
         # Constants
-        LIGHT_AREA_RADIUS = 20
+        LIGHT_AREA_RADIUS = 200
+        BUFFER_SEGMENTS = 8
+        BUFFER_END_CAP_STYLE = 0
+        BUFFER_JOIN_STYLE = 0
+        BUFFER_MITER_LIMIT = 2
+        BUFFER_DISSOLVE = False
+        RASTER_BURN_VALUE = 1
+        RASTER_NODATA_VALUE = 0
+        SCORE_BINS = [0, 1, 20, 40, 60, 80, 100]
+        SCORES = [0, 1, 2, 3, 4, 5]
+        EXTENT_BUFFER = LIGHT_AREA_RADIUS * 8  # Buffer for extent to ensure full coverage
 
         # Set up directories
         current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -2576,33 +2586,50 @@ class GenderIndicatorTool:
         processing.run("native:buffer", {
             'INPUT': vector_layer,
             'DISTANCE': LIGHT_AREA_RADIUS,
-            'SEGMENTS': 5,
-            'END_CAP_STYLE': 0,
-            'JOIN_STYLE': 0,
-            'MITER_LIMIT': 2,
-            'DISSOLVE': False,
+            'SEGMENTS': BUFFER_SEGMENTS,
+            'END_CAP_STYLE': BUFFER_END_CAP_STYLE,
+            'JOIN_STYLE': BUFFER_JOIN_STYLE,
+            'MITER_LIMIT': BUFFER_MITER_LIMIT,
+            'DISSOLVE': BUFFER_DISSOLVE,
             'OUTPUT': buffered_layer
         })
 
-        # Get the extent of the buffered layer
+        # Calculate the extent of the buffered layer
         buffered_gdf = gpd.read_file(buffered_layer)
         extent = buffered_gdf.total_bounds
         xmin, ymin, xmax, ymax = extent
+
+        # Calculate the kernel radius
+        pixels_light_radius = int(LIGHT_AREA_RADIUS / pixelSize)
+        kernel_radius = pixels_light_radius
+
+        # Add buffer to extent to ensure full coverage, considering twice the kernel radius
+        xmin -= (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+        ymin -= (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+        xmax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+        ymax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+
+        # Log the calculated extent and dimensions
+        print(f"Extent: xmin={xmin}, ymin={ymin}, xmax={xmax}, ymax={ymax}")
 
         # Rasterize the buffered layer
         rasterized_layer = os.path.join(tempDir, "streetlights_raster.tif")
         width = max(1, int((xmax - xmin) / pixelSize))
         height = max(1, int((ymax - ymin) / pixelSize))
+
+        # Log the calculated raster dimensions
+        print(f"Raster Dimensions: width={width}, height={height}")
+
         processing.run("gdal:rasterize", {
             'INPUT': buffered_layer,
             'FIELD': '',
-            'BURN': 1,
+            'BURN': RASTER_BURN_VALUE,
             'USE_Z': False,
             'UNITS': 1,  # Pixels
             'WIDTH': width,
             'HEIGHT': height,
             'EXTENT': f'{xmin},{xmax},{ymin},{ymax}',
-            'NODATA': 0,
+            'NODATA': RASTER_NODATA_VALUE,
             'OUTPUT': rasterized_layer
         })
 
@@ -2610,9 +2637,6 @@ class GenderIndicatorTool:
         with rasterio.open(rasterized_layer) as src:
             streetlight_raster = src.read(1)
             meta = src.meta
-
-        # Calculate the number of pixels that represent 20 meters
-        pixels_light_radius = int(LIGHT_AREA_RADIUS / pixelSize)
 
         # Create a circular kernel representing the light radius buffer
         y, x = np.ogrid[-pixels_light_radius:pixels_light_radius + 1, -pixels_light_radius:pixels_light_radius + 1]
@@ -2631,15 +2655,11 @@ class GenderIndicatorTool:
         # Calculate the percentage of coverage
         coverage_percentage = (coverage / kernel_sum) * 100
 
-        # Define the bin edges and corresponding scores
-        bin_edges = [0, 1, 20, 40, 60, 80, 100]
-        scores = [0, 1, 2, 3, 4, 5]
-
         # Use np.digitize to find the indices of the bins to which each value in coverage_percentage belongs
-        bins = np.digitize(coverage_percentage, bin_edges, right=True) - 1
+        bins = np.digitize(coverage_percentage, SCORE_BINS, right=True) - 1
 
         # Map the bin indices to scores
-        result = np.array([scores[i] for i in bins.flat]).reshape(bins.shape).astype(np.float32)
+        result = np.array([SCORES[i] for i in bins.flat]).reshape(bins.shape).astype(np.float32)
 
         # Save the final raster
         meta.update(dtype=rasterio.float32)
