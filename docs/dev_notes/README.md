@@ -1,5 +1,7 @@
 # SAFStreetLight Function
 
+![Extracted road network](img/6.png)
+
 ## Function Overview
 
 The `SAFStreetLight` function processes streetlight vector data to create a raster representation of safety scores based on streetlight coverage.
