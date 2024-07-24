@@ -2677,11 +2677,12 @@ class GenderIndicatorTool:
         # Ensure areas with no coverage map to 0
         result[coverage_percentage == 0] = 0
 
-        self.dlg.SAF_status.setText("Saving raster...")
-        self.dlg.SAF_status.repaint()
-
         try:
             # Save the final raster
+            # Update UI
+            self.dlg.SAF_status.setText("Saving raster...")
+            self.dlg.SAF_status.repaint()
+
             meta.update(dtype=rasterio.float32)
             os.makedirs(os.path.dirname(output_raster), exist_ok=True)
             with rasterio.open(output_raster, 'w', **meta) as dst:
