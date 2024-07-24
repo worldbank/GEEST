@@ -2537,7 +2537,7 @@ class GenderIndicatorTool:
         RASTER_BURN_VALUE = 1
         RASTER_NODATA_VALUE = 0
         SCORE_BINS = [0, 1, 20, 40, 60, 80, 100]
-        SCORES = [0, 1, 2, 3, 4, 5]
+        SCORES = [0, 0, 1, 2, 3, 4, 5]  # Updated to ensure areas with no values map to 0
         EXTENT_BUFFER = LIGHT_AREA_RADIUS * 8  # Buffer for extent to ensure full coverage
 
         # Set up directories
@@ -2660,6 +2660,9 @@ class GenderIndicatorTool:
 
         # Map the bin indices to scores
         result = np.array([SCORES[i] for i in bins.flat]).reshape(bins.shape).astype(np.float32)
+
+        # Ensure areas with no coverage map to 0
+        result[coverage_percentage == 0] = 0
 
         # Save the final raster
         meta.update(dtype=rasterio.float32)
