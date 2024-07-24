@@ -2680,19 +2680,29 @@ class GenderIndicatorTool:
         self.dlg.SAF_status.setText("Saving raster...")
         self.dlg.SAF_status.repaint()
 
-        # Save the final raster
-        meta.update(dtype=rasterio.float32)
-        os.makedirs(os.path.dirname(output_raster), exist_ok=True)
-        with rasterio.open(output_raster, 'w', **meta) as dst:
-            dst.write(result, 1)
+        try:
+            # Save the final raster
+            meta.update(dtype=rasterio.float32)
+            os.makedirs(os.path.dirname(output_raster), exist_ok=True)
+            with rasterio.open(output_raster, 'w', **meta) as dst:
+                dst.write(result, 1)
 
-        # Update UI
-        self.dlg.SAF_Aggregate_Field.setText(output_raster)
-        self.dlg.SAF_status.setText("Processing complete!")
-        self.dlg.SAF_status.repaint()
+            # Update UI
+            self.dlg.SAF_Aggregate_Field.setText(output_raster)
+            self.dlg.SAF_status.setText("Processing complete!")
+            self.dlg.SAF_status.repaint()
 
-        # Clean up temporary files
-        shutil.rmtree(tempDir)
+            # Clean up temporary files
+            shutil.rmtree(tempDir)
+        except Exception as e:
+            # Something went awry, inform the user
+            error_message = f"Processing failed: {str(e)}"
+            self.dlg.SAF_status.setText(error_message)
+            self.dlg.SAF_status.repaint()
+
+            # Ensure we return to the original working directory even if an error occurs
+            if os.getcwd() != workingDir:
+                os.chdir(workingDir)
 
     def ELCnightTimeLights(self):
         """
