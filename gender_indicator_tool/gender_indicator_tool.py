@@ -2527,7 +2527,7 @@ class GenderIndicatorTool:
         It creates 20-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
         """
 
-        # Some values thtat will be used...
+        # Constants
         LIGHT_AREA_RADIUS = 20
 
         # Set up directories
@@ -2559,6 +2559,17 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.repaint()
             QgsMessageLog.logMessage("Invalid vector input: " + input_file, "SAFstreetLights", Qgis.Critical)
             return
+
+        # Reproject vector layer if necessary
+        input_crs = vector_layer.crs()
+        if input_crs.authid() != project_crs:
+            reprojected_layer = os.path.join(tempDir, "streetlights_reprojected.shp")
+            processing.run("native:reprojectlayer", {
+                'INPUT': vector_layer,
+                'TARGET_CRS': QgsCoordinateReferenceSystem(project_crs),
+                'OUTPUT': reprojected_layer
+            })
+            vector_layer = QgsVectorLayer(reprojected_layer, "streetlights_reprojected", "ogr")
 
         # Buffer the vector layer
         buffered_layer = os.path.join(tempDir, "streetlights_buffer.shp")
@@ -2613,19 +2624,22 @@ class GenderIndicatorTool:
         coverage = np.zeros_like(streetlight_raster, dtype=np.float32)
         for i in range(pixels_light_radius, streetlight_raster.shape[0] - pixels_light_radius):
             for j in range(pixels_light_radius, streetlight_raster.shape[1] - pixels_light_radius):
-                sub_array = streetlight_raster[i - pixels_light_radius:i + pixels_light_radius + 1, j - pixels_light_radius:j + pixels_light_radius + 1]
+                sub_array = streetlight_raster[i - pixels_light_radius:i + pixels_light_radius + 1,
+                            j - pixels_light_radius:j + pixels_light_radius + 1]
                 coverage[i, j] = (sub_array * kernel).sum()
 
         # Calculate the percentage of coverage
         coverage_percentage = (coverage / kernel_sum) * 100
 
-        # Assign scores based on coverage percentages
-        result = np.zeros_like(coverage_percentage, dtype=np.float32)
-        result[coverage_percentage >= 80] = 5
-        result[(coverage_percentage >= 60) & (coverage_percentage < 80)] = 4
-        result[(coverage_percentage >= 40) & (coverage_percentage < 60)] = 3
-        result[(coverage_percentage >= 20) & (coverage_percentage < 40)] = 2
-        result[(coverage_percentage >= 1) & (coverage_percentage < 20)] = 1
+        # Define the bin edges and corresponding scores
+        bin_edges = [0, 1, 20, 40, 60, 80, 100]
+        scores = [0, 1, 2, 3, 4, 5]
+
+        # Use np.digitize to find the indices of the bins to which each value in coverage_percentage belongs
+        bins = np.digitize(coverage_percentage, bin_edges, right=True) - 1
+
+        # Map the bin indices to scores
+        result = np.array([scores[i] for i in bins.flat]).reshape(bins.shape).astype(np.float32)
 
         # Save the final raster
         meta.update(dtype=rasterio.float32)
