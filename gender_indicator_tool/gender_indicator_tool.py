@@ -28,13 +28,16 @@ from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog, QApplication
 from qgis.core import *
 
+# package installs
+
+
 # Auxiliary libraries
 import os
 import sys
 import geopandas as gpd
 import pandas as pd
-from rasterio.crs import CRS
 import rasterio
+from rasterio.crs import CRS
 import numpy as np
 import math
 import shutil
@@ -43,6 +46,7 @@ import logging
 import ast
 from rasterio.mask import mask
 from rasterio.features import geometry_mask
+import csv
 
 # Prepare processing framework
 # sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
@@ -689,7 +693,7 @@ class GenderIndicatorTool:
             self.dlg.DIG_status.repaint()
             
         elif factor_no == 6:
-            polygonlayer = self.dlg.FCV_Input_Field.filePath()
+            csvFile = self.dlg.FCV_Input_Field.filePath()
             rasField = self.dlg.FCV_rasField_CB.currentText()
             self.dlg.FCV_status.setText("Variables Set")
             self.dlg.FCV_status.repaint()
@@ -1221,6 +1225,13 @@ class GenderIndicatorTool:
             
         elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+            
+            # csv conversion to shapefile
+            
+            with open(csvFile, 'r') as csv_file:
+                reader = csv.DictReader(csv_file)
+                field_names = reader.fieldnames
+            
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
             clipPolygonUTM = processing.run(
@@ -1526,6 +1537,8 @@ class GenderIndicatorTool:
             facility_data = 0
             for FaciltyPointlayer in FaciltyPointlayerList:
                 os.chdir(workingDir)
+                base_name = os.path.basename(FaciltyPointlayer)
+                shapefile_name, _ = os.path.splitext(base_name)
                 gdf = gpd.read_file(FaciltyPointlayer)
 
                 subset_size = 5
@@ -1764,7 +1777,7 @@ class GenderIndicatorTool:
                     else:
                         pass
                 
-                    rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{facility_data}.tif"
+                    rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{shapefile_name}.tif"
 
                     rasterize = processing.run(
                         "gdal:rasterize",
