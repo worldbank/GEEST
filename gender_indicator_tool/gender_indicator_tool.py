@@ -724,7 +724,7 @@ class GenderIndicatorTool:
         countryUTMLayerBuf = buffer["OUTPUT"]
 
         # Convert spatial data to UTM CRS
-        if factor_no in [1, 2, 3]:
+        if factor_no in [1, 2, 3, 6]:
             pass
         else:
             self.convertCRS(polygonlayer, UTM_crs)
@@ -1225,41 +1225,79 @@ class GenderIndicatorTool:
             
         elif factor_no == 6:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
-            
+            csvFileLayer = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             # csv conversion to shapefile
             
             with open(csvFile, 'r') as csv_file:
                 reader = csv.DictReader(csv_file)
                 field_names = reader.fieldnames
+                for row in reader:
+                    feature = QgsFeature()
+                    latitude = float(row['latitude'])
+                    longitude = float(row['longitude'])
+                    point = QgsPointXY(longitude, latitude)
+                    feature.setGeometry(QgsGeometry.fromPointXY(point))
+                    
+                    attributes = [row[field_name] for field_name in field_names]
+                    feature.setAttributes(attributes)
+                    csvFileLayer.addFeature(feature)
             
-            polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
-            clipPolygonUTM = processing.run(
+            clipCsvFileUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
+                   "INPUT": csvFileLayer,
                    "OVERLAY": countryUTMLayerBuf,
                    "OUTPUT": "memory:",
                 }
             )
             
-            polygonUTM = clipPolygonUTM["OUTPUT"]
+            csvFileLayerUTM = clipCsvFileUTM["OUTPUT"]
 
             Difference = processing.run(
                 "native:difference",
                 {
                     "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": polygonUTM,
+                    "OVERLAY": csvFileLayerUTM,
                     "OUTPUT": "memory:",
                     "GRID_SIZE": None,
                 },
             )
 
             difference = Difference["OUTPUT"]
+            
+            buffers = []
+            for feature in csvFileLayerUTM.getFeatures():
+                event_type = feature['event_type']
+                if 'impact_radius' in feature.fields().names():
+                    radius = feature['impact_radius']
+                else:
+                    radius = 5000  # Default radius of 5 km
+
+            buffer_result = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": QgsGeometry.fromPointXY(
+                        QgsPointXY(feature['longitude'],
+                                   feature['latitude'])),
+                    "DISTANCE": radius,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": False,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": "memory:",
+                },
+            )
+    
+            buffer_layer = buffer_result["OUTPUT"]
+            for buf_feat in buffer_layer.getFeatures():
+                buf_feat.setAttributes(feature.attributes())
+                buffers.append(buf_feat)
 
             Merge = processing.run(
                 "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
+                {"LAYERS": [csvFileLayerUTM, difference], "CRS": None, "OUTPUT": "memory:"},
             )
 
             mergeOutput = Merge["OUTPUT"]
