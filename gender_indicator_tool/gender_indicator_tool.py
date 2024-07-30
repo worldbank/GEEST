@@ -28,7 +28,7 @@ from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog, QApplication
 from qgis.core import *
 from qgis.core import QgsVectorLayer, QgsProject, QgsCoordinateReferenceSystem, QgsCoordinateTransformContext, \
-    QgsCoordinateTransform, QgsMessageLog, Qgis
+    QgsCoordinateTransform, QgsMessageLog, Qgis, QgsWkbTypes
 
 # Auxiliary libraries
 import os
@@ -321,6 +321,7 @@ class GenderIndicatorTool:
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
         ###### TAB 4.2 - Safe Urban Design
+        self.dlg.SAF_Input_Field.fileChanged.connect(self.populateFieldsFromPolygonLayer_PC_SAF)
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
         ###### TAB 4.3 - Digital Inclusion
@@ -2518,8 +2519,22 @@ class GenderIndicatorTool:
                 if os.getcwd() != workingDir:
                     os.chdir(workingDir)
 
-        else:  # Handle non-raster (assumed to be vector) layer
-            self.SAFstreetLights()
+        else:
+            # Handle non-raster (assumed to be vector) layer
+            input_layer = QgsVectorLayer(input_file, "input", "ogr")
+            if not input_layer.isValid():
+                self.dlg.SAF_status.setText("The input file is not a valid raster or vector layer.")
+                self.dlg.SAF_status.repaint()
+                return
+
+            # Check the geometry type of the vector layer. If points then streetlights, if polygons then areas/zones
+            if input_layer.geometryType() == QgsWkbTypes.PointGeometry:
+                self.SAFstreetLights()
+            elif input_layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+                self.SAFPerceivedSafety(input_layer)
+            else:
+                self.dlg.SAF_status.setText("Unsupported vector layer type. Only point and polygon geometries are supported.")
+                self.dlg.SAF_status.repaint()
 
     def SAFstreetLights(self):
         """
@@ -2704,6 +2719,19 @@ class GenderIndicatorTool:
             # Ensure we return to the original working directory even if an error occurs
             if os.getcwd() != workingDir:
                 os.chdir(workingDir)
+
+    def populateFieldsFromPolygonLayer_PC_SAF(self, file_path):
+        layer = QgsVectorLayer(file_path, "input", "ogr")
+        # Check if the layer is a polygon
+        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+            self.dlg.SAF_rasField_CB.setEnabled(True)
+            self.dlg.SAF_rasField_CB.clear()
+            fields = [field.name() for field in layer.fields()]
+            self.dlg.SAF_rasField_CB.addItems(fields)
+
+    def SAFPerceivedSafety(self, layer):
+        self.dlg.SAF_status.setText("Handling areas")
+        self.dlg.SAF_status.repaint()
 
     def ELCnightTimeLights(self):
         """
