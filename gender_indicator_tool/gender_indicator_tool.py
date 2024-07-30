@@ -321,7 +321,7 @@ class GenderIndicatorTool:
         self.dlg.WLK_Execute_PB.clicked.connect(self.walkability)
 
         ###### TAB 4.2 - Safe Urban Design
-        self.dlg.SAF_Input_Field.fileChanged.connect(self.populateFieldsFromPolygonLayer_PC_SAF)
+        self.dlg.SAF_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_SAF)
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
         ###### TAB 4.3 - Digital Inclusion
@@ -2720,14 +2720,20 @@ class GenderIndicatorTool:
             if os.getcwd() != workingDir:
                 os.chdir(workingDir)
 
-    def populateFieldsFromPolygonLayer_PC_SAF(self, file_path):
+    def populateCBFieldsFromPolygonLayer_PC_SAF(self, file_path):
         layer = QgsVectorLayer(file_path, "input", "ogr")
         # Check if the layer is a polygon
         if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+            # if it is, populate the combo box fields
             self.dlg.SAF_rasField_CB.setEnabled(True)
             self.dlg.SAF_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.SAF_rasField_CB.addItems(fields)
+        else:
+            # ensure the CB is not displaying stale information
+            self.dlg.SAF_rasField_CB.clear()
+            self.dlg.SAF_rasField_CB.setEnabled(False)
+
 
     def SAFPerceivedSafety(self, layer):
         self.dlg.SAF_status.setText("Handling areas")
