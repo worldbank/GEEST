@@ -2539,11 +2539,11 @@ class GenderIndicatorTool:
     def SAFstreetLights(self):
         """
         This function processes streetlight vector data for safety assessment.
-        It creates 200-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
+        It creates 20-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
         """
 
         # Constants
-        LIGHT_AREA_RADIUS = 200
+        LIGHT_AREA_RADIUS = 20
         BUFFER_SEGMENTS = 8
         BUFFER_END_CAP_STYLE = 0
         BUFFER_JOIN_STYLE = 0
