@@ -2368,7 +2368,7 @@ class GenderIndicatorTool:
     def SAFnightTimeLights(self):
         """
         This function processes night-time lights data for safety assessment.
-        It can handle both raster (existing functionality) and vector (to be implemented) inputs.
+        It can handle raster inputs, vector inputs are handled by SAFstreetLights.
         How brightly lit an area is used as a proxy for safety or safe urban design.
         """
 

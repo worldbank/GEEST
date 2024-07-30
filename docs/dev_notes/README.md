@@ -1,3 +1,10 @@
+# Table of Contents
+
+- [SAFStreetLight Function](#safstreetLight-function)
+    - [Substitute Streetlights Data Generation](#substitute-streetlights-data-generation)
+- [SAFPerceivedSafety Function](#safperceivedSafety-function)
+    - [Substitute Perceived Safety Data Generation](#substitute-perceived-safety-data-generation)
+
 # SAFStreetLight Function
 
 ![Extracted road network](img/6.png)
@@ -100,3 +107,35 @@ This methodology produces a calculated estimation of light source distribution f
 The final distribution provides a reasonable proxy for actual streetlight locations, allowing for the development and testing of the SAFStreetLight function in the absence of real-world data.
 
 ![Map of streetlight distribution](img/5.png)
+
+# SAFPerceivedSafety Function
+
+bla bla
+
+## Substitute 'Perceived Safety' Data Generation
+
+Due to the unavailability of actual Perceived Safety data in the sample dataset, a method was devised to generate substitute data based on available building footprint information.
+
+### Data Source and Preprocessing
+
+The primary data source was the building_footprints shapefile for the area of interest. Using the `Random Points in Polygon` tool, and specifying a minimum separation of 0.001 degrees, a set of random points was generated.
+
+![Buildings with random points](img/7.png)
+
+### ffdf
+
+![Voronoi polygons from random points](img/8.png)
+
+### ffdf
+
+![Trimmed Voronoi](img/9.png)
+
+### Safety Level generation
+
+The density of the generated points is directly related to the density of buildings and the resulting Voronoi polygons are thus smaller in densely populated areas than the less-dense areas. Based on the assumption that the amount of night-time lighting is directly proportional to the population density and thereby the polygon size, the perceived safety within the polygon is a function of its area by the equation:
+
+`safety_lvl = 1 - (area - area_min) / (area_max - area_min)`
+
+so that the smallest polygon has a Perceived Safety level of 1, and the largest polygon has a Perceived Safety level 0.
+
+![Generated Perceived Safety levels](img/10.png)
