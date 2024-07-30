@@ -326,8 +326,8 @@ class GenderIndicatorTool:
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
         ###### TAB 4.3 - Digital Inclusion
-        self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
-        self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(8))
+        #self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
+        self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(5))
 
         ###### TAB 4.4 - Natural Environment
         self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
@@ -684,8 +684,8 @@ class GenderIndicatorTool:
             self.dlg.SEC_status.repaint()
 
         elif factor_no == 5:
-            polygonlayer = self.dlg.DIG_Input_Field.filePath()
-            rasField = self.dlg.DIG_rasField_CB.currentText()
+            rasField = "rasField"
+            DIG_Value_SB = self.dlg.DIG_User_Value_Input.value()
             self.dlg.DIG_status.setText("Variables Set")
             self.dlg.DIG_status.repaint()
             time.sleep(0.5)
@@ -724,7 +724,7 @@ class GenderIndicatorTool:
         countryUTMLayerBuf = buffer["OUTPUT"]
 
         # Convert spatial data to UTM CRS
-        if factor_no in [1, 2, 3, 6]:
+        if factor_no in [1, 2, 3, 5, 6]:
             pass
         else:
             self.convertCRS(polygonlayer, UTM_crs)
@@ -1144,6 +1144,7 @@ class GenderIndicatorTool:
 
 
         elif factor_no == 5:
+            shp_utm[rasField] = DIG_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             

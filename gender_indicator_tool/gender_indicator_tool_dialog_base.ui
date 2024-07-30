@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -795,7 +795,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -1877,7 +1877,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>5</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -2196,11 +2196,31 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Internet Access Input Layer (Polygon)</string>
+              <string>Internet Access Value</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="3" rowspan="7">
+           <item row="3" column="0" colspan="2">
+            <widget class="QgsFilterLineEdit" name="DIG_Output_Field">
+             <property name="text">
+              <string>DIG_.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QDoubleSpinBox" name="DIG_User_Value_Input"/>
+           </item>
+           <item row="4" column="0">
+            <widget class="QPushButton" name="DIG_Execute_PB">
+             <property name="text">
+              <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3" rowspan="5">
             <widget class="QTextEdit" name="textEdit_29">
              <property name="enabled">
               <bool>true</bool>
@@ -2219,38 +2239,19 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Digital Inclusion&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;This tab characterizes areas based on the percentage of houses with access to the Internet. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A polygon layer (.shp) containing a field representing the percentage of houses with Internet access. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A value representing the percentage of houses with Internet access. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where all houses have access to the Internet while 0 indicates areas where no houses have Internet access. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="DIG_Input_Field" native="true"/>
-           </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="DIG_Set_PB">
+           <item row="4" column="1" colspan="2">
+            <widget class="QLabel" name="DIG_status">
              <property name="text">
-              <string>Set</string>
+              <string/>
              </property>
             </widget>
            </item>
-           <item row="2" column="0" colspan="3">
-            <widget class="QLabel" name="label_121">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Field of interest in the polygon layer</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QComboBox" name="DIG_rasField_CB"/>
-           </item>
-           <item row="4" column="0" colspan="2">
+           <item row="2" column="0" colspan="2">
             <widget class="QLabel" name="label_126">
              <property name="maximumSize">
               <size>
@@ -2260,30 +2261,6 @@ p, li { white-space: pre-wrap; }
              </property>
              <property name="text">
               <string>Output Raster Filename</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="DIG_Output_Field">
-             <property name="text">
-              <string>DIG_.tif</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QPushButton" name="DIG_Execute_PB">
-             <property name="text">
-              <string>Execute</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1" colspan="2">
-            <widget class="QLabel" name="DIG_status">
-             <property name="text">
-              <string/>
              </property>
             </widget>
            </item>
