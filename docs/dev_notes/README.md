@@ -142,7 +142,7 @@ The data sources used are the building_footprints and Adm2 shapefiles for the ar
 
 ### Safety Level generation
 
-The 'Artificial Perceived Safety' metric is introduced for development purposes to assign relative 'perceived' safety (from abuse/violence/crime) scores to regional areas based on nighttime lighting levels (x-axis) and population density (y-axis). The underlying assumption is that areas with fewer people and more night light are perceived to be safer, while areas with high population density and low light are perceived to be less safe. To model this, we assigned arbitrary relative values to the four corner cases: 
+In order to develop and test the processing and rasterization of tabular data (.csv) with control over the expected outcomes, the 'Artificial Perceived Safety' metric is introduced for development purposes to assign relative 'perceived' safety (from violence/crime) scores to regional areas based on nighttime lighting levels (x-axis) and population density (y-axis). The underlying assumption is that areas with fewer people and more night light are perceived to be safer, while areas with high population density and low light are perceived to be less safe. To model this, we assigned arbitrary relative values to the four corner cases: 
 
 - low light/high population density was assigned a value of 0 (least safe), 
 - low light/low population density was assigned a value of 1, 
