@@ -5,6 +5,10 @@
 - [SAFPerceivedSafety Function](#safperceivedSafety-function)
     - [Substitute Perceived Safety Data Generation](#substitute-perceived-safety-data-generation)
 
+## Additional Resources
+
+- [St. Lucia Administrative boundaries](https://data.humdata.org/dataset/cod-ab-lca?)
+
 # SAFStreetLight Function
 
 ![Extracted road network](img/6.png)
@@ -118,7 +122,9 @@ Due to the unavailability of actual Perceived Safety data in the sample dataset,
 
 ### Data Source and Preprocessing
 
-The primary data source was the building_footprints shapefile for the area of interest. Using the `Random Points in Polygon` tool, and specifying a minimum separation of 0.001 degrees, a set of random points was generated.
+The data sources used are the building_footprints and Adm2 shapefiles for the area of interest. The footprints accompany the example data and the Adm2 data was obtained from [HDX](https://data.humdata.org/dataset/cod-ab-lca?).
+
+
 
 ![Buildings with random points](img/7.png)
 
@@ -130,12 +136,39 @@ The primary data source was the building_footprints shapefile for the area of in
 
 ![Trimmed Voronoi](img/9.png)
 
-### Safety Level generation
-
-The density of the generated points is directly related to the density of buildings and the resulting Voronoi polygons are thus smaller in densely populated areas than the less-dense areas. Based on the assumption that the amount of night-time lighting is directly proportional to the population density and thereby the polygon size, the perceived safety within the polygon is a function of its area by the equation:
-
-`safety_lvl = 1 - (area - area_min) / (area_max - area_min)`
-
-so that the smallest polygon has a Perceived Safety level of 1, and the largest polygon has a Perceived Safety level 0.
+### sfsf
 
 ![Generated Perceived Safety levels](img/10.png)
+
+### Safety Level generation
+
+The 'Artificial Perceived Safety' metric is introduced for development purposes to assign relative 'perceived' safety (from abuse/violence/crime) scores to regional areas based on nighttime lighting levels (x-axis) and population density (y-axis). The underlying assumption is that areas with fewer people and more night light are perceived to be safer, while areas with high population density and low light are perceived to be less safe. To model this, we assigned arbitrary relative values to the four corner cases: 
+
+- low light/high population density was assigned a value of 0 (least safe), 
+- low light/low population density was assigned a value of 1, 
+- high light/high population density was assigned a value of 2
+- high light/low population density was assigned a value of 3 (most safe) 
+
+These assignments led to the derivation of the bilinear function: 
+
+`k(x,y) = y(-(x(-a + b) + a - x(-c + d) + c)) + x(-a + b) + a`
+
+rearranged to
+
+`k(x,y) = xy(a - b - c + d) - xa + xb - ya - yc + a`
+
+Substituting the values a = 1, b = 2, c = 0, and d = 3 into the equation, we obtain: 
+
+`k(x,y) = xy(1 - 2 - 0 + 3) - x(1) + x(2) - y(1) - y(0) + 1`
+
+Simplifying this, we get: 
+
+`k(x,y) = xy(2) - x + 2x - y + 1`
+
+which further simplifies to 
+
+`k(x,y) = 2xy + x - y + 1`
+
+![Artificial Perceived Safety plot](img/plot1.png)
+
+This bilinear function was chosen to reflect the interactions between these variables, capturing the increase in perceived safety with higher lighting and lower population density. The most unsafe conditions are characterized by low lighting and high population density, whereas the safest conditions are marked by high lighting and low population density. This function is then used to compute perceived safety scores for each region.
