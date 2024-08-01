@@ -2087,20 +2087,14 @@ p, li { white-space: pre-wrap; }
            <string>Safety</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_19">
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_109">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Nighttime Lights Input Layer (Raster or Points)</string>
+           <item row="3" column="0">
+            <widget class="QComboBox" name="SAF_rasField_CB">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
+           <item row="6" column="0" colspan="2">
             <widget class="QLabel" name="label_111">
              <property name="maximumSize">
               <size>
@@ -2113,10 +2107,46 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
+           <item row="8" column="0">
+            <widget class="QPushButton" name="SAF_Execute_PB">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
             <widget class="QLabel" name="SAF_status">
              <property name="text">
               <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_109">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Input Layer (Points, Polygons or Raster)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="2">
+            <widget class="QgsFilterLineEdit" name="SAF_Output_Field">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>SAF_.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
              </property>
             </widget>
            </item>
@@ -2133,7 +2163,20 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="0" column="2" rowspan="7">
+           <item row="1" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="SAF_Input_Field">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" rowspan="9">
             <widget class="QTextEdit" name="textEdit_21">
              <property name="enabled">
               <bool>true</bool>
@@ -2157,46 +2200,38 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="SAF_Input_Field">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <property name="text">
+              <string>Score extracted attributes from (0-5)</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="SAF_Output_Field">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <item row="5" column="0">
+            <widget class="QgsFilterLineEdit" name="SAF_typeScore_Field">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="text">
-              <string>SAF_.tif</string>
+              <string>E.g. [[&quot;Bad&quot;, 3], [&quot;Fair&quot;, 2], [&quot;Good&quot;, 1]]</string>
+             </property>
+             <property name="cursorPosition">
+              <number>0</number>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QPushButton" name="SAF_Execute_PB">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="text">
-              <string>Execute</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QComboBox" name="SAF_rasField_CB">
-             <property name="enabled">
-              <bool>false</bool>
              </property>
             </widget>
            </item>

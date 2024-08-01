@@ -25,10 +25,12 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt5.QtWidgets import QFileDialog, QApplication, QComboBox
 from qgis.core import *
 from qgis.core import QgsVectorLayer, QgsProject, QgsCoordinateReferenceSystem, QgsCoordinateTransformContext, \
     QgsCoordinateTransform, QgsMessageLog, Qgis, QgsWkbTypes
+from PyQt5.QtCore import QVariant
+
 
 # Auxiliary libraries
 import os
@@ -322,6 +324,7 @@ class GenderIndicatorTool:
 
         ###### TAB 4.2 - Safe Urban Design
         self.dlg.SAF_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_SAF)
+        self.dlg.SAF_rasField_CB.textActivated.connect(self.populateTextFieldWithUniqueValues_PC_SAF)
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
         ###### TAB 4.3 - Digital Inclusion
@@ -2721,18 +2724,65 @@ class GenderIndicatorTool:
                 os.chdir(workingDir)
 
     def populateCBFieldsFromPolygonLayer_PC_SAF(self, file_path):
+        # Clear and disable the SAF_typeScore_Field by default
+        self.dlg.SAF_typeScore_Field.clear()
+        self.dlg.SAF_typeScore_Field.setEnabled(False)
         layer = QgsVectorLayer(file_path, "input", "ogr")
         # Check if the layer is a polygon
         if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
             # if it is, populate the combo box fields
             self.dlg.SAF_rasField_CB.setEnabled(True)
             self.dlg.SAF_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.SAF_rasField_CB.addItems(fields)
+            for field in layer.fields():
+                field_name = field.name()
+                # Check if the field is of type text
+                if field.type() == QVariant.String:
+                    # distinguish text fields
+                    field_name = f"{field_name} (text)"
+                self.dlg.SAF_rasField_CB.addItem(field_name)
         else:
             # ensure the CB is not displaying stale information
             self.dlg.SAF_rasField_CB.clear()
             self.dlg.SAF_rasField_CB.setEnabled(False)
+            # Clear and disable the SAF_typeScore_Field by default
+            self.dlg.SAF_typeScore_Field.clear()
+            self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+    def populateTextFieldWithUniqueValues_PC_SAF(self, layer):
+        # Get the file path from the QgsFileWidget
+        file_path = self.dlg.SAF_Input_Field.filePath()
+        # Get the selected field name from the QComboBox
+        field_name = self.dlg.SAF_rasField_CB.currentText()
+
+        # Clear and disable the SAF_typeScore_Field by default
+        self.dlg.SAF_typeScore_Field.clear()
+        self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+        if file_path and field_name:
+            if field_name.endswith(" (text)"):
+                # Remove " (text)" suffix
+                field_name = field_name.replace(" (text)", "")
+                try:
+                    # Read the file using geopandas
+                    gdf = gpd.read_file(file_path)
+                    # Get unique values from the selected field
+                    unique_values = gdf[field_name].unique().tolist()
+                    # Create the score list
+                    score_list = [[str(val), 0] for val in unique_values if pd.notna(val)]
+                    # Set the text in the QFilterLineEdit and enable it
+                    self.dlg.SAF_typeScore_Field.setText(str(score_list))
+                    self.dlg.SAF_typeScore_Field.setEnabled(True)
+                except Exception as e:
+                    # Handle any errors (e.g., file not found, invalid field name)
+                    self.dlg.SAF_typeScore_Field.setText(f"Error: {str(e)}")
+                    self.dlg.SAF_typeScore_Field.setEnabled(False)
+            else:
+                # Field name doesn't end with " (text)", so we keep the field cleared and disabled
+                pass
+        else:
+            # Handle the case where no file or field is selected
+            self.dlg.SAF_typeScore_Field.setText("Please select a file and field first.")
+            self.dlg.SAF_typeScore_Field.setEnabled(False)
 
 
     def SAFPerceivedSafety(self, layer):
