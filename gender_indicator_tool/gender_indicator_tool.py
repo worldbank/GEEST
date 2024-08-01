@@ -2784,10 +2784,137 @@ class GenderIndicatorTool:
             self.dlg.SAF_typeScore_Field.setText("Please select a file and field first.")
             self.dlg.SAF_typeScore_Field.setEnabled(False)
 
+    from qgis.core import QgsProject, QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, \
+        QgsCoordinateTransform, QgsRectangle, QgsField, edit
+    from qgis.PyQt.QtCore import QVariant
+    from qgis import processing
+    import os
+    import shutil
+    import time
 
     def SAFPerceivedSafety(self, layer):
-        self.dlg.SAF_status.setText("Handling areas")
-        self.dlg.SAF_status.repaint()
+        """
+        This function rasterizes the Perceived Safety factor for the SAF (Safety Assessment Framework).
+        It converts vector data to raster, applying necessary transformations and standardizations using a binning approach.
+        """
+        try:
+            # Get field name
+            rasField = self.dlg.SAF_rasField_CB.currentText()
+
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            countryLayer = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+
+            # Update status
+            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.SAF_status.setText("Processing...")
+            self.dlg.SAF_status.repaint()
+
+            # Ensure the layer is valid
+            if not layer.isValid():
+                raise ValueError("Invalid layer")
+
+            # Convert CRS if necessary
+            if layer.crs() != UTM_crs:
+                layer = processing.run("native:reprojectlayer", {
+                    'INPUT': layer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Get min and max values of the field
+            values = [f[rasField] for f in layer.getFeatures() if f[rasField] is not None]
+            if not values:
+                raise ValueError("No valid values in the selected field")
+            min_val, max_val = min(values), max(values)
+
+            # Define bins and scores
+            bin_width = (max_val - min_val) / 5
+            SCORE_BINS = [min_val + i * bin_width for i in range(6)]
+            SCORES = [0, 1, 2, 3, 4, 5]
+
+            # Create a temporary memory layer to hold the scaled scores
+            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+            temp_layer.updateFields()
+
+            # Calculate the scaled scores and add to temp layer
+            temp_layer.startEditing()
+            for feature in layer.getFeatures():
+                value = feature[rasField]
+                if value is None or value == 0:
+                    score = 0
+                else:
+                    for i in range(len(SCORE_BINS) - 1):
+                        if SCORE_BINS[i] <= value < SCORE_BINS[i + 1]:
+                            score = SCORES[i]
+                            break
+                    else:
+                        score = SCORES[-1]
+
+                # Create a new feature for the temp layer
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
+
+            temp_layer.commitChanges()
+
+            # Get the extent for rasterization
+            extent = temp_layer.extent()
+            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+
+            # Set up output directory
+            Dimension = "Place Characterization"
+            os.makedirs(os.path.join(workingDir, Dimension), exist_ok=True)
+            os.chdir(os.path.join(workingDir, Dimension))
+
+            rasOutput = self.dlg.SAF_Output_Field.text()
+
+            # Rasterize
+            rasterize_output = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput
+                }
+            )
+
+            # Set output field
+            self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+
+            # Apply style
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            # Update status
+            self.dlg.SAF_status.setText("Processing has been completed!")
+            self.dlg.SAF_status.repaint()
+
+        except Exception as e:
+            self.dlg.SAF_status.setText(f"Error: {str(e)}")
+            self.dlg.SAF_status.repaint()
 
     def ELCnightTimeLights(self):
         """
