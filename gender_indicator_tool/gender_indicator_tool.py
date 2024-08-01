@@ -340,7 +340,7 @@ class GenderIndicatorTool:
         self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
         
         ###### TAB 4.6 - Facility, conflict, and violence
-        self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
+        #self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
         self.dlg.FCV_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
 
 
@@ -514,9 +514,9 @@ class GenderIndicatorTool:
         elif factor_no == 5:
             polygonlayer = self.dlg.FCV_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
-            self.dlg.FCV_rasField_CB.clear()
-            fields = [field.name() for field in layer.fields()]
-            self.dlg.FCV_rasField_CB.addItems(fields)
+            #self.dlg.FCV_rasField_CB.clear()
+            #fields = [field.name() for field in layer.fields()]
+            #self.dlg.FCV_rasField_CB.addItems(fields)
 
     def TypeSet(self, factor_no):
         """
@@ -694,7 +694,8 @@ class GenderIndicatorTool:
             
         elif factor_no == 6:
             csvFile = self.dlg.FCV_Input_Field.filePath()
-            rasField = self.dlg.FCV_rasField_CB.currentText()
+            csvFile = f"file://{csvFile}?delimiter=,&yField=latitude&xField=longitude"
+            rasField = "rasField"
             self.dlg.FCV_status.setText("Variables Set")
             self.dlg.FCV_status.repaint()
             time.sleep(0.5)
@@ -768,7 +769,9 @@ class GenderIndicatorTool:
 
             Merge = processing.run(
                 "native:mergevectorlayers",
-                {"LAYERS": [polygonUTM, difference], "CRS": None, "OUTPUT": "memory:"},
+                {"LAYERS": [polygonUTM, difference],
+                 "CRS": None,
+                 "OUTPUT": "memory:"},
             )
 
             mergeOutput = Merge["OUTPUT"]
@@ -1225,28 +1228,49 @@ class GenderIndicatorTool:
             self.dlg.DIG_status.repaint()
             
         elif factor_no == 6:
+            shp_utm[rasField] = 100
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
-            csvFileLayer = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             # csv conversion to shapefile
             
-            with open(csvFile, 'r') as csv_file:
-                reader = csv.DictReader(csv_file)
-                field_names = reader.fieldnames
-                for row in reader:
-                    feature = QgsFeature()
-                    latitude = float(row['latitude'])
-                    longitude = float(row['longitude'])
-                    point = QgsPointXY(longitude, latitude)
-                    feature.setGeometry(QgsGeometry.fromPointXY(point))
-                    
-                    attributes = [row[field_name] for field_name in field_names]
-                    feature.setAttributes(attributes)
-                    csvFileLayer.addFeature(feature)
+            temp = "temp"
+            if os.path.exists(temp):
+                pass
+            else:
+                os.mkdir(temp)
+            
+            outputPath = f"{workingDir}{temp}/acled.shp"
+            crs = QgsCoordinateReferenceSystem('EPSG:4326')
+            
+            layer = QgsVectorLayer(csvFile, 'acled', 'delimitedtext')
+            layer.setCrs(crs)
+            save_options = QgsVectorFileWriter.SaveVectorOptions()
+
+            save_options.driverName = "ESRI Shapefile"
+
+            save_options.fileEncoding = "UTF-8"
+
+            transform_context = QgsProject.instance().transformContext()
+            error = QgsVectorFileWriter.writeAsVectorFormatV3(
+                layer,
+                outputPath,
+                transform_context,
+                save_options
+            )
+            
+            if error[0] == QgsVectorFileWriter.NoError:
+                print('Shapefile successfully created!')
+            else:
+                print('Error occurred:', error)
+                
+            csvFileLayer = outputPath
+            self.convertCRS(csvFileLayer, UTM_crs)
+            csvFileLayerUTM = QgsVectorLayer(shp_utm.to_json(), "csvFileLayerUTM", "ogr")
+            
             
             clipCsvFileUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": csvFileLayer,
+                   "INPUT": csvFileLayerUTM,
                    "OVERLAY": countryUTMLayerBuf,
                    "OUTPUT": "memory:",
                 }
@@ -1266,20 +1290,17 @@ class GenderIndicatorTool:
 
             difference = Difference["OUTPUT"]
             
-            buffers = []
-            for feature in csvFileLayerUTM.getFeatures():
-                event_type = feature['event_type']
-                if 'impact_radius' in feature.fields().names():
-                    radius = feature['impact_radius']
-                else:
-                    radius = 5000  # Default radius of 5 km
+            radius = self.dlg.FCV_Input_Radius.value()
+            
+            if radius is not None:
+                radius
+            else:
+                radius = 5000
 
             buffer_result = processing.run(
                 "native:buffer",
                 {
-                    "INPUT": QgsGeometry.fromPointXY(
-                        QgsPointXY(feature['longitude'],
-                                   feature['latitude'])),
+                    "INPUT": csvFileLayerUTM,
                     "DISTANCE": radius,
                     "SEGMENTS": 5,
                     "END_CAP_STYLE": 0,
@@ -1292,13 +1313,10 @@ class GenderIndicatorTool:
             )
     
             buffer_layer = buffer_result["OUTPUT"]
-            for buf_feat in buffer_layer.getFeatures():
-                buf_feat.setAttributes(feature.attributes())
-                buffers.append(buf_feat)
 
             Merge = processing.run(
                 "native:mergevectorlayers",
-                {"LAYERS": [csvFileLayerUTM, difference], "CRS": None, "OUTPUT": "memory:"},
+                {"LAYERS": [buffer_layer, difference], "CRS": None, "OUTPUT": "memory:"},
             )
 
             mergeOutput = Merge["OUTPUT"]

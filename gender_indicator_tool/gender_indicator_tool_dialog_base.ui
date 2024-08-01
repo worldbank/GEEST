@@ -1877,7 +1877,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>2</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -2630,35 +2630,6 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_110">
-             <property name="maximumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Input CSV File</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QLabel" name="label_113">
-             <property name="maximumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Raster Output Filename</string>
-             </property>
-             <property name="scaledContents">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="3" rowspan="7">
             <widget class="QTextEdit" name="textEdit_47">
              <property name="enabled">
@@ -2683,24 +2654,19 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="FCV_Input_Field" native="true">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <item row="4" column="0" colspan="2">
+            <widget class="QLabel" name="label_113">
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>50</height>
+              </size>
              </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QComboBox" name="FCV_rasField_CB">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer Field&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1" colspan="2">
-            <widget class="QLabel" name="FCV_status">
              <property name="text">
-              <string/>
+              <string>Raster Output Filename</string>
+             </property>
+             <property name="scaledContents">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -2714,10 +2680,36 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="FCV_Set_PB">
+           <item row="1" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="FCV_Input_Field" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_110">
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>50</height>
+              </size>
+             </property>
              <property name="text">
-              <string>Set</string>
+              <string>Input CSV File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1" colspan="2">
+            <widget class="QLabel" name="FCV_status">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -2730,7 +2722,14 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Field of interest in the point layer</string>
+              <string>Impact Radius in Metres (Optional)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QDoubleSpinBox" name="FCV_Input_Radius">
+             <property name="maximum">
+              <double>100000.000000000000000</double>
              </property>
             </widget>
            </item>
