@@ -3266,8 +3266,7 @@ class GenderIndicatorTool:
                 for feature in countryLayerBuf.getFeatures():
                     new_feature = QgsFeature(temp_layer.fields())
                     new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score",
-                                             int((user_value - 0) / (100 - 0) * 5))  # Normalize to a 0-5 scale
+                    new_feature.setAttribute("scaled_score", int((user_value / 100) * 5))  # Normalize to a 0-5 scale
                     temp_layer.addFeature(new_feature)
 
                 temp_layer.commitChanges()
