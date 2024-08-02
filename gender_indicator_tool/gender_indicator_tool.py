@@ -2832,8 +2832,8 @@ class GenderIndicatorTool:
                 })['OUTPUT']
 
             # Ensure spatial index exists
-            spatial_index_layer = QgsSpatialIndex(layer.getFeatures())
-            spatial_index_country = QgsSpatialIndex(countryLayer.getFeatures())
+            _ = QgsSpatialIndex(layer.getFeatures())
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
 
             # Clip the input layer by the country layer
             clipped_layer = processing.run("native:clip", {
@@ -2869,9 +2869,7 @@ class GenderIndicatorTool:
             temp_layer.startEditing()
             for feature in clipped_layer.getFeatures():
                 value = feature[rasField]
-                if value is None:
-                    score = 0
-                elif value == 0:
+                if value is None or value == 0:
                     score = 0
                 else:
                     normalized_value = (value - min_val) / (max_val - min_val)
@@ -2882,16 +2880,16 @@ class GenderIndicatorTool:
                     else:
                         score = SCORES[-1]
 
-                    # Create a new feature for the temp layer
-                    new_feature = QgsFeature(temp_layer.fields())
-                    new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score", score)
-                    temp_layer.addFeature(new_feature)
+                # Create a new feature for the temp layer
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
 
             temp_layer.commitChanges()
 
             # Ensure spatial index for temp_layer
-            spatial_index_temp = QgsSpatialIndex(temp_layer.getFeatures())
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
 
             # Get the extent for rasterization
             extent = temp_layer.extent()
@@ -2906,7 +2904,7 @@ class GenderIndicatorTool:
             rasOutput = self.dlg.SAF_Output_Field.text()
 
             # Rasterize
-            rasterize_output = processing.run(
+            _ = processing.run(
                 "gdal:rasterize",
                 {
                     "INPUT": temp_layer,
