@@ -3120,27 +3120,205 @@ class GenderIndicatorTool:
             self.dlg.EDU_rasField_CB.clear()
             for field in layer.fields():
                 field_name = field.name()
-                # Check if the field is of type text
-                if True: #field.type() != QVariant.String:
-                    # remove text fields
+                # Check if the field is not of type text, and if not, add it to the combo box
+                if field.type() != QVariant.String:
                     self.dlg.EDU_rasField_CB.addItem(field_name)
                     field_count += 1
             if field_count > 0:
+                # disable user input if there are fields to choose from
                 self.dlg.EDU_User_Value_Input.setEnabled(False)
         else:
             # ensure the CB is not displaying stale information
             self.dlg.EDU_rasField_CB.clear()
-            self.dlg.EDU_rasField_CB.addItem("No fields")
-            #self.dlg.EDU_rasField_CB.setEnabled(False)
+            self.dlg.EDU_rasField_CB.setEnabled(False)
             # enable user input
             self.dlg.EDU_User_Value_Input.setEnabled(True)
         self.dlg.EDU_rasField_CB.repaint()
 
-
     def EDUShapefileOrUserInputRasterizer(self):
         """
+        This function rasterizes the Education factor for the Urban Safety Factor.
+        It either uses an incoming shapefile and the field corresponding to the checkbox,
+        or a user-specified value to rasterize.
         """
-        pass
+        try:
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+            Dimension = "Education"
+
+            if not os.path.exists(Dimension):
+                os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+            # Load and reproject country layer if necessary
+            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
+
+            # Buffer the country layer
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryLayer,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": 'memory:',
+                },
+            )
+            countryLayerBuf = buffer["OUTPUT"]
+
+            # Check if the QComboBox has a selected value
+            rasField = self.dlg.EDU_rasField_CB.currentText()
+            if rasField:
+                # Use the incoming shapefile and the field corresponding to the checkbox
+                polygonLayerPath = self.dlg.EDU_Input_Field.filePath()
+                polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
+                if not polygonLayer.isValid():
+                    raise ValueError("Invalid polygon layer")
+
+                if polygonLayer.crs() != UTM_crs:
+                    polygonLayer = processing.run("native:reprojectlayer", {
+                        'INPUT': polygonLayer,
+                        'TARGET_CRS': UTM_crs,
+                        'OUTPUT': 'memory:'
+                    })['OUTPUT']
+
+                # Clip the polygon layer by the country buffer layer
+                clipped_layer = processing.run("native:clip", {
+                    'INPUT': polygonLayer,
+                    'OVERLAY': countryLayerBuf,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+                if not any(clipped_layer.getFeatures()):
+                    raise ValueError("Clipping resulted in an empty layer")
+
+                # Get min and max values of the field
+                values = [f[rasField] for f in clipped_layer.getFeatures() if f[rasField] is not None]
+                if not values:
+                    raise ValueError("No valid values in the selected field")
+                min_val, max_val = min(values), max(values)
+
+                # Normalize values
+                normalized_values = [(val - min_val) / (max_val - min_val) for val in values]
+
+                # Define bins and scores
+                buffer = 1e-6  # Small buffer around zero to create a bin for exactly zero values
+                SCORES = [0, 0, 1, 2, 3, 4, 5]
+                bin_width = (1 - buffer) / (len(SCORES) - 2)  # Adjust for the extra zero bin
+                SCORE_BINS = [0, buffer] + [i * bin_width for i in range(1, len(SCORES) - 1)] + [1]
+
+                # Create a temporary memory layer to hold the scaled scores
+                temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+                temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+                temp_layer.updateFields()
+
+                # Calculate the scaled scores and add to temp layer
+                temp_layer.startEditing()
+                for feature in clipped_layer.getFeatures():
+                    value = feature[rasField]
+                    if value is None or value == 0:
+                        score = 0
+                    else:
+                        normalized_value = (value - min_val) / (max_val - min_val)
+                        for i in range(len(SCORE_BINS) - 1):
+                            if SCORE_BINS[i] <= normalized_value < SCORE_BINS[i + 1]:
+                                score = SCORES[i]
+                                break
+                        else:
+                            score = SCORES[-1]
+
+                    # Create a new feature for the temp layer
+                    new_feature = QgsFeature(temp_layer.fields())
+                    new_feature.setGeometry(feature.geometry())
+                    new_feature.setAttribute("scaled_score", score)
+                    temp_layer.addFeature(new_feature)
+
+                temp_layer.commitChanges()
+
+            else:
+                # Use the user-specified value to rasterize the country layer buffer
+                user_value = self.dlg.EDU_User_Value_Input.value()
+                temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+                temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+                temp_layer.updateFields()
+
+                temp_layer.startEditing()
+                for feature in countryLayerBuf.getFeatures():
+                    new_feature = QgsFeature(temp_layer.fields())
+                    new_feature.setGeometry(feature.geometry())
+                    new_feature.setAttribute("scaled_score",
+                                             int((user_value - 0) / (100 - 0) * 5))  # Normalize to a 0-5 scale
+                    temp_layer.addFeature(new_feature)
+
+                temp_layer.commitChanges()
+
+            # Ensure spatial index for temp_layer
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
+
+            # Get the extent for rasterization
+            extent = temp_layer.extent()
+            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+
+            rasOutput = self.dlg.EDU_Output_Field.text()
+
+            # Rasterize
+            _ = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput
+                }
+            )
+
+            # Set output field
+            self.dlg.EDU_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+
+            # Apply style
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            # Update status
+            self.dlg.EDU_status.setText("Processing has been completed!")
+            self.dlg.EDU_status.repaint()
+
+        except Exception as e:
+            self.dlg.EDU_status.setText(f"Error: {str(e)}")
+            self.dlg.EDU_status.repaint()
 
     def ELCnightTimeLights(self):
         """
