@@ -2967,9 +2967,147 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
 
+    def SAFPerceivedSafetyFromTextFieldRasterizer(self, layer):
+        """
+        This function rasterizes the Perceived Safety factor for the Urban Safety Factor.
+        It converts vector data to raster, applying scores based on text attributes.
+        """
+        try:
+            # Get field name
+            rasField = self.dlg.SAF_rasField_CB.currentText()
+            rasField = rasField.replace(" (text)", "")
 
-    def SAFPerceivedSafetyFromTextFieldRasterizer(self):
-        pass
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+
+            # Get scoring from SAF_typeScore_Field
+            scoring_text = self.dlg.SAF_typeScore_Field.text()
+            scoring_dict = {item[0]: item[1] for item in eval(scoring_text)}
+
+            # Update status
+            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.SAF_status.setText("Processing...")
+            self.dlg.SAF_status.repaint()
+
+            # Ensure the layer is valid
+            if not layer.isValid():
+                raise ValueError("Invalid layer")
+
+            # Convert CRS if necessary
+            if layer.crs() != UTM_crs:
+                layer = processing.run("native:reprojectlayer", {
+                    'INPUT': layer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Load country layer and convert CRS if necessary
+            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(layer.getFeatures())
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
+
+            # Clip the input layer by the country layer
+            clipped_layer = processing.run("native:clip", {
+                'INPUT': layer,
+                'OVERLAY': countryLayer,
+                'OUTPUT': 'memory:'
+            })['OUTPUT']
+
+            if not any(clipped_layer.getFeatures()):
+                raise ValueError("Clipping resulted in an empty layer")
+
+            # Create a temporary memory layer to hold the scaled scores
+            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+            temp_layer.updateFields()
+
+            # Calculate the scaled scores and add to temp layer
+            temp_layer.startEditing()
+            for feature in clipped_layer.getFeatures():
+                value = feature[rasField]
+                if value is None or value not in scoring_dict:
+                    score = 0
+                else:
+                    score = scoring_dict[value]
+
+                # Create a new feature for the temp layer
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
+
+            temp_layer.commitChanges()
+
+            # Ensure spatial index for temp_layer
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
+
+            # Get the extent for rasterization
+            extent = temp_layer.extent()
+            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+
+            # Set up output directory
+            Dimension = "Place Characterization"
+            if not os.path.exists(Dimension):
+                os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+            rasOutput = self.dlg.SAF_Output_Field.text()
+
+            # Rasterize
+            _ = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput
+                }
+            )
+
+            # Set output field
+            self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+
+            # Apply style
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            # Update status
+            self.dlg.SAF_status.setText("Processing has been completed!")
+            self.dlg.SAF_status.repaint()
+
+        except Exception as e:
+            self.dlg.SAF_status.setText(f"Error: {str(e)}")
+            self.dlg.SAF_status.repaint()
 
     def ELCnightTimeLights(self):
         """
