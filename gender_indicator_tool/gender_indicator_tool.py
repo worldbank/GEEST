@@ -338,8 +338,9 @@ class GenderIndicatorTool:
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
 
         ###### TAB 4.5- Education
-        self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
-        self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
+        #self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
+        self.dlg.EDU_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_EDU)
+        self.dlg.EDU_Execute_PB.clicked.connect(self.EDUShapefileOrUserInputRasterizer)
 
         ###### TAB 4.6 - Facility, conflict, and violence
         self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
@@ -478,11 +479,11 @@ class GenderIndicatorTool:
                 - Fragility, conflict, and violence(FCV)
         """
         if factor_no == 0:
-            polygonlayer = self.dlg.EDU_Input_Field.filePath()
+            """polygonlayer = self.dlg.EDU_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.EDU_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
-            self.dlg.EDU_rasField_CB.addItems(fields)
+            self.dlg.EDU_rasField_CB.addItems(fields)"""
 
         elif factor_no == 1:
             polygonlayer = self.dlg.WD_Input_Field.filePath()
@@ -635,13 +636,13 @@ class GenderIndicatorTool:
 
         # INPUT
         if factor_no == 0:
-            polygonlayer = self.dlg.EDU_Input_Field.filePath()
+            """polygonlayer = self.dlg.EDU_Input_Field.filePath()
             rasField = self.dlg.EDU_rasField_CB.currentText()
             self.dlg.EDU_status.setText("Variables Set")
             self.dlg.EDU_status.repaint()
             time.sleep(0.5)
             self.dlg.EDU_status.setText("Processing...")
-            self.dlg.EDU_status.repaint()
+            self.dlg.EDU_status.repaint()"""
 
         elif factor_no == 1:
             # polygonlayer = self.dlg.WD_Input_Field.filePath()
@@ -3108,6 +3109,38 @@ class GenderIndicatorTool:
         except Exception as e:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
+
+    def populateCBFieldsFromPolygonLayer_PC_EDU(self, file_path):
+        field_count = 0
+        layer = QgsVectorLayer(file_path, "input", "ogr")
+        # Check if the layer is a polygon
+        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+            # if it is, populate the combo box fields
+            self.dlg.EDU_rasField_CB.setEnabled(True)
+            self.dlg.EDU_rasField_CB.clear()
+            for field in layer.fields():
+                field_name = field.name()
+                # Check if the field is of type text
+                if True: #field.type() != QVariant.String:
+                    # remove text fields
+                    self.dlg.EDU_rasField_CB.addItem(field_name)
+                    field_count += 1
+            if field_count > 0:
+                self.dlg.EDU_User_Value_Input.setEnabled(False)
+        else:
+            # ensure the CB is not displaying stale information
+            self.dlg.EDU_rasField_CB.clear()
+            self.dlg.EDU_rasField_CB.addItem("No fields")
+            #self.dlg.EDU_rasField_CB.setEnabled(False)
+            # enable user input
+            self.dlg.EDU_User_Value_Input.setEnabled(True)
+        self.dlg.EDU_rasField_CB.repaint()
+
+
+    def EDUShapefileOrUserInputRasterizer(self):
+        """
+        """
+        pass
 
     def ELCnightTimeLights(self):
         """
