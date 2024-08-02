@@ -39,12 +39,12 @@ Called by `SAFnightTimeLights` when input is a vector layer:
 
 ```python
 def SAFnightTimeLights(self):
-    # ... (earlier code)
-    if input_layer.isValid():
-        # Handle raster input
-    else:
-        # Handle vector input (assumed to be streetlights)
-        self.SAFstreetLights()
+  # ... (earlier code)
+  if input_layer.isValid():
+  # Handle raster input
+  else:
+    # Handle vector input (assumed to be streetlights)
+    self.SAFstreetLightsRasterizer()
 ```
 
 ## Technical Details
