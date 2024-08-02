@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -322,7 +322,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual">
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_2">
           <attribute name="title">
@@ -345,7 +345,7 @@ p, li { white-space: pre-wrap; }
            <item row="4" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WD_Output_Field">
              <property name="text">
-              <string>WD_.tif</string>
+              <string>WD.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -511,7 +511,7 @@ p, li { white-space: pre-wrap; }
            <item row="6" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="RF_Output_Field">
              <property name="text">
-              <string>RF_.tif</string>
+              <string>RF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -535,7 +535,7 @@ p, li { white-space: pre-wrap; }
            <item row="4" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="FIN_Output_Field">
              <property name="text">
-              <string>FIN_.tif</string>
+              <string>FIN.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -733,7 +733,7 @@ p, li { white-space: pre-wrap; }
            <item row="5" column="0" colspan="3">
             <widget class="QgsFilterLineEdit" name="Contextual_AggregateOutput_Field">
              <property name="text">
-              <string>CD_AGG.tif</string>
+              <string>Contextual_score.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -795,7 +795,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -825,7 +825,7 @@ p, li { white-space: pre-wrap; }
            <item row="20" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WTP_AGGOutput_Field">
              <property name="text">
-              <string>WTP_.tif</string>
+              <string>WTP.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -856,7 +856,7 @@ p, li { white-space: pre-wrap; }
            <item row="16" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WTP_FacilityOutput_Field">
              <property name="text">
-              <string>Facility_.tif</string>
+              <string>WTP_.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1151,7 +1151,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="PBT_Output_Field">
              <property name="text">
-              <string>PBT_.tif</string>
+              <string>PBT.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1303,7 +1303,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="ETF_Output_Field">
              <property name="text">
-              <string>ETF_.tif</string>
+              <string>ETF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1455,7 +1455,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="HEA_Output_Field">
              <property name="text">
-              <string>HEA_.tif</string>
+              <string>HEF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1607,7 +1607,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="FIF_Output_Field">
              <property name="text">
-              <string>FIF_.tif</string>
+              <string>FIF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1817,7 +1817,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="3">
             <widget class="QgsFilterLineEdit" name="Accessibility_AggregateOutput_Field">
              <property name="text">
-              <string>AD_AGG.tif</string>
+              <string>Accessibility_score.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1877,7 +1877,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>0</number>
+          <number>6</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -1893,7 +1893,7 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Street Crossings Input Layer (Point)</string>
+              <string>Crosswalks Input Layer (Point)</string>
              </property>
             </widget>
            </item>
@@ -1945,7 +1945,7 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Cycle Paths Network Input Layer (Polyline)</string>
+              <string>Cycle Paths Input Layer (Polyline)</string>
              </property>
             </widget>
            </item>
@@ -1968,7 +1968,7 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Foot Paths Input Layer (Polyline)</string>
+              <string>Pathways Input Layer (Polyline)</string>
              </property>
             </widget>
            </item>
@@ -1991,7 +1991,7 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Block Sizes Input Layer (Polygon)</string>
+              <string>Block Lengths Input Layer (Polyline)</string>
              </property>
             </widget>
            </item>
@@ -2021,7 +2021,7 @@ p, li { white-space: pre-wrap; }
            <item row="10" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WLK_Output_Field">
              <property name="text">
-              <string>WLK_.tif</string>
+              <string>Activetransport.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2208,7 +2208,7 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>SAF_.tif</string>
+              <string>SAF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2255,7 +2255,7 @@ p, li { white-space: pre-wrap; }
            <item row="3" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="DIG_Output_Field">
              <property name="text">
-              <string>DIG_.tif</string>
+              <string>DIG.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2320,7 +2320,7 @@ p, li { white-space: pre-wrap; }
          </widget>
          <widget class="QWidget" name="tab_32">
           <attribute name="title">
-           <string>Natural Environment</string>
+           <string>Environment Hazards</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_21">
            <item row="0" column="0" colspan="3">
@@ -2498,7 +2498,7 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>ENV_.tif</string>
+              <string>ENV.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2638,7 +2638,7 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>EDU_.tif</string>
+              <string>EDU.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2675,7 +2675,7 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>FCV_.tif</string>
+              <string>FCV.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2845,7 +2845,7 @@ p, li { white-space: pre-wrap; }
            <item row="1" column="0">
             <widget class="QLabel" name="label_101">
              <property name="text">
-              <string>Active Transport (WLK)</string>
+              <string>Active Transport (Activetransport)</string>
              </property>
             </widget>
            </item>
@@ -2969,7 +2969,7 @@ p, li { white-space: pre-wrap; }
            <item row="5" column="0">
             <widget class="QLabel" name="label_107">
              <property name="text">
-              <string>Natural Environment (ENV)</string>
+              <string>Environment Hazards (ENV)</string>
              </property>
             </widget>
            </item>
@@ -3044,7 +3044,7 @@ p, li { white-space: pre-wrap; }
            <item row="8" column="0">
             <widget class="QgsFilterLineEdit" name="PlaceCharacterization_AggregateOutput_Field">
              <property name="text">
-              <string>PD_AGG.tif</string>
+              <string>Place_score.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -3242,7 +3242,7 @@ p, li { white-space: pre-wrap; }
        <item row="6" column="1" colspan="3">
         <widget class="QgsFilterLineEdit" name="Dimensions_AggregateOutput_Field">
          <property name="text">
-          <string>Final_AGG.tif</string>
+          <string>WEE.tif</string>
          </property>
          <property name="qgisRelation" stdset="0">
           <string notr="true"/>
@@ -3320,7 +3320,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_38">
           <attribute name="title">
@@ -3528,7 +3528,7 @@ p, li { white-space: pre-wrap; }
            <item row="19" column="0" colspan="3">
             <widget class="QgsFilterLineEdit" name="AGG_Output_Field">
              <property name="text">
-              <string>Aggregation_</string>
+              <string>WEE_pop_adm_score</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -3622,7 +3622,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="RE_Output_Field">
              <property name="text">
-              <string>RE_zone_</string>
+              <string>AOI_WEE_score</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -3735,7 +3735,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="Buffer_Output_Field">
              <property name="text">
-              <string>RE_point_</string>
+              <string>POI_WEE_score</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
