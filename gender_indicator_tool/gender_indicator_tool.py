@@ -326,7 +326,7 @@ class GenderIndicatorTool:
         self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
 
         ###### TAB 4.3 - Digital Inclusion
-        #self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
+        self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
         self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(5))
 
         ###### TAB 4.4 - Natural Environment
@@ -684,8 +684,11 @@ class GenderIndicatorTool:
             self.dlg.SEC_status.repaint()
 
         elif factor_no == 5:
-            rasField = "rasField"
-            DIG_Value_SB = self.dlg.DIG_User_Value_Input.value()
+            polygonlayer = self.dlg.DIG_Input_Field.filePath()
+            rasField = self.dlg.DIG_rasField_CB.currentText()
+            if polygonlayer is not None:
+                rasField = "rasField"
+                DIG_Value_SB = self.dlg.DIG_User_Value_Input.value()
             self.dlg.DIG_status.setText("Variables Set")
             self.dlg.DIG_status.repaint()
             time.sleep(0.5)
@@ -1147,7 +1150,8 @@ class GenderIndicatorTool:
 
 
         elif factor_no == 5:
-            shp_utm[rasField] = DIG_Value_SB
+            if polygonlayer is not None:
+                shp_utm[rasField] = DIG_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
             
