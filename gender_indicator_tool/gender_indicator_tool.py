@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 # QGIS and PyQt libraries and modules
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from PyQt5.QtWidgets import QFileDialog, QApplication
@@ -710,6 +710,7 @@ class GenderIndicatorTool:
         shp_utm[rasField] = [0]
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
+        outputPathCountry = f"{workingDir}temp/countryBuff.shp"
         buffer = processing.run(
             "native:buffer",
             {
@@ -721,7 +722,7 @@ class GenderIndicatorTool:
                 "MITER_LIMIT": 2,
                 "DISSOLVE": True,
                 "SEPARATE_DISJOINT": False,
-                "OUTPUT": "memory:",
+                "OUTPUT": outputPathCountry,
             },
         )
 
@@ -1281,49 +1282,88 @@ class GenderIndicatorTool:
             )
             
             csvFileLayerUTM = clipCsvFileUTM["OUTPUT"]
-
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": csvFileLayerUTM,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
             
             radius = self.dlg.FCV_Input_Radius.value()
             
-            if radius is not None:
-                radius
+            if radius > 0:
+                radius = radius
             else:
                 radius = 5000
-
+            
             buffer_result = processing.run(
                 "native:buffer",
                 {
                     "INPUT": csvFileLayerUTM,
-                    "DISTANCE": radius,
+                    "DISTANCE": 5000,
                     "SEGMENTS": 5,
                     "END_CAP_STYLE": 0,
                     "JOIN_STYLE": 0,
                     "MITER_LIMIT": 2,
                     "DISSOLVE": False,
                     "SEPARATE_DISJOINT": False,
-                    "OUTPUT": "memory:",
+                    "OUTPUT":"memory:",
                 },
             )
     
             buffer_layer = buffer_result["OUTPUT"]
-
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [buffer_layer, difference], "CRS": None, "OUTPUT": "memory:"},
+            
+            event_type_scores = {
+                'Battle': 0,
+                'Explosions': 0,
+                'Remote violence': 1,
+                'Violence against civilians': 2,
+                'Protests': 4,
+                'Riots': 4,
+                'no_event': 5
+            }
+            
+            buffer_layer_provider = buffer_layer.dataProvider()
+            buffer_layer_provider.addAttributes([QgsField("score", QVariant.Int)])
+            buffer_layer.updateFields()
+            
+            buffer_layer.startEditing()
+            for feature in buffer_layer.getFeatures():
+                event_type = feature['event_type']
+                score = event_type_scores.get(event_type, event_type_scores['no_event'])
+                feature.setAttribute("score", score)
+                buffer_layer.updateFeature(feature)
+                
+            buffer_layer.commitChanges()
+            
+            outputPath1 = f"{workingDir}{temp}/clipBuff.shp"
+            
+            clipBuffer = processing.run(
+                "native:clip",
+                {
+                   "INPUT": buffer_layer,
+                   "OVERLAY": countryUTMLayerBuf,
+                   "OUTPUT": outputPath1,
+                }
+            )
+            
+            buffer_layer = clipBuffer["OUTPUT"]
+            
+            outputPath2 = f"{workingDir}{temp}/difference.shp"
+            Difference = processing.run(
+                "native:difference",
+                {
+                    "INPUT": countryUTMLayerBuf,
+                    "OVERLAY": buffer_layer,
+                    "OUTPUT": outputPath2,
+                    "GRID_SIZE": None,
+                },
             )
 
-            mergeOutput = Merge["OUTPUT"]
+            difference = Difference["OUTPUT"]
+            outputPath3 = f"{workingDir}{temp}/merge.shp"
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": [difference, buffer_layer], "CRS": None, "OUTPUT": "memory:"},
+            )
+            
+            buffer_layer = Merge["OUTPUT"]
+
+            mergeOutput = buffer_layer
 
             # Get the width and height of the extent
             extent = mergeOutput.extent()
@@ -1343,7 +1383,7 @@ class GenderIndicatorTool:
                 "gdal:rasterize",
                 {
                     "INPUT": mergeOutput,
-                    "FIELD": rasField,
+                    "FIELD": "score",
                     "BURN": 0,
                     "USE_Z": False,
                     "UNITS": 0,
