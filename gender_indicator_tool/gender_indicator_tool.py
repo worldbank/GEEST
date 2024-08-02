@@ -325,7 +325,7 @@ class GenderIndicatorTool:
         ###### TAB 4.2 - Safe Urban Design
         self.dlg.SAF_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_SAF)
         self.dlg.SAF_rasField_CB.textActivated.connect(self.populateTextFieldWithUniqueValues_PC_SAF)
-        self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
+        self.dlg.SAF_Execute_PB.clicked.connect(self.SAFRasterizerDelegator)
 
         ###### TAB 4.3 - Digital Inclusion
         self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(8))
@@ -2368,11 +2368,108 @@ class GenderIndicatorTool:
         self.dlg.WLK_status.setText("Processing Complete!")
         self.dlg.WLK_status.repaint()
 
+    def SAFRasterizerDelegator(self):
+        """
+        This function delegates the rendering task to one of four rasterizing functions based on input type and subtype:
+        - In case of raster input --> SAFnightTimeLights
+        - In case of points (vector) input --> SAFstreetLightsRasterizer
+        - In case of polygons (vector) with numeric field as metric --> SAFPerceivedSafetyFromNumericFieldRasterizer
+        - In case of polygons (vector) with text field as metric --> SAFPerceivedSafetyFromTextFieldRasterizer
+        """
+        input_file = self.dlg.SAF_Input_Field.filePath()
+        input_layer = QgsRasterLayer(input_file, "input")
+
+        if input_layer.isValid():
+            self.SAFnightTimeLights()
+        else:
+            input_layer = QgsVectorLayer(input_file, "input", "ogr")
+            if not input_layer.isValid():
+                self.dlg.SAF_status.setText("The input file is not a valid raster or vector layer.")
+                self.dlg.SAF_status.repaint()
+                return
+
+            # Check the geometry type of the vector layer
+            if input_layer.geometryType() == QgsWkbTypes.PointGeometry:
+                self.SAFstreetLightsRasterizer()
+            elif input_layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+                selected_field = self.dlg.SAF_rasField_CB.currentText()
+                if selected_field.endswith(" (text)"):
+                    self.SAFPerceivedSafetyFromTextFieldRasterizer(input_layer)
+                else:
+                    self.SAFPerceivedSafetyFromNumericFieldRasterizer(input_layer)
+            else:
+                self.dlg.SAF_status.setText(
+                    "Unsupported vector layer type. Only point and polygon geometries are supported.")
+                self.dlg.SAF_status.repaint()
+
+
+    def populateCBFieldsFromPolygonLayer_PC_SAF(self, file_path):
+        # Clear and disable the SAF_typeScore_Field by default
+        self.dlg.SAF_typeScore_Field.clear()
+        self.dlg.SAF_typeScore_Field.setEnabled(False)
+        layer = QgsVectorLayer(file_path, "input", "ogr")
+        # Check if the layer is a polygon
+        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+            # if it is, populate the combo box fields
+            self.dlg.SAF_rasField_CB.setEnabled(True)
+            self.dlg.SAF_rasField_CB.clear()
+            for field in layer.fields():
+                field_name = field.name()
+                # Check if the field is of type text
+                if field.type() == QVariant.String:
+                    # distinguish text fields
+                    field_name = f"{field_name} (text)"
+                self.dlg.SAF_rasField_CB.addItem(field_name)
+        else:
+            # ensure the CB is not displaying stale information
+            self.dlg.SAF_rasField_CB.clear()
+            self.dlg.SAF_rasField_CB.setEnabled(False)
+            # Clear and disable the SAF_typeScore_Field by default
+            self.dlg.SAF_typeScore_Field.clear()
+            self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+
+    def populateTextFieldWithUniqueValues_PC_SAF(self, layer):
+        # Get the file path from the QgsFileWidget
+        file_path = self.dlg.SAF_Input_Field.filePath()
+        # Get the selected field name from the QComboBox
+        field_name = self.dlg.SAF_rasField_CB.currentText()
+
+        # Clear and disable the SAF_typeScore_Field by default
+        self.dlg.SAF_typeScore_Field.clear()
+        self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+        if file_path and field_name:
+            if field_name.endswith(" (text)"):
+                # Remove " (text)" suffix
+                field_name = field_name.replace(" (text)", "")
+                try:
+                    # Read the file using geopandas
+                    gdf = gpd.read_file(file_path)
+                    # Get unique values from the selected field
+                    unique_values = gdf[field_name].unique().tolist()
+                    # Create the score list
+                    score_list = [[str(val), 0] for val in unique_values if pd.notna(val)]
+                    # Set the text in the QFilterLineEdit and enable it
+                    self.dlg.SAF_typeScore_Field.setText(str(score_list))
+                    self.dlg.SAF_typeScore_Field.setEnabled(True)
+                except Exception as e:
+                    # Handle any errors (e.g., file not found, invalid field name)
+                    self.dlg.SAF_typeScore_Field.setText(f"Error: {str(e)}")
+                    self.dlg.SAF_typeScore_Field.setEnabled(False)
+            else:
+                # Field name doesn't end with " (text)", so we keep the field cleared and disabled
+                pass
+        else:
+            # Handle the case where no file or field is selected
+            self.dlg.SAF_typeScore_Field.setText("Please select a file and field first.")
+            self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+
     def SAFnightTimeLights(self):
         """
         This function processes night-time lights data for safety assessment.
-        It can handle raster inputs, vector inputs are handled by SAFstreetLights.
-        How brightly lit an area is used as a proxy for safety or safe urban design.
+        It handles only raster inputs. How brightly lit an area is used as a proxy for safety or safe urban design.
         """
 
         # Set up directories
@@ -2523,21 +2620,9 @@ class GenderIndicatorTool:
                     os.chdir(workingDir)
 
         else:
-            # Handle non-raster (assumed to be vector) layer
-            input_layer = QgsVectorLayer(input_file, "input", "ogr")
-            if not input_layer.isValid():
-                self.dlg.SAF_status.setText("The input file is not a valid raster or vector layer.")
-                self.dlg.SAF_status.repaint()
-                return
+            self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
+            self.dlg.SAF_status.repaint()
 
-            # Check the geometry type of the vector layer. If points then streetlights, if polygons then areas/zones
-            if input_layer.geometryType() == QgsWkbTypes.PointGeometry:
-                self.SAFstreetLightsRasterizer()
-            elif input_layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-                self.SAFPerceivedSafetyRasterizer(input_layer)
-            else:
-                self.dlg.SAF_status.setText("Unsupported vector layer type. Only point and polygon geometries are supported.")
-                self.dlg.SAF_status.repaint()
 
     def SAFstreetLightsRasterizer(self):
         """
@@ -2723,70 +2808,10 @@ class GenderIndicatorTool:
             if os.getcwd() != workingDir:
                 os.chdir(workingDir)
 
-    def populateCBFieldsFromPolygonLayer_PC_SAF(self, file_path):
-        # Clear and disable the SAF_typeScore_Field by default
-        self.dlg.SAF_typeScore_Field.clear()
-        self.dlg.SAF_typeScore_Field.setEnabled(False)
-        layer = QgsVectorLayer(file_path, "input", "ogr")
-        # Check if the layer is a polygon
-        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-            # if it is, populate the combo box fields
-            self.dlg.SAF_rasField_CB.setEnabled(True)
-            self.dlg.SAF_rasField_CB.clear()
-            for field in layer.fields():
-                field_name = field.name()
-                # Check if the field is of type text
-                if field.type() == QVariant.String:
-                    # distinguish text fields
-                    field_name = f"{field_name} (text)"
-                self.dlg.SAF_rasField_CB.addItem(field_name)
-        else:
-            # ensure the CB is not displaying stale information
-            self.dlg.SAF_rasField_CB.clear()
-            self.dlg.SAF_rasField_CB.setEnabled(False)
-            # Clear and disable the SAF_typeScore_Field by default
-            self.dlg.SAF_typeScore_Field.clear()
-            self.dlg.SAF_typeScore_Field.setEnabled(False)
 
-    def populateTextFieldWithUniqueValues_PC_SAF(self, layer):
-        # Get the file path from the QgsFileWidget
-        file_path = self.dlg.SAF_Input_Field.filePath()
-        # Get the selected field name from the QComboBox
-        field_name = self.dlg.SAF_rasField_CB.currentText()
-
-        # Clear and disable the SAF_typeScore_Field by default
-        self.dlg.SAF_typeScore_Field.clear()
-        self.dlg.SAF_typeScore_Field.setEnabled(False)
-
-        if file_path and field_name:
-            if field_name.endswith(" (text)"):
-                # Remove " (text)" suffix
-                field_name = field_name.replace(" (text)", "")
-                try:
-                    # Read the file using geopandas
-                    gdf = gpd.read_file(file_path)
-                    # Get unique values from the selected field
-                    unique_values = gdf[field_name].unique().tolist()
-                    # Create the score list
-                    score_list = [[str(val), 0] for val in unique_values if pd.notna(val)]
-                    # Set the text in the QFilterLineEdit and enable it
-                    self.dlg.SAF_typeScore_Field.setText(str(score_list))
-                    self.dlg.SAF_typeScore_Field.setEnabled(True)
-                except Exception as e:
-                    # Handle any errors (e.g., file not found, invalid field name)
-                    self.dlg.SAF_typeScore_Field.setText(f"Error: {str(e)}")
-                    self.dlg.SAF_typeScore_Field.setEnabled(False)
-            else:
-                # Field name doesn't end with " (text)", so we keep the field cleared and disabled
-                pass
-        else:
-            # Handle the case where no file or field is selected
-            self.dlg.SAF_typeScore_Field.setText("Please select a file and field first.")
-            self.dlg.SAF_typeScore_Field.setEnabled(False)
-
-    def SAFPerceivedSafetyRasterizer(self, layer):
+    def SAFPerceivedSafetyFromNumericFieldRasterizer(self, layer):
         """
-        This function rasterizes the Perceived Safety factor for the SAF (Safety Assessment Framework).
+        This function rasterizes the Perceived Safety factor for the Urban Safety Factor.
         It converts vector data to raster, applying necessary transformations and standardizations using a binning approach.
         """
         try:
@@ -2941,6 +2966,10 @@ class GenderIndicatorTool:
         except Exception as e:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
+
+
+    def SAFPerceivedSafetyFromTextFieldRasterizer(self):
+        pass
 
     def ELCnightTimeLights(self):
         """
