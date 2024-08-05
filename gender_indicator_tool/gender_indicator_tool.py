@@ -31,7 +31,6 @@ from qgis.core import QgsVectorLayer, QgsProject, QgsCoordinateReferenceSystem, 
     QgsCoordinateTransform, QgsMessageLog, Qgis, QgsWkbTypes
 from PyQt5.QtCore import QVariant
 
-
 # package installs
 
 
@@ -337,8 +336,10 @@ class GenderIndicatorTool:
         self.dlg.DIG_Execute_PB.clicked.connect(lambda: self.Rasterize(5))
 
         ###### TAB 4.4 - Natural Environment
-        self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
-        self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
+        #self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
+        self.dlg.ENV_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_ENV)
+        #self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
+        self.dlg.ENV_riskLevelField_CB.textActivated.connect(self.populateTextFieldWithUniqueValues_PC_ENV)
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
 
@@ -1244,16 +1245,16 @@ class GenderIndicatorTool:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
 
             # csv conversion to shapefile
-            
+
             temp = "temp"
             if os.path.exists(temp):
                 pass
             else:
                 os.mkdir(temp)
-            
+
             outputPath = f"{workingDir}{temp}/acled.shp"
             crs = QgsCoordinateReferenceSystem('EPSG:4326')
-            
+
             layer = QgsVectorLayer(csvFile, 'acled', 'delimitedtext')
             layer.setCrs(crs)
             save_options = QgsVectorFileWriter.SaveVectorOptions()
@@ -1269,35 +1270,34 @@ class GenderIndicatorTool:
                 transform_context,
                 save_options
             )
-            
+
             if error[0] == QgsVectorFileWriter.NoError:
                 print('Shapefile successfully created!')
             else:
                 print('Error occurred:', error)
-                
+
             csvFileLayer = outputPath
             self.convertCRS(csvFileLayer, UTM_crs)
             csvFileLayerUTM = QgsVectorLayer(shp_utm.to_json(), "csvFileLayerUTM", "ogr")
-            
-            
+
             clipCsvFileUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": csvFileLayerUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": csvFileLayerUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             csvFileLayerUTM = clipCsvFileUTM["OUTPUT"]
-            
+
             radius = self.dlg.FCV_Input_Radius.value()
-            
+
             if radius > 0:
                 radius = radius
             else:
                 radius = 5000
-            
+
             buffer_result = processing.run(
                 "native:buffer",
                 {
@@ -1309,12 +1309,12 @@ class GenderIndicatorTool:
                     "MITER_LIMIT": 2,
                     "DISSOLVE": False,
                     "SEPARATE_DISJOINT": False,
-                    "OUTPUT":"memory:",
+                    "OUTPUT": "memory:",
                 },
             )
-    
+
             buffer_layer = buffer_result["OUTPUT"]
-            
+
             event_type_scores = {
                 'Battle': 0,
                 'Explosions': 0,
@@ -1324,33 +1324,33 @@ class GenderIndicatorTool:
                 'Riots': 4,
                 'no_event': 5
             }
-            
+
             buffer_layer_provider = buffer_layer.dataProvider()
             buffer_layer_provider.addAttributes([QgsField("score", QVariant.Int)])
             buffer_layer.updateFields()
-            
+
             buffer_layer.startEditing()
             for feature in buffer_layer.getFeatures():
                 event_type = feature['event_type']
                 score = event_type_scores.get(event_type, event_type_scores['no_event'])
                 feature.setAttribute("score", score)
                 buffer_layer.updateFeature(feature)
-                
+
             buffer_layer.commitChanges()
-            
+
             outputPath1 = f"{workingDir}{temp}/clipBuff.shp"
-            
+
             clipBuffer = processing.run(
                 "native:clip",
                 {
-                   "INPUT": buffer_layer,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": outputPath1,
+                    "INPUT": buffer_layer,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": outputPath1,
                 }
             )
-            
+
             buffer_layer = clipBuffer["OUTPUT"]
-            
+
             outputPath2 = f"{workingDir}{temp}/difference.shp"
             Difference = processing.run(
                 "native:difference",
@@ -1368,7 +1368,7 @@ class GenderIndicatorTool:
                 "native:mergevectorlayers",
                 {"LAYERS": [difference, buffer_layer], "CRS": None, "OUTPUT": "memory:"},
             )
-            
+
             buffer_layer = Merge["OUTPUT"]
 
             mergeOutput = buffer_layer
@@ -1885,7 +1885,7 @@ class GenderIndicatorTool:
                         styleFile = f"{rasOutput.split('.')[0]}.qml"
                     else:
                         pass
-                
+
                     rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{shapefile_name}.tif"
 
                     rasterize = processing.run(
@@ -2363,10 +2363,10 @@ class GenderIndicatorTool:
         pixelSize = self.dlg.pixelSize_SB.value()
         streetCrossingLayer = self.dlg.WLK_Input_Field.filePath()
         input_fields = [
-                self.dlg.WLK_Input_Field_2,
-                self.dlg.WLK_Input_Field_3,
-                self.dlg.WLK_Input_Field_4
-            ]
+            self.dlg.WLK_Input_Field_2,
+            self.dlg.WLK_Input_Field_3,
+            self.dlg.WLK_Input_Field_4
+        ]
 
         lineLayerList = []
 
@@ -2391,7 +2391,7 @@ class GenderIndicatorTool:
         if lineLayerList is not None:
             for lineLayer in lineLayerList:
                 os.chdir(workingDir)
-                
+
                 base_name = os.path.basename(lineLayer)
                 shapefile_name, _ = os.path.splitext(base_name)
                 scoredRoads = f"{workingDir}/{tempDir}/Scored_roads_{shapefile_name}.shp"
@@ -2421,7 +2421,7 @@ class GenderIndicatorTool:
 
                 #shp_utm[rasField] = shp_utm[rasField].astype(int)
                 shp_utm.to_file(scoredRoads)
-                
+
                 gridOutput = f"{workingDir}/{tempDir}/grid.shp"
                 gridExtent = countryUTMLayerBuf.extent()
                 grid_params = {
@@ -2432,10 +2432,10 @@ class GenderIndicatorTool:
                     'CRS': UTM_crs,
                     'OUTPUT': gridOutput
                 }
-                
+
                 grid_result = processing.run('native:creategrid', grid_params)
                 grid_layer = QgsVectorLayer(grid_result['OUTPUT'], 'grid', 'ogr')
-                
+
                 field_name = 'reclass_val'
                 if not grid_layer.fields().indexFromName(field_name) >= 0:
                     grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
@@ -2460,28 +2460,29 @@ class GenderIndicatorTool:
                         "OUTPUT": roadBuf_out,
                     },
                 )
-                
+
                 # Count the number of buffers within each grid cell
                 buffer_layer = QgsVectorLayer(Buffer['OUTPUT'], 'buffer', 'ogr')
                 index = QgsSpatialIndex(buffer_layer.getFeatures())
                 reclass_vals = {}
-                
+
                 for grid_feat in grid_layer.getFeatures():
                     intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
                     num_footpaths = len(intersecting_ids)
-                    
+
                     if num_footpaths > 2:
                         reclass_val = 5
                     elif num_footpaths == 1:
                         reclass_val = 3
                     else:
                         reclass_val = 0
-                    
+
                     reclass_vals[grid_feat.id()] = reclass_val
-                    
+
                 grid_layer.startEditing()
                 for grid_feat in grid_layer.getFeatures():
-                    grid_layer.changeAttributeValue(grid_feat.id(), grid_layer.fields().indexFromName(field_name), reclass_vals[grid_feat.id()])
+                    grid_layer.changeAttributeValue(grid_feat.id(), grid_layer.fields().indexFromName(field_name),
+                                                    reclass_vals[grid_feat.id()])
                 grid_layer.commitChanges()
 
                 dif_out = f"{workingDir}/{tempDir}/Dif.shp"
@@ -2552,14 +2553,14 @@ class GenderIndicatorTool:
                 self.dlg.WLK_status_2.repaint()
         else:
             pass
-        if  len(streetCrossingLayer) > 5:
+        if len(streetCrossingLayer) > 5:
             SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
             temp_merge = f"{tempDir}/temp_merge.shp"
             base_name = os.path.basename(streetCrossingLayer)
             shapefile_name, _ = os.path.splitext(base_name)
-            
+
             # important variables/attributes
-            ranges = self.dlg.WLK_Ranges_Field.text() #thresholds #TODO
+            ranges = self.dlg.WLK_Ranges_Field.text()  #thresholds #TODO
             rasOutput = f"{self.dlg.WLK_Output_Field_2.text()[:-4]}{shapefile_name}.tif"
             mergeOutput = (
                 f"{workingDir}{Dimension}/AT/SA/{rasOutput[:-4]}_Service_Area.shp"
@@ -2584,8 +2585,7 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.WLK_status_2.setText("Processing...")
             self.dlg.WLK_status_2.repaint()
-            
-            
+
             os.chdir(workingDir)
             gdf = gpd.read_file(streetCrossingLayer)
 
@@ -2593,7 +2593,7 @@ class GenderIndicatorTool:
             subsets = []
 
             for i in range(0, len(gdf), subset_size):
-                subset = gdf.iloc[i : i + subset_size]
+                subset = gdf.iloc[i: i + subset_size]
                 subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
                 subset_outfile = (
                     f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
@@ -2672,7 +2672,7 @@ class GenderIndicatorTool:
 
             for i in range(-1, -len(range_subsets), -1):
                 output = (
-                    f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                    f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i - 1]}.shp"
                 )
                 # Merge_list.append(output)
                 difference = processing.run(
@@ -2711,24 +2711,24 @@ class GenderIndicatorTool:
 
             dis_output = dissolve["OUTPUT"]
             Merge_list.append(dis_output)
-            
+
             print(f"Path: {os.getcwd()}")
 
             if os.path.exists(f"{Dimension}/SA_SHP"):
                 pass
             else:
                 os.mkdir(f"{Dimension}/SA_SHP")
-                
+
             feedback = QgsProcessingFeedback()
 
             Merge = processing.run(
                 "native:mergevectorlayers",
                 {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
             )
-                
+
             if Merge is not None and "OUTPUT" in Merge:
                 print(f"Processing completed successfully")
-                
+
                 # Do something
 
                 merge_df = gpd.read_file(f"{mergeOutput}")
@@ -2757,7 +2757,7 @@ class GenderIndicatorTool:
                 )
 
                 buffer_output = buffer["OUTPUT"]
-    
+
                 clipAOI = processing.run(
                     "native:clip",
                     {
@@ -2766,7 +2766,7 @@ class GenderIndicatorTool:
                         "OUTPUT": "memory:",
                     }
                 )
-        
+
                 merge_SA_UTM = clipAOI["OUTPUT"]
 
                 Difference = processing.run(
@@ -2797,7 +2797,7 @@ class GenderIndicatorTool:
                 else:
                     os.mkdir(Dimension)
                     os.chdir(Dimension)
-            
+
                 Output_Folder = "AT"
                 if os.path.exists(Output_Folder):
                     os.chdir(Output_Folder)
@@ -2870,7 +2870,6 @@ class GenderIndicatorTool:
                     "Unsupported vector layer type. Only point and polygon geometries are supported.")
                 self.dlg.SAF_status.repaint()
 
-
     def populateCBFieldsFromPolygonLayer_PC_SAF(self, file_path):
         # Clear and disable the SAF_typeScore_Field by default
         self.dlg.SAF_typeScore_Field.clear()
@@ -2895,6 +2894,7 @@ class GenderIndicatorTool:
             # Clear and disable the SAF_typeScore_Field by default
             self.dlg.SAF_typeScore_Field.clear()
             self.dlg.SAF_typeScore_Field.setEnabled(False)
+
     def populateCBFieldsFromPolygonLayer_PC_EDU(self, file_path):
         layer = QgsVectorLayer(file_path, "input", "ogr")
         # Check if the layer is a polygon
@@ -2908,12 +2908,35 @@ class GenderIndicatorTool:
                 if field.type() != QVariant.String:
                     # remove text fields
                     self.dlg.EDU_rasField_CB.addItem(field_name)
-
         else:
             # ensure the CB is not displaying stale information
             self.dlg.EDU_rasField_CB.clear()
             self.dlg.EDU_rasField_CB.setEnabled(False)
 
+    def populateCBFieldsFromPolygonLayer_PC_ENV(self, file_path):
+        # Clear and disable the SAF_typeScore_Field by default
+        self.dlg.ENV_typeScore_Field.clear()
+        self.dlg.ENV_typeScore_Field.setEnabled(False)
+        layer = QgsVectorLayer(file_path, "input", "ogr")
+        # Check if the layer is a polygon
+        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+            # if it is, populate the combo box fields
+            self.dlg.ENV_riskLevelField_CB.setEnabled(True)
+            self.dlg.ENV_riskLevelField_CB.clear()
+            for field in layer.fields():
+                field_name = field.name()
+                # Check if the field is of type text
+                if field.type() == QVariant.String:
+                    # distinguish text fields
+                    field_name = f"{field_name} (text)"
+                self.dlg.ENV_riskLevelField_CB.addItem(field_name)
+        else:
+            # ensure the CB is not displaying stale information
+            self.dlg.ENV_riskLevelField_CB.clear()
+            self.dlg.ENV_riskLevelField_CB.setEnabled(False)
+            # Clear and disable the ENV_typeScore_Field by default
+            self.dlg.ENV_typeScore_Field.clear()
+            self.dlg.ENV_typeScore_Field.setEnabled(False)
 
     def populateTextFieldWithUniqueValues_PC_SAF(self, layer):
         # Get the file path from the QgsFileWidget
@@ -2951,6 +2974,41 @@ class GenderIndicatorTool:
             self.dlg.SAF_typeScore_Field.setText("Please select a file and field first.")
             self.dlg.SAF_typeScore_Field.setEnabled(False)
 
+    def populateTextFieldWithUniqueValues_PC_ENV(self, layer):
+        # Get the file path from the QgsFileWidget
+        file_path = self.dlg.ENV_Input_Field.filePath()
+        # Get the selected field name from the QComboBox
+        field_name = self.dlg.ENV_riskLevelField_CB.currentText()
+
+        # Clear and disable the ENV_typeScore_Field by default
+        self.dlg.ENV_typeScore_Field.clear()
+        self.dlg.ENV_typeScore_Field.setEnabled(False)
+
+        if file_path and field_name:
+            if field_name.endswith(" (text)"):
+                # Remove " (text)" suffix
+                field_name = field_name.replace(" (text)", "")
+                try:
+                    # Read the file using geopandas
+                    gdf = gpd.read_file(file_path)
+                    # Get unique values from the selected field
+                    unique_values = gdf[field_name].unique().tolist()
+                    # Create the score list
+                    score_list = [[str(val), 0] for val in unique_values if pd.notna(val)]
+                    # Set the text in the QFilterLineEdit and enable it
+                    self.dlg.ENV_typeScore_Field.setText(str(score_list))
+                    self.dlg.ENV_typeScore_Field.setEnabled(True)
+                except Exception as e:
+                    # Handle any errors (e.g., file not found, invalid field name)
+                    self.dlg.ENV_typeScore_Field.setText(f"Error: {str(e)}")
+                    self.dlg.ENV_typeScore_Field.setEnabled(False)
+            else:
+                # Field name doesn't end with " (text)", so we keep the field cleared and disabled
+                pass
+        else:
+            # Handle the case where no file or field is selected
+            self.dlg.ENV_typeScore_Field.setText("Please select a file and field first.")
+            self.dlg.ENV_typeScore_Field.setEnabled(False)
 
     def SAFnightTimeLights(self):
         """
@@ -3108,7 +3166,6 @@ class GenderIndicatorTool:
         else:
             self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
             self.dlg.SAF_status.repaint()
-
 
     def SAFstreetLightsRasterizer(self):
         """
@@ -3293,7 +3350,6 @@ class GenderIndicatorTool:
             # Ensure we return to the original working directory even if an error occurs
             if os.getcwd() != workingDir:
                 os.chdir(workingDir)
-
 
     def SAFPerceivedSafetyFromNumericFieldRasterizer(self, layer):
         """
@@ -4639,7 +4695,7 @@ class GenderIndicatorTool:
 
             weightingSum = round(sum(factorWeighting))
             if weightingSum == 100:
-                
+
                 with rasterio.open(rasLayers[0]) as src:
                     WD_ras = src.read(1)
                     WD_weight = factorWeighting[0]
@@ -5953,7 +6009,7 @@ class GenderIndicatorTool:
 
     def processCallback(self):
         print("Call back")
-        
+
     def walkabilityAggregate(self):
         """
         This function is used in combination with the "walkability" function.

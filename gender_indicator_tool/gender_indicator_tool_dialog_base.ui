@@ -1877,7 +1877,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>4</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -2570,13 +2570,6 @@ p, li { white-space: pre-wrap; }
            <item row="2" column="0" colspan="2">
             <widget class="QgsFileWidget" name="ENV_Input_Field"/>
            </item>
-           <item row="2" column="2">
-            <widget class="QPushButton" name="ENV_Set_PB">
-             <property name="text">
-              <string>Set</string>
-             </property>
-            </widget>
-           </item>
            <item row="3" column="0" colspan="3">
             <widget class="QLabel" name="label_130">
              <property name="text">
@@ -2587,33 +2580,10 @@ p, li { white-space: pre-wrap; }
            <item row="4" column="0" colspan="2">
             <widget class="QComboBox" name="ENV_riskLevelField_CB"/>
            </item>
-           <item row="4" column="2">
-            <widget class="QPushButton" name="ENV_unique_PB">
-             <property name="text">
-              <string>Unique Values</string>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="0" colspan="3">
             <widget class="QLabel" name="label_129">
              <property name="text">
               <string>Score extracted risk levels from (0-5)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0" colspan="3">
-            <widget class="QgsFilterLineEdit" name="ENV_typeScore_Field">
-             <property name="inputMask">
-              <string/>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="placeholderText">
-              <string>E.g. [[&quot;low&quot;, 4], [&quot;medium&quot;, 2], [&quot;high&quot;, 1]]</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
              </property>
             </widget>
            </item>
@@ -2708,15 +2678,29 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
+           <item row="6" column="0" colspan="3">
+            <widget class="QgsFilterLineEdit" name="ENV_typeScore_Field">
+             <property name="inputMask">
+              <string/>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="placeholderText">
+              <string>E.g. [[&quot;low&quot;, 4], [&quot;medium&quot;, 2], [&quot;high&quot;, 1]]</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
           </layout>
           <zorder>label_127</zorder>
           <zorder>ENV_riskLevelField_CB</zorder>
           <zorder>label_128</zorder>
           <zorder>label_129</zorder>
-          <zorder>ENV_Set_PB</zorder>
           <zorder>ENV_typeScore_Field</zorder>
           <zorder>ENV_Output_Field</zorder>
-          <zorder>ENV_unique_PB</zorder>
           <zorder>ENV_Execute_PB</zorder>
           <zorder>label_130</zorder>
           <zorder>ENV_Input_Field</zorder>
