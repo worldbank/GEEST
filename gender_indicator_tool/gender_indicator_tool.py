@@ -3654,12 +3654,11 @@ class GenderIndicatorTool:
     def EDUShapefileOrUserInputRasterizer(self):
         """
         This function rasterizes the Education factor for the Urban Safety Factor.
-        It either uses an incoming shapefile and the field corresponding to the checkbox,
+        It either uses an incoming shapefile and the field corresponding to the combobox,
         or a user-specified value to rasterize.
         """
         try:
             # Set up variables
-            current_script_path = os.path.dirname(os.path.abspath(__file__))
             workingDir = self.dlg.workingDir_Field.text()
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
@@ -3673,6 +3672,7 @@ class GenderIndicatorTool:
 
             if not os.path.exists(Dimension):
                 os.mkdir(Dimension)
+            os.chdir(Dimension)
 
             if os.path.exists(tempDir):
                 shutil.rmtree(tempDir)
@@ -3831,7 +3831,7 @@ class GenderIndicatorTool:
             self.dlg.EDU_Aggregate_Field.setText(rasOutputPath)
 
             # Apply style
-            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleTemplate = os.path.join(workingDir, "Style", f"{Dimension}.qml")
             styleFileDestination = os.path.join(workingDir, Dimension)
             styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
@@ -3841,6 +3841,7 @@ class GenderIndicatorTool:
             self.dlg.EDU_status.repaint()
 
         except Exception as e:
+            print(str(e))
             self.dlg.EDU_status.setText(f"Error: {str(e)}")
             self.dlg.EDU_status.repaint()
 
