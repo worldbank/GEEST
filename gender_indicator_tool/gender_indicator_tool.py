@@ -2505,13 +2505,19 @@ class GenderIndicatorTool:
                 raster_height = int(extent.height() / pixelSize)
 
                 os.chdir(Dimension)
+                Output_Folder = "AT"
+                if os.path.exists(Output_Folder):
+                    os.chdir(Output_Folder)
+                else:
+                    os.mkdir(Output_Folder)
+                    os.chdir(Output_Folder)
                 rasOutput = f"{self.dlg.WLK_Output_Field_2.text()[:-4]}_{shapefile_name}.tif"
 
                 rasterize = processing.run(
                     "gdal:rasterize",
                     {
                         "INPUT": mergeOutput,
-                        "FIELD": rasField,
+                        "FIELD": field_name,
                         "BURN": 0,
                         "USE_Z": False,
                         "UNITS": 0,
@@ -2528,7 +2534,7 @@ class GenderIndicatorTool:
                     },
                 )
 
-                self.dlg.WLK_Output_Field_2.setText(f"{workingDir}{Dimension}/{rasOutput}")
+                #self.dlg.WLK_Output_Field_2.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
                 styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
                 styleFileDestination = f"{workingDir}{Dimension}/"
@@ -2540,7 +2546,7 @@ class GenderIndicatorTool:
                 self.dlg.WLK_status_2.repaint()
         else:
             pass
-        if  streetCrossingLayer is not None:
+        if  len(streetCrossingLayer) > 5:
             SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
             temp_merge = f"{tempDir}/temp_merge.shp"
             base_name = os.path.basename(streetCrossingLayer)
@@ -2786,7 +2792,13 @@ class GenderIndicatorTool:
                     os.mkdir(Dimension)
                     os.chdir(Dimension)
             
-                f"{self.dlg.WLK_Output_Field_2.text()[:-4]}_{shapefile_name}.tif"
+                Output_Folder = "AT"
+                if os.path.exists(Output_Folder):
+                    os.chdir(Output_Folder)
+                else:
+                    os.mkdir(Output_Folder)
+                    os.chdir(Output_Folder)
+                rasOutput = f"{Output_Folder}/{self.dlg.WLK_Output_Field_2.text()[:-4]}_{shapefile_name}.tif"
 
                 rasterize = processing.run(
                     "gdal:rasterize",
@@ -5142,7 +5154,7 @@ class GenderIndicatorTool:
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
-        Dimension = "Place characteriztion"
+        Dimension = "Place Characterization"
         AT_Folder = f"{Dimension}/AT"
 
         if os.path.exists(AT_Folder):
