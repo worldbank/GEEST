@@ -694,7 +694,7 @@ class GenderIndicatorTool:
         elif factor_no == 5:
             polygonlayer = self.dlg.DIG_Input_Field.filePath()
             rasField = self.dlg.DIG_rasField_CB.currentText()
-            if polygonlayer is not None:
+            if len(polygonlayer) < 1:
                 rasField = "rasField"
                 DIG_Value_SB = self.dlg.DIG_User_Value_Input.value()
             self.dlg.DIG_status.setText("Variables Set")
@@ -737,8 +737,13 @@ class GenderIndicatorTool:
         countryUTMLayerBuf = buffer["OUTPUT"]
 
         # Convert spatial data to UTM CRS
-        if factor_no in [1, 2, 3, 5, 6]:
+        if factor_no in [1, 2, 3, 6]:
             pass
+        elif factor_no in [5]:
+            if len(polygonlayer) > 1:
+                self.convertCRS(polygonlayer, UTM_crs)
+            else:
+                pass
         else:
             self.convertCRS(polygonlayer, UTM_crs)
 
@@ -1159,8 +1164,10 @@ class GenderIndicatorTool:
 
 
         elif factor_no == 5:
-            if polygonlayer is not None:
+            if len(polygonlayer) < 1:
                 shp_utm[rasField] = DIG_Value_SB
+            else:
+                shp_utm[rasField] = shp_utm[rasField]
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
 
@@ -2422,7 +2429,7 @@ class GenderIndicatorTool:
                 #shp_utm[rasField] = shp_utm[rasField].astype(int)
                 shp_utm.to_file(scoredRoads)
 
-                gridOutput = f"{workingDir}/{tempDir}/grid.shp"
+                gridOutput = f"{workingDir}{tempDir}/grid.shp"
                 gridExtent = countryUTMLayerBuf.extent()
                 grid_params = {
                     'TYPE': 2,  # Rectangle (polygon)
