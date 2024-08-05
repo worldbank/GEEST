@@ -2895,6 +2895,24 @@ class GenderIndicatorTool:
             # Clear and disable the SAF_typeScore_Field by default
             self.dlg.SAF_typeScore_Field.clear()
             self.dlg.SAF_typeScore_Field.setEnabled(False)
+    def populateCBFieldsFromPolygonLayer_PC_EDU(self, file_path):
+        layer = QgsVectorLayer(file_path, "input", "ogr")
+        # Check if the layer is a polygon
+        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+            # if it is, populate the combo box fields
+            self.dlg.EDU_rasField_CB.setEnabled(True)
+            self.dlg.EDU_rasField_CB.clear()
+            for field in layer.fields():
+                field_name = field.name()
+                # Check if the field is of type text
+                if field.type() != QVariant.String:
+                    # remove text fields
+                    self.dlg.EDU_rasField_CB.addItem(field_name)
+
+        else:
+            # ensure the CB is not displaying stale information
+            self.dlg.EDU_rasField_CB.clear()
+            self.dlg.EDU_rasField_CB.setEnabled(False)
 
 
     def populateTextFieldWithUniqueValues_PC_SAF(self, layer):
