@@ -3664,7 +3664,7 @@ class GenderIndicatorTool:
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
-            Dimension = "Education"
+            Dimension = "Place Characterization"
             tempDir = os.path.join(workingDir, "temp")
 
             # Create necessary directories
