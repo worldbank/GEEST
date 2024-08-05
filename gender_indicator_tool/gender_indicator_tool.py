@@ -2905,10 +2905,10 @@ class GenderIndicatorTool:
             for field in layer.fields():
                 field_name = field.name()
                 # Check if the field is of type text
-                if field.type() == QVariant.String:
-                    # distinguish text fields
-                    field_name = f"{field_name} (text)"
-                self.dlg.EDU_rasField_CB.addItem(field_name)
+                if field.type() != QVariant.String:
+                    # remove text fields
+                    self.dlg.EDU_rasField_CB.addItem(field_name)
+
         else:
             # ensure the CB is not displaying stale information
             self.dlg.EDU_rasField_CB.clear()
