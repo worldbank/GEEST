@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -87,6 +87,7 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#2b2b2b;&quot;&gt;About&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#2b2b2b;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; color:#535353;&quot;&gt;GEEST effectively identifies areas where conditions are conducive for women to attain employment or business oportunitier by implementing the framework described in “A Methodological Framework for a Geospatial Assessment of Women’s Employment and Business Opportunities in the Renewable Energy Sector” which can be accessed in the tools GitHub repository.&lt;/span&gt;&lt;/p&gt;
@@ -100,52 +101,73 @@ p, li { white-space: pre-wrap; }
 &lt;table border=&quot;1&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:16px; margin-right:0px; border-collapse:collapse;&quot; cellspacing=&quot;2&quot; cellpadding=&quot;0&quot; bgcolor=&quot;transparent&quot;&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-top:1px; border-right:1px; border-bottom:1px; border-left:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-weight:600; color:#535353;&quot;&gt; Score range&lt;/span&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-top:1px; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-top-style:solid; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-weight:600; color:#535353;&quot;&gt; Class&lt;/span&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-top:1px; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-top-style:solid; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-weight:600; color:#535353;&quot;&gt;Interpretation&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-top:1px; border-right:1px; border-bottom:1px; border-left:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;0.00 - 0.50 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-top:1px; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-top-style:solid; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;0 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-top:1px; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-top-style:solid; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;Not enabling &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-left:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;0.51 - 1.50 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;1 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;Very low enabling &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-left:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;1.51 - 2.50 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;2 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;Low enabling &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-left:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;2.51 - 3.50 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;3 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;Moderately enabling&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-left:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;3.51 - 4.50 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;4 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;Enabling &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-left:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;4.51 - 5.00 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;5 &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:0; padding-right:0; padding-top:0; padding-bottom:0; border-right:1px; border-bottom:1px; border-top-color:#000000; border-right-color:#000000; border-bottom-color:#000000; border-left-color:#000000; border-right-style:solid; border-bottom-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; color:#535353;&quot;&gt;Highly enabling &lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; color:#2b2b2b;&quot;&gt;  &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:14pt; font-weight:600; color:#2b2b2b;&quot;&gt;Confidence Level&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; color:#2b2b2b;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
@@ -214,6 +236,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;GEEST - Setup&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;In this tab, the user must: &lt;/span&gt;&lt;/p&gt;
@@ -1971,6 +1994,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Active Transport&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;This tab defines areas based on the degree to which they support safe and efficient active transport (walking, cycling and other forms of non-motorized transport) for women, through the classification of road type.&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
@@ -1980,58 +2004,80 @@ p, li { white-space: pre-wrap; }
 &lt;table border=&quot;1&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; border-collapse:collapse;&quot; cellspacing=&quot;2&quot; cellpadding=&quot;0&quot; bgcolor=&quot;transparent&quot;&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top:2px; border-bottom:2px; border-top-color:#4b4b55; border-right-color:#ffffff; border-bottom-color:#4b4b55; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; font-weight:600; color:#4b4b55;&quot;&gt;Road Type&lt;/span&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top:2px; border-bottom:2px; border-top-color:#4b4b55; border-right-color:#ffffff; border-bottom-color:#4b4b55; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; font-weight:600; color:#4b4b55;&quot;&gt;Score&lt;/span&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top:2px; border-top-color:#4b4b55; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Footway​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top:2px; border-top-color:#4b4b55; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;5​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Track​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;5​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Bridleway​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;5​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Service​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;4​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Residential​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;3​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Tertiary​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;3​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Secondary​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;2​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Primary​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;2​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;Motorway​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#ffffff; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;1​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-bottom:2px; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#4b4b55; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;No road​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;
 &lt;td bgcolor=&quot;transparent&quot; style=&quot; padding-left:1; padding-right:1; padding-top:0; padding-bottom:0; border-bottom:2px; border-top-color:#ffffff; border-right-color:#ffffff; border-bottom-color:#4b4b55; border-left-color:#ffffff; border-top-style:solid; border-right-style:solid; border-bottom-style:solid; border-left-style:solid;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:transparent;&quot;&gt;&lt;span style=&quot; font-family:'Quire Sans','Quire Sans_EmbeddedFont','Quire Sans_MSFontService','sans-serif'; font-size:9pt; color:#4b4b55;&quot;&gt;0​&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas that are most conducive to active transport. A value of 1 indicates areas that are least conducive to active transport. A value of 0 indicates areas where there are no roads at all, and thus active transport is assumed to be impossible.&lt;/span&gt;&lt;/p&gt;
@@ -2200,20 +2246,7 @@ p, li { white-space: pre-wrap; }
            <string>Safety</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_19">
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_109">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Nighttime Lights Input Layer (Raster)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2" rowspan="5">
+           <item row="0" column="2" rowspan="9">
             <widget class="QTextEdit" name="textEdit_21">
              <property name="enabled">
               <bool>true</bool>
@@ -2229,11 +2262,48 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Safe Urban Design&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;This tab defines areas based on how brightly lit they are and assumes that brightly lit areas are safer than areas with no lights.&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: VIIRS nighttime lights dataset (.tif) is used as proxy data for streetlight locations.  If used for assessing safe urban design, nighttime lights should be excluded from the calculation of electrical access.&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates the most brightly lit areas and by assumption the safest. A value of 0 indicates no nighttime lights and by assumption the least safe areas.  &lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="2">
+            <widget class="QLabel" name="label_111">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Raster Output Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QLabel" name="SAF_status">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QComboBox" name="SAF_rasField_CB"/>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_109">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Input Layer (Point, Polygon or Raster)</string>
              </property>
             </widget>
            </item>
@@ -2250,26 +2320,27 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="2" column="0" colspan="2">
-            <widget class="QLabel" name="label_111">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="text">
-              <string>Raster Output Filename</string>
+              <string>Field of interest in polygon layer</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="2">
+           <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="SAF_Output_Field">
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>SAF.tif</string>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -2278,7 +2349,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
+           <item row="8" column="0">
             <widget class="QPushButton" name="SAF_Execute_PB">
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -2288,12 +2359,21 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
-            <widget class="QLabel" name="SAF_status">
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
-              <string/>
+              <string>User input (WBL Safety Index)</string>
              </property>
             </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QgsDoubleSpinBox" name="SAF_User_Value_Input"/>
            </item>
           </layout>
          </widget>
@@ -2693,6 +2773,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Education&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;This tab computes a raster containing a standardized measure of the percentage of women who have achieved a post-secondary education in the country of interest.   &lt;/span&gt;&lt;/p&gt;
@@ -2848,19 +2929,6 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QLabel" name="label_113">
-             <property name="maximumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Raster Output Filename</string>
-             </property>
-             <property name="scaledContents">
-              <bool>false</bool>
            <item row="1" column="0" colspan="2">
             <widget class="QgsFileWidget" name="FCV_Input_Field" native="true">
              <property name="maximumSize">
@@ -3896,6 +3964,11 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QgsDoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>qgsdoublespinbox.h</header>
+  </customwidget>
   <customwidget>
    <class>QgsFileWidget</class>
    <extends>QWidget</extends>
