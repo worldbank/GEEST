@@ -3659,6 +3659,7 @@ class GenderIndicatorTool:
         """
         try:
             # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
             workingDir = self.dlg.workingDir_Field.text()
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
@@ -3670,14 +3671,20 @@ class GenderIndicatorTool:
             if not os.path.exists(workingDir):
                 os.mkdir(workingDir)
 
-            if not os.path.exists(Dimension):
-                os.mkdir(Dimension)
-            os.chdir(Dimension)
+            dimension_dir = os.path.join(workingDir, Dimension)
+            if not os.path.exists(dimension_dir):
+                os.mkdir(dimension_dir)
 
             if os.path.exists(tempDir):
                 shutil.rmtree(tempDir)
             time.sleep(0.5)
             os.mkdir(tempDir)
+
+            # Copy style file
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = dimension_dir
+            styleFile = f"{os.path.splitext(self.dlg.EDU_Output_Field.text())[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
             # Load and reproject country layer if necessary
             countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
@@ -3829,12 +3836,6 @@ class GenderIndicatorTool:
 
             # Set output field
             self.dlg.EDU_Aggregate_Field.setText(rasOutputPath)
-
-            # Apply style
-            styleTemplate = os.path.join(workingDir, "Style", f"{Dimension}.qml")
-            styleFileDestination = os.path.join(workingDir, Dimension)
-            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
             # Update status
             self.dlg.EDU_status.setText("Processing has been completed!")
