@@ -795,7 +795,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -1877,7 +1877,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>0</number>
+          <number>6</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -2085,13 +2085,6 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="11" column="2">
-            <widget class="QLabel" name="WLK_status_2">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
            <item row="10" column="0" colspan="2">
             <widget class="QLabel" name="label_70">
              <property name="maximumSize">
@@ -2152,7 +2145,7 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="14" column="0">
-            <widget class="QgsFilterLineEdit" name="AT_Aggregate_Field">
+            <widget class="QgsFilterLineEdit" name="AT_AGGOutput_Field">
              <property name="maximumSize">
               <size>
                <width>150</width>
@@ -2190,6 +2183,13 @@ p, li { white-space: pre-wrap; }
              </property>
              <property name="text">
               <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="1">
+            <widget class="QLabel" name="WLK_status_2">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -2964,7 +2964,7 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QgsFilterLineEdit" name="WLK_Aggregate_Field">
+            <widget class="QgsFilterLineEdit" name="AT_Aggregate_Field">
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
              </property>
