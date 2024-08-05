@@ -718,7 +718,7 @@ class GenderIndicatorTool:
         shp_utm[rasField] = [0]
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
-        outputPathCountry = f"{workingDir}temp/countryBuff.shp"
+        #outputPathCountry = f"{workingDir}temp/countryBuff.shp"
         buffer = processing.run(
             "native:buffer",
             {
@@ -730,7 +730,7 @@ class GenderIndicatorTool:
                 "MITER_LIMIT": 2,
                 "DISSOLVE": True,
                 "SEPARATE_DISJOINT": False,
-                "OUTPUT": outputPathCountry,
+                "OUTPUT": "memory:",
             },
         )
 
