@@ -2200,6 +2200,19 @@ p, li { white-space: pre-wrap; }
            <string>Safety</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_19">
+           <item row="1" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="SAF_Input_Field">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0" colspan="2">
             <widget class="QLabel" name="label_109">
              <property name="maximumSize">
@@ -2213,7 +2226,50 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="0" column="2" rowspan="5">
+           <item row="8" column="0" colspan="2">
+            <widget class="QLabel" name="label_111">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Raster Output Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Field of interest in polygon layer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QPushButton" name="SAF_Execute_PB">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QgsDoubleSpinBox" name="mQgsDoubleSpinBox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" rowspan="11">
             <widget class="QTextEdit" name="textEdit_21">
              <property name="enabled">
               <bool>true</bool>
@@ -2231,39 +2287,36 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Safe Urban Design&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab defines areas based on how brightly lit they are and assumes that brightly lit areas are safer than areas with no lights.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: VIIRS nighttime lights dataset (.tif) is used as proxy data for streetlight locations.  If used for assessing safe urban design, nighttime lights should be excluded from the calculation of electrical access.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates the most brightly lit areas and by assumption the safest. A value of 0 indicates no nighttime lights and by assumption the least safe areas.  &lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab defines areas based on how brightly lit they are and assumes that brightly lit areas are safer than areas with no lights.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: Streetlight Locations (.shp, Point) or, if unavailable, VIIRS Nighttime Lights dataset (.tif) may be used as proxy data for streetlight locations. Alternatively, Perceived Safety data (.shp, Polygon) can be used if other data is unavailable. (&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; font-style:italic;&quot;&gt;Important note&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: If used for assessing safe urban design, nighttime lights should be excluded from the calculation of Electrical access.)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates the most brightly lit areas and by assumption the safest areas. 0 represents areas with no nighttime lights and by assumption the least safe areas.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="SAF_Input_Field">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <item row="3" column="0">
+            <widget class="QComboBox" name="SAF_rasField_CB">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
-           <item row="2" column="0" colspan="2">
-            <widget class="QLabel" name="label_111">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
+           <item row="5" column="0" colspan="2">
+            <widget class="QgsFilterLineEdit" name="SAF_typeScore_Field">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
-             <property name="text">
-              <string>Raster Output Filename</string>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="2">
+           <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="SAF_Output_Field">
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -2280,19 +2333,35 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QPushButton" name="SAF_Execute_PB">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <widget class="QLabel" name="label_6">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
              <property name="text">
-              <string>Execute</string>
+              <string>Score level (0-5)</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
+           <item row="10" column="1">
             <widget class="QLabel" name="SAF_status">
              <property name="text">
               <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Perceived Safety Value</string>
              </property>
             </widget>
            </item>
@@ -3900,6 +3969,11 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QgsDoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>qgsdoublespinbox.h</header>
+  </customwidget>
   <customwidget>
    <class>QgsFileWidget</class>
    <extends>QWidget</extends>
