@@ -3828,19 +3828,24 @@ class GenderIndicatorTool:
 
             weightingSum = round(sum(factorWeighting))
             if weightingSum == 100:
-
+                
                 with rasterio.open(rasLayers[0]) as src:
-                    RF_ras = src.read(1)
-                    RF_weight = factorWeighting[0]
+                    WD_ras = src.read(1)
+                    WD_weight = factorWeighting[0]
                     meta1 = src.meta
 
                 with rasterio.open(rasLayers[1]) as src:
+                    RF_ras = src.read(1)
+                    RF_weight = factorWeighting[1]
+                    meta1 = src.meta
+
+                with rasterio.open(rasLayers[2]) as src:
                     FIN_ras = src.read(1)
-                    FIN_weight = factorWeighting[1]
+                    FIN_weight = factorWeighting[2]
 
                 # Raster Calculation
 
-                result = (RF_ras * RF_weight / 100) + (FIN_ras * FIN_weight / 100)
+                result = (WD_ras * WD_weight / 100) + (RF_ras * RF_weight / 100) + (FIN_ras * FIN_weight / 100)
 
                 meta1.update(dtype=rasterio.float32)
 
