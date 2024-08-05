@@ -2443,7 +2443,7 @@ class GenderIndicatorTool:
                 grid_result = processing.run('native:creategrid', grid_params)
                 grid_layer = QgsVectorLayer(grid_result['OUTPUT'], 'grid', 'ogr')
 
-                field_name = 'reclass_val'
+                field_name = 'reclass_va'
                 if not grid_layer.fields().indexFromName(field_name) >= 0:
                     grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
                     grid_layer.updateFields()
