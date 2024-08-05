@@ -4490,148 +4490,161 @@ class GenderIndicatorTool:
             Place Characterization Dimension
                 - Natural Environment and Climatic factors
         """
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-        tempDir = "temp"
-        Dimension = "Place Characterization"
+        try:
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            Dimension = "Place Characterization"
+            tempDir = os.path.join(workingDir, "temp")
 
-        if os.path.exists(Dimension):
-            pass
-        else:
-            os.mkdir(Dimension)
+            if not os.path.exists(workingDir):
+                os.mkdir(workingDir)
 
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-        else:
-            pass
+            dimension_dir = os.path.join(workingDir, Dimension)
+            if not os.path.exists(dimension_dir):
+                os.mkdir(dimension_dir)
 
-        time.sleep(0.5)
-        os.mkdir(tempDir)
+            if os.path.exists(tempDir):
+                shutil.rmtree(tempDir)
+            time.sleep(0.5)
+            os.mkdir(tempDir)
 
-        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
-        countryLayer = self.dlg.countryLayer_Field.filePath()
-        pixelSize = self.dlg.pixelSize_SB.value()
-        polygonLayer = self.dlg.ENV_Input_Field.filePath()
-        riskLevelField = self.dlg.ENV_riskLevelField_CB.currentText()
-        riskType_Score = ast.literal_eval(self.dlg.ENV_typeScore_Field.text())
-        rasField = "Score"
+            # Copy style file
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(dimension_dir, "ENV")
+            if not os.path.exists(styleFileDestination):
+                os.mkdir(styleFileDestination)
+            rasOutput = self.dlg.ENV_Output_Field.text()
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        self.dlg.ENV_status.setText("Variables Set")
-        self.dlg.ENV_status.repaint()
-        time.sleep(0.5)
-        self.dlg.ENV_status.setText("Processing...")
-        self.dlg.ENV_status.repaint()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            polygonLayerPath = self.dlg.ENV_Input_Field.filePath()
+            riskLevelField = self.dlg.ENV_riskLevelField_CB.currentText()
 
-        self.convertCRS(countryLayer, UTM_crs)
-        shp_utm[rasField] = [0]
-        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+            # Remove " (text)" from riskLevelField if present
+            if riskLevelField.endswith(" (text)"):
+                riskLevelField = riskLevelField.replace(" (text)", "")
 
-        scoredRisks = f"{workingDir}/{tempDir}/Scored_risks.shp"
+                # Get scoring from ENV_typeScore_Field
+                scoring_text = self.dlg.ENV_typeScore_Field.text()
+                riskType_Score = {item[0]: item[1] for item in eval(scoring_text)}
+            else:
+                riskType_Score = {}
 
-        buffer = processing.run(
-            "native:buffer",
-            {
-                "INPUT": countryUTMLayer,
-                "DISTANCE": 2000,
-                "SEGMENTS": 5,
-                "END_CAP_STYLE": 0,
-                "JOIN_STYLE": 0,
-                "MITER_LIMIT": 2,
-                "DISSOLVE": True,
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": "memory:",
-            },
-        )
+            rasField = "Score"
 
-        countryUTMLayerBuf = buffer["OUTPUT"]
+            self.dlg.ENV_status.setText("Variables Set")
+            self.dlg.ENV_status.repaint()
+            time.sleep(0.5)
+            self.dlg.ENV_status.setText("Processing...")
+            self.dlg.ENV_status.repaint()
 
-        self.convertCRS(polygonLayer, UTM_crs)
-        shp_utm[rasField] = 0
+            # Load and reproject country layer if necessary
+            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
 
-        for i in riskType_Score:
-            # QMessageBox.information(self.dlg, "Message", f"{i}")
-            shp_utm.loc[shp_utm[riskLevelField] == i[0], "Score"] = i[1]
+            # Load and reproject polygon layer if necessary
+            polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
+            if not polygonLayer.isValid():
+                raise ValueError("Invalid polygon layer")
+            if polygonLayer.crs() != UTM_crs:
+                polygonLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': polygonLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
 
-        shp_utm[rasField] = shp_utm[rasField].astype(int)
-        shp_utm.to_file(scoredRisks)
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
+            _ = QgsSpatialIndex(polygonLayer.getFeatures())
 
-        dif_out = f"{workingDir}/{tempDir}/Dif.shp"
+            # Buffer the country layer
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryLayer,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": 'memory:',
+                },
+            )
+            countryLayerBuf = buffer["OUTPUT"]
 
-        Difference = processing.run(
-            "native:difference",
-            {
-                "INPUT": countryUTMLayerBuf,
-                "OVERLAY": QgsProcessingFeatureSourceDefinition(
-                    scoredRisks,
-                    selectedFeaturesOnly=False,
-                    featureLimit=-1,
-                    flags=QgsProcessingFeatureSourceDefinition.FlagOverrideDefaultGeometryCheck,
-                    geometryCheck=QgsFeatureRequest.GeometrySkipInvalid,
-                ),
-                "OUTPUT": dif_out,
-                "GRID_SIZE": None,
-            },
-        )
+            # Assign scores to the polygon layer based on the riskType_Score
+            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+            temp_layer.updateFields()
 
-        Merge = processing.run(
-            "native:mergevectorlayers",
-            {"LAYERS": [scoredRisks, dif_out], "CRS": None, "OUTPUT": "memory:"},
-        )
+            temp_layer.startEditing()
+            for feature in polygonLayer.getFeatures():
+                value = feature[riskLevelField]
+                if value is None or value not in riskType_Score:
+                    score = 0
+                else:
+                    score = riskType_Score[value]
 
-        mergeOutput = Merge["OUTPUT"]
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
 
-        # Get the width and height of the extent
-        extent = countryUTMLayerBuf.extent()
-        raster_width = int(extent.width() / pixelSize)
-        raster_height = int(extent.height() / pixelSize)
+            temp_layer.commitChanges()
 
-        if os.path.exists(Dimension):
-            os.chdir(Dimension)
-        else:
-            os.mkdir(Dimension)
-            os.chdir(Dimension)
+            # Ensure spatial index for temp_layer
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
 
-        Output_Folder = "ENV"
-        if os.path.exists(Output_Folder):
-            os.chdir(Output_Folder)
-        else:
-            os.mkdir(Output_Folder)
-            os.chdir(Output_Folder)
+            # Get the extent for rasterization
+            extent = temp_layer.extent()
+            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
 
-        rasOutput = self.dlg.ENV_Output_Field.text()
+            rasOutputPath = os.path.join(dimension_dir, "ENV", rasOutput)
 
-        rasterize = processing.run(
-            "gdal:rasterize",
-            {
-                "INPUT": mergeOutput,
-                "FIELD": rasField,
-                "BURN": 0,
-                "USE_Z": False,
-                "UNITS": 0,
-                "WIDTH": raster_width,
-                "HEIGHT": raster_height,
-                "EXTENT": None,
-                "NODATA": None,
-                "OPTIONS": "",
-                "DATA_TYPE": 5,
-                "INIT": None,
-                "INVERT": False,
-                "EXTRA": "",
-                "OUTPUT": rasOutput,
-            },
-        )
+            # Rasterize
+            _ = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 0,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutputPath,
+                },
+            )
 
-        self.dlg.ENV_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            self.dlg.ENV_Aggregate_Field.setText(rasOutputPath)
 
-        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-        styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
-        styleFile = f"{rasOutput.split('.')[0]}.qml"
+            self.dlg.ENV_status.setText("Processing Complete!")
+            self.dlg.ENV_status.repaint()
 
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
-
-        self.dlg.ENV_status.setText("Processing Complete!")
-        self.dlg.ENV_status.repaint()
+        except Exception as e:
+            print(str(e))
+            self.dlg.ENV_status.setText(f"Error: {str(e)}")
+            self.dlg.ENV_status.repaint()
 
     def envAggregate(self):
         """
