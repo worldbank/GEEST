@@ -2437,11 +2437,11 @@ class GenderIndicatorTool:
                     'HSPACING': 100,  # Horizontal spacing
                     'VSPACING': 100,  # Vertical spacing
                     'CRS': UTM_crs,
-                    'OUTPUT': gridOutput
+                    'OUTPUT': "memory:"
                 }
 
                 grid_result = processing.run('native:creategrid', grid_params)
-                grid_layer = QgsVectorLayer(grid_result['OUTPUT'], 'grid', 'ogr')
+                grid_layer = grid_result['OUTPUT']
 
                 field_name = 'reclass_va'
                 if not grid_layer.fields().indexFromName(field_name) >= 0:
