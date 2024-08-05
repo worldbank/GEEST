@@ -795,7 +795,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -1877,15 +1877,25 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
            <string>Active Transport</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_18">
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_58">
+           <item row="9" column="0" colspan="3">
+            <widget class="QgsFileWidget" name="WLK_Input_Field_4" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0" colspan="3">
+            <widget class="QLabel" name="label_61">
              <property name="maximumSize">
               <size>
                <width>16777215</width>
@@ -1893,22 +1903,12 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Crosswalks Input Layer (Point)</string>
+              <string>Block Lengths Input Layer (Polyline)</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WLK_Input_Field" native="true">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_62">
+           <item row="4" column="0" colspan="3">
+            <widget class="QLabel" name="label_59">
              <property name="maximumSize">
               <size>
                <width>16777215</width>
@@ -1916,11 +1916,11 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Travel distance(m):</string>
+              <string>Cycle Paths Input Layer (Polyline)</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
+           <item row="3" column="0">
             <widget class="QgsFilterLineEdit" name="WLK_Ranges_Field">
              <property name="maximumSize">
               <size>
@@ -1936,80 +1936,11 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QLabel" name="label_59">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Cycle Paths Input Layer (Polyline)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WLK_Input_Field_2" native="true">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0" colspan="2">
-            <widget class="QLabel" name="label_60">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Pathways Input Layer (Polyline)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WLK_Input_Field_3" native="true">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0" colspan="2">
-            <widget class="QLabel" name="label_61">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Block Lengths Input Layer (Polyline)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WLK_Input_Field_4" native="true">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0" colspan="2">
+           <item row="13" column="0">
             <widget class="QLabel" name="label_65">
              <property name="maximumSize">
               <size>
-               <width>16777215</width>
+               <width>250</width>
                <height>50</height>
               </size>
              </property>
@@ -2018,38 +1949,14 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="10" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="WLK_Output_Field">
-             <property name="text">
-              <string>Activetransport.tif</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="0">
-            <widget class="QPushButton" name="WLK_Execute_PB">
-             <property name="text">
-              <string>Execute</string>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="1">
-            <widget class="QLabel" name="WLK_status">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2" rowspan="12">
+           <item row="0" column="3" rowspan="16">
             <widget class="QTextEdit" name="textEdit_18">
              <property name="enabled">
               <bool>true</bool>
              </property>
              <property name="maximumSize">
               <size>
-               <width>16777215</width>
+               <width>500</width>
                <height>1000</height>
               </size>
              </property>
@@ -2129,6 +2036,160 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas that are most conducive to active transport. A value of 1 indicates areas that are least conducive to active transport. A value of 0 indicates areas where there are no roads at all, and thus active transport is assumed to be impossible.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" colspan="3">
+            <widget class="QgsFileWidget" name="WLK_Input_Field_2" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_62">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Travel distance(m):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="3">
+            <widget class="QgsFileWidget" name="WLK_Input_Field" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_58">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Crosswalks Input Layer (Point)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="2">
+            <widget class="QLabel" name="WLK_status_2">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0" colspan="2">
+            <widget class="QLabel" name="label_70">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Subfactor Output Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="0">
+            <widget class="QPushButton" name="AT_Aggregate_PB">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Aggregate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
+            <widget class="QgsFilterLineEdit" name="WLK_Output_Field_2">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>25</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>AT_.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="1">
+            <widget class="QLabel" name="ATAGG_status">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="3">
+            <widget class="QgsFileWidget" name="WLK_Input_Field_3" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0">
+            <widget class="QgsFilterLineEdit" name="AT_Aggregate_Field">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>25</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Activetransport.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="3">
+            <widget class="QLabel" name="label_60">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Pathways Input Layer (Polyline)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
+            <widget class="QPushButton" name="WLK_Execute_PB_2">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Execute</string>
              </property>
             </widget>
            </item>
