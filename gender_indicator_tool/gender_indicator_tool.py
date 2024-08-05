@@ -3110,31 +3110,6 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
 
-    def populateCBFieldsFromPolygonLayer_PC_EDU(self, file_path):
-        field_count = 0
-        layer = QgsVectorLayer(file_path, "input", "ogr")
-        # Check if the layer is a polygon
-        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-            # if it is, populate the combo box fields
-            self.dlg.EDU_rasField_CB.setEnabled(True)
-            self.dlg.EDU_rasField_CB.clear()
-            for field in layer.fields():
-                field_name = field.name()
-                # Check if the field is not of type text, and if not, add it to the combo box
-                if field.type() != QVariant.String:
-                    self.dlg.EDU_rasField_CB.addItem(field_name)
-                    field_count += 1
-            if field_count > 0:
-                # disable user input if there are fields to choose from
-                self.dlg.EDU_User_Value_Input.setEnabled(False)
-        else:
-            # ensure the CB is not displaying stale information
-            self.dlg.EDU_rasField_CB.clear()
-            self.dlg.EDU_rasField_CB.setEnabled(False)
-            # enable user input
-            self.dlg.EDU_User_Value_Input.setEnabled(True)
-        self.dlg.EDU_rasField_CB.repaint()
-
     def EDUShapefileOrUserInputRasterizer(self):
         """
         This function rasterizes the Education factor for the Urban Safety Factor.
@@ -3145,15 +3120,23 @@ class GenderIndicatorTool:
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
             workingDir = self.dlg.workingDir_Field.text()
-            os.chdir(workingDir)
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
             Dimension = "Education"
+            tempDir = os.path.join(workingDir, "temp")
+
+            # Create necessary directories
+            if not os.path.exists(workingDir):
+                os.mkdir(workingDir)
 
             if not os.path.exists(Dimension):
                 os.mkdir(Dimension)
-            os.chdir(Dimension)
+
+            if os.path.exists(tempDir):
+                shutil.rmtree(tempDir)
+            time.sleep(0.5)
+            os.mkdir(tempDir)
 
             # Load and reproject country layer if necessary
             countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
@@ -3279,6 +3262,7 @@ class GenderIndicatorTool:
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
 
             rasOutput = self.dlg.EDU_Output_Field.text()
+            rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
 
             # Rasterize
             _ = processing.run(
@@ -3298,12 +3282,12 @@ class GenderIndicatorTool:
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
-                    "OUTPUT": rasOutput
+                    "OUTPUT": rasOutputPath
                 }
             )
 
             # Set output field
-            self.dlg.EDU_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+            self.dlg.EDU_Aggregate_Field.setText(rasOutputPath)
 
             # Apply style
             styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
