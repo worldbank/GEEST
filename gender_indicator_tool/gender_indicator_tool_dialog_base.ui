@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -322,7 +322,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual">
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_2">
           <attribute name="title">
@@ -345,7 +345,7 @@ p, li { white-space: pre-wrap; }
            <item row="4" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WD_Output_Field">
              <property name="text">
-              <string>WD_.tif</string>
+              <string>WD.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -511,7 +511,7 @@ p, li { white-space: pre-wrap; }
            <item row="6" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="RF_Output_Field">
              <property name="text">
-              <string>RF_.tif</string>
+              <string>RF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -535,7 +535,7 @@ p, li { white-space: pre-wrap; }
            <item row="4" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="FIN_Output_Field">
              <property name="text">
-              <string>FIN_.tif</string>
+              <string>FIN.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -733,7 +733,7 @@ p, li { white-space: pre-wrap; }
            <item row="5" column="0" colspan="3">
             <widget class="QgsFilterLineEdit" name="Contextual_AggregateOutput_Field">
              <property name="text">
-              <string>CD_AGG.tif</string>
+              <string>Contextual_score.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -795,7 +795,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -825,7 +825,7 @@ p, li { white-space: pre-wrap; }
            <item row="20" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WTP_AGGOutput_Field">
              <property name="text">
-              <string>WTP_.tif</string>
+              <string>WTP.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -856,7 +856,7 @@ p, li { white-space: pre-wrap; }
            <item row="16" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WTP_FacilityOutput_Field">
              <property name="text">
-              <string>Facility_.tif</string>
+              <string>WTP_.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -866,7 +866,7 @@ p, li { white-space: pre-wrap; }
            <item row="14" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WTP_Ranges_Field">
              <property name="text">
-              <string>400, 800, 1200, 1600, 2000</string>
+              <string>400, 800, 1200, 1500, 2000</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1151,7 +1151,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="PBT_Output_Field">
              <property name="text">
-              <string>PBT_.tif</string>
+              <string>PBT.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1303,7 +1303,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="ETF_Output_Field">
              <property name="text">
-              <string>ETF_.tif</string>
+              <string>ETF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1432,7 +1432,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="HEA_Ranges_Field">
              <property name="text">
-              <string>1000, 2000, 3000, 4000, 5000</string>
+              <string>2000, 4000, 6000, 8000, 10000</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1455,7 +1455,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="HEA_Output_Field">
              <property name="text">
-              <string>HEA_.tif</string>
+              <string>HEF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1607,7 +1607,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="FIF_Output_Field">
              <property name="text">
-              <string>FIF_.tif</string>
+              <string>FIF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1817,7 +1817,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="3">
             <widget class="QgsFilterLineEdit" name="Accessibility_AggregateOutput_Field">
              <property name="text">
-              <string>AD_AGG.tif</string>
+              <string>Accessibility_score.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -1877,15 +1877,25 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>5</number>
+          <number>6</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
            <string>Active Transport</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_18">
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_58">
+           <item row="9" column="0" colspan="3">
+            <widget class="QgsFileWidget" name="WLK_Input_Field_4" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0" colspan="3">
+            <widget class="QLabel" name="label_61">
              <property name="maximumSize">
               <size>
                <width>16777215</width>
@@ -1893,14 +1903,62 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Road Network Input Layer (Polyline)</string>
+              <string>Block Lengths Input Layer (Polyline)</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="3" rowspan="9">
+           <item row="4" column="0" colspan="3">
+            <widget class="QLabel" name="label_59">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Cycle Paths Input Layer (Polyline)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QgsFilterLineEdit" name="WLK_Ranges_Field">
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>400, 800, 1200, 1500, 2000</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="0">
+            <widget class="QLabel" name="label_65">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Raster Output Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3" rowspan="16">
             <widget class="QTextEdit" name="textEdit_18">
              <property name="enabled">
               <bool>true</bool>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>500</width>
+               <height>1000</height>
+              </size>
              </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
@@ -1981,70 +2039,41 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WLK_Input_Field" native="true"/>
-           </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="WLK_Set_PB">
-             <property name="text">
-              <string>Set</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0" colspan="3">
-            <widget class="QLabel" name="label_63">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Field representing road type in the input layer</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QComboBox" name="WLK_roadTypeField_CB"/>
-           </item>
-           <item row="3" column="2">
-            <widget class="QPushButton" name="WLK_unique_PB">
-             <property name="text">
-              <string>Unique Values</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="3">
-            <widget class="QLabel" name="label_117">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Score extracted road types from (0-5)</string>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="0" colspan="3">
-            <widget class="QgsFilterLineEdit" name="WLK_typeScore_Field">
-             <property name="inputMask">
-              <string/>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="placeholderText">
-              <string>E.g. [[&quot;Trail&quot;, 4], [&quot;Tertiary&quot;, 3], [&quot;Motorway&quot;, 1]]</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
+            <widget class="QgsFileWidget" name="WLK_Input_Field_2" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
              </property>
             </widget>
            </item>
-           <item row="6" column="0" colspan="2">
-            <widget class="QLabel" name="label_65">
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_62">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Travel distance(m):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="3">
+            <widget class="QgsFileWidget" name="WLK_Input_Field" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_58">
              <property name="maximumSize">
               <size>
                <width>16777215</width>
@@ -2052,29 +2081,113 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Raster Output Filename</string>
+              <string>Crosswalks Input Layer (Point)</string>
              </property>
             </widget>
            </item>
-           <item row="7" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="WLK_Output_Field">
+           <item row="10" column="0" colspan="2">
+            <widget class="QLabel" name="label_70">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
              <property name="text">
-              <string>WLK_.tif</string>
+              <string>Subfactor Output Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="0">
+            <widget class="QPushButton" name="AT_Aggregate_PB">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Aggregate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
+            <widget class="QgsFilterLineEdit" name="WLK_Output_Field_2">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>25</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>AT_.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
-            <widget class="QPushButton" name="WLK_Execute_PB">
+           <item row="15" column="1">
+            <widget class="QLabel" name="ATAGG_status">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="3">
+            <widget class="QgsFileWidget" name="WLK_Input_Field_3" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>25</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0">
+            <widget class="QgsFilterLineEdit" name="AT_AGGOutput_Field">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>25</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Activetransport.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="3">
+            <widget class="QLabel" name="label_60">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Pathways Input Layer (Polyline)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
+            <widget class="QPushButton" name="WLK_Execute_PB_2">
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="text">
               <string>Execute</string>
              </property>
             </widget>
            </item>
-           <item row="8" column="1" colspan="2">
-            <widget class="QLabel" name="WLK_status">
+           <item row="11" column="1">
+            <widget class="QLabel" name="WLK_status_2">
              <property name="text">
               <string/>
              </property>
@@ -2156,7 +2269,7 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>SAF_.tif</string>
+              <string>SAF.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2187,7 +2300,54 @@ p, li { white-space: pre-wrap; }
            <string>Digital Inclusion</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_20">
-           <item row="0" column="0" colspan="3">
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_81">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Polygon Input Layer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="DIG_Input_Field" native="true">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="DIG_Set_PB">
+             <property name="text">
+              <string>Set</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QLabel" name="label_77">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Field of interest in the polygon layer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QComboBox" name="DIG_rasField_CB">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer Field&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
             <widget class="QLabel" name="label_124">
              <property name="maximumSize">
               <size>
@@ -2196,14 +2356,60 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Internet Access Input Layer (Polygon)</string>
+              <string>Internet Access Value</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="3" rowspan="7">
+           <item row="5" column="0">
+            <widget class="QDoubleSpinBox" name="DIG_User_Value_Input"/>
+           </item>
+           <item row="6" column="0" colspan="2">
+            <widget class="QLabel" name="label_126">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Output Raster Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="2">
+            <widget class="QgsFilterLineEdit" name="DIG_Output_Field">
+             <property name="text">
+              <string>DIG.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QPushButton" name="DIG_Execute_PB">
+             <property name="text">
+              <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QLabel" name="DIG_status">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3" rowspan="9">
             <widget class="QTextEdit" name="textEdit_29">
              <property name="enabled">
               <bool>true</bool>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>1200</height>
+              </size>
              </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
@@ -2219,71 +2425,8 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Digital Inclusion&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;This tab characterizes areas based on the percentage of houses with access to the Internet. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A polygon layer (.shp) containing a field representing the percentage of houses with Internet access. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A value representing the percentage of houses with Internet access. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where all houses have access to the Internet while 0 indicates areas where no houses have Internet access. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="DIG_Input_Field" native="true"/>
-           </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="DIG_Set_PB">
-             <property name="text">
-              <string>Set</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0" colspan="3">
-            <widget class="QLabel" name="label_121">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Field of interest in the polygon layer</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QComboBox" name="DIG_rasField_CB"/>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QLabel" name="label_126">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Output Raster Filename</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0" colspan="2">
-            <widget class="QgsFilterLineEdit" name="DIG_Output_Field">
-             <property name="text">
-              <string>DIG_.tif</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QPushButton" name="DIG_Execute_PB">
-             <property name="text">
-              <string>Execute</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1" colspan="2">
-            <widget class="QLabel" name="DIG_status">
-             <property name="text">
-              <string/>
              </property>
             </widget>
            </item>
@@ -2291,7 +2434,7 @@ p, li { white-space: pre-wrap; }
          </widget>
          <widget class="QWidget" name="tab_32">
           <attribute name="title">
-           <string>Natural Environment</string>
+           <string>Environment Hazards</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_21">
            <item row="0" column="0" colspan="3">
@@ -2469,7 +2612,7 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>ENV_.tif</string>
+              <string>ENV.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2609,7 +2752,7 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>EDU_.tif</string>
+              <string>EDU.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -2646,39 +2789,10 @@ p, li { white-space: pre-wrap; }
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>FCV_.tif</string>
+              <string>FCV.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_110">
-             <property name="maximumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Point Input Layer</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QLabel" name="label_113">
-             <property name="maximumSize">
-              <size>
-               <width>200</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Raster Output Filename</string>
-             </property>
-             <property name="scaledContents">
-              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -2701,29 +2815,24 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;Fragility, conflict, and violence&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:20pt; font-weight:600; color:#535353;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;   &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;_Hlk146891458&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;I&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;nput&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A Point layer (.shp) &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;_Hlk146891458&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;I&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;nput&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: ACLED data (,csv}&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="FCV_Input_Field" native="true">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <item row="4" column="0" colspan="2">
+            <widget class="QLabel" name="label_113">
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>50</height>
+              </size>
              </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QComboBox" name="FCV_rasField_CB">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer Field&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1" colspan="2">
-            <widget class="QLabel" name="FCV_status">
              <property name="text">
-              <string/>
+              <string>Raster Output Filename</string>
+             </property>
+             <property name="scaledContents">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -2737,10 +2846,36 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="FCV_Set_PB">
+           <item row="1" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="FCV_Input_Field" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_110">
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>50</height>
+              </size>
+             </property>
              <property name="text">
-              <string>Set</string>
+              <string>Input CSV File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1" colspan="2">
+            <widget class="QLabel" name="FCV_status">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -2753,7 +2888,14 @@ p, li { white-space: pre-wrap; }
               </size>
              </property>
              <property name="text">
-              <string>Field of interest in the point layer</string>
+              <string>Impact Radius in Metres (Optional)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QDoubleSpinBox" name="FCV_Input_Radius">
+             <property name="maximum">
+              <double>100000.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -2817,12 +2959,12 @@ p, li { white-space: pre-wrap; }
            <item row="1" column="0">
             <widget class="QLabel" name="label_101">
              <property name="text">
-              <string>Active Transport (WLK)</string>
+              <string>Active Transport (Activetransport)</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QgsFilterLineEdit" name="WLK_Aggregate_Field">
+            <widget class="QgsFilterLineEdit" name="AT_Aggregate_Field">
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
              </property>
@@ -2941,7 +3083,7 @@ p, li { white-space: pre-wrap; }
            <item row="5" column="0">
             <widget class="QLabel" name="label_107">
              <property name="text">
-              <string>Natural Environment (ENV)</string>
+              <string>Environment Hazards (ENV)</string>
              </property>
             </widget>
            </item>
@@ -3016,7 +3158,7 @@ p, li { white-space: pre-wrap; }
            <item row="8" column="0">
             <widget class="QgsFilterLineEdit" name="PlaceCharacterization_AggregateOutput_Field">
              <property name="text">
-              <string>PD_AGG.tif</string>
+              <string>Place_score.tif</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -3214,7 +3356,7 @@ p, li { white-space: pre-wrap; }
        <item row="6" column="1" colspan="3">
         <widget class="QgsFilterLineEdit" name="Dimensions_AggregateOutput_Field">
          <property name="text">
-          <string>Final_AGG.tif</string>
+          <string>WEE.tif</string>
          </property>
          <property name="qgisRelation" stdset="0">
           <string notr="true"/>
@@ -3292,7 +3434,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_38">
           <attribute name="title">
@@ -3500,7 +3642,7 @@ p, li { white-space: pre-wrap; }
            <item row="19" column="0" colspan="3">
             <widget class="QgsFilterLineEdit" name="AGG_Output_Field">
              <property name="text">
-              <string>Aggregation_</string>
+              <string>WEE_pop_adm_score</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -3594,7 +3736,7 @@ p, li { white-space: pre-wrap; }
            <item row="7" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="RE_Output_Field">
              <property name="text">
-              <string>RE_zone_</string>
+              <string>AOI_WEE_score</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
@@ -3707,7 +3849,7 @@ p, li { white-space: pre-wrap; }
            <item row="9" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="Buffer_Output_Field">
              <property name="text">
-              <string>RE_point_</string>
+              <string>POI_WEE_score</string>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
