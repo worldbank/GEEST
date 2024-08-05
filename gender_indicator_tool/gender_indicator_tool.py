@@ -25,8 +25,12 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import *
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt5.QtWidgets import QFileDialog, QApplication, QComboBox
 from qgis.core import *
+from qgis.core import QgsVectorLayer, QgsProject, QgsCoordinateReferenceSystem, QgsCoordinateTransformContext, \
+    QgsCoordinateTransform, QgsMessageLog, Qgis, QgsWkbTypes
+from PyQt5.QtCore import QVariant
+
 
 # package installs
 
@@ -136,16 +140,16 @@ class GenderIndicatorTool:
         return QCoreApplication.translate("GenderIndicatorTool", message)
 
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None,
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None,
     ):
         """Add a toolbar icon to the toolbar.
 
@@ -246,10 +250,10 @@ class GenderIndicatorTool:
         self.dlg.workingDir_Button.clicked.connect(lambda: self.getFolder(0))
 
         ## TAB 2 - Contextual ***************************************************************************
-        
+
         ###### TAB 2.1 - Workplace Discrimination
         self.dlg.WD_Execute_PB.clicked.connect(lambda: self.Rasterize(1))
-        
+
         ###### TAB 2.2 - Regulatory Frameworks
         self.dlg.RF_Execute_PB.clicked.connect(lambda: self.Rasterize(2))
 
@@ -324,7 +328,9 @@ class GenderIndicatorTool:
         self.dlg.AT_Aggregate_PB.clicked.connect(self.walkabilityAggregate)
 
         ###### TAB 4.2 - Safe Urban Design
-        self.dlg.SAF_Execute_PB.clicked.connect(self.SAFnightTimeLights)
+        self.dlg.SAF_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_SAF)
+        self.dlg.SAF_rasField_CB.textActivated.connect(self.populateTextFieldWithUniqueValues_PC_SAF)
+        self.dlg.SAF_Execute_PB.clicked.connect(self.SAFRasterizerDelegator)
 
         ###### TAB 4.3 - Digital Inclusion
         self.dlg.DIG_Set_PB.clicked.connect(lambda: self.RasterizeSet(4))
@@ -335,15 +341,15 @@ class GenderIndicatorTool:
         self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
-        
+
         ###### TAB 4.5- Education
-        self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
-        self.dlg.EDU_Execute_PB.clicked.connect(lambda: self.Rasterize(0))
-        
+        #self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
+        self.dlg.EDU_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_EDU)
+        self.dlg.EDU_Execute_PB.clicked.connect(self.EDUShapefileOrUserInputRasterizer)
+
         ###### TAB 4.6 - Facility, conflict, and violence
         #self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
         self.dlg.FCV_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
-
 
         ###### TAB 4.7 - Aggregate
         self.dlg.WLK_Aggregate_TB.clicked.connect(lambda: self.getFile(11))
@@ -391,7 +397,7 @@ class GenderIndicatorTool:
 
         if button_num == 0:
             self.dlg.EDU_Aggregate_Field.setText(response[0])
-            
+
         elif button_num == 1:
             self.dlg.WD_Aggregate_Field.setText(response[0])
 
@@ -442,7 +448,7 @@ class GenderIndicatorTool:
 
         elif button_num == 25:
             self.dlg.PD_Aggregate_Field.setText(response[0])
-            
+
         elif button_num == 26:
             self.dlg.FCV_Aggregate_Field.setText(response[0])
 
@@ -478,12 +484,12 @@ class GenderIndicatorTool:
                 - Fragility, conflict, and violence(FCV)
         """
         if factor_no == 0:
-            polygonlayer = self.dlg.EDU_Input_Field.filePath()
+            """polygonlayer = self.dlg.EDU_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
             self.dlg.EDU_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
-            self.dlg.EDU_rasField_CB.addItems(fields)
-            
+            self.dlg.EDU_rasField_CB.addItems(fields)"""
+
         elif factor_no == 1:
             polygonlayer = self.dlg.WD_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
@@ -511,7 +517,7 @@ class GenderIndicatorTool:
             self.dlg.DIG_rasField_CB.clear()
             fields = [field.name() for field in layer.fields()]
             self.dlg.DIG_rasField_CB.addItems(fields)
-            
+
         elif factor_no == 5:
             polygonlayer = self.dlg.FCV_Input_Field.filePath()
             layer = QgsVectorLayer(polygonlayer, "polygonlayer", "ogr")
@@ -635,16 +641,16 @@ class GenderIndicatorTool:
 
         # INPUT
         if factor_no == 0:
-            polygonlayer = self.dlg.EDU_Input_Field.filePath()
+            """polygonlayer = self.dlg.EDU_Input_Field.filePath()
             rasField = self.dlg.EDU_rasField_CB.currentText()
             self.dlg.EDU_status.setText("Variables Set")
             self.dlg.EDU_status.repaint()
             time.sleep(0.5)
             self.dlg.EDU_status.setText("Processing...")
-            self.dlg.EDU_status.repaint()
-            
+            self.dlg.EDU_status.repaint()"""
+
         elif factor_no == 1:
-            #polygonlayer = self.dlg.WD_Input_Field.filePath()
+            # polygonlayer = self.dlg.WD_Input_Field.filePath()
             rasField = "rasField"
             WD_Value_SB = self.dlg.WD_User_Value_Input.value()
             self.dlg.WD_status.setText("Variables Set")
@@ -654,7 +660,7 @@ class GenderIndicatorTool:
             self.dlg.WD_status.repaint()
 
         elif factor_no == 2:
-            #polygonlayer = self.dlg.RF_Input_Field.filePath()
+            # polygonlayer = self.dlg.RF_Input_Field.filePath()
             rasField = "rasField"
             RF_Value_SB = self.dlg.RF_User_Value_Input.value()
             RF_Value_SB_2 = self.dlg.RF_User_Value_Input_2.value()
@@ -666,7 +672,7 @@ class GenderIndicatorTool:
             self.dlg.RF_status.repaint()
 
         elif factor_no == 3:
-            #polygonlayer = self.dlg.FIN_Input_Field.filePath()
+            # polygonlayer = self.dlg.FIN_Input_Field.filePath()
             rasField = "rasField"
             FIN_Value_SB = self.dlg.FIN_User_Value_Input.value()
             self.dlg.FIN_status.setText("Variables Set")
@@ -695,7 +701,7 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.DIG_status.setText("Processing...")
             self.dlg.DIG_status.repaint()
-            
+
         elif factor_no == 6:
             csvFile = self.dlg.FCV_Input_Field.filePath()
             csvFile = f"file://{csvFile}?delimiter=,&yField=latitude&xField=longitude"
@@ -734,7 +740,7 @@ class GenderIndicatorTool:
             pass
         else:
             self.convertCRS(polygonlayer, UTM_crs)
-        
+
         if rasField not in shp_utm.columns:
             shp_utm[rasField] = [0]
         shp_utm[rasField] = shp_utm[rasField].astype(float)
@@ -748,16 +754,16 @@ class GenderIndicatorTool:
             # Standardization formula
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -831,16 +837,16 @@ class GenderIndicatorTool:
             shp_utm[rasField] = WD_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -907,21 +913,21 @@ class GenderIndicatorTool:
 
             self.dlg.WD_status.setText("Processing has been completed!")
             self.dlg.WD_status.repaint()
-            
+
         elif factor_no == 2:
             shp_utm[rasField] = RF_Value_Average
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -993,16 +999,16 @@ class GenderIndicatorTool:
             shp_utm[rasField] = FIN_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -1073,16 +1079,16 @@ class GenderIndicatorTool:
         elif factor_no == 4:
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -1156,16 +1162,16 @@ class GenderIndicatorTool:
                 shp_utm[rasField] = DIG_Value_SB
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
             polygonUTM = QgsVectorLayer(shp_utm.to_json(), "polygonUTM", "ogr")
-            
+
             clipPolygonUTM = processing.run(
                 "native:clip",
                 {
-                   "INPUT": polygonUTM,
-                   "OVERLAY": countryUTMLayerBuf,
-                   "OUTPUT": "memory:",
+                    "INPUT": polygonUTM,
+                    "OVERLAY": countryUTMLayerBuf,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             polygonUTM = clipPolygonUTM["OUTPUT"]
 
             Difference = processing.run(
@@ -1232,10 +1238,11 @@ class GenderIndicatorTool:
 
             self.dlg.DIG_status.setText("Processing has been completed!")
             self.dlg.DIG_status.repaint()
-            
+
         elif factor_no == 6:
             shp_utm[rasField] = 100
             shp_utm[rasField] = (shp_utm[rasField] - Rmin) / (Rmax - Rmin) * m_max
+
             # csv conversion to shapefile
             
             temp = "temp"
@@ -1605,7 +1612,7 @@ class GenderIndicatorTool:
                 file_path = input_field.filePath()
                 if file_path:
                     FaciltyPointlayerList.append(file_path)
-            
+
             ranges = self.dlg.WTP_Ranges_Field.text()
             rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}.tif"
             mergeOutput = (
@@ -1633,7 +1640,7 @@ class GenderIndicatorTool:
         # OUTPUT
         SAOutput_utm = f"{tempDir}/SA_OUTPUT_UTM.shp"
         temp_merge = f"{tempDir}/temp_merge.shp"
-        
+
         if factor_no == 5:
             # Do stuff
             facility_data = 0
@@ -1647,8 +1654,8 @@ class GenderIndicatorTool:
                 subsets = []
 
                 for i in range(0, len(gdf), subset_size):
-                    subset = gdf.iloc[i : i + subset_size]
-                    subset = QgsVectorLayer(subset.to_json(),   "mygeojson", "ogr")
+                    subset = gdf.iloc[i: i + subset_size]
+                    subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
                     subset_outfile = (
                         f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
                     )
@@ -1739,7 +1746,7 @@ class GenderIndicatorTool:
 
                 for i in range(-1, -len(range_subsets), -1):
                     output = (
-                        f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                        f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i - 1]}.shp"
                     )
                     # Merge_list.append(output)
                     difference = processing.run(
@@ -1778,24 +1785,24 @@ class GenderIndicatorTool:
 
                 dis_output = dissolve["OUTPUT"]
                 Merge_list.append(dis_output)
-                
+
                 print(f"Path: {os.getcwd()}")
 
                 if os.path.exists(f"{Dimension}/SA_SHP"):
                     pass
                 else:
                     os.mkdir(f"{Dimension}/SA_SHP")
-                    
+
                 feedback = QgsProcessingFeedback()
 
                 Merge = processing.run(
                     "native:mergevectorlayers",
                     {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
                 )
-                
+
                 if Merge is not None and "OUTPUT" in Merge:
                     print(f"Processing completed successfully")
-                    
+
                     # Do something
 
                     merge_df = gpd.read_file(f"{mergeOutput}")
@@ -1824,7 +1831,7 @@ class GenderIndicatorTool:
                     )
 
                     buffer_output = buffer["OUTPUT"]
-        
+
                     clipAOI = processing.run(
                         "native:clip",
                         {
@@ -1833,7 +1840,7 @@ class GenderIndicatorTool:
                             "OUTPUT": "memory:",
                         }
                     )
-            
+
                     merge_SA_UTM = clipAOI["OUTPUT"]
 
                     Difference = processing.run(
@@ -1901,7 +1908,7 @@ class GenderIndicatorTool:
                             "OUTPUT": rasOutput,
                         },
                     )
-                
+
                     facility_data = facility_data + 1
 
                     shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
@@ -1936,7 +1943,7 @@ class GenderIndicatorTool:
             subsets = []
 
             for i in range(0, len(gdf), subset_size):
-                subset = gdf.iloc[i : i + subset_size]
+                subset = gdf.iloc[i: i + subset_size]
                 print(f"subset:{subset}")
                 subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
                 subset_outfile = (
@@ -2029,7 +2036,7 @@ class GenderIndicatorTool:
 
             for i in range(-1, -len(range_subsets), -1):
                 output = (
-                    f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i-1]}.shp"
+                    f"{tempDir}/band_dif_{int_ranges_list[i]}_-_{int_ranges_list[i - 1]}.shp"
                 )
                 # Merge_list.append(output)
                 difference = processing.run(
@@ -2078,8 +2085,7 @@ class GenderIndicatorTool:
                 "native:mergevectorlayers",
                 {"LAYERS": Merge_list, "CRS": None, "OUTPUT": f"{mergeOutput}"},
             )
-        
-        
+
             time.sleep(0.5)
 
             merge_df = gpd.read_file(f"{mergeOutput}")
@@ -2108,16 +2114,16 @@ class GenderIndicatorTool:
             )
 
             buffer_output = buffer["OUTPUT"]
-        
+
             clipAOI = processing.run(
                 "native:clip",
                 {
-                   "INPUT": merge_SA_UTM,
-                   "OVERLAY": buffer_output,
-                   "OUTPUT": "memory:",
+                    "INPUT": merge_SA_UTM,
+                    "OVERLAY": buffer_output,
+                    "OUTPUT": "memory:",
                 }
             )
-            
+
             merge_SA_UTM = clipAOI["OUTPUT"]
 
             Difference = processing.run(
@@ -2830,152 +2836,939 @@ class GenderIndicatorTool:
         else:
             pass
 
+    def SAFRasterizerDelegator(self):
+        """
+        This function delegates the rendering task to one of four rasterizing functions based on input type and subtype:
+        - In case of raster input --> SAFnightTimeLights
+        - In case of points (vector) input --> SAFstreetLightsRasterizer
+        - In case of polygons (vector) with numeric field as metric --> SAFPerceivedSafetyFromNumericFieldRasterizer
+        - In case of polygons (vector) with text field as metric --> SAFPerceivedSafetyFromTextFieldRasterizer
+        """
+        input_file = self.dlg.SAF_Input_Field.filePath()
+        input_layer = QgsRasterLayer(input_file, "input")
+
+        if input_layer.isValid():
+            self.SAFnightTimeLights()
+        else:
+            input_layer = QgsVectorLayer(input_file, "input", "ogr")
+            if not input_layer.isValid():
+                self.dlg.SAF_status.setText("The input file is not a valid raster or vector layer.")
+                self.dlg.SAF_status.repaint()
+                return
+
+            # Check the geometry type of the vector layer
+            if input_layer.geometryType() == QgsWkbTypes.PointGeometry:
+                self.SAFstreetLightsRasterizer()
+            elif input_layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+                selected_field = self.dlg.SAF_rasField_CB.currentText()
+                if selected_field.endswith(" (text)"):
+                    self.SAFPerceivedSafetyFromTextFieldRasterizer(input_layer)
+                else:
+                    self.SAFPerceivedSafetyFromNumericFieldRasterizer(input_layer)
+            else:
+                self.dlg.SAF_status.setText(
+                    "Unsupported vector layer type. Only point and polygon geometries are supported.")
+                self.dlg.SAF_status.repaint()
+
+
+    def populateCBFieldsFromPolygonLayer_PC_SAF(self, file_path):
+        # Clear and disable the SAF_typeScore_Field by default
+        self.dlg.SAF_typeScore_Field.clear()
+        self.dlg.SAF_typeScore_Field.setEnabled(False)
+        layer = QgsVectorLayer(file_path, "input", "ogr")
+        # Check if the layer is a polygon
+        if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+            # if it is, populate the combo box fields
+            self.dlg.SAF_rasField_CB.setEnabled(True)
+            self.dlg.SAF_rasField_CB.clear()
+            for field in layer.fields():
+                field_name = field.name()
+                # Check if the field is of type text
+                if field.type() == QVariant.String:
+                    # distinguish text fields
+                    field_name = f"{field_name} (text)"
+                self.dlg.SAF_rasField_CB.addItem(field_name)
+        else:
+            # ensure the CB is not displaying stale information
+            self.dlg.SAF_rasField_CB.clear()
+            self.dlg.SAF_rasField_CB.setEnabled(False)
+            # Clear and disable the SAF_typeScore_Field by default
+            self.dlg.SAF_typeScore_Field.clear()
+            self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+
+    def populateTextFieldWithUniqueValues_PC_SAF(self, layer):
+        # Get the file path from the QgsFileWidget
+        file_path = self.dlg.SAF_Input_Field.filePath()
+        # Get the selected field name from the QComboBox
+        field_name = self.dlg.SAF_rasField_CB.currentText()
+
+        # Clear and disable the SAF_typeScore_Field by default
+        self.dlg.SAF_typeScore_Field.clear()
+        self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+        if file_path and field_name:
+            if field_name.endswith(" (text)"):
+                # Remove " (text)" suffix
+                field_name = field_name.replace(" (text)", "")
+                try:
+                    # Read the file using geopandas
+                    gdf = gpd.read_file(file_path)
+                    # Get unique values from the selected field
+                    unique_values = gdf[field_name].unique().tolist()
+                    # Create the score list
+                    score_list = [[str(val), 0] for val in unique_values if pd.notna(val)]
+                    # Set the text in the QFilterLineEdit and enable it
+                    self.dlg.SAF_typeScore_Field.setText(str(score_list))
+                    self.dlg.SAF_typeScore_Field.setEnabled(True)
+                except Exception as e:
+                    # Handle any errors (e.g., file not found, invalid field name)
+                    self.dlg.SAF_typeScore_Field.setText(f"Error: {str(e)}")
+                    self.dlg.SAF_typeScore_Field.setEnabled(False)
+            else:
+                # Field name doesn't end with " (text)", so we keep the field cleared and disabled
+                pass
+        else:
+            # Handle the case where no file or field is selected
+            self.dlg.SAF_typeScore_Field.setText("Please select a file and field first.")
+            self.dlg.SAF_typeScore_Field.setEnabled(False)
+
+
     def SAFnightTimeLights(self):
         """
-        This function use a linearly scales the night time lights raster dataset according to the standardized scoring system.
-        How brightly lit an area is is used as a proxy for safety or safe urban design.
-
-        Factors it is applied:
-            Place Characterization Dimension
-                - Safe Urban Design
+        This function processes night-time lights data for safety assessment.
+        It handles only raster inputs. How brightly lit an area is used as a proxy for safety or safe urban design.
         """
+
+        # Set up directories
         current_script_path = os.path.dirname(os.path.abspath(__file__))
         workingDir = self.dlg.workingDir_Field.text()
         os.chdir(workingDir)
         tempDir = "temp"
         Dimension = "Place Characterization"
 
-        if os.path.exists(Dimension):
-            pass
-        else:
+        # Create necessary directories
+        if not os.path.exists(Dimension):
             os.mkdir(Dimension)
 
         if os.path.exists(tempDir):
             shutil.rmtree(tempDir)
-        else:
-            pass
-
         time.sleep(0.5)
         os.mkdir(tempDir)
 
+        # Set CRS and input/output paths
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
-        NTL_input = self.dlg.SAF_Input_Field.filePath()
+        input_file = self.dlg.SAF_Input_Field.filePath()
         rasOutput = self.dlg.SAF_Output_Field.text()
 
-        # Temp files
-        tempCalc = f"{tempDir}/tempCalc.tif"
-        tempResample = f"{tempDir}/tempResample.tif"
-        countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+        # Detect input file type, assuming it's raster
+        input_layer = QgsRasterLayer(input_file, "input")
 
-        styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-        styleFileDestination = f"{workingDir}{Dimension}/"
-        styleFile = f"{rasOutput.split('.')[0]}.qml"
+        # Handle raster input layer
+        if input_layer.isValid():
+            # Raster input detected - proceed with existing functionality
+            NTL_input = input_file
 
-        shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+            # Define temporary file paths
+            tempCalc = f"{tempDir}/tempCalc.tif"
+            tempResample = f"{tempDir}/tempResample.tif"
+            countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
 
-        self.dlg.SAF_status.setText("Variables Set")
-        self.dlg.SAF_status.repaint()
-        time.sleep(0.5)
-        self.dlg.SAF_status.setText("Processing...")
-        self.dlg.SAF_status.repaint()
+            # Copy style file
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        self.convertCRS(countryLayer, UTM_crs)
-        countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+            # Update UI status
+            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.SAF_status.setText("Processing...")
+            self.dlg.SAF_status.repaint()
 
-        buffer = processing.run(
-            "native:buffer",
-            {
-                "INPUT": countryUTMLayer,
-                "DISTANCE": 2000,
-                "SEGMENTS": 5,
-                "END_CAP_STYLE": 0,
-                "JOIN_STYLE": 0,
-                "MITER_LIMIT": 2,
-                "DISSOLVE": True,
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": countryUTMLayerBuf,
-            },
-        )
+            # Convert CRS of country layer
+            self.convertCRS(countryLayer, UTM_crs)
+            countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
 
-        # countryUTMLayerBuf = buffer["OUTPUT"]
+            # Buffer the country layer
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryUTMLayer,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": countryUTMLayerBuf,
+                },
+            )
 
-        CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
-        country_extent = CountryBuf_df.total_bounds
+            # Get the extent of the buffered country layer
+            CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+            country_extent = CountryBuf_df.total_bounds
 
-        processing.run(
-            "gdal:warpreproject",
-            {
-                "INPUT": NTL_input,
-                "SOURCE_CRS": None,
-                "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                "RESAMPLING": 0,
-                "NODATA": None,
-                "TARGET_RESOLUTION": pixelSize,
-                "OPTIONS": "",
-                "DATA_TYPE": 0,
-                "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
-                "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                "MULTITHREADING": False,
-                "EXTRA": "",
-                "OUTPUT": tempResample,
-            },
-        )
+            # Reproject and resample the night-time lights raster
+            processing.run(
+                "gdal:warpreproject",
+                {
+                    "INPUT": NTL_input,
+                    "SOURCE_CRS": None,
+                    "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "RESAMPLING": 0,
+                    "NODATA": None,
+                    "TARGET_RESOLUTION": pixelSize,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 0,
+                    "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                    "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "MULTITHREADING": False,
+                    "EXTRA": "",
+                    "OUTPUT": tempResample,
+                },
+            )
 
-        processing.run(
-            "gdal:rastercalculator",
-            {
-                "INPUT_A": tempResample,
-                "BAND_A": 1,
-                "INPUT_B": None,
-                "BAND_B": None,
-                "INPUT_C": None,
-                "BAND_C": None,
-                "INPUT_D": None,
-                "BAND_D": None,
-                "INPUT_E": None,
-                "BAND_E": None,
-                "INPUT_F": None,
-                "BAND_F": None,
-                "FORMULA": "A*1000",
-                "NO_DATA": None,
-                "EXTENT_OPT": 0,
-                "PROJWIN": None,
-                "RTYPE": 4,
-                "OPTIONS": "",
-                "EXTRA": "",
-                "OUTPUT": tempCalc,
-            },
-        )
+            # Perform raster calculation
+            processing.run(
+                "gdal:rastercalculator",
+                {
+                    "INPUT_A": tempResample,
+                    "BAND_A": 1,
+                    "FORMULA": "A*1000",
+                    "NO_DATA": None,
+                    "RTYPE": 4,
+                    "OPTIONS": "",
+                    "EXTRA": "",
+                    "OUTPUT": tempCalc,
+                },
+            )
 
-        with rasterio.open(tempCalc, "r+") as src:
-            SAF_ras = src.read(1)
-            meta1 = src.meta
+            # Normalize raster values
+            with rasterio.open(tempCalc, "r+") as src:
+                SAF_ras = src.read(1)
+                meta1 = src.meta
+                Rmax = SAF_ras.max()
+                Rmin = SAF_ras.min()
+                m_max = 5
+                m_min = 0
+                result = ((SAF_ras - Rmin) / (Rmax - Rmin)) * m_max
+                meta1.update(dtype=rasterio.float32)
 
-            Rmax = SAF_ras.max()
-            Rmin = SAF_ras.min()
-            m_max = 5
-            m_min = 0
+            try:
+                # Create output directory if it does not exist
+                if not os.path.exists(Dimension):
+                    os.mkdir(Dimension)
+                os.chdir(Dimension)
 
-        result = ((SAF_ras - Rmin) / (Rmax - Rmin)) * m_max
-        meta1.update(dtype=rasterio.float32)
+                # Write the final output raster
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(result, 1)
 
-        if os.path.exists(Dimension):
-            os.chdir(Dimension)
+                # Update UI with the output path
+                self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+                self.dlg.SAF_status.setText("Processing Complete!")
+                self.dlg.SAF_status.repaint()
+
+                # Return to the original working directory
+                os.chdir(workingDir)
+
+            except Exception as e:
+                # Something went awry, inform the user
+                error_message = f"Processing failed: {str(e)}"
+                self.dlg.SAF_status.setText(error_message)
+                self.dlg.SAF_status.repaint()
+
+                # Ensure we return to the original working directory even if an error occurs
+                if os.getcwd() != workingDir:
+                    os.chdir(workingDir)
+
         else:
+            self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
+            self.dlg.SAF_status.repaint()
+
+
+    def SAFstreetLightsRasterizer(self):
+        """
+        This function processes streetlight vector data for safety assessment.
+        It creates 20-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
+        """
+
+        # Constants
+        LIGHT_AREA_RADIUS = 20
+        BUFFER_SEGMENTS = 8
+        BUFFER_END_CAP_STYLE = 0
+        BUFFER_JOIN_STYLE = 0
+        BUFFER_MITER_LIMIT = 2
+        BUFFER_DISSOLVE = False
+        RASTER_BURN_VALUE = 1
+        RASTER_NODATA_VALUE = 0
+        SCORE_BINS = [0, 1, 20, 40, 60, 80, 100]
+        SCORES = [0, 0, 1, 2, 3, 4, 5]  # Updated to ensure areas with no values map to 0
+        EXTENT_BUFFER = LIGHT_AREA_RADIUS * 8  # Buffer for extent to ensure full coverage
+
+        # Set up directories
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        # Create necessary directories
+        if not os.path.exists(Dimension):
             os.mkdir(Dimension)
-            os.chdir(Dimension)
 
-        with rasterio.open(rasOutput, "w", **meta1) as dst:
-            dst.write(result, 1)
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        time.sleep(0.5)
+        os.mkdir(tempDir)
 
-        self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+        # Set CRS and input/output paths
+        project_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        input_file = self.dlg.SAF_Input_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        output_raster = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
 
-        self.dlg.SAF_status.setText("Processing Complete!")
+        # Load input vector layer
+        vector_layer = QgsVectorLayer(input_file, "streetlights", "ogr")
+        if not vector_layer.isValid():
+            self.dlg.SAF_status.setText("Invalid vector input. Please check the file.")
+            self.dlg.SAF_status.repaint()
+            QgsMessageLog.logMessage("Invalid vector input: " + input_file, "SAFstreetLights", Qgis.Critical)
+            return
+
+        # Reproject vector layer if necessary
+        input_crs = vector_layer.crs()
+        if input_crs.authid() != project_crs:
+            self.dlg.SAF_status.setText("Reprojecting...")
+            self.dlg.SAF_status.repaint()
+            reprojected_layer = os.path.join(tempDir, "streetlights_reprojected.shp")
+            processing.run("native:reprojectlayer", {
+                'INPUT': vector_layer,
+                'TARGET_CRS': QgsCoordinateReferenceSystem(project_crs),
+                'OUTPUT': reprojected_layer
+            })
+            vector_layer = QgsVectorLayer(reprojected_layer, "streetlights_reprojected", "ogr")
+
+        # Buffer the vector layer
+        self.dlg.SAF_status.setText("Buffering layer...")
+        self.dlg.SAF_status.repaint()
+        buffered_layer = os.path.join(tempDir, "streetlights_buffer.shp")
+        processing.run("native:buffer", {
+            'INPUT': vector_layer,
+            'DISTANCE': LIGHT_AREA_RADIUS,
+            'SEGMENTS': BUFFER_SEGMENTS,
+            'END_CAP_STYLE': BUFFER_END_CAP_STYLE,
+            'JOIN_STYLE': BUFFER_JOIN_STYLE,
+            'MITER_LIMIT': BUFFER_MITER_LIMIT,
+            'DISSOLVE': BUFFER_DISSOLVE,
+            'OUTPUT': buffered_layer
+        })
+
+        self.dlg.SAF_status.setText("Starting calculations...")
         self.dlg.SAF_status.repaint()
 
-        os.chdir(workingDir)
+        # Calculate the extent of the buffered layer
+        buffered_gdf = gpd.read_file(buffered_layer)
+        extent = buffered_gdf.total_bounds
+        xmin, ymin, xmax, ymax = extent
+
+        # Calculate the kernel radius
+        pixels_light_radius = int(LIGHT_AREA_RADIUS / pixelSize)
+        kernel_radius = pixels_light_radius
+
+        # Add buffer to extent to ensure full coverage, considering twice the kernel radius
+        xmin -= (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+        ymin -= (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+        xmax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+        ymax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+
+        # Log the calculated extent and dimensions
+        print(f"Extent: xmin={xmin}, ymin={ymin}, xmax={xmax}, ymax={ymax}")
+
+        # Rasterize the buffered layer
+        rasterized_layer = os.path.join(tempDir, "streetlights_raster.tif")
+        width = max(1, int((xmax - xmin) / pixelSize))
+        height = max(1, int((ymax - ymin) / pixelSize))
+
+        # Log the calculated raster dimensions
+        print(f"Raster Dimensions: width={width}, height={height}")
+
+        self.dlg.SAF_status.setText("Rasterizing...")
+        self.dlg.SAF_status.repaint()
+
+        processing.run("gdal:rasterize", {
+            'INPUT': buffered_layer,
+            'FIELD': '',
+            'BURN': RASTER_BURN_VALUE,
+            'USE_Z': False,
+            'UNITS': 1,  # Pixels
+            'WIDTH': width,
+            'HEIGHT': height,
+            'EXTENT': f'{xmin},{xmax},{ymin},{ymax}',
+            'NODATA': RASTER_NODATA_VALUE,
+            'OUTPUT': rasterized_layer
+        })
+
+        self.dlg.SAF_status.setText("Calculating coverage scores...")
+        self.dlg.SAF_status.repaint()
+
+        # Calculate percentage coverage and assign scores
+        with rasterio.open(rasterized_layer) as src:
+            streetlight_raster = src.read(1)
+            meta = src.meta
+
+        # Create a circular kernel representing the light radius buffer
+        y, x = np.ogrid[-pixels_light_radius:pixels_light_radius + 1, -pixels_light_radius:pixels_light_radius + 1]
+        kernel = x * x + y * y <= pixels_light_radius * pixels_light_radius
+        kernel = kernel.astype(np.float32)
+        kernel_sum = kernel.sum()
+
+        # Perform the convolution
+        coverage = np.zeros_like(streetlight_raster, dtype=np.float32)
+        for i in range(pixels_light_radius, streetlight_raster.shape[0] - pixels_light_radius):
+            for j in range(pixels_light_radius, streetlight_raster.shape[1] - pixels_light_radius):
+                sub_array = streetlight_raster[i - pixels_light_radius:i + pixels_light_radius + 1,
+                            j - pixels_light_radius:j + pixels_light_radius + 1]
+                coverage[i, j] = (sub_array * kernel).sum()
+
+        # Calculate the percentage of coverage
+        coverage_percentage = (coverage / kernel_sum) * 100
+
+        # Use np.digitize to find the indices of the bins to which each value in coverage_percentage belongs
+        bins = np.digitize(coverage_percentage, SCORE_BINS, right=True) - 1
+
+        # Map the bin indices to scores
+        result = np.array([SCORES[i] for i in bins.flat]).reshape(bins.shape).astype(np.float32)
+
+        # Ensure areas with no coverage map to 0
+        result[coverage_percentage == 0] = 0
+
+        try:
+            # Save the final raster
+            # Update UI
+            self.dlg.SAF_status.setText("Saving raster...")
+            self.dlg.SAF_status.repaint()
+
+            meta.update(dtype=rasterio.float32)
+            os.makedirs(os.path.dirname(output_raster), exist_ok=True)
+            with rasterio.open(output_raster, 'w', **meta) as dst:
+                dst.write(result, 1)
+
+            # Update UI
+            self.dlg.SAF_Aggregate_Field.setText(output_raster)
+            self.dlg.SAF_status.setText("Processing complete!")
+            self.dlg.SAF_status.repaint()
+
+            # Clean up temporary files
+            shutil.rmtree(tempDir)
+        except Exception as e:
+            # Something went awry, inform the user
+            error_message = f"Processing failed: {str(e)}"
+            self.dlg.SAF_status.setText(error_message)
+            self.dlg.SAF_status.repaint()
+
+            # Ensure we return to the original working directory even if an error occurs
+            if os.getcwd() != workingDir:
+                os.chdir(workingDir)
+
+
+    def SAFPerceivedSafetyFromNumericFieldRasterizer(self, layer):
+        """
+        This function rasterizes the Perceived Safety factor for the Urban Safety Factor.
+        It converts vector data to raster, applying necessary transformations and standardizations using a binning approach.
+        """
+        try:
+            # Get field name
+            rasField = self.dlg.SAF_rasField_CB.currentText()
+
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+
+            # Update status
+            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.SAF_status.setText("Processing...")
+            self.dlg.SAF_status.repaint()
+
+            # Ensure the layer is valid
+            if not layer.isValid():
+                raise ValueError("Invalid layer")
+
+            # Convert CRS if necessary
+            if layer.crs() != UTM_crs:
+                layer = processing.run("native:reprojectlayer", {
+                    'INPUT': layer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Load country layer and convert CRS if necessary
+            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(layer.getFeatures())
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
+
+            # Clip the input layer by the country layer
+            clipped_layer = processing.run("native:clip", {
+                'INPUT': layer,
+                'OVERLAY': countryLayer,
+                'OUTPUT': 'memory:'
+            })['OUTPUT']
+
+            if not any(clipped_layer.getFeatures()):
+                raise ValueError("Clipping resulted in an empty layer")
+
+            # Get min and max values of the field
+            values = [f[rasField] for f in clipped_layer.getFeatures() if f[rasField] is not None]
+            if not values:
+                raise ValueError("No valid values in the selected field")
+            min_val, max_val = min(values), max(values)
+
+            # Normalize values
+            normalized_values = [(val - min_val) / (max_val - min_val) for val in values]
+
+            # Define bins and scores
+            buffer = 1e-6  # Small buffer around zero to create a bin for exactly zero values
+            SCORES = [0, 0, 1, 2, 3, 4, 5]
+            bin_width = (1 - buffer) / (len(SCORES) - 2)  # Adjust for the extra zero bin
+            SCORE_BINS = [0, buffer] + [i * bin_width for i in range(1, len(SCORES) - 1)] + [1]
+
+            # Create a temporary memory layer to hold the scaled scores
+            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+            temp_layer.updateFields()
+
+            # Calculate the scaled scores and add to temp layer
+            temp_layer.startEditing()
+            for feature in clipped_layer.getFeatures():
+                value = feature[rasField]
+                if value is None or value == 0:
+                    score = 0
+                else:
+                    normalized_value = (value - min_val) / (max_val - min_val)
+                    for i in range(len(SCORE_BINS) - 1):
+                        if SCORE_BINS[i] <= normalized_value < SCORE_BINS[i + 1]:
+                            score = SCORES[i]
+                            break
+                    else:
+                        score = SCORES[-1]
+
+                # Create a new feature for the temp layer
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
+
+            temp_layer.commitChanges()
+
+            # Ensure spatial index for temp_layer
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
+
+            # Get the extent for rasterization
+            extent = temp_layer.extent()
+            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+
+            # Set up output directory
+            Dimension = "Place Characterization"
+            if not os.path.exists(Dimension):
+                os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+            rasOutput = self.dlg.SAF_Output_Field.text()
+
+            # Rasterize
+            _ = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput
+                }
+            )
+
+            # Set output field
+            self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+
+            # Apply style
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            # Update status
+            self.dlg.SAF_status.setText("Processing has been completed!")
+            self.dlg.SAF_status.repaint()
+
+        except Exception as e:
+            self.dlg.SAF_status.setText(f"Error: {str(e)}")
+            self.dlg.SAF_status.repaint()
+
+    def SAFPerceivedSafetyFromTextFieldRasterizer(self, layer):
+        """
+        This function rasterizes the Perceived Safety factor for the Urban Safety Factor.
+        It converts vector data to raster, applying scores based on text attributes.
+        """
+        try:
+            # Get field name
+            rasField = self.dlg.SAF_rasField_CB.currentText()
+            rasField = rasField.replace(" (text)", "")
+
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+
+            # Get scoring from SAF_typeScore_Field
+            scoring_text = self.dlg.SAF_typeScore_Field.text()
+            scoring_dict = {item[0]: item[1] for item in eval(scoring_text)}
+
+            # Update status
+            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.repaint()
+            time.sleep(0.5)
+            self.dlg.SAF_status.setText("Processing...")
+            self.dlg.SAF_status.repaint()
+
+            # Ensure the layer is valid
+            if not layer.isValid():
+                raise ValueError("Invalid layer")
+
+            # Convert CRS if necessary
+            if layer.crs() != UTM_crs:
+                layer = processing.run("native:reprojectlayer", {
+                    'INPUT': layer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Load country layer and convert CRS if necessary
+            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(layer.getFeatures())
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
+
+            # Clip the input layer by the country layer
+            clipped_layer = processing.run("native:clip", {
+                'INPUT': layer,
+                'OVERLAY': countryLayer,
+                'OUTPUT': 'memory:'
+            })['OUTPUT']
+
+            if not any(clipped_layer.getFeatures()):
+                raise ValueError("Clipping resulted in an empty layer")
+
+            # Create a temporary memory layer to hold the scaled scores
+            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+            temp_layer.updateFields()
+
+            # Calculate the scaled scores and add to temp layer
+            temp_layer.startEditing()
+            for feature in clipped_layer.getFeatures():
+                value = feature[rasField]
+                if value is None or value not in scoring_dict:
+                    score = 0
+                else:
+                    score = scoring_dict[value]
+
+                # Create a new feature for the temp layer
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
+
+            temp_layer.commitChanges()
+
+            # Ensure spatial index for temp_layer
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
+
+            # Get the extent for rasterization
+            extent = temp_layer.extent()
+            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+
+            # Set up output directory
+            Dimension = "Place Characterization"
+            if not os.path.exists(Dimension):
+                os.mkdir(Dimension)
+            os.chdir(Dimension)
+
+            rasOutput = self.dlg.SAF_Output_Field.text()
+
+            # Rasterize
+            _ = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput
+                }
+            )
+
+            # Set output field
+            self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+
+            # Apply style
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            # Update status
+            self.dlg.SAF_status.setText("Processing has been completed!")
+            self.dlg.SAF_status.repaint()
+
+        except Exception as e:
+            self.dlg.SAF_status.setText(f"Error: {str(e)}")
+            self.dlg.SAF_status.repaint()
+
+    def EDUShapefileOrUserInputRasterizer(self):
+        """
+        This function rasterizes the Education factor for the Urban Safety Factor.
+        It either uses an incoming shapefile and the field corresponding to the checkbox,
+        or a user-specified value to rasterize.
+        """
+        try:
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+            Dimension = "Education"
+            tempDir = os.path.join(workingDir, "temp")
+
+            # Create necessary directories
+            if not os.path.exists(workingDir):
+                os.mkdir(workingDir)
+
+            if not os.path.exists(Dimension):
+                os.mkdir(Dimension)
+
+            if os.path.exists(tempDir):
+                shutil.rmtree(tempDir)
+            time.sleep(0.5)
+            os.mkdir(tempDir)
+
+            # Load and reproject country layer if necessary
+            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
+
+            # Buffer the country layer
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryLayer,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": 'memory:',
+                },
+            )
+            countryLayerBuf = buffer["OUTPUT"]
+
+            # Check if the QComboBox has a selected value
+            rasField = self.dlg.EDU_rasField_CB.currentText()
+            if rasField:
+                # Use the incoming shapefile and the field corresponding to the checkbox
+                polygonLayerPath = self.dlg.EDU_Input_Field.filePath()
+                polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
+                if not polygonLayer.isValid():
+                    raise ValueError("Invalid polygon layer")
+
+                if polygonLayer.crs() != UTM_crs:
+                    polygonLayer = processing.run("native:reprojectlayer", {
+                        'INPUT': polygonLayer,
+                        'TARGET_CRS': UTM_crs,
+                        'OUTPUT': 'memory:'
+                    })['OUTPUT']
+
+                # Clip the polygon layer by the country buffer layer
+                clipped_layer = processing.run("native:clip", {
+                    'INPUT': polygonLayer,
+                    'OVERLAY': countryLayerBuf,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+                if not any(clipped_layer.getFeatures()):
+                    raise ValueError("Clipping resulted in an empty layer")
+
+                # Get min and max values of the field
+                values = [f[rasField] for f in clipped_layer.getFeatures() if f[rasField] is not None]
+                if not values:
+                    raise ValueError("No valid values in the selected field")
+                min_val, max_val = min(values), max(values)
+
+                # Normalize values
+                normalized_values = [(val - min_val) / (max_val - min_val) for val in values]
+
+                # Define bins and scores
+                buffer = 1e-6  # Small buffer around zero to create a bin for exactly zero values
+                SCORES = [0, 0, 1, 2, 3, 4, 5]
+                bin_width = (1 - buffer) / (len(SCORES) - 2)  # Adjust for the extra zero bin
+                SCORE_BINS = [0, buffer] + [i * bin_width for i in range(1, len(SCORES) - 1)] + [1]
+
+                # Create a temporary memory layer to hold the scaled scores
+                temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+                temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+                temp_layer.updateFields()
+
+                # Calculate the scaled scores and add to temp layer
+                temp_layer.startEditing()
+                for feature in clipped_layer.getFeatures():
+                    value = feature[rasField]
+                    if value is None or value == 0:
+                        score = 0
+                    else:
+                        normalized_value = (value - min_val) / (max_val - min_val)
+                        for i in range(len(SCORE_BINS) - 1):
+                            if SCORE_BINS[i] <= normalized_value < SCORE_BINS[i + 1]:
+                                score = SCORES[i]
+                                break
+                        else:
+                            score = SCORES[-1]
+
+                    # Create a new feature for the temp layer
+                    new_feature = QgsFeature(temp_layer.fields())
+                    new_feature.setGeometry(feature.geometry())
+                    new_feature.setAttribute("scaled_score", score)
+                    temp_layer.addFeature(new_feature)
+
+                temp_layer.commitChanges()
+
+            else:
+                # Use the user-specified value to rasterize the country layer buffer
+                user_value = self.dlg.EDU_User_Value_Input.value()
+                temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+                temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+                temp_layer.updateFields()
+
+                temp_layer.startEditing()
+                for feature in countryLayerBuf.getFeatures():
+                    new_feature = QgsFeature(temp_layer.fields())
+                    new_feature.setGeometry(feature.geometry())
+                    new_feature.setAttribute("scaled_score", int((user_value / 100) * 5))  # Normalize to a 0-5 scale
+                    temp_layer.addFeature(new_feature)
+
+                temp_layer.commitChanges()
+
+            # Ensure spatial index for temp_layer
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
+
+            # Get the extent for rasterization
+            extent = temp_layer.extent()
+            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+
+            rasOutput = self.dlg.EDU_Output_Field.text()
+            rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
+
+            # Rasterize
+            _ = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutputPath
+                }
+            )
+
+            # Set output field
+            self.dlg.EDU_Aggregate_Field.setText(rasOutputPath)
+
+            # Apply style
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            # Update status
+            self.dlg.EDU_status.setText("Processing has been completed!")
+            self.dlg.EDU_status.repaint()
+
+        except Exception as e:
+            self.dlg.EDU_status.setText(f"Error: {str(e)}")
+            self.dlg.EDU_status.repaint()
 
     def ELCnightTimeLights(self):
         """
@@ -3478,7 +4271,7 @@ class GenderIndicatorTool:
         merged = pd.merge(grouped, grouped2, on=["id"], how="outer")
         merged_length_gdf = pd.DataFrame(merged)
         merged_length_gdf[rasField] = (
-            merged_length_gdf["More60_Count"] / merged_length_gdf["Total_Count"] * 100
+                merged_length_gdf["More60_Count"] / merged_length_gdf["Total_Count"] * 100
         )
 
         hex_gdf = gpd.read_file(adminUTMLayer)
@@ -3493,7 +4286,7 @@ class GenderIndicatorTool:
         m_min = 0
 
         merge_hex_gdf[rasField] = (
-            (merge_hex_gdf[rasField] - Rmin) / (Rmax - Rmin) * m_max
+                (merge_hex_gdf[rasField] - Rmin) / (Rmax - Rmin) * m_max
         )
         merge_hex_gdf.to_file(hexPercOutput)
 
@@ -3508,7 +4301,7 @@ class GenderIndicatorTool:
         )
 
         difference = Difference["OUTPUT"]
-        
+
         diff = processing.run(
             "native:polygonstolines",
             {
@@ -3516,7 +4309,7 @@ class GenderIndicatorTool:
                 "OUTPUT": "memory:"
             }
         )
-        
+
         difference = diff["OUTPUT"]
 
         Merge = processing.run(
@@ -3871,7 +4664,7 @@ class GenderIndicatorTool:
                 loggerCD.addHandler(handlerCD)
 
                 loggerCD.info(
-                    f"Factors: {non_empty_count}/2 - {non_empty_count/2 * 100} % - {non_empty_count}"
+                    f"Factors: {non_empty_count}/2 - {non_empty_count / 2 * 100} % - {non_empty_count}"
                 )
                 logging.shutdown()
 
@@ -3987,11 +4780,11 @@ class GenderIndicatorTool:
                 # Raster Calculation
 
                 result = (
-                    (WTP_ras * WTP_weight / 100)
-                    + (PBT_ras * PBT_weight / 100)
-                    + (ETF_ras * ETF_weight / 100)
-                    + (HEA_ras * HEA_weight / 100)
-                    + (FIF_ras * FIF_weight / 100)
+                        (WTP_ras * WTP_weight / 100)
+                        + (PBT_ras * PBT_weight / 100)
+                        + (ETF_ras * ETF_weight / 100)
+                        + (HEA_ras * HEA_weight / 100)
+                        + (FIF_ras * FIF_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
@@ -4018,7 +4811,7 @@ class GenderIndicatorTool:
                 loggerAD.addHandler(handlerAD)
 
                 loggerAD.info(
-                    f"Factors: {non_empty_count}/6 - {non_empty_count/6 * 100} % - {non_empty_count}"
+                    f"Factors: {non_empty_count}/6 - {non_empty_count / 6 * 100} % - {non_empty_count}"
                 )
                 logging.shutdown()
 
@@ -4136,11 +4929,11 @@ class GenderIndicatorTool:
                 with rasterio.open(rasLayers[3]) as src:
                     ENV_ras = src.read(1)
                     ENV_weight = factorWeighting[3]
-                    
+
                 with rasterio.open(rasLayers[4]) as src:
                     EDU_ras = src.read(1)
                     EDU_weight = factorWeighting[4]
-                    
+
                 with rasterio.open(rasLayers[5]) as src:
                     EDU_ras = src.read(1)
                     EDU_weight = factorWeighting[5]
@@ -4148,12 +4941,12 @@ class GenderIndicatorTool:
                 # Raster Calculation
 
                 result = (
-                    (WLK_ras * WLK_weight / 100)
-                    + (SAF_ras * SAF_weight / 100)
-                    + (DIG_ras * DIG_weight / 100)
-                    + (ENV_ras * ENV_weight / 100)
-                    + (EDU_ras * EDU_weight / 100)
-                    + (FCV_ras * FCV_weight / 100)
+                        (WLK_ras * WLK_weight / 100)
+                        + (SAF_ras * SAF_weight / 100)
+                        + (DIG_ras * DIG_weight / 100)
+                        + (ENV_ras * ENV_weight / 100)
+                        + (EDU_ras * EDU_weight / 100)
+                        + (FCV_ras * FCV_weight / 100)
                 )
 
                 meta1.update(dtype=rasterio.float32)
@@ -4281,10 +5074,10 @@ class GenderIndicatorTool:
                 # Raster Calculation
 
                 result = (
-                    (ID_ras * ID_weight / 100)
-                    + (CD_ras * CD_weight / 100)
-                    + (AD_ras * AD_weight / 100)
-                    + (PD_ras * PD_weight / 100)
+                        (ID_ras * ID_weight / 100)
+                        + (CD_ras * CD_weight / 100)
+                        + (AD_ras * AD_weight / 100)
+                        + (PD_ras * PD_weight / 100)
                 )
                 result[result == 0] = src.nodata
 
@@ -4453,12 +5246,12 @@ class GenderIndicatorTool:
         # Raster Calculation
 
         result = (
-            0 * (score_ras <= 0.5)
-            + 1 * (score_ras > 0.5) * (score_ras <= 1.5)
-            + 2 * (score_ras > 1.5) * (score_ras <= 2.5)
-            + 3 * (score_ras > 2.5) * (score_ras <= 3.5)
-            + 4 * (score_ras > 3.5) * (score_ras <= 4.5)
-            + 5 * (score_ras > 4.5)
+                0 * (score_ras <= 0.5)
+                + 1 * (score_ras > 0.5) * (score_ras <= 1.5)
+                + 2 * (score_ras > 1.5) * (score_ras <= 2.5)
+                + 3 * (score_ras > 2.5) * (score_ras <= 3.5)
+                + 4 * (score_ras > 3.5) * (score_ras <= 4.5)
+                + 5 * (score_ras > 4.5)
         )
 
         meta1.update(dtype=rasterio.float32)
@@ -4584,10 +5377,10 @@ class GenderIndicatorTool:
         # # Raster Calculation
         #
         result = (
-            0 * (pop_ras == -1)
-            + 1 * (pop_ras > -1) * (pop_ras <= percentile_25)
-            + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75)
-            + 3 * (pop_ras > percentile_75)
+                0 * (pop_ras == -1)
+                + 1 * (pop_ras > -1) * (pop_ras <= percentile_25)
+                + 2 * (pop_ras > percentile_25) * (pop_ras <= percentile_75)
+                + 3 * (pop_ras > percentile_75)
         )
 
         # result = pop_ras
@@ -4665,21 +5458,21 @@ class GenderIndicatorTool:
         # Raster Calculation
 
         result = (
-            1 * (score_rec_ras == 1) * (pop_rec_ras == 1)
-            + 2 * (score_rec_ras == 1) * (pop_rec_ras == 2)
-            + 3 * (score_rec_ras == 1) * (pop_rec_ras == 3)
-            + 4 * (score_rec_ras == 2) * (pop_rec_ras == 1)
-            + 5 * (score_rec_ras == 2) * (pop_rec_ras == 2)
-            + 6 * (score_rec_ras == 2) * (pop_rec_ras == 3)
-            + 7 * (score_rec_ras == 3) * (pop_rec_ras == 1)
-            + 8 * (score_rec_ras == 3) * (pop_rec_ras == 2)
-            + 9 * (score_rec_ras == 3) * (pop_rec_ras == 3)
-            + 10 * (score_rec_ras == 4) * (pop_rec_ras == 1)
-            + 11 * (score_rec_ras == 4) * (pop_rec_ras == 2)
-            + 12 * (score_rec_ras == 4) * (pop_rec_ras == 3)
-            + 13 * (score_rec_ras == 5) * (pop_rec_ras == 1)
-            + 14 * (score_rec_ras == 5) * (pop_rec_ras == 2)
-            + 15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
+                1 * (score_rec_ras == 1) * (pop_rec_ras == 1)
+                + 2 * (score_rec_ras == 1) * (pop_rec_ras == 2)
+                + 3 * (score_rec_ras == 1) * (pop_rec_ras == 3)
+                + 4 * (score_rec_ras == 2) * (pop_rec_ras == 1)
+                + 5 * (score_rec_ras == 2) * (pop_rec_ras == 2)
+                + 6 * (score_rec_ras == 2) * (pop_rec_ras == 3)
+                + 7 * (score_rec_ras == 3) * (pop_rec_ras == 1)
+                + 8 * (score_rec_ras == 3) * (pop_rec_ras == 2)
+                + 9 * (score_rec_ras == 3) * (pop_rec_ras == 3)
+                + 10 * (score_rec_ras == 4) * (pop_rec_ras == 1)
+                + 11 * (score_rec_ras == 4) * (pop_rec_ras == 2)
+                + 12 * (score_rec_ras == 4) * (pop_rec_ras == 3)
+                + 13 * (score_rec_ras == 5) * (pop_rec_ras == 1)
+                + 14 * (score_rec_ras == 5) * (pop_rec_ras == 2)
+                + 15 * (score_rec_ras == 5) * (pop_rec_ras == 3)
         )
 
         meta1.update(dtype=rasterio.float32)
@@ -4757,9 +5550,9 @@ class GenderIndicatorTool:
             os.mkdir(f"{Insights_folder}/{Insights_aggregation}")
 
         shpOutput = (
-            f"{workingDir}{Insights_folder}/{Insights_aggregation}/"
-            + self.dlg.AGG_Output_Field.text()
-            + ".shp"
+                f"{workingDir}{Insights_folder}/{Insights_aggregation}/"
+                + self.dlg.AGG_Output_Field.text()
+                + ".shp"
         )
 
         processing.run(
@@ -4897,9 +5690,9 @@ class GenderIndicatorTool:
         meta1.update(dtype=rasterio.float32)
 
         combined_RE = (
-            f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
-            + self.dlg.RE_Output_Field.text()
-            + "Enablement_&_Population_Combined.tif"
+                f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
+                + self.dlg.RE_Output_Field.text()
+                + "Enablement_&_Population_Combined.tif"
         )
         with rasterio.open(combined_RE, "w", **meta1) as dst:
             dst.write(result, 1)
@@ -4952,9 +5745,9 @@ class GenderIndicatorTool:
 
         # Save to a new shapefile
         admin_RE = (
-            f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
-            + self.dlg.RE_Output_Field.text()
-            + "admin_units_intersection.shp"
+                f"{workingDir}{Insights_folder}/{Insights_re_raster}/"
+                + self.dlg.RE_Output_Field.text()
+                + "admin_units_intersection.shp"
         )
         intersecting_polygons.to_file(admin_RE)
 
@@ -5066,9 +5859,9 @@ class GenderIndicatorTool:
             os.mkdir(f"{Insights_folder}/{Insights_re_point}")
 
         shpOutput = (
-            f"{workingDir}{Insights_folder}/{Insights_re_point}/"
-            + self.dlg.Buffer_Output_Field.text()
-            + f"{str(bufferDistance)}m_buffer.shp"
+                f"{workingDir}{Insights_folder}/{Insights_re_point}/"
+                + self.dlg.Buffer_Output_Field.text()
+                + f"{str(bufferDistance)}m_buffer.shp"
         )
 
         processing.run(
@@ -5113,9 +5906,9 @@ class GenderIndicatorTool:
 
         # Save to a new shapefile
         admin_RE = (
-            f"{workingDir}{Insights_folder}/{Insights_re_point}/"
-            + self.dlg.Buffer_Output_Field.text()
-            + f"admin_unit_{str(bufferDistance)}m_buffer_intersection.shp"
+                f"{workingDir}{Insights_folder}/{Insights_re_point}/"
+                + self.dlg.Buffer_Output_Field.text()
+                + f"admin_unit_{str(bufferDistance)}m_buffer_intersection.shp"
         )
         intersecting_polygons.to_file(admin_RE)
 
@@ -5139,7 +5932,7 @@ class GenderIndicatorTool:
 
         self.dlg.REpoint_status.setText("RE point proximity complete!")
         self.dlg.REpoint_status.repaint()
-        
+
     def processCallback(self):
         print("Call back")
         
