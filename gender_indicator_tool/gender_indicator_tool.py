@@ -1297,6 +1297,24 @@ class GenderIndicatorTool:
             )
 
             csvFileLayerUTM = clipCsvFileUTM["OUTPUT"]
+            
+            gridExtent = countryUTMLayerBuf.extent()
+            grid_params = {
+                'TYPE': 2,  # Rectangle (polygon)
+                'EXTENT': gridExtent,
+                'HSPACING': 100,  # Horizontal spacing
+                'VSPACING': 100,  # Vertical spacing
+                'CRS': UTM_crs,
+                'OUTPUT': "memory:"
+            }
+
+            grid_result = processing.run('native:creategrid', grid_params)
+            grid_layer = grid_result['OUTPUT']
+
+            field_name = 'reclass_va'
+            if not grid_layer.fields().indexFromName(field_name) >= 0:
+                grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
+                grid_layer.updateFields()
 
             radius = self.dlg.FCV_Input_Radius.value()
 
@@ -1344,27 +1362,59 @@ class GenderIndicatorTool:
                 buffer_layer.updateFeature(feature)
 
             buffer_layer.commitChanges()
+            
+            grid_layer_provider = grid_layer.dataProvider()
+            grid_layer_provider.addAttributes([QgsField("score", QVariant.Int)])
+            grid_layer.updateFields()
 
+            
+            # Create a spatial index for the buffer layer
+            spatial_index = QgsSpatialIndex(buffer_layer.getFeatures())
+
+            # Start editing the grid layer
+            grid_layer.startEditing()
+
+            for grid_feature in grid_layer.getFeatures():
+                grid_geom = grid_feature.geometry()
+                intersecting_ids = spatial_index.intersects(grid_geom.boundingBox())
+
+                min_score = event_type_scores['no_event']
+
+                # Check intersections and find the minimum score (most serious event)
+                for buffer_id in intersecting_ids:
+                    buffer_feature = buffer_layer.getFeature(buffer_id)
+                    buffer_geom = buffer_feature.geometry()
+
+                    if grid_geom.intersects(buffer_geom):
+                        buffer_score = buffer_feature['score']
+                        if buffer_score < min_score:
+                            min_score = buffer_score
+                
+                # Set the minimum score (most serious event) to the grid cell
+                grid_feature.setAttribute('score', min_score)
+                grid_layer.updateFeature(grid_feature)
+            grid_layer.commitChanges()
+            
             outputPath1 = f"{workingDir}{temp}/clipBuff.shp"
 
             clipBuffer = processing.run(
                 "native:clip",
                 {
-                    "INPUT": buffer_layer,
+                    "INPUT": grid_layer,
                     "OVERLAY": countryUTMLayerBuf,
-                    "OUTPUT": outputPath1,
+                    "OUTPUT": "memory:",
                 }
             )
 
-            buffer_layer = clipBuffer["OUTPUT"]
+            grid_layer = clipBuffer["OUTPUT"]
 
             outputPath2 = f"{workingDir}{temp}/difference.shp"
             Difference = processing.run(
                 "native:difference",
                 {
                     "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": buffer_layer,
-                    "OUTPUT": outputPath2,
+                    "OVERLAY": grid_layer,
+                    "OUTPUT": "memory:",
                     "GRID_SIZE": None,
                 },
             )
@@ -1373,12 +1423,12 @@ class GenderIndicatorTool:
             outputPath3 = f"{workingDir}{temp}/merge.shp"
             Merge = processing.run(
                 "native:mergevectorlayers",
-                {"LAYERS": [difference, buffer_layer], "CRS": None, "OUTPUT": "memory:"},
+                {"LAYERS": [difference, grid_layer], "CRS": None, "OUTPUT": "memory:"},
             )
 
-            buffer_layer = Merge["OUTPUT"]
+            grid_layer = Merge["OUTPUT"]
 
-            mergeOutput = buffer_layer
+            mergeOutput = grid_layer
 
             # Get the width and height of the extent
             extent = mergeOutput.extent()
