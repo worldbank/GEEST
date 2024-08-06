@@ -1402,7 +1402,7 @@ class GenderIndicatorTool:
                 {
                     "INPUT": grid_layer,
                     "OVERLAY": countryUTMLayerBuf,
-                    "OUTPUT": outputPath1,
+                    "OUTPUT": "memory:",
                 }
             )
 
@@ -1414,7 +1414,7 @@ class GenderIndicatorTool:
                 {
                     "INPUT": countryUTMLayerBuf,
                     "OVERLAY": grid_layer,
-                    "OUTPUT": outputPath2,
+                    "OUTPUT": "memory:",
                     "GRID_SIZE": None,
                 },
             )
