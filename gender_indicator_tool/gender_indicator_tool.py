@@ -705,7 +705,7 @@ class GenderIndicatorTool:
 
         elif factor_no == 6:
             csvFile = self.dlg.FCV_Input_Field.filePath()
-            csvFile = f"file://{csvFile}?delimiter=,&yField=latitude&xField=longitude"
+            csvFile = f"file:///{csvFile.replace(os.sep, '/')}?type=csv&maxFields=10000&detectTypes=yes&xField=longitude&yField=latitude&crs=EPSG:4326&spatialIndex=no&subsetIndex=no&watchFile=no"
             rasField = "rasField"
             self.dlg.FCV_status.setText("Variables Set")
             self.dlg.FCV_status.repaint()
