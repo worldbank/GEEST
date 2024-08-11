@@ -1635,7 +1635,7 @@ class GenderIndicatorTool:
                 },
             )
 
-            #self.dlg.WLK_Output_Field_2.setText(f"{workingDir}{Dimension}/{rasOutput}")
+            self.dlg.WAS_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
             styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
             styleFileDestination = f"{workingDir}{Dimension}/"
@@ -5484,7 +5484,7 @@ class GenderIndicatorTool:
 
                 integer_list = [int(item) for item in factor_num]
                 sum_list = sum(integer_list)
-                Confidence = round(sum_list / 21 * 100, 2)
+                Confidence = round(sum_list / 15 * 100, 2)
 
                 layer = QgsRasterLayer(aggregation, f"{aggregation}")
 
@@ -5494,7 +5494,7 @@ class GenderIndicatorTool:
                 QgsProject.instance().addMapLayer(layer)
 
                 self.dlg.FinalAggregation_Check.setText(
-                    f"Dimensional aggregation complete! - Confidence: {sum_list}/21 factors used. ({Confidence} %)"
+                    f"Dimensional aggregation complete! - Confidence: {sum_list}/15 factors used. ({Confidence} %)"
                 )
             else:
                 self.dlg.dimensionAggregation_Check.setText(
