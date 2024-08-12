@@ -1420,7 +1420,7 @@ class GenderIndicatorTool:
                 "native:clip",
                 {
                     "INPUT": grid_layer,
-                    "OVERLAY": countryUTMLayerBuf,
+                    "OVERLAY": countryUTMLayer,
                     "OUTPUT": "memory:",
                 }
             )
@@ -1593,7 +1593,7 @@ class GenderIndicatorTool:
                 "native:clip",
                 {
                     "INPUT": merge,
-                    "OVERLAY": countryUTMLayerBuf,
+                    "OVERLAY": countryUTMLayer,
                     "OUTPUT": "memory:",
                 }
             )
