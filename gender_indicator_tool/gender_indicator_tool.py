@@ -1692,7 +1692,7 @@ class GenderIndicatorTool:
             self.dlg.PBT_status.repaint()
             FaciltyPointlayer = self.dlg.PBT_Input_Field.filePath()
             ranges = self.dlg.PBT_Ranges_Field.text()
-            rasOutput = f"{self.dlg.PBT_Output_Field.text()[:-4]}{self.dlg.PBT_mode_CB.currentText()}.tif"
+            rasOutput = f"{self.dlg.PBT_Output_Field.text()}"
             mergeOutput = (
                 f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
             )
@@ -1726,7 +1726,7 @@ class GenderIndicatorTool:
             self.dlg.ETF_status.repaint()
             FaciltyPointlayer = self.dlg.ETF_Input_Field.filePath()
             ranges = self.dlg.ETF_Ranges_Field.text()
-            rasOutput = f"{self.dlg.ETF_Output_Field.text()[:-4]}{self.dlg.ETF_mode_CB.currentText()}.tif"
+            rasOutput = f"{self.dlg.ETF_Output_Field.text()}"
             mergeOutput = (
                 f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
             )
@@ -1760,7 +1760,7 @@ class GenderIndicatorTool:
             self.dlg.HEA_status.repaint()
             FaciltyPointlayer = self.dlg.HEA_Input_Field.filePath()
             ranges = self.dlg.HEA_Ranges_Field.text()
-            rasOutput = f"{self.dlg.HEA_Output_Field.text()[:-4]}{self.dlg.HEA_mode_CB.currentText()}.tif"
+            rasOutput = f"{self.dlg.HEA_Output_Field.text()}"
             mergeOutput = (
                 f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
             )
@@ -1794,7 +1794,7 @@ class GenderIndicatorTool:
             self.dlg.FIF_status.repaint()
             FaciltyPointlayer = self.dlg.FIF_Input_Field.filePath()
             ranges = self.dlg.FIF_Ranges_Field.text()
-            rasOutput = f"{self.dlg.FIF_Output_Field.text()[:-4]}{self.dlg.FIF_mode_CB.currentText()}.tif"
+            rasOutput = f"{self.dlg.FIF_Output_Field.text()}"
             mergeOutput = (
                 f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
             )
@@ -1841,7 +1841,7 @@ class GenderIndicatorTool:
                     FaciltyPointlayerList.append(file_path)
 
             ranges = self.dlg.WTP_Ranges_Field.text()
-            rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}.tif"
+            rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()}"
             mergeOutput = (
                 f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
             )
@@ -1873,6 +1873,7 @@ class GenderIndicatorTool:
             facility_data = 0
             for FaciltyPointlayer in FaciltyPointlayerList:
                 os.chdir(workingDir)
+                rasOutput = ""
                 base_name = os.path.basename(FaciltyPointlayer)
                 shapefile_name, _ = os.path.splitext(base_name)
                 gdf = gpd.read_file(FaciltyPointlayer)
@@ -2092,6 +2093,8 @@ class GenderIndicatorTool:
                     extent = merge_output.extent()
                     raster_width = int(extent.width() / pixelSize)
                     raster_height = int(extent.height() / pixelSize)
+                    
+                    rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{shapefile_name}.tif"
 
                     if os.path.exists(Dimension):
                         os.chdir(Dimension)
@@ -2112,8 +2115,6 @@ class GenderIndicatorTool:
                         styleFile = f"{rasOutput.split('.')[0]}.qml"
                     else:
                         pass
-
-                    rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{self.dlg.WTP_mode_CB.currentText()}_{shapefile_name}.tif"
 
                     rasterize = processing.run(
                         "gdal:rasterize",
