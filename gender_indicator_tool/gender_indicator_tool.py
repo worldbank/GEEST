@@ -3152,6 +3152,13 @@ class GenderIndicatorTool:
                 self.dlg.SAF_status.repaint()
 
     def populateCBFieldsFromPolygonLayer_PC_SAF(self, file_path):
+        if file_path == '':
+            # enable the user value field if no file is selected
+            self.dlg.SAF_User_Value_Input.setEnabled(True)
+        else:
+            # disable the user value field
+            self.dlg.SAF_User_Value_Input.setEnabled(False)
+
         # Clear and disable the SAF_typeScore_Field by default
         self.dlg.SAF_typeScore_Field.clear()
         self.dlg.SAF_typeScore_Field.setEnabled(False)
@@ -3161,8 +3168,6 @@ class GenderIndicatorTool:
             # if it is, populate the combo box fields
             self.dlg.SAF_rasField_CB.setEnabled(True)
             self.dlg.SAF_rasField_CB.clear()
-            # disable the user value field
-            self.dlg.SAF_User_Value_Input.setEnabled(False)
             for field in layer.fields():
                 field_name = field.name()
                 # Check if the field is of type text
@@ -3177,8 +3182,6 @@ class GenderIndicatorTool:
             # Clear and disable the SAF_typeScore_Field by default
             self.dlg.SAF_typeScore_Field.clear()
             self.dlg.SAF_typeScore_Field.setEnabled(False)
-            # enable the user value field
-            self.dlg.SAF_User_Value_Input.setEnabled(True)
 
     def populateCBFieldsFromPolygonLayer_PC_EDU(self, file_path):
         layer = QgsVectorLayer(file_path, "input", "ogr")
@@ -3891,6 +3894,7 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
 
+
     def SAFPerceivedSafetyFromNumericFieldRasterizer(self, layer):
                 """
                 This function rasterizes the Perceived Safety factor for the Urban Safety Factor.
@@ -4176,7 +4180,7 @@ class GenderIndicatorTool:
                         else:
                             score = SCORES[-1]
 
-                    # Create a new feature for the temp layer
+                    # Create a new feature for the temp_layer
                     new_feature = QgsFeature(temp_layer.fields())
                     new_feature.setGeometry(feature.geometry())
                     new_feature.setAttribute("scaled_score", score)
@@ -4208,7 +4212,8 @@ class GenderIndicatorTool:
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
 
             rasOutput = self.dlg.EDU_Output_Field.text()
-            rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
+            temp_rasOutputPath = os.path.join(tempDir, "temp_raster.tif")
+            final_rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
 
             # Rasterize
             _ = processing.run(
@@ -4228,12 +4233,30 @@ class GenderIndicatorTool:
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
-                    "OUTPUT": rasOutputPath
+                    "OUTPUT": temp_rasOutputPath  # Output to a temporary file for clipping
+                }
+            )
+
+            # Clip the raster to the country layer buffer
+            _ = processing.run(
+                "gdal:cliprasterbymasklayer",
+                {
+                    "INPUT": temp_rasOutputPath,
+                    "MASK": countryLayerBuf,
+                    "SOURCE_CRS": UTM_crs,
+                    "TARGET_CRS": UTM_crs,
+                    "NODATA": None,
+                    "ALPHA_BAND": False,
+                    "CROP_TO_CUTLINE": True,
+                    "KEEP_RESOLUTION": True,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "OUTPUT": final_rasOutputPath
                 }
             )
 
             # Set output field
-            self.dlg.EDU_Aggregate_Field.setText(rasOutputPath)
+            self.dlg.EDU_Aggregate_Field.setText(final_rasOutputPath)
 
             # Update status
             self.dlg.EDU_status.setText("Processing has been completed!")
@@ -4243,6 +4266,7 @@ class GenderIndicatorTool:
             print(str(e))
             self.dlg.EDU_status.setText(f"Error: {str(e)}")
             self.dlg.EDU_status.repaint()
+
 
     def ELCnightTimeLights(self):
         """
