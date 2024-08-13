@@ -4128,11 +4128,12 @@ class GenderIndicatorTool:
 
                 # Scale values to 0-5 range
                 def scale_value(val):
-                    return 0 if max_val == min_val else (val - min_val) / (max_val - min_val) * 5
+                    return 0.0 if max_val == min_val else (val - min_val) / (max_val - min_val) * 5.0
 
                 # Create a temporary memory layer to hold the scaled scores
                 temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
-                temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+                temp_layer.dataProvider().addAttributes(
+                    [QgsField("scaled_score", QVariant.Double)])  # Use Double for real numbers
                 temp_layer.updateFields()
 
                 # Calculate the scaled scores and add to temp layer
@@ -4142,7 +4143,7 @@ class GenderIndicatorTool:
                     score = scale_value(value)
                     new_feature = QgsFeature(temp_layer.fields())
                     new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score", int(score))
+                    new_feature.setAttribute("scaled_score", score)
                     temp_layer.addFeature(new_feature)
 
                 temp_layer.commitChanges()
@@ -4156,14 +4157,16 @@ class GenderIndicatorTool:
 
                 user_value = self.dlg.EDU_User_Value_Input.value()
                 temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
-                temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+                temp_layer.dataProvider().addAttributes(
+                    [QgsField("scaled_score", QVariant.Double)])  # Use Double for real numbers
                 temp_layer.updateFields()
 
                 temp_layer.startEditing()
                 for feature in countryLayer.getFeatures():
                     new_feature = QgsFeature(temp_layer.fields())
                     new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score", int(user_value / 20))  # Normalize to a 0-5 scale
+                    new_feature.setAttribute("scaled_score",
+                                             user_value / 20.0)  # Normalize to a 0-5 scale as a real number
                     temp_layer.addFeature(new_feature)
 
                 temp_layer.commitChanges()
@@ -4197,7 +4200,7 @@ class GenderIndicatorTool:
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                     "NODATA": None,
                     "OPTIONS": "",
-                    "DATA_TYPE": 5,  # GDT_Int32
+                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
@@ -4222,7 +4225,7 @@ class GenderIndicatorTool:
                     "CROP_TO_CUTLINE": True,
                     "KEEP_RESOLUTION": True,
                     "OPTIONS": "",
-                    "DATA_TYPE": 5,  # GDT_Int32
+                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
                     "OUTPUT": final_rasOutputPath
                 }
             )
