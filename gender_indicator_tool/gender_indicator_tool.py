@@ -4102,23 +4102,6 @@ class GenderIndicatorTool:
             # Ensure spatial index exists
             _ = QgsSpatialIndex(countryLayer.getFeatures())
 
-            # Buffer the country layer
-            buffer = processing.run(
-                "native:buffer",
-                {
-                    "INPUT": countryLayer,
-                    "DISTANCE": 2000,
-                    "SEGMENTS": 5,
-                    "END_CAP_STYLE": 0,
-                    "JOIN_STYLE": 0,
-                    "MITER_LIMIT": 2,
-                    "DISSOLVE": True,
-                    "SEPARATE_DISJOINT": False,
-                    "OUTPUT": 'memory:',
-                },
-            )
-            countryLayerBuf = buffer["OUTPUT"]
-
             # Check if the QComboBox has a selected value
             rasField = self.dlg.EDU_rasField_CB.currentText()
             if rasField:
@@ -4135,10 +4118,10 @@ class GenderIndicatorTool:
                         'OUTPUT': 'memory:'
                     })['OUTPUT']
 
-                # Clip the polygon layer by the country buffer layer
+                # Clip the polygon layer by the country layer
                 clipped_layer = processing.run("native:clip", {
                     'INPUT': polygonLayer,
-                    'OVERLAY': countryLayerBuf,
+                    'OVERLAY': countryLayer,
                     'OUTPUT': 'memory:'
                 })['OUTPUT']
 
@@ -4189,14 +4172,14 @@ class GenderIndicatorTool:
                 temp_layer.commitChanges()
 
             else:
-                # Use the user-specified value to rasterize the country layer buffer
+                # Use the user-specified value to rasterize the country layer
                 user_value = self.dlg.EDU_User_Value_Input.value()
                 temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
                 temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
                 temp_layer.updateFields()
 
                 temp_layer.startEditing()
-                for feature in countryLayerBuf.getFeatures():
+                for feature in countryLayer.getFeatures():
                     new_feature = QgsFeature(temp_layer.fields())
                     new_feature.setGeometry(feature.geometry())
                     new_feature.setAttribute("scaled_score", int((user_value / 100) * 5))  # Normalize to a 0-5 scale
@@ -4215,7 +4198,7 @@ class GenderIndicatorTool:
             temp_rasOutputPath = os.path.join(tempDir, "temp_raster.tif")
             final_rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
 
-            # Rasterize
+            # Rasterize using the pixelSize for resolution
             _ = processing.run(
                 "gdal:rasterize",
                 {
@@ -4237,12 +4220,12 @@ class GenderIndicatorTool:
                 }
             )
 
-            # Clip the raster to the country layer buffer
+            # Clip the raster to the country layer
             _ = processing.run(
                 "gdal:cliprasterbymasklayer",
                 {
                     "INPUT": temp_rasOutputPath,
-                    "MASK": countryLayerBuf,
+                    "MASK": countryLayer,
                     "SOURCE_CRS": UTM_crs,
                     "TARGET_CRS": UTM_crs,
                     "NODATA": None,
