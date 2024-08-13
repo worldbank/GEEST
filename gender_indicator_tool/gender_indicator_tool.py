@@ -3115,14 +3115,14 @@ class GenderIndicatorTool:
 
         # Announce the start of the process
         self.dlg.SAF_status.setText("Starting...")
+        self.dlg.SAF_status.repaint()
 
         input_file = self.dlg.SAF_Input_Field.filePath()
 
         # Check if the input file is empty or not provided
         if not input_file:
-            # Get the user-provided value from the spin box
+            # Get the user-provided value from the spinner
             user_value = self.dlg.SAF_User_Value_Input.value()
-            # Call the appropriate function with the user-provided value
             self.SAFPerceivedSafetyFromUserValueRasterizer(user_value)
             return
 
@@ -3636,7 +3636,6 @@ class GenderIndicatorTool:
             if os.getcwd() != workingDir:
                 os.chdir(workingDir)
 
-
     def SAFPerceivedSafetyFromUserValueRasterizer(self, user_value):
         """
         This function rasterizes the Perceived Safety factor for the Urban Safety Factor based on a user-provided value.
@@ -3687,10 +3686,11 @@ class GenderIndicatorTool:
                 os.mkdir(Dimension)
             os.chdir(Dimension)
 
-            rasOutput = self.dlg.SAF_Output_Field.text()
+            # Create a temporary raster with a uniform value
+            temp_raster = os.path.join(workingDir, Dimension, "temp_raster.tif")
 
-            # Create the initial raster using the user-provided render value
-            initial_raster = processing.run(
+            # Rasterize using the user-provided render value
+            _ = processing.run(
                 "gdal:rasterize",
                 {
                     "INPUT": countryLayer,
@@ -3707,15 +3707,16 @@ class GenderIndicatorTool:
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
-                    "OUTPUT": 'memory:'  # Output to memory for further processing
+                    "OUTPUT": temp_raster  # Output to a temporary file for clipping
                 }
-            )['OUTPUT']
+            )
 
-            # Clip the raster with the country layer
-            clipped_raster = processing.run(
+            # Clip the raster using the country layer
+            rasOutput = self.dlg.SAF_Output_Field.text()
+            _ = processing.run(
                 "gdal:cliprasterbymasklayer",
                 {
-                    "INPUT": initial_raster,
+                    "INPUT": temp_raster,
                     "MASK": countryLayer,
                     "SOURCE_CRS": UTM_crs,
                     "TARGET_CRS": UTM_crs,
@@ -3727,7 +3728,7 @@ class GenderIndicatorTool:
                     "DATA_TYPE": 5,  # GDT_Int32
                     "OUTPUT": rasOutput
                 }
-            )['OUTPUT']
+            )
 
             # Set output field
             self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
@@ -3888,6 +3889,164 @@ class GenderIndicatorTool:
         except Exception as e:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
+
+    def SAFPerceivedSafetyFromNumericFieldRasterizer(self, layer):
+                """
+                This function rasterizes the Perceived Safety factor for the Urban Safety Factor.
+                It converts vector data to raster, applying necessary transformations and standardizations using a binning approach.
+                """
+                try:
+                    # Get field name
+                    rasField = self.dlg.SAF_rasField_CB.currentText()
+
+                    # Set up variables
+                    current_script_path = os.path.dirname(os.path.abspath(__file__))
+                    workingDir = self.dlg.workingDir_Field.text()
+                    os.chdir(workingDir)
+                    countryLayerPath = self.dlg.countryLayer_Field.filePath()
+                    pixelSize = self.dlg.pixelSize_SB.value()
+                    UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+
+                    # Update status
+                    self.dlg.SAF_status.setText("Variables Set")
+                    self.dlg.SAF_status.repaint()
+                    time.sleep(0.5)
+                    self.dlg.SAF_status.setText("Processing...")
+                    self.dlg.SAF_status.repaint()
+
+                    # Ensure the layer is valid
+                    if not layer.isValid():
+                        raise ValueError("Invalid layer")
+
+                    # Convert CRS if necessary
+                    if layer.crs() != UTM_crs:
+                        layer = processing.run("native:reprojectlayer", {
+                            'INPUT': layer,
+                            'TARGET_CRS': UTM_crs,
+                            'OUTPUT': 'memory:'
+                        })['OUTPUT']
+
+                    # Load country layer and convert CRS if necessary
+                    countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+                    if not countryLayer.isValid():
+                        raise ValueError("Invalid country layer")
+                    if countryLayer.crs() != UTM_crs:
+                        countryLayer = processing.run("native:reprojectlayer", {
+                            'INPUT': countryLayer,
+                            'TARGET_CRS': UTM_crs,
+                            'OUTPUT': 'memory:'
+                        })['OUTPUT']
+
+                    # Ensure spatial index exists
+                    _ = QgsSpatialIndex(layer.getFeatures())
+                    _ = QgsSpatialIndex(countryLayer.getFeatures())
+
+                    # Clip the input layer by the country layer
+                    clipped_layer = processing.run("native:clip", {
+                        'INPUT': layer,
+                        'OVERLAY': countryLayer,
+                        'OUTPUT': 'memory:'
+                    })['OUTPUT']
+
+                    if not any(clipped_layer.getFeatures()):
+                        raise ValueError("Clipping resulted in an empty layer")
+
+                    # Get min and max values of the field
+                    values = [f[rasField] for f in clipped_layer.getFeatures() if f[rasField] is not None]
+                    if not values:
+                        raise ValueError("No valid values in the selected field")
+                    min_val, max_val = min(values), max(values)
+
+                    # Normalize values
+                    normalized_values = [(val - min_val) / (max_val - min_val) for val in values]
+
+                    # Define bins and scores
+                    buffer = 1e-6  # Small buffer around zero to create a bin for exactly zero values
+                    SCORES = [0, 0, 1, 2, 3, 4, 5]
+                    bin_width = (1 - buffer) / (len(SCORES) - 2)  # Adjust for the extra zero bin
+                    SCORE_BINS = [0, buffer] + [i * bin_width for i in range(1, len(SCORES) - 1)] + [1]
+
+                    # Create a temporary memory layer to hold the scaled scores
+                    temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+                    temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+                    temp_layer.updateFields()
+
+                    # Calculate the scaled scores and add to temp layer
+                    temp_layer.startEditing()
+                    for feature in clipped_layer.getFeatures():
+                        value = feature[rasField]
+                        if value is None or value == 0:
+                            score = 0
+                        else:
+                            normalized_value = (value - min_val) / (max_val - min_val)
+                            for i in range(len(SCORE_BINS) - 1):
+                                if SCORE_BINS[i] <= normalized_value < SCORE_BINS[i + 1]:
+                                    score = SCORES[i]
+                                    break
+                            else:
+                                score = SCORES[-1]
+
+                        # Create a new feature for the temp layer
+                        new_feature = QgsFeature(temp_layer.fields())
+                        new_feature.setGeometry(feature.geometry())
+                        new_feature.setAttribute("scaled_score", score)
+                        temp_layer.addFeature(new_feature)
+
+                    temp_layer.commitChanges()
+
+                    # Ensure spatial index for temp_layer
+                    _ = QgsSpatialIndex(temp_layer.getFeatures())
+
+                    # Get the extent for rasterization
+                    extent = temp_layer.extent()
+                    xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+
+                    # Set up output directory
+                    Dimension = "Place Characterization"
+                    if not os.path.exists(Dimension):
+                        os.mkdir(Dimension)
+                    os.chdir(Dimension)
+
+                    rasOutput = self.dlg.SAF_Output_Field.text()
+
+                    # Rasterize
+                    _ = processing.run(
+                        "gdal:rasterize",
+                        {
+                            "INPUT": temp_layer,
+                            "FIELD": "scaled_score",
+                            "BURN": 0,
+                            "USE_Z": False,
+                            "UNITS": 1,
+                            "WIDTH": pixelSize,
+                            "HEIGHT": pixelSize,
+                            "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                            "NODATA": None,
+                            "OPTIONS": "",
+                            "DATA_TYPE": 5,  # GDT_Int32
+                            "INIT": None,
+                            "INVERT": False,
+                            "EXTRA": "",
+                            "OUTPUT": rasOutput
+                        }
+                    )
+
+                    # Set output field
+                    self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+
+                    # Apply style
+                    styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+                    styleFileDestination = os.path.join(workingDir, Dimension)
+                    styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+                    shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                    # Update status
+                    self.dlg.SAF_status.setText("Processing has been completed!")
+                    self.dlg.SAF_status.repaint()
+
+                except Exception as e:
+                    self.dlg.SAF_status.setText(f"Error: {str(e)}")
+                    self.dlg.SAF_status.repaint()
 
     def EDUShapefileOrUserInputRasterizer(self):
         """
