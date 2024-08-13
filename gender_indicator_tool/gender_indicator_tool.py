@@ -4059,6 +4059,11 @@ class GenderIndicatorTool:
         It either uses an incoming shapefile and the field corresponding to the combobox,
         or a user-specified value to rasterize.
         """
+
+        # Update status
+        self.dlg.EDU_status.setText("Starting...")
+        self.dlg.EDU_status.repaint()
+
         try:
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -4105,6 +4110,9 @@ class GenderIndicatorTool:
             # Check if the QComboBox has a selected value
             rasField = self.dlg.EDU_rasField_CB.currentText()
             if rasField:
+                # Update status
+                self.dlg.EDU_status.setText("Processing polygon layer...")
+                self.dlg.EDU_status.repaint()
                 # Use the incoming shapefile and the field corresponding to the checkbox
                 polygonLayerPath = self.dlg.EDU_Input_Field.filePath()
                 polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
@@ -4173,6 +4181,11 @@ class GenderIndicatorTool:
 
             else:
                 # Use the user-specified value to rasterize the country layer
+
+                # Update status
+                self.dlg.EDU_status.setText("Processing user value...")
+                self.dlg.EDU_status.repaint()
+
                 user_value = self.dlg.EDU_User_Value_Input.value()
                 temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
                 temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
@@ -4198,6 +4211,11 @@ class GenderIndicatorTool:
             temp_rasOutputPath = os.path.join(tempDir, "temp_raster.tif")
             final_rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
 
+
+            # Update status
+            self.dlg.EDU_status.setText("Rasterizing...")
+            self.dlg.EDU_status.repaint()
+
             # Rasterize using the pixelSize for resolution
             _ = processing.run(
                 "gdal:rasterize",
@@ -4219,6 +4237,10 @@ class GenderIndicatorTool:
                     "OUTPUT": temp_rasOutputPath  # Output to a temporary file for clipping
                 }
             )
+
+            # Update status
+            self.dlg.EDU_status.setText("Clipping raster...")
+            self.dlg.EDU_status.repaint()
 
             # Clip the raster to the country layer
             _ = processing.run(
