@@ -3646,6 +3646,7 @@ class GenderIndicatorTool:
         try:
             # Convert the user-provided value to the 0-5 scale
             render_value = user_value / 20.0
+            print(f"User value set to {render_value}")
 
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3656,7 +3657,7 @@ class GenderIndicatorTool:
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
 
             # Update status
-            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.setText(f"Value set to {render_value}")
             self.dlg.SAF_status.repaint()
             time.sleep(0.5)
             self.dlg.SAF_status.setText("Processing...")
