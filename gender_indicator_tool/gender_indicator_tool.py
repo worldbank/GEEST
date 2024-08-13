@@ -3636,15 +3636,17 @@ class GenderIndicatorTool:
             if os.getcwd() != workingDir:
                 os.chdir(workingDir)
 
+
     def SAFPerceivedSafetyFromUserValueRasterizer(self, user_value):
         """
         This function rasterizes the Perceived Safety factor for the Urban Safety Factor based on a user-provided value.
         It creates a raster with a uniform value across all cells, based on the input from the user.
-        The user-provided value (0-100) is scaled to a range of 0-5 before rasterization.
+        The value provided by the user is in the range 0-100, but the value to render the output at is 0-5,
+        so it's user value divided by 20.0.
         """
         try:
-            # Scale the user value to the 0-5 range
-            scaled_value = user_value / 20.0
+            # Convert the user-provided value to the 0-5 scale
+            render_value = user_value / 20.0
 
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3655,7 +3657,7 @@ class GenderIndicatorTool:
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
 
             # Update status
-            self.dlg.SAF_status.setText(f"Value set to {scaled_value}")
+            self.dlg.SAF_status.setText("Variables Set")
             self.dlg.SAF_status.repaint()
             time.sleep(0.5)
             self.dlg.SAF_status.setText("Processing...")
@@ -3687,13 +3689,13 @@ class GenderIndicatorTool:
 
             rasOutput = self.dlg.SAF_Output_Field.text()
 
-            # Rasterize using the scaled value
-            _ = processing.run(
+            # Create the initial raster using the user-provided render value
+            initial_raster = processing.run(
                 "gdal:rasterize",
                 {
                     "INPUT": countryLayer,
                     "FIELD": "",  # No field since we use a uniform value
-                    "BURN": scaled_value,  # Use the scaled value
+                    "BURN": render_value,  # Use the scaled user-provided value
                     "USE_Z": False,
                     "UNITS": 1,
                     "WIDTH": pixelSize,
@@ -3705,9 +3707,27 @@ class GenderIndicatorTool:
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
+                    "OUTPUT": 'memory:'  # Output to memory for further processing
+                }
+            )['OUTPUT']
+
+            # Clip the raster with the country layer
+            clipped_raster = processing.run(
+                "gdal:cliprasterbymasklayer",
+                {
+                    "INPUT": initial_raster,
+                    "MASK": countryLayer,
+                    "SOURCE_CRS": UTM_crs,
+                    "TARGET_CRS": UTM_crs,
+                    "NODATA": None,
+                    "ALPHA_BAND": False,
+                    "CROP_TO_CUTLINE": True,
+                    "KEEP_RESOLUTION": True,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
                     "OUTPUT": rasOutput
                 }
-            )
+            )['OUTPUT']
 
             # Set output field
             self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
@@ -3725,6 +3745,7 @@ class GenderIndicatorTool:
         except Exception as e:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
+
 
     def SAFPerceivedSafetyFromTextFieldRasterizer(self, layer):
         """
