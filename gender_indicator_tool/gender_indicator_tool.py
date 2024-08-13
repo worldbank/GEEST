@@ -351,7 +351,7 @@ class GenderIndicatorTool:
         ###### TAB 4.6 - Facility, conflict, and violence
         #self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
         self.dlg.FCV_Execute_PB.clicked.connect(lambda: self.Rasterize(6))
-        
+
         ###### TAB 4.7 - Water and Sanitation
         self.dlg.WAS_Execute_PB.clicked.connect(lambda: self.Rasterize(7))
 
@@ -456,7 +456,7 @@ class GenderIndicatorTool:
 
         elif button_num == 26:
             self.dlg.FCV_Aggregate_Field.setText(response[0])
-            
+
         elif button_num == 27:
             self.dlg.WAS_Aggregate_Field.setText(response[0])
 
@@ -718,7 +718,7 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.FCV_status.setText("Processing...")
             self.dlg.FCV_status.repaint()
-            
+
         elif factor_no == 7:
             pointlayer = self.dlg.WAS_Input_Field.filePath()
             #rasField = self.dlg.WAS_rasField_CB.currentText()
@@ -1316,7 +1316,7 @@ class GenderIndicatorTool:
             )
 
             csvFileLayerUTM = clipCsvFileUTM["OUTPUT"]
-            
+
             gridExtent = countryUTMLayerBuf.extent()
             grid_params = {
                 'TYPE': 2,  # Rectangle (polygon)
@@ -1381,12 +1381,12 @@ class GenderIndicatorTool:
                 buffer_layer.updateFeature(feature)
 
             buffer_layer.commitChanges()
-            
+
             grid_layer_provider = grid_layer.dataProvider()
             grid_layer_provider.addAttributes([QgsField("score", QVariant.Int)])
             grid_layer.updateFields()
 
-            
+
             # Create a spatial index for the buffer layer
             spatial_index = QgsSpatialIndex(buffer_layer.getFeatures())
 
@@ -1408,12 +1408,12 @@ class GenderIndicatorTool:
                         buffer_score = buffer_feature['score']
                         if buffer_score < min_score:
                             min_score = buffer_score
-                
+
                 # Set the minimum score (most serious event) to the grid cell
                 grid_feature.setAttribute('score', min_score)
                 grid_layer.updateFeature(grid_feature)
             grid_layer.commitChanges()
-            
+
             outputPath1 = f"{workingDir}{temp}/clipBuff.shp"
 
             clipBuffer = processing.run(
@@ -1526,7 +1526,7 @@ class GenderIndicatorTool:
 
             self.dlg.WAS_status.setText("Processing...")
             self.dlg.WAS_status.repaint()
-            
+
             #dif_out = f"{workingDir}/temp/tempBuf.shp"
 
             Buffer = processing.run(
@@ -1588,7 +1588,7 @@ class GenderIndicatorTool:
             )
 
             merge = Merge["OUTPUT"]
-            
+
             mergeClip = processing.run(
                 "native:clip",
                 {
@@ -1597,21 +1597,21 @@ class GenderIndicatorTool:
                     "OUTPUT": "memory:",
                 }
             )
-            
+
             mergeOutput = mergeClip["OUTPUT"]
 
             # Get the width and height of the extent
             extent = mergeOutput.extent()
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
-            
+
             Dimension = "Place Characterization"
             if os.path.exists(Dimension):
                 os.chdir(Dimension)
             else:
                 os.mkdir(Dimension)
                 os.chdir(Dimension)
-            
+
             rasOutput = self.dlg.WAS_Output_Field.text()
 
             rasterize = processing.run(
@@ -1645,7 +1645,7 @@ class GenderIndicatorTool:
 
             self.dlg.WAS_status.setText("Processing Complete!")
             self.dlg.WAS_status.repaint()
-            
+
     def ServiceArea(self, factor_no):
         """
         This function is used to conduct a service area network analysis facilitated using Openrouteservices' (ORS) isochrones service. Isochrones are derived from the OpenStreetMap (OSM) road network
@@ -2093,7 +2093,7 @@ class GenderIndicatorTool:
                     extent = merge_output.extent()
                     raster_width = int(extent.width() / pixelSize)
                     raster_height = int(extent.height() / pixelSize)
-                    
+
                     rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()[:-4]}{shapefile_name}.tif"
 
                     if os.path.exists(Dimension):
@@ -2733,7 +2733,7 @@ class GenderIndicatorTool:
                 )
 
                 merge = Merge["OUTPUT"]
-                
+
                 mergeClip = processing.run(
                     "native:clip",
                     {
@@ -2742,7 +2742,7 @@ class GenderIndicatorTool:
                         "OUTPUT": "memory:",
                     }
                 )
-                
+
                 mergeOutput = mergeClip["OUTPUT"]
 
                 # Get the width and height of the extent
@@ -2797,7 +2797,7 @@ class GenderIndicatorTool:
             temp_merge = f"{tempDir}/temp_merge.shp"
             base_name = os.path.basename(streetCrossingLayer)
             shapefile_name, _ = os.path.splitext(base_name)
-            
+
             buffer = processing.run(
                     "native:buffer",
                     {
@@ -2829,7 +2829,7 @@ class GenderIndicatorTool:
             #self.dlg.WLK_Output_Field_2.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
             # default parameters
-            # walking        
+            # walking
             mode = 6
 
             # Distance
@@ -3043,7 +3043,7 @@ class GenderIndicatorTool:
                 )
 
                 merge = Merge["OUTPUT"]
-                
+
                 mergeClip = processing.run(
                     "native:clip",
                     {
@@ -3052,7 +3052,7 @@ class GenderIndicatorTool:
                         "OUTPUT": "memory:",
                     }
                 )
-                
+
                 mergeOutput = mergeClip["OUTPUT"]
 
                 extent = mergeOutput.extent()
@@ -4096,6 +4096,7 @@ class GenderIndicatorTool:
                 # Update status
                 self.dlg.EDU_status.setText("Processing polygon layer...")
                 self.dlg.EDU_status.repaint()
+
                 # Use the incoming shapefile and the field corresponding to the checkbox
                 polygonLayerPath = self.dlg.EDU_Input_Field.filePath()
                 polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
@@ -4125,14 +4126,9 @@ class GenderIndicatorTool:
                     raise ValueError("No valid values in the selected field")
                 min_val, max_val = min(values), max(values)
 
-                # Normalize values
-                normalized_values = [(val - min_val) / (max_val - min_val) for val in values]
-
-                # Define bins and scores
-                buffer = 1e-6  # Small buffer around zero to create a bin for exactly zero values
-                SCORES = [0, 0, 1, 2, 3, 4, 5]
-                bin_width = (1 - buffer) / (len(SCORES) - 2)  # Adjust for the extra zero bin
-                SCORE_BINS = [0, buffer] + [i * bin_width for i in range(1, len(SCORES) - 1)] + [1]
+                # Scale values to 0-5 range
+                def scale_value(val):
+                    return 0 if max_val == min_val else (val - min_val) / (max_val - min_val) * 5
 
                 # Create a temporary memory layer to hold the scaled scores
                 temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
@@ -4143,21 +4139,10 @@ class GenderIndicatorTool:
                 temp_layer.startEditing()
                 for feature in clipped_layer.getFeatures():
                     value = feature[rasField]
-                    if value is None or value == 0:
-                        score = 0
-                    else:
-                        normalized_value = (value - min_val) / (max_val - min_val)
-                        for i in range(len(SCORE_BINS) - 1):
-                            if SCORE_BINS[i] <= normalized_value < SCORE_BINS[i + 1]:
-                                score = SCORES[i]
-                                break
-                        else:
-                            score = SCORES[-1]
-
-                    # Create a new feature for the temp_layer
+                    score = scale_value(value)
                     new_feature = QgsFeature(temp_layer.fields())
                     new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score", score)
+                    new_feature.setAttribute("scaled_score", int(score))
                     temp_layer.addFeature(new_feature)
 
                 temp_layer.commitChanges()
@@ -4178,7 +4163,7 @@ class GenderIndicatorTool:
                 for feature in countryLayer.getFeatures():
                     new_feature = QgsFeature(temp_layer.fields())
                     new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score", int((user_value / 100) * 5))  # Normalize to a 0-5 scale
+                    new_feature.setAttribute("scaled_score", int(user_value / 20))  # Normalize to a 0-5 scale
                     temp_layer.addFeature(new_feature)
 
                 temp_layer.commitChanges()
@@ -4193,7 +4178,6 @@ class GenderIndicatorTool:
             rasOutput = self.dlg.EDU_Output_Field.text()
             temp_rasOutputPath = os.path.join(tempDir, "temp_raster.tif")
             final_rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
-
 
             # Update status
             self.dlg.EDU_status.setText("Rasterizing...")
@@ -5440,7 +5424,7 @@ class GenderIndicatorTool:
                 with rasterio.open(rasLayers[5]) as src:
                     FCV_ras = src.read(1)
                     FCV_weight = factorWeighting[5]
-                    
+
                 with rasterio.open(rasLayers[6]) as src:
                     WAS_ras = src.read(1)
                     WAS_weight = factorWeighting[6]
