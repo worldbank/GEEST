@@ -3110,8 +3110,22 @@ class GenderIndicatorTool:
         - In case of points (vector) input --> SAFstreetLightsRasterizer
         - In case of polygons (vector) with numeric field as metric --> SAFPerceivedSafetyFromNumericFieldRasterizer
         - In case of polygons (vector) with text field as metric --> SAFPerceivedSafetyFromTextFieldRasterizer
+        - If no input layer is given, uses a user-provided value to rasterize --> SAFPerceivedSafetyFromUserValueRasterizer
         """
+
+        # Announce the start of the process
+        self.dlg.SAF_status.setText("Starting...")
+
         input_file = self.dlg.SAF_Input_Field.filePath()
+
+        # Check if the input file is empty or not provided
+        if not input_file:
+            # Get the user-provided value from the spin box
+            user_value = self.dlg.SAF_User_Value_Input.value()
+            # Call the appropriate function with the user-provided value
+            self.SAFPerceivedSafetyFromUserValueRasterizer(user_value)
+            return
+
         input_layer = QgsRasterLayer(input_file, "input")
 
         if input_layer.isValid():
@@ -3147,6 +3161,8 @@ class GenderIndicatorTool:
             # if it is, populate the combo box fields
             self.dlg.SAF_rasField_CB.setEnabled(True)
             self.dlg.SAF_rasField_CB.clear()
+            # disable the user value field
+            self.dlg.SAF_User_Value_Input.setEnabled(False)
             for field in layer.fields():
                 field_name = field.name()
                 # Check if the field is of type text
@@ -3161,6 +3177,8 @@ class GenderIndicatorTool:
             # Clear and disable the SAF_typeScore_Field by default
             self.dlg.SAF_typeScore_Field.clear()
             self.dlg.SAF_typeScore_Field.setEnabled(False)
+            # enable the user value field
+            self.dlg.SAF_User_Value_Input.setEnabled(True)
 
     def populateCBFieldsFromPolygonLayer_PC_EDU(self, file_path):
         layer = QgsVectorLayer(file_path, "input", "ogr")
@@ -3618,14 +3636,15 @@ class GenderIndicatorTool:
             if os.getcwd() != workingDir:
                 os.chdir(workingDir)
 
-    def SAFPerceivedSafetyFromNumericFieldRasterizer(self, layer):
+    def SAFPerceivedSafetyFromUserValueRasterizer(self, user_value):
         """
-        This function rasterizes the Perceived Safety factor for the Urban Safety Factor.
-        It converts vector data to raster, applying necessary transformations and standardizations using a binning approach.
+        This function rasterizes the Perceived Safety factor for the Urban Safety Factor based on a user-provided value.
+        It creates a raster with a uniform value across all cells, based on the input from the user.
+        The user-provided value (0-100) is scaled to a range of 0-5 before rasterization.
         """
         try:
-            # Get field name
-            rasField = self.dlg.SAF_rasField_CB.currentText()
+            # Scale the user value to the 0-5 range
+            scaled_value = user_value / 20.0
 
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3636,23 +3655,11 @@ class GenderIndicatorTool:
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
 
             # Update status
-            self.dlg.SAF_status.setText("Variables Set")
+            self.dlg.SAF_status.setText(f"Value set to {scaled_value}")
             self.dlg.SAF_status.repaint()
             time.sleep(0.5)
             self.dlg.SAF_status.setText("Processing...")
             self.dlg.SAF_status.repaint()
-
-            # Ensure the layer is valid
-            if not layer.isValid():
-                raise ValueError("Invalid layer")
-
-            # Convert CRS if necessary
-            if layer.crs() != UTM_crs:
-                layer = processing.run("native:reprojectlayer", {
-                    'INPUT': layer,
-                    'TARGET_CRS': UTM_crs,
-                    'OUTPUT': 'memory:'
-                })['OUTPUT']
 
             # Load country layer and convert CRS if necessary
             countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
@@ -3666,67 +3673,10 @@ class GenderIndicatorTool:
                 })['OUTPUT']
 
             # Ensure spatial index exists
-            _ = QgsSpatialIndex(layer.getFeatures())
             _ = QgsSpatialIndex(countryLayer.getFeatures())
 
-            # Clip the input layer by the country layer
-            clipped_layer = processing.run("native:clip", {
-                'INPUT': layer,
-                'OVERLAY': countryLayer,
-                'OUTPUT': 'memory:'
-            })['OUTPUT']
-
-            if not any(clipped_layer.getFeatures()):
-                raise ValueError("Clipping resulted in an empty layer")
-
-            # Get min and max values of the field
-            values = [f[rasField] for f in clipped_layer.getFeatures() if f[rasField] is not None]
-            if not values:
-                raise ValueError("No valid values in the selected field")
-            min_val, max_val = min(values), max(values)
-
-            # Normalize values
-            normalized_values = [(val - min_val) / (max_val - min_val) for val in values]
-
-            # Define bins and scores
-            buffer = 1e-6  # Small buffer around zero to create a bin for exactly zero values
-            SCORES = [0, 0, 1, 2, 3, 4, 5]
-            bin_width = (1 - buffer) / (len(SCORES) - 2)  # Adjust for the extra zero bin
-            SCORE_BINS = [0, buffer] + [i * bin_width for i in range(1, len(SCORES) - 1)] + [1]
-
-            # Create a temporary memory layer to hold the scaled scores
-            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
-            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
-            temp_layer.updateFields()
-
-            # Calculate the scaled scores and add to temp layer
-            temp_layer.startEditing()
-            for feature in clipped_layer.getFeatures():
-                value = feature[rasField]
-                if value is None or value == 0:
-                    score = 0
-                else:
-                    normalized_value = (value - min_val) / (max_val - min_val)
-                    for i in range(len(SCORE_BINS) - 1):
-                        if SCORE_BINS[i] <= normalized_value < SCORE_BINS[i + 1]:
-                            score = SCORES[i]
-                            break
-                    else:
-                        score = SCORES[-1]
-
-                # Create a new feature for the temp layer
-                new_feature = QgsFeature(temp_layer.fields())
-                new_feature.setGeometry(feature.geometry())
-                new_feature.setAttribute("scaled_score", score)
-                temp_layer.addFeature(new_feature)
-
-            temp_layer.commitChanges()
-
-            # Ensure spatial index for temp_layer
-            _ = QgsSpatialIndex(temp_layer.getFeatures())
-
             # Get the extent for rasterization
-            extent = temp_layer.extent()
+            extent = countryLayer.extent()
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
 
             # Set up output directory
@@ -3737,13 +3687,13 @@ class GenderIndicatorTool:
 
             rasOutput = self.dlg.SAF_Output_Field.text()
 
-            # Rasterize
+            # Rasterize using the scaled value
             _ = processing.run(
                 "gdal:rasterize",
                 {
-                    "INPUT": temp_layer,
-                    "FIELD": "scaled_score",
-                    "BURN": 0,
+                    "INPUT": countryLayer,
+                    "FIELD": "",  # No field since we use a uniform value
+                    "BURN": scaled_value,  # Use the scaled value
                     "USE_Z": False,
                     "UNITS": 1,
                     "WIDTH": pixelSize,
