@@ -3493,6 +3493,7 @@ class GenderIndicatorTool:
         # Set CRS and input/output paths
         project_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
         input_file = self.dlg.SAF_Input_Field.filePath()
+        countryLayerPath = self.dlg.countryLayer_Field.filePath()  # Country layer for clipping
         pixelSize = self.dlg.pixelSize_SB.value()
         output_raster = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
 
@@ -3535,8 +3536,27 @@ class GenderIndicatorTool:
         self.dlg.SAF_status.setText("Starting calculations...")
         self.dlg.SAF_status.repaint()
 
-        # Calculate the extent of the buffered layer
-        buffered_gdf = gpd.read_file(buffered_layer)
+        # Load and reproject country layer if necessary
+        countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+        if not countryLayer.isValid():
+            raise ValueError("Invalid country layer")
+        if countryLayer.crs().authid() != project_crs:
+            countryLayer = processing.run("native:reprojectlayer", {
+                'INPUT': countryLayer,
+                'TARGET_CRS': QgsCoordinateReferenceSystem(project_crs),
+                'OUTPUT': 'memory:'
+            })['OUTPUT']
+
+        # Clip the buffered layer to the country layer
+        clipped_buffered_layer = os.path.join(tempDir, "streetlights_buffer_clipped.shp")
+        processing.run("native:clip", {
+            'INPUT': buffered_layer,
+            'OVERLAY': countryLayer,
+            'OUTPUT': clipped_buffered_layer
+        })
+
+        # Calculate the extent of the clipped buffered layer
+        buffered_gdf = gpd.read_file(clipped_buffered_layer)
         extent = buffered_gdf.total_bounds
         xmin, ymin, xmax, ymax = extent
 
@@ -3550,22 +3570,16 @@ class GenderIndicatorTool:
         xmax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
         ymax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
 
-        # Log the calculated extent and dimensions
-        print(f"Extent: xmin={xmin}, ymin={ymin}, xmax={xmax}, ymax={ymax}")
-
-        # Rasterize the buffered layer
+        # Rasterize the clipped buffered layer
         rasterized_layer = os.path.join(tempDir, "streetlights_raster.tif")
         width = max(1, int((xmax - xmin) / pixelSize))
         height = max(1, int((ymax - ymin) / pixelSize))
-
-        # Log the calculated raster dimensions
-        print(f"Raster Dimensions: width={width}, height={height}")
 
         self.dlg.SAF_status.setText("Rasterizing...")
         self.dlg.SAF_status.repaint()
 
         processing.run("gdal:rasterize", {
-            'INPUT': buffered_layer,
+            'INPUT': clipped_buffered_layer,
             'FIELD': '',
             'BURN': RASTER_BURN_VALUE,
             'USE_Z': False,
@@ -3573,7 +3587,7 @@ class GenderIndicatorTool:
             'WIDTH': width,
             'HEIGHT': height,
             'EXTENT': f'{xmin},{xmax},{ymin},{ymax}',
-            'NODATA': RASTER_NODATA_VALUE,
+            'NODATA': RASTER_NODATA_VALUE,  # Ensure areas without streetlights are 0
             'OUTPUT': rasterized_layer
         })
 
@@ -3613,7 +3627,6 @@ class GenderIndicatorTool:
 
         try:
             # Save the final raster
-            # Update UI
             self.dlg.SAF_status.setText("Saving raster...")
             self.dlg.SAF_status.repaint()
 
@@ -3621,6 +3634,23 @@ class GenderIndicatorTool:
             os.makedirs(os.path.dirname(output_raster), exist_ok=True)
             with rasterio.open(output_raster, 'w', **meta) as dst:
                 dst.write(result, 1)
+
+            # Clip the final raster to the country layer
+            final_clipped_raster = os.path.join(tempDir, "streetlights_final_clipped.tif")
+            processing.run("gdal:cliprasterbymasklayer", {
+                'INPUT': output_raster,
+                'MASK': countryLayerPath,
+                'SOURCE_CRS': project_crs,
+                'TARGET_CRS': project_crs,
+                'NODATA': RASTER_NODATA_VALUE,
+                'ALPHA_BAND': False,
+                'CROP_TO_CUTLINE': True,
+                'KEEP_RESOLUTION': True,
+                'OUTPUT': final_clipped_raster
+            })
+
+            # Move the final clipped raster to the intended output location
+            shutil.move(final_clipped_raster, output_raster)
 
             # Update UI
             self.dlg.SAF_Aggregate_Field.setText(output_raster)
