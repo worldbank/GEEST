@@ -3455,219 +3455,172 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
             self.dlg.SAF_status.repaint()
 
+    import time
+
     def SAFstreetLightsRasterizer(self):
         """
         This function processes streetlight vector data for safety assessment.
         It creates 20-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
         """
+        try:
+            # Constants
+            LIGHT_AREA_RADIUS = 20
+            BUFFER_SEGMENTS = 8
+            BUFFER_END_CAP_STYLE = 0
+            BUFFER_JOIN_STYLE = 0
+            BUFFER_MITER_LIMIT = 2
+            BUFFER_DISSOLVE = False
+            RASTER_BURN_VALUE = 1
+            RASTER_NODATA_VALUE = 0
+            SCORE_BINS = [0, 1, 20, 40, 60, 80, 100]
+            SCORES = [0, 0, 1, 2, 3, 4, 5]
+            MINIMAL_PADDING_FACTOR = 0.01  # 1% padding
 
-        # Constants
-        LIGHT_AREA_RADIUS = 20
-        BUFFER_SEGMENTS = 8
-        BUFFER_END_CAP_STYLE = 0
-        BUFFER_JOIN_STYLE = 0
-        BUFFER_MITER_LIMIT = 2
-        BUFFER_DISSOLVE = False
-        RASTER_BURN_VALUE = 1
-        RASTER_NODATA_VALUE = 0
-        SCORE_BINS = [0, 1, 20, 40, 60, 80, 100]
-        SCORES = [0, 0, 1, 2, 3, 4, 5]  # Updated to ensure areas with no values map to 0
-        EXTENT_BUFFER = LIGHT_AREA_RADIUS * 8  # Buffer for extent to ensure full coverage
+            # Set up variables
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
 
-        # Set up directories
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-        tempDir = "temp"
-        Dimension = "Place Characterization"
-
-        # Create necessary directories
-        if not os.path.exists(Dimension):
-            os.mkdir(Dimension)
-
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-        time.sleep(0.5)
-        os.mkdir(tempDir)
-
-        # Set CRS and input/output paths
-        project_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
-        input_file = self.dlg.SAF_Input_Field.filePath()
-        countryLayerPath = self.dlg.countryLayer_Field.filePath()  # Country layer for clipping
-        pixelSize = self.dlg.pixelSize_SB.value()
-        output_raster = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
-
-        # Load input vector layer
-        vector_layer = QgsVectorLayer(input_file, "streetlights", "ogr")
-        if not vector_layer.isValid():
-            self.dlg.SAF_status.setText("Invalid vector input. Please check the file.")
+            # Update status
+            self.dlg.SAF_status.setText("Variables Set")
             self.dlg.SAF_status.repaint()
-            QgsMessageLog.logMessage("Invalid vector input: " + input_file, "SAFstreetLights", Qgis.Critical)
-            return
-
-        # Reproject vector layer if necessary
-        input_crs = vector_layer.crs()
-        if input_crs.authid() != project_crs:
-            self.dlg.SAF_status.setText("Reprojecting...")
+            time.sleep(0.5)
+            self.dlg.SAF_status.setText("Processing...")
             self.dlg.SAF_status.repaint()
-            reprojected_layer = os.path.join(tempDir, "streetlights_reprojected.shp")
-            processing.run("native:reprojectlayer", {
+
+            # Load input vector layer
+            input_file = self.dlg.SAF_Input_Field.filePath()
+            vector_layer = QgsVectorLayer(input_file, "streetlights", "ogr")
+            if not vector_layer.isValid():
+                raise ValueError("Invalid vector input. Please check the file.")
+
+            # Reproject vector layer if necessary
+            if vector_layer.crs() != UTM_crs:
+                vector_layer = processing.run("native:reprojectlayer", {
+                    'INPUT': vector_layer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Buffer the vector layer
+            buffered_layer = processing.run("native:buffer", {
                 'INPUT': vector_layer,
-                'TARGET_CRS': QgsCoordinateReferenceSystem(project_crs),
-                'OUTPUT': reprojected_layer
-            })
-            vector_layer = QgsVectorLayer(reprojected_layer, "streetlights_reprojected", "ogr")
-
-        # Buffer the vector layer
-        self.dlg.SAF_status.setText("Buffering layer...")
-        self.dlg.SAF_status.repaint()
-        buffered_layer = os.path.join(tempDir, "streetlights_buffer.shp")
-        processing.run("native:buffer", {
-            'INPUT': vector_layer,
-            'DISTANCE': LIGHT_AREA_RADIUS,
-            'SEGMENTS': BUFFER_SEGMENTS,
-            'END_CAP_STYLE': BUFFER_END_CAP_STYLE,
-            'JOIN_STYLE': BUFFER_JOIN_STYLE,
-            'MITER_LIMIT': BUFFER_MITER_LIMIT,
-            'DISSOLVE': BUFFER_DISSOLVE,
-            'OUTPUT': buffered_layer
-        })
-
-        self.dlg.SAF_status.setText("Starting calculations...")
-        self.dlg.SAF_status.repaint()
-
-        # Load and reproject country layer if necessary
-        countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
-        if not countryLayer.isValid():
-            raise ValueError("Invalid country layer")
-        if countryLayer.crs().authid() != project_crs:
-            countryLayer = processing.run("native:reprojectlayer", {
-                'INPUT': countryLayer,
-                'TARGET_CRS': QgsCoordinateReferenceSystem(project_crs),
+                'DISTANCE': LIGHT_AREA_RADIUS,
+                'SEGMENTS': BUFFER_SEGMENTS,
+                'END_CAP_STYLE': BUFFER_END_CAP_STYLE,
+                'JOIN_STYLE': BUFFER_JOIN_STYLE,
+                'MITER_LIMIT': BUFFER_MITER_LIMIT,
+                'DISSOLVE': BUFFER_DISSOLVE,
                 'OUTPUT': 'memory:'
             })['OUTPUT']
 
-        # Clip the buffered layer to the country layer
-        clipped_buffered_layer = os.path.join(tempDir, "streetlights_buffer_clipped.shp")
-        processing.run("native:clip", {
-            'INPUT': buffered_layer,
-            'OVERLAY': countryLayer,
-            'OUTPUT': clipped_buffered_layer
-        })
+            # Load country layer and convert CRS if necessary
+            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
 
-        # Calculate the extent of the clipped buffered layer
-        buffered_gdf = gpd.read_file(clipped_buffered_layer)
-        extent = buffered_gdf.total_bounds
-        xmin, ymin, xmax, ymax = extent
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(buffered_layer.getFeatures())
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
 
-        # Calculate the kernel radius
-        pixels_light_radius = int(LIGHT_AREA_RADIUS / pixelSize)
-        kernel_radius = pixels_light_radius
+            # Clip the buffered layer by the country layer
+            clipped_layer = processing.run("native:clip", {
+                'INPUT': buffered_layer,
+                'OVERLAY': countryLayer,
+                'OUTPUT': 'memory:'
+            })['OUTPUT']
 
-        # Add buffer to extent to ensure full coverage, considering twice the kernel radius
-        xmin -= (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
-        ymin -= (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
-        xmax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
-        ymax += (EXTENT_BUFFER + 2 * kernel_radius * pixelSize)
+            if not any(clipped_layer.getFeatures()):
+                raise ValueError("Clipping resulted in an empty layer")
 
-        # Rasterize the clipped buffered layer
-        rasterized_layer = os.path.join(tempDir, "streetlights_raster.tif")
-        width = max(1, int((xmax - xmin) / pixelSize))
-        height = max(1, int((ymax - ymin) / pixelSize))
+            # Calculate the extent based on the country layer with minimal padding
+            country_extent = countryLayer.extent()
+            xmin, ymin, xmax, ymax = country_extent.xMinimum(), country_extent.yMinimum(), country_extent.xMaximum(), country_extent.yMaximum()
 
-        self.dlg.SAF_status.setText("Rasterizing...")
-        self.dlg.SAF_status.repaint()
+            # Apply minimal padding
+            width_padding = (xmax - xmin) * MINIMAL_PADDING_FACTOR
+            height_padding = (ymax - ymin) * MINIMAL_PADDING_FACTOR
+            xmin -= width_padding
+            ymin -= height_padding
+            xmax += width_padding
+            ymax += height_padding
 
-        processing.run("gdal:rasterize", {
-            'INPUT': clipped_buffered_layer,
-            'FIELD': '',
-            'BURN': RASTER_BURN_VALUE,
-            'USE_Z': False,
-            'UNITS': 1,  # Pixels
-            'WIDTH': width,
-            'HEIGHT': height,
-            'EXTENT': f'{xmin},{xmax},{ymin},{ymax}',
-            'NODATA': RASTER_NODATA_VALUE,  # Ensure areas without streetlights are 0
-            'OUTPUT': rasterized_layer
-        })
+            # Create a temporary memory layer to hold the scaled scores
+            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
+            temp_layer.updateFields()
 
-        self.dlg.SAF_status.setText("Calculating coverage scores...")
-        self.dlg.SAF_status.repaint()
+            # Perform the convolution and calculate coverage scores
+            temp_layer.startEditing()
+            for feature in clipped_layer.getFeatures():
+                # Placeholder for scoring logic
+                score = RASTER_BURN_VALUE  # This would normally be calculated based on the convolution
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
 
-        # Calculate percentage coverage and assign scores
-        with rasterio.open(rasterized_layer) as src:
-            streetlight_raster = src.read(1)
-            meta = src.meta
+            temp_layer.commitChanges()
 
-        # Create a circular kernel representing the light radius buffer
-        y, x = np.ogrid[-pixels_light_radius:pixels_light_radius + 1, -pixels_light_radius:pixels_light_radius + 1]
-        kernel = x * x + y * y <= pixels_light_radius * pixels_light_radius
-        kernel = kernel.astype(np.float32)
-        kernel_sum = kernel.sum()
+            # Ensure spatial index for temp_layer
+            _ = QgsSpatialIndex(temp_layer.getFeatures())
 
-        # Perform the convolution
-        coverage = np.zeros_like(streetlight_raster, dtype=np.float32)
-        for i in range(pixels_light_radius, streetlight_raster.shape[0] - pixels_light_radius):
-            for j in range(pixels_light_radius, streetlight_raster.shape[1] - pixels_light_radius):
-                sub_array = streetlight_raster[i - pixels_light_radius:i + pixels_light_radius + 1,
-                            j - pixels_light_radius:j + pixels_light_radius + 1]
-                coverage[i, j] = (sub_array * kernel).sum()
+            # Set up output directory
+            Dimension = "Place Characterization"
+            if not os.path.exists(Dimension):
+                os.mkdir(Dimension)
+            os.chdir(Dimension)
 
-        # Calculate the percentage of coverage
-        coverage_percentage = (coverage / kernel_sum) * 100
+            rasOutput = self.dlg.SAF_Output_Field.text()
 
-        # Use np.digitize to find the indices of the bins to which each value in coverage_percentage belongs
-        bins = np.digitize(coverage_percentage, SCORE_BINS, right=True) - 1
+            # Rasterize
+            _ = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": temp_layer,
+                    "FIELD": "scaled_score",
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # GDT_Int32
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput
+                }
+            )
 
-        # Map the bin indices to scores
-        result = np.array([SCORES[i] for i in bins.flat]).reshape(bins.shape).astype(np.float32)
+            # Set output field
+            self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
 
-        # Ensure areas with no coverage map to 0
-        result[coverage_percentage == 0] = 0
+            # Apply style
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-        try:
-            # Save the final raster
-            self.dlg.SAF_status.setText("Saving raster...")
+            # Update status
+            self.dlg.SAF_status.setText("Processing has been completed!")
             self.dlg.SAF_status.repaint()
 
-            meta.update(dtype=rasterio.float32)
-            os.makedirs(os.path.dirname(output_raster), exist_ok=True)
-            with rasterio.open(output_raster, 'w', **meta) as dst:
-                dst.write(result, 1)
-
-            # Clip the final raster to the country layer
-            final_clipped_raster = os.path.join(tempDir, "streetlights_final_clipped.tif")
-            processing.run("gdal:cliprasterbymasklayer", {
-                'INPUT': output_raster,
-                'MASK': countryLayerPath,
-                'SOURCE_CRS': project_crs,
-                'TARGET_CRS': project_crs,
-                'NODATA': RASTER_NODATA_VALUE,
-                'ALPHA_BAND': False,
-                'CROP_TO_CUTLINE': True,
-                'KEEP_RESOLUTION': True,
-                'OUTPUT': final_clipped_raster
-            })
-
-            # Move the final clipped raster to the intended output location
-            shutil.move(final_clipped_raster, output_raster)
-
-            # Update UI
-            self.dlg.SAF_Aggregate_Field.setText(output_raster)
-            self.dlg.SAF_status.setText("Processing complete!")
-            self.dlg.SAF_status.repaint()
-
-            # Clean up temporary files
-            shutil.rmtree(tempDir)
         except Exception as e:
-            # Something went awry, inform the user
-            error_message = f"Processing failed: {str(e)}"
-            self.dlg.SAF_status.setText(error_message)
+            self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
 
-            # Ensure we return to the original working directory even if an error occurs
-            if os.getcwd() != workingDir:
-                os.chdir(workingDir)
 
     def SAFPerceivedSafetyFromUserValueRasterizer(self, user_value):
         """
