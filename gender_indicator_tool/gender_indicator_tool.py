@@ -1529,31 +1529,31 @@ class GenderIndicatorTool:
             
             #dif_out = f"{workingDir}/temp/tempBuf.shp"
 
-            Buffer = processing.run(
-                "native:buffer",
-            {
-                "INPUT": pointUTM,
-                "DISTANCE": 250,
-                "SEGMENTS": 5,
-                "END_CAP_STYLE": 0,
-                "JOIN_STYLE": 0,
-                "MITER_LIMIT": 2,
-                "DISSOLVE": False,
-                "SEPARATE_DISJOINT": False,
-                "OUTPUT": "memory:",
-            },
-            )
+            #Buffer = processing.run(
+            #    "native:buffer",
+            #{
+            #    "INPUT": pointUTM,
+            #    "DISTANCE": 250,
+            #    "SEGMENTS": 5,
+            #    "END_CAP_STYLE": 0,
+            #    "JOIN_STYLE": 0,
+            #    "MITER_LIMIT": 2,
+            #    "DISSOLVE": False,
+            #    "SEPARATE_DISJOINT": False,
+            #    "OUTPUT": "memory:",
+            #},
+            #)
 
             # Count the number of buffers within each grid cell
-            buffer_layer = Buffer['OUTPUT']
-            index = QgsSpatialIndex(buffer_layer.getFeatures())
+            #buffer_layer = Buffer['OUTPUT']
+            index = QgsSpatialIndex(pointUTM.getFeatures())
             reclass_vals = {}
 
             for grid_feat in grid_layer.getFeatures():
                 intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
                 num_waterpoints = len(intersecting_ids)
 
-                if num_waterpoints > 2:
+                if num_waterpoints >= 2:
                     reclass_val = 5
                 elif num_waterpoints == 1:
                     reclass_val = 3
@@ -1588,7 +1588,7 @@ class GenderIndicatorTool:
             )
 
             merge = Merge["OUTPUT"]
-            
+            dif_out = f"{workingDir}/temp/Dif.shp"
             mergeClip = processing.run(
                 "native:clip",
                 {
