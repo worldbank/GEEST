@@ -2699,12 +2699,12 @@ class GenderIndicatorTool:
                     intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
                     # Initialize a set to store unique intersecting line feature IDs
                     unique_intersections = set()
-                    
+
                     # Check each potentially intersecting line feature
                     for line_id in intersecting_ids:
                         line_feat = line_layer.getFeature(line_id)
                         line_geom = line_feat.geometry()
-                        
+
                         # Perform a detailed intersection check
                         if grid_feat.geometry().intersects(line_geom):
                             unique_intersections.add(line_id)  # Add the line feature ID to the set
@@ -2922,7 +2922,7 @@ class GenderIndicatorTool:
             )
 
             merge = Merge["OUTPUT"]
-            
+
             mergeClip = processing.run(
                 "native:clip",
                 {
@@ -2931,7 +2931,7 @@ class GenderIndicatorTool:
                     "OUTPUT": "memory:",
                 }
             )
-            
+
             mergeOutput = mergeClip["OUTPUT"]
 
             # Get the width and height of the extent
@@ -3062,12 +3062,12 @@ class GenderIndicatorTool:
                 intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
                 # Initialize a set to store unique intersecting polygon feature IDs
                 unique_intersections = set()
-                
+
                 # Check each potentially intersecting polygon feature
                 for poly_id in intersecting_ids:
                     poly_feat = block_layer.getFeature(poly_id)
                     poly_geom = poly_feat.geometry()
-                    
+
                     # Perform a detailed intersection check
                     if grid_feat.geometry().intersects(poly_geom):
                         unique_intersections.add(poly_id)
@@ -3520,15 +3520,15 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
             self.dlg.SAF_status.repaint()
 
+
     def SAFstreetLightsRasterizer(self):
         """
         This function processes streetlight vector data for safety assessment.
-        It creates 20-meter buffers around streetlight points, counts the overlap within a 100x100m grid,
+        It counts the streetlight points within a 100x100m grid,
         scales the counts to a 0-5 range, and rasterizes the result, ensuring NoData values are set to zero.
         """
         try:
             # Constants
-            LIGHT_AREA_RADIUS = 20  # Buffer radius around streetlights
             GRID_SIZE = 100  # Grid size for rasterization
 
             # Set up variables
@@ -3565,19 +3565,7 @@ class GenderIndicatorTool:
                     'INPUT': vector_layer,
                     'TARGET_CRS': UTM_crs,
                     'OUTPUT': 'memory:'
-                })['OUTPUT']
-
-            # Buffer the vector layer (create 20m buffers around streetlights)
-            buffered_layer = processing.run("native:buffer", {
-                'INPUT': vector_layer,
-                'DISTANCE': LIGHT_AREA_RADIUS,
-                'SEGMENTS': 8,
-                'END_CAP_STYLE': 0,
-                'JOIN_STYLE': 0,
-                'MITER_LIMIT': 2,
-                'DISSOLVE': False,
-                'OUTPUT': 'memory:'
-            })['OUTPUT']
+                }, feedback=QgsProcessingFeedback())['OUTPUT']
 
             # Load country layer and convert CRS if necessary
             countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
@@ -3588,7 +3576,7 @@ class GenderIndicatorTool:
                     'INPUT': countryLayer,
                     'TARGET_CRS': UTM_crs,
                     'OUTPUT': 'memory:'
-                })['OUTPUT']
+                }, feedback=QgsProcessingFeedback())['OUTPUT']
 
             # Generate a 100x100m grid over the country boundary
             grid = processing.run("native:creategrid", {
@@ -3598,22 +3586,22 @@ class GenderIndicatorTool:
                 'VSPACING': GRID_SIZE,  # Vertical spacing
                 'CRS': UTM_crs,
                 'OUTPUT': 'memory:'
-            })['OUTPUT']
+            }, feedback=QgsProcessingFeedback())['OUTPUT']
 
             # Clip the grid to the country boundary
             clipped_grid = processing.run("native:clip", {
                 'INPUT': grid,
                 'OVERLAY': countryLayer,
                 'OUTPUT': 'memory:'
-            })['OUTPUT']
+            }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-            # Count the number of buffer overlaps at each grid point
+            # Count the number of streetlight points in each grid cell
             overlap_count = processing.run("qgis:countpointsinpolygon", {
                 'POLYGONS': clipped_grid,
-                'POINTS': buffered_layer,
+                'POINTS': vector_layer,
                 'FIELD': 'OVERLAP',
                 'OUTPUT': 'memory:'
-            })['OUTPUT']
+            }, feedback=QgsProcessingFeedback())['OUTPUT']
 
             # Normalize the overlap counts to the 0-5 scale
             max_overlap = max([f['OVERLAP'] for f in overlap_count.getFeatures()])
@@ -3640,7 +3628,7 @@ class GenderIndicatorTool:
                 'DATA_TYPE': 5,  # Float32
                 'INIT': 0,  # Initialize all cells with zero
                 'OUTPUT': raster_output
-            })
+            }, feedback=QgsProcessingFeedback())
 
             # Set output field
             self.dlg.SAF_Aggregate_Field.setText(raster_output)
