@@ -3624,7 +3624,7 @@ class GenderIndicatorTool:
                                                    normalized_value)
             overlap_count.commitChanges()
 
-            # Rasterize the grid points, ensuring NoData values are set to zero
+            # Rasterize the grid points, ensuring all values are set (no NoData)
             raster_output = os.path.join(output_dir, self.dlg.SAF_Output_Field.text())
             processing.run("gdal:rasterize", {
                 'INPUT': overlap_count,
@@ -3632,13 +3632,13 @@ class GenderIndicatorTool:
                 'BURN': 0,
                 'USE_Z': False,
                 'UNITS': 1,
-                'WIDTH': GRID_SIZE,
-                'HEIGHT': GRID_SIZE,
-                'EXTENT': f'{countryLayer.extent().xMinimum()},{countryLayer.extent().xMaximum()},{countryLayer.extent().yMinimum()},{countryLayer.extent().yMaximum()}',
-                'INIT': 0,  # Initialize with zero to ensure NoData values are set to zero
-                'NODATA': 0,
+                'WIDTH': pixelSize,
+                'HEIGHT': pixelSize,
+                'EXTENT': countryLayer.extent(),
+                'NODATA': None,  # Don't set NoData value
                 'OPTIONS': '',
-                'DATA_TYPE': 6,  # Float64
+                'DATA_TYPE': 5,  # Float32
+                'INIT': 0,  # Initialize all cells with zero
                 'OUTPUT': raster_output
             })
 
