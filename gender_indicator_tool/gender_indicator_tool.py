@@ -3487,7 +3487,6 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
 
-
     def SAFPerceivedSafetyFromUserValueRasterizer(self, user_value):
         """
         This function rasterizes the Perceived Safety factor for the Urban Safety Factor based on a user-provided value.
@@ -3556,7 +3555,7 @@ class GenderIndicatorTool:
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                     "NODATA": None,
                     "OPTIONS": "",
-                    "DATA_TYPE": 5,  # GDT_Int32
+                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
@@ -3578,7 +3577,7 @@ class GenderIndicatorTool:
                     "CROP_TO_CUTLINE": True,
                     "KEEP_RESOLUTION": True,
                     "OPTIONS": "",
-                    "DATA_TYPE": 5,  # GDT_Int32
+                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
                     "OUTPUT": rasOutput
                 }
             )
