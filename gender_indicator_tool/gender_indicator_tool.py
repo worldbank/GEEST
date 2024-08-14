@@ -3510,18 +3510,25 @@ class GenderIndicatorTool:
     def SAFstreetLightsRasterizer(self):
         """
         This function processes streetlight vector data for safety assessment.
-        It creates 20-meter buffers around streetlight points, samples these buffers using a grid of points,
-        counts the overlaps at each grid point, and rasterizes the result.
+        It creates 20-meter buffers around streetlight points, counts the overlap within a 100x100m grid,
+        scales the counts to a 0-5 range, and rasterizes the result, ensuring NoData values are set to zero.
         """
         try:
             # Constants
-            BUFFER_RADIUS = 10  # Radius of the buffer in meters
-            GRID_SIZE = 100  # Grid size in meters (100x100m)
+            LIGHT_AREA_RADIUS = 20  # Buffer radius around streetlights
+            GRID_SIZE = 100  # Grid size for rasterization
 
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
             workingDir = self.dlg.workingDir_Field.text()
-            os.chdir(workingDir)
+            Dimension = "Place Characterization"
+            output_dir = os.path.join(workingDir, Dimension)
+
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+
+            os.chdir(output_dir)
+
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
@@ -3533,7 +3540,7 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText("Processing...")
             self.dlg.SAF_status.repaint()
 
-            # Load input vector layer
+            # Load input vector layer (streetlights)
             input_file = self.dlg.SAF_Input_Field.filePath()
             vector_layer = QgsVectorLayer(input_file, "streetlights", "ogr")
             if not vector_layer.isValid():
@@ -3547,10 +3554,10 @@ class GenderIndicatorTool:
                     'OUTPUT': 'memory:'
                 })['OUTPUT']
 
-            # Buffer the streetlight points
+            # Buffer the vector layer (create 20m buffers around streetlights)
             buffered_layer = processing.run("native:buffer", {
                 'INPUT': vector_layer,
-                'DISTANCE': BUFFER_RADIUS,
+                'DISTANCE': LIGHT_AREA_RADIUS,
                 'SEGMENTS': 8,
                 'END_CAP_STYLE': 0,
                 'JOIN_STYLE': 0,
@@ -3570,66 +3577,65 @@ class GenderIndicatorTool:
                     'OUTPUT': 'memory:'
                 })['OUTPUT']
 
-            # Generate a point grid over the country layer
-            country_extent = countryLayer.extent()
-            grid_params = {
-                'TYPE': 0,  # Point grid
-                'EXTENT': f'{country_extent.xMinimum()},{country_extent.xMaximum()},{country_extent.yMinimum()},{country_extent.yMaximum()}',
-                'HSPACING': GRID_SIZE,
-                'VSPACING': GRID_SIZE,
-                'CRS': UTM_crs.authid(),
+            # Generate a 100x100m grid over the country boundary
+            grid = processing.run("native:creategrid", {
+                'TYPE': 2,  # Rectangle (polygon)
+                'EXTENT': countryLayer.extent(),
+                'HSPACING': GRID_SIZE,  # Horizontal spacing
+                'VSPACING': GRID_SIZE,  # Vertical spacing
+                'CRS': UTM_crs,
                 'OUTPUT': 'memory:'
-            }
-            grid_layer = processing.run('native:creategrid', grid_params)['OUTPUT']
+            })['OUTPUT']
 
-            # Clip the grid to the country boundaries
-            clipped_grid_layer = processing.run("native:clip", {
-                'INPUT': grid_layer,
+            # Clip the grid to the country boundary
+            clipped_grid = processing.run("native:clip", {
+                'INPUT': grid,
                 'OVERLAY': countryLayer,
                 'OUTPUT': 'memory:'
             })['OUTPUT']
 
-            # Count the number of overlapping buffers at each grid point
-            clipped_grid_layer.startEditing()
-            for grid_feat in clipped_grid_layer.getFeatures():
-                point_geom = grid_feat.geometry()
-                count = sum(
-                    1 for buffer_feat in buffered_layer.getFeatures() if point_geom.intersects(buffer_feat.geometry()))
-                clipped_grid_layer.changeAttributeValue(grid_feat.id(), clipped_grid_layer.fields().indexFromName('ID'),
-                                                        count)
-            clipped_grid_layer.commitChanges()
+            # Count the number of buffer overlaps at each grid point
+            overlap_count = processing.run("qgis:countpointsinpolygon", {
+                'POLYGONS': clipped_grid,
+                'POINTS': buffered_layer,
+                'FIELD': 'OVERLAP',
+                'OUTPUT': 'memory:'
+            })['OUTPUT']
 
-            # Rasterize the grid layer
-            rasOutput = self.dlg.SAF_Output_Field.text()
+            # Normalize the overlap counts to the 0-5 scale
+            max_overlap = max([f['OVERLAP'] for f in overlap_count.getFeatures()])
+            overlap_count.startEditing()
+            for feature in overlap_count.getFeatures():
+                normalized_value = min(5.0, (feature['OVERLAP'] / max_overlap) * 5.0)
+                overlap_count.changeAttributeValue(feature.id(), overlap_count.fields().indexFromName('OVERLAP'),
+                                                   normalized_value)
+            overlap_count.commitChanges()
 
-            _ = processing.run(
-                "gdal:rasterize",
-                {
-                    "INPUT": clipped_grid_layer,
-                    "FIELD": "ID",  # The field with the count of overlapping buffers
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 1,
-                    "WIDTH": int((country_extent.width()) / pixelSize),
-                    "HEIGHT": int((country_extent.height()) / pixelSize),
-                    "EXTENT": f"{country_extent.xMinimum()},{country_extent.xMaximum()},{country_extent.yMinimum()},{country_extent.yMaximum()}",
-                    "NODATA": 0,  # Ensure no-data areas are 0
-                    "OPTIONS": "",
-                    "DATA_TYPE": 6,  # GDT_Float64
-                    "INIT": 0,  # Initialize with 0
-                    "INVERT": False,
-                    "EXTRA": "",
-                    "OUTPUT": rasOutput
-                }
-            )
+            # Rasterize the grid points, ensuring NoData values are set to zero
+            raster_output = os.path.join(output_dir, self.dlg.SAF_Output_Field.text())
+            processing.run("gdal:rasterize", {
+                'INPUT': overlap_count,
+                'FIELD': 'OVERLAP',
+                'BURN': 0,
+                'USE_Z': False,
+                'UNITS': 1,
+                'WIDTH': GRID_SIZE,
+                'HEIGHT': GRID_SIZE,
+                'EXTENT': f'{countryLayer.extent().xMinimum()},{countryLayer.extent().xMaximum()},{countryLayer.extent().yMinimum()},{countryLayer.extent().yMaximum()}',
+                'INIT': 0,  # Initialize with zero to ensure NoData values are set to zero
+                'NODATA': 0,
+                'OPTIONS': '',
+                'DATA_TYPE': 6,  # Float64
+                'OUTPUT': raster_output
+            })
 
             # Set output field
-            self.dlg.SAF_Aggregate_Field.setText(os.path.join(workingDir, Dimension, rasOutput))
+            self.dlg.SAF_Aggregate_Field.setText(raster_output)
 
             # Apply style
             styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
-            styleFileDestination = os.path.join(workingDir, Dimension)
-            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+            styleFileDestination = os.path.join(output_dir)
+            styleFile = f"{os.path.splitext(raster_output)[0]}.qml"
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
             # Update status
