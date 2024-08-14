@@ -2743,7 +2743,7 @@ class GenderIndicatorTool:
 
                 Merge = processing.run(
                     "native:mergevectorlayers",
-                    {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": dif_out},
+                    {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
                 )
 
                 merge = Merge["OUTPUT"]
