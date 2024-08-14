@@ -2591,10 +2591,10 @@ class GenderIndicatorTool:
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
         streetCrossingLayer = self.dlg.WLK_Input_Field.filePath()
+        blockLayer = self.dlg.WLK_Input_Field_4.filePath()
         input_fields = [
             self.dlg.WLK_Input_Field_2,
-            self.dlg.WLK_Input_Field_3,
-            self.dlg.WLK_Input_Field_4
+            self.dlg.WLK_Input_Field_3
         ]
 
         lineLayerList = []
@@ -2652,7 +2652,7 @@ class GenderIndicatorTool:
                 shp_utm.to_file(scoredRoads)
 
                 gridOutput = f"{workingDir}{tempDir}/grid.shp"
-                gridExtent = countryUTMLayerBuf.extent()
+                gridExtent = countryUTMLayer.extent()
                 grid_params = {
                     'TYPE': 2,  # Rectangle (polygon)
                     'EXTENT': gridExtent,
@@ -2697,7 +2697,20 @@ class GenderIndicatorTool:
 
                 for grid_feat in grid_layer.getFeatures():
                     intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
-                    num_footpaths = len(intersecting_ids)
+                    # Initialize a set to store unique intersecting line feature IDs
+                    unique_intersections = set()
+                    
+                    # Check each potentially intersecting line feature
+                    for line_id in intersecting_ids:
+                        line_feat = line_layer.getFeature(line_id)
+                        line_geom = line_feat.geometry()
+                        
+                        # Perform a detailed intersection check
+                        if grid_feat.geometry().intersects(line_geom):
+                            unique_intersections.add(line_id)  # Add the line feature ID to the set
+
+                    # Count the number of unique intersecting line features
+                    num_footpaths = len(unique_intersections)
 
                     if num_footpaths >= 2:
                         reclass_val = 5
@@ -2730,7 +2743,7 @@ class GenderIndicatorTool:
 
                 Merge = processing.run(
                     "native:mergevectorlayers",
-                    {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
+                    {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": dif_out},
                 )
 
                 merge = Merge["OUTPUT"]
@@ -2793,7 +2806,7 @@ class GenderIndicatorTool:
                 self.dlg.WLK_status_2.repaint()
         else:
             pass
-        if len(streetCrossingLayer) > 5:
+        if streetCrossingLayer:
             os.chdir(workingDir)
 
             base_name = os.path.basename(streetCrossingLayer)
@@ -2827,7 +2840,7 @@ class GenderIndicatorTool:
             shp_utm.to_file(scoredRoads)
 
             gridOutput = f"{workingDir}{tempDir}/grid.shp"
-            gridExtent = countryUTMLayerBuf.extent()
+            gridExtent = countryUTMLayer.extent()
             grid_params = {
                 'TYPE': 2,  # Rectangle (polygon)
                 'EXTENT': gridExtent,
@@ -2968,6 +2981,179 @@ class GenderIndicatorTool:
             self.dlg.WLK_status_2.repaint()
         else:
             pass
+        if blockLayer:
+            os.chdir(workingDir)
+
+            base_name = os.path.basename(blockLayer)
+            shapefile_name, _ = os.path.splitext(base_name)
+            scoredBlocks = f"{workingDir}/{tempDir}/Scored_blocks_{shapefile_name}.shp"
+
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryUTMLayer,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": "memory:",
+                },
+            )
+
+            countryUTMLayerBuf = buffer["OUTPUT"]
+
+            self.convertCRS(blockLayer, UTM_crs)
+            #shp_utm[rasField] = [0]
+
+            #for i in roadType_Score:
+            #    shp_utm.loc[shp_utm[roadTypeField] == i[0], "Score"] = i[1]
+
+            #shp_utm[rasField] = shp_utm[rasField].astype(int)
+            shp_utm.to_file(scoredBlocks)
+
+            gridOutput = f"{workingDir}{tempDir}/grid.shp"
+            gridExtent = countryUTMLayer.extent()
+            grid_params = {
+                'TYPE': 2,  # Rectangle (polygon)
+                'EXTENT': gridExtent,
+                'HSPACING': 100,  # Horizontal spacing
+                'VSPACING': 100,  # Vertical spacing
+                'CRS': UTM_crs,
+                'OUTPUT': "memory:"
+            }
+
+            grid_result = processing.run('native:creategrid', grid_params)
+            grid_layer = grid_result['OUTPUT']
+
+            field_name = 'reclass_va'
+            if not grid_layer.fields().indexFromName(field_name) >= 0:
+                grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
+                grid_layer.updateFields()
+
+            # scoredRoadsUTM = QgsVectorLayer(shp_utm.to_json(), "linebufUTM", "ogr")
+            roadBuf_out = f"{workingDir}/{tempDir}/roadBuf.shp"
+
+            self.dlg.WLK_status_2.setText(f"Processing... {shapefile_name}")
+            self.dlg.WLK_status_2.repaint()
+
+            Buffer = processing.run(
+                "gdal:buffervectors",
+                {
+                    "INPUT": scoredBlocks,
+                    "GEOMETRY": "geometry",
+                    "DISTANCE": 50,
+                    "FIELD": "",
+                    "DISSOLVE": False,
+                    "EXPLODE_COLLECTIONS": False,
+                    "OPTIONS": "",
+                    "OUTPUT": roadBuf_out,
+                },
+            )
+
+            # Count the number of buffers within each grid cell
+            block_layer = QgsVectorLayer(scoredBlocks, 'buffer', 'ogr')
+            index = QgsSpatialIndex(block_layer.getFeatures())
+            reclass_vals = {}
+
+            for grid_feat in grid_layer.getFeatures():
+                intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
+                num_footpaths = len(intersecting_ids)
+
+                if num_footpaths >= 2:
+                    reclass_val = 5
+                elif num_footpaths == 1:
+                    reclass_val = 3
+                else:
+                    reclass_val = 0
+
+                reclass_vals[grid_feat.id()] = reclass_val
+
+            grid_layer.startEditing()
+            for grid_feat in grid_layer.getFeatures():
+                grid_layer.changeAttributeValue(grid_feat.id(), grid_layer.fields().indexFromName(field_name),
+                                                reclass_vals[grid_feat.id()])
+            grid_layer.commitChanges()
+
+            dif_out = f"{workingDir}/{tempDir}/Dif.shp"
+
+            #Difference = processing.run(
+            #    "native:difference",
+            #    {
+            #        "INPUT": countryUTMLayerBuf,
+            #        "OVERLAY": grid_layer,
+            #        "OUTPUT": dif_out,
+            #        "GRID_SIZE": None,
+            #    },
+            #)
+
+            # difference = Difference["OUTPUT"]
+
+            Merge = processing.run(
+                "native:mergevectorlayers",
+                {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
+            )
+
+            merge = Merge["OUTPUT"]
+
+            mergeClip = processing.run(
+                "native:clip",
+                {
+                    "INPUT": merge,
+                    "OVERLAY": countryUTMLayer,
+                    "OUTPUT": "memory:",
+                }
+            )
+
+            mergeOutput = mergeClip["OUTPUT"]
+
+            # Get the width and height of the extent
+            extent = mergeOutput.extent()
+            raster_width = int(extent.width() / pixelSize)
+            raster_height = int(extent.height() / pixelSize)
+
+            os.chdir(Dimension)
+            Output_Folder = "AT"
+            if os.path.exists(Output_Folder):
+                os.chdir(Output_Folder)
+            else:
+                os.mkdir(Output_Folder)
+                os.chdir(Output_Folder)
+            rasOutput = f"{self.dlg.WLK_Output_Field_2.text()[:-4]}{shapefile_name}.tif"
+
+            rasterize = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": mergeOutput,
+                    "FIELD": field_name,
+                    "BURN": 0,
+                    "USE_Z": False,
+                    "UNITS": 0,
+                    "WIDTH": raster_width,
+                    "HEIGHT": raster_height,
+                    "EXTENT": None,
+                    "NODATA": None,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": rasOutput,
+                },
+            )
+
+            #self.dlg.WLK_Output_Field_2.setText(f"{workingDir}{Dimension}/{rasOutput}")
+
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/{Output_Folder}"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            self.dlg.WLK_status_2.setText(f"Processing Complete for {shapefile_name}!")
+            self.dlg.WLK_status_2.repaint()
 
     def SAFRasterizerDelegator(self):
         """
