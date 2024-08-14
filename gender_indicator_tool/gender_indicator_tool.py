@@ -2743,7 +2743,7 @@ class GenderIndicatorTool:
 
                 Merge = processing.run(
                     "native:mergevectorlayers",
-                    {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": dif_out},
+                    {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
                 )
 
                 merge = Merge["OUTPUT"]
@@ -3060,11 +3060,24 @@ class GenderIndicatorTool:
 
             for grid_feat in grid_layer.getFeatures():
                 intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
-                num_footpaths = len(intersecting_ids)
+                # Initialize a set to store unique intersecting polygon feature IDs
+                unique_intersections = set()
+                
+                # Check each potentially intersecting polygon feature
+                for poly_id in intersecting_ids:
+                    poly_feat = block_layer.getFeature(poly_id)
+                    poly_geom = poly_feat.geometry()
+                    
+                    # Perform a detailed intersection check
+                    if grid_feat.geometry().intersects(poly_geom):
+                        unique_intersections.add(poly_id)
 
-                if num_footpaths >= 2:
+                # Count the number of unique intersecting polygon features
+                num_blocks = len(unique_intersections)
+
+                if num_blocks >= 2:
                     reclass_val = 5
-                elif num_footpaths == 1:
+                elif num_blocks == 1:
                     reclass_val = 3
                 else:
                     reclass_val = 0
