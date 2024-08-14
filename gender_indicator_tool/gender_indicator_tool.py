@@ -3321,26 +3321,16 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
             self.dlg.SAF_status.repaint()
 
-    import time
-
     def SAFstreetLightsRasterizer(self):
         """
         This function processes streetlight vector data for safety assessment.
-        It creates 20-meter buffers around streetlight points, rasterizes them, and assigns safety scores based on coverage.
+        It creates 20-meter buffers around streetlight points, samples these buffers using a grid of points,
+        counts the overlaps at each grid point, and rasterizes the result.
         """
         try:
             # Constants
-            LIGHT_AREA_RADIUS = 20
-            BUFFER_SEGMENTS = 8
-            BUFFER_END_CAP_STYLE = 0
-            BUFFER_JOIN_STYLE = 0
-            BUFFER_MITER_LIMIT = 2
-            BUFFER_DISSOLVE = False
-            RASTER_BURN_VALUE = 1
-            RASTER_NODATA_VALUE = 0
-            SCORE_BINS = [0, 1, 20, 40, 60, 80, 100]
-            SCORES = [0, 0, 1, 2, 3, 4, 5]
-            MINIMAL_PADDING_FACTOR = 0.01  # 1% padding
+            BUFFER_RADIUS = 10  # Radius of the buffer in meters
+            GRID_SIZE = 100  # Grid size in meters (100x100m)
 
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -3371,15 +3361,15 @@ class GenderIndicatorTool:
                     'OUTPUT': 'memory:'
                 })['OUTPUT']
 
-            # Buffer the vector layer
+            # Buffer the streetlight points
             buffered_layer = processing.run("native:buffer", {
                 'INPUT': vector_layer,
-                'DISTANCE': LIGHT_AREA_RADIUS,
-                'SEGMENTS': BUFFER_SEGMENTS,
-                'END_CAP_STYLE': BUFFER_END_CAP_STYLE,
-                'JOIN_STYLE': BUFFER_JOIN_STYLE,
-                'MITER_LIMIT': BUFFER_MITER_LIMIT,
-                'DISSOLVE': BUFFER_DISSOLVE,
+                'DISTANCE': BUFFER_RADIUS,
+                'SEGMENTS': 8,
+                'END_CAP_STYLE': 0,
+                'JOIN_STYLE': 0,
+                'MITER_LIMIT': 2,
+                'DISSOLVE': False,
                 'OUTPUT': 'memory:'
             })['OUTPUT']
 
@@ -3394,76 +3384,53 @@ class GenderIndicatorTool:
                     'OUTPUT': 'memory:'
                 })['OUTPUT']
 
-            # Ensure spatial index exists
-            _ = QgsSpatialIndex(buffered_layer.getFeatures())
-            _ = QgsSpatialIndex(countryLayer.getFeatures())
+            # Generate a point grid over the country layer
+            country_extent = countryLayer.extent()
+            grid_params = {
+                'TYPE': 0,  # Point grid
+                'EXTENT': f'{country_extent.xMinimum()},{country_extent.xMaximum()},{country_extent.yMinimum()},{country_extent.yMaximum()}',
+                'HSPACING': GRID_SIZE,
+                'VSPACING': GRID_SIZE,
+                'CRS': UTM_crs.authid(),
+                'OUTPUT': 'memory:'
+            }
+            grid_layer = processing.run('native:creategrid', grid_params)['OUTPUT']
 
-            # Clip the buffered layer by the country layer
-            clipped_layer = processing.run("native:clip", {
-                'INPUT': buffered_layer,
+            # Clip the grid to the country boundaries
+            clipped_grid_layer = processing.run("native:clip", {
+                'INPUT': grid_layer,
                 'OVERLAY': countryLayer,
                 'OUTPUT': 'memory:'
             })['OUTPUT']
 
-            if not any(clipped_layer.getFeatures()):
-                raise ValueError("Clipping resulted in an empty layer")
+            # Count the number of overlapping buffers at each grid point
+            clipped_grid_layer.startEditing()
+            for grid_feat in clipped_grid_layer.getFeatures():
+                point_geom = grid_feat.geometry()
+                count = sum(
+                    1 for buffer_feat in buffered_layer.getFeatures() if point_geom.intersects(buffer_feat.geometry()))
+                clipped_grid_layer.changeAttributeValue(grid_feat.id(), clipped_grid_layer.fields().indexFromName('ID'),
+                                                        count)
+            clipped_grid_layer.commitChanges()
 
-            # Calculate the extent based on the country layer with minimal padding
-            country_extent = countryLayer.extent()
-            xmin, ymin, xmax, ymax = country_extent.xMinimum(), country_extent.yMinimum(), country_extent.xMaximum(), country_extent.yMaximum()
-
-            # Apply minimal padding
-            width_padding = (xmax - xmin) * MINIMAL_PADDING_FACTOR
-            height_padding = (ymax - ymin) * MINIMAL_PADDING_FACTOR
-            xmin -= width_padding
-            ymin -= height_padding
-            xmax += width_padding
-            ymax += height_padding
-
-            # Create a temporary memory layer to hold the scaled scores
-            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
-            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
-            temp_layer.updateFields()
-
-            # Perform the convolution and calculate coverage scores
-            temp_layer.startEditing()
-            for feature in clipped_layer.getFeatures():
-                # Placeholder for scoring logic
-                score = RASTER_BURN_VALUE  # This would normally be calculated based on the convolution
-                new_feature = QgsFeature(temp_layer.fields())
-                new_feature.setGeometry(feature.geometry())
-                new_feature.setAttribute("scaled_score", score)
-                temp_layer.addFeature(new_feature)
-
-            temp_layer.commitChanges()
-
-            # Ensure spatial index for temp_layer
-            _ = QgsSpatialIndex(temp_layer.getFeatures())
-
-            # Set up output directory
-            Dimension = "Place Characterization"
-            if not os.path.exists(Dimension):
-                os.mkdir(Dimension)
-            os.chdir(Dimension)
-
+            # Rasterize the grid layer
             rasOutput = self.dlg.SAF_Output_Field.text()
 
-            # Rasterize
             _ = processing.run(
                 "gdal:rasterize",
                 {
-                    "INPUT": temp_layer,
-                    "FIELD": "scaled_score",
+                    "INPUT": clipped_grid_layer,
+                    "FIELD": "ID",  # The field with the count of overlapping buffers
                     "BURN": 0,
                     "USE_Z": False,
                     "UNITS": 1,
-                    "WIDTH": pixelSize,
-                    "HEIGHT": pixelSize,
-                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
-                    "NODATA": None,
+                    "WIDTH": int((country_extent.width()) / pixelSize),
+                    "HEIGHT": int((country_extent.height()) / pixelSize),
+                    "EXTENT": f"{country_extent.xMinimum()},{country_extent.xMaximum()},{country_extent.yMinimum()},{country_extent.yMaximum()}",
+                    "NODATA": 0,  # Ensure no-data areas are 0
                     "OPTIONS": "",
-                    "DATA_TYPE": 5,  # GDT_Int32
-                    "INIT": None,
+                    "DATA_TYPE": 6,  # GDT_Float64
+                    "INIT": 0,  # Initialize with 0
                     "INVERT": False,
                     "EXTRA": "",
                     "OUTPUT": rasOutput
