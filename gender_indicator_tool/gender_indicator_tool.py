@@ -3529,7 +3529,7 @@ class GenderIndicatorTool:
         """
         try:
             # Constants
-            GRID_SIZE = 100  # Grid size for rasterization
+            GRID_SIZE = self.dlg.pixelSize_SB.value()  # Grid size for rasterization
 
             # Set up variables
             current_script_path = os.path.dirname(os.path.abspath(__file__))
