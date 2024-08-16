@@ -337,9 +337,9 @@ class GenderIndicatorTool:
 
         ###### TAB 4.4 - Natural Environment
         #self.dlg.ENV_Set_PB.clicked.connect(lambda: self.TypeSet(3))
-        self.dlg.ENV_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_ENV)
+        #self.dlg.ENV_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_ENV)
         #self.dlg.ENV_unique_PB.clicked.connect(lambda: self.uniqueValues(3))
-        self.dlg.ENV_riskLevelField_CB.textActivated.connect(self.populateTextFieldWithUniqueValues_PC_ENV)
+        #self.dlg.ENV_riskLevelField_CB.textActivated.connect(self.populateTextFieldWithUniqueValues_PC_ENV)
         self.dlg.ENV_Execute_PB.clicked.connect(self.natEnvironment)
         self.dlg.ENV_Aggregate_PB.clicked.connect(self.envAggregate)
 
@@ -4849,7 +4849,7 @@ class GenderIndicatorTool:
 
         Factors it is applied:
             Place Characterization Dimension
-                - Natural Environment and Climatic factors
+                - Environmental Hazards
         """
         try:
             # Set up variables
@@ -4869,6 +4869,12 @@ class GenderIndicatorTool:
                 shutil.rmtree(tempDir)
             time.sleep(0.5)
             os.mkdir(tempDir)
+            
+            # Temp files
+            tempCalc = f"{tempDir}/tempEnvCalc.tif"
+            tempResample = f"{tempDir}/tempEnvResample.tif"
+            tempClipResample = f"{tempDir}/tempEnvClipResample.tif"
+            countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
 
             # Copy style file
             styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
@@ -4882,18 +4888,8 @@ class GenderIndicatorTool:
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
-            polygonLayerPath = self.dlg.ENV_Input_Field.filePath()
-            riskLevelField = self.dlg.ENV_riskLevelField_CB.currentText()
-
-            # Remove " (text)" from riskLevelField if present
-            if riskLevelField.endswith(" (text)"):
-                riskLevelField = riskLevelField.replace(" (text)", "")
-
-                # Get scoring from ENV_typeScore_Field
-                scoring_text = self.dlg.ENV_typeScore_Field.text()
-                riskType_Score = {item[0]: item[1] for item in eval(scoring_text)}
-            else:
-                riskType_Score = {}
+            rasterLayerPath = self.dlg.ENV_Input_Field.filePath()
+            #riskLevelField = self.dlg.ENV_riskLevelField_CB.currentText()
 
             rasField = "Score"
 
@@ -4914,20 +4910,9 @@ class GenderIndicatorTool:
                     'OUTPUT': 'memory:'
                 })['OUTPUT']
 
-            # Load and reproject polygon layer if necessary
-            polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
-            if not polygonLayer.isValid():
-                raise ValueError("Invalid polygon layer")
-            if polygonLayer.crs() != UTM_crs:
-                polygonLayer = processing.run("native:reprojectlayer", {
-                    'INPUT': polygonLayer,
-                    'TARGET_CRS': UTM_crs,
-                    'OUTPUT': 'memory:'
-                })['OUTPUT']
-
             # Ensure spatial index exists
             _ = QgsSpatialIndex(countryLayer.getFeatures())
-            _ = QgsSpatialIndex(polygonLayer.getFeatures())
+            #_ = QgsSpatialIndex(polygonLayer.getFeatures())
 
             # Buffer the country layer
             buffer = processing.run(
@@ -4941,63 +4926,104 @@ class GenderIndicatorTool:
                     "MITER_LIMIT": 2,
                     "DISSOLVE": True,
                     "SEPARATE_DISJOINT": False,
-                    "OUTPUT": 'memory:',
+                    "OUTPUT": countryUTMLayerBuf,
                 },
             )
-            countryLayerBuf = buffer["OUTPUT"]
+            countryUTMLayerBuf = buffer["OUTPUT"]
+            
+            CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+            country_extent = CountryBuf_df.total_bounds
 
-            # Assign scores to the polygon layer based on the riskType_Score
-            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
-            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Int)])
-            temp_layer.updateFields()
-
-            temp_layer.startEditing()
-            for feature in polygonLayer.getFeatures():
-                value = feature[riskLevelField]
-                if value is None or value not in riskType_Score:
-                    score = 0
-                else:
-                    score = riskType_Score[value]
-
-                new_feature = QgsFeature(temp_layer.fields())
-                new_feature.setGeometry(feature.geometry())
-                new_feature.setAttribute("scaled_score", score)
-                temp_layer.addFeature(new_feature)
-
-            temp_layer.commitChanges()
-
-            # Ensure spatial index for temp_layer
-            _ = QgsSpatialIndex(temp_layer.getFeatures())
-
-            # Get the extent for rasterization
-            extent = temp_layer.extent()
-            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
-
-            rasOutputPath = os.path.join(dimension_dir, "ENV", rasOutput)
-
-            # Rasterize
-            _ = processing.run(
-                "gdal:rasterize",
+            processing.run(
+                "gdal:warpreproject",
                 {
-                    "INPUT": temp_layer,
-                    "FIELD": "scaled_score",
-                    "BURN": 0,
-                    "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": pixelSize,
-                    "HEIGHT": pixelSize,
-                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "INPUT": rasterLayerPath,
+                    "SOURCE_CRS": None,
+                    "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "RESAMPLING": 0,
                     "NODATA": None,
+                    "TARGET_RESOLUTION": pixelSize,
                     "OPTIONS": "",
-                    "DATA_TYPE": 5,
-                    "INIT": None,
-                    "INVERT": False,
+                    "DATA_TYPE": 0,
+                    "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                    "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "MULTITHREADING": False,
                     "EXTRA": "",
-                    "OUTPUT": rasOutputPath,
+                    "OUTPUT": tempResample,
+                },
+            )
+            
+            processing.run("gdal:cliprasterbymasklayer", {
+                'INPUT': tempResample,
+                'MASK': countryLayer,
+                'SOURCE_CRS': None,
+                'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                'NODATA': None,
+                'ALPHA_BAND': False,
+                'CROP_TO_CUTLINE': True,
+                'KEEP_RESOLUTION': True,
+                'SET_RESOLUTION': False,
+                'X_RESOLUTION': None,
+                'Y_RESOLUTION': None,
+                'MULTITHREADING': False,
+                'OPTIONS': '',
+                'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                'EXTRA': '',
+                'OUTPUT': tempClipResample
+            })
+
+            processing.run(
+                "gdal:rastercalculator",
+                {
+                    "INPUT_A": tempClipResample,
+                    "BAND_A": 1,
+                    "INPUT_B": None,
+                    "BAND_B": None,
+                    "INPUT_C": None,
+                    "BAND_C": None,
+                    "INPUT_D": None,
+                    "BAND_D": None,
+                    "INPUT_E": None,
+                    "BAND_E": None,
+                    "INPUT_F": None,
+                    "BAND_F": None,
+                    "FORMULA": "A*1000",
+                    "NO_DATA": None,
+                    "EXTENT_OPT": 0,
+                    "PROJWIN": None,
+                    "RTYPE": 4,
+                    "OPTIONS": "",
+                    "EXTRA": "",
+                    "OUTPUT": tempCalc,
                 },
             )
 
-            self.dlg.ENV_Aggregate_Field.setText(rasOutputPath)
+            with rasterio.open(tempClipResample, "r+") as src:
+                ENV_ras = src.read(1)
+                meta1 = src.meta
+
+                #Rmax = ENV_ras.max()
+                #Rmin = ENV_ras.min()
+                #m_max = 5
+                #m_min = 0
+
+                #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
+                reclassified_ras = np.vectorize(self.reclassify_fire_hazards)(ENV_ras)
+                meta1.update(dtype=rasterio.float32)
+
+            if os.path.exists(f"{workingDir}/{Dimension}/ENV"):
+                os.chdir(f"{workingDir}/{Dimension}/ENV")
+            else:
+                os.mkdir(f"{workingDir}/{Dimension}/ENV")
+                os.chdir(f"{workingDir}/{Dimension}/ENV")
+                
+            #rasOutput = f"ENV/{rasOutput}"
+            print(os.getcwd())
+
+            with rasterio.open(rasOutput, "w", **meta1) as dst:
+                dst.write(reclassified_ras, 1)
+
+            self.dlg.ENV_Aggregate_Field.setText(rasOutput)
 
             self.dlg.ENV_status.setText("Processing Complete!")
             self.dlg.ENV_status.repaint()
@@ -6495,3 +6521,21 @@ class GenderIndicatorTool:
         self.dlg.ATAGG_status.repaint()
 
         os.chdir(workingDir)
+        
+        
+    # Define the reclassification function
+    def reclassify_fire_hazards(self, value):
+        if value == 0:
+            return 5
+        elif 0 < value <= 1:
+            return 4
+        elif 1 < value <= 2:
+            return 3
+        elif 2 < value <= 5:
+            return 2
+        elif 5 < value <= 8:
+            return 1
+        elif value > 8:
+            return 0
+        else:
+            return np.nan  # Handle NoData or unexpected values
