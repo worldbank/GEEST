@@ -4876,19 +4876,15 @@ class GenderIndicatorTool:
             tempClipResample = f"{tempDir}/tempEnvClipResample.tif"
             countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
 
-            # Copy style file
-            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
-            styleFileDestination = os.path.join(dimension_dir, "ENV")
-            if not os.path.exists(styleFileDestination):
-                os.mkdir(styleFileDestination)
-            rasOutput = self.dlg.ENV_Output_Field.text()
-            styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
-            rasterLayerPath = self.dlg.ENV_Input_Field.filePath()
+            fireHazardLayer = self.dlg.ENV_Input_Field.filePath()
+            floodLayer = self.dlg.ENV_Input_Field_2.filePath()
+            landSlideLayer = self.dlg.ENV_Input_Field_3.filePath()
+            cycloneLayer = self.dlg.ENV_Input_Field_4.filePath()
+            droughtLayer = self.dlg.ENV_Input_Field_5.filePath()
             #riskLevelField = self.dlg.ENV_riskLevelField_CB.currentText()
 
             rasField = "Score"
@@ -4934,104 +4930,652 @@ class GenderIndicatorTool:
             CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
             country_extent = CountryBuf_df.total_bounds
 
-            processing.run(
-                "gdal:warpreproject",
-                {
-                    "INPUT": rasterLayerPath,
-                    "SOURCE_CRS": None,
-                    "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                    "RESAMPLING": 0,
-                    "NODATA": None,
-                    "TARGET_RESOLUTION": pixelSize,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 0,
-                    "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
-                    "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                    "MULTITHREADING": False,
-                    "EXTRA": "",
-                    "OUTPUT": tempResample,
-                },
-            )
-            
-            processing.run("gdal:cliprasterbymasklayer", {
-                'INPUT': tempResample,
-                'MASK': countryLayer,
-                'SOURCE_CRS': None,
-                'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                'NODATA': None,
-                'ALPHA_BAND': False,
-                'CROP_TO_CUTLINE': True,
-                'KEEP_RESOLUTION': True,
-                'SET_RESOLUTION': False,
-                'X_RESOLUTION': None,
-                'Y_RESOLUTION': None,
-                'MULTITHREADING': False,
-                'OPTIONS': '',
-                'DATA_TYPE': 0,  # Use 0 for the same data type as the input
-                'EXTRA': '',
-                'OUTPUT': tempClipResample
-            })
-
-            processing.run(
-                "gdal:rastercalculator",
-                {
-                    "INPUT_A": tempClipResample,
-                    "BAND_A": 1,
-                    "INPUT_B": None,
-                    "BAND_B": None,
-                    "INPUT_C": None,
-                    "BAND_C": None,
-                    "INPUT_D": None,
-                    "BAND_D": None,
-                    "INPUT_E": None,
-                    "BAND_E": None,
-                    "INPUT_F": None,
-                    "BAND_F": None,
-                    "FORMULA": "A*1000",
-                    "NO_DATA": None,
-                    "EXTENT_OPT": 0,
-                    "PROJWIN": None,
-                    "RTYPE": 4,
-                    "OPTIONS": "",
-                    "EXTRA": "",
-                    "OUTPUT": tempCalc,
-                },
-            )
-
-            with rasterio.open(tempClipResample, "r+") as src:
-                ENV_ras = src.read(1)
-                meta1 = src.meta
-
-                #Rmax = ENV_ras.max()
-                #Rmin = ENV_ras.min()
-                #m_max = 5
-                #m_min = 0
-
-                #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
-                reclassified_ras = np.vectorize(self.reclassify_fire_hazards)(ENV_ras)
-                meta1.update(dtype=rasterio.float32)
-
-            if os.path.exists(f"{workingDir}/{Dimension}/ENV"):
-                os.chdir(f"{workingDir}/{Dimension}/ENV")
-            else:
-                os.mkdir(f"{workingDir}/{Dimension}/ENV")
-                os.chdir(f"{workingDir}/{Dimension}/ENV")
+            if fireHazardLayer:
+                processing.run(
+                    "gdal:warpreproject",
+                    {
+                        "INPUT": fireHazardLayer,
+                        "SOURCE_CRS": None,
+                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "RESAMPLING": 0,
+                        "NODATA": None,
+                        "TARGET_RESOLUTION": pixelSize,
+                        "OPTIONS": "",
+                        "DATA_TYPE": 0,
+                        "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                        "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "MULTITHREADING": False,
+                        "EXTRA": "",
+                        "OUTPUT": tempResample,
+                    },
+                )
                 
-            #rasOutput = f"ENV/{rasOutput}"
-            print(os.getcwd())
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': None,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': tempClipResample
+                })
 
-            with rasterio.open(rasOutput, "w", **meta1) as dst:
-                dst.write(reclassified_ras, 1)
+                processing.run(
+                    "gdal:rastercalculator",
+                    {
+                        "INPUT_A": tempClipResample,
+                        "BAND_A": 1,
+                        "INPUT_B": None,
+                        "BAND_B": None,
+                        "INPUT_C": None,
+                        "BAND_C": None,
+                        "INPUT_D": None,
+                        "BAND_D": None,
+                        "INPUT_E": None,
+                        "BAND_E": None,
+                        "INPUT_F": None,
+                        "BAND_F": None,
+                        "FORMULA": "A*1000",
+                        "NO_DATA": None,
+                        "EXTENT_OPT": 0,
+                        "PROJWIN": None,
+                        "RTYPE": 4,
+                        "OPTIONS": "",
+                        "EXTRA": "",
+                        "OUTPUT": tempCalc,
+                    },
+                )
 
-            self.dlg.ENV_Aggregate_Field.setText(rasOutput)
+                with rasterio.open(tempClipResample, "r+") as src:
+                    ENV_ras = src.read(1)
+                    meta1 = src.meta
 
-            self.dlg.ENV_status.setText("Processing Complete!")
-            self.dlg.ENV_status.repaint()
+                    #Rmax = ENV_ras.max()
+                    #Rmin = ENV_ras.min()
+                    #m_max = 5
+                    #m_min = 0
+
+                    #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
+                    reclassified_ras = np.vectorize(self.reclassifyFireHazards)(ENV_ras)
+                    meta1.update(dtype=rasterio.float32)
+
+                if os.path.exists(f"{workingDir}/{Dimension}/ENV"):
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                else:
+                    os.mkdir(f"{workingDir}/{Dimension}/ENV")
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                    
+                rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Fire_Density.tif"
+                print(os.getcwd())
+
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(reclassified_ras, 1)
+
+                self.dlg.ENV_Aggregate_Field.setText(rasOutput)
+                
+                # Copy style file
+                styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+                styleFileDestination = os.path.join(dimension_dir, "ENV")
+                if not os.path.exists(styleFileDestination):
+                    os.mkdir(styleFileDestination)
+                styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                self.dlg.ENV_status.setText("Processing Complete!")
+                self.dlg.ENV_status.repaint()
+                
+            if floodLayer:
+                processing.run(
+                    "gdal:warpreproject",
+                    {
+                        "INPUT": floodLayer,
+                        "SOURCE_CRS": None,
+                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "RESAMPLING": 0,
+                        "NODATA": None,
+                        "TARGET_RESOLUTION": pixelSize,
+                        "OPTIONS": "",
+                        "DATA_TYPE": 0,
+                        "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                        "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "MULTITHREADING": False,
+                        "EXTRA": "",
+                        "OUTPUT": tempResample,
+                    },
+                )
+                
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': None,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': tempClipResample
+                })
+
+                processing.run(
+                    "gdal:rastercalculator",
+                    {
+                        "INPUT_A": tempClipResample,
+                        "BAND_A": 1,
+                        "INPUT_B": None,
+                        "BAND_B": None,
+                        "INPUT_C": None,
+                        "BAND_C": None,
+                        "INPUT_D": None,
+                        "BAND_D": None,
+                        "INPUT_E": None,
+                        "BAND_E": None,
+                        "INPUT_F": None,
+                        "BAND_F": None,
+                        "FORMULA": "A*1000",
+                        "NO_DATA": None,
+                        "EXTENT_OPT": 0,
+                        "PROJWIN": None,
+                        "RTYPE": 4,
+                        "OPTIONS": "",
+                        "EXTRA": "",
+                        "OUTPUT": tempCalc,
+                    },
+                )
+
+                with rasterio.open(tempClipResample, "r+") as src:
+                    ENV_ras = src.read(1)
+                    meta1 = src.meta
+
+                    #Rmax = ENV_ras.max()
+                    #Rmin = ENV_ras.min()
+                    #m_max = 5
+                    #m_min = 0
+
+                    #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
+                    reclassified_ras = np.vectorize(self.reclassifyFloodHazard)(ENV_ras)
+                    meta1.update(dtype=rasterio.float32)
+
+                if os.path.exists(f"{workingDir}/{Dimension}/ENV"):
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                else:
+                    os.mkdir(f"{workingDir}/{Dimension}/ENV")
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                    
+                rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Flood.tif"
+
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(reclassified_ras, 1)
+
+                self.dlg.ENV_Aggregate_Field.setText(rasOutput)
+                
+                # Copy style file
+                styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+                styleFileDestination = os.path.join(dimension_dir, "ENV")
+                if not os.path.exists(styleFileDestination):
+                    os.mkdir(styleFileDestination)
+                styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                self.dlg.ENV_status.setText("Processing Complete!")
+                self.dlg.ENV_status.repaint()
+            
+            if landSlideLayer:
+                processing.run(
+                    "gdal:warpreproject",
+                    {
+                        "INPUT": landSlideLayer,
+                        "SOURCE_CRS": None,
+                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "RESAMPLING": 0,
+                        "NODATA": None,
+                        "TARGET_RESOLUTION": pixelSize,
+                        "OPTIONS": "",
+                        "DATA_TYPE": 0,
+                        "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                        "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "MULTITHREADING": False,
+                        "EXTRA": "",
+                        "OUTPUT": tempResample,
+                    },
+                )
+                
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': None,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': tempClipResample
+                })
+
+                processing.run(
+                    "gdal:rastercalculator",
+                    {
+                        "INPUT_A": tempClipResample,
+                        "BAND_A": 1,
+                        "INPUT_B": None,
+                        "BAND_B": None,
+                        "INPUT_C": None,
+                        "BAND_C": None,
+                        "INPUT_D": None,
+                        "BAND_D": None,
+                        "INPUT_E": None,
+                        "BAND_E": None,
+                        "INPUT_F": None,
+                        "BAND_F": None,
+                        "FORMULA": "A*1000",
+                        "NO_DATA": None,
+                        "EXTENT_OPT": 0,
+                        "PROJWIN": None,
+                        "RTYPE": 4,
+                        "OPTIONS": "",
+                        "EXTRA": "",
+                        "OUTPUT": tempCalc,
+                    },
+                )
+
+                with rasterio.open(tempClipResample, "r+") as src:
+                    ENV_ras = src.read(1)
+                    meta1 = src.meta
+
+                    #Rmax = ENV_ras.max()
+                    #Rmin = ENV_ras.min()
+                    #m_max = 5
+                    #m_min = 0
+
+                    #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
+                    reclassified_ras = np.vectorize(self.reclassifyLandslide)(ENV_ras)
+                    meta1.update(dtype=rasterio.float32)
+
+                if os.path.exists(f"{workingDir}/{Dimension}/ENV"):
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                else:
+                    os.mkdir(f"{workingDir}/{Dimension}/ENV")
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                    
+                rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Landslide_Susceptibility.tif"
+
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(reclassified_ras, 1)
+
+                self.dlg.ENV_Aggregate_Field.setText(rasOutput)
+                
+                # Copy style file
+                styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+                styleFileDestination = os.path.join(dimension_dir, "ENV")
+                if not os.path.exists(styleFileDestination):
+                    os.mkdir(styleFileDestination)
+                styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                self.dlg.ENV_status.setText("Processing Complete!")
+                self.dlg.ENV_status.repaint()
+            
+            if cycloneLayer:
+                processing.run(
+                    "gdal:warpreproject",
+                    {
+                        "INPUT": cycloneLayer,
+                        "SOURCE_CRS": None,
+                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "RESAMPLING": 0,
+                        "NODATA": None,
+                        "TARGET_RESOLUTION": pixelSize,
+                        "OPTIONS": "",
+                        "DATA_TYPE": 0,
+                        "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                        "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "MULTITHREADING": False,
+                        "EXTRA": "",
+                        "OUTPUT": tempResample,
+                    },
+                )
+                
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': None,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': tempClipResample
+                })
+
+                processing.run(
+                    "gdal:rastercalculator",
+                    {
+                        "INPUT_A": tempClipResample,
+                        "BAND_A": 1,
+                        "INPUT_B": None,
+                        "BAND_B": None,
+                        "INPUT_C": None,
+                        "BAND_C": None,
+                        "INPUT_D": None,
+                        "BAND_D": None,
+                        "INPUT_E": None,
+                        "BAND_E": None,
+                        "INPUT_F": None,
+                        "BAND_F": None,
+                        "FORMULA": "A*1000",
+                        "NO_DATA": None,
+                        "EXTENT_OPT": 0,
+                        "PROJWIN": None,
+                        "RTYPE": 4,
+                        "OPTIONS": "",
+                        "EXTRA": "",
+                        "OUTPUT": tempCalc,
+                    },
+                )
+
+                with rasterio.open(tempClipResample, "r+") as src:
+                    ENV_ras = src.read(1)
+                    meta1 = src.meta
+
+                    #Rmax = ENV_ras.max()
+                    #Rmin = ENV_ras.min()
+                    #m_max = 5
+                    #m_min = 0
+
+                    #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
+                    reclassified_ras = np.vectorize(self.reclassifyTropicalCyclone)(ENV_ras)
+                    meta1.update(dtype=rasterio.float32)
+
+                if os.path.exists(f"{workingDir}/{Dimension}/ENV"):
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                else:
+                    os.mkdir(f"{workingDir}/{Dimension}/ENV")
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                    
+                rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Cyclones.tif"
+
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(reclassified_ras, 1)
+
+                self.dlg.ENV_Aggregate_Field.setText(rasOutput)
+                
+                # Copy style file
+                styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+                styleFileDestination = os.path.join(dimension_dir, "ENV")
+                if not os.path.exists(styleFileDestination):
+                    os.mkdir(styleFileDestination)
+                styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                self.dlg.ENV_status.setText("Processing Complete!")
+                self.dlg.ENV_status.repaint()
+            
+            if droughtLayer:
+                processing.run(
+                    "gdal:warpreproject",
+                    {
+                        "INPUT": droughtLayer,
+                        "SOURCE_CRS": None,
+                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "RESAMPLING": 0,
+                        "NODATA": None,
+                        "TARGET_RESOLUTION": pixelSize,
+                        "OPTIONS": "",
+                        "DATA_TYPE": 0,
+                        "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                        "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "MULTITHREADING": False,
+                        "EXTRA": "",
+                        "OUTPUT": tempResample,
+                    },
+                )
+                
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': None,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': tempClipResample
+                })
+
+                processing.run(
+                    "gdal:rastercalculator",
+                    {
+                        "INPUT_A": tempClipResample,
+                        "BAND_A": 1,
+                        "INPUT_B": None,
+                        "BAND_B": None,
+                        "INPUT_C": None,
+                        "BAND_C": None,
+                        "INPUT_D": None,
+                        "BAND_D": None,
+                        "INPUT_E": None,
+                        "BAND_E": None,
+                        "INPUT_F": None,
+                        "BAND_F": None,
+                        "FORMULA": "A*1000",
+                        "NO_DATA": None,
+                        "EXTENT_OPT": 0,
+                        "PROJWIN": None,
+                        "RTYPE": 4,
+                        "OPTIONS": "",
+                        "EXTRA": "",
+                        "OUTPUT": tempCalc,
+                    },
+                )
+
+                with rasterio.open(tempClipResample, "r+") as src:
+                    ENV_ras = src.read(1)
+                    meta1 = src.meta
+
+                    #Rmax = ENV_ras.max()
+                    #Rmin = ENV_ras.min()
+                    #m_max = 5
+                    #m_min = 0
+                    # Retrieve the NoData value from the metadata
+                    nodata_value = src.nodata
+
+                    #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
+                    reclassified_ras = np.vectorize(self.reclassifyDrought)(ENV_ras, nodata_value)
+                    meta1.update(dtype=rasterio.float32)
+
+                if os.path.exists(f"{workingDir}/{Dimension}/ENV"):
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                else:
+                    os.mkdir(f"{workingDir}/{Dimension}/ENV")
+                    os.chdir(f"{workingDir}/{Dimension}/ENV")
+                    
+                rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Drought.tif"
+
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(reclassified_ras, 1)
+
+                self.dlg.ENV_Aggregate_Field.setText(rasOutput)
+                
+                # Copy style file
+                styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+                styleFileDestination = os.path.join(dimension_dir, "ENV")
+                if not os.path.exists(styleFileDestination):
+                    os.mkdir(styleFileDestination)
+                styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+                self.dlg.ENV_status.setText("Processing Complete!")
+                self.dlg.ENV_status.repaint()
 
         except Exception as e:
             print(str(e))
             self.dlg.ENV_status.setText(f"Error: {str(e)}")
             self.dlg.ENV_status.repaint()
+            
+    # Define the reclassification function
+    def reclassifyFireHazards(self, value):
+        if value == 0:
+            return 5
+        elif 0 < value <= 1:
+            return 4
+        elif 1 < value <= 2:
+            return 3
+        elif 2 < value <= 5:
+            return 2
+        elif 5 < value <= 8:
+            return 1
+        elif value > 8:
+            return 0
+        else:
+            return np.nan  # Handle NoData or unexpected values
+
+    def reclassifyEarthQuakes(self, value):
+        if 0.01 <= value < 0.02:
+            return 5
+        elif 0.02 < value <= 0.05:
+            return 4
+        elif 0.05 < value <= 0.013:
+            return 3
+        elif 0.013 < value <= 0.35:
+            return 2
+        elif 0.35 < value <= 0.90:
+            return 1
+        elif 0.90 < value <= 1.90:
+            return 0
+        else:
+            return np.nan
+        
+    def reclassifyTsunami(self, value):
+        if value == 0:
+            return 5
+        elif 0 < value <= 0.000001:
+            return 4
+        elif 0.000001 < value <= 0.00001:
+            return 3
+        elif 0.00001 < value <= 0.0001:
+            return 2
+        elif 0.0001 < value <= 0.001:
+            return 1
+        elif 0.001 < value <= 0.002:
+            return 0
+        else:
+            return np.nan
+        
+    def reclassifyFloodHazard(self, value):
+        if value == 0:
+            return 5
+        elif 0 < value <= 180:
+            return 4
+        elif 180 < value <= 360:
+            return 3
+        elif 360 < value <= 540:
+            return 2
+        elif 540 < value <= 720:
+            return 1
+        elif 720 < value <= 900:
+            return 0
+        else:
+            return np.nan
+        
+    def reclassifyLandslide(self, value):
+        if value == 0:
+            return 5
+        elif value == 1:
+            return 4
+        elif value == 2:
+            return 3
+        elif value == 3:
+            return 2
+        elif value == 4:
+            return 1
+        elif value > 5:
+            return 0
+        else:
+            return 5
+        
+    def reclassifyTropicalCyclone(self, value):
+        if value == 0:
+            return 5
+        elif 0 < value <= 25:
+            return 4
+        elif 25 < value <= 50:
+            return 3
+        elif 50 < value <= 75:
+            return 2
+        elif 75 < value <= 100:
+            return 1
+        elif value > 100:
+            return 0
+        else:
+            return np.nan
+        
+    def reclassifyDrought(self, value, nodata):
+        if value == 0:
+            return 5
+        elif 0 < value <= 1:
+            return 4
+        elif 1 < value <= 2:
+            return 3
+        elif 2 < value <= 3:
+            return 2
+        elif 3 < value <= 4:
+            return 1
+        elif 4 < value <= 5:
+            return 0
+        elif np.isnan(value) or value == nodata:
+            return 5
+        
+    def reclassifyAirPollution(self, value):
+        if 0 < value <= 10:
+            return 5
+        elif 10 < value <= 20:
+            return 4
+        elif 20 < value <= 30:
+            return 3
+        elif 30 < value <= 50:
+            return 2
+        elif 50 < value <= 80:
+            return 1
+        elif 80 < value <= 300:
+            return 0
+        else:
+            return np.nan
 
     def envAggregate(self):
         """
@@ -6523,19 +7067,4 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
         
         
-    # Define the reclassification function
-    def reclassify_fire_hazards(self, value):
-        if value == 0:
-            return 5
-        elif 0 < value <= 1:
-            return 4
-        elif 1 < value <= 2:
-            return 3
-        elif 2 < value <= 5:
-            return 2
-        elif 5 < value <= 8:
-            return 1
-        elif value > 8:
-            return 0
-        else:
-            return np.nan  # Handle NoData or unexpected values
+    

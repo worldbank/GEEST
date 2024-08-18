@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -1937,7 +1937,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -2544,33 +2544,72 @@ p, li { white-space: pre-wrap; }
            <string>Environment Hazards</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_21">
-           <item row="0" column="0" colspan="2">
-            <widget class="QTextEdit" name="textEdit_32">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
+           <item row="9" column="0">
+            <widget class="QLabel" name="label_134">
              <property name="maximumSize">
               <size>
-               <width>350</width>
+               <width>16777215</width>
                <height>50</height>
               </size>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
-             </property>
-             <property name="html">
-              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-weight:600;&quot;&gt;Step 1: Repeat for all available disaster risk types&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <property name="text">
+              <string>Drought Input Layer (Raster)</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QLabel" name="label_128">
+           <item row="19" column="1">
+            <widget class="QLabel" name="ENVAGG_status">
              <property name="text">
-              <string>Hazard Input Layer (Raster)</string>
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_131">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Landslide Input Layer (Raster)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_132">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Tropical cyclone Input Layer (Raster)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="19" column="0">
+            <widget class="QPushButton" name="ENV_Aggregate_PB">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Aggregate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="1">
+            <widget class="QLabel" name="ENV_status">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -2579,15 +2618,8 @@ p, li { white-space: pre-wrap; }
              <property name="maximumSize">
               <size>
                <width>300</width>
-               <height>16777215</height>
+               <height>50</height>
               </size>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QLabel" name="label_130">
-             <property name="text">
-              <string>Hazard Input Layer (Raster)</string>
              </property>
             </widget>
            </item>
@@ -2596,41 +2628,40 @@ p, li { white-space: pre-wrap; }
              <property name="maximumSize">
               <size>
                <width>300</width>
-               <height>16777215</height>
+               <height>50</height>
               </size>
              </property>
             </widget>
            </item>
-           <item row="5" column="0" colspan="2">
-            <widget class="QLabel" name="label_131">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_128">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
              <property name="text">
-              <string>Hazard Input Layer (Raster)</string>
+              <string>Fire Hazard Input Layer (Raster)</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="ENV_Input_Field_3" native="true">
+           <item row="10" column="0">
+            <widget class="QgsFileWidget" name="ENV_Input_Field_5" native="true">
              <property name="maximumSize">
               <size>
                <width>300</width>
-               <height>16777215</height>
+               <height>50</height>
               </size>
              </property>
             </widget>
            </item>
-           <item row="7" column="0" colspan="2">
-            <widget class="QLabel" name="label_127">
-             <property name="text">
-              <string>Hazard Type Output Raster Filename</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0">
+           <item row="14" column="0">
             <widget class="QgsFilterLineEdit" name="ENV_Output_Field">
              <property name="maximumSize">
               <size>
                <width>250</width>
-               <height>16777215</height>
+               <height>50</height>
               </size>
              </property>
              <property name="text">
@@ -2641,27 +2672,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="9" column="0">
-            <widget class="QPushButton" name="ENV_Execute_PB">
-             <property name="maximumSize">
-              <size>
-               <width>200</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Execute</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="1">
-            <widget class="QLabel" name="ENV_status">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0" colspan="2">
+           <item row="16" column="0" colspan="2">
             <widget class="QTextEdit" name="textEdit_40">
              <property name="enabled">
               <bool>false</bool>
@@ -2684,56 +2695,7 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="11" column="0" colspan="2">
-            <widget class="QLabel" name="label_133">
-             <property name="text">
-              <string>Aggregated Hazard Raster Output Filename</string>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="0">
-            <widget class="QgsFilterLineEdit" name="ENV_AGGOutput_Field">
-             <property name="maximumSize">
-              <size>
-               <width>250</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="text">
-              <string>ENV.tif</string>
-             </property>
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="0">
-            <widget class="QPushButton" name="ENV_Aggregate_PB">
-             <property name="maximumSize">
-              <size>
-               <width>250</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Geoprocessiong Execution&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="text">
-              <string>Aggregate</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="1">
-            <widget class="QLabel" name="ENVAGG_status">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2" rowspan="14">
+           <item row="0" column="2" rowspan="20">
             <widget class="QTextEdit" name="textEdit_30">
              <property name="enabled">
               <bool>true</bool>
@@ -2761,8 +2723,121 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
+           <item row="8" column="0">
+            <widget class="QgsFileWidget" name="ENV_Input_Field_4" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>50</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="0">
+            <widget class="QPushButton" name="ENV_Execute_PB">
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QTextEdit" name="textEdit_32">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>350</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="html">
+              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-weight:600;&quot;&gt;Step 1: Repeat for all available disaster risk types&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="17" column="0" colspan="2">
+            <widget class="QLabel" name="label_133">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Aggregated Hazard Raster Output Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="2">
+            <widget class="QgsFileWidget" name="ENV_Input_Field_3" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>50</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="18" column="0">
+            <widget class="QgsFilterLineEdit" name="ENV_AGGOutput_Field">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Standardized Raster Output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>ENV.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_130">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Flood Hazard Input Layer (Raster)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="0">
+            <widget class="QLabel" name="label_127">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Hazard Type Output Raster Filename</string>
+             </property>
+            </widget>
+           </item>
           </layout>
-          <zorder>label_127</zorder>
           <zorder>label_128</zorder>
           <zorder>ENV_Output_Field</zorder>
           <zorder>ENV_Execute_PB</zorder>
@@ -2779,6 +2854,11 @@ p, li { white-space: pre-wrap; }
           <zorder>ENV_Input_Field_2</zorder>
           <zorder>label_131</zorder>
           <zorder>ENV_Input_Field_3</zorder>
+          <zorder>ENV_Input_Field_4</zorder>
+          <zorder>label_132</zorder>
+          <zorder>label_134</zorder>
+          <zorder>ENV_Input_Field_5</zorder>
+          <zorder>label_127</zorder>
          </widget>
          <widget class="QWidget" name="tab_36">
           <attribute name="title">
