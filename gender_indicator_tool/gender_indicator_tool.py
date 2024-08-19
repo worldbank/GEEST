@@ -1602,7 +1602,8 @@ class GenderIndicatorTool:
             mergeOutput = mergeClip["OUTPUT"]
 
             # Get the width and height of the extent
-            extent = mergeOutput.extent()
+            
+            extent = countryUTMLayerBuf.extent()
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
 
