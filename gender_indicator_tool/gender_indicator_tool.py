@@ -4949,53 +4949,8 @@ class GenderIndicatorTool:
                         "OUTPUT": tempResample,
                     },
                 )
-                
-                processing.run("gdal:cliprasterbymasklayer", {
-                    'INPUT': tempResample,
-                    'MASK': countryLayer,
-                    'SOURCE_CRS': None,
-                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': None,
-                    'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': True,
-                    'KEEP_RESOLUTION': True,
-                    'SET_RESOLUTION': False,
-                    'X_RESOLUTION': None,
-                    'Y_RESOLUTION': None,
-                    'MULTITHREADING': False,
-                    'OPTIONS': '',
-                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
-                    'EXTRA': '',
-                    'OUTPUT': tempClipResample
-                })
 
-                processing.run(
-                    "gdal:rastercalculator",
-                    {
-                        "INPUT_A": tempClipResample,
-                        "BAND_A": 1,
-                        "INPUT_B": None,
-                        "BAND_B": None,
-                        "INPUT_C": None,
-                        "BAND_C": None,
-                        "INPUT_D": None,
-                        "BAND_D": None,
-                        "INPUT_E": None,
-                        "BAND_E": None,
-                        "INPUT_F": None,
-                        "BAND_F": None,
-                        "FORMULA": "A*1000",
-                        "NO_DATA": None,
-                        "EXTENT_OPT": 0,
-                        "PROJWIN": None,
-                        "RTYPE": 4,
-                        "OPTIONS": "",
-                        "EXTRA": "",
-                        "OUTPUT": tempCalc,
-                    },
-                )
-
-                with rasterio.open(tempClipResample, "r+") as src:
+                with rasterio.open(tempResample, "r+") as src:
                     ENV_ras = src.read(1)
                     meta1 = src.meta
 
@@ -5015,10 +4970,28 @@ class GenderIndicatorTool:
                     os.chdir(f"{workingDir}/{Dimension}/ENV")
                     
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Fire_Density.tif"
-                print(os.getcwd())
 
-                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
+                    
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempClipResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': 0,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': False,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': rasOutput
+                })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
                 
@@ -5052,53 +5025,8 @@ class GenderIndicatorTool:
                         "OUTPUT": tempResample,
                     },
                 )
-                
-                processing.run("gdal:cliprasterbymasklayer", {
-                    'INPUT': tempResample,
-                    'MASK': countryLayer,
-                    'SOURCE_CRS': None,
-                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': None,
-                    'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': True,
-                    'KEEP_RESOLUTION': True,
-                    'SET_RESOLUTION': False,
-                    'X_RESOLUTION': None,
-                    'Y_RESOLUTION': None,
-                    'MULTITHREADING': False,
-                    'OPTIONS': '',
-                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
-                    'EXTRA': '',
-                    'OUTPUT': tempClipResample
-                })
 
-                processing.run(
-                    "gdal:rastercalculator",
-                    {
-                        "INPUT_A": tempClipResample,
-                        "BAND_A": 1,
-                        "INPUT_B": None,
-                        "BAND_B": None,
-                        "INPUT_C": None,
-                        "BAND_C": None,
-                        "INPUT_D": None,
-                        "BAND_D": None,
-                        "INPUT_E": None,
-                        "BAND_E": None,
-                        "INPUT_F": None,
-                        "BAND_F": None,
-                        "FORMULA": "A*1000",
-                        "NO_DATA": None,
-                        "EXTENT_OPT": 0,
-                        "PROJWIN": None,
-                        "RTYPE": 4,
-                        "OPTIONS": "",
-                        "EXTRA": "",
-                        "OUTPUT": tempCalc,
-                    },
-                )
-
-                with rasterio.open(tempClipResample, "r+") as src:
+                with rasterio.open(tempResample, "r+") as src:
                     ENV_ras = src.read(1)
                     meta1 = src.meta
 
@@ -5106,6 +5034,7 @@ class GenderIndicatorTool:
                     #Rmin = ENV_ras.min()
                     #m_max = 5
                     #m_min = 0
+                    #nodata_value = src.nodata
 
                     #result = ((ENV_ras - Rmin) / (Rmax - Rmin)) * m_max
                     reclassified_ras = np.vectorize(self.reclassifyFloodHazard)(ENV_ras)
@@ -5119,8 +5048,27 @@ class GenderIndicatorTool:
                     
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Flood.tif"
 
-                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
+                    
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempClipResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': 0,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': False,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': rasOutput
+                })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
                 
@@ -5154,53 +5102,8 @@ class GenderIndicatorTool:
                         "OUTPUT": tempResample,
                     },
                 )
-                
-                processing.run("gdal:cliprasterbymasklayer", {
-                    'INPUT': tempResample,
-                    'MASK': countryLayer,
-                    'SOURCE_CRS': None,
-                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': None,
-                    'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': True,
-                    'KEEP_RESOLUTION': True,
-                    'SET_RESOLUTION': False,
-                    'X_RESOLUTION': None,
-                    'Y_RESOLUTION': None,
-                    'MULTITHREADING': False,
-                    'OPTIONS': '',
-                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
-                    'EXTRA': '',
-                    'OUTPUT': tempClipResample
-                })
 
-                processing.run(
-                    "gdal:rastercalculator",
-                    {
-                        "INPUT_A": tempClipResample,
-                        "BAND_A": 1,
-                        "INPUT_B": None,
-                        "BAND_B": None,
-                        "INPUT_C": None,
-                        "BAND_C": None,
-                        "INPUT_D": None,
-                        "BAND_D": None,
-                        "INPUT_E": None,
-                        "BAND_E": None,
-                        "INPUT_F": None,
-                        "BAND_F": None,
-                        "FORMULA": "A*1000",
-                        "NO_DATA": None,
-                        "EXTENT_OPT": 0,
-                        "PROJWIN": None,
-                        "RTYPE": 4,
-                        "OPTIONS": "",
-                        "EXTRA": "",
-                        "OUTPUT": tempCalc,
-                    },
-                )
-
-                with rasterio.open(tempClipResample, "r+") as src:
+                with rasterio.open(tempResample, "r+") as src:
                     ENV_ras = src.read(1)
                     meta1 = src.meta
 
@@ -5221,8 +5124,27 @@ class GenderIndicatorTool:
                     
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Landslide_Susceptibility.tif"
 
-                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
+                    
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempClipResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': 0,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': False,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': rasOutput
+                })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
                 
@@ -5256,53 +5178,8 @@ class GenderIndicatorTool:
                         "OUTPUT": tempResample,
                     },
                 )
-                
-                processing.run("gdal:cliprasterbymasklayer", {
-                    'INPUT': tempResample,
-                    'MASK': countryLayer,
-                    'SOURCE_CRS': None,
-                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': None,
-                    'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': True,
-                    'KEEP_RESOLUTION': True,
-                    'SET_RESOLUTION': False,
-                    'X_RESOLUTION': None,
-                    'Y_RESOLUTION': None,
-                    'MULTITHREADING': False,
-                    'OPTIONS': '',
-                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
-                    'EXTRA': '',
-                    'OUTPUT': tempClipResample
-                })
 
-                processing.run(
-                    "gdal:rastercalculator",
-                    {
-                        "INPUT_A": tempClipResample,
-                        "BAND_A": 1,
-                        "INPUT_B": None,
-                        "BAND_B": None,
-                        "INPUT_C": None,
-                        "BAND_C": None,
-                        "INPUT_D": None,
-                        "BAND_D": None,
-                        "INPUT_E": None,
-                        "BAND_E": None,
-                        "INPUT_F": None,
-                        "BAND_F": None,
-                        "FORMULA": "A*1000",
-                        "NO_DATA": None,
-                        "EXTENT_OPT": 0,
-                        "PROJWIN": None,
-                        "RTYPE": 4,
-                        "OPTIONS": "",
-                        "EXTRA": "",
-                        "OUTPUT": tempCalc,
-                    },
-                )
-
-                with rasterio.open(tempClipResample, "r+") as src:
+                with rasterio.open(tempResample, "r+") as src:
                     ENV_ras = src.read(1)
                     meta1 = src.meta
 
@@ -5323,8 +5200,27 @@ class GenderIndicatorTool:
                     
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Cyclones.tif"
 
-                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
+                    
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempClipResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': 0,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': False,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': rasOutput
+                })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
                 
@@ -5359,52 +5255,7 @@ class GenderIndicatorTool:
                     },
                 )
                 
-                processing.run("gdal:cliprasterbymasklayer", {
-                    'INPUT': tempResample,
-                    'MASK': countryLayer,
-                    'SOURCE_CRS': None,
-                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': None,
-                    'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': True,
-                    'KEEP_RESOLUTION': True,
-                    'SET_RESOLUTION': False,
-                    'X_RESOLUTION': None,
-                    'Y_RESOLUTION': None,
-                    'MULTITHREADING': False,
-                    'OPTIONS': '',
-                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
-                    'EXTRA': '',
-                    'OUTPUT': tempClipResample
-                })
-
-                processing.run(
-                    "gdal:rastercalculator",
-                    {
-                        "INPUT_A": tempClipResample,
-                        "BAND_A": 1,
-                        "INPUT_B": None,
-                        "BAND_B": None,
-                        "INPUT_C": None,
-                        "BAND_C": None,
-                        "INPUT_D": None,
-                        "BAND_D": None,
-                        "INPUT_E": None,
-                        "BAND_E": None,
-                        "INPUT_F": None,
-                        "BAND_F": None,
-                        "FORMULA": "A*1000",
-                        "NO_DATA": None,
-                        "EXTENT_OPT": 0,
-                        "PROJWIN": None,
-                        "RTYPE": 4,
-                        "OPTIONS": "",
-                        "EXTRA": "",
-                        "OUTPUT": tempCalc,
-                    },
-                )
-
-                with rasterio.open(tempClipResample, "r+") as src:
+                with rasterio.open(tempResample, "r+") as src:
                     ENV_ras = src.read(1)
                     meta1 = src.meta
 
@@ -5427,8 +5278,27 @@ class GenderIndicatorTool:
                     
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Drought.tif"
 
-                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
+                    
+                processing.run("gdal:cliprasterbymasklayer", {
+                    'INPUT': tempClipResample,
+                    'MASK': countryLayer,
+                    'SOURCE_CRS': None,
+                    'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                    'NODATA': 0,
+                    'ALPHA_BAND': False,
+                    'CROP_TO_CUTLINE': False,
+                    'KEEP_RESOLUTION': True,
+                    'SET_RESOLUTION': False,
+                    'X_RESOLUTION': None,
+                    'Y_RESOLUTION': None,
+                    'MULTITHREADING': False,
+                    'OPTIONS': '',
+                    'DATA_TYPE': 0,  # Use 0 for the same data type as the input
+                    'EXTRA': '',
+                    'OUTPUT': rasOutput
+                })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
                 
@@ -5510,8 +5380,8 @@ class GenderIndicatorTool:
             return 1
         elif 720 < value <= 900:
             return 0
-        else:
-            return np.nan
+        elif np.isnan(value) or value == nodata:
+            return 5
         
     def reclassifyLandslide(self, value):
         if value == 0:
