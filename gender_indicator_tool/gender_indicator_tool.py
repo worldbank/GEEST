@@ -2761,7 +2761,7 @@ class GenderIndicatorTool:
                 mergeOutput = mergeClip["OUTPUT"]
 
                 # Get the width and height of the extent
-                extent = mergeOutput.extent()
+                extent = countryUTMLayerBuf.extent()
                 raster_width = int(extent.width() / pixelSize)
                 raster_height = int(extent.height() / pixelSize)
 
@@ -2936,7 +2936,7 @@ class GenderIndicatorTool:
             mergeOutput = mergeClip["OUTPUT"]
 
             # Get the width and height of the extent
-            extent = mergeOutput.extent()
+            extent = countryUTMLayerBuf.extent()
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
 
@@ -3124,7 +3124,7 @@ class GenderIndicatorTool:
             mergeOutput = mergeClip["OUTPUT"]
 
             # Get the width and height of the extent
-            extent = mergeOutput.extent()
+            extent = countryUTMLayerBuf.extent()
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
 
@@ -4186,7 +4186,26 @@ class GenderIndicatorTool:
             _ = QgsSpatialIndex(temp_layer.getFeatures())
 
             # Get the extent for rasterization
-            extent = temp_layer.extent()
+            UTM_crs_2 = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+            self.convertCRS(countryLayerPath, UTM_crs_2)
+            shp_utm[rasField] = [0]
+            countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryUTMLayer,
+                    "DISTANCE": 2000,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": "memory:",
+                },
+            )
+            countryUTMLayerBuf = buffer["OUTPUT"]
+            extent = countryUTMLayerBuf.extent()
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
 
             rasOutput = self.dlg.EDU_Output_Field.text()
@@ -4233,7 +4252,7 @@ class GenderIndicatorTool:
                     "TARGET_CRS": UTM_crs,
                     "NODATA": None,
                     "ALPHA_BAND": False,
-                    "CROP_TO_CUTLINE": True,
+                    "CROP_TO_CUTLINE": False,
                     "KEEP_RESOLUTION": True,
                     "OPTIONS": "",
                     "DATA_TYPE": 6,  # GDT_Float32 for real numbers
