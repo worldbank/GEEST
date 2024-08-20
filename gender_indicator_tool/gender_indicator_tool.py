@@ -4087,16 +4087,10 @@ class GenderIndicatorTool:
             styleFile = f"{os.path.splitext(self.dlg.EDU_Output_Field.text())[0]}.qml"
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-            # Load and reproject country layer if necessary
+            # Load country layer
             countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
             if not countryLayer.isValid():
                 raise ValueError("Invalid country layer")
-            if countryLayer.crs() != UTM_crs:
-                countryLayer = processing.run("native:reprojectlayer", {
-                    'INPUT': countryLayer,
-                    'TARGET_CRS': UTM_crs,
-                    'OUTPUT': 'memory:'
-                })['OUTPUT']
 
             # Ensure spatial index exists
             _ = QgsSpatialIndex(countryLayer.getFeatures())
