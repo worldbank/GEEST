@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -322,7 +322,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual">
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_2">
           <attribute name="title">
@@ -838,6 +838,13 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
+           <item row="4" column="4">
+            <widget class="QPushButton" name="PB_CTX_aggregate_auto">
+             <property name="text">
+              <string>Auto</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </widget>
@@ -855,7 +862,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -1923,6 +1930,13 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
+           <item row="6" column="4">
+            <widget class="QPushButton" name="PB_ACC_aggregate_auto">
+             <property name="text">
+              <string>Auto</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </widget>
@@ -1937,7 +1951,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>3</number>
+          <number>7</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -3276,57 +3290,6 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
-            <widget class="QLabel" name="label_95">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Weight %</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_101">
-             <property name="text">
-              <string>Active Transport (Activetransport)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QgsFilterLineEdit" name="AT_Aggregate_Field">
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QToolButton" name="WLK_Aggregate_TB">
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QDoubleSpinBox" name="WLK_Aggregate_SB">
-             <property name="maximum">
-              <double>100.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>14.300000000000001</double>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_99">
-             <property name="text">
-              <string>Safe Urban Design (SAF)</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="1">
             <widget class="QgsFilterLineEdit" name="SAF_Aggregate_Field">
              <property name="qgisRelation" stdset="0">
@@ -3334,10 +3297,17 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="2" column="2">
-            <widget class="QToolButton" name="SAF_Aggregate_TB">
+           <item row="11" column="0">
+            <widget class="QPushButton" name="PlaceCharacterization_AggregateExecute_PB">
              <property name="text">
-              <string>...</string>
+              <string>Execute</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QgsFilterLineEdit" name="EDU_Aggregate_Field">
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
              </property>
             </widget>
            </item>
@@ -3351,115 +3321,18 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_105">
-             <property name="text">
-              <string>Education (EDU)</string>
+           <item row="1" column="3">
+            <widget class="QDoubleSpinBox" name="WLK_Aggregate_SB">
+             <property name="maximum">
+              <double>100.000000000000000</double>
              </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QgsFilterLineEdit" name="EDU_Aggregate_Field">
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
+             <property name="value">
+              <double>14.300000000000001</double>
              </property>
             </widget>
            </item>
            <item row="3" column="2">
             <widget class="QToolButton" name="EDU_Aggregate_TB">
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="3">
-            <widget class="QDoubleSpinBox" name="EDU_Aggregate_SB">
-             <property name="maximum">
-              <double>100.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>14.300000000000001</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_106">
-             <property name="text">
-              <string>Digital Inclusion (DIG)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QgsFilterLineEdit" name="DIG_Aggregate_Field">
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="2">
-            <widget class="QToolButton" name="DIG_Aggregate_TB">
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="3">
-            <widget class="QDoubleSpinBox" name="DIG_Aggregate_SB">
-             <property name="maximum">
-              <double>100.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>14.300000000000001</double>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_107">
-             <property name="text">
-              <string>Environment Hazards (ENV)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QgsFilterLineEdit" name="ENV_Aggregate_Field">
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="2">
-            <widget class="QToolButton" name="ENV_Aggregate_TB">
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="3">
-            <widget class="QDoubleSpinBox" name="ENV_Aggregate_SB">
-             <property name="maximum">
-              <double>100.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>14.300000000000001</double>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_151">
-             <property name="text">
-              <string>Fragility, conflict and violence (FCV)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QgsFilterLineEdit" name="FCV_Aggregate_Field">
-             <property name="qgisRelation" stdset="0">
-              <string notr="true"/>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="2">
-            <widget class="QToolButton" name="FCV_Aggregate_TB">
              <property name="text">
               <string>...</string>
              </property>
@@ -3475,27 +3348,52 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_154">
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_99">
              <property name="text">
-              <string>Water and Sanitation (WAS)</string>
+              <string>Safe Urban Design (SAF)</string>
              </property>
             </widget>
            </item>
-           <item row="7" column="1">
-            <widget class="QgsFilterLineEdit" name="WAS_Aggregate_Field">
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_107">
              <property name="text">
-              <string/>
+              <string>Environment Hazards (ENV)</string>
              </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QgsFilterLineEdit" name="DIG_Aggregate_Field">
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
              </property>
             </widget>
            </item>
-           <item row="7" column="2">
-            <widget class="QToolButton" name="WAS_Aggregate_TB">
+           <item row="6" column="1">
+            <widget class="QgsFilterLineEdit" name="FCV_Aggregate_Field">
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QToolButton" name="SAF_Aggregate_TB">
              <property name="text">
               <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_106">
+             <property name="text">
+              <string>Digital Inclusion (DIG)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_154">
+             <property name="text">
+              <string>Water and Sanitation (WAS)</string>
              </property>
             </widget>
            </item>
@@ -3509,44 +3407,34 @@ p, li { white-space: pre-wrap; }
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
-            <widget class="QLabel" name="label_98">
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
+           <item row="7" column="1">
+            <widget class="QgsFilterLineEdit" name="WAS_Aggregate_Field">
              <property name="text">
-              <string>Output Aggregate Raster File</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0">
-            <widget class="QgsFilterLineEdit" name="PlaceCharacterization_AggregateOutput_Field">
-             <property name="text">
-              <string>Place_score.tif</string>
+              <string/>
              </property>
              <property name="qgisRelation" stdset="0">
               <string notr="true"/>
              </property>
             </widget>
            </item>
-           <item row="10" column="0">
-            <widget class="QPushButton" name="PlaceCharacterization_AggregateExecute_PB">
+           <item row="4" column="2">
+            <widget class="QToolButton" name="DIG_Aggregate_TB">
              <property name="text">
-              <string>Execute</string>
+              <string>...</string>
              </property>
             </widget>
            </item>
-           <item row="10" column="1">
-            <widget class="QLabel" name="placeCharacterizationAggregation_Check">
-             <property name="text">
-              <string/>
+           <item row="5" column="3">
+            <widget class="QDoubleSpinBox" name="ENV_Aggregate_SB">
+             <property name="maximum">
+              <double>100.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>14.300000000000001</double>
              </property>
             </widget>
            </item>
-           <item row="0" column="4" rowspan="11">
+           <item row="0" column="4" rowspan="12">
             <widget class="QTextEdit" name="textEdit_33">
              <property name="enabled">
               <bool>true</bool>
@@ -3567,6 +3455,139 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab aggregates the raster outputs of all available factors within the place characterization dimension by assuming equal weighting of all factors within the dimension. If equal weights are not appropriate for the specific context of the analysis, the user can adjust weights as necessary provided all weights still sum to 100%. If a factor was not calculated (perhaps due to missing data, or because it was deemed to be unimportant) that factor should be assigned a weight of 0%, and the remaining factor weights adjusted such that they add up to 100%. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Factor outputs that are created during the current working session are automatically loaded. &lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:9pt;&quot;&gt;Users can choose to load previously generated factor outputs from the output directory set up at tool initiation.&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-family:'Calibri','sans-serif'; font-size:8pt;&quot;&gt;: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;A raster file containing values ranging from 0 to 5 is saved to the output directory and loaded into the workspace. Scores should be interpreted as outlined in the “About” tab.&lt;/span&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="1">
+            <widget class="QLabel" name="placeCharacterizationAggregation_Check">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QToolButton" name="WLK_Aggregate_TB">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="2">
+            <widget class="QToolButton" name="WAS_Aggregate_TB">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QDoubleSpinBox" name="EDU_Aggregate_SB">
+             <property name="maximum">
+              <double>100.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>14.300000000000001</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QToolButton" name="ENV_Aggregate_TB">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QgsFilterLineEdit" name="PlaceCharacterization_AggregateOutput_Field">
+             <property name="text">
+              <string>Place_score.tif</string>
+             </property>
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_105">
+             <property name="text">
+              <string>Education (EDU)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3">
+            <widget class="QDoubleSpinBox" name="DIG_Aggregate_SB">
+             <property name="maximum">
+              <double>100.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>14.300000000000001</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QgsFilterLineEdit" name="ENV_Aggregate_Field">
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2">
+            <widget class="QToolButton" name="FCV_Aggregate_TB">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_151">
+             <property name="text">
+              <string>Fragility, conflict and violence (FCV)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_101">
+             <property name="text">
+              <string>Active Transport (Activetransport)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLabel" name="label_95">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Weight %</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QgsFilterLineEdit" name="AT_Aggregate_Field">
+             <property name="qgisRelation" stdset="0">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLabel" name="label_98">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Output Aggregate Raster File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="3">
+            <widget class="QPushButton" name="PB_PC_aggregate_auto">
+             <property name="text">
+              <string>Auto</string>
              </property>
             </widget>
            </item>
@@ -3778,6 +3799,13 @@ p, li { white-space: pre-wrap; }
          </property>
          <property name="qgisRelation" stdset="0">
           <string notr="true"/>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="5">
+        <widget class="QPushButton" name="PB_AGG_aggregate_auto">
+         <property name="text">
+          <string>Auto</string>
          </property>
         </widget>
        </item>

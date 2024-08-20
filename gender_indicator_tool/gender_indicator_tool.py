@@ -389,6 +389,70 @@ class GenderIndicatorTool:
         ###### TAB 6.3 - Point Locations
         self.dlg.Buffer_Execute_PB.clicked.connect(self.Bufferinsights)
 
+        # ******************************************************************************************* Weights Auto-calc #
+        # weights auto-calc button
+        self.dlg.PB_PC_aggregate_auto.clicked.connect(lambda: self.calculate_aggregate_weights(self.PC_aggregate_field_pairs))
+        self.dlg.PB_CTX_aggregate_auto.clicked.connect(lambda: self.calculate_aggregate_weights(self.CTX_aggregate_field_pairs))
+        self.dlg.PB_ACC_aggregate_auto.clicked.connect(lambda: self.calculate_aggregate_weights(self.ACC_aggregate_field_pairs))
+        self.dlg.PB_AGG_aggregate_auto.clicked.connect(lambda: self.calculate_aggregate_weights(self.AGG_aggregate_field_pairs))
+
+        # Place Characterization field pairs
+        self.PC_aggregate_field_pairs = [
+            (self.dlg.AT_Aggregate_Field, self.dlg.WLK_Aggregate_SB),
+            (self.dlg.SAF_Aggregate_Field, self.dlg.SAF_Aggregate_SB),
+            (self.dlg.EDU_Aggregate_Field, self.dlg.EDU_Aggregate_SB),
+            (self.dlg.DIG_Aggregate_Field, self.dlg.DIG_Aggregate_SB),
+            (self.dlg.ENV_Aggregate_Field, self.dlg.ENV_Aggregate_SB),
+            (self.dlg.FCV_Aggregate_Field, self.dlg.FCV_Aggregate_SB),
+            (self.dlg.WAS_Aggregate_Field, self.dlg.WAS_Aggregate_SB),
+        ]
+
+        self.CTX_aggregate_field_pairs = [
+            (self.dlg.WD_Aggregate_Field, self.dlg.WD_Aggregate_SB),
+            (self.dlg.RF_Aggregate_Field, self.dlg.RF_Aggregate_SB),
+            (self.dlg.FIN_Aggregate_Field, self.dlg.FIN_Aggregate_SB)
+        ]
+
+        self.ACC_aggregate_field_pairs = [
+            (self.dlg.WTP_Aggregate_Field, self.dlg.WTP_Aggregate_SB),
+            (self.dlg.PBT_Aggregate_Field, self.dlg.PBT_Aggregate_SB),
+            (self.dlg.ETF_Aggregate_Field, self.dlg.ETF_Aggregate_SB),
+            (self.dlg.HEA_Aggregate_Field, self.dlg.HEA_Aggregate_SB),
+            (self.dlg.FIF_Aggregate_Field, self.dlg.FIF_Aggregate_SB)
+        ]
+
+        self.AGG_aggregate_field_pairs = [
+            (self.dlg.CD_Aggregate_Field, self.dlg.CD_Aggregate_SB),
+            (self.dlg.AD_Aggregate_Field, self.dlg.AD_Aggregate_SB),
+            (self.dlg.PD_Aggregate_Field, self.dlg.PD_Aggregate_SB)
+        ]
+
+    # ================================================================================================================ #
+
+    def calculate_aggregate_weights(self, field_pairs):
+        non_empty_fields = [pair for pair in field_pairs if pair[0].text()]
+        num_non_empty = len(non_empty_fields)
+
+        if num_non_empty == 0:
+            return  # No fields with text, nothing to do
+
+        weight_per_field = 100 / num_non_empty
+
+        for line_edit, spin_box in field_pairs:
+            if line_edit.text():
+                spin_box.setValue(weight_per_field)
+            else:
+                spin_box.setValue(0)
+
+        # Ensure total is exactly 100
+        total = sum(pair[1].value() for pair in field_pairs)
+        if total != 100:
+            # Adjust the last non-empty field to make the total exactly 100
+            last_non_empty = next((pair[1] for pair in reversed(field_pairs) if pair[0].text()), None)
+            if last_non_empty:
+                last_non_empty.setValue(last_non_empty.value() + (100 - total))
+
+
     def getFile(self, button_num):
         """
         Function used for all factor tabs to browse files and retrieve filepaths required to be used as input to other functions.
@@ -1602,7 +1666,7 @@ class GenderIndicatorTool:
             mergeOutput = mergeClip["OUTPUT"]
 
             # Get the width and height of the extent
-            
+
             extent = countryUTMLayerBuf.extent()
             raster_width = int(extent.width() / pixelSize)
             raster_height = int(extent.height() / pixelSize)
@@ -4883,7 +4947,7 @@ class GenderIndicatorTool:
                 shutil.rmtree(tempDir)
             time.sleep(0.5)
             os.mkdir(tempDir)
-            
+
             # Temp files
             tempCalc = f"{tempDir}/tempEnvCalc.tif"
             tempResample = f"{tempDir}/tempEnvResample.tif"
@@ -4940,7 +5004,7 @@ class GenderIndicatorTool:
                 },
             )
             countryUTMLayerBuf = buffer["OUTPUT"]
-            
+
             CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
             country_extent = CountryBuf_df.total_bounds
 
@@ -4982,12 +5046,12 @@ class GenderIndicatorTool:
                 else:
                     os.mkdir(f"{workingDir}/{Dimension}/ENV")
                     os.chdir(f"{workingDir}/{Dimension}/ENV")
-                    
+
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Fire_Density.tif"
 
                 with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
-                    
+
                 processing.run("gdal:cliprasterbymasklayer", {
                     'INPUT': tempClipResample,
                     'MASK': countryLayer,
@@ -5008,7 +5072,7 @@ class GenderIndicatorTool:
                 })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
-                
+
                 # Copy style file
                 styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
                 styleFileDestination = os.path.join(dimension_dir, "ENV")
@@ -5019,7 +5083,7 @@ class GenderIndicatorTool:
 
                 self.dlg.ENV_status.setText("Processing Complete!")
                 self.dlg.ENV_status.repaint()
-                
+
             if floodLayer:
                 processing.run(
                     "gdal:warpreproject",
@@ -5059,12 +5123,12 @@ class GenderIndicatorTool:
                 else:
                     os.mkdir(f"{workingDir}/{Dimension}/ENV")
                     os.chdir(f"{workingDir}/{Dimension}/ENV")
-                    
+
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Flood.tif"
 
                 with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
-                    
+
                 processing.run("gdal:cliprasterbymasklayer", {
                     'INPUT': tempClipResample,
                     'MASK': countryLayer,
@@ -5085,7 +5149,7 @@ class GenderIndicatorTool:
                 })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
-                
+
                 # Copy style file
                 styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
                 styleFileDestination = os.path.join(dimension_dir, "ENV")
@@ -5096,7 +5160,7 @@ class GenderIndicatorTool:
 
                 self.dlg.ENV_status.setText("Processing Complete!")
                 self.dlg.ENV_status.repaint()
-            
+
             if landSlideLayer:
                 processing.run(
                     "gdal:warpreproject",
@@ -5135,12 +5199,12 @@ class GenderIndicatorTool:
                 else:
                     os.mkdir(f"{workingDir}/{Dimension}/ENV")
                     os.chdir(f"{workingDir}/{Dimension}/ENV")
-                    
+
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Landslide_Susceptibility.tif"
 
                 with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
-                    
+
                 processing.run("gdal:cliprasterbymasklayer", {
                     'INPUT': tempClipResample,
                     'MASK': countryLayer,
@@ -5161,7 +5225,7 @@ class GenderIndicatorTool:
                 })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
-                
+
                 # Copy style file
                 styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
                 styleFileDestination = os.path.join(dimension_dir, "ENV")
@@ -5172,7 +5236,7 @@ class GenderIndicatorTool:
 
                 self.dlg.ENV_status.setText("Processing Complete!")
                 self.dlg.ENV_status.repaint()
-            
+
             if cycloneLayer:
                 processing.run(
                     "gdal:warpreproject",
@@ -5211,12 +5275,12 @@ class GenderIndicatorTool:
                 else:
                     os.mkdir(f"{workingDir}/{Dimension}/ENV")
                     os.chdir(f"{workingDir}/{Dimension}/ENV")
-                    
+
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Cyclones.tif"
 
                 with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
-                    
+
                 processing.run("gdal:cliprasterbymasklayer", {
                     'INPUT': tempClipResample,
                     'MASK': countryLayer,
@@ -5237,7 +5301,7 @@ class GenderIndicatorTool:
                 })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
-                
+
                 # Copy style file
                 styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
                 styleFileDestination = os.path.join(dimension_dir, "ENV")
@@ -5248,7 +5312,7 @@ class GenderIndicatorTool:
 
                 self.dlg.ENV_status.setText("Processing Complete!")
                 self.dlg.ENV_status.repaint()
-            
+
             if droughtLayer:
                 processing.run(
                     "gdal:warpreproject",
@@ -5268,7 +5332,7 @@ class GenderIndicatorTool:
                         "OUTPUT": tempResample,
                     },
                 )
-                
+
                 with rasterio.open(tempResample, "r+") as src:
                     ENV_ras = src.read(1)
                     meta1 = src.meta
@@ -5289,12 +5353,12 @@ class GenderIndicatorTool:
                 else:
                     os.mkdir(f"{workingDir}/{Dimension}/ENV")
                     os.chdir(f"{workingDir}/{Dimension}/ENV")
-                    
+
                 rasOutput = f"{self.dlg.ENV_Output_Field.text()[:-4]}Drought.tif"
 
                 with rasterio.open(tempClipResample, "w", **meta1) as dst:
                     dst.write(reclassified_ras, 1)
-                    
+
                 processing.run("gdal:cliprasterbymasklayer", {
                     'INPUT': tempClipResample,
                     'MASK': countryLayer,
@@ -5315,7 +5379,7 @@ class GenderIndicatorTool:
                 })
 
                 self.dlg.ENV_Aggregate_Field.setText(rasOutput)
-                
+
                 # Copy style file
                 styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
                 styleFileDestination = os.path.join(dimension_dir, "ENV")
@@ -5331,7 +5395,7 @@ class GenderIndicatorTool:
             print(str(e))
             self.dlg.ENV_status.setText(f"Error: {str(e)}")
             self.dlg.ENV_status.repaint()
-            
+
     # Define the reclassification function
     def reclassifyFireHazards(self, value):
         if value == 0:
@@ -5364,7 +5428,7 @@ class GenderIndicatorTool:
             return 0
         else:
             return np.nan
-        
+
     def reclassifyTsunami(self, value):
         if value == 0:
             return 5
@@ -5380,7 +5444,7 @@ class GenderIndicatorTool:
             return 0
         else:
             return np.nan
-        
+
     def reclassifyFloodHazard(self, value):
         if value == 0:
             return 5
@@ -5396,7 +5460,7 @@ class GenderIndicatorTool:
             return 0
         elif np.isnan(value) or value == nodata:
             return 5
-        
+
     def reclassifyLandslide(self, value):
         if value == 0:
             return 5
@@ -5412,7 +5476,7 @@ class GenderIndicatorTool:
             return 0
         else:
             return 5
-        
+
     def reclassifyTropicalCyclone(self, value):
         if value == 0:
             return 5
@@ -5428,7 +5492,7 @@ class GenderIndicatorTool:
             return 0
         else:
             return np.nan
-        
+
     def reclassifyDrought(self, value, nodata):
         if value == 0:
             return 5
@@ -5444,7 +5508,7 @@ class GenderIndicatorTool:
             return 0
         elif np.isnan(value) or value == nodata:
             return 5
-        
+
     def reclassifyAirPollution(self, value):
         if 0 < value <= 10:
             return 5
