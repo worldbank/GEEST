@@ -13,14 +13,14 @@ jobs:
     steps:
     # Step 1: Checkout the code at the tagged commit
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     # Step 2: Create a pre-release on GitHub
     - name: Create a pre-release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref }}
-        name: "Pre-Release ${{ github.ref }}"
+        tag_name: ${{ github.ref_name }}
+        name: "Pre-Release ${{ github.ref_name }}"
         body: "This is a pre-release for testing purposes."
         prerelease: true
       env:
