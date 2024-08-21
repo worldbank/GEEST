@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
+    <width>900</width>
     <height>775</height>
    </rect>
   </property>
@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tab_33">
       <attribute name="title">
@@ -257,6 +257,9 @@ p, li { white-space: pre-wrap; }
         <widget class="QgsFileWidget" name="countryLayer_Field">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Country Boundary&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="filter">
+          <string>SHP (*.shp)</string>
          </property>
         </widget>
        </item>
@@ -862,7 +865,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>4</number>
          </property>
          <widget class="QWidget" name="tab_17">
           <attribute name="title">
@@ -887,7 +890,11 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="8" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WTP_Input_Field"/>
+            <widget class="QgsFileWidget" name="WTP_Input_Field">
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
+            </widget>
            </item>
            <item row="20" column="0" colspan="2">
             <widget class="QgsFilterLineEdit" name="WTP_AGGOutput_Field">
@@ -1079,13 +1086,25 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="6" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WTP_Input_Field_4"/>
+            <widget class="QgsFileWidget" name="WTP_Input_Field_4">
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
+            </widget>
            </item>
            <item row="4" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WTP_Input_Field_3"/>
+            <widget class="QgsFileWidget" name="WTP_Input_Field_3">
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
+            </widget>
            </item>
            <item row="2" column="0" colspan="2">
-            <widget class="QgsFileWidget" name="WTP_Input_Field_2"/>
+            <widget class="QgsFileWidget" name="WTP_Input_Field_2">
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -1297,6 +1316,9 @@ p, li { white-space: pre-wrap; }
                <height>50</height>
               </size>
              </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
             </widget>
            </item>
            <item row="2" column="0" colspan="2">
@@ -1449,6 +1471,9 @@ p, li { white-space: pre-wrap; }
                <height>50</height>
               </size>
              </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
             </widget>
            </item>
            <item row="2" column="0" colspan="2">
@@ -1600,6 +1625,9 @@ p, li { white-space: pre-wrap; }
                <width>16777215</width>
                <height>50</height>
               </size>
+             </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
              </property>
             </widget>
            </item>
@@ -1951,7 +1979,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_Contextual_3">
          <property name="currentIndex">
-          <number>7</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_24">
           <attribute name="title">
@@ -1965,6 +1993,9 @@ p, li { white-space: pre-wrap; }
                <width>350</width>
                <height>25</height>
               </size>
+             </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
              </property>
             </widget>
            </item>
@@ -2017,6 +2048,9 @@ p, li { white-space: pre-wrap; }
                <width>350</width>
                <height>25</height>
               </size>
+             </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
              </property>
             </widget>
            </item>
@@ -2074,6 +2108,9 @@ p, li { white-space: pre-wrap; }
                <height>25</height>
               </size>
              </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
             </widget>
            </item>
            <item row="1" column="0" colspan="2">
@@ -2096,6 +2133,9 @@ p, li { white-space: pre-wrap; }
                <width>350</width>
                <height>25</height>
               </size>
+             </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
              </property>
             </widget>
            </item>
@@ -2241,6 +2281,9 @@ p, li { white-space: pre-wrap; }
              </property>
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="filter">
+              <string>TIF (*.tif);;SHP (*.shp);;All files (*.*)</string>
              </property>
             </widget>
            </item>
@@ -2499,6 +2542,9 @@ p, li { white-space: pre-wrap; }
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
             </widget>
            </item>
            <item row="3" column="0" colspan="2">
@@ -2730,7 +2776,7 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This tab characterizes areas based on their vulnerability to natural disasters. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Input&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: One or many polygon layers (.shp) which contain a field representing the level of risk of natural disasters. Risk should be classed as either low, medium or high. Different classes of natural disasters (such as landslide risk or flood risk) are often represented by separate input layers, and so each type of natural disaster is processed individually in step 1, before aggregating outputs in step 2. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 1 &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;For each layer representing a different class of natural disaster, the input layer is set, and the user selects the field containing the level of risk from the drop-down list. In each layer, areas are classified as having either low, medium, or high risk. The algorithm reclassifies the input field such that low-risk areas are assigned a score of 0, medium-risk areas are assigned a score of 2, and high-risk areas are assigned a score of 0. The reclassified data are rasterized. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;For each layer representing a different class of natural disaster, the input layer is set, and the user selects the field containing the level of risk from the drop-down list. In each layer, areas are classified as having either low, medium, or high risk. The algorithm reclassifies the input field such that low-risk areas are assigned a score of 5, medium-risk areas are assigned a score of 2, and high-risk areas are assigned a score of 0. The reclassified data are rasterized. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Step 2&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The algorithm identifies all raster layers created in step 1 and aggregates them by calculating the mean score for each pixel. The default raster output filename does not need to be altered unless the user wishes. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Output&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where natural disaster risk is lowest. A value of 0 indicates areas where natural disaster risk is highest. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -2940,6 +2986,9 @@ p, li { white-space: pre-wrap; }
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
+             </property>
             </widget>
            </item>
            <item row="3" column="0" colspan="2">
@@ -3105,6 +3154,9 @@ p, li { white-space: pre-wrap; }
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
+             <property name="filter">
+              <string>CSV (*.csv);;All files (*.*)</string>
+             </property>
             </widget>
            </item>
            <item row="0" column="0" colspan="2">
@@ -3267,6 +3319,9 @@ p, li { white-space: pre-wrap; }
              </property>
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Education Facility Point Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="filter">
+              <string>SHP (*.shp);;All files (*.*)</string>
              </property>
             </widget>
            </item>

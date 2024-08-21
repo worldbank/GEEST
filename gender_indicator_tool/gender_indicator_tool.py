@@ -3585,46 +3585,37 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
             self.dlg.SAF_status.repaint()
 
-
     def SAFstreetLightsRasterizer(self):
         """
-        This function processes streetlight vector data for safety assessment.
-        It counts the streetlight points within a 100x100m grid,
-        scales the counts to a 0-5 range, and rasterizes the result, ensuring NoData values are set to zero.
+        Process streetlight vector data for safety assessment.
+        Count streetlight points within a grid, scale to 0-5 range, and rasterize using rasterio.
         """
         try:
-            # Constants
-            GRID_SIZE = self.dlg.pixelSize_SB.value()  # Grid size for rasterization
-
-            # Set up variables
+            # Setup
             current_script_path = os.path.dirname(os.path.abspath(__file__))
             workingDir = self.dlg.workingDir_Field.text()
             Dimension = "Place Characterization"
-            output_dir = os.path.join(workingDir, Dimension)
+            tempDir = "temp"
+            os.makedirs(os.path.join(workingDir, Dimension), exist_ok=True)
+            os.makedirs(os.path.join(workingDir, tempDir), exist_ok=True)
+            os.chdir(workingDir)
 
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
-            os.chdir(output_dir)
-
+            # Input parameters
             countryLayerPath = self.dlg.countryLayer_Field.filePath()
             pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
+            input_file = self.dlg.SAF_Input_Field.filePath()
 
-            # Update status
             self.dlg.SAF_status.setText("Variables Set")
             self.dlg.SAF_status.repaint()
             time.sleep(0.5)
             self.dlg.SAF_status.setText("Processing...")
             self.dlg.SAF_status.repaint()
 
-            # Load input vector layer (streetlights)
-            input_file = self.dlg.SAF_Input_Field.filePath()
+            # Load and preprocess layers
             vector_layer = QgsVectorLayer(input_file, "streetlights", "ogr")
             if not vector_layer.isValid():
                 raise ValueError("Invalid vector input. Please check the file.")
-
-            # Reproject vector layer if necessary
             if vector_layer.crs() != UTM_crs:
                 vector_layer = processing.run("native:reprojectlayer", {
                     'INPUT': vector_layer,
@@ -3632,7 +3623,6 @@ class GenderIndicatorTool:
                     'OUTPUT': 'memory:'
                 }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-            # Load country layer and convert CRS if necessary
             countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
             if not countryLayer.isValid():
                 raise ValueError("Invalid country layer")
@@ -3643,24 +3633,47 @@ class GenderIndicatorTool:
                     'OUTPUT': 'memory:'
                 }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-            # Generate a 100x100m grid over the country boundary
+            # Buffer the country layer
+            buffered_country_layer_path = os.path.join(tempDir, "countryUTMLayerBuf.shp")
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryLayer,
+                    "DISTANCE": 2000,  # Same buffer distance as in SAFnightTimeLights
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": buffered_country_layer_path,
+                },
+                feedback=QgsProcessingFeedback()
+            )
+
+            buffered_country_layer = QgsVectorLayer(buffered_country_layer_path, "buffered_country_layer", "ogr")
+            if not buffered_country_layer.isValid():
+                raise ValueError("Buffering failed. Invalid buffered layer.")
+
+            # Get the extent of the buffered country layer
+            country_extent = buffered_country_layer.extent()
+
+            # Generate grid and count points
             grid = processing.run("native:creategrid", {
-                'TYPE': 2,  # Rectangle (polygon)
-                'EXTENT': countryLayer.extent(),
-                'HSPACING': GRID_SIZE,  # Horizontal spacing
-                'VSPACING': GRID_SIZE,  # Vertical spacing
+                'TYPE': 2,
+                'EXTENT': country_extent,
+                'HSPACING': pixelSize,
+                'VSPACING': pixelSize,
                 'CRS': UTM_crs,
                 'OUTPUT': 'memory:'
             }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-            # Clip the grid to the country boundary
             clipped_grid = processing.run("native:clip", {
                 'INPUT': grid,
-                'OVERLAY': countryLayer,
+                'OVERLAY': buffered_country_layer,
                 'OUTPUT': 'memory:'
             }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-            # Count the number of streetlight points in each grid cell
             overlap_count = processing.run("qgis:countpointsinpolygon", {
                 'POLYGONS': clipped_grid,
                 'POINTS': vector_layer,
@@ -3668,43 +3681,52 @@ class GenderIndicatorTool:
                 'OUTPUT': 'memory:'
             }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-            # Normalize the overlap counts to the 0-5 scale
-            max_overlap = max([f['OVERLAP'] for f in overlap_count.getFeatures()])
-            overlap_count.startEditing()
+            # Prepare raster data
+            xmin, ymin, xmax, ymax = country_extent.toRectF().getCoords()
+            width = int(np.floor((xmax - xmin) / pixelSize))
+            height = int(np.floor((ymax - ymin) / pixelSize))
+            raster_data = np.zeros((height, width), dtype=np.float32)
+
+            # Rasterize vector data
             for feature in overlap_count.getFeatures():
-                normalized_value = min(5.0, (feature['OVERLAP'] / max_overlap) * 5.0)
-                overlap_count.changeAttributeValue(feature.id(), overlap_count.fields().indexFromName('OVERLAP'),
-                                                   normalized_value)
-            overlap_count.commitChanges()
+                geom = feature.geometry()
+                if geom.type() == QgsWkbTypes.PolygonGeometry:
+                    centroid = geom.centroid().asPoint()
+                    col = int((centroid.x() - xmin) / pixelSize)
+                    row = int((ymax - centroid.y()) / pixelSize)
+                    if 0 <= row < height and 0 <= col < width:
+                        raster_data[row, col] = feature['OVERLAP']
 
-            # Rasterize the grid points, ensuring all values are set (no NoData)
-            raster_output = os.path.join(output_dir, self.dlg.SAF_Output_Field.text())
-            processing.run("gdal:rasterize", {
-                'INPUT': overlap_count,
-                'FIELD': 'OVERLAP',
-                'BURN': 0,
-                'USE_Z': False,
-                'UNITS': 1,
-                'WIDTH': pixelSize,
-                'HEIGHT': pixelSize,
-                'EXTENT': countryLayer.extent(),
-                'NODATA': None,  # Don't set NoData value
-                'OPTIONS': '',
-                'DATA_TYPE': 5,  # Float32
-                'INIT': 0,  # Initialize all cells with zero
-                'OUTPUT': raster_output
-            }, feedback=QgsProcessingFeedback())
+            # Normalize raster data
+            max_value = np.max(raster_data)
+            if max_value > 0:
+                raster_data = (raster_data / max_value) * 5.0
 
-            # Set output field
+            # Create output raster
+            raster_output = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
+            transform = rasterio.transform.from_origin(xmin, ymax, pixelSize, pixelSize)
+
+            with rasterio.open(
+                    raster_output,
+                    'w',
+                    driver='GTiff',
+                    height=height,
+                    width=width,
+                    count=1,
+                    dtype=raster_data.dtype,
+                    crs=UTM_crs.toWkt(),
+                    transform=transform,
+                    nodata=0  # Explicitly setting NoData value
+            ) as dst:
+                dst.write(raster_data, 1)
+                dst.nodata = 0.0
+
+            # Set output field and apply style
             self.dlg.SAF_Aggregate_Field.setText(raster_output)
-
-            # Apply style
             styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
-            styleFileDestination = os.path.join(output_dir)
-            styleFile = f"{os.path.splitext(raster_output)[0]}.qml"
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+            styleFile = f"{os.path.splitext(os.path.basename(raster_output))[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(workingDir, Dimension, styleFile))
 
-            # Update status
             self.dlg.SAF_status.setText("Processing has been completed!")
             self.dlg.SAF_status.repaint()
 
