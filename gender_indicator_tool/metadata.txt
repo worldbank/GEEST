@@ -5,10 +5,10 @@
 [general]
 name=Gender Enabling Environments Spatial Tool (GEEST)
 qgisMinimumVersion=3.0
-description=Gender Enabling Environments Spatial Tool
-version=0.1.47
-author=Pegasys
-email=andre@pegasys.co.za
+description=Gender Enabling Environments Spatial Tool (Derived from the original version written by andre@pegasys.co.za from Pegasys)
+version=0.1.52
+author=Pegasys / Kartoza
+email=info@kartoza.com
 
 about=This tool employs a multicriteria evaluation (MCE) framework to spatially describe womens' access to formal employment and business opportunities in the renewable energy sector in Small Island Developing States (SIDS). The MCE framework allows for the incorporation and assessment of dimensions, factors, and indicators to identify where the enabling environments (or lack thereof) are located for women to secure employment opportunities in SIDS.
 
