@@ -1,0 +1,27 @@
+name: Create Pre-Release
+
+# Trigger the workflow when a tag matching '*-test' is pushed
+on:
+  push:
+    tags:
+      - '*-test'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code at the tagged commit
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Step 2: Create a pre-release on GitHub
+    - name: Create a pre-release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        name: "Pre-Release ${{ github.ref }}"
+        body: "This is a pre-release for testing purposes."
+        prerelease: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
