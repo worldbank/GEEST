@@ -4128,7 +4128,7 @@ class GenderIndicatorTool:
                     "WIDTH": setup['pixelSize'],
                     "HEIGHT": setup['pixelSize'],
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
-                    "NODATA": 0,  # Ensure NoData is set to 0
+                    "NODATA": None,
                     "OPTIONS": "",
                     "DATA_TYPE": 6,  # GDT_Float32 for real numbers
                     "INIT": None,
@@ -4143,7 +4143,7 @@ class GenderIndicatorTool:
             styleTemplate = os.path.join(setup['current_script_path'], "Style", f"{setup['Dimension']}.qml")
             styleFileDestination = os.path.join(setup['workingDir'], setup['Dimension'])
             styleFile = f"{os.path.splitext(os.path.basename(rasOutput))[0]}.qml"
-            shutil.copy(styleTemplate, styleFileDestination, styleFile)
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
             # Update status
             self.dlg.SAF_status.setText("Processing has been completed!")
@@ -4237,7 +4237,7 @@ class GenderIndicatorTool:
                     "WIDTH": setup['pixelSize'],
                     "HEIGHT": setup['pixelSize'],
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
-                    "NODATA": 0,  # Ensure NoData is set to 0
+                    "NODATA": None,
                     "OPTIONS": "",
                     "DATA_TYPE": 6,  # GDT_Float32 for real numbers
                     "INIT": None,
@@ -4252,7 +4252,7 @@ class GenderIndicatorTool:
             styleTemplate = os.path.join(setup['current_script_path'], "Style", f"{setup['Dimension']}.qml")
             styleFileDestination = os.path.join(setup['workingDir'], setup['Dimension'])
             styleFile = f"{os.path.splitext(os.path.basename(rasOutput))[0]}.qml"
-            shutil.copy(styleTemplate, styleFileDestination, styleFile)
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
             # Update status
             self.dlg.SAF_status.setText("Processing has been completed!")
