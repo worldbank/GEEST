@@ -1,4 +1,4 @@
-name: Create Pre-Release
+name: Create Test Snapshot
 
 # Trigger the workflow when a tag matching '*-test' is pushed
 on:

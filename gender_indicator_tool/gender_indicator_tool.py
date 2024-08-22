@@ -50,6 +50,7 @@ import ast
 from rasterio.mask import mask
 from rasterio.features import geometry_mask
 import csv
+import subprocess
 
 # Prepare processing framework
 # sys.path.append(r'C:\Program Files\QGIS 3.32.0\apps\qgis\python\plugins') # Folder where Processing is located
@@ -3263,7 +3264,7 @@ class GenderIndicatorTool:
         input_layer = QgsRasterLayer(input_file, "input")
 
         if input_layer.isValid():
-            self.SAFnightTimeLights()
+            self.SAFnightTimeLights_v2()
         else:
             input_layer = QgsVectorLayer(input_file, "input", "ogr")
             if not input_layer.isValid():
@@ -3432,6 +3433,8 @@ class GenderIndicatorTool:
             self.dlg.ENV_typeScore_Field.setText("Please select a file and field first.")
             self.dlg.ENV_typeScore_Field.setEnabled(False)
 
+
+    # ------------------------------------ SAFETY factor rasterization section
     def SAFnightTimeLights(self):
         """
         This function processes night-time lights data for safety assessment.
@@ -3589,7 +3592,203 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
             self.dlg.SAF_status.repaint()
 
-    # ------------------------------------ SAFETY factor rasterization section
+    def SAFnightTimeLights_v2(self):
+        """
+        This function processes night-time lights (NTL) data to assess urban safety, using luminosity as a proxy for safe urban design.
+        The approach refines NTL classification by employing local statistics (e.g., median, 75th percentile) to adapt the analysis
+        to specific contexts, such as small island nations, as suggested by Elvidge et al. (2013) and Levin & Zhang (2017).
+        This method replaces fixed thresholds with a classification scheme grounded in local NTL characteristics,
+        aligning with the principles outlined by Chen & Nordhaus (2011) for using luminosity as a socio-economic indicator.
+        """
+
+        # Set up directories
+        current_script_path = os.path.dirname(os.path.abspath(__file__))
+        workingDir = self.dlg.workingDir_Field.text()
+        os.chdir(workingDir)
+        tempDir = "temp"
+        Dimension = "Place Characterization"
+
+        # Create necessary directories
+        if not os.path.exists(Dimension):
+            os.mkdir(Dimension)
+
+        if os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+        time.sleep(0.5)
+        os.mkdir(tempDir)
+
+        # Set CRS and input/output paths
+        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+        countryLayer = self.dlg.countryLayer_Field.filePath()
+        pixelSize = self.dlg.pixelSize_SB.value()
+        input_file = self.dlg.SAF_Input_Field.filePath()
+        rasOutput = self.dlg.SAF_Output_Field.text()
+
+        # Detect input file type, assuming it's raster
+        input_layer = QgsRasterLayer(input_file, "input")
+
+        # Handle raster input layer
+        if input_layer.isValid():
+            # Raster input detected - proceed with existing functionality
+            NTL_input = input_file
+
+            # Define temporary file paths
+            tempCalc = f"{tempDir}/tempCalc.tif"
+            tempResample = f"{tempDir}/tempResample.tif"
+            countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+
+            # Copy style file
+            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
+            styleFileDestination = f"{workingDir}{Dimension}/"
+            styleFile = f"{rasOutput.split('.')[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+
+            # Update UI status
+            self.dlg.SAF_status.setText("Processing...")
+            self.dlg.SAF_status.repaint()
+
+            # Convert CRS of country layer
+            self.convertCRS(countryLayer, UTM_crs)
+            countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+
+            # Buffer the country layer
+            self.dlg.SAF_status.setText("Buffering...")
+            self.dlg.SAF_status.repaint()
+            buffer = processing.run(
+                "native:buffer",
+                {
+                    "INPUT": countryUTMLayer,
+                    "DISTANCE": self.BUFFER_DISTANCE,
+                    "SEGMENTS": 5,
+                    "END_CAP_STYLE": 0,
+                    "JOIN_STYLE": 0,
+                    "MITER_LIMIT": 2,
+                    "DISSOLVE": True,
+                    "SEPARATE_DISJOINT": False,
+                    "OUTPUT": countryUTMLayerBuf,
+                },
+            )
+
+            # Get the extent of the buffered country layer
+            CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+            country_extent = CountryBuf_df.total_bounds
+
+            # Reproject and resample the night-time lights raster
+            self.dlg.SAF_status.setText("Resampling...")
+            self.dlg.SAF_status.repaint()
+            processing.run(
+                "gdal:warpreproject",
+                {
+                    "INPUT": NTL_input,
+                    "SOURCE_CRS": None,
+                    "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "RESAMPLING": 0,
+                    "NODATA": 0,  # Set NoData to zero
+                    "TARGET_RESOLUTION": pixelSize,
+                    "OPTIONS": "",
+                    "DATA_TYPE": 5,  # Float32
+                    "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                    "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                    "MULTITHREADING": False,
+                    "EXTRA": "",
+                    "OUTPUT": tempResample,
+                },
+            )
+
+            # Open the resampled raster and perform manual classification
+            with rasterio.open(tempResample) as src:
+                resampled_data = src.read(1)
+                meta1 = src.meta
+                print(
+                    f"Resampled data stats - min: {resampled_data.min()}, max: {resampled_data.max()}, mean: {resampled_data.mean()}")
+
+            # Calculate the median and 75th percentile from the resampled raster
+            median_val, percentile_75 = self.calculate_raster_stats(tempResample)
+            print(f"Calculated median: {median_val}, 75th percentile: {percentile_75}")
+
+            # Manually classify the raster
+            SAF_ras_classified = np.zeros_like(resampled_data, dtype=np.float32)
+
+            SAF_ras_classified[(resampled_data > 0) & (resampled_data <= 0.25 * median_val)] = 1
+            SAF_ras_classified[(resampled_data > 0.25 * median_val) & (resampled_data <= 0.5 * median_val)] = 2
+            SAF_ras_classified[(resampled_data > 0.5 * median_val) & (resampled_data <= median_val)] = 3
+            SAF_ras_classified[(resampled_data > median_val) & (resampled_data <= percentile_75)] = 4
+            SAF_ras_classified[resampled_data > percentile_75] = 5
+
+            # Handle normalization (if needed)
+            Rmax = SAF_ras_classified.max()
+            Rmin = SAF_ras_classified.min()
+            print(f"Before normalization (manual classification): min={Rmin}, max={Rmax}")
+
+            if Rmax != Rmin:
+                SAF_ras_normalized = ((SAF_ras_classified - Rmin) / (Rmax - Rmin)) * 5
+            else:
+                SAF_ras_normalized = SAF_ras_classified
+
+            try:
+                # Create output directory if it does not exist
+                if not os.path.exists(Dimension):
+                    os.mkdir(Dimension)
+                os.chdir(Dimension)
+
+                # Write the final output raster
+                with rasterio.open(rasOutput, "w", **meta1) as dst:
+                    dst.write(SAF_ras_normalized, 1)
+
+                # Ensure NoData values are set to zero
+                self.set_nodata_to_zero(rasOutput)
+
+                # Update UI with the output path
+                self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+                self.dlg.SAF_status.setText("Processing Complete!")
+                self.dlg.SAF_status.repaint()
+
+                # Return to the original working directory
+                os.chdir(workingDir)
+
+            except Exception as e:
+                # Something went awry, inform the user
+                error_message = f"Processing failed: {str(e)}"
+                self.dlg.SAF_status.setText(error_message)
+                self.dlg.SAF_status.repaint()
+
+                # Ensure we return to the original working directory even if an error occurs
+                if os.getcwd() != workingDir:
+                    os.chdir(workingDir)
+
+        else:
+            self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
+            self.dlg.SAF_status.repaint()
+
+    def set_nodata_to_zero(self, raster_path):
+        """
+        Sets all NoData values in the raster to zero.
+        """
+
+        with rasterio.open(raster_path, "r+") as src:
+            data = src.read(1)
+            nodata_value = src.nodata
+            if nodata_value is not None:
+                data[data == nodata_value] = 0
+                src.write(data, 1)
+                # Update the NoData value in the metadata to None
+                src.nodata = None
+
+
+    def calculate_raster_stats(self, raster_path):
+        """
+        Calculates the median and 75th percentile values for a given raster.
+        """
+
+        with rasterio.open(raster_path) as src:
+            data = src.read(1)
+            data = data[data != src.nodata]  # Remove no data values
+
+            median_val = np.median(data)
+            percentile_75 = np.percentile(data, 75)
+
+        return median_val, percentile_75
+
     def SAFCommonSetup(self):
         """
         Common setup for SAF-related functions. Handles directory setup, CRS conversion,
@@ -3753,6 +3952,9 @@ class GenderIndicatorTool:
             ) as dst:
                 dst.write(raster_data, 1)
                 dst.nodata = 0.0
+
+            # Ensure NoData values are set to zero
+            self.set_nodata_to_zero(raster_output)
 
             # Set output field and apply style
             self.dlg.SAF_Aggregate_Field.setText(raster_output)
