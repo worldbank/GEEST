@@ -351,7 +351,7 @@ class GenderIndicatorTool:
         ###### TAB 4.5- Education
         #self.dlg.EDU_Set_PB.clicked.connect(lambda: self.RasterizeSet(0))
         self.dlg.EDU_Input_Field.fileChanged.connect(self.populateCBFieldsFromPolygonLayer_PC_EDU)
-        self.dlg.EDU_Execute_PB.clicked.connect(self.EDUShapefileOrUserInputRasterizer)
+        self.dlg.EDU_Execute_PB.clicked.connect(self.EDURasterizerDelegator)
 
         ###### TAB 4.6 - Facility, conflict, and violence
         #self.dlg.FCV_Set_PB.clicked.connect(lambda: self.RasterizeSet(5))
@@ -3789,7 +3789,7 @@ class GenderIndicatorTool:
 
         return median_val, percentile_75
 
-    def SAFCommonSetup(self):
+    def CommonRasterizerSetup(self):
         """
         Common setup for SAF-related functions. Handles directory setup, CRS conversion,
         and loading/buffering the country layer.
@@ -3830,7 +3830,7 @@ class GenderIndicatorTool:
             "native:buffer",
             {
                 "INPUT": countryLayer,
-                "DISTANCE": self.BUFFER_DISTANCE,  # Same buffer distance as in SAFnightTimeLights
+                "DISTANCE": self.BUFFER_DISTANCE,
                 "SEGMENTS": 5,
                 "END_CAP_STYLE": 0,
                 "JOIN_STYLE": 0,
@@ -3868,7 +3868,7 @@ class GenderIndicatorTool:
         """
         try:
             # Call the common setup function
-            setup = self.SAFCommonSetup()
+            setup = self.CommonRasterizerSetup()
 
             # Input parameters
             input_file = self.dlg.SAF_Input_Field.filePath()
@@ -3978,7 +3978,7 @@ class GenderIndicatorTool:
         """
         try:
             # Call the common setup function
-            setup = self.SAFCommonSetup()
+            setup = self.CommonRasterizerSetup()
 
             # Convert the user-provided value to the 0-5 scale
             render_value = user_value / 20.0
@@ -4009,18 +4009,18 @@ class GenderIndicatorTool:
                 dst.write(raster_data, 1)
 
             # Rasterize the user value within the country bounds
-            processing.run(
+            rasterize_result = processing.run(
                 "gdal:rasterize",
                 {
                     "INPUT": setup['countryLayer'],
-                    "FIELD": "",  # No field since we use a uniform value
+                    "FIELD": None,  # No field since we use a uniform value
                     "BURN": render_value,  # Use the scaled user-provided value
                     "USE_Z": False,
                     "UNITS": 1,
                     "WIDTH": setup['pixelSize'],
                     "HEIGHT": setup['pixelSize'],
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
-                    "NODATA": 0,  # NoData is zero outside the country bounds
+                    "NODATA": None,  # NoData is zero outside the country bounds
                     "OPTIONS": "",
                     "DATA_TYPE": 6,  # GDT_Float32 for real numbers
                     "INIT": None,
@@ -4029,6 +4029,9 @@ class GenderIndicatorTool:
                     "OUTPUT": temp_raster_path  # Output to the temporary raster
                 }
             )
+
+            if not rasterize_result:
+                raise ValueError("Rasterization failed. Please check the input data.")
 
             # Copy the temporary raster to the final output location
             raster_output = os.path.join(setup['workingDir'], setup['Dimension'], self.dlg.SAF_Output_Field.text())
@@ -4054,7 +4057,7 @@ class GenderIndicatorTool:
         """
         try:
             # Call the common setup function
-            setup = self.SAFCommonSetup()
+            setup = self.CommonRasterizerSetup()
 
             # Get the field name
             rasField = self.dlg.SAF_rasField_CB.currentText().replace(" (text)", "")
@@ -4157,7 +4160,7 @@ class GenderIndicatorTool:
         """
         try:
             # Call the common setup function
-            setup = self.SAFCommonSetup()
+            setup = self.CommonRasterizerSetup()
 
             # Get the field name
             rasField = self.dlg.SAF_rasField_CB.currentText()
@@ -4259,176 +4262,189 @@ class GenderIndicatorTool:
             self.dlg.SAF_status.setText(f"Error: {str(e)}")
             self.dlg.SAF_status.repaint()
 
-    def EDUShapefileOrUserInputRasterizer(self):
+    def EDURasterizerDelegator(self):
+        input_file = self.dlg.EDU_Input_Field.filePath()
+
+        # Check if the input file is empty or not provided
+        if not input_file:
+            # Get the user-provided value from the spinner
+            user_value = self.dlg.EDU_User_Value_Input.value()
+            self.EDULevelFromUserValueRasterizer(user_value)
+            return
+        else:
+            self.EDUShapefileRasterizer()
+            return
+
+    def EDULevelFromUserValueRasterizer(self, user_value):
+        """
+        This function rasterizes the Education Level based on a user-provided value.
+        It creates a raster with the user-provided value within the country bounds and fills pixels outside the country shape with zero.
+        The value provided by the user is in the range 0-100, but the value to render the output at is 0-5,
+        so it's user value divided by 20.0.
+        """
+        try:
+            # Call the common setup function
+            setup = self.CommonRasterizerSetup()
+
+            # Convert the user-provided value to the 0-5 scale
+            render_value = user_value / 20.0
+
+            self.dlg.EDU_status.setText("Variables Set")
+            self.dlg.EDU_status.repaint()
+            time.sleep(0.5)
+            self.dlg.EDU_status.setText("Processing...")
+            self.dlg.EDU_status.repaint()
+
+            # Get the extent of the buffered country layer
+            xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
+
+            # Initialize raster data with zeros
+            width = int(np.floor((xmax - xmin) / setup['pixelSize']))
+            height = int(np.floor((ymax - ymin) / setup['pixelSize']))
+            raster_data = np.zeros((height, width), dtype=np.float32)
+
+            # Create the transform for the raster
+            transform = rasterio.transform.from_origin(xmin, ymax, setup['pixelSize'], setup['pixelSize'])
+
+            # Write initial raster to a temporary file with zeros (NoData value)
+            temp_raster_path = os.path.join(setup['tempDir'], "temp_raster.tif")
+            with rasterio.open(
+                    temp_raster_path, 'w', driver='GTiff', height=height, width=width,
+                    count=1, dtype=np.float32, crs=setup['UTM_crs'].toWkt(), transform=transform, nodata=0
+            ) as dst:
+                dst.write(raster_data, 1)
+
+            # Rasterize the user value within the country bounds
+            rasterize_result = processing.run(
+                "gdal:rasterize",
+                {
+                    "INPUT": setup['countryLayer'],
+                    "FIELD": None,  # No field since we use a uniform value
+                    "BURN": render_value,  # Use the scaled user-provided value
+                    "USE_Z": False,
+                    "UNITS": 1,
+                    "WIDTH": setup['pixelSize'],
+                    "HEIGHT": setup['pixelSize'],
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "NODATA": None,  # NoData is zero outside the country bounds
+                    "OPTIONS": "",
+                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
+                    "INIT": None,
+                    "INVERT": False,
+                    "EXTRA": "",
+                    "OUTPUT": temp_raster_path  # Output to the temporary raster
+                }
+            )
+
+            if not rasterize_result:
+                raise ValueError("Rasterization failed. Please check the input data.")
+
+            # Copy the temporary raster to the final output location
+            raster_output = os.path.join(setup['workingDir'], setup['Dimension'], self.dlg.EDU_Output_Field.text())
+            shutil.move(temp_raster_path, raster_output)
+
+            # Set output field and apply style
+            self.dlg.EDU_Aggregate_Field.setText(raster_output)
+            styleTemplate = os.path.join(setup['current_script_path'], "Style", f"{setup['Dimension']}.qml")
+            styleFile = f"{os.path.splitext(os.path.basename(raster_output))[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(setup['workingDir'], setup['Dimension'], styleFile))
+
+            self.dlg.EDU_status.setText("Processing has been completed!")
+            self.dlg.EDU_status.repaint()
+
+        except Exception as e:
+            self.dlg.EDU_status.setText(f"Error: {str(e)}")
+            self.dlg.EDU_status.repaint()
+
+    def EDUShapefileRasterizer(self):
         """
         This function rasterizes the Education factor for the Urban Safety Factor.
-        It either uses an incoming shapefile and the field corresponding to the combobox,
-        or a user-specified value to rasterize.
+        It converts vector data to raster, applying necessary transformations and standardizations using a scaling approach.
         """
-
-        # Update status
-        self.dlg.EDU_status.setText("Starting...")
-        self.dlg.EDU_status.repaint()
-
         try:
             # Set up variables
-            current_script_path = os.path.dirname(os.path.abspath(__file__))
-            workingDir = self.dlg.workingDir_Field.text()
-            countryLayerPath = self.dlg.countryLayer_Field.filePath()
+            workingDir = os.path.normpath(self.dlg.workingDir_Field.text())
+            countryLayerPath = os.path.normpath(self.dlg.countryLayer_Field.filePath())
             pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
             Dimension = "Place Characterization"
-            tempDir = os.path.join(workingDir, "temp")
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
 
-            # Create necessary directories
-            if not os.path.exists(workingDir):
-                os.mkdir(workingDir)
-
-            dimension_dir = os.path.join(workingDir, Dimension)
-            if not os.path.exists(dimension_dir):
-                os.mkdir(dimension_dir)
-
-            if os.path.exists(tempDir):
-                shutil.rmtree(tempDir)
+            # Update status
+            self.dlg.EDU_status.setText("Variables Set")
+            self.dlg.EDU_status.repaint()
             time.sleep(0.5)
-            os.mkdir(tempDir)
-
-            # Copy style file
-            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
-            styleFileDestination = dimension_dir
-            styleFile = f"{os.path.splitext(self.dlg.EDU_Output_Field.text())[0]}.qml"
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+            self.dlg.EDU_status.setText("Processing...")
+            self.dlg.EDU_status.repaint()
 
             # Load country layer
             countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
             if not countryLayer.isValid():
                 raise ValueError("Invalid country layer")
 
-            # Ensure spatial index exists
-            _ = QgsSpatialIndex(countryLayer.getFeatures())
-
-            # Check if the QComboBox has a selected value
+            # Get the input layer and field
             rasField = self.dlg.EDU_rasField_CB.currentText()
-            if rasField:
-                # Update status
-                self.dlg.EDU_status.setText("Processing polygon layer...")
-                self.dlg.EDU_status.repaint()
+            polygonLayerPath = os.path.normpath(self.dlg.EDU_Input_Field.filePath())
+            polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
+            if not polygonLayer.isValid():
+                raise ValueError("Invalid polygon layer")
 
-                # Use the incoming shapefile and the field corresponding to the checkbox
-                polygonLayerPath = self.dlg.EDU_Input_Field.filePath()
-                polygonLayer = QgsVectorLayer(polygonLayerPath, "polygon_layer", "ogr")
-                if not polygonLayer.isValid():
-                    raise ValueError("Invalid polygon layer")
-
-                if polygonLayer.crs() != UTM_crs:
-                    polygonLayer = processing.run("native:reprojectlayer", {
-                        'INPUT': polygonLayer,
-                        'TARGET_CRS': UTM_crs,
-                        'OUTPUT': 'memory:'
-                    })['OUTPUT']
-
-                # Clip the polygon layer by the country layer
-                clipped_layer = processing.run("native:clip", {
+            # Convert CRS if necessary
+            if polygonLayer.crs() != UTM_crs:
+                polygonLayer = processing.run("native:reprojectlayer", {
                     'INPUT': polygonLayer,
-                    'OVERLAY': countryLayer,
+                    'TARGET_CRS': UTM_crs,
                     'OUTPUT': 'memory:'
-                })['OUTPUT']
+                }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-                if not any(clipped_layer.getFeatures()):
-                    raise ValueError("Clipping resulted in an empty layer")
+            # Clip the input layer by the country layer
+            clipped_layer = processing.run("native:clip", {
+                'INPUT': polygonLayer,
+                'OVERLAY': countryLayer,
+                'OUTPUT': 'memory:'
+            }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-                # Get min and max values of the field
-                values = [f[rasField] for f in clipped_layer.getFeatures() if f[rasField] is not None]
-                if not values:
-                    raise ValueError("No valid values in the selected field")
-                min_val, max_val = min(values), max(values)
+            if not any(clipped_layer.getFeatures()):
+                raise ValueError("Clipping resulted in an empty layer")
 
-                # Scale values to 0-5 range
-                def scale_value(val):
-                    return 0.0 if max_val == min_val else (val - min_val) / (max_val - min_val) * 5.0
+            # Get min and max values of the field
+            values = [f[rasField] for f in clipped_layer.getFeatures() if f[rasField] is not None]
+            if not values:
+                raise ValueError("No valid values in the selected field")
+            min_val, max_val = min(values), max(values)
 
-                # Create a temporary memory layer to hold the scaled scores
-                temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
-                temp_layer.dataProvider().addAttributes(
-                    [QgsField("scaled_score", QVariant.Double)])  # Use Double for real numbers
-                temp_layer.updateFields()
+            # Scale values to the 0-5 range
+            def scale_value(val):
+                return 0.0 if max_val == min_val else (val - min_val) / (max_val - min_val) * 5.0
 
-                # Calculate the scaled scores and add to temp layer
-                temp_layer.startEditing()
-                for feature in clipped_layer.getFeatures():
-                    value = feature[rasField]
-                    score = scale_value(value)
-                    new_feature = QgsFeature(temp_layer.fields())
-                    new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score", score)
-                    temp_layer.addFeature(new_feature)
+            # Create a temporary memory layer to hold the scaled scores
+            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Double)])
+            temp_layer.updateFields()
 
-                temp_layer.commitChanges()
-
-            else:
-                # Use the user-specified value to rasterize the country layer
-
-                # Update status
-                self.dlg.EDU_status.setText("Processing user value...")
-                self.dlg.EDU_status.repaint()
-
-                user_value = self.dlg.EDU_User_Value_Input.value()
-                temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
-                temp_layer.dataProvider().addAttributes(
-                    [QgsField("scaled_score", QVariant.Double)])  # Use Double for real numbers
-                temp_layer.updateFields()
-
-                temp_layer.startEditing()
-                for feature in countryLayer.getFeatures():
-                    new_feature = QgsFeature(temp_layer.fields())
-                    new_feature.setGeometry(feature.geometry())
-                    new_feature.setAttribute("scaled_score",
-                                             user_value / 20.0)  # Normalize to a 0-5 scale as a real number
-                    temp_layer.addFeature(new_feature)
-
-                temp_layer.commitChanges()
-
-            # Ensure spatial index for temp_layer
-            _ = QgsSpatialIndex(temp_layer.getFeatures())
+            # Calculate the scaled scores and add to temp layer
+            temp_layer.startEditing()
+            for feature in clipped_layer.getFeatures():
+                value = feature[rasField]
+                score = scale_value(value)
+                new_feature = QgsFeature(temp_layer.fields())
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttribute("scaled_score", score)
+                temp_layer.addFeature(new_feature)
+            temp_layer.commitChanges()
 
             # Get the extent for rasterization
-            UTM_crs_2 = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
-            self.convertCRS(countryLayerPath, UTM_crs_2)
-            shp_utm[rasField] = [0]
-            countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
-            buffer = processing.run(
-                "native:buffer",
-                {
-                    "INPUT": countryUTMLayer,
-                    "DISTANCE": self.BUFFER_DISTANCE,
-                    "SEGMENTS": 5,
-                    "END_CAP_STYLE": 0,
-                    "JOIN_STYLE": 0,
-                    "MITER_LIMIT": 2,
-                    "DISSOLVE": True,
-                    "SEPARATE_DISJOINT": False,
-                    "OUTPUT": "memory:",
-                },
-            )
-            countryUTMLayerBuf = buffer["OUTPUT"]
-            extent = countryUTMLayerBuf.extent()
+            extent = temp_layer.extent()
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
 
-            rasOutput = self.dlg.EDU_Output_Field.text()
-            temp_rasOutputPath = os.path.join(tempDir, "temp_raster.tif")
-            final_rasOutputPath = os.path.join(workingDir, Dimension, rasOutput)
-
-            # Update status
-            self.dlg.EDU_status.setText("Rasterizing...")
-            self.dlg.EDU_status.repaint()
-
-            # Rasterize using the pixelSize for resolution
+            # Rasterize
+            rasOutput = os.path.join(workingDir, Dimension, self.dlg.EDU_Output_Field.text())
             _ = processing.run(
                 "gdal:rasterize",
                 {
                     "INPUT": temp_layer,
                     "FIELD": "scaled_score",
-                    "BURN": 0,
+                    "BURN": 0.0,
                     "USE_Z": False,
                     "UNITS": 1,
                     "WIDTH": pixelSize,
@@ -4440,44 +4456,24 @@ class GenderIndicatorTool:
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
-                    "OUTPUT": temp_rasOutputPath  # Output to a temporary file for clipping
+                    "OUTPUT": rasOutput
                 }
             )
 
-            # Update status
-            self.dlg.EDU_status.setText("Clipping raster...")
-            self.dlg.EDU_status.repaint()
-
-            # Clip the raster to the country layer
-            _ = processing.run(
-                "gdal:cliprasterbymasklayer",
-                {
-                    "INPUT": temp_rasOutputPath,
-                    "MASK": countryLayer,
-                    "SOURCE_CRS": UTM_crs,
-                    "TARGET_CRS": UTM_crs,
-                    "NODATA": None,
-                    "ALPHA_BAND": False,
-                    "CROP_TO_CUTLINE": False,
-                    "KEEP_RESOLUTION": True,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
-                    "OUTPUT": final_rasOutputPath
-                }
-            )
-
-            # Set output field
-            self.dlg.EDU_Aggregate_Field.setText(final_rasOutputPath)
+            # Set output field and apply style
+            self.dlg.EDU_Aggregate_Field.setText(rasOutput)
+            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleFile = f"{os.path.splitext(os.path.basename(rasOutput))[0]}.qml"
+            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
             # Update status
             self.dlg.EDU_status.setText("Processing has been completed!")
             self.dlg.EDU_status.repaint()
 
         except Exception as e:
-            print(str(e))
             self.dlg.EDU_status.setText(f"Error: {str(e)}")
             self.dlg.EDU_status.repaint()
-
 
     def ELCnightTimeLights(self):
         """
