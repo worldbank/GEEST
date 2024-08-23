@@ -4112,7 +4112,7 @@ class GenderIndicatorTool:
             temp_layer.commitChanges()
 
             # Get the extent for rasterization
-            extent = setup['country_extent'].extent()
+            extent = setup['country_extent']
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
             width = int(np.floor((xmax - xmin) / setup['pixelSize']))
             height = int(np.floor((ymax - ymin) / setup['pixelSize']))
