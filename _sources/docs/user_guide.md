@@ -17,6 +17,7 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
     - 4.2.1. [Workplace Discrimination](#workplace-discrimination)
     - 4.2.2. [Regulatory Frameworks](#regulatory-frameworks)
     - 4.2.3. [Financial Inclusion](#financial-inclusion)
+    - 4.2.4. [Aggregate](#aggregation-tab)
   - 4.4. [ACCESSIBILITY TAB](#accessibility-tab)
     - 4.4.1. [Women's Travel Patterns](#women-s-travel-patterns)
     - 4.4.2. [Access to Public Transport](#access-to-public-transport)
@@ -249,6 +250,29 @@ Examples of files that can be used as input at a particular step as per the Pilo
 3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
 4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (Project_Folder/Contextual/FIN.tif). The user can rename the output file to preferred filename.
+
+#### 4.2.4 Aggregate
+
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WDAG.jpg" alt="picture">
+</p>
+
+1.	Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
+If a factor was executed in the same work session, its file path will automatically be populated after execution.
+
+2.	If factors are missing adjust the weighting percentage accordingly and ensure it totals to 100%.
+
+3.	If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weights.
+
+4.	Enter an alternate aggregated raster output file name if desired. The standard output file name is Contextual_score.tif
+
+5.	Click the “Execute” button to run the algorithm.
+
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
+
+7.	The aggregated layer will be loaded to the QGIS and appear in the table of contents.
+
+8.	The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (Project_Folder/Contextual/ Contextual_score.tif). The user can rename the output file to preferred filename.
 
 
 ### 4.4 ACCESSIBILITY TAB

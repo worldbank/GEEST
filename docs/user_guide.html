@@ -418,6 +418,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#workplace-discrimination">4.2.1 Workplace Discrimination</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#regulatory-frameworks">4.2.2 Regulatory Frameworks</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#financial-inclusion">4.2.3 Financial Inclusion</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate">4.2.4 Aggregate</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accessibility-tab">4.4 ACCESSIBILITY TAB</a><ul class="nav section-nav flex-column">
@@ -427,7 +428,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-jobs-in-the-re-sector">4.4.4 Access to Jobs in the RE sector</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-health-facilities">4.4.5 Access to Health Facilities</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-financial-facilities">4.4.6 Access to Financial Facilities</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate">4.4.7 Aggregate</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ad-aggregation-tab">4.4.7 Aggregate</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.5 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
@@ -505,6 +506,7 @@ document.write(`
 <li><p>4.2.1. <a class="reference internal" href="#workplace-discrimination"><span class="xref myst">Workplace Discrimination</span></a></p></li>
 <li><p>4.2.2. <a class="reference internal" href="#regulatory-frameworks"><span class="xref myst">Regulatory Frameworks</span></a></p></li>
 <li><p>4.2.3. <a class="reference internal" href="#financial-inclusion"><span class="xref myst">Financial Inclusion</span></a></p></li>
+<li><p>4.2.4. <a class="reference internal" href="#aggregation-tab"><span class="xref myst">Aggregate</span></a></p></li>
 </ul>
 </li>
 <li><p>4.4. <a class="reference internal" href="#accessibility-tab"><span class="xref myst">ACCESSIBILITY TAB</span></a></p>
@@ -733,6 +735,23 @@ document.write(`
 <li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (Project_Folder/Contextual/FIN.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
+<section id="aggregate">
+<h4>4.2.4 Aggregate<a class="headerlink" href="#aggregate" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WDAG.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
+If a factor was executed in the same work session, its file path will automatically be populated after execution.</p></li>
+<li><p>If factors are missing adjust the weighting percentage accordingly and ensure it totals to 100%.</p></li>
+<li><p>If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weights.</p></li>
+<li><p>Enter an alternate aggregated raster output file name if desired. The standard output file name is Contextual_score.tif</p></li>
+<li><p>Click the “Execute” button to run the algorithm.</p></li>
+<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
+<li><p>The aggregated layer will be loaded to the QGIS and appear in the table of contents.</p></li>
+<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (Project_Folder/Contextual/ Contextual_score.tif). The user can rename the output file to preferred filename.</p></li>
+</ol>
+</section>
 </section>
 <section id="accessibility-tab">
 <h3>4.4 ACCESSIBILITY TAB<a class="headerlink" href="#accessibility-tab" title="Permalink to this heading">#</a></h3>
@@ -848,8 +867,8 @@ document.write(`
 <li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder (<em>Project_Folder/Accessibility/FIF_Raster_output.tif</em>).</p></li>
 </ol>
 </section>
-<section id="aggregate">
-<span id="ad-aggregation-tab"></span><h4>4.4.7 Aggregate<a class="headerlink" href="#aggregate" title="Permalink to this heading">#</a></h4>
+<section id="ad-aggregation-tab">
+<span id="id1"></span><h4>4.4.7 Aggregate<a class="headerlink" href="#ad-aggregation-tab" title="Permalink to this heading">#</a></h4>
 <p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/ba3c884c-5940-4255-9ca5-9e202ae106b8" /></p>
 <ol class="arabic simple">
 <li><p>Load the raster outputs generated in each of the previous factor tabs for the Accessibility Dimension.</p></li>
@@ -1051,7 +1070,7 @@ document.write(`
 </ol>
 </section>
 <section id="pd-aggregation-tab">
-<span id="id1"></span><h4>4.5.11 Aggregate<a class="headerlink" href="#pd-aggregation-tab" title="Permalink to this heading">#</a></h4>
+<span id="id2"></span><h4>4.5.11 Aggregate<a class="headerlink" href="#pd-aggregation-tab" title="Permalink to this heading">#</a></h4>
 <p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/bedf9d85-63c5-4cd9-857a-c726ef77a89a" /></p>
 <ol class="arabic simple">
 <li><p>Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.</p></li>
@@ -1432,6 +1451,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#workplace-discrimination">4.2.1 Workplace Discrimination</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#regulatory-frameworks">4.2.2 Regulatory Frameworks</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#financial-inclusion">4.2.3 Financial Inclusion</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate">4.2.4 Aggregate</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accessibility-tab">4.4 ACCESSIBILITY TAB</a><ul class="nav section-nav flex-column">
@@ -1441,7 +1461,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-jobs-in-the-re-sector">4.4.4 Access to Jobs in the RE sector</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-health-facilities">4.4.5 Access to Health Facilities</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-financial-facilities">4.4.6 Access to Financial Facilities</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate">4.4.7 Aggregate</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ad-aggregation-tab">4.4.7 Aggregate</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.5 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
