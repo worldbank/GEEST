@@ -8,7 +8,7 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 ## User Manual
 
 [**Gender Enabling Environments Spatial Tool (GEEST) User Manual**](#gender-enabling-environments-spatial-tool-geest-user-manual)
-1. [Install QGIS](#install-qgis)
+1. [Install QGIS](#1-install-qgis)
 2. [Install Open Route Service (ORS) plugin](#install-open-route-service-ors-plugin)
 3. [Installing Plugin on local device](#installing-plugin-on-local-device)
 4. [Using the Plugin](#using-the-plugin)
@@ -54,7 +54,7 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 - [List of CRSs for SIDS](#list-of-crss-for-sids)
 - [License](#license)
 
-# 1 Install QGIS
+## 1 Install QGIS
 
 1. The link below will take you to the QGIS website where you will be able to download the QGIS installation file. Note that it is possible to use older versions of QGIS, e.g. Version 3.28.
 
