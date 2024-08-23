@@ -8,7 +8,7 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 ## User Manual
 
 [**Gender Enabling Environments Spatial Tool (GEEST) User Manual**](#gender-enabling-environments-spatial-tool-geest-user-manual)
-1. [Install QGIS](#install-qgis)
+1. [Install QGIS](##install-qgis)
 2. [Install Open Route Service (ORS) plugin](#install-open-route-service-ors-plugin)
 3. [Installing Plugin on local device](#installing-plugin-on-local-device)
 4. [Using the Plugin](#using-the-plugin)
