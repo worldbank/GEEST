@@ -176,25 +176,25 @@ support@openrouteservice.heigit.org
 ![image](https://github.com/worldbank/GEEST/assets/120469484/eceaf443-ff8b-4be0-9282-a1236a03bb86)
 
 ## 4 Using the Plugin
-Examples of files that can be used as input at a particular step as per the Pilot Country Database will be indicated at the end of the step. The following format will be used:
-
-**Input File:** *Folder/file_name* --> *AccessFinance/Access_to_finance.shp*
+Examples of files that can be used as input at a particular step as per the Pilot Country Database will be indicated at the end of the step.
 
 ### 4.1 SETUP TAB
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/6ff06edc-198a-4807-a59f-038f1b401d43)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/setupTab.jpg" alt="Setup Tab">
+</p>
 
-1. Create a project folder that will be used to store all tool outputs.
+1.	Create a project folder that will be used to store all tool outputs.
 
-3. Set the output directory to the project folder created in the previous step.
+2.	Set the output directory to the project folder created in the previous step.
 
-5. Set the country boundary layer by navigating to and selecting the **Admin 0** country boundary polygon shapefile for the country you want to analyze.
+3.	Set the country boundary layer by navigating to and selecting the Admin0 country boundary polygon shapefile for the country you want to analyze.
+Input File: AdminBoundaries/Admin0.shp
 
-   **Input File:** *AdminBoundaries/Admin0.shp*
+4.	Select the appropriate coordinate reference system (CRS) from the QGIS CRS database. Appendix A lists all the CRS to be used for the SIDS countries.
 
-7. Select the appropriate coordinate reference system (CRS) from the QGIS CRS database.
+5.	Copy and paste the EPSG code for your specific country and paste it in the Filter bar as seen in the image below.
 
-**Appendix A**  _lists all the CRS to be used for the SIDS countries._
 
 5. Copy and paste the EPSG code for your specific country and paste it in the Filter bar as seen in the image below.
 
