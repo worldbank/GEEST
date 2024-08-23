@@ -9,12 +9,12 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 
 [**Gender Enabling Environments Spatial Tool (GEEST) User Manual**](#gender-enabling-environments-spatial-tool-geest-user-manual)
 1. [Install QGIS](#1-install-qgis)
-2. [Install Open Route Service (ORS) plugin](#install-open-route-service-ors-plugin)
-3. [Installing Plugin on local device](#installing-plugin-on-local-device)
-4. [Using the Plugin](#using-the-plugin)
-  - 4.1. [SETUP TAB](#setup-tab)
-  - 4.2. [CONTEXTUAL TAB](#contextual-tab)
-    - 4.2.1. [Workplace Discrimination](#workplace-discrimination)
+2. [Install Open Route Service (ORS) plugin](#2-install-open-route-service-ors-plugin)
+3. [Installing Plugin on local device](#3-installing-plugin-on-local-device)
+4. [Using the Plugin](#4-using-the-plugin)
+  - 4.1. [SETUP TAB](#41-setup-tab)
+  - 4.2. [CONTEXTUAL TAB](#42-contextual-tab)
+    - 4.2.1. [Workplace Discrimination](#421-workplace-discrimination)
     - 4.3.2. [Access to Finance](#access-to-finance)
     - 4.3.3. [Aggregate](#cd-aggregation-tab)
   - 4.4. [ACCESSIBILITY TAB](#accessibility-tab)
@@ -56,24 +56,31 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 
 ## 1 Install QGIS
 
-1. The link below will take you to the QGIS website where you will be able to download the QGIS installation file. Note that it is possible to use older versions of QGIS, e.g. Version 3.28.
+1. 1.	The link below will take you to the QGIS website where you will be able to download the QGIS installation file. Note that it is possible to use older versions of QGIS, e.g. Version 3.32 - Lima. 
 
 QGIS website: [https://www.qgis.org/en/site/](https://www.qgis.org/en/site/)
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/e0448baf-9a0b-475e-9bc2-c883868318d2)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/installQGIS.jpg" alt="Install QGIS">
+</p>
+
 
 2. Once the installation file is downloaded run the installation file.
 
 3. A pop-up window as seen in the image below should show up. Follow the prompts and leave all settings on default.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/52464df3-b408-4d05-af88-c6ef4a55c599)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/qgis-setup.jpg" alt="QGIS Setup">
+</p>
 
 
 ## 2 Install Open Route Service (ORS) plugin
 
 1. Open QGIS, navigate to the "Plugins" tab and select the "Manage and Install Plugins…" option from the drop-down menu.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/1a2b1b0c-2a6f-49a6-b3d3-6e48386b7b22)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/installORS.jpg" alt="install ORS">
+</p>
 
 2. The "Plugins" pop-up window should appear as seen in the image below.
 
@@ -197,92 +204,9 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 7. Set your preferred output raster output resolution in meters squared.
 
-### 4.2 INDIVIDUAL TAB
+### 4.2 CONTEXTUAL TAB
 
-#### 4.2.1 Education
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/783752ba-77a9-4c37-95ad-d5ffb34b9bf7)
-
-1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of women who have achieved a post-secondary education.
-
-   **Input File:** *Education/Level_of_education*
-
-3. Click the "Set" button to extract all the fields from the polygon input layer.
-
-4. Select the field containing the numeric value representing the percentage of women who have achieved a post-secondary education.
-
-5. Enter an alternate raster output file name if desired.
-
-6. Click the "Execute" button to run the algorithm.
-
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/EDU_Raster_output.tif*)
-
-#### 4.2.2 Care Responsibilities
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/a22a693d-7979-442a-9e6d-b485417d8fad)
-
-1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of time women spend on care responsibilities or household activities.
-
-3. Click the "Set" button to extract all the fields from the polygon input layer.
-
-4. Select the field containing the numeric value representing the percentage of time women spend on care responsibilities or household activities.
-
-5. Enter an alternate raster output file name if desired.
-
-6. Click the "Execute" button to run the algorithm.
-
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/CRE_Raster_output.tif*)
-
-#### 4.2.3 Domestic Violence
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/b2b9e9e9-cb5c-4251-b495-2ee10ea8f404)
-
-1. Navigate to and select the polygon input shapefile containing a field reporting the percentage of women who have suffered domestic violence.
-
-   **Input File:** *DomesticViolence/Prevalence_of_domestic_violence.shp*
-
-3. Click the "Set" button to extract all the fields from the polygon input layer.
-
-4. Select the field containing the numeric value representing the percentage of women who have suffered domestic violence.
-
-5. Enter an alternate raster output file name if desired.
-
-6. Click the "Execute" button to run the algorithm.
-
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/DOV_Raster_output.tif*)
-
-(id-aggregation-tab)=
-#### 4.2.4 Aggregate
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/e9e14c68-2111-4377-9ea2-bc73c6241fc1)
-
-1. Load the raster outputs generated in each of the previous factor tabs for the Individual Dimension.
-
-_If a factor was executed in the same work session, its file path will automatically be populated after execution._
-
-2. If factors are missing adjust the weighting percentage accordingly and ensure it totals to 100%.
-
-_If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension._
-
-3. Enter an alternate aggregated raster output file name if desired.
-
-4. Click the "Execute" button to run the algorithm.
-
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
-
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Individual" folder. (*Project_Folder/Individual/AGG_Raster_output.tif*)
-
-### 4.3 CONTEXTUAL TAB
-
-#### 4.3.1 Policy and Legal Protection
+#### 4.2.1 Workplace Discrimination
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/ab6797a8-b09e-4a6e-92c8-6e2b664d17c0)
 
