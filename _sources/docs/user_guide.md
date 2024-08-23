@@ -17,7 +17,7 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
     - 4.2.1. [Workplace Discrimination](#workplace-discrimination)
     - 4.2.2. [Regulatory Frameworks](#regulatory-frameworks)
     - 4.2.3. [Financial Inclusion](#financial-inclusion)
-    - 4.2.4. [Aggregate](#aggregation-tab)
+    - 4.2.4. [Aggregate](#aggregate)
   - 4.4. [ACCESSIBILITY TAB](#accessibility-tab)
     - 4.4.1. [Women's Travel Patterns](#women-s-travel-patterns)
     - 4.4.2. [Access to Public Transport](#access-to-public-transport)
