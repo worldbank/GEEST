@@ -1,4 +1,5 @@
 # Gender Enabling Environments Spatial Tool (GEEST) User Manual
+
 This tool employs a multicriteria evaluation (MCE) framework to spatially describe womens' access to formal employment and business opportunities in the renewable energy sector in Small Island Developing States (SIDS). The MCE framework allows for the incorporation and assessment of dimensions, factors, and indicators to identify where the enabling environments (or lack thereof) are located for women to secure employment opportunities in SIDS.
 
 - The spatial GDBs for all SIDS can be accessed [here](https://datacatalog.worldbank.org/search/collections/genderspatial).
@@ -7,10 +8,10 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
 ## User Manual
 
 [**Gender Enabling Environments Spatial Tool (GEEST) User Manual**](#gender-enabling-environments-spatial-tool-geest-user-manual)
-- 1. [Install QGIS](#install-qgis)
-- 2. [Install Open Route Service (ORS) plugin](#install-open-route-service-ors-plugin)
-- 3. [Installing Plugin on local device](#installing-plugin-on-local-device)
-- 4. [Using the Plugin](#using-the-plugin)
+1. [Install QGIS](#install-qgis)
+2. [Install Open Route Service (ORS) plugin](#install-open-route-service-ors-plugin)
+3. [Installing Plugin on local device](#installing-plugin-on-local-device)
+4. [Using the Plugin](#using-the-plugin)
   - 4.1. [SETUP TAB](#setup-tab)
   - 4.2. [INDIVIDUAL TAB](#individual-tab)
     - 4.2.1. [Education](#education)
