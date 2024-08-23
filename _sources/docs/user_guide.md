@@ -188,8 +188,8 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 2.	Set the output directory to the project folder created in the previous step.
 
-3.	Set the country boundary layer by navigating to and selecting the Admin0 country boundary polygon shapefile for the country you want to analyze.
-Input File: AdminBoundaries/Admin0.shp
+3.	Set the country boundary layer by navigating to and selecting the **Admin0** country boundary polygon shapefile for the country you want to analyze.
+**Input File: AdminBoundaries/Admin0.shp**
 
 4.	Select the appropriate coordinate reference system (CRS) from the QGIS CRS database. Appendix A lists all the CRS to be used for the SIDS countries.
 
