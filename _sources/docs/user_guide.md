@@ -209,23 +209,18 @@ Examples of files that can be used as input at a particular step as per the Pilo
 
 #### 4.2.1 Workplace Discrimination
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/ab6797a8-b09e-4a6e-92c8-6e2b664d17c0)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WD.jpg" alt="picture">
+</p>
 
-1. Navigate to and select polygon input shapefile containing a field reporting a percentage representing the level of protective policies afforded to women.
+1.	Navigate to the WBL (Women, Business and the Law) report and input the WBL index score representing the value from 0 to 100. This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL. The data is already formatted on a scale from 1 to 100. 
 
-   **Input File:** *PolicyLegal/Regulatory_Framework_Law_agg.shp*
+2.	Click the “Execute” button to run the algorithm.
 
-3. Click the "Set" button to extract all the fields from the polygon input layer.
+3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-4. Select the field containing the numeric value representing a percentage representing the level of protective policies afforded to women.
+4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (Project_Folder/Contextual/WD.tif). The user can rename the output file to preferred filename.
 
-5. Enter an alternate raster output file name if desired.
-
-6. Click the "Execute" button to run the algorithm.
-
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/PLP_Raster_output.tif*)
 
 #### 4.3.2 Access to Finance
 
