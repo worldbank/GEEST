@@ -189,20 +189,21 @@ Examples of files that can be used as input at a particular step as per the Pilo
 2.	Set the output directory to the project folder created in the previous step.
 
 3.	Set the country boundary layer by navigating to and selecting the **Admin0** country boundary polygon shapefile for the country you want to analyze.
+
 **Input File: AdminBoundaries/Admin0.shp**
 
 4.	Select the appropriate coordinate reference system (CRS) from the QGIS CRS database. Appendix A lists all the CRS to be used for the SIDS countries.
 
 5.	Copy and paste the EPSG code for your specific country and paste it in the Filter bar as seen in the image below.
 
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/CRS.jpg" alt="CRS">
+</p>
 
-5. Copy and paste the EPSG code for your specific country and paste it in the Filter bar as seen in the image below.
+6.	Select the CRS from the list and click “OK”.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/5e9d2066-c641-4129-8e4c-a876b19da8a2)
+7.	Set your preferred output raster output resolution in meters squared.
 
-6. Select the CRS from the list and click "OK".
-
-7. Set your preferred output raster output resolution in meters squared.
 
 ### 4.2 CONTEXTUAL TAB
 
