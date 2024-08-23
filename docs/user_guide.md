@@ -15,8 +15,8 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
   - 4.1. [SETUP TAB](#setup-tab)
   - 4.2. [CONTEXTUAL TAB](#contextual-tab)
     - 4.2.1. [Workplace Discrimination](#workplace-discrimination)
-    - 4.3.2. [Access to Finance](#access-to-finance)
-    - 4.3.3. [Aggregate](#cd-aggregation-tab)
+    - 4.2.2. [Regulatory Frameworks](#regulatory-frameworks)
+    - 4.2.3. [Financial Inclusion](#financial-inclusion)
   - 4.4. [ACCESSIBILITY TAB](#accessibility-tab)
     - 4.4.1. [Women's Travel Patterns](#women-s-travel-patterns)
     - 4.4.2. [Access to Public Transport](#access-to-public-transport)
@@ -222,48 +222,34 @@ Examples of files that can be used as input at a particular step as per the Pilo
 4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (Project_Folder/Contextual/WD.tif). The user can rename the output file to preferred filename.
 
 
-#### 4.3.2 Access to Finance
+#### 4.2.2 Regulatory Frameworks
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/2e4050cd-d458-4b19-9876-b434431b68c7)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/RF.jpg" alt="picture">
+</p>
 
-1. Navigate to and select polygon input shapefile containing a field reporting the percentage of women who have a bank account.
+1.	Navigate to the WBL (Women, Business and the Law) report and input the WBL Pay and Parenthood index scores, values ranging from 0 to 100. This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by aggregating the Parenthood and Pay Index scores of the WBL. The data is already formatted on a scale from 1 to 100.
 
-   **Input File:** *AccessFinance/Access_to_finance.shp*
+2.	Click the “Execute” button to run the algorithm.
 
-3. Click the "Set" button to extract all the fields from the polygon input layer.
+3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-4. Select the field containing the numeric value representing the percentage of women who have a bank account.
+4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (Project_Folder/Contextual/RF.tif). The user can rename the output file to preferred filename.
 
-5. Enter an alternate raster output file name if desired.
+#### 4.2.3 Financial Inclusion
 
-6. Click the "Execute" button to run the algorithm.
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/FI.jpg" alt="picture">
+</p>
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+1.	Navigate to the WBL (Women, Business and the Law) report and input the WBL Entrepreneurship index score, value ranging from 0 to 100. This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. The data is already formatted on a scale from 1 to 100. It comes from the Entrepreneurship rating of the WBL Index.
 
-8. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/FIN_Raster_output.tif*)
+2.	Click the “Execute” button to run the algorithm.
 
-(cd-aggregation-tab)=
-#### 4.3.3 Aggregate
+3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/bcf2260d-5db0-4be5-a583-ac9d0537e35c)
+4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (Project_Folder/Contextual/FIN.tif). The user can rename the output file to preferred filename.
 
-1. Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
-
-_If a factor was executed in the same work session, its file path will automatically be populated after execution._
-
-2. If factors are missing adjust the weighting percentage accordingly and ensure it totals to 100%.
-
-If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension.
-
-3. Enter an alternate aggregated raster output file name if desired.
-
-4. Click the "Execute" button to run the algorithm.
-
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
-
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Contextual/AGG_Raster_output.tif*)
 
 ### 4.4 ACCESSIBILITY TAB
 
