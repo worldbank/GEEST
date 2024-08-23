@@ -4112,8 +4112,10 @@ class GenderIndicatorTool:
             temp_layer.commitChanges()
 
             # Get the extent for rasterization
-            extent = temp_layer.extent()
+            extent = setup['country_extent'].extent()
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+            width = int(np.floor((xmax - xmin) / setup['pixelSize']))
+            height = int(np.floor((ymax - ymin) / setup['pixelSize']))
 
             # Rasterize
             rasOutput = os.path.join(setup['workingDir'], setup['Dimension'], self.dlg.SAF_Output_Field.text())
@@ -4122,15 +4124,15 @@ class GenderIndicatorTool:
                 {
                     "INPUT": temp_layer,
                     "FIELD": "scaled_score",
-                    "BURN": 0.0,
+                    "BURN": 0,
                     "USE_Z": False,
-                    "UNITS": 1,
-                    "WIDTH": setup['pixelSize'],
-                    "HEIGHT": setup['pixelSize'],
-                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "UNITS": 0,
+                    "WIDTH": width,
+                    "HEIGHT": height,
+                    "EXTENT": None,
                     "NODATA": None,
                     "OPTIONS": "",
-                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
+                    "DATA_TYPE": 6,
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
@@ -4221,8 +4223,10 @@ class GenderIndicatorTool:
             temp_layer.commitChanges()
 
             # Get the extent for rasterization
-            extent = temp_layer.extent()
+            extent = setup['country_extent']
             xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+            width = int(np.floor((xmax - xmin) / setup['pixelSize']))
+            height = int(np.floor((ymax - ymin) / setup['pixelSize']))
 
             # Rasterize
             rasOutput = os.path.join(setup['workingDir'], setup['Dimension'], self.dlg.SAF_Output_Field.text())
@@ -4231,15 +4235,15 @@ class GenderIndicatorTool:
                 {
                     "INPUT": temp_layer,
                     "FIELD": "scaled_score",
-                    "BURN": 0.0,
+                    "BURN": 0,
                     "USE_Z": False,
-                    "UNITS": 1,
-                    "WIDTH": setup['pixelSize'],
-                    "HEIGHT": setup['pixelSize'],
-                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
+                    "UNITS": 0,
+                    "WIDTH": width,
+                    "HEIGHT": height,
+                    "EXTENT": None,
                     "NODATA": None,
                     "OPTIONS": "",
-                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
+                    "DATA_TYPE": 6,
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
