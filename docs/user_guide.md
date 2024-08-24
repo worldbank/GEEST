@@ -31,7 +31,7 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
     - 4.4.3. [Digital Inclusion](#digital-inclusion)
     - 4.4.4. [Environmental Hazards](#environmental-hazards)
     - 4.4.5. [Education](#education)
-    - 4.4.6. [Fragility, conflict, and violence (FCV)](#fragility,-conflict,-and-violence-(fcv))
+    - 4.4.6. [Fragility, conflict, and violence (FCV)](#fragility-conflict-and-violence-fcv)
     - 4.5.11. [Aggregate](#pd-aggregation-tab)
   - 4.6. [DIMENSION AGGREGATION TAB](#dimension-aggregation-tab)
   - 4.7. [ABOUT TAB](#about-tab)
