@@ -441,16 +441,20 @@ If a factor was executed in the same work session, its file path will automatica
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/SAF.jpg" alt="picture">
 </p>
 
-1.	Navigate to and select 
-    •	streetlight Locations (point shapefile) 
-    •	or, if unavailable, VIIRS Nighttime Lights dataset (.tif) may be used as proxy data for streetlight locations
-    •	alternatively, Perceived Safety data (polygon shapefile) can be used if other data is unavailable; select the field containing the numeric value representing data on women's perceived safety at the municipal,       district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example: 
-              Score 5 (Safest): 0 to 1 homicide per 100,000 people
-              Score 4: 1.1 to 3 homicides per 100,000 people
-              Score 3: 3.1 to 6 homicides per 100,000 people
-              Score 2: 6.1 to 10 homicides per 100,000 people
-              Score 1: 10.1 to 15 homicides per 100,000 people
-              Score 0 (Least Safe): More than 15 homicides per 100,000 people
+1.	Navigate to and select
+   - **streetlight Locations** (point shapefile)
+   - or, if unavailable, **VIIRS Nighttime Lights dataset (.tif)** may be used as proxy data for streetlight locations
+   - alternatively, **Perceived Safety data (polygon shapefile)** can be used if other data is unavailable; select the field containing the numeric value representing data on women's perceived safety at the municipal, district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example:
+
+     ```
+     Score 5 (Safest): 0 to 1 homicide per 100,000 people
+     Score 4: 1.1 to 3 homicides per 100,000 people
+     Score 3: 3.1 to 6 homicides per 100,000 people
+     Score 2: 6.1 to 10 homicides per 100,000 people
+     Score 1: 10.1 to 15 homicides per 100,000 people
+     Score 0 (Least Safe): More than 15 homicides per 100,000 people
+     ```
+
 
 2.	Click the “Execute” button to run the algorithm.
 
