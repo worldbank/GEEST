@@ -140,7 +140,7 @@ Examples of data layers present in the GDB for selected countries:
 An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities, categorized into three dimensions: Contextual, Accessibility, and Place Characterization. The latter two dimensions concentrate on geographical factors. For a comprehensive understanding of the Analytical Framework and the associated methodology employed to evaluate women's spatial access to employment opportunities, please refer to the Methodology Report available at the following link: <https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42>
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/dim.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/anal.jpg" alt="picture">
 </p>
 
 (gender-enabling-environments-tool-geest)=
@@ -152,7 +152,9 @@ Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS,
 The table below outlines the dimensions, factors, and recommended indicators for computing the GEEST, derived from the Methodological Framework:
 
 :::{figure-md} markdown-fig
-<img src="docs/images/img08.png" alt="Dimensions, Factors and indicators included in the Analytical Framework">
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/factors.jpg" alt="picture">
+</p>
 
 Dimensions, Factors and indicators included in the Analytical Framework
 :::
