@@ -413,13 +413,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geospatial-databases">2. Geospatial Databases</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#novel-analytical-framework">3. Novel Analytical Framework</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gender-enabling-environments-tool-geest">4. Gender Enabling Environments Tool (GEEST)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-main-limitations">6. GEEST Main Limitations</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-availability-and-granularity">Data Availability and Granularity</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-time">Processing Time</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#methodological-deviations">Methodological Deviations</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#opportunities-for-enhancement">Opportunities for Enhancement</a></li>
-</ul>
-</li>
 </ul>
             </nav>
         </div>
@@ -758,25 +751,35 @@ document.write(`
 </p>
 <p align="center"><strong>Place characterization factors aggregated</strong></p>
 <p>Below are some of the overall insights derived from the GEEST for Saint Lucia. The first map illustrates the degree of enablement within environments; the second map shows the level of enablement concerning the female population on a raster 100x100m format. The third map shows the results for the level of enablement concerning female population, aggregated at the administrative subdivisions of the island.</p>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE.jpg" alt="picture">
+</p>
+<p>Raster results concerning enabling environments for Saint Lucia</p>
+</div>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39.jpg" alt="picture">
+</p>
+<p>Raster results concerning enabling environments with respect to women’s population for Saint Lucia</p>
+<div class="docutils">
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39 Admin2.jpg" alt="picture">
+</p>
+<p>Aggregate results concerning enabling environments with respect to women’s population for Saint Lucia at administrative subdivision level</p>
 </div>
 <p>If the job opportunities’ location layer is presented in raster format, the GEEST can generate scores specifically for the regions where employment prospects exist, emphasizing opportunities exclusively within those areas.</p>
-</section>
-<section id="geest-main-limitations">
-<span id="id6"></span><h2>6. GEEST Main Limitations<a class="headerlink" href="#geest-main-limitations" title="Permalink to this heading">#</a></h2>
-<section id="data-availability-and-granularity">
-<h3>Data Availability and Granularity<a class="headerlink" href="#data-availability-and-granularity" title="Permalink to this heading">#</a></h3>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Solar Project - WEE.jpg" alt="picture">
+</p>
+<p>Raster results concerning enabling environments in RE sites with respect to women’s population for Saint Lucia</p>
+<div class="docutils">
+<h2 class="rubric" id="id6"><span id="geest-main-limitations"></span>6. GEEST Main Limitations</h2>
+<h4 class="rubric" id="data-availability-and-granularity">Data Availability and Granularity</h4>
 <p>The effectiveness of GEEST relies heavily on the quality of open-source data. Therefore, it is imperative to underscore that the principal limitation of the tool in its current state originates from the scarcity of open-source data in SIDS and the limited granularity of the available data. One of the primary challenges in data collection for St. Lucia was the prevalence of information in non-geospatial formats, such as PDFs and JPGs, or as simple statistics found in sources like the World Bank’s Data Portal. Specifically, the Central Statistical Office of St. Lucia’s Mapping Unit distributes maps exclusively in PDF format. Additionally, at the time of our research, the 2022 Census data had not yet been released, leaving us with only the 2010 Census data, which may not accurately reflect the current situation of the country. Furthermore, this earlier census data was largely unavailable in a geospatial format. Moreover, as mentioned earlier, information sourced from open-source repositories (like OSM) was occasionally outdated, incomplete, or lacked detailed specifications regarding the attributes of mapped features, a notable example being financial facilities.</p>
-</section>
-<section id="processing-time">
-<h3>Processing Time<a class="headerlink" href="#processing-time" title="Permalink to this heading">#</a></h3>
+<h4 class="rubric" id="processing-time">Processing Time</h4>
 <p>The processing of factors within the Place Characterization dimension is notably slow. Subsequent enhancements should prioritize the reduction of computational demands for calculating these indicators.</p>
-</section>
-<section id="methodological-deviations">
-<h3>Methodological Deviations<a class="headerlink" href="#methodological-deviations" title="Permalink to this heading">#</a></h3>
+<h4 class="rubric" id="methodological-deviations">Methodological Deviations</h4>
 <p>The Place Characterization factors pose challenges due to restricted data availability, necessitating deviations from the proposed geoprocessing techniques outlined in the methodology. The granularity of GEEST’s output is confined by available data, suggesting potential refinement opportunities in geoprocessing procedures with improved data access or alternative methods to those specified in the methodology.</p>
-</section>
-<section id="opportunities-for-enhancement">
-<h3>Opportunities for Enhancement<a class="headerlink" href="#opportunities-for-enhancement" title="Permalink to this heading">#</a></h3>
+<h4 class="rubric" id="opportunities-for-enhancement">Opportunities for Enhancement</h4>
 <p>To improve the quality and availability of data for GEEST input in Saint Lucia, the following enhanced strategies are recommended:</p>
 <p><strong>Invest in Proprietary Gender Data</strong>: Secure proprietary datasets that shed light on domestic violence, Gender-Based Violence (GBV), and women’s safety perceptions. Collaborate with organizations specializing in gender-sensitive issues, as they likely possess valuable data.</p>
 <p><strong>Leverage Satellite Imagery and Drone Technology</strong>: Use satellite imagery and aerial photography to assess the comprehensiveness and quality of the geospatial datasets included in this analysis. Specifically, around the areas where potential or current job opportunities are located, to verify the accuracy of the results.</p>
@@ -784,7 +787,7 @@ document.write(`
 <p><strong>Host Mapathons</strong>: Organize mapathons to mobilize volunteers for the mapping of current geospatial data or to perform quality assurance checks. This method is invaluable for refreshing outdated maps in neglected areas, thus achieving more extensive and accurate mapping.</p>
 <p><strong>Establish Standardized Data Protocols</strong>: Ensure the adoption of standardized protocols for geospatial data collection and management. Uniform standards are key to preserving data consistency and ensuring that different datasets and projects are compatible, thereby boosting data integration and application effectiveness.</p>
 <p>By implementing these refined strategies, the accessibility and quality of data for GEEST inputs in Saint Lucia can be significantly enhanced, leading to more informed analyses and decision-making processes.</p>
-</section>
+</div>
 </section>
 <div class="toctree-wrapper compound">
 </div>
@@ -851,13 +854,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geospatial-databases">2. Geospatial Databases</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#novel-analytical-framework">3. Novel Analytical Framework</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gender-enabling-environments-tool-geest">4. Gender Enabling Environments Tool (GEEST)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-main-limitations">6. GEEST Main Limitations</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-availability-and-granularity">Data Availability and Granularity</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-time">Processing Time</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#methodological-deviations">Methodological Deviations</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#opportunities-for-enhancement">Opportunities for Enhancement</a></li>
-</ul>
-</li>
 </ul>
   </nav></div>
 
