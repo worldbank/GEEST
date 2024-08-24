@@ -433,15 +433,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.4 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">4.4.1 Active Transport</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">4.4.2 Safety</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#security">4.5.4 Security</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#income-level">4.5.5 Income Level</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#electricity-access">4.5.6 Electricity Access</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#level-of-urbanization">4.5.7 Level of Urbanization</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#size-of-housing">4.5.8 Size of Housing</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">4.5.9 Digital Inclusion</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#natural-environment-and-climatic-factors">4.5.10 Natural Environment and Climatic Factors</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">4.4.3 Digital Inclusion</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">4.4.4 Environmental Hazards</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pd-aggregation-tab">4.5.11 Aggregate</a></li>
 </ul>
 </li>
@@ -521,13 +514,8 @@ document.write(`
 <ul>
 <li><p>4.4.1. <a class="reference internal" href="#active-transport"><span class="xref myst">Active Transport</span></a></p></li>
 <li><p>4.4.2. <a class="reference internal" href="#safety"><span class="xref myst">Safety</span></a></p></li>
-<li><p>4.4.4. <a class="reference internal" href="#security"><span class="xref myst">Security</span></a></p></li>
-<li><p>4.4.5. <a class="reference internal" href="#income-level"><span class="xref myst">Income Level</span></a></p></li>
-<li><p>4.4.6. <a class="reference internal" href="#electricity-access"><span class="xref myst">Electricity Access</span></a></p></li>
-<li><p>4.4.7. <a class="reference internal" href="#level-of-urbanization"><span class="xref myst">Level of Urbanization</span></a></p></li>
-<li><p>4.5.8. <a class="reference internal" href="#size-of-housing"><span class="xref myst">Size of Housing</span></a></p></li>
-<li><p>4.5.9. <a class="reference internal" href="#digital-inclusion"><span class="xref myst">Digital Inclusion</span></a></p></li>
-<li><p>4.5.10. <a class="reference internal" href="#natural-environment-and-climatic-factors"><span class="xref myst">Natural Environment and Climatic Factors</span></a></p></li>
+<li><p>4.4.3. <a class="reference internal" href="#digital-inclusion"><span class="xref myst">Digital Inclusion</span></a></p></li>
+<li><p>4.4.4. <a class="reference internal" href="#environmental-hazards"><span class="xref myst">Environmental Hazards</span></a></p></li>
 <li><p>4.5.11. <a class="reference internal" href="#pd-aggregation-tab">Aggregate</a></p></li>
 </ul>
 </li>
@@ -871,7 +859,7 @@ If a factor was executed in the same work session, its file path will automatica
 <li><p>Navigate to and select</p></li>
 </ol>
 <ul>
-<li><p><strong>streetlight Locations</strong> (point shapefile)</p></li>
+<li><p><strong>streetlight locations</strong> (point shapefile)</p></li>
 <li><p>or, if unavailable, <strong>VIIRS Nighttime Lights dataset (.tif)</strong> may be used as proxy data for streetlight locations</p></li>
 <li><p>alternatively, <strong>Perceived Safety data (polygon shapefile)</strong> can be used if other data is unavailable; select the field containing the numeric value representing data on women’s perceived safety at the municipal, district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Score</span> <span class="mi">5</span> <span class="p">(</span><span class="n">Safest</span><span class="p">):</span> <span class="mi">0</span> <span class="n">to</span> <span class="mi">1</span> <span class="n">homicide</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
@@ -890,137 +878,45 @@ If a factor was executed in the same work session, its file path will automatica
 <li><p>The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/PlaceCharacterization/SAF.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
-</section>
-<section id="security">
-<h3>4.5.4 Security<a class="headerlink" href="#security" title="Permalink to this heading">#</a></h3>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/10d4eb39-51b9-421d-b105-46466f4b3ba9" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select the crime rate polygon input shapefile containing a field reporting the crime rate for a specific incident.</p>
-<p><strong>Input File:</strong> <em>Security/Crime_Incidence_Serious_Assaults.shp</em></p>
-<p><strong>Input File:</strong> <em>Security/Crime_Incidence_Sexual_Violence.shp</em></p>
-</li>
-<li><p>Click the “Set” button to extract all the fields from the polygon input layer.</p></li>
-<li><p>Select the field containing the numeric value representing the crime rate.</p></li>
-<li><p>Enter the raster output file name for the crime type.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, in the “SEC” folder under the “Accessibility” folder (<em>Project_Folder/Place Characterization/SEC/Incidents_Raster_output.tif</em>).</p></li>
-</ol>
-<p><strong>Steps 1 – 8 will have to be repeated for all facility types</strong>.</p>
-<ol class="arabic simple" start="8">
-<li><p>Once all crime types have completed the processing, enter the aggregated raster output file name.</p></li>
-<li><p>Click the “Aggregate” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (<em>Project_Folder/Place Characterization/SEC_Raster_output.tif</em>)</p></li>
-</ol>
-<section id="income-level">
-<h4>4.5.5 Income Level<a class="headerlink" href="#income-level" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/c1a88898-25a9-47ba-83a3-567bbf525f1a" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select the wealth index polygon input shapefile containing a field with the wealth index.</p>
-<p><strong>Input File:</strong> <em>Income/Wealth_Index.shp</em></p>
-</li>
-<li><p>Click the “Set” button to extract all the fields from the polygon input layer.</p></li>
-<li><p>Select the field containing the numeric value representing the wealth index.</p></li>
-<li><p>Enter an alternate raster output file name if desired.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (<em>Project_Folder/Place Characterization/INC_Raster_output.tif</em>).</p></li>
-</ol>
-</section>
-<section id="electricity-access">
-<h4>4.5.6 Electricity Access<a class="headerlink" href="#electricity-access" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/1a37676f-d82f-44bd-a554-9fcb854ce42d" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select electricity access polygon input shapefile containing a field indicating the percentage of individuals that have access to electricity.</p>
-<p><strong>Input File:</strong> <em>Electricity/Electrification_rate.shp</em></p>
-</li>
-<li><p>Click the “Set” button to extract all the fields from the polygon input layer.</p></li>
-<li><p>Select the field containing the numeric value representing the percentage of individuals that have access to electricity.</p></li>
-<li><p>Enter an alternate raster output file name if desired.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (<em>Project_Folder/Place Characterization/ELC_Raster_output.tif</em>).</p></li>
-</ol>
-<p>OR</p>
-<ol class="arabic">
-<li><p>Navigate to and select nighttime lights raster input.</p>
-<p><strong>Input File:</strong> <em>Electricity/Nighttime_Lights_2021.tif</em></p>
-</li>
-<li><p>Enter the raster output file name.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (<em>Project_Folder/Place Characterization/ELC_Raster_output.tif</em>).</p></li>
-</ol>
-<p><strong>N.B. If nighttime lights raster data is used for the “Safe Urban Design” factor it should not be used in the “Electrical Access” factor and vice-versa</strong></p>
-</section>
-<section id="level-of-urbanization">
-<h4>4.5.7 Level of Urbanization<a class="headerlink" href="#level-of-urbanization" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/8776fd6c-8f40-4584-b517-a8610b867dd6" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select GHS-SMOD raster input.</p>
-<p><strong>Input File:</strong> <em>Urbanization/GHS_SMOD_E2020_GLOBE_R2023A_54009_1000_V1_0_R7_C12.tif</em></p>
-</li>
-<li><p>Enter an alternate raster output file name if desired.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (<em>Project_Folder/Place Characterization/LOU_Raster_output.tif</em>).</p></li>
-</ol>
-</section>
-<section id="size-of-housing">
-<h4>4.5.8 Size of Housing<a class="headerlink" href="#size-of-housing" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/b50b4538-6610-438b-b90a-4ee0c9462dc4" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select the building footprints polygon shapefile.</p>
-<p><strong>Input File:</strong> <em>Housing/Building_footprint.shp</em></p>
-</li>
-<li><p>Set hexagon grid size. The default is 1 km.</p></li>
-</ol>
-<p>The smaller size the more computationally intensive the algorithm will be.</p>
-<ol class="arabic simple" start="3">
-<li><p>Enter an alternate raster output file name if desired.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (<em>Project_Folder/Place Characterization/QUH_Raster_output.tif</em>).</p></li>
-</ol>
-</section>
 <section id="digital-inclusion">
-<h4>4.5.9 Digital Inclusion<a class="headerlink" href="#digital-inclusion" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/de34e9da-6e68-4d09-bec5-84755bb35545" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select the polygon input shapefile containing a field indicating the percentage of houses with internet access.</p>
-<p><strong>Input File:</strong> <em>Digital/Access_to_broadband_rates_community.shp</em></p>
+<h4>4.4.3 Digital Inclusion<a class="headerlink" href="#digital-inclusion" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/DIG.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select</p>
+<ul class="simple">
+<li><p>the polygon input shapefile containing a field indicating the percentage of houses with internet access with disaggregated scores at, for example, the municipal or district level; select the field containing the          numeric value representing data on houses with internet access.</p></li>
+<li><p>or a score at the country level as “Internet Access Value”</p></li>
+</ul>
 </li>
-<li><p>Click the “Set” button to extract all the fields from the polygon input layer.</p></li>
-<li><p>Select the field containing the numeric value representing the percentage of houses with Internet access</p></li>
-<li><p>Enter an alternate raster output file name if desired.</p></li>
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (<em>Project_Folder/Place Characterization/DIG_Raster_output.tif</em>).</p></li>
+<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/DIG.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
-<section id="natural-environment-and-climatic-factors">
-<h4>4.5.10 Natural Environment and Climatic Factors<a class="headerlink" href="#natural-environment-and-climatic-factors" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/2b0a1b43-6f34-436e-a790-5516027d291a" /></p>
+<section id="environmental-hazards">
+<h4>4.4.4 Environmental Hazards<a class="headerlink" href="#environmental-hazards" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ENV.jpg" alt="picture">
+</p>
 <ol class="arabic">
-<li><p>Navigate to and select polygon hazard shapefile.</p>
-<p><strong>Input File:</strong> <em>Environment/Flood_risk.shp</em></p>
+<li><p>Navigate to and select raster hazard event.</p>
+<ul class="simple">
+<li><p><strong>Forest Fire</strong>: Active Fires Density</p></li>
+<li><p><strong>Flood</strong>: Flood Hazard</p></li>
+<li><p><strong>Landslide</strong>: Landslide Susceptibility</p></li>
+<li><p><strong>Tropical Cyclone</strong>: Frequency of Tropical Cyclones</p></li>
+<li><p><strong>Drought</strong>: Global Drought Hazard based on the Standardized Precipitation Evapotranspiration Index (SPEI)</p></li>
+</ul>
+<p>Users should be able to select between 1 to 5 of these hazards that are most relevant to their specific context. For each selected hazard, the tool will generate raster cells of 100m x 100m and assign a score ranging from 0 to 5, standardized according to the hazard’s scale. A score of 5 represents no hazard, while a score of 0 indicates areas at the highest risk. The final score will be the average of the scores from the selected hazards.</p>
 </li>
-<li><p>Click the “Set” button to extract all the fields from the polyline input layer.</p></li>
-<li><p>Select the field containing the descriptive risk level values.</p></li>
-<li><p>Click the “Unique Values” button to extract all the unique risk level values.</p></li>
-<li><p>Score each of the extracted risk levels from 1 to 5, where 5 is the lowest risk and 1 is the highest risk.</p></li>
-<li><p>Enter hazard type raster output file name.</p></li>
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder. (<em>Project_Folder/Place Characterization/ENV/Hazard_Raster_output.tif</em>)</p></li>
-</ol>
-<p><strong>Steps 1 – 9 will have to be repeated for all hazard types</strong>.</p>
-<ol class="arabic simple" start="10">
-<li><p>Once all hazard types have been processed, enter the aggregated raster output file name.</p></li>
+<li><p>Each output factor will be stored in the project folder specified in the “Setup” tab, in the “ENV” folder under the “Place Characterization” folder and have the following names Hazard_Landslide.tif, Hazard_Fires.tif, Hazard_Floods_100_yrp.tif, Hazard_Tropical_Cyclone.tif, and Hazard_Drought.tif. The user can rename the output file to preferred filename.</p></li>
 <li><p>Click the “Aggregate” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (<em>Project_Folder/Place Characterization/ENV_Raster_output.tif</em>).</p></li>
+<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/ENV.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
 <section id="pd-aggregation-tab">
@@ -1420,15 +1316,8 @@ If a factor was executed in the same work session, its file path will automatica
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.4 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">4.4.1 Active Transport</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">4.4.2 Safety</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#security">4.5.4 Security</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#income-level">4.5.5 Income Level</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#electricity-access">4.5.6 Electricity Access</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#level-of-urbanization">4.5.7 Level of Urbanization</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#size-of-housing">4.5.8 Size of Housing</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">4.5.9 Digital Inclusion</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#natural-environment-and-climatic-factors">4.5.10 Natural Environment and Climatic Factors</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">4.4.3 Digital Inclusion</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">4.4.4 Environmental Hazards</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pd-aggregation-tab">4.5.11 Aggregate</a></li>
 </ul>
 </li>
