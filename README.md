@@ -159,7 +159,7 @@ The table below outlines the dimensions, factors, and recommended indicators for
 Dimensions, Factors and indicators included in the Analytical Framework
 :::
 
-The GEEST generates raw score outputs for 21 of the 23 factors outlined in the Analytical Framework. The factors (i) Water and Sanitation and (ii) Fragility, Conflict, and Violence are absent due to lack of data availability. Each of the 21 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
+The GEEST generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
 
 The interpretation of these scores is thoroughly detailed in the Methodology Report: <https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42>. Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
 
