@@ -151,7 +151,7 @@ Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS,
 
 The table below outlines the dimensions, factors, and recommended indicators for computing the GEEST, derived from the Methodological Framework:
 
-:::{figure-md} markdown-fig
+
 <p align="center">
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/factors.jpg" alt="picture">
 </p>
