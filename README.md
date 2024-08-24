@@ -245,7 +245,7 @@ The Place-Characterization dimension contains factors that refer to attributes t
 
 Below are some of the overall insights derived from the GEEST for Saint Lucia. The first map illustrates the degree of enablement within environments; the second map shows the level of enablement concerning the female population on a raster 100x100m format. The third map shows the results for the level of enablement concerning female population, aggregated at the administrative subdivisions of the island.
 
-:::{figure-md} markdown-fig
+
 <p align="center">
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE.jpg" alt="picture">
 </p>
@@ -253,7 +253,7 @@ Below are some of the overall insights derived from the GEEST for Saint Lucia. T
 Raster results concerning enabling environments for Saint Lucia
 :::
 
-:::{figure-md} markdown-fig
+
 
 <p align="center">
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39.jpg" alt="picture">
@@ -262,7 +262,7 @@ Raster results concerning enabling environments for Saint Lucia
 Raster results concerning enabling environments with respect to women’s population for Saint Lucia
 :::
 
-:::{figure-md} markdown-fig
+
 
 <p align="center">
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39 Admin2.jpg" alt="picture">
@@ -273,7 +273,7 @@ Aggregate results concerning enabling environments with respect to women’s pop
 
 If the job opportunities' location layer is presented in raster format, the GEEST can generate scores specifically for the regions where employment prospects exist, emphasizing opportunities exclusively within those areas.
 
-:::{figure-md} markdown-fig
+
 
 <p align="center">
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Solar Project - WEE.jpg" alt="picture">
