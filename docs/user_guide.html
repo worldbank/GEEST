@@ -437,13 +437,19 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">4.4.4 Environmental Hazards</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#education">4.4.5 Education</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fragility-conflict-and-violence-fcv">4.4.6 Fragility, conflict, and violence (FCV)</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pd-aggregation-tab">4.5.11 Aggregate</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">4.4.7 Water Sanitation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pd-aggregation-tab">4.4.8 Aggregate</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-aggregation-tab">4.6 DIMENSION AGGREGATION TAB</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#about-tab">4.7 ABOUT TAB</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#insights-tab">4.8 INSIGHTS TAB</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">4.8.1 Enablement</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-aggregation-tab">4.5 DIMENSION AGGREGATION TAB</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#about-tab">4.6 ABOUT TAB</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#insights-tab">4.7 INSIGHTS TAB</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">4.7.1 Enablement</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">Step 1: Classify into discrete classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">Step 2: Combine score and population classifications</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">Step 3: Aggregation</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">4.8.2 RE Zone Raster Locations</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">4.8.3 RE Point Locations</a></li>
 </ul>
@@ -520,16 +526,17 @@ document.write(`
 <li><p>4.4.4. <a class="reference internal" href="#environmental-hazards"><span class="xref myst">Environmental Hazards</span></a></p></li>
 <li><p>4.4.5. <a class="reference internal" href="#education"><span class="xref myst">Education</span></a></p></li>
 <li><p>4.4.6. <a class="reference internal" href="#fragility-conflict-and-violence-fcv"><span class="xref myst">Fragility, conflict, and violence (FCV)</span></a></p></li>
-<li><p>4.5.11. <a class="reference internal" href="#pd-aggregation-tab">Aggregate</a></p></li>
+<li><p>4.4.7. <a class="reference internal" href="#water-sanitation"><span class="xref myst">Water Sanitation</span></a></p></li>
+<li><p>4.4.8. <a class="reference internal" href="#pd-aggregation-tab">Aggregate</a></p></li>
 </ul>
 </li>
-<li><p>4.6. <a class="reference internal" href="#dimension-aggregation-tab"><span class="xref myst">DIMENSION AGGREGATION TAB</span></a></p></li>
-<li><p>4.7. <a class="reference internal" href="#about-tab"><span class="xref myst">ABOUT TAB</span></a></p></li>
-<li><p>4.8. <a class="reference internal" href="#insights-tab"><span class="xref myst">INSIGHTS TAB</span></a></p>
+<li><p>4.5. <a class="reference internal" href="#dimension-aggregation-tab"><span class="xref myst">DIMENSION AGGREGATION TAB</span></a></p></li>
+<li><p>4.6. <a class="reference internal" href="#about-tab"><span class="xref myst">ABOUT TAB</span></a></p></li>
+<li><p>4.7. <a class="reference internal" href="#insights-tab"><span class="xref myst">INSIGHTS TAB</span></a></p>
 <ul>
-<li><p>4.8.1. <a class="reference internal" href="#enablement"><span class="xref myst">Enablement</span></a></p></li>
-<li><p>4.8.2. <a class="reference internal" href="#re-zone-raster-locations"><span class="xref myst">RE Zone Raster Locations</span></a></p></li>
-<li><p>4.8.3. <a class="reference internal" href="#re-point-locations"><span class="xref myst">RE Point Locations</span></a></p></li>
+<li><p>4.7.1. <a class="reference internal" href="#enablement"><span class="xref myst">Enablement</span></a></p></li>
+<li><p>4.7.2. <a class="reference internal" href="#re-zone-raster-locations"><span class="xref myst">RE Zone Raster Locations</span></a></p></li>
+<li><p>4.7.3. <a class="reference internal" href="#re-point-locations"><span class="xref myst">RE Point Locations</span></a></p></li>
 </ul>
 </li>
 </ul>
@@ -942,85 +949,111 @@ If a factor was executed in the same work session, its file path will automatica
 </section>
 <section id="fragility-conflict-and-violence-fcv">
 <h4>4.4.6 Fragility, conflict, and violence (FCV)<a class="headerlink" href="#fragility-conflict-and-violence-fcv" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/FCV.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select the csv data for Fragility, conflict and violence (FCV-ACLED data).</p></li>
+<li><p>The default radius of 5km circular buffer can be changed from “Impact Radius in Meters (Optional)” if the impact radius of an event is known.</p></li>
+<li><p>Click the “Execute” button to run the algorithm.</p></li>
+<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
+<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/FCV.tif). The user can rename the output file to preferred filename.</p></li>
+</ol>
+</section>
+<section id="water-sanitation">
+<h4>4.4.7 Water Sanitation<a class="headerlink" href="#water-sanitation" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WAS.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select point shapefile for water points, catch basins, water valves and fire hydrants.</p></li>
+<li><p>Click the “Execute” button to run the algorithm.</p></li>
+<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
+<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/WAS.tif). The user can rename the output file to preferred filename.</p></li>
+</ol>
 </section>
 <section id="pd-aggregation-tab">
-<span id="id2"></span><h4>4.5.11 Aggregate<a class="headerlink" href="#pd-aggregation-tab" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/bedf9d85-63c5-4cd9-857a-c726ef77a89a" /></p>
+<span id="id2"></span><h4>4.4.8 Aggregate<a class="headerlink" href="#pd-aggregation-tab" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AGGPD.jpg" alt="picture">
+</p>
 <ol class="arabic simple">
-<li><p>Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.</p></li>
-</ol>
-<p><em>If a factor was executed in the same work session, its file path will automatically be populated after execution.</em></p>
-<ol class="arabic simple" start="2">
-<li><p>If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.</p></li>
-</ol>
-<p><em>If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension.</em></p>
-<ol class="arabic simple" start="3">
-<li><p>Enter the aggregated raster output file name.</p></li>
+<li><p>Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.
+If a factor was executed in the same work session, the file path will automatically be populated after execution.</p></li>
+<li><p>If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
+If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension. The Auto button will automatically adjust the weights to ensure they sum to 100.</p></li>
+<li><p>Enter alternate aggregated raster output file name if desired.</p></li>
+<li><p>Enter an alternate aggregated raster output file name if desired. The standard output file name is Place_score.tif.</p></li>
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
 <li><p>The aggregated layer will be loaded to the QGIS and appear in the table of contents.</p></li>
-<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (<em>Project_Folder/Place Characterization/AGG_Raster_output.tif</em>).</p></li>
+<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/Place_score.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
 </section>
 <section id="dimension-aggregation-tab">
-<h3>4.6 DIMENSION AGGREGATION TAB<a class="headerlink" href="#dimension-aggregation-tab" title="Permalink to this heading">#</a></h3>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/651ed053-e36a-4fa1-b44d-6759fc5b60d8" /></p>
+<h3>4.5 DIMENSION AGGREGATION TAB<a class="headerlink" href="#dimension-aggregation-tab" title="Permalink to this heading">#</a></h3>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AGGALL.jpg" alt="picture">
+</p>
 <ol class="arabic simple">
-<li><p>Load each dimension’s aggregated raster outputs.</p></li>
+<li><p>Load each dimension’s aggregated raster outputs of previous domains (Contextual, Accessibility and Place Characterization).</p></li>
 </ol>
-<p><em>If a dimension’s factor aggregation was executed in the same work session, its file path will automatically be populated after execution.</em></p>
+<p>If a dimension’s factor aggregation was executed in the same work session, its file path will automatically be populated after execution.</p>
 <ol class="arabic simple" start="2">
-<li><p>If dimensions are missing, adjust the weighting percentage accordingly and ensure it totals up to 100%.</p></li>
-</ol>
-<p><em>If a dimension is missing it needs to be given a weighting of 0%.</em></p>
-<ol class="arabic simple" start="3">
+<li><p>If dimensions are missing, adjust the weighting percentage accordingly and ensure it totals up to 100%.
+If a dimension is missing it needs to be given a weighting of 0%. All domains should have equal weighting within the aggregation tab.</p></li>
 <li><p>Enter aggregated dimensions raster output file name.</p></li>
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
 <li><p>The aggregated dimensional layer will be loaded to the QGIS and appear in the table of contents.</p></li>
-<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Final_output” folder (*Project_Folder/Final_Output/Final_AGG_Raster_output.tif_).</p></li>
+<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Final_output” folder (*Project_Folder/Final_Output/WEE.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
 <section id="about-tab">
-<h3>4.7 ABOUT TAB<a class="headerlink" href="#about-tab" title="Permalink to this heading">#</a></h3>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/a949054b-1b8e-46f6-9279-fdd2b54212de" /></p>
-<p>Information on the tool its framework, scoring system, and how results should or can be interpreted.</p>
+<h3>4.6 ABOUT TAB<a class="headerlink" href="#about-tab" title="Permalink to this heading">#</a></h3>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/About.jpg" alt="picture">
+</p>
+<p>Information on the tool, its framework, scoring system, and how results should or can be interpreted.</p>
 </section>
 <section id="insights-tab">
-<h3>4.8 INSIGHTS TAB<a class="headerlink" href="#insights-tab" title="Permalink to this heading">#</a></h3>
+<h3>4.7 INSIGHTS TAB<a class="headerlink" href="#insights-tab" title="Permalink to this heading">#</a></h3>
 <section id="enablement">
-<h4>4.8.1 Enablement<a class="headerlink" href="#enablement" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/e0e94c47-bf17-462c-a41c-5023f96ab642" /></p>
-<p><strong>Classify into discrete classes</strong></p>
-<ol class="arabic">
-<li><p>Navigate to and select the enablement score input raster file. This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer.</p></li>
-<li><p>Click the “Classify” button under the “Enablement Score Input layer” field to run the algorithm.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/1) Level of Enablement Classification” folder. (<em>Project_Folder/Insights/1) Level of Enablement Classification/Level_of_Enablement.tif</em>)</p></li>
-<li><p>Navigate to and select the population input raster file.</p>
-<p><strong>Input File:</strong> <em>Population/Female_population_35_39.tif</em> (<strong>Any of the age ranges can be used as input</strong>)</p>
-</li>
-<li><p>Click the “Classify” button under the “Population Input layer” field to run the algorithm.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/2) Relative Population Count Classification” folder. (<em>Project_Folder/Insights/2) Relative Population Count Classification/Relative_Population_Count.tif</em>)</p></li>
-</ol>
-<p><strong>Combine score and population classifications</strong></p>
-<ol class="arabic simple" start="8">
-<li><p>Navigate to and select the “Level of Enablement” output raster file produced in <strong>step 2</strong>. This file path will be automatically populated if <strong>step 2</strong> was executed in the same work session.</p></li>
-<li><p>Navigate to and select the “Relative Population Count” output raster file produced in <strong>step 6</strong>. This file path will be automatically populated if <strong>step 6</strong> was executed in the same work session.</p></li>
-<li><p>Click the “Combine Classification” button to run the algorithm combining the “Level of Enablement” and “Relative Population Count” raster layers.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification” folder. (<em>Project_Folder/Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification/Enablement_&amp;_Population_Combined_classification.tif</em>)</p></li>
-</ol>
-<p><strong>Aggregation</strong></p>
-<ol class="arabic" start="12">
-<li><p>Navigate to and select the “Combine Classification” output raster file produced in <strong>step 10</strong>. This file path will be automatically populated if <strong>step 10</strong> was executed in the same work session.</p></li>
-<li><p>Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer)</p>
-<p><strong>Input File:</strong> <em>AdminBoundaries/Admin6.shp</em> (<strong>Any admin level can be used as input</strong>)</p>
-</li>
-<li><p>Enter aggregated “Combine Classification” shapefiles output file name.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/4) Aggregation” folder. (<em>Project_Folder/Insights/4) Aggregation/Aggregation_.tif</em>)</p></li>
-</ol>
+<h4>4.7.1 Enablement<a class="headerlink" href="#enablement" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ENA.jpg" alt="picture">
+</p>
 </section>
+</section>
+<section id="step-1-classify-into-discrete-classes">
+<h3>Step 1: Classify into discrete classes<a class="headerlink" href="#step-1-classify-into-discrete-classes" title="Permalink to this heading">#</a></h3>
+<p>1.1 Navigate to and select the enablement score input raster file. This can be the final aggregate score (WEE.tif), a dimension aggregate score, or even a single factor output layer.</p>
+<p>1.2 Click the “Classify” button under the “Enablement Score Input layer” field to run the algorithm.</p>
+<p>1.3 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/1) Level of Enablement Classification” folder. (Project_Folder/Insights/1) Level of Enablement Classification/WEE_score.tif). The user can rename the output file to the preferred filename.</p>
+<p>1.4 Navigate to and select the population input raster file.</p>
+<ul class="simple">
+<li><p>E.g., Input File: Population/Female_population_35_39.tif (Any of the age ranges can be used as input).</p></li>
+</ul>
+<p>1.5 Click the “Classify” button under the “Population Input layer” field to run the algorithm.</p>
+<p>1.6 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/2) Relative Population Count Classification” folder. (Project_Folder/Insights/2) Relative Population Count Classification/Population.tif). The user can rename the output file to the preferred filename.</p>
+</section>
+<section id="step-2-combine-score-and-population-classifications">
+<h3>Step 2: Combine score and population classifications<a class="headerlink" href="#step-2-combine-score-and-population-classifications" title="Permalink to this heading">#</a></h3>
+<p>2.1 Navigate to and select the “Level of Enablement” output raster file produced in step 1.2 (WEE_score.tif). This file path will be automatically populated if step 1.2 was executed in the same work session.</p>
+<p>2.2 Navigate to and select the “Relative Population Count” output raster file produced in step 1.5 (Population.tif). This file path will be automatically populated if step 1.5 was executed in the same work session.</p>
+<p>2.3 Click the “Combine Classification” button to run the algorithm combining the “Level of Enablement” and “Relative Population Count” raster layers.</p>
+<p>2.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification” folder. (Project_Folder/Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification/WEE_pop_score.tif). The user can rename the output file to the preferred filename.</p>
+</section>
+<section id="step-3-aggregation">
+<h3>Step 3: Aggregation<a class="headerlink" href="#step-3-aggregation" title="Permalink to this heading">#</a></h3>
+<p>3.1 Navigate to and select the “Combine Classification” output raster file produced in step 2.3. This file path will be automatically populated if step 2.3 was executed in the same work session.</p>
+<p>3.2 Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g., municipal boundary layer).</p>
+<ul class="simple">
+<li><p>E.G., Input File: AdminBoundaries/Admin2.shp (Any admin level can be used as input)</p></li>
+</ul>
+<p>3.3 Click the “Execute” button to run the algorithm.</p>
+<p>3.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/4) Aggregation” folder. (Project_Folder/Insights/4) Aggregation/WEE_pop_adm_score.shp). The user can rename the output file to the preferred filename.</p>
 <section id="re-zone-raster-locations">
 <h4>4.8.2 RE Zone Raster Locations<a class="headerlink" href="#re-zone-raster-locations" title="Permalink to this heading">#</a></h4>
 <p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/612670ce-b60f-48a1-b085-7c6478c5b5f8" /></p>
@@ -1344,13 +1377,19 @@ If a factor was executed in the same work session, its file path will automatica
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">4.4.4 Environmental Hazards</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#education">4.4.5 Education</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#fragility-conflict-and-violence-fcv">4.4.6 Fragility, conflict, and violence (FCV)</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pd-aggregation-tab">4.5.11 Aggregate</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">4.4.7 Water Sanitation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pd-aggregation-tab">4.4.8 Aggregate</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-aggregation-tab">4.6 DIMENSION AGGREGATION TAB</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#about-tab">4.7 ABOUT TAB</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#insights-tab">4.8 INSIGHTS TAB</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">4.8.1 Enablement</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dimension-aggregation-tab">4.5 DIMENSION AGGREGATION TAB</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#about-tab">4.6 ABOUT TAB</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#insights-tab">4.7 INSIGHTS TAB</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">4.7.1 Enablement</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">Step 1: Classify into discrete classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">Step 2: Combine score and population classifications</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">Step 3: Aggregation</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">4.8.2 RE Zone Raster Locations</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">4.8.3 RE Point Locations</a></li>
 </ul>
