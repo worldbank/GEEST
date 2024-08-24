@@ -58,48 +58,32 @@ This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS inclu
 | --- |
 | Administrative boundaries |
 | Location and outline of cities/villages |
-| Building footprints |  
+| Coordinate reference system |  
 | **Demographics and Population** |
 | Population Density |  
 | Level of Education |  
-| Age |
-| Wealth Index |
-| Female-Headed Households |  
-| Average Number of Children |  
-| Adolescent Fertility Rate |  
-| Share of Female University Graduates, STEM |
-| Tertiary -Post Secondary- Education Attainment |  
-| Secondary Education Attainment |
-| Agency of Women: Sexual Relations, Contraception, Reproductive Care |  
+| Age |   
+| Workplace Discrimination |
+| Regulatory Frameworks |  
+| Financial Inclusion |
 | **Renewable Energy** |
 | Existing RE: Solar Plants |
 | Potential RE Project Sites: Solar |
 | Potential RE Project Sites: Wind |
 | Potential RE Project Sites: Wind Offshore |
 | **Energy Access** |
-| Location of Power Plants |  
-| Location of Stations and Substations |  
-| Grid Network: Transmission + Distribution |  
-| Prevalence of Energy Source |
-| Measure of Visible Light at Nighttime |  
-| Electrification Rates |  
-| Access to Electricity/Community |  
-| Access to Reliable Electricity/Community |  
+| Measure of Visible Light at Nighttime |
 | **Education** |
-| Location Universities |  
-| Location Technical Schools |  
+| Location of Universities |  
+| Location of Technical Schools |  
+| Percentage of Women who have achieved a post-secondary education | 
 | **Jobs and Finance** |
 | Financial Facilities |
-| Labor in Industry Sector, Gender-Disaggregated |  
-| % Female Managers/Entrepreneurship |
-| % Women in Middle/High Management Positions |
-| Economic Participation and Opportunities Gap Score |
-| Unpaid Domestic Work (% of day) |
+| Labor in Industry Sector, Gender-Disaggregated | 
 | **Digital Inclusion** |
 | Access to Broadband Rates |  
 | Digital Literacy Rates |  
 | **Transportation** |
-| Road Network |
 | Public Transportation Networks |  
 | Public Transportation Stops |  
 | Ports |
@@ -107,27 +91,22 @@ This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS inclu
 | Mobility Dataset |
 | Commuting Zones |
 | **Safety** |
-| Crime Incidence: Serious Assaults |
-| Crime Incidence: Sexual Violence |
 | Prevalence of Domestic Violence |
 | Trust in the Police |  
+| Street lights for safe areas at night |  
 | **Amenities** |
 | Location of Hospitals |  
 | Location of Grocery Stores |  
-| Location of Playgrounds and Parks |  
-| Location of Daycares/Elementary Schools |  
+| Location of Green Spaces |  
+| Location of Daycares/Elementary Schools | 
+| Location of Pharmacies |  
 | **Climate/Earth (5 datasets, four in GDB)** |
-| Average Rainfall |  
-| Coastal Flood Risk |  
-| Vegetation Areas |
-| Waterways |
+| Fires |  
+| Coastal or Inland Flood Risk |  
+| Cyclones |
+| Landslides |
+| Drought |
 | **Law/Policy/Government** |
-| Sexual and Reproductive Health and Rights (% developed) |
-| Length of Paid Maternity Leave (days) |
-| Legislation Against Domestic Violence |
-| Non-Discrimination Employment Legislation: Gender-Based |
-| Legislation Against Sexual Harassment in Employment |  
-| National Parliament Seats Held by Women (%) |
 | Missing Data from SDGs |
 
 </font>
@@ -146,7 +125,7 @@ Proportion of data availability for the 59 datasets, by country
 
 In parallel with the Gender Data Gap Assessment, a comprehensive geospatial database was compiled for each of the 31 Small Island Developing States (SIDS) Targeted in the project.  The repository containing the geospatial databases can be found in the following link: <https://datacatalog.worldbank.org/search/collections/genderspatial>
 
-Examples of data layers present in the GDB for select countries:
+Examples of data layers present in the GDB for selected countries:
 
 ![image](docs/images/img04.png)
 
@@ -158,9 +137,11 @@ Examples of data layers present in the GDB for select countries:
 
 ## 3. Novel Analytical Framework
 
-An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 23 key factors, both spatial and non-spatial, that affect women’s job opportunities, categorized into four dimensions: Individual, Contextual, Accessibility, and Place Characterization. The latter two dimensions concentrate on geographical factors. For a comprehensive understanding of the Analytical Framework and the associated methodology employed to evaluate women's spatial access to employment opportunities, please refer to the Methodology Report available at the following link: <https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42>
+An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities, categorized into three dimensions: Contextual, Accessibility, and Place Characterization. The latter two dimensions concentrate on geographical factors. For a comprehensive understanding of the Analytical Framework and the associated methodology employed to evaluate women's spatial access to employment opportunities, please refer to the Methodology Report available at the following link: <https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42>
 
-![image](docs/images/img07.png)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/dim.jpg" alt="picture">
+</p>
 
 (gender-enabling-environments-tool-geest)=
 
