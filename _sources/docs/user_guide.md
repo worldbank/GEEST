@@ -18,14 +18,13 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
     - 4.2.2. [Regulatory Frameworks](#regulatory-frameworks)
     - 4.2.3. [Financial Inclusion](#financial-inclusion)
     - 4.2.4. [Aggregate](#aggregate)
-  - 4.4. [ACCESSIBILITY TAB](#accessibility-tab)
-    - 4.4.1. [Women's Travel Patterns](#women-s-travel-patterns)
-    - 4.4.2. [Access to Public Transport](#access-to-public-transport)
-    - 4.4.3. [Access to Education and Training Facilities](#access-to-education-and-training-facilities)
-    - 4.4.4. [Access to Jobs in the RE sector](#access-to-jobs-in-the-re-sector)
-    - 4.4.5. [Access to Health Facilities](#access-to-health-facilities)
-    - 4.4.6. [Access to Financial Facilities](#access-to-financial-facilities)
-    - 4.4.7. [Aggregate](#ad-aggregation-tab)
+  - 4.3. [ACCESSIBILITY TAB](#accessibility-tab)
+    - 4.3.1. [Women's Travel Patterns](#women-s-travel-patterns)
+    - 4.3.2. [Access to Public Transport](#access-to-public-transport)
+    - 4.3.3. [Access to Education and Training Facilities](#access-to-education-and-training-facilities)
+    - 4.3.4. [Access to Health Facilities](#access-to-health-facilities)
+    - 4.3.5. [Access to Financial Facilities](#access-to-financial-facilities)
+    - 4.3.6. [Aggregate](#ad-aggregation-tab)
   - 4.5. [PLACE CHARACTERIZATION TAB](#place-characterization-tab)
     - 4.5.1. [Active Transport](#active-transport)
     - 4.5.2. [Availability of Public Transport](#availability-of-public-transport)
@@ -275,179 +274,144 @@ If a factor was executed in the same work session, its file path will automatica
 8.	The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (Project_Folder/Contextual/ Contextual_score.tif). The user can rename the output file to preferred filename.
 
 
-### 4.4 ACCESSIBILITY TAB
+### 4.3 ACCESSIBILITY TAB
 
-#### 4.4.1 Women's Travel Patterns
+#### 4.3.1 Women's Travel Patterns
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/6541477e-2ff8-4878-8962-3abb48e4ce43)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WTP.jpg" alt="picture">
+</p>
 
-1. Navigate to and select point shapefile input of facilities related to women's role as caregivers. This includes:
-  - Childcare facilities
-  - Primary and secondary schools
-  - Markets
-  - Grocery stores
-  - Recreational areas
+1.	Navigate to and select point shapefile input of facilities related to women’s role as caregivers. This includes green spaces, grocery stores, pharmacies, kindergartens and schools.
 
-      **Input File:** *Amenities/Daycares_elementary_schools.shp*
+2.	Select the mode of travel (Walking OR Driving).
 
-      **Input File:** *Amenities/Grocery_stores.shp*
+3.	Select the method of measurement (Distance OR Time).
 
-2. Select the mode of travel (Walking OR Driving).
+4.	Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-3. Select the method of measurement (Distance OR Time).
+5.	Click the “Execute” button to run the algorithm.
 
-4. Specify travel distance or time increments in meters or time respectively using comma delimitation.
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-5. Edit the facility raster output file name for each unique type of facility.
+7.	Each output factor will be stored in the project folder specified in the “Setup” tab, in the “WTP” folder under the “Accessibility” folder and have the following names WTP_Walking_Green_spaces.tif, WTP_Walking_Groceries.tif, WTP_Walking_Pharmacies.tif and WTP_Walking_Kindergartens_and_Schools.tif. The user can rename the output file to preferred filename.
 
-6. Click the "Execute" button to run the algorithm.
+8.	Click the “Aggregate” button to run the algorithm.
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+9.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-8. The output raster file will be stored in the project folder specified in the "Setup" tab, in the "WTP" folder under the "Accessibility" folder. (*Project_Folder/Accessibility/WTP/Facility_Raster_output.tif*)
+10.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder. (Project_Folder/Accessibility/WTP.tif). The user can rename the output file to preferred filename.
 
-**Steps 1 – 8 will have to be repeated for all facility types**.
 
-9. Once all facilities have completed the processing, move on to the next step and enter the aggregated raster output file name.
+#### 4.3.2 Access to Public Transport
 
-10. Click the "Aggregate" button to run the algorithm.
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/APT.jpg" alt="picture">
+</p>
 
-11. Status text next to the "Execute" button will appear and let you know once processing is complete.
+1.	Navigate to and select point shapefile input for public transport stops, including both land and maritime stops.
 
-12. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Accessibility/WTP_Raster_output.tif*)
+2.	Select the mode of travel (Walking OR Driving).
 
-#### 4.4.2 Access to Public Transport
+3.	Select the method of measurement (Distance OR Time).
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/ade68b40-f9f4-477c-a631-3ed137b71e27)
+4.	Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-1. Navigate to and select point shapefile input for public transport stops.
+5.	Click the “Execute” button to run the algorithm.
 
-   **Input File:** *PubTransportStops/Public_transportation_stops.shp*
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-3. Select the mode of travel (Walking OR Driving).
+7.	The output raster file will be stored in the project folder set in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/PBT.tif). The user can rename the output file to preferred filename.
 
-4. Select the method of measurement (Distance OR Time).
 
-5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
+#### 4.3.3 Access to Education and Training Facilities
 
-6. Enter an alternate raster output file name if desired.
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ETF.jpg" alt="picture">
+</p>
 
-7. Click the "Execute" button to run the algorithm.
+1.	Navigate to and select point shapefile input of education and training facilities (colleges, training facilities and universities).
 
-8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+2.	Select the mode of travel (Walking OR Driving).
 
-9. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/PBT_Raster_output.tif*).
+3.	Select the method of measurement (Distance OR Time).
 
-#### 4.4.3 Access to Education and Training Facilities
+4.	Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/0899eb4e-9547-4d7a-9a30-95082ebb71dc)
+5.	Click the “Execute” button to run the algorithm.
 
-1. Navigate to and select point shapefile input of education and training facilities.
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-   **Input File:** *EducationFacilities/Techncal_schools.shp*
+7.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/ETF.tif). The user can rename the output file to preferred filename.
 
-   **Input File:** *EducationFacilities/Universities.shp*
 
-3. Select the mode of travel (Walking OR Driving).
+#### 4.3.4 Access to Health Facilities
 
-4. Select the method of measurement (Distance OR Time).
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/HEF.jpg" alt="picture">
+</p>
 
-5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
+1.	Navigate to and select point shapefile input of health facilities (hospitals and clinics as the points of interest).
 
-6. Enter an alternate raster output file name if desired.
+2.	Select the mode of travel (Walking OR Driving).
 
-7. Click the "Execute" button to run the algorithm.
+3.	Select the method of measurement (Distance OR Time).
 
-8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+4.	Specify travel distance or time increments in meters or time respectively using comma delamination.
 
-9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/ETF_Raster_output.tif*).
+5.	Click the “Execute” button to run the algorithm.
 
-#### 4.4.4 Access to Jobs in the RE sector
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/572b704c-830a-40c4-96f0-6dceb7e6100d)
+7.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/HEF.tif). The user can rename the output file to preferred filename.
 
-1. Navigate to and select point shapefile input of jobs or job facilities.
 
-3. Select the mode of travel (Walking OR Driving).
+#### 4.3.5 Access to Financial Facilities
 
-4. Select the method of measurement (Distance OR Time).
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/FIF.jpg" alt="picture">
+</p>
 
-5. Specify travel distance or time increments in meters or time respectively using comma delamination.
+1.	Navigate to and select point shapefile input of financial facilities (location of banks and other financial facilities except for ATMs).
 
-6. Enter an alternate raster output file name if desired.
+2.	Select the mode of travel (Walking OR Driving).
 
-7. Click the "Execute" button to run the algorithm.
+3.	Select the method of measurement (Distance OR Time).
 
-8. Status text next to the "Execute" button will appear and let you know once processing is complete.
+4.	Specify travel distance or time increments in meters or time respectively using comma delimitation.
 
-9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/JOB_Raster_output.tif*).
+5.	Click the “Execute” button to run the algorithm.
 
-#### 4.4.5 Access to Health Facilities
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/c38e5cb6-2264-4bd3-8e53-56c19d8213e4)
+7.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder. (Project_Folder/Accessibility/FIF.tif). The user can rename the output file to preferred filename.
 
-1. Navigate to and select point shapefile input of health care facilities.
-
-   **Input File:** *HealthFacilities/Hospitals.shp*
-
-3. Select the mode of travel (Walking OR Driving).
-
-4. Select the method of measurement (Distance OR Time).
-
-5. Specify travel distance or time increments in meters or time respectively using comma delimitation.
-
-6. Enter an alternate raster output file name if desired.
-
-7. Click the "Execute" button to run the algorithm.
-
-8. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder. (*Project_Folder/Accessibility/HEA_Raster_output.tif*)
-
-#### 4.4.6 Access to Financial Facilities
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/bd2bace8-e569-4b23-a4c0-a6024fe2adf6)
-
-1. Navigate to and select point shapefile input of financial facilities.
-
-   **Input File:** *FinancialFacilities/Financial_Facilities.shp*
-
-3. Select the mode of travel (Walking OR Driving).
-
-4. Select the method of measurement (Distance OR Time).
-
-5. Specify travel distance or time increments in meters or time respectively using comma delamination.
-
-6. Enter an alternate raster output file name if desired.
-
-7. Click the "Execute" button to run the algorithm.
-
-8. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-9. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Accessibility" folder (*Project_Folder/Accessibility/FIF_Raster_output.tif*).
 
 (ad-aggregation-tab)=
-#### 4.4.7 Aggregate
+#### 4.3.6 Aggregate
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/ba3c884c-5940-4255-9ca5-9e202ae106b8)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AGGACC.jpg" alt="picture">
+</p>
 
-1. Load the raster outputs generated in each of the previous factor tabs for the Accessibility Dimension.
+1.	Load the raster outputs generated in each of the previous factor tabs for the Accessibility Dimension.
+*If a factor was executed in the same work session, the file path will automatically be populated after execution.*
 
-_If a factor was executed in the same work session, the file path will automatically be populated after execution._
+2.	If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
+*If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension.*
 
-2. If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
+3.	Enter alternate aggregated raster output file name if desired.
 
-_If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension._
+4.	Enter an alternate aggregated raster output file name if desired. The standard output file name is Accessibility_score.tif.
 
-3. Enter alternate aggregated raster output file name if desired.
+5.	Click the “Execute” button to run the algorithm.
 
-4. Click the "Execute" button to run the algorithm.
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
+7.	The aggregated layer will be loaded to the QGIS and appear in the table of contents.
 
-6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
+8.	The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/Accessibility_score.tif). The user can rename the output file to preferred filename.
 
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Accessibility/AGG_Raster_output.tif*).
 
 ### 4.5 PLACE CHARACTERIZATION TAB
 
