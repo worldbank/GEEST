@@ -28,13 +28,8 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
   - 4.4. [PLACE CHARACTERIZATION TAB](#place-characterization-tab)
     - 4.4.1. [Active Transport](#active-transport)
     - 4.4.2. [Safety](#safety)
-    - 4.4.4. [Security](#security)
-    - 4.4.5. [Income Level](#income-level)
-    - 4.4.6. [Electricity Access](#electricity-access)
-    - 4.4.7. [Level of Urbanization](#level-of-urbanization)
-    - 4.5.8. [Size of Housing](#size-of-housing)
-    - 4.5.9. [Digital Inclusion](#digital-inclusion)
-    - 4.5.10. [Natural Environment and Climatic Factors](#natural-environment-and-climatic-factors)
+    - 4.4.3. [Digital Inclusion](#digital-inclusion)
+    - 4.4.4. [Environmental Hazards](#environmental-hazards)
     - 4.5.11. [Aggregate](#pd-aggregation-tab)
   - 4.6. [DIMENSION AGGREGATION TAB](#dimension-aggregation-tab)
   - 4.7. [ABOUT TAB](#about-tab)
@@ -442,7 +437,7 @@ If a factor was executed in the same work session, its file path will automatica
 </p>
 
 1.	Navigate to and select
-   - **streetlight Locations** (point shapefile)
+   - **streetlight locations** (point shapefile)
    - or, if unavailable, **VIIRS Nighttime Lights dataset (.tif)** may be used as proxy data for streetlight locations
    - alternatively, **Perceived Safety data (polygon shapefile)** can be used if other data is unavailable; select the field containing the numeric value representing data on women's perceived safety at the municipal, district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example:
 
@@ -463,183 +458,50 @@ If a factor was executed in the same work session, its file path will automatica
 4.	The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/PlaceCharacterization/SAF.tif). The user can rename the output file to preferred filename.
 
 
-### 4.5.4 Security
+#### 4.4.3 Digital Inclusion
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/10d4eb39-51b9-421d-b105-46466f4b3ba9)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/DIG.jpg" alt="picture">
+</p>
 
-1. Navigate to and select the crime rate polygon input shapefile containing a field reporting the crime rate for a specific incident.
+1.	Navigate to and select
+    - the polygon input shapefile containing a field indicating the percentage of houses with internet access with disaggregated scores at, for example, the municipal or district level; select the field containing the          numeric value representing data on houses with internet access.
+    - or a score at the country level as “Internet Access Value”
 
-   **Input File:** *Security/Crime_Incidence_Serious_Assaults.shp*
+2.	Click the “Execute” button to run the algorithm.
 
-   **Input File:** *Security/Crime_Incidence_Sexual_Violence.shp*
+3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-3. Click the "Set" button to extract all the fields from the polygon input layer.
+4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/DIG.tif). The user can rename the output file to preferred filename. 
 
-4. Select the field containing the numeric value representing the crime rate.
 
-5. Enter the raster output file name for the crime type.
+#### 4.4.4 Environmental Hazards
 
-6. Click the "Execute" button to run the algorithm.
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ENV.jpg" alt="picture">
+</p>
 
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
+1. Navigate to and select raster hazard event.
+   - **Forest Fire**: Active Fires Density
+   - **Flood**: Flood Hazard
+   - **Landslide**: Landslide Susceptibility
+   - **Tropical Cyclone**: Frequency of Tropical Cyclones
+   - **Drought**: Global Drought Hazard based on the Standardized Precipitation Evapotranspiration Index (SPEI)
 
-8. The output raster file will be stored in the project folder specified in the "Setup" tab, in the "SEC" folder under the "Accessibility" folder (*Project_Folder/Place Characterization/SEC/Incidents_Raster_output.tif*).
+   Users should be able to select between 1 to 5 of these hazards that are most relevant to their specific context. For each selected hazard, the tool will generate raster cells of 100m x 100m and assign a score ranging from 0 to 5, standardized according to the hazard's scale. A score of 5 represents no hazard, while a score of 0 indicates areas at the highest risk. The final score will be the average of the scores from the selected hazards.
 
-**Steps 1 – 8 will have to be repeated for all facility types**.
+2. Click the “Execute” button to run the algorithm.
 
-8. Once all crime types have completed the processing, enter the aggregated raster output file name.
+3. Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-9. Click the "Aggregate" button to run the algorithm.
+4. Each output factor will be stored in the project folder specified in the “Setup” tab, in the “ENV” folder under the “Place Characterization” folder and have the following names Hazard_Landslide.tif, Hazard_Fires.tif, Hazard_Floods_100_yrp.tif, Hazard_Tropical_Cyclone.tif, and Hazard_Drought.tif. The user can rename the output file to preferred filename.
 
-10. Status text next to the "Execute" button will appear and let you know once processing is complete.
+5. Click the “Aggregate” button to run the algorithm.
 
-11. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder. (*Project_Folder/Place Characterization/SEC_Raster_output.tif*)
+6. Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-#### 4.5.5 Income Level
+7. The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/ENV.tif). The user can rename the output file to preferred filename.
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/c1a88898-25a9-47ba-83a3-567bbf525f1a)
-
-1. Navigate to and select the wealth index polygon input shapefile containing a field with the wealth index.
-
-   **Input File:** *Income/Wealth_Index.shp*
-
-3. Click the "Set" button to extract all the fields from the polygon input layer.
-
-4. Select the field containing the numeric value representing the wealth index.
-
-5. Enter an alternate raster output file name if desired.
-
-6. Click the "Execute" button to run the algorithm.
-
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/INC_Raster_output.tif*).
-
-#### 4.5.6 Electricity Access
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/1a37676f-d82f-44bd-a554-9fcb854ce42d)
-
-1. Navigate to and select electricity access polygon input shapefile containing a field indicating the percentage of individuals that have access to electricity.
-
-   **Input File:** *Electricity/Electrification_rate.shp*
-
-3. Click the "Set" button to extract all the fields from the polygon input layer.
-
-4. Select the field containing the numeric value representing the percentage of individuals that have access to electricity.
-
-5. Enter an alternate raster output file name if desired.
-
-6. Click the "Execute" button to run the algorithm.
-
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/ELC_Raster_output.tif*).
-
-OR
-
-1. Navigate to and select nighttime lights raster input.
-
-   **Input File:** *Electricity/Nighttime_Lights_2021.tif*
-
-3. Enter the raster output file name.
-
-4. Click the "Execute" button to run the algorithm.
-
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-6. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/ELC_Raster_output.tif*).
-
-**N.B. If nighttime lights raster data is used for the "Safe Urban Design" factor it should not be used in the "Electrical Access" factor and vice-versa**
-
-#### 4.5.7 Level of Urbanization
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/8776fd6c-8f40-4584-b517-a8610b867dd6)
-
-1. Navigate to and select GHS-SMOD raster input.
-
-   **Input File:** *Urbanization/GHS_SMOD_E2020_GLOBE_R2023A_54009_1000_V1_0_R7_C12.tif*
-
-3. Enter an alternate raster output file name if desired.
-
-4. Click the "Execute" button to run the algorithm.
-
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-6. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/LOU_Raster_output.tif*).
-
-#### 4.5.8 Size of Housing
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/b50b4538-6610-438b-b90a-4ee0c9462dc4)
-
-1. Navigate to and select the building footprints polygon shapefile.
-
-   **Input File:** *Housing/Building_footprint.shp*
-
-3. Set hexagon grid size. The default is 1 km.
-
-The smaller size the more computationally intensive the algorithm will be.
-
-3. Enter an alternate raster output file name if desired.
-
-4. Click the "Execute" button to run the algorithm.
-
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/QUH_Raster_output.tif*).
-
-#### 4.5.9 Digital Inclusion
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/de34e9da-6e68-4d09-bec5-84755bb35545)
-
-1. Navigate to and select the polygon input shapefile containing a field indicating the percentage of houses with internet access.
-
-   **Input File:** *Digital/Access_to_broadband_rates_community.shp*
-
-3. Click the "Set" button to extract all the fields from the polygon input layer.
-
-4. Select the field containing the numeric value representing the percentage of houses with Internet access
-
-5. Enter an alternate raster output file name if desired.
-
-6. Click the "Execute" button to run the algorithm.
-
-7. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-8. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/DIG_Raster_output.tif*).
-
-#### 4.5.10 Natural Environment and Climatic Factors
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/2b0a1b43-6f34-436e-a790-5516027d291a)
-
-1. Navigate to and select polygon hazard shapefile.
-
-   **Input File:** *Environment/Flood_risk.shp*
-
-3. Click the "Set" button to extract all the fields from the polyline input layer.
-
-4. Select the field containing the descriptive risk level values.
-
-5. Click the "Unique Values" button to extract all the unique risk level values.
-
-6. Score each of the extracted risk levels from 1 to 5, where 5 is the lowest risk and 1 is the highest risk.
-
-7. Enter hazard type raster output file name.
-
-8. Click the "Execute" button to run the algorithm.
-
-9. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder. (*Project_Folder/Place Characterization/ENV/Hazard_Raster_output.tif*)
-
-**Steps 1 – 9 will have to be repeated for all hazard types**.
-
-10. Once all hazard types have been processed, enter the aggregated raster output file name.
-
-11. Click the "Aggregate" button to run the algorithm.
-
-12. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-13. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/ENV_Raster_output.tif*).
 
 (pd-aggregation-tab)=
 #### 4.5.11 Aggregate
