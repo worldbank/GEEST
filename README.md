@@ -161,7 +161,9 @@ Dimensions, Factors and indicators included in the Analytical Framework
 
 The GEEST generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
 
-The interpretation of these scores is thoroughly detailed in the Methodology Report: <https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42>. Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
+The interpretation of these scores is thoroughly detailed in the Methodology Report: <https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42>. 
+
+Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
 
 ```{list-table} Proposed discrete score classes to enable simpler visual interpretation of raw score outputs and enable intersection with other layers of information (reproduced from the Methodology Report).
 :header-rows: 1
@@ -196,29 +198,36 @@ To access the User Manual for GEEST and the necessary installation files for QGI
 
 ## 5. Implementation
 
-The GEEST was tested in three pilot countries – Comoros, Dominican Republic, and Papua New Guinea (PNG) – to assess its functionality. The selection of these countries was strategic, considering their varied geographic regions, income levels, sizes, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: [insert link].
+The GEEST was tested Saint Lucia to assess its functionality. The selection of this country was strategic, considering its varied geographic region, size, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: [insert link].
 
-#### INDIVIDUAL DIMENSION RESULTS IN PILOT COUNTRIES
+#### CONTEXTUAL DIMENSION IN SAINT LUCIA
 
-The Individual dimension contains factors that reflect a woman’s personal characteristics, such as physical, psychological, and socio-cultural characteristics. These factors can act as barriers or enablers to women’s career development and include care responsibilities, exposure to domestic violence, and education. Only the Dominican Republic included data for all three factors associated with the Individual Dimension.
+The Contextual dimension encompasses factors that provide information concerning the laws and policies in place, influencing workplace gender discrimination, financial autonomy, and overall gender empowerment.
 
-![image](docs/images/img09.png)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Contextual.jpg" alt="picture">
+</p>
 
-#### CONTEXTUAL DIMENSION IN PILOT COUNTRIES
+#### ACCESIBILITY DIMENSION RESULTS IN SAINT LUCIA
 
-The Contextual dimension encompasses factors that provide information concerning the legal and policy environment of places, which can influence workplace gender discrimination, women's financial independence, and the overall likelihood that women will be empowered to work outside the home.
+The Accessibility dimension includes factors that relate to the ease with which women can reach specific services or destinations and are often determined by proximity. These factors affect the day- to-day mobility of women. Accessibility factors found to be most relevant to women in SIDS include  (i) women's travel patterns, (ii) access to public transport, (iii) access to education facilities, (iv) access to health facilities, (v) access to financial facilities.
 
-![image](docs/images/img10.png)
 
-#### ACCESIBILITY DIMENSION RESULTS IN PILOT COUNTRIES
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Accessibility.jpg" alt="picture">
+</p>
 
-The Accessibility dimension includes factors that relate to the ease with which women can reach specific services or destinations and are often determined by proximity. These factors affect the day- to-day mobility of women. Accessibility factors found to be most relevant to women in SIDS include  (i) women's travel patterns, (ii) access to public transport, (iii) access to education facilities, (iv) access to RE jobs, (v) access to health facilities, and (vi) access to financial facilities.
+<p align="center">Accessibility factors</p>
 
-![image](docs/images/img11.png)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Accall.jpg" alt="picture">
+</p>
+
+<p align="center">Accessibility factors aggregated</p>
 
 #### PLACE CHARACTERIZATION DIMENSION RESULTS IN PILOT COUNTRIES
 
-The Place-Characterization dimension contains factors that refer to attributes that are used to define a specific geographical location or environment and do not include a mobility component. Those deemed to be most important place-characterization factors concerning women’s access to jobs include (i) walkability, (ii) the availability of cycleways and public transport, (iii) safety, (iii) electricity access, (iv) digital inclusion, (v) fragility, conflict, and violence, (vi) access to water and sanitation, and (vii) natural environment and climatic factors.
+The Place-Characterization dimension contains factors that refer to attributes that are used to define a specific geographical location or environment and do not include a mobility component. Those deemed to be most important place-characterization factors concerning women’s access to jobs include (i) walkability, (ii) safety, (iii) digital inclusion, (iv) environmental hazards, (v) education , (vi) fragility, conflict, and violence, and (vii) water sanitation.
 
 ![image](docs/images/img12.png)
 
