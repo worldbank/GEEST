@@ -32,13 +32,14 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
     - 4.4.4. [Environmental Hazards](#environmental-hazards)
     - 4.4.5. [Education](#education)
     - 4.4.6. [Fragility, conflict, and violence (FCV)](#fragility-conflict-and-violence-fcv)
-    - 4.5.11. [Aggregate](#pd-aggregation-tab)
-  - 4.6. [DIMENSION AGGREGATION TAB](#dimension-aggregation-tab)
-  - 4.7. [ABOUT TAB](#about-tab)
-  - 4.8. [INSIGHTS TAB](#insights-tab)
-    - 4.8.1. [Enablement](#enablement)
-    - 4.8.2. [RE Zone Raster Locations](#re-zone-raster-locations)
-    - 4.8.3. [RE Point Locations](#re-point-locations)
+    - 4.4.7. [Water Sanitation](#water-sanitation)
+    - 4.4.8. [Aggregate](#pd-aggregation-tab)
+  - 4.5. [DIMENSION AGGREGATION TAB](#dimension-aggregation-tab)
+  - 4.6. [ABOUT TAB](#about-tab)
+  - 4.7. [INSIGHTS TAB](#insights-tab)
+    - 4.7.1. [Enablement](#enablement)
+    - 4.7.2. [RE Zone Raster Locations](#re-zone-raster-locations)
+    - 4.7.3. [RE Point Locations](#re-point-locations)
 5. [Troubleshooting](#troubleshooting)
   - 5.1. [ACCESSIBILTY TABS PERMISSIONS ERROR](#accessibilty-permissions-error)
   - 5.2. [QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY](#distorted)
@@ -525,101 +526,137 @@ If a factor was executed in the same work session, its file path will automatica
 
 #### 4.4.6 Fragility, conflict, and violence (FCV)
 
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/FCV.jpg" alt="picture">
+</p>
+
+1.	Navigate to and select the csv data for Fragility, conflict and violence (FCV-ACLED data).
+
+2.	The default radius of 5km circular buffer can be changed from “Impact Radius in Meters (Optional)” if the impact radius of an event is known.
+
+3.	Click the “Execute” button to run the algorithm.
+
+4.	Status text next to the “Execute” button will appear and let you know once processing is complete.
+
+5.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/FCV.tif). The user can rename the output file to preferred filename.
+
+
+#### 4.4.7 Water Sanitation
+
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WAS.jpg" alt="picture">
+</p>
+
+1.	Navigate to and select point shapefile for water points, catch basins, water valves and fire hydrants.
+
+2.	Click the “Execute” button to run the algorithm.
+
+3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
+
+4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/WAS.tif). The user can rename the output file to preferred filename.
+
+
 (pd-aggregation-tab)=
-#### 4.5.11 Aggregate
+#### 4.4.8 Aggregate
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/bedf9d85-63c5-4cd9-857a-c726ef77a89a)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AGGPD.jpg" alt="picture">
+</p>
 
-1. Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.
+1.	Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.
+If a factor was executed in the same work session, the file path will automatically be populated after execution.
 
-_If a factor was executed in the same work session, its file path will automatically be populated after execution._
+2.	If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
+If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension. The Auto button will automatically adjust the weights to ensure they sum to 100.
 
-2. If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
+3.	Enter alternate aggregated raster output file name if desired.
 
-_If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension._
+4.	Enter an alternate aggregated raster output file name if desired. The standard output file name is Place_score.tif.
 
-3. Enter the aggregated raster output file name.
+5.	Click the “Execute” button to run the algorithm.
 
-4. Click the "Execute" button to run the algorithm.
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
+7.	The aggregated layer will be loaded to the QGIS and appear in the table of contents.
 
-6. The aggregated layer will be loaded to the QGIS and appear in the table of contents.
+8.	The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/Place_score.tif). The user can rename the output file to preferred filename.
 
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Contextual" folder (*Project_Folder/Place Characterization/AGG_Raster_output.tif*).
 
-### 4.6 DIMENSION AGGREGATION TAB
+### 4.5 DIMENSION AGGREGATION TAB
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/651ed053-e36a-4fa1-b44d-6759fc5b60d8)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AGGALL.jpg" alt="picture">
+</p>
 
-1. Load each dimension's aggregated raster outputs.
+1.	Load each dimension’s aggregated raster outputs of previous domains (Contextual, Accessibility and Place Characterization).
 
-_If a dimension's factor aggregation was executed in the same work session, its file path will automatically be populated after execution._
+If a dimension’s factor aggregation was executed in the same work session, its file path will automatically be populated after execution.
 
-2. If dimensions are missing, adjust the weighting percentage accordingly and ensure it totals up to 100%.
+2.	If dimensions are missing, adjust the weighting percentage accordingly and ensure it totals up to 100%.
+If a dimension is missing it needs to be given a weighting of 0%. All domains should have equal weighting within the aggregation tab.
 
-_If a dimension is missing it needs to be given a weighting of 0%._
+3.	Enter aggregated dimensions raster output file name.
 
-3. Enter aggregated dimensions raster output file name.
+4.	Click the “Execute” button to run the algorithm.
 
-4. Click the "Execute" button to run the algorithm.
+5.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
+6.	The aggregated dimensional layer will be loaded to the QGIS and appear in the table of contents.
 
-6. The aggregated dimensional layer will be loaded to the QGIS and appear in the table of contents.
+7.	The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Final_output” folder (*Project_Folder/Final_Output/WEE.tif). The user can rename the output file to preferred filename.
 
-7. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Final\_output" folder (*Project_Folder/Final_Output/Final_AGG_Raster_output.tif_).
 
-### 4.7 ABOUT TAB
+### 4.6 ABOUT TAB
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/a949054b-1b8e-46f6-9279-fdd2b54212de)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/About.jpg" alt="picture">
+</p>
 
-Information on the tool its framework, scoring system, and how results should or can be interpreted.
+Information on the tool, its framework, scoring system, and how results should or can be interpreted.
 
-### 4.8 INSIGHTS TAB
-#### 4.8.1 Enablement
+### 4.7 INSIGHTS TAB
+#### 4.7.1 Enablement
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/e0e94c47-bf17-462c-a41c-5023f96ab642)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ENA.jpg" alt="picture">
+</p>
 
-**Classify into discrete classes**
+### Step 1: Classify into discrete classes
 
-1. Navigate to and select the enablement score input raster file. This can be the final aggregate score, a dimension aggregate score, or even a single factor output layer.
+1.1 Navigate to and select the enablement score input raster file. This can be the final aggregate score (WEE.tif), a dimension aggregate score, or even a single factor output layer.
 
-2. Click the "Classify" button under the "Enablement Score Input layer" field to run the algorithm.
+1.2 Click the “Classify” button under the “Enablement Score Input layer” field to run the algorithm.
 
-3. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/1) Level of Enablement Classification" folder. (*Project_Folder/Insights/1) Level of Enablement Classification/Level_of_Enablement.tif*)
+1.3 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/1) Level of Enablement Classification” folder. (Project_Folder/Insights/1) Level of Enablement Classification/WEE_score.tif). The user can rename the output file to the preferred filename.
 
-4. Navigate to and select the population input raster file.
+1.4 Navigate to and select the population input raster file.
+   - E.g., Input File: Population/Female_population_35_39.tif (Any of the age ranges can be used as input).
 
-   **Input File:** *Population/Female_population_35_39.tif* (**Any of the age ranges can be used as input**)
+1.5 Click the “Classify” button under the “Population Input layer” field to run the algorithm.
 
-6. Click the "Classify" button under the "Population Input layer" field to run the algorithm.
+1.6 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/2) Relative Population Count Classification” folder. (Project_Folder/Insights/2) Relative Population Count Classification/Population.tif). The user can rename the output file to the preferred filename.
 
-7. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/2) Relative Population Count Classification" folder. (*Project_Folder/Insights/2) Relative Population Count Classification/Relative_Population_Count.tif*)
+### Step 2: Combine score and population classifications
 
-**Combine score and population classifications**
+2.1 Navigate to and select the “Level of Enablement” output raster file produced in step 1.2 (WEE_score.tif). This file path will be automatically populated if step 1.2 was executed in the same work session.
 
-8. Navigate to and select the "Level of Enablement" output raster file produced in **step 2**. This file path will be automatically populated if **step 2** was executed in the same work session.
+2.2 Navigate to and select the “Relative Population Count” output raster file produced in step 1.5 (Population.tif). This file path will be automatically populated if step 1.5 was executed in the same work session.
 
-9. Navigate to and select the "Relative Population Count" output raster file produced in **step 6**. This file path will be automatically populated if **step 6** was executed in the same work session.
+2.3 Click the “Combine Classification” button to run the algorithm combining the “Level of Enablement” and “Relative Population Count” raster layers.
 
-10. Click the "Combine Classification" button to run the algorithm combining the "Level of Enablement" and "Relative Population Count" raster layers.
+2.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/3) Combined Level of Enablement & Relative Population Count Classification” folder. (Project_Folder/Insights/3) Combined Level of Enablement & Relative Population Count Classification/WEE_pop_score.tif). The user can rename the output file to the preferred filename.
 
-11. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/3) Combined Level of Enablement & Relative Population Count Classification" folder. (*Project_Folder/Insights/3) Combined Level of Enablement & Relative Population Count Classification/Enablement_&_Population_Combined_classification.tif*)
+### Step 3: Aggregation
 
-**Aggregation**
+3.1 Navigate to and select the “Combine Classification” output raster file produced in step 2.3. This file path will be automatically populated if step 2.3 was executed in the same work session.
 
-12. Navigate to and select the "Combine Classification" output raster file produced in **step 10**. This file path will be automatically populated if **step 10** was executed in the same work session.
+3.2 Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g., municipal boundary layer).
+   - E.G., Input File: AdminBoundaries/Admin2.shp (Any admin level can be used as input)
 
-13. Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer)
+3.3 Click the “Execute” button to run the algorithm.
 
-    **Input File:** *AdminBoundaries/Admin6.shp* (**Any admin level can be used as input**)
+3.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/4) Aggregation” folder. (Project_Folder/Insights/4) Aggregation/WEE_pop_adm_score.shp). The user can rename the output file to the preferred filename.
 
-14. Enter aggregated "Combine Classification" shapefiles output file name.
-
-15.  Click the "Execute" button to run the algorithm.
-
-16.  The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Insights/4) Aggregation" folder. (*Project_Folder/Insights/4) Aggregation/Aggregation_.tif*)
 
 #### 4.8.2 RE Zone Raster Locations
 
