@@ -30,6 +30,8 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
     - 4.4.2. [Safety](#safety)
     - 4.4.3. [Digital Inclusion](#digital-inclusion)
     - 4.4.4. [Environmental Hazards](#environmental-hazards)
+    - 4.4.5. [Education](#education)
+    - 4.4.6. [Fragility, conflict, and violence (FCV)](#fragility,-conflict,-and-violence-(fcv))
     - 4.5.11. [Aggregate](#pd-aggregation-tab)
   - 4.6. [DIMENSION AGGREGATION TAB](#dimension-aggregation-tab)
   - 4.7. [ABOUT TAB](#about-tab)
@@ -502,6 +504,26 @@ If a factor was executed in the same work session, its file path will automatica
 
 7. The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/ENV.tif). The user can rename the output file to preferred filename.
 
+
+#### 4.4.5 Education
+
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/EDU.jpg" alt="picture">
+</p>
+
+1. Navigate to and select
+
+   - the polygon input shapefile containing a field indicating the percentage of women who have achieved a post-secondary education with disaggregated scores at, for example, the municipal or district level; select the field containing the numeric value representing the above percentage.
+   - or a score at the country level as “percentage of the labor force comprising women with university degrees in specified field” in Education Level Value.
+
+2. Click the “Execute” button to run the algorithm.
+
+3. Status text next to the “Execute” button will appear and let you know once processing is complete.
+
+4. The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/EDU.tif). The user can rename the output file to preferred filename.
+
+
+#### 4.4.6 Fragility, conflict, and violence (FCV)
 
 (pd-aggregation-tab)=
 #### 4.5.11 Aggregate
