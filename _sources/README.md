@@ -214,31 +214,31 @@ The Accessibility dimension includes factors that relate to the ease with which 
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Accessibility.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility%20factors.png" alt="picture">
 </p>
 
 <p align="center"><strong>Accessibility factors</strong></p>
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Accall.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility%20score.JPG" alt="picture">
 </p>
 
 <p align="center"><strong>Accessibility factors aggregated</strong></p>
 
 
-#### PLACE CHARACTERIZATION DIMENSION RESULTS IN PILOT COUNTRIES
+#### PLACE CHARACTERIZATION DIMENSION RESULTS IN SAINT LUCIA
 
 The Place-Characterization dimension contains factors that refer to attributes that are used to define a specific geographical location or environment and do not include a mobility component. Those deemed to be most important place-characterization factors concerning women’s access to jobs include (i) walkability, (ii) safety, (iii) digital inclusion, (iv) environmental hazards, (v) education , (vi) fragility, conflict, and violence, and (vii) water sanitation.
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Place characterization factors.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Place%20characterization%20factors.png" alt="picture">
 </p>
 
 <p align="center"><strong>Place characterization factors</strong></p>
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/place.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Place%20score.JPG" alt="picture">
 </p>
 
 <p align="center"><strong>Place characterization factors aggregated</strong></p>
@@ -247,7 +247,7 @@ Below are some of the overall insights derived from the GEEST for Saint Lucia. T
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE.png" alt="picture">
 </p>
 
 Raster results concerning enabling environments for Saint Lucia
@@ -256,7 +256,7 @@ Raster results concerning enabling environments for Saint Lucia
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE%20pop%2035-39.png" alt="picture">
 </p>
 
 Raster results concerning enabling environments with respect to women’s population for Saint Lucia
@@ -265,7 +265,7 @@ Raster results concerning enabling environments with respect to women’s popula
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39 Admin2.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE%20pop%20admin2%2035-39.png" alt="picture">
 </p>
 
 Aggregate results concerning enabling environments with respect to women’s population for Saint Lucia at administrative subdivision level
@@ -276,7 +276,7 @@ If the job opportunities' location layer is presented in raster format, the GEES
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Solar Project - WEE.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE%20Solar.png" alt="picture">
 </p>
 
 Raster results concerning enabling environments in RE sites with respect to women’s population for Saint Lucia
