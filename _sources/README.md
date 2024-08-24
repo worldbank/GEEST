@@ -217,21 +217,33 @@ The Accessibility dimension includes factors that relate to the ease with which 
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Accessibility.jpg" alt="picture">
 </p>
 
-<p align="center">Accessibility factors</p>
+<p align="center"><strong>Accessibility factors</strong></p>
+
 
 <p align="center">
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Accall.jpg" alt="picture">
 </p>
 
-<p align="center">Accessibility factors aggregated</p>
+<p align="center"><strong>Accessibility factors aggregated</strong></p>
+
 
 #### PLACE CHARACTERIZATION DIMENSION RESULTS IN PILOT COUNTRIES
 
 The Place-Characterization dimension contains factors that refer to attributes that are used to define a specific geographical location or environment and do not include a mobility component. Those deemed to be most important place-characterization factors concerning women’s access to jobs include (i) walkability, (ii) safety, (iii) digital inclusion, (iv) environmental hazards, (v) education , (vi) fragility, conflict, and violence, and (vii) water sanitation.
 
-![image](docs/images/img12.png)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Place characterization factors.jpg" alt="picture">
+</p>
 
-Below are some of the overall insights derived from the GEEST for the Dominican Republic. The first map illustrates the degree of enablement within environments; the second map shows the level of enablement concerning the female population on a raster 100x100m format. The third map focuses on this score exclusively within a 10 km radius of points of interest, specifically potential Renewable Energy (RE) sites. Meanwhile, the fourth map shows the results for the level of enablement concerning female population, aggregated at the lowest administrative level.
+<p align="center"><strong>Place characterization factors</strong></p>
+
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/place.jpg" alt="picture">
+</p>
+
+<p align="center"><strong>Place characterization factors aggregated</strong></p>
+
+Below are some of the overall insights derived from the GEEST for Saint Lucia. The first map illustrates the degree of enablement within environments; the second map shows the level of enablement concerning the female population on a raster 100x100m format. The third map shows the results for the level of enablement concerning female population, aggregated at the administrative subdivisions of the island.
 
 :::{figure-md} markdown-fig
 <img src="docs/images/img13.png" alt="Raster results concerning enabling environments for the Dominican Republic">
