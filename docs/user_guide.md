@@ -658,28 +658,26 @@ Information on the tool, its framework, scoring system, and how results should o
 3.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/4) Aggregation” folder. (Project_Folder/Insights/4) Aggregation/WEE_pop_adm_score.shp). The user can rename the output file to the preferred filename.
 
 
-#### 4.8.2 RE Zone Raster Locations
+#### 4.7.2 RE Zone Raster Locations
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/612670ce-b60f-48a1-b085-7c6478c5b5f8)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/REzone.jpg" alt="picture">
+</p>
 
-1. Navigate to and select the combined classification input file produced in **step 10** of the "Enablement" tab. This file path will be automatically populated if **step 10** of the "Enablement" tab was executed in the same work session.
+1. Navigate to and select the combined classification input file produced in step 2.3 of the “Enablement” tab (WEE_pop_score.tif). This file path will be automatically populated if step 2.3 of the “Enablement” tab was executed in the same work session.
 
-2. Navigate to and select the aggregated combined classification input file produced in **step 15** of the "Enablement" tab. This file path will be automatically populated if **step 15** of the "Enablement" tab was executed in the same work session.
+2. Navigate to and select the aggregated combined classification input file produced in step 3.3 of the “Enablement” tab (WEE_pop_adm_score.shp). This file path will be automatically populated if step 3.3 of the “Enablement” tab was executed in the same work session.
 
-3. Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with "no data" or "inf" values in the raster file)
+3. Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with “no data” or “inf” values in the raster file).
+   - E.G. Input File: RE/WBG_REZoning_DOM_score_wind.tif
+   - E.G. Input File: RE/WBG_REZoning_DOM_score_solar.tif
 
-   **Input File:** *RE/WBG_REZoning_DOM_score_wind.tif*
+4. Click the “Execute” button to run the algorithm.
 
-   **Input File:** *RE/WBG_REZoning_DOM_score_solar.tif*
-
-4. Enter the "RE zones" raster file and shapefile prefix for the output file name.
-
-5. Click the "Execute" button to run the algorithm.
-
-6. The 2 output files will be stored in the project folder specified in the "Setup" tab, under the "Insights/5) RE Zone Raster Locations" folder. (*Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_.tif* **&** *Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_admin_units.shp*)
+5. The 2 output files will be stored in the project folder specified in the “Setup” tab, under Raster Locations/AOI_WEE_score.tif & Project_Folder/Insights/5) RE Zone Raster Locations/AOI_WEE_score.shp). The user can rename the output file to the preferred filename.
 
 
-#### 4.8.3 RE Point Locations
+#### 4.7.3 RE Point Locations
 
 ![image](https://github.com/worldbank/GEEST/assets/120469484/55ae3e3a-2b0a-463c-a2d1-c76d37605e17)
 
