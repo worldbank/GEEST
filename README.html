@@ -413,13 +413,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geospatial-databases">2. Geospatial Databases</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#novel-analytical-framework">3. Novel Analytical Framework</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gender-enabling-environments-tool-geest">4. Gender Enabling Environments Tool (GEEST)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">5. Implementation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#individual-dimension-results-in-pilot-countries">INDIVIDUAL DIMENSION RESULTS IN PILOT COUNTRIES</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#contextual-dimension-in-pilot-countries">CONTEXTUAL DIMENSION IN PILOT COUNTRIES</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accesibility-dimension-results-in-pilot-countries">ACCESIBILITY DIMENSION RESULTS IN PILOT COUNTRIES</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-dimension-results-in-pilot-countries">PLACE CHARACTERIZATION DIMENSION RESULTS IN PILOT COUNTRIES</a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-main-limitations">6. GEEST Main Limitations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-availability-and-granularity">Data Availability and Granularity</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-time">Processing Time</a></li>
@@ -687,6 +680,11 @@ document.write(`
 <span id="id4"></span><h2>4. Gender Enabling Environments Tool (GEEST)<a class="headerlink" href="#gender-enabling-environments-tool-geest" title="Permalink to this heading">#</a></h2>
 <p>Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GEEST characterizes communities based on women’s prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women’s participation in the RE sector in SIDS.</p>
 <p>The table below outlines the dimensions, factors, and recommended indicators for computing the GEEST, derived from the Methodological Framework:</p>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/factors.jpg" alt="picture">
+</p>
+<p>Dimensions, Factors and indicators included in the Analytical Framework</p>
+<div class="docutils">
 <p>The GEEST generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.</p>
 <p>The interpretation of these scores is thoroughly detailed in the Methodology Report: <a class="reference external" href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42">https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42</a>. Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct ‘classes,’ offering a simplified approach to their interpretation, as shown in the following table:</p>
 <div class="pst-scrollable-table-container"><table class="table" id="class-scores-table">
@@ -731,27 +729,18 @@ document.write(`
 </table>
 </div>
 <p>To access the User Manual for GEEST and the necessary installation files for QGIS, please visit the <a class="reference internal" href="docs/user_guide.html"><span class="std std-doc">User Guide</span></a> or the <a class="reference external" href="https://github.com/worldbank/GEEST">GitHub repository</a>.</p>
-</section>
-<section id="implementation">
-<span id="id5"></span><h2>5. Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading">#</a></h2>
+<h2 class="rubric" id="id5"><span id="implementation"></span>5. Implementation</h2>
 <p>The GEEST was tested in three pilot countries – Comoros, Dominican Republic, and Papua New Guinea (PNG) – to assess its functionality. The selection of these countries was strategic, considering their varied geographic regions, income levels, sizes, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: [insert link].</p>
-<section id="individual-dimension-results-in-pilot-countries">
-<h3>INDIVIDUAL DIMENSION RESULTS IN PILOT COUNTRIES<a class="headerlink" href="#individual-dimension-results-in-pilot-countries" title="Permalink to this heading">#</a></h3>
+<h4 class="rubric" id="individual-dimension-results-in-pilot-countries">INDIVIDUAL DIMENSION RESULTS IN PILOT COUNTRIES</h4>
 <p>The Individual dimension contains factors that reflect a woman’s personal characteristics, such as physical, psychological, and socio-cultural characteristics. These factors can act as barriers or enablers to women’s career development and include care responsibilities, exposure to domestic violence, and education. Only the Dominican Republic included data for all three factors associated with the Individual Dimension.</p>
 <p><img alt="image" src="_images/img09.png" /></p>
-</section>
-<section id="contextual-dimension-in-pilot-countries">
-<h3>CONTEXTUAL DIMENSION IN PILOT COUNTRIES<a class="headerlink" href="#contextual-dimension-in-pilot-countries" title="Permalink to this heading">#</a></h3>
+<h4 class="rubric" id="contextual-dimension-in-pilot-countries">CONTEXTUAL DIMENSION IN PILOT COUNTRIES</h4>
 <p>The Contextual dimension encompasses factors that provide information concerning the legal and policy environment of places, which can influence workplace gender discrimination, women’s financial independence, and the overall likelihood that women will be empowered to work outside the home.</p>
 <p><img alt="image" src="_images/img10.png" /></p>
-</section>
-<section id="accesibility-dimension-results-in-pilot-countries">
-<h3>ACCESIBILITY DIMENSION RESULTS IN PILOT COUNTRIES<a class="headerlink" href="#accesibility-dimension-results-in-pilot-countries" title="Permalink to this heading">#</a></h3>
+<h4 class="rubric" id="accesibility-dimension-results-in-pilot-countries">ACCESIBILITY DIMENSION RESULTS IN PILOT COUNTRIES</h4>
 <p>The Accessibility dimension includes factors that relate to the ease with which women can reach specific services or destinations and are often determined by proximity. These factors affect the day- to-day mobility of women. Accessibility factors found to be most relevant to women in SIDS include  (i) women’s travel patterns, (ii) access to public transport, (iii) access to education facilities, (iv) access to RE jobs, (v) access to health facilities, and (vi) access to financial facilities.</p>
 <p><img alt="image" src="_images/img11.png" /></p>
-</section>
-<section id="place-characterization-dimension-results-in-pilot-countries">
-<h3>PLACE CHARACTERIZATION DIMENSION RESULTS IN PILOT COUNTRIES<a class="headerlink" href="#place-characterization-dimension-results-in-pilot-countries" title="Permalink to this heading">#</a></h3>
+<h4 class="rubric" id="place-characterization-dimension-results-in-pilot-countries">PLACE CHARACTERIZATION DIMENSION RESULTS IN PILOT COUNTRIES</h4>
 <p>The Place-Characterization dimension contains factors that refer to attributes that are used to define a specific geographical location or environment and do not include a mobility component. Those deemed to be most important place-characterization factors concerning women’s access to jobs include (i) walkability, (ii) the availability of cycleways and public transport, (iii) safety, (iii) electricity access, (iv) digital inclusion, (v) fragility, conflict, and violence, (vi) access to water and sanitation, and (vii) natural environment and climatic factors.</p>
 <p><img alt="image" src="_images/img12.png" /></p>
 <p>Below are some of the overall insights derived from the GEEST for the Dominican Republic. The first map illustrates the degree of enablement within environments; the second map shows the level of enablement concerning the female population on a raster 100x100m format. The third map focuses on this score exclusively within a 10 km radius of points of interest, specifically potential Renewable Energy (RE) sites. Meanwhile, the fourth map shows the results for the level of enablement concerning female population, aggregated at the lowest administrative level.</p>
@@ -761,6 +750,7 @@ document.write(`
 <p><span class="caption-number">Fig. 2 </span><span class="caption-text">Raster results concerning enabling environments for the Dominican Republic</span><a class="headerlink" href="#id6" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
+</div>
 <figure class="align-default" id="id7">
 <img alt="Raster results concerning enabling environments with respect to women’s population for the Dominican Republic" src="_images/img14.png" />
 <figcaption>
@@ -794,7 +784,6 @@ document.write(`
 <p><span class="caption-number">Fig. 7 </span><span class="caption-text">Aggregate results concerning enabling environments near RE sites with respect to women’s population for the DR</span><a class="headerlink" href="#id11" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
-</section>
 </section>
 <section id="geest-main-limitations">
 <span id="id12"></span><h2>6. GEEST Main Limitations<a class="headerlink" href="#geest-main-limitations" title="Permalink to this heading">#</a></h2>
@@ -880,13 +869,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geospatial-databases">2. Geospatial Databases</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#novel-analytical-framework">3. Novel Analytical Framework</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gender-enabling-environments-tool-geest">4. Gender Enabling Environments Tool (GEEST)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">5. Implementation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#individual-dimension-results-in-pilot-countries">INDIVIDUAL DIMENSION RESULTS IN PILOT COUNTRIES</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#contextual-dimension-in-pilot-countries">CONTEXTUAL DIMENSION IN PILOT COUNTRIES</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accesibility-dimension-results-in-pilot-countries">ACCESIBILITY DIMENSION RESULTS IN PILOT COUNTRIES</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-dimension-results-in-pilot-countries">PLACE CHARACTERIZATION DIMENSION RESULTS IN PILOT COUNTRIES</a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-main-limitations">6. GEEST Main Limitations</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-availability-and-granularity">Data Availability and Granularity</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-time">Processing Time</a></li>
