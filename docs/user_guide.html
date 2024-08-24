@@ -450,8 +450,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">Step 1: Classify into discrete classes</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">Step 2: Combine score and population classifications</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">Step 3: Aggregation</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">4.8.2 RE Zone Raster Locations</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">4.8.3 RE Point Locations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">4.7.2 RE Zone Raster Locations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">4.7.3 RE Point Locations</a></li>
 </ul>
 </li>
 </ul>
@@ -1055,22 +1055,25 @@ If a dimension is missing it needs to be given a weighting of 0%. All domains sh
 <p>3.3 Click the “Execute” button to run the algorithm.</p>
 <p>3.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/4) Aggregation” folder. (Project_Folder/Insights/4) Aggregation/WEE_pop_adm_score.shp). The user can rename the output file to the preferred filename.</p>
 <section id="re-zone-raster-locations">
-<h4>4.8.2 RE Zone Raster Locations<a class="headerlink" href="#re-zone-raster-locations" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/612670ce-b60f-48a1-b085-7c6478c5b5f8" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select the combined classification input file produced in <strong>step 10</strong> of the “Enablement” tab. This file path will be automatically populated if <strong>step 10</strong> of the “Enablement” tab was executed in the same work session.</p></li>
-<li><p>Navigate to and select the aggregated combined classification input file produced in <strong>step 15</strong> of the “Enablement” tab. This file path will be automatically populated if <strong>step 15</strong> of the “Enablement” tab was executed in the same work session.</p></li>
-<li><p>Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with “no data” or “inf” values in the raster file)</p>
-<p><strong>Input File:</strong> <em>RE/WBG_REZoning_DOM_score_wind.tif</em></p>
-<p><strong>Input File:</strong> <em>RE/WBG_REZoning_DOM_score_solar.tif</em></p>
+<h4>4.7.2 RE Zone Raster Locations<a class="headerlink" href="#re-zone-raster-locations" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/REzone.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select the combined classification input file produced in step 2.3 of the “Enablement” tab (WEE_pop_score.tif). This file path will be automatically populated if step 2.3 of the “Enablement” tab was executed in the same work session.</p></li>
+<li><p>Navigate to and select the aggregated combined classification input file produced in step 3.3 of the “Enablement” tab (WEE_pop_adm_score.shp). This file path will be automatically populated if step 3.3 of the “Enablement” tab was executed in the same work session.</p></li>
+<li><p>Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with “no data” or “inf” values in the raster file).</p>
+<ul class="simple">
+<li><p>E.G. Input File: RE/WBG_REZoning_DOM_score_wind.tif</p></li>
+<li><p>E.G. Input File: RE/WBG_REZoning_DOM_score_solar.tif</p></li>
+</ul>
 </li>
-<li><p>Enter the “RE zones” raster file and shapefile prefix for the output file name.</p></li>
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>The 2 output files will be stored in the project folder specified in the “Setup” tab, under the “Insights/5) RE Zone Raster Locations” folder. (<em>Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_.tif</em> <strong>&amp;</strong> <em>Project_Folder/Insights/5) RE Zone Raster Locations/RE_zone_admin_units.shp</em>)</p></li>
+<li><p>The 2 output files will be stored in the project folder specified in the “Setup” tab, under Raster Locations/AOI_WEE_score.tif &amp; Project_Folder/Insights/5) RE Zone Raster Locations/AOI_WEE_score.shp). The user can rename the output file to the preferred filename.</p></li>
 </ol>
 </section>
 <section id="re-point-locations">
-<h4>4.8.3 RE Point Locations<a class="headerlink" href="#re-point-locations" title="Permalink to this heading">#</a></h4>
+<h4>4.7.3 RE Point Locations<a class="headerlink" href="#re-point-locations" title="Permalink to this heading">#</a></h4>
 <p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/55ae3e3a-2b0a-463c-a2d1-c76d37605e17" /></p>
 <ol class="arabic simple">
 <li><p>Navigate to and select the combined classification input file produced in <strong>step 10</strong> of the “Enablement” tab. This file path will be automatically populated if <strong>step 10</strong> of the “Enablement” tab was executed in the same work session.</p></li>
@@ -1390,8 +1393,8 @@ If a dimension is missing it needs to be given a weighting of 0%. All domains sh
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">Step 1: Classify into discrete classes</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">Step 2: Combine score and population classifications</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">Step 3: Aggregation</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">4.8.2 RE Zone Raster Locations</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">4.8.3 RE Point Locations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">4.7.2 RE Zone Raster Locations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">4.7.3 RE Point Locations</a></li>
 </ul>
 </li>
 </ul>
