@@ -609,7 +609,7 @@ If a dimension is missing it needs to be given a weighting of 0%. All domains sh
 ### 4.6 ABOUT TAB
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AB.jpg" alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/abou.jpg" alt="picture">
 </p>
 
 Information on the tool, its framework, scoring system, and how results should or can be interpreted.
