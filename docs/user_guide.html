@@ -430,10 +430,9 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ad-aggregation-tab">4.3.6 Aggregate</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.5 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">4.5.1 Active Transport</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#availability-of-public-transport">4.5.2 Availability of Public Transport</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#safe-urban-design">4.5.3 Safe Urban Design</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.4 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">4.4.1 Active Transport</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">4.4.2 Safety</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#security">4.5.4 Security</a><ul class="nav section-nav flex-column">
@@ -518,18 +517,14 @@ document.write(`
 <li><p>4.3.6. <a class="reference internal" href="#ad-aggregation-tab">Aggregate</a></p></li>
 </ul>
 </li>
-<li><p>4.5. <a class="reference internal" href="#place-characterization-tab"><span class="xref myst">PLACE CHARACTERIZATION TAB</span></a></p>
+<li><p>4.4. <a class="reference internal" href="#place-characterization-tab"><span class="xref myst">PLACE CHARACTERIZATION TAB</span></a></p>
 <ul>
-<li><p>4.5.1. <a class="reference internal" href="#active-transport"><span class="xref myst">Active Transport</span></a></p></li>
-<li><p>4.5.2. <a class="reference internal" href="#availability-of-public-transport"><span class="xref myst">Availability of Public Transport</span></a></p></li>
-<li><p>4.5.3. <a class="reference internal" href="#safe-urban-design"><span class="xref myst">Safe Urban Design</span></a></p></li>
-</ul>
-</li>
-<li><p>4.5.4. <a class="reference internal" href="#security"><span class="xref myst">Security</span></a></p>
-<ul>
-<li><p>4.5.5. <a class="reference internal" href="#income-level"><span class="xref myst">Income Level</span></a></p></li>
-<li><p>4.5.6. <a class="reference internal" href="#electricity-access"><span class="xref myst">Electricity Access</span></a></p></li>
-<li><p>4.5.7. <a class="reference internal" href="#level-of-urbanization"><span class="xref myst">Level of Urbanization</span></a></p></li>
+<li><p>4.4.1. <a class="reference internal" href="#active-transport"><span class="xref myst">Active Transport</span></a></p></li>
+<li><p>4.4.2. <a class="reference internal" href="#safety"><span class="xref myst">Safety</span></a></p></li>
+<li><p>4.4.4. <a class="reference internal" href="#security"><span class="xref myst">Security</span></a></p></li>
+<li><p>4.4.5. <a class="reference internal" href="#income-level"><span class="xref myst">Income Level</span></a></p></li>
+<li><p>4.4.6. <a class="reference internal" href="#electricity-access"><span class="xref myst">Electricity Access</span></a></p></li>
+<li><p>4.4.7. <a class="reference internal" href="#level-of-urbanization"><span class="xref myst">Level of Urbanization</span></a></p></li>
 <li><p>4.5.8. <a class="reference internal" href="#size-of-housing"><span class="xref myst">Size of Housing</span></a></p></li>
 <li><p>4.5.9. <a class="reference internal" href="#digital-inclusion"><span class="xref myst">Digital Inclusion</span></a></p></li>
 <li><p>4.5.10. <a class="reference internal" href="#natural-environment-and-climatic-factors"><span class="xref myst">Natural Environment and Climatic Factors</span></a></p></li>
@@ -851,52 +846,41 @@ If a factor was executed in the same work session, its file path will automatica
 </section>
 </section>
 <section id="place-characterization-tab">
-<h3>4.5 PLACE CHARACTERIZATION TAB<a class="headerlink" href="#place-characterization-tab" title="Permalink to this heading">#</a></h3>
+<h3>4.4 PLACE CHARACTERIZATION TAB<a class="headerlink" href="#place-characterization-tab" title="Permalink to this heading">#</a></h3>
 <section id="active-transport">
-<h4>4.5.1 Active Transport<a class="headerlink" href="#active-transport" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/bf89b9ad-7ecc-460c-a7d9-38f1a894176a" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select polyline road network shapefile.</p>
-<p><strong>Input File:</strong> <em>Roads/Roads.shp</em></p>
-</li>
-<li><p>Click the “Set” button to extract all the fields from the polyline input layer.</p></li>
-<li><p>Select the field containing the road type categorical values.</p></li>
-<li><p>Click the “Unique Values” button to extract all the unique road type values.</p></li>
-<li><p>Score each of the extracted road types from 1 to 5 based on local knowledge, where 5 is a road type that is very safe for walking and cycling and 1 is an unsafe road type.</p></li>
-<li><p>Enter an alternate raster output file name if desired.</p></li>
+<h4>4.4.1 Active Transport<a class="headerlink" href="#active-transport" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AT.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select point shapefile for crosswalks, polyline shapefiles for cycle paths and for footpaths and polygon shapefile for block lengths.</p></li>
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (<em>Project_Folder/Place Characterization/WLK_Raster_output.tif</em>).</p></li>
+<li><p>Each output factor will be stored in the project folder specified in the “Setup” tab, in the “AT” folder under the “Place Characterization” folder and have the following names AT_street_crossings.tif, AT_cycle_paths.tif, AT_footway.tif and AT_blocks.tif. The user can rename the output file to preferred filename.</p></li>
+<li><p>Click the “Aggregate” button to run the algorithm.</p></li>
+<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
+<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/Activetransport.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
-<section id="availability-of-public-transport">
-<h4>4.5.2 Availability of Public Transport<a class="headerlink" href="#availability-of-public-transport" title="Permalink to this heading">#</a></h4>
-<p>!<img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/8dd068ae-b4dd-447c-bef0-0e57c8f4db17" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select point shapefile input for public transport stops.</p>
-<p><strong>Input File:</strong> <em>PubTransportStops/Public_transportation_stops.shp</em></p>
-</li>
-<li><p>Set hexagon grid size. The default is 1km.</p></li>
-</ol>
-<p>The smaller size the more computationally intensive the algorithm will be.</p>
-<ol class="arabic simple" start="3">
-<li><p>Enter an alternate raster output file name if desired.</p></li>
+<section id="safety">
+<h4>4.4.2 Safety<a class="headerlink" href="#safety" title="Permalink to this heading">#</a></h4>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/SAF.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select
+•	streetlight Locations (point shapefile)
+•	or, if unavailable, VIIRS Nighttime Lights dataset (.tif) may be used as proxy data for streetlight locations
+•	alternatively, Perceived Safety data (polygon shapefile) can be used if other data is unavailable; select the field containing the numeric value representing data on women’s perceived safety at the municipal,       district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example:
+Score 5 (Safest): 0 to 1 homicide per 100,000 people
+Score 4: 1.1 to 3 homicides per 100,000 people
+Score 3: 3.1 to 6 homicides per 100,000 people
+Score 2: 6.1 to 10 homicides per 100,000 people
+Score 1: 10.1 to 15 homicides per 100,000 people
+Score 0 (Least Safe): More than 15 homicides per 100,000 people</p></li>
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (<em>Project_Folder/Place Characterization/APT_Raster_output.tif</em>).</p></li>
-</ol>
-</section>
-<section id="safe-urban-design">
-<h4>4.5.3 Safe Urban Design<a class="headerlink" href="#safe-urban-design" title="Permalink to this heading">#</a></h4>
-<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/2ab8874d-50cb-4445-9bac-3231b8328fb7" /></p>
-<ol class="arabic">
-<li><p>Navigate to and select nighttime lights raster input.</p>
-<p><strong>Input File:</strong> <em>Electricity/Nighttime_Lights_2021.tif</em></p>
-</li>
-<li><p>Enter an alternate raster output file name if desired.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (<em>Project_Folder/Place Characterization/SAF_Raster_output.tif</em>).</p></li>
+<li><p>The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/PlaceCharacterization/SAF.tif). The user can rename the output file to preferred filename.</p></li>
 </ol>
 </section>
 </section>
@@ -1426,10 +1410,9 @@ If a factor was executed in the same work session, its file path will automatica
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ad-aggregation-tab">4.3.6 Aggregate</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.5 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">4.5.1 Active Transport</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#availability-of-public-transport">4.5.2 Availability of Public Transport</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#safe-urban-design">4.5.3 Safe Urban Design</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#place-characterization-tab">4.4 PLACE CHARACTERIZATION TAB</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">4.4.1 Active Transport</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">4.4.2 Safety</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#security">4.5.4 Security</a><ul class="nav section-nav flex-column">

@@ -25,14 +25,13 @@ This tool employs a multicriteria evaluation (MCE) framework to spatially descri
     - 4.3.4. [Access to Health Facilities](#access-to-health-facilities)
     - 4.3.5. [Access to Financial Facilities](#access-to-financial-facilities)
     - 4.3.6. [Aggregate](#ad-aggregation-tab)
-  - 4.5. [PLACE CHARACTERIZATION TAB](#place-characterization-tab)
-    - 4.5.1. [Active Transport](#active-transport)
-    - 4.5.2. [Availability of Public Transport](#availability-of-public-transport)
-    - 4.5.3. [Safe Urban Design](#safe-urban-design)
-  - 4.5.4. [Security](#security)
-    - 4.5.5. [Income Level](#income-level)
-    - 4.5.6. [Electricity Access](#electricity-access)
-    - 4.5.7. [Level of Urbanization](#level-of-urbanization)
+  - 4.4. [PLACE CHARACTERIZATION TAB](#place-characterization-tab)
+    - 4.4.1. [Active Transport](#active-transport)
+    - 4.4.2. [Safety](#safety)
+    - 4.4.4. [Security](#security)
+    - 4.4.5. [Income Level](#income-level)
+    - 4.4.6. [Electricity Access](#electricity-access)
+    - 4.4.7. [Level of Urbanization](#level-of-urbanization)
     - 4.5.8. [Size of Housing](#size-of-housing)
     - 4.5.9. [Digital Inclusion](#digital-inclusion)
     - 4.5.10. [Natural Environment and Climatic Factors](#natural-environment-and-climatic-factors)
@@ -413,67 +412,52 @@ If a factor was executed in the same work session, its file path will automatica
 8.	The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/Accessibility_score.tif). The user can rename the output file to preferred filename.
 
 
-### 4.5 PLACE CHARACTERIZATION TAB
+### 4.4 PLACE CHARACTERIZATION TAB
 
-#### 4.5.1 Active Transport
+#### 4.4.1 Active Transport
 
-![image](https://github.com/worldbank/GEEST/assets/120469484/bf89b9ad-7ecc-460c-a7d9-38f1a894176a)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AT.jpg" alt="picture">
+</p>
 
-1. Navigate to and select polyline road network shapefile.
+1.	Navigate to and select point shapefile for crosswalks, polyline shapefiles for cycle paths and for footpaths and polygon shapefile for block lengths.
 
-   **Input File:** *Roads/Roads.shp*
+2.	Click the “Execute” button to run the algorithm.
 
-3. Click the "Set" button to extract all the fields from the polyline input layer.
+3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-4. Select the field containing the road type categorical values.
+4.	Each output factor will be stored in the project folder specified in the “Setup” tab, in the “AT” folder under the “Place Characterization” folder and have the following names AT_street_crossings.tif, AT_cycle_paths.tif, AT_footway.tif and AT_blocks.tif. The user can rename the output file to preferred filename.
 
-5. Click the "Unique Values" button to extract all the unique road type values.
+5.	Click the “Aggregate” button to run the algorithm.
 
-6. Score each of the extracted road types from 1 to 5 based on local knowledge, where 5 is a road type that is very safe for walking and cycling and 1 is an unsafe road type.
+6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-7. Enter an alternate raster output file name if desired.
+7.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/Activetransport.tif). The user can rename the output file to preferred filename.
 
-8. Click the "Execute" button to run the algorithm.
 
-9. Status text next to the "Execute" button will appear and let you know once processing is complete.
+#### 4.4.2 Safety
 
-10. The output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/WLK_Raster_output.tif*).
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/SAF.jpg" alt="picture">
+</p>
 
-#### 4.5.2 Availability of Public Transport
+1.	Navigate to and select 
+    •	streetlight Locations (point shapefile) 
+    •	or, if unavailable, VIIRS Nighttime Lights dataset (.tif) may be used as proxy data for streetlight locations
+    •	alternatively, Perceived Safety data (polygon shapefile) can be used if other data is unavailable; select the field containing the numeric value representing data on women's perceived safety at the municipal,       district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example: 
+              Score 5 (Safest): 0 to 1 homicide per 100,000 people
+              Score 4: 1.1 to 3 homicides per 100,000 people
+              Score 3: 3.1 to 6 homicides per 100,000 people
+              Score 2: 6.1 to 10 homicides per 100,000 people
+              Score 1: 10.1 to 15 homicides per 100,000 people
+              Score 0 (Least Safe): More than 15 homicides per 100,000 people
 
-!![image](https://github.com/worldbank/GEEST/assets/120469484/8dd068ae-b4dd-447c-bef0-0e57c8f4db17)
+2.	Click the “Execute” button to run the algorithm.
 
-1. Navigate to and select point shapefile input for public transport stops.
+3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
 
-   **Input File:** *PubTransportStops/Public_transportation_stops.shp*
+4.	The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/PlaceCharacterization/SAF.tif). The user can rename the output file to preferred filename.
 
-3. Set hexagon grid size. The default is 1km.
-
-The smaller size the more computationally intensive the algorithm will be.
-
-3. Enter an alternate raster output file name if desired.
-
-4. Click the "Execute" button to run the algorithm.
-
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-6. The aggregated output raster file will be stored in the project folder specified in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/APT_Raster_output.tif*).
-
-#### 4.5.3 Safe Urban Design
-
-![image](https://github.com/worldbank/GEEST/assets/120469484/2ab8874d-50cb-4445-9bac-3231b8328fb7)
-
-1. Navigate to and select nighttime lights raster input.
-
-   **Input File:** *Electricity/Nighttime_Lights_2021.tif*
-
-3. Enter an alternate raster output file name if desired.
-
-4. Click the "Execute" button to run the algorithm.
-
-5. Status text next to the "Execute" button will appear and let you know once processing is complete.
-
-6. The output raster file will be stored in the project folder set in the "Setup" tab, under the "Place Characterization" folder (*Project_Folder/Place Characterization/SAF_Raster_output.tif*).
 
 ### 4.5.4 Security
 
