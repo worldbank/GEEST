@@ -4,7 +4,9 @@ With support from the [Canada Clean Energy and Forest Climate Facility (CCEFCFy)
 
 ![image](docs/images/img01.png)
 
-![image](docs/images/img02.png)
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WEE pop 35-39.jpg" alt="WEE pop 35-39">
+</p>
 
 Countries included in the project:
 
