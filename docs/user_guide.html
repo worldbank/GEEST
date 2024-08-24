@@ -868,16 +868,23 @@ If a factor was executed in the same work session, its file path will automatica
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/SAF.jpg" alt="picture">
 </p>
 <ol class="arabic simple">
-<li><p>Navigate to and select
-•	streetlight Locations (point shapefile)
-•	or, if unavailable, VIIRS Nighttime Lights dataset (.tif) may be used as proxy data for streetlight locations
-•	alternatively, Perceived Safety data (polygon shapefile) can be used if other data is unavailable; select the field containing the numeric value representing data on women’s perceived safety at the municipal,       district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example:
-Score 5 (Safest): 0 to 1 homicide per 100,000 people
-Score 4: 1.1 to 3 homicides per 100,000 people
-Score 3: 3.1 to 6 homicides per 100,000 people
-Score 2: 6.1 to 10 homicides per 100,000 people
-Score 1: 10.1 to 15 homicides per 100,000 people
-Score 0 (Least Safe): More than 15 homicides per 100,000 people</p></li>
+<li><p>Navigate to and select</p></li>
+</ol>
+<ul>
+<li><p><strong>streetlight Locations</strong> (point shapefile)</p></li>
+<li><p>or, if unavailable, <strong>VIIRS Nighttime Lights dataset (.tif)</strong> may be used as proxy data for streetlight locations</p></li>
+<li><p>alternatively, <strong>Perceived Safety data (polygon shapefile)</strong> can be used if other data is unavailable; select the field containing the numeric value representing data on women’s perceived safety at the municipal, district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Score</span> <span class="mi">5</span> <span class="p">(</span><span class="n">Safest</span><span class="p">):</span> <span class="mi">0</span> <span class="n">to</span> <span class="mi">1</span> <span class="n">homicide</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
+<span class="n">Score</span> <span class="mi">4</span><span class="p">:</span> <span class="mf">1.1</span> <span class="n">to</span> <span class="mi">3</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
+<span class="n">Score</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">3.1</span> <span class="n">to</span> <span class="mi">6</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
+<span class="n">Score</span> <span class="mi">2</span><span class="p">:</span> <span class="mf">6.1</span> <span class="n">to</span> <span class="mi">10</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
+<span class="n">Score</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">10.1</span> <span class="n">to</span> <span class="mi">15</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
+<span class="n">Score</span> <span class="mi">0</span> <span class="p">(</span><span class="n">Least</span> <span class="n">Safe</span><span class="p">):</span> <span class="n">More</span> <span class="n">than</span> <span class="mi">15</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<ol class="arabic simple" start="2">
 <li><p>Click the “Execute” button to run the algorithm.</p></li>
 <li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
 <li><p>The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/PlaceCharacterization/SAF.tif). The user can rename the output file to preferred filename.</p></li>
