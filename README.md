@@ -246,45 +246,40 @@ The Place-Characterization dimension contains factors that refer to attributes t
 Below are some of the overall insights derived from the GEEST for Saint Lucia. The first map illustrates the degree of enablement within environments; the second map shows the level of enablement concerning the female population on a raster 100x100m format. The third map shows the results for the level of enablement concerning female population, aggregated at the administrative subdivisions of the island.
 
 :::{figure-md} markdown-fig
-<img src="docs/images/img13.png" alt="Raster results concerning enabling environments for the Dominican Republic">
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE.jpg" alt="picture">
+</p>
 
-Raster results concerning enabling environments for the Dominican Republic
+Raster results concerning enabling environments for Saint Lucia
 :::
 
 :::{figure-md} markdown-fig
-<img src="docs/images/img14.png" alt="Raster results concerning enabling environments with respect to women’s population for the Dominican Republic">
 
-Raster results concerning enabling environments with respect to women’s population for the Dominican Republic
-:::
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39.jpg" alt="picture">
+</p>
 
-![image](docs/images/img15.png)
-
-:::{figure-md} markdown-fig
-<img src="docs/images/img16.png" alt="Point location (RE sites) results concerning enabling environments with respect to women’s population for the DR">
-
-Point location (RE sites) results concerning enabling environments with respect to women’s population for the DR
+Raster results concerning enabling environments with respect to women’s population for Saint Lucia
 :::
 
 :::{figure-md} markdown-fig
-<img src="docs/images/img17.png" alt="Aggregate results concerning enabling environments with respect to women’s population for the Dominican Republic">
 
-Aggregate results concerning enabling environments with respect to women’s population for the Dominican Republic
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/WEE pop 35-39 Admin2.jpg" alt="picture">
+</p>
+
+Aggregate results concerning enabling environments with respect to women’s population for Saint Lucia at administrative subdivision level
 :::
 
 If the job opportunities' location layer is presented in raster format, the GEEST can generate scores specifically for the regions where employment prospects exist, emphasizing opportunities exclusively within those areas.
 
 :::{figure-md} markdown-fig
-<img src="docs/images/img18.png" alt="Raster results concerning enabling environments in RE sites with respect to women’s population for the DR">
 
-Raster results concerning enabling environments in RE sites with respect to women’s population for the DR
-:::
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Solar Project - WEE.jpg" alt="picture">
+</p>
 
-Likewise, the GEEST has the capability to aggregate results solely within the administrative zones where jobs are situated.
-
-:::{figure-md} markdown-fig
-<img src="docs/images/img19.png" alt="Aggregate results concerning enabling environments near RE sites with respect to women’s population for the DR">
-
-Aggregate results concerning enabling environments near RE sites with respect to women’s population for the DR
+Raster results concerning enabling environments in RE sites with respect to women’s population for Saint Lucia
 :::
 
 (geest-main-limitations)=
@@ -293,16 +288,29 @@ Aggregate results concerning enabling environments near RE sites with respect to
 
 #### Data Availability and Granularity
 
-The effectiveness of GEEST relies heavily on the quality of open-source data. Therefore, it is imperative to underscore that the principal limitation of the tool in its current state originates from the scarcity of open-source data in SIDS and the limited granularity of the available data.
+The effectiveness of GEEST relies heavily on the quality of open-source data. Therefore, it is imperative to underscore that the principal limitation of the tool in its current state originates from the scarcity of open-source data in SIDS and the limited granularity of the available data. One of the primary challenges in data collection for St. Lucia was the prevalence of information in non-geospatial formats, such as PDFs and JPGs, or as simple statistics found in sources like the World Bank’s Data Portal. Specifically, the Central Statistical Office of St. Lucia’s Mapping Unit distributes maps exclusively in PDF format. Additionally, at the time of our research, the 2022 Census data had not yet been released, leaving us with only the 2010 Census data, which may not accurately reflect the current situation of the country. Furthermore, this earlier census data was largely unavailable in a geospatial format. Moreover, as mentioned earlier, information sourced from open-source repositories (like OSM) was occasionally outdated, incomplete, or lacked detailed specifications regarding the attributes of mapped features, a notable example being financial facilities. 
 
 #### Processing Time
 
-The processing of factors within the Accessibility dimension is notably slow. Subsequent enhancements should prioritize the reduction of computational demands for calculating these indicators.
+The processing of factors within the Place Characterization dimension is notably slow. Subsequent enhancements should prioritize the reduction of computational demands for calculating these indicators.
 
 #### Methodological Deviations
 
 The Place Characterization factors pose challenges due to restricted data availability, necessitating deviations from the proposed geoprocessing techniques outlined in the methodology. The granularity of GEEST's output is confined by available data, suggesting potential refinement opportunities in geoprocessing procedures with improved data access or alternative methods to those specified in the methodology.
 
-#### Lack of Specialized Urban-Rural Analyses
+#### Opportunities for Enhancement
 
-Applying the GEEST in the pilot countries has yielded valuable insights, particularly in highlighting disparities between rural and urban outcomes. This divergence underscores the need for a more tailored approach, emphasizing targeted subgroup analyses to accommodate the distinct characteristics of rural and urban areas.
+To improve the quality and availability of data for GEEST input in Saint Lucia, the following enhanced strategies are recommended:
+
+**Invest in Proprietary Gender Data**: Secure proprietary datasets that shed light on domestic violence, Gender-Based Violence (GBV), and women's safety perceptions. Collaborate with organizations specializing in gender-sensitive issues, as they likely possess valuable data.
+
+**Leverage Satellite Imagery and Drone Technology**: Use satellite imagery and aerial photography to assess the comprehensiveness and quality of the geospatial datasets included in this analysis. Specifically, around the areas where potential or current job opportunities are located, to verify the accuracy of the results.
+
+**Adopt Mobile Data Collection Techniques**: Considering Saint Lucia's size, the strategic use of mobile applications, such as KoboToolbox, for field data collection can be highly efficient, requiring minimal personnel. These tools empower field workers to collect, update, and immediately share geospatial data, significantly enhancing data accuracy and timeliness.
+
+**Host Mapathons**: Organize mapathons to mobilize volunteers for the mapping of current geospatial data or to perform quality assurance checks. This method is invaluable for refreshing outdated maps in neglected areas, thus achieving more extensive and accurate mapping.
+
+**Establish Standardized Data Protocols**: Ensure the adoption of standardized protocols for geospatial data collection and management. Uniform standards are key to preserving data consistency and ensuring that different datasets and projects are compatible, thereby boosting data integration and application effectiveness.
+
+By implementing these refined strategies, the accessibility and quality of data for GEEST inputs in Saint Lucia can be significantly enhanced, leading to more informed analyses and decision-making processes.
+
