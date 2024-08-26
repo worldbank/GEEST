@@ -3601,164 +3601,140 @@ class GenderIndicatorTool:
         aligning with the principles outlined by Chen & Nordhaus (2011) for using luminosity as a socio-economic indicator.
         """
 
-        # Set up directories
-        current_script_path = os.path.dirname(os.path.abspath(__file__))
-        workingDir = self.dlg.workingDir_Field.text()
-        os.chdir(workingDir)
-        tempDir = "temp"
-        Dimension = "Place Characterization"
+        try:
+            # Set up directories
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            workingDir = self.dlg.workingDir_Field.text()
+            os.chdir(workingDir)
+            tempDir = "temp"
+            Dimension = "Place Characterization"
 
-        # Create necessary directories
-        if not os.path.exists(Dimension):
-            os.mkdir(Dimension)
+            # Helper function to create directories if they don't exist
+            def create_directory(path):
+                if not os.path.exists(path):
+                    os.mkdir(path)
 
-        if os.path.exists(tempDir):
-            shutil.rmtree(tempDir)
-        time.sleep(0.5)
-        os.mkdir(tempDir)
+            # Create necessary directories
+            create_directory(Dimension)
 
-        # Set CRS and input/output paths
-        UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
-        countryLayer = self.dlg.countryLayer_Field.filePath()
-        pixelSize = self.dlg.pixelSize_SB.value()
-        input_file = self.dlg.SAF_Input_Field.filePath()
-        rasOutput = self.dlg.SAF_Output_Field.text()
+            if os.path.exists(tempDir):
+                shutil.rmtree(tempDir)
+            time.sleep(0.5)
+            create_directory(tempDir)
 
-        # Detect input file type, assuming it's raster
-        input_layer = QgsRasterLayer(input_file, "input")
+            # Set CRS and input/output paths
+            UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
+            countryLayer = self.dlg.countryLayer_Field.filePath()
+            pixelSize = self.dlg.pixelSize_SB.value()
+            input_file = self.dlg.SAF_Input_Field.filePath()
+            rasOutput = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
 
-        # Handle raster input layer
-        if input_layer.isValid():
-            # Raster input detected - proceed with existing functionality
-            NTL_input = input_file
+            # Detect input file type, assuming it's raster
+            input_layer = QgsRasterLayer(input_file, "input")
 
-            # Define temporary file paths
-            tempCalc = f"{tempDir}/tempCalc.tif"
-            tempResample = f"{tempDir}/tempResample.tif"
-            countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+            if input_layer.isValid():
+                # Raster input detected - proceed with processing
+                NTL_input = input_file
 
-            # Copy style file
-            styleTemplate = f"{current_script_path}/Style/{Dimension}.qml"
-            styleFileDestination = f"{workingDir}{Dimension}/"
-            styleFile = f"{rasOutput.split('.')[0]}.qml"
-            shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
+                # Open the raster in its native CRS and perform classification
+                with rasterio.open(NTL_input) as src:
+                    ntl_data = src.read(1)
+                    out_meta = src.meta.copy()
 
-            # Update UI status
-            self.dlg.SAF_status.setText("Processing...")
-            self.dlg.SAF_status.repaint()
+                # Get valid data (non-NaN values)
+                valid_data = ntl_data[~np.isnan(ntl_data)]
 
-            # Convert CRS of country layer
-            self.convertCRS(countryLayer, UTM_crs)
-            countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+                max_value = np.max(valid_data)
+                median = np.median(valid_data)
+                percentile_75 = np.percentile(valid_data, 75)
 
-            # Buffer the country layer
-            self.dlg.SAF_status.setText("Buffering...")
-            self.dlg.SAF_status.repaint()
-            buffer = processing.run(
-                "native:buffer",
-                {
-                    "INPUT": countryUTMLayer,
-                    "DISTANCE": self.BUFFER_DISTANCE,
-                    "SEGMENTS": 5,
-                    "END_CAP_STYLE": 0,
-                    "JOIN_STYLE": 0,
-                    "MITER_LIMIT": 2,
-                    "DISSOLVE": True,
-                    "SEPARATE_DISJOINT": False,
-                    "OUTPUT": countryUTMLayerBuf,
-                },
-            )
+                print(f"Max Value: {max_value:.6f}")
+                print(f"Median: {median:.6f}")
+                print(f"75th Percentile: {percentile_75:.6f}")
 
-            # Get the extent of the buffered country layer
-            CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
-            country_extent = CountryBuf_df.total_bounds
+                # Determine classification scheme
+                if max_value <= 0.05 or (max_value - percentile_75) <= 0.05 * max_value:
+                    print("Using max_value classification scheme")
+                    classification = np.full_like(ntl_data, 0, dtype=np.uint8)
+                    classification[(ntl_data > 0) & (ntl_data <= 0.2 * max_value)] = 1
+                    classification[(ntl_data > 0.2 * max_value) & (ntl_data <= 0.4 * max_value)] = 2
+                    classification[(ntl_data > 0.4 * max_value) & (ntl_data <= 0.6 * max_value)] = 3
+                    classification[(ntl_data > 0.6 * max_value) & (ntl_data <= 0.8 * max_value)] = 4
+                    classification[ntl_data > 0.8 * max_value] = 5
+                else:
+                    print("Using original classification scheme")
+                    classification = np.full_like(ntl_data, 0, dtype=np.uint8)
+                    classification[(ntl_data > 0.05) & (ntl_data <= 0.25 * median)] = 1
+                    classification[(ntl_data > 0.25 * median) & (ntl_data <= 0.5 * median)] = 2
+                    classification[(ntl_data > 0.5 * median) & (ntl_data <= median)] = 3
+                    classification[(ntl_data > median) & (ntl_data <= percentile_75)] = 4
+                    classification[ntl_data > percentile_75] = 5
 
-            # Reproject and resample the night-time lights raster
-            self.dlg.SAF_status.setText("Resampling...")
-            self.dlg.SAF_status.repaint()
-            processing.run(
-                "gdal:warpreproject",
-                {
-                    "INPUT": NTL_input,
-                    "SOURCE_CRS": None,
-                    "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                    "RESAMPLING": 0,
-                    "NODATA": 0,  # Set NoData to zero
-                    "TARGET_RESOLUTION": pixelSize,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 5,  # Float32
-                    "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
-                    "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
-                    "MULTITHREADING": False,
-                    "EXTRA": "",
-                    "OUTPUT": tempResample,
-                },
-            )
+                # Set NaN values in the original data to 255
+                classification[np.isnan(ntl_data)] = 255
 
-            # Open the resampled raster and perform manual classification
-            with rasterio.open(tempResample) as src:
-                resampled_data = src.read(1)
-                meta1 = src.meta
-                print(
-                    f"Resampled data stats - min: {resampled_data.min()}, max: {resampled_data.max()}, mean: {resampled_data.mean()}")
+                # Update metadata for output
+                out_meta.update(dtype=rasterio.uint8, nodata=255)
 
-            # Calculate the median and 75th percentile from the resampled raster
-            median_val, percentile_75 = self.calculate_raster_stats(tempResample)
-            print(f"Calculated median: {median_val}, 75th percentile: {percentile_75}")
+                # Save the classified raster in native CRS
+                tempClassified = os.path.join(tempDir, "tempClassified.tif")
+                with rasterio.open(tempClassified, "w", **out_meta) as dst:
+                    dst.write(classification, 1)
 
-            # Manually classify the raster
-            SAF_ras_classified = np.zeros_like(resampled_data, dtype=np.float32)
+                print(f"Classified NTL raster saved to {tempClassified}")
 
-            SAF_ras_classified[(resampled_data > 0) & (resampled_data <= 0.25 * median_val)] = 1
-            SAF_ras_classified[(resampled_data > 0.25 * median_val) & (resampled_data <= 0.5 * median_val)] = 2
-            SAF_ras_classified[(resampled_data > 0.5 * median_val) & (resampled_data <= median_val)] = 3
-            SAF_ras_classified[(resampled_data > median_val) & (resampled_data <= percentile_75)] = 4
-            SAF_ras_classified[resampled_data > percentile_75] = 5
+                # Clip the classified raster to the country boundaries
+                clippedClassified = os.path.join(tempDir, "clippedClassified.tif")
+                processing.run(
+                    "gdal:cliprasterbymasklayer",
+                    {
+                        "INPUT": tempClassified,
+                        "MASK": countryLayer,
+                        "CROP_TO_CUTLINE": True,
+                        "OUTPUT": clippedClassified
+                    }
+                )
 
-            # Handle normalization (if needed)
-            Rmax = SAF_ras_classified.max()
-            Rmin = SAF_ras_classified.min()
-            print(f"Before normalization (manual classification): min={Rmin}, max={Rmax}")
+                print(f"Clipped NTL raster saved to {clippedClassified}")
 
-            if Rmax != Rmin:
-                SAF_ras_normalized = ((SAF_ras_classified - Rmin) / (Rmax - Rmin)) * 5
-            else:
-                SAF_ras_normalized = SAF_ras_classified
+                # Reproject the clipped raster to the output CRS without resampling
+                self.dlg.SAF_status.setText("Reprojecting to output CRS...")
+                self.dlg.SAF_status.repaint()
+                processing.run(
+                    "gdal:warpreproject",
+                    {
+                        "INPUT": clippedClassified,
+                        "SOURCE_CRS": QgsCoordinateReferenceSystem(input_layer.crs()),
+                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "RESAMPLING": 0,  # Nearest neighbor to preserve classification
+                        "NODATA": 255,
+                        "OUTPUT": rasOutput,
+                    },
+                )
 
-            try:
-                # Create output directory if it does not exist
-                if not os.path.exists(Dimension):
-                    os.mkdir(Dimension)
-                os.chdir(Dimension)
-
-                # Write the final output raster
-                with rasterio.open(rasOutput, "w", **meta1) as dst:
-                    dst.write(SAF_ras_normalized, 1)
-
-                # Ensure NoData values are set to zero
-                self.set_nodata_to_zero(rasOutput)
+                print(f"Reprojected and saved final NTL raster to {rasOutput}")
 
                 # Update UI with the output path
-                self.dlg.SAF_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
+                self.dlg.SAF_Aggregate_Field.setText(rasOutput)
                 self.dlg.SAF_status.setText("Processing Complete!")
                 self.dlg.SAF_status.repaint()
 
                 # Return to the original working directory
                 os.chdir(workingDir)
 
-            except Exception as e:
-                # Something went awry, inform the user
-                error_message = f"Processing failed: {str(e)}"
-                self.dlg.SAF_status.setText(error_message)
+            else:
+                self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
                 self.dlg.SAF_status.repaint()
 
-                # Ensure we return to the original working directory even if an error occurs
-                if os.getcwd() != workingDir:
-                    os.chdir(workingDir)
-
-        else:
-            self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
+        except Exception as e:
+            # Something went awry, inform the user
+            error_message = f"Processing failed: {str(e)}"
+            self.dlg.SAF_status.setText(error_message)
             self.dlg.SAF_status.repaint()
+
+            # Ensure we return to the original working directory even if an error occurs
+            if os.getcwd() != workingDir:
+                os.chdir(workingDir)
 
     def set_nodata_to_zero(self, raster_path):
         """

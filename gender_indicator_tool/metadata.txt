@@ -6,7 +6,7 @@
 name=Gender Enabling Environments Spatial Tool (GEEST)
 qgisMinimumVersion=3.0
 description=Gender Enabling Environments Spatial Tool (Derived from the original version written by andre@pegasys.co.za from Pegasys)
-version=0.1.56
+version=0.1.57
 author=Pegasys / Kartoza
 email=info@kartoza.com
 
