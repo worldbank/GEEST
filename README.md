@@ -5,7 +5,7 @@ With support from the [Canada Clean Energy and Forest Climate Facility (CCEFCFy)
 ![image](docs/images/img01.png)
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE%20pop%2035-39.png" height = 800 alt="WEE pop 35-39">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE_15classes_raster.png" height = 800 alt="WEE pop 35-39">
 </p>
 
 Countries included in the project:
@@ -202,7 +202,7 @@ The GEEST was tested Saint Lucia to assess its functionality. The selection of t
 The Contextual dimension encompasses factors that provide information concerning the laws and policies in place, influencing workplace gender discrimination, financial autonomy, and overall gender empowerment.
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Contextual.png" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Contextual.png" height = 600 alt="picture">
 </p>
 
 #### ACCESIBILITY DIMENSION RESULTS IN SAINT LUCIA
@@ -211,14 +211,14 @@ The Accessibility dimension includes factors that relate to the ease with which 
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility%20factors.png" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility%20factors%20new.png" height = 600 alt="picture">
 </p>
 
 <p align="center"><strong>Accessibility factors</strong></p>
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility%20score.JPG" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility_score.JPG" height = 500 alt="picture">
 </p>
 
 <p align="center"><strong>Accessibility factors aggregated</strong></p>
@@ -229,13 +229,13 @@ The Accessibility dimension includes factors that relate to the ease with which 
 The Place-Characterization dimension contains factors that refer to attributes that are used to define a specific geographical location or environment and do not include a mobility component. Those deemed to be most important place-characterization factors concerning women’s access to jobs include (i) walkability, (ii) safety, (iii) digital inclusion, (iv) environmental hazards, (v) education , (vi) fragility, conflict, and violence, and (vii) water sanitation.
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Place%20characterization%20factors.png" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Place_factors.png" height = 600 alt="picture">
 </p>
 
 <p align="center"><strong>Place characterization factors</strong></p>
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Place%20score.JPG" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/PCAGG.JPG" height = 500 alt="picture">
 </p>
 
 <p align="center"><strong>Place characterization factors aggregated</strong></p>
@@ -244,7 +244,7 @@ Below are some of the overall insights derived from the GEEST for Saint Lucia. T
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE.png" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE_score.png" height = 800 alt="picture">
 </p>
 
 Raster results concerning enabling environments for Saint Lucia
@@ -253,7 +253,7 @@ Raster results concerning enabling environments for Saint Lucia
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE%20pop%2035-39.png" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE_15classes_raster.png" height = 800 alt="picture">
 </p>
 
 Raster results concerning enabling environments with respect to women’s population for Saint Lucia
@@ -262,7 +262,7 @@ Raster results concerning enabling environments with respect to women’s popula
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE%20pop%20admin2%2035-39.png" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE_15classes.png" height = 800 alt="picture">
 </p>
 
 Aggregate results concerning enabling environments with respect to women’s population for Saint Lucia at administrative subdivision level
@@ -273,7 +273,7 @@ If the job opportunities' location layer is presented in raster format, the GEES
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE%20Solar.png" height = 800 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/WEE_15classes_solar.png" height = 800 alt="picture">
 </p>
 
 Raster results concerning enabling environments in RE sites with respect to women’s population for Saint Lucia
