@@ -218,7 +218,7 @@ The Accessibility dimension includes factors that relate to the ease with which 
 
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility_score.JPG" height = 500 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New/Accessibility_score_tr1.JPG" height = 500 alt="picture">
 </p>
 
 <p align="center"><strong>Accessibility factors aggregated</strong></p>
