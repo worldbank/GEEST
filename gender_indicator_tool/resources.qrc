@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/gender_indicator_tool" >
-        <file>icon.png</file>
-    </qresource>
-</RCC>
