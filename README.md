@@ -203,7 +203,7 @@ The GEEST was tested Saint Lucia to assess its functionality. The selection of t
 The Contextual dimension encompasses factors that provide information concerning the laws and policies in place, influencing workplace gender discrimination, financial autonomy, and overall gender empowerment.
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/Contextual_new.png" height = 600 alt="picture">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/New\Contextual_new.png" height = 600 alt="picture">
 </p>
 
 #### ACCESIBILITY DIMENSION RESULTS IN SAINT LUCIA
