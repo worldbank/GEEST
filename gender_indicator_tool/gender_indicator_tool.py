@@ -3800,10 +3800,8 @@ class GenderIndicatorTool:
                 'OUTPUT': 'memory:'
             }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-        # Buffer the country layer
-        buffered_country_layer_path = os.path.join(tempDir, "countryUTMLayerBuf.shp")
-        buffered_country_layer_path = os.path.normpath(buffered_country_layer_path)  # Normalize path
-        buffer = processing.run(
+        # Buffer the country layer in memory
+        buffer_result = processing.run(
             "native:buffer",
             {
                 "INPUT": countryLayer,
@@ -3814,12 +3812,12 @@ class GenderIndicatorTool:
                 "MITER_LIMIT": 2,
                 "DISSOLVE": True,
                 "SEPARATE_DISJOINT": False,
-                "OUTPUT": buffered_country_layer_path,
+                "OUTPUT": 'memory:'
             },
             feedback=QgsProcessingFeedback()
         )
 
-        buffered_country_layer = QgsVectorLayer(buffered_country_layer_path, "buffered_country_layer", "ogr")
+        buffered_country_layer = buffer_result['OUTPUT']
         if not buffered_country_layer.isValid():
             raise ValueError("Buffering failed. Invalid buffered layer.")
 
@@ -4604,25 +4602,28 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
     def WAS_rasterizer_v2(self):
-        """
-        This function processes the Water and Sanitation (WAS) point data, creates circular buffers around each point,
-        clips the buffers to the country shape, assigns a value of 5 to the buffers (with a cap of 5 where they overlap),
-        rasterizes the result using the specified pixel size, and clips it to the country boundaries.
-        """
-
         try:
-            # Perform common setup
+            # Set up variables
             setup = self.CommonRasterizerSetup()
-            current_script_path = setup["current_script_path"]
-            workingDir = setup["workingDir"]
+            workingDir = os.path.abspath(setup["workingDir"])
             Dimension = setup["Dimension"]
-            tempDir = setup["tempDir"]
+            tempDir = os.path.abspath(setup["tempDir"])
             countryLayer = setup["countryLayer"]
             country_extent = setup["country_extent"]
             pixelSize = setup["pixelSize"]
             UTM_crs = setup["UTM_crs"]
+            current_script_path = setup["current_script_path"]
 
-            # Update UI status
+            print(f"Working directory: {workingDir}")
+            print(f"Temp directory: {tempDir}")
+
+            # Check if temp directory exists and is writable
+            if not os.path.exists(tempDir):
+                os.makedirs(tempDir)
+            if not os.access(tempDir, os.W_OK):
+                raise PermissionError(f"Temp directory is not writable: {tempDir}")
+
+            # Update status
             self.dlg.WAS_status.setText("Processing...")
             self.dlg.WAS_status.repaint()
 
@@ -4634,143 +4635,115 @@ class GenderIndicatorTool:
 
             # Convert CRS if necessary
             if pointUTMLayer.crs() != UTM_crs:
-                pointUTMLayer = processing.run(
-                    "native:reprojectlayer",
-                    {
-                        'INPUT': pointUTMLayer,
-                        'TARGET_CRS': UTM_crs,
-                        'OUTPUT': 'memory:'
-                    }, feedback=QgsProcessingFeedback()
-                )['OUTPUT']
+                pointUTMLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': pointUTMLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                }, feedback=QgsProcessingFeedback())['OUTPUT']
 
-            # Create a 1000-meter buffer around each point
-            self.dlg.WAS_status.setText("Buffering...")
+            # Buffer the points
+            self.dlg.WAS_status.setText("Buffering points...")
             self.dlg.WAS_status.repaint()
-            buffer_result = processing.run(
-                "native:buffer",
-                {
-                    "INPUT": pointUTMLayer,
-                    "DISTANCE": 1000,
-                    "SEGMENTS": 50,  # Sufficient segments to approximate a circle
-                    "END_CAP_STYLE": 0,
-                    "JOIN_STYLE": 0,
-                    "MITER_LIMIT": 2,
-                    "DISSOLVE": False,  # Keep individual buffers separate initially
-                    "SEPARATE_DISJOINT": False,
-                    "OUTPUT": "memory:",
-                },
-            )
-            buffer_layer = buffer_result["OUTPUT"]
+            buffer_result = processing.run("native:buffer", {
+                'INPUT': pointUTMLayer,
+                'DISTANCE': 1000,
+                'SEGMENTS': 50,
+                'END_CAP_STYLE': 0,
+                'JOIN_STYLE': 0,
+                'MITER_LIMIT': 2,
+                'DISSOLVE': False,
+                'OUTPUT': 'memory:'
+            }, feedback=QgsProcessingFeedback())
+            buffer_layer = buffer_result['OUTPUT']
 
-            # Clip the buffer layer to the country shape
-            self.dlg.WAS_status.setText("Clipping buffers to country shape...")
-            self.dlg.WAS_status.repaint()
-            clipped_buffer_result = processing.run(
-                "native:clip",
-                {
-                    "INPUT": buffer_layer,
-                    "OVERLAY": countryLayer,
-                    "OUTPUT": "memory:"
-                },
-            )
-            clipped_buffer_layer = clipped_buffer_result["OUTPUT"]
-
-            # Assign a value of 5 to the clipped buffer areas
+            # Add buffer value field
             rasField = "buffer_value"
-            clipped_buffer_layer_provider = clipped_buffer_layer.dataProvider()
-            clipped_buffer_layer_provider.addAttributes([QgsField(rasField, QVariant.Int)])
-            clipped_buffer_layer.updateFields()
+            buffer_layer.dataProvider().addAttributes([QgsField(rasField, QVariant.Double)])
+            buffer_layer.updateFields()
 
-            clipped_buffer_layer.startEditing()
-            for feature in clipped_buffer_layer.getFeatures():
-                feature.setAttribute(rasField, 5)
-                clipped_buffer_layer.updateFeature(feature)
-            clipped_buffer_layer.commitChanges()
+            buffer_layer.startEditing()
+            for feature in buffer_layer.getFeatures():
+                feature[rasField] = 5.0
+                buffer_layer.updateFeature(feature)
+            buffer_layer.commitChanges()
 
-            # Dissolve clipped buffers to handle overlaps, capping the value at 5
-            self.dlg.WAS_status.setText("Dissolving...")
-            self.dlg.WAS_status.repaint()
-            dissolve_result = processing.run(
-                "native:dissolve",
-                {
-                    "INPUT": clipped_buffer_layer,
-                    "FIELD": [],
-                    "OUTPUT": "memory:"
-                }
-            )
-            dissolved_layer = dissolve_result["OUTPUT"]
-
-            # Rasterize the dissolved buffer layer, with a value of 5 within buffers and 0 elsewhere
-            if not os.path.exists(Dimension):
-                os.mkdir(Dimension)
-            os.chdir(Dimension)
-
-            rasOutput = self.dlg.WAS_Output_Field.text()
+            # Rasterize
+            temp_raster = os.path.join(tempDir, "temp_WAS.tif")
+            print(f"Temporary raster path: {temp_raster}")
             self.dlg.WAS_status.setText("Rasterizing...")
             self.dlg.WAS_status.repaint()
-            _ = processing.run(
+            rasterize_result = processing.run(
                 "gdal:rasterize",
                 {
-                    "INPUT": dissolved_layer,
+                    "INPUT": buffer_layer,
                     "FIELD": rasField,
                     "BURN": 0,
                     "USE_Z": False,
-                    "UNITS": 1,  # Output units in pixels
-                    "WIDTH": 0,  # Width of 0 means it will be automatically computed
-                    "HEIGHT": 0,  # Height of 0 means it will be automatically computed
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
                     "EXTENT": country_extent,
                     "NODATA": None,
-                    "OPTIONS": f"-tr {pixelSize} {pixelSize}",  # Set the target resolution
+                    "OPTIONS": "",
                     "DATA_TYPE": 5,  # Float32
-                    "INIT": 0,  # Initialize raster with 0
+                    "INIT": 0,
                     "INVERT": False,
                     "EXTRA": "",
-                    "OUTPUT": rasOutput,
-                },
-            )
-
-            # Clip the raster to the country boundaries (this step may be redundant now, but keeping for safety)
-            self.dlg.WAS_status.setText("Final clipping...")
-            self.dlg.WAS_status.repaint()
-            clipped_raster_output = os.path.join(Dimension, f"clipped_{os.path.basename(rasOutput)}")
-            _ = processing.run(
-                "gdal:cliprasterbymasklayer",
-                {
-                    "INPUT": rasOutput,
-                    "MASK": countryLayer,
-                    "SOURCE_CRS": UTM_crs,
-                    "TARGET_CRS": UTM_crs,
-                    "NODATA": None,
-                    "ALPHA_BAND": False,
-                    "CROP_TO_CUTLINE": True,
-                    "KEEP_RESOLUTION": True,
-                    "SET_RESOLUTION": False,
-                    "X_RESOLUTION": None,
-                    "Y_RESOLUTION": None,
-                    "MULTITHREADING": False,
-                    "OPTIONS": "",
-                    "DATA_TYPE": 0,  # Use input layer data type
-                    "EXTRA": "",
-                    "OUTPUT": clipped_raster_output
+                    "OUTPUT": temp_raster
                 }
             )
 
-            # Update the output field in the UI
-            self.dlg.WAS_Aggregate_Field.setText(clipped_raster_output)
+            # Check if rasterization was successful
+            if not os.path.exists(temp_raster):
+                raise FileNotFoundError(f"Rasterization failed. Output file not created: {temp_raster}")
 
-            # Apply styling to the raster
+            print(f"Raster file created successfully: {temp_raster}")
+
+            # Clip raster to country shape
+            rasOutput = os.path.join(workingDir, Dimension, self.dlg.WAS_Output_Field.text())
+            print(f"Final output path: {rasOutput}")
+            self.dlg.WAS_status.setText("Clipping to country...")
+            self.dlg.WAS_status.repaint()
+            clip_result = processing.run("gdal:cliprasterbymasklayer", {
+                'INPUT': temp_raster,
+                'MASK': countryLayer,
+                'SOURCE_CRS': None,
+                'TARGET_CRS': None,
+                'NODATA': None,
+                'ALPHA_BAND': False,
+                'CROP_TO_CUTLINE': True,
+                'KEEP_RESOLUTION': True,
+                'SET_RESOLUTION': False,
+                'DATA_TYPE': 5,
+                'OUTPUT': rasOutput
+            })
+
+            # Check if clipping was successful
+            if not os.path.exists(rasOutput):
+                raise FileNotFoundError(f"Clipping failed. Output file not created: {rasOutput}")
+
+            print(f"Clipped raster file created successfully: {rasOutput}")
+
+            # Clean up temporary file
+            if os.path.exists(temp_raster):
+                os.remove(temp_raster)
+                print(f"Temporary file removed: {temp_raster}")
+
+            # Set output field and apply style
+            self.dlg.WAS_Aggregate_Field.setText(rasOutput)
             styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
             styleFileDestination = os.path.join(workingDir, Dimension)
-            styleFile = f"{os.path.splitext(os.path.basename(clipped_raster_output))[0]}.qml"
+            styleFile = f"{os.path.splitext(os.path.basename(rasOutput))[0]}.qml"
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
-            # Final status update
-            self.dlg.WAS_status.setText("Processing Complete!")
+            # Update status
+            self.dlg.WAS_status.setText("Processing has been completed!")
             self.dlg.WAS_status.repaint()
 
         except Exception as e:
             self.dlg.WAS_status.setText(f"Error: {str(e)}")
             self.dlg.WAS_status.repaint()
+            print(f"Error in WAS_rasterizer_v2: {str(e)}")
             raise
 
     def urbanization(self):
