@@ -4607,7 +4607,7 @@ class GenderIndicatorTool:
         """
         This function processes the Water and Sanitation (WAS) point data, creates circular buffers around each point,
         clips the buffers to the country shape, assigns a value of 5 to the buffers (with a cap of 5 where they overlap),
-        rasterizes the result, and clips it to the country boundaries.
+        rasterizes the result using the specified pixel size, and clips it to the country boundaries.
         """
 
         try:
@@ -4701,9 +4701,6 @@ class GenderIndicatorTool:
             dissolved_layer = dissolve_result["OUTPUT"]
 
             # Rasterize the dissolved buffer layer, with a value of 5 within buffers and 0 elsewhere
-            raster_width = int(country_extent.width() / pixelSize)
-            raster_height = int(country_extent.height() / pixelSize)
-
             if not os.path.exists(Dimension):
                 os.mkdir(Dimension)
             os.chdir(Dimension)
@@ -4718,12 +4715,12 @@ class GenderIndicatorTool:
                     "FIELD": rasField,
                     "BURN": 0,
                     "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
+                    "UNITS": 1,  # Output units in pixels
+                    "WIDTH": 0,  # Width of 0 means it will be automatically computed
+                    "HEIGHT": 0,  # Height of 0 means it will be automatically computed
                     "EXTENT": country_extent,
                     "NODATA": None,
-                    "OPTIONS": "",
+                    "OPTIONS": f"-tr {pixelSize} {pixelSize}",  # Set the target resolution
                     "DATA_TYPE": 5,  # Float32
                     "INIT": 0,  # Initialize raster with 0
                     "INVERT": False,
