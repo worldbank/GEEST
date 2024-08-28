@@ -4683,7 +4683,7 @@ class GenderIndicatorTool:
                     "WIDTH": pixelSize,
                     "HEIGHT": pixelSize,
                     "EXTENT": country_extent,
-                    "NODATA": None,
+                    "NODATA": -9999,
                     "OPTIONS": "",
                     "DATA_TYPE": 5,  # Float32
                     "INIT": 0,
@@ -4709,7 +4709,7 @@ class GenderIndicatorTool:
                 'MASK': countryLayer,
                 'SOURCE_CRS': None,
                 'TARGET_CRS': None,
-                'NODATA': None,
+                'NODATA': -9999,
                 'ALPHA_BAND': False,
                 'CROP_TO_CUTLINE': True,
                 'KEEP_RESOLUTION': True,
