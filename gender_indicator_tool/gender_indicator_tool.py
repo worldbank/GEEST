@@ -3604,7 +3604,6 @@ class GenderIndicatorTool:
 
         try:
             # Set up directories
-            current_script_path = os.path.dirname(os.path.abspath(__file__))
             workingDir = self.dlg.workingDir_Field.text()
             os.chdir(workingDir)
             tempDir = "temp"
@@ -3613,38 +3612,37 @@ class GenderIndicatorTool:
             # Helper function to create directories if they don't exist
             def create_directory(path):
                 if not os.path.exists(path):
-                    os.mkdir(path)
+                    os.makedirs(path, exist_ok=True)
 
             # Create necessary directories
             create_directory(Dimension)
-
             if os.path.exists(tempDir):
                 shutil.rmtree(tempDir)
-            time.sleep(0.5)
             create_directory(tempDir)
 
             # Set CRS and input/output paths
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
             countryLayer = self.dlg.countryLayer_Field.filePath()
-            pixelSize = self.dlg.pixelSize_SB.value()
             input_file = self.dlg.SAF_Input_Field.filePath()
             rasOutput = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
 
-            # Detect input file type, assuming it's raster
-            input_layer = QgsRasterLayer(input_file, "input")
+            # Open the raster in its native CRS and perform classification
+            with rasterio.open(input_file) as src:
+                ntl_data = src.read(1)
+                out_meta = src.meta.copy()
+                nodata_value = src.nodata
 
-            if input_layer.isValid():
-                # Raster input detected - proceed with processing
-                NTL_input = input_file
+            # Handle case where nodata_value is None
+            if nodata_value is None:
+                nodata_value = 255  # or another appropriate value for your data
 
-                # Open the raster in its native CRS and perform classification
-                with rasterio.open(NTL_input) as src:
-                    ntl_data = src.read(1)
-                    out_meta = src.meta.copy()
+            # Ensure nodata_value is a number
+            nodata_value = float(nodata_value)
 
-                # Get valid data (non-NaN values)
-                valid_data = ntl_data[~np.isnan(ntl_data)]
+            # Handle NODATA values
+            valid_data = ntl_data[~np.isnan(ntl_data) & (ntl_data != nodata_value)]
 
+            if valid_data.size > 0:
                 max_value = np.max(valid_data)
                 median = np.median(valid_data)
                 percentile_75 = np.percentile(valid_data, 75)
@@ -3671,11 +3669,11 @@ class GenderIndicatorTool:
                     classification[(ntl_data > median) & (ntl_data <= percentile_75)] = 4
                     classification[ntl_data > percentile_75] = 5
 
-                # Set NaN values in the original data to 255
-                classification[np.isnan(ntl_data)] = 255
+                # Ensure NODATA values are preserved
+                classification[np.isnan(ntl_data) | (ntl_data == nodata_value)] = nodata_value
 
                 # Update metadata for output
-                out_meta.update(dtype=rasterio.uint8, nodata=255)
+                out_meta.update(dtype=rasterio.uint8, nodata=nodata_value)
 
                 # Save the classified raster in native CRS
                 tempClassified = os.path.join(tempDir, "tempClassified.tif")
@@ -3692,11 +3690,15 @@ class GenderIndicatorTool:
                         "INPUT": tempClassified,
                         "MASK": countryLayer,
                         "CROP_TO_CUTLINE": True,
+                        "NODATA": nodata_value,
                         "OUTPUT": clippedClassified
                     }
                 )
 
                 print(f"Clipped NTL raster saved to {clippedClassified}")
+
+                # Get the CRS from the original raster
+                src_crs = out_meta['crs'].to_string()
 
                 # Reproject the clipped raster to the output CRS without resampling
                 self.dlg.SAF_status.setText("Reprojecting to output CRS...")
@@ -3705,12 +3707,12 @@ class GenderIndicatorTool:
                     "gdal:warpreproject",
                     {
                         "INPUT": clippedClassified,
-                        "SOURCE_CRS": QgsCoordinateReferenceSystem(input_layer.crs()),
-                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
+                        "SOURCE_CRS": src_crs,
+                        "TARGET_CRS": UTM_crs,
                         "RESAMPLING": 0,  # Nearest neighbor to preserve classification
-                        "NODATA": 255,
+                        "NODATA": nodata_value,
                         "OUTPUT": rasOutput,
-                    },
+                    }
                 )
 
                 print(f"Reprojected and saved final NTL raster to {rasOutput}")
@@ -3720,11 +3722,9 @@ class GenderIndicatorTool:
                 self.dlg.SAF_status.setText("Processing Complete!")
                 self.dlg.SAF_status.repaint()
 
-                # Return to the original working directory
-                os.chdir(workingDir)
-
             else:
-                self.dlg.SAF_status.setText("The input file is not a valid raster layer.")
+                print("No valid data found after handling NODATA values.")
+                self.dlg.SAF_status.setText("No valid data found in the input raster.")
                 self.dlg.SAF_status.repaint()
 
         except Exception as e:
@@ -3732,10 +3732,11 @@ class GenderIndicatorTool:
             error_message = f"Processing failed: {str(e)}"
             self.dlg.SAF_status.setText(error_message)
             self.dlg.SAF_status.repaint()
+            print(f"Error details: {e}")  # Add this for more detailed error information
 
-            # Ensure we return to the original working directory even if an error occurs
-            if os.getcwd() != workingDir:
-                os.chdir(workingDir)
+        finally:
+            # Ensure we return to the original working directory
+            os.chdir(workingDir)
 
     def set_nodata_to_zero(self, raster_path):
         """
