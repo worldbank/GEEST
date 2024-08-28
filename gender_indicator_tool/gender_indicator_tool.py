@@ -3131,27 +3131,36 @@ class GenderIndicatorTool:
 
             for grid_feat in grid_layer.getFeatures():
                 intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
-                # Initialize a set to store unique intersecting polygon feature IDs
                 unique_intersections = set()
 
-                # Check each potentially intersecting polygon feature
+                # Initialize variable to keep track of the maximum perimeter
+                max_perimeter = 0
+
                 for poly_id in intersecting_ids:
                     poly_feat = block_layer.getFeature(poly_id)
                     poly_geom = poly_feat.geometry()
 
-                    # Perform a detailed intersection check
                     if grid_feat.geometry().intersects(poly_geom):
                         unique_intersections.add(poly_id)
+                        perimeter = poly_geom.length()
 
-                # Count the number of unique intersecting polygon features
-                num_blocks = len(unique_intersections)
+                        # Update max_perimeter if this perimeter is larger
+                        if perimeter > max_perimeter:
+                            max_perimeter = perimeter
 
-                if num_blocks >= 2:
-                    reclass_val = 5
-                elif num_blocks == 1:
+                # Assign reclassification value based on the maximum perimeter
+                if max_perimeter > 1000:  # Very large blocks
+                    reclass_val = 1
+                elif 751 <= max_perimeter <= 1000:  # Large blocks
+                    reclass_val = 2
+                elif 501 <= max_perimeter <= 750:  # Moderate blocks
                     reclass_val = 3
+                elif 251 <= max_perimeter <= 500:  # Small blocks
+                    reclass_val = 4
+                elif 0 < max_perimeter <= 250:  # Very small blocks
+                    reclass_val = 5
                 else:
-                    reclass_val = 0
+                    reclass_val = 0  # No intersection
 
                 reclass_vals[grid_feat.id()] = reclass_val
 
