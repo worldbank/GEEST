@@ -3621,6 +3621,7 @@ class GenderIndicatorTool:
             create_directory(tempDir)
 
             # Set CRS and input/output paths
+            pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
             countryLayer = self.dlg.countryLayer_Field.filePath()
             input_file = self.dlg.SAF_Input_Field.filePath()
@@ -3711,6 +3712,7 @@ class GenderIndicatorTool:
                         "TARGET_CRS": UTM_crs,
                         "RESAMPLING": 0,  # Nearest neighbor to preserve classification
                         "NODATA": nodata_value,
+                        "TARGET_RESOLUTION": pixelSize,
                         "OUTPUT": rasOutput,
                     }
                 )
