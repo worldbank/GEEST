@@ -3604,6 +3604,7 @@ class GenderIndicatorTool:
 
         try:
             # Set up directories
+            current_script_path = os.path.dirname(os.path.abspath(__file__))
             workingDir = self.dlg.workingDir_Field.text()
             os.chdir(workingDir)
             tempDir = "temp"
@@ -3616,11 +3617,13 @@ class GenderIndicatorTool:
 
             # Create necessary directories
             create_directory(Dimension)
+            dimension_dir = os.path.join(workingDir, Dimension)
             if os.path.exists(tempDir):
                 shutil.rmtree(tempDir)
             create_directory(tempDir)
 
             # Set CRS and input/output paths
+            pixelSize = self.dlg.pixelSize_SB.value()
             UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(" ")[-1][:-1]
             countryLayer = self.dlg.countryLayer_Field.filePath()
             input_file = self.dlg.SAF_Input_Field.filePath()
@@ -3707,15 +3710,24 @@ class GenderIndicatorTool:
                     "gdal:warpreproject",
                     {
                         "INPUT": clippedClassified,
-                        "SOURCE_CRS": src_crs,
-                        "TARGET_CRS": UTM_crs,
+                        "SOURCE_CRS": None,
+                        "TARGET_CRS": QgsCoordinateReferenceSystem(UTM_crs),
                         "RESAMPLING": 0,  # Nearest neighbor to preserve classification
                         "NODATA": nodata_value,
+                        "TARGET_RESOLUTION": pixelSize,
                         "OUTPUT": rasOutput,
                     }
                 )
 
                 print(f"Reprojected and saved final NTL raster to {rasOutput}")
+                
+                # Copy style file
+                styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
+                styleFileDestination = os.path.join(dimension_dir)
+                if not os.path.exists(styleFileDestination):
+                    os.mkdir(styleFileDestination)
+                styleFile = f"{os.path.splitext(rasOutput)[0]}.qml"
+                shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
                 # Update UI with the output path
                 self.dlg.SAF_Aggregate_Field.setText(rasOutput)
