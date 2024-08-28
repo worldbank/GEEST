@@ -3654,7 +3654,7 @@ class GenderIndicatorTool:
                 # Determine classification scheme
                 if max_value <= 0.05 or (max_value - percentile_75) <= 0.05 * max_value:
                     print("Using max_value classification scheme")
-                    classification = np.full_like(ntl_data, 0, dtype=np.uint8)
+                    classification = np.full_like(ntl_data, 0, dtype=np.float32)
                     classification[(ntl_data > 0) & (ntl_data <= 0.2 * max_value)] = 1
                     classification[(ntl_data > 0.2 * max_value) & (ntl_data <= 0.4 * max_value)] = 2
                     classification[(ntl_data > 0.4 * max_value) & (ntl_data <= 0.6 * max_value)] = 3
@@ -3662,7 +3662,7 @@ class GenderIndicatorTool:
                     classification[ntl_data > 0.8 * max_value] = 5
                 else:
                     print("Using original classification scheme")
-                    classification = np.full_like(ntl_data, 0, dtype=np.uint8)
+                    classification = np.full_like(ntl_data, 0, dtype=np.float32)
                     classification[(ntl_data > 0.05) & (ntl_data <= 0.25 * median)] = 1
                     classification[(ntl_data > 0.25 * median) & (ntl_data <= 0.5 * median)] = 2
                     classification[(ntl_data > 0.5 * median) & (ntl_data <= median)] = 3
@@ -3673,7 +3673,7 @@ class GenderIndicatorTool:
                 classification[np.isnan(ntl_data) | (ntl_data == nodata_value)] = nodata_value
 
                 # Update metadata for output
-                out_meta.update(dtype=rasterio.uint8, nodata=nodata_value)
+                out_meta.update(dtype=rasterio.float32, nodata=nodata_value)
 
                 # Save the classified raster in native CRS
                 tempClassified = os.path.join(tempDir, "tempClassified.tif")
