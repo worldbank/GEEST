@@ -4399,13 +4399,8 @@ class GenderIndicatorTool:
         It converts vector data to raster, applying necessary transformations and standardizations using a scaling approach.
         """
         try:
-            # Set up variables
-            workingDir = os.path.normpath(self.dlg.workingDir_Field.text())
-            countryLayerPath = os.path.normpath(self.dlg.countryLayer_Field.filePath())
-            pixelSize = self.dlg.pixelSize_SB.value()
-            UTM_crs = self.dlg.mQgsProjectionSelectionWidget.crs()
-            Dimension = "Place Characterization"
-            current_script_path = os.path.dirname(os.path.abspath(__file__))
+            # Call the common setup function
+            setup = self.CommonRasterizerSetup()
 
             # Update status
             self.dlg.EDU_status.setText("Variables Set")
@@ -4413,11 +4408,6 @@ class GenderIndicatorTool:
             time.sleep(0.5)
             self.dlg.EDU_status.setText("Processing...")
             self.dlg.EDU_status.repaint()
-
-            # Load country layer
-            countryLayer = QgsVectorLayer(countryLayerPath, "country_layer", "ogr")
-            if not countryLayer.isValid():
-                raise ValueError("Invalid country layer")
 
             # Get the input layer and field
             rasField = self.dlg.EDU_rasField_CB.currentText()
@@ -4427,17 +4417,17 @@ class GenderIndicatorTool:
                 raise ValueError("Invalid polygon layer")
 
             # Convert CRS if necessary
-            if polygonLayer.crs() != UTM_crs:
+            if polygonLayer.crs() != setup['UTM_crs']:
                 polygonLayer = processing.run("native:reprojectlayer", {
                     'INPUT': polygonLayer,
-                    'TARGET_CRS': UTM_crs,
+                    'TARGET_CRS': setup['UTM_crs'],
                     'OUTPUT': 'memory:'
                 }, feedback=QgsProcessingFeedback())['OUTPUT']
 
             # Clip the input layer by the country layer
             clipped_layer = processing.run("native:clip", {
                 'INPUT': polygonLayer,
-                'OVERLAY': countryLayer,
+                'OVERLAY': setup['countryLayer'],
                 'OUTPUT': 'memory:'
             }, feedback=QgsProcessingFeedback())['OUTPUT']
 
@@ -4451,15 +4441,13 @@ class GenderIndicatorTool:
             min_val, max_val = min(values), max(values)
 
             # Scale values to the 0-5 range
-            Rmax = 100
-            Rmin = 0
-            m_max = 5
-            m_min = 0
+            Rmax, Rmin = 100, 0
+
             def scale_value(val):
                 return (val - Rmin) / (Rmax - Rmin) * 5.0
 
             # Create a temporary memory layer to hold the scaled scores
-            temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
+            temp_layer = QgsVectorLayer(f"Polygon?crs={setup['UTM_crs'].authid()}", "temp_layer", "memory")
             temp_layer.dataProvider().addAttributes([QgsField("scaled_score", QVariant.Double)])
             temp_layer.updateFields()
 
@@ -4475,11 +4463,12 @@ class GenderIndicatorTool:
             temp_layer.commitChanges()
 
             # Get the extent for rasterization
-            xmin, ymin, xmax, ymax = countryLayer.extent().toRectF().getCoords()
+            xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
+            print(f"Extent: xmin={xmin}, xmax={xmax}, ymin={ymin}, ymax={ymax}")
 
             # Rasterize
-            rasOutput = os.path.join(workingDir, Dimension, self.dlg.EDU_Output_Field.text())
-            _ = processing.run(
+            rasOutput = os.path.join(setup['workingDir'], setup['Dimension'], self.dlg.EDU_Output_Field.text())
+            rasterize_result = processing.run(
                 "gdal:rasterize",
                 {
                     "INPUT": temp_layer,
@@ -4487,8 +4476,8 @@ class GenderIndicatorTool:
                     "BURN": 0.0,
                     "USE_Z": False,
                     "UNITS": 1,
-                    "WIDTH": pixelSize,
-                    "HEIGHT": pixelSize,
+                    "WIDTH": setup['pixelSize'],
+                    "HEIGHT": setup['pixelSize'],
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                     "NODATA": -9999,
                     "OPTIONS": "",
@@ -4500,10 +4489,13 @@ class GenderIndicatorTool:
                 }
             )
 
+            if not rasterize_result:
+                raise ValueError("Rasterization failed. Please check the input data.")
+
             # Set output field and apply style
             self.dlg.EDU_Aggregate_Field.setText(rasOutput)
-            styleTemplate = os.path.join(current_script_path, "Style", f"{Dimension}.qml")
-            styleFileDestination = os.path.join(workingDir, Dimension)
+            styleTemplate = os.path.join(setup['current_script_path'], "Style", f"{setup['Dimension']}.qml")
+            styleFileDestination = os.path.join(setup['workingDir'], setup['Dimension'])
             styleFile = f"{os.path.splitext(os.path.basename(rasOutput))[0]}.qml"
             shutil.copy(styleTemplate, os.path.join(styleFileDestination, styleFile))
 
