@@ -3131,27 +3131,36 @@ class GenderIndicatorTool:
 
             for grid_feat in grid_layer.getFeatures():
                 intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
-                # Initialize a set to store unique intersecting polygon feature IDs
                 unique_intersections = set()
 
-                # Check each potentially intersecting polygon feature
+                # Initialize variable to keep track of the maximum perimeter
+                max_perimeter = 0
+
                 for poly_id in intersecting_ids:
                     poly_feat = block_layer.getFeature(poly_id)
                     poly_geom = poly_feat.geometry()
 
-                    # Perform a detailed intersection check
                     if grid_feat.geometry().intersects(poly_geom):
                         unique_intersections.add(poly_id)
+                        perimeter = poly_geom.length()
 
-                # Count the number of unique intersecting polygon features
-                num_blocks = len(unique_intersections)
+                        # Update max_perimeter if this perimeter is larger
+                        if perimeter > max_perimeter:
+                            max_perimeter = perimeter
 
-                if num_blocks >= 2:
-                    reclass_val = 5
-                elif num_blocks == 1:
+                # Assign reclassification value based on the maximum perimeter
+                if max_perimeter > 1000:  # Very large blocks
+                    reclass_val = 1
+                elif 751 <= max_perimeter <= 1000:  # Large blocks
+                    reclass_val = 2
+                elif 501 <= max_perimeter <= 750:  # Moderate blocks
                     reclass_val = 3
+                elif 251 <= max_perimeter <= 500:  # Small blocks
+                    reclass_val = 4
+                elif 0 < max_perimeter <= 250:  # Very small blocks
+                    reclass_val = 5
                 else:
-                    reclass_val = 0
+                    reclass_val = 0  # No intersection
 
                 reclass_vals[grid_feat.id()] = reclass_val
 
@@ -4406,8 +4415,12 @@ class GenderIndicatorTool:
             min_val, max_val = min(values), max(values)
 
             # Scale values to the 0-5 range
+            Rmax = 100
+            Rmin = 0
+            m_max = 5
+            m_min = 0
             def scale_value(val):
-                return 0.0 if max_val == min_val else (val - min_val) / (max_val - min_val) * 5.0
+                return (val - Rmin) / (Rmax - Rmin) * 5.0
 
             # Create a temporary memory layer to hold the scaled scores
             temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
@@ -5491,7 +5504,7 @@ class GenderIndicatorTool:
                     'MASK': countryLayer,
                     'SOURCE_CRS': None,
                     'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': 0,
+                    'NODATA': None,
                     'ALPHA_BAND': False,
                     'CROP_TO_CUTLINE': False,
                     'KEEP_RESOLUTION': True,
@@ -5739,7 +5752,7 @@ class GenderIndicatorTool:
             return 1
         elif 720 < value <= 900:
             return 0
-        elif np.isnan(value) or value == nodata:
+        elif np.isnan(value):
             return 5
 
     def reclassifyLandslide(self, value):
@@ -5753,7 +5766,7 @@ class GenderIndicatorTool:
             return 2
         elif value == 4:
             return 1
-        elif value > 5:
+        elif value == 5:
             return 0
         else:
             return 5
