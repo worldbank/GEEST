@@ -3795,34 +3795,7 @@ class GenderIndicatorTool:
             # Ensure we return to the original working directory
             os.chdir(workingDir)
 
-    def set_nodata_to_zero(self, raster_path):
-        """
-        Sets all NoData values in the raster to zero.
-        """
 
-        with rasterio.open(raster_path, "r+") as src:
-            data = src.read(1)
-            nodata_value = src.nodata
-            if nodata_value is not None:
-                data[data == nodata_value] = 0
-                src.write(data, 1)
-                # Update the NoData value in the metadata to None
-                src.nodata = None
-
-
-    def calculate_raster_stats(self, raster_path):
-        """
-        Calculates the median and 75th percentile values for a given raster.
-        """
-
-        with rasterio.open(raster_path) as src:
-            data = src.read(1)
-            data = data[data != src.nodata]  # Remove no data values
-
-            median_val = np.median(data)
-            percentile_75 = np.percentile(data, 75)
-
-        return median_val, percentile_75
 
     def CommonRasterizerSetup(self):
         """
@@ -3950,7 +3923,7 @@ class GenderIndicatorTool:
             xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
             width = int(np.floor((xmax - xmin) / setup['pixelSize']))
             height = int(np.floor((ymax - ymin) / setup['pixelSize']))
-            raster_data = np.zeros((height, width), dtype=np.float32)
+            raster_data = np.full((height, width), -9999, dtype=np.float32)
 
             # Rasterize vector data
             for feature in overlap_count.getFeatures():
@@ -3963,9 +3936,10 @@ class GenderIndicatorTool:
                         raster_data[row, col] = feature['OVERLAP']
 
             # Normalize raster data
-            max_value = np.max(raster_data)
+            valid_data = raster_data != -9999
+            max_value = np.max(raster_data[valid_data])
             if max_value > 0:
-                raster_data = (raster_data / max_value) * 5.0
+                raster_data[valid_data] = (raster_data[valid_data] / max_value) * 5.0
 
             # Create output raster
             raster_output = os.path.join(setup['workingDir'], setup['Dimension'], self.dlg.SAF_Output_Field.text())
@@ -3981,13 +3955,10 @@ class GenderIndicatorTool:
                     dtype=raster_data.dtype,
                     crs=setup['UTM_crs'].toWkt(),
                     transform=transform,
-                    nodata=0  # Explicitly setting NoData value
+                    nodata=-9999
             ) as dst:
                 dst.write(raster_data, 1)
-                dst.nodata = 0.0
-
-            # Ensure NoData values are set to zero
-            self.set_nodata_to_zero(raster_output)
+                dst.write_mask(valid_data.astype(np.uint8))
 
             # Set output field and apply style
             self.dlg.SAF_Aggregate_Field.setText(raster_output)
