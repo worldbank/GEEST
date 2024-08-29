@@ -4415,8 +4415,12 @@ class GenderIndicatorTool:
             min_val, max_val = min(values), max(values)
 
             # Scale values to the 0-5 range
+            Rmax = 100
+            Rmin = 0
+            m_max = 5
+            m_min = 0
             def scale_value(val):
-                return 0.0 if max_val == min_val else (val - min_val) / (max_val - min_val) * 5.0
+                return (val - Rmin) / (Rmax - Rmin) * 5.0
 
             # Create a temporary memory layer to hold the scaled scores
             temp_layer = QgsVectorLayer("Polygon?crs=" + UTM_crs.authid(), "temp_layer", "memory")
@@ -5500,7 +5504,7 @@ class GenderIndicatorTool:
                     'MASK': countryLayer,
                     'SOURCE_CRS': None,
                     'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': 0,
+                    'NODATA': None,
                     'ALPHA_BAND': False,
                     'CROP_TO_CUTLINE': False,
                     'KEEP_RESOLUTION': True,
@@ -5748,7 +5752,7 @@ class GenderIndicatorTool:
             return 1
         elif 720 < value <= 900:
             return 0
-        elif np.isnan(value) or value == nodata:
+        elif np.isnan(value):
             return 5
 
     def reclassifyLandslide(self, value):
@@ -5762,7 +5766,7 @@ class GenderIndicatorTool:
             return 2
         elif value == 4:
             return 1
-        elif value > 5:
+        elif value == 5:
             return 0
         else:
             return 5
