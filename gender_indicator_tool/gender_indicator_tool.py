@@ -5750,7 +5750,7 @@ class GenderIndicatorTool:
             return 1
         elif 720 < value <= 900:
             return 0
-        elif np.isnan(value):
+        else:
             return 5
 
     def reclassifyLandslide(self, value):
