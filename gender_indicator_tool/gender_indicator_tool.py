@@ -3637,6 +3637,20 @@ class GenderIndicatorTool:
             countryLayer = self.dlg.countryLayer_Field.filePath()
             input_file = self.dlg.SAF_Input_Field.filePath()
             rasOutput = os.path.join(workingDir, Dimension, self.dlg.SAF_Output_Field.text())
+            
+            # Load and reproject country layer if necessary
+            countryLayer = QgsVectorLayer(countryLayer, "country_layer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid country layer")
+            if countryLayer.crs() != UTM_crs:
+                countryLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': UTM_crs,
+                    'OUTPUT': 'memory:'
+                })['OUTPUT']
+
+            # Ensure spatial index exists
+            _ = QgsSpatialIndex(countryLayer.getFeatures())
 
             # Open the raster in its native CRS and perform classification
             with rasterio.open(input_file) as src:
@@ -3715,6 +3729,26 @@ class GenderIndicatorTool:
                 # Reproject the clipped raster to the output CRS without resampling
                 self.dlg.SAF_status.setText("Reprojecting to output CRS...")
                 self.dlg.SAF_status.repaint()
+                countryUTMLayerBuf = f"{tempDir}/countryUTMLayerBuf.shp"
+                # Buffer the country layer
+                buffer = processing.run(
+                    "native:buffer",
+                    {
+                        "INPUT": countryLayer,
+                        "DISTANCE": self.BUFFER_DISTANCE,
+                        "SEGMENTS": 5,
+                        "END_CAP_STYLE": 0,
+                        "JOIN_STYLE": 0,
+                        "MITER_LIMIT": 2,
+                        "DISSOLVE": True,
+                        "SEPARATE_DISJOINT": False,
+                        "OUTPUT": countryUTMLayerBuf,
+                    },
+                )
+                countryUTMLayerBuf = buffer["OUTPUT"]
+
+                CountryBuf_df = gpd.read_file(countryUTMLayerBuf)
+                country_extent = CountryBuf_df.total_bounds
                 processing.run(
                     "gdal:warpreproject",
                     {
@@ -3724,6 +3758,8 @@ class GenderIndicatorTool:
                         "RESAMPLING": 0,  # Nearest neighbor to preserve classification
                         "NODATA": nodata_value,
                         "TARGET_RESOLUTION": pixelSize,
+                        "TARGET_EXTENT": f"{country_extent[0]},{country_extent[2]},{country_extent[1]},{country_extent[3]} [{UTM_crs}]",
+                        "TARGET_EXTENT_CRS": QgsCoordinateReferenceSystem(UTM_crs),
                         "OUTPUT": rasOutput,
                     }
                 )
