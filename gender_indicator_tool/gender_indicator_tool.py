@@ -1315,7 +1315,7 @@ class GenderIndicatorTool:
                     "WIDTH": raster_width,
                     "HEIGHT": raster_height,
                     "EXTENT": None,
-                    "NODATA": None,
+                    "NODATA": -9999,
                     "OPTIONS": "",
                     "DATA_TYPE": 5,
                     "INIT": None,
@@ -4363,9 +4363,9 @@ class GenderIndicatorTool:
                     "WIDTH": setup['pixelSize'],
                     "HEIGHT": setup['pixelSize'],
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
-                    "NODATA": None,  # NoData is zero outside the country bounds
+                    "NODATA": -9999,
                     "OPTIONS": "",
-                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
+                    "DATA_TYPE": 6,
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
@@ -4475,8 +4475,7 @@ class GenderIndicatorTool:
             temp_layer.commitChanges()
 
             # Get the extent for rasterization
-            extent = temp_layer.extent()
-            xmin, ymin, xmax, ymax = extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()
+            xmin, ymin, xmax, ymax = countryLayer.extent().toRectF().getCoords()
 
             # Rasterize
             rasOutput = os.path.join(workingDir, Dimension, self.dlg.EDU_Output_Field.text())
@@ -4491,9 +4490,9 @@ class GenderIndicatorTool:
                     "WIDTH": pixelSize,
                     "HEIGHT": pixelSize,
                     "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
-                    "NODATA": None,
+                    "NODATA": -9999,
                     "OPTIONS": "",
-                    "DATA_TYPE": 6,  # GDT_Float32 for real numbers
+                    "DATA_TYPE": 5,
                     "INIT": None,
                     "INVERT": False,
                     "EXTRA": "",
