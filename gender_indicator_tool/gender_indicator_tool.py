@@ -5975,7 +5975,14 @@ class GenderIndicatorTool:
                         (np.where(RF_ras != -9999, RF_ras, 0) * RF_weight / 100) +
                         (np.where(FIN_ras != -9999, FIN_ras, 0) * FIN_weight / 100)
                 )
-                result[np.logical_or(WD_ras == -9999, RF_ras == -9999, FIN_ras == -9999)] = -9999
+
+                # Corrected logical_or operation
+                nodata_mask = np.logical_or.reduce((
+                    WD_ras == -9999,
+                    RF_ras == -9999,
+                    FIN_ras == -9999
+                ))
+                result[nodata_mask] = -9999
 
                 meta1.update(dtype=rasterio.float32, nodata=-9999)
 
@@ -6123,8 +6130,16 @@ class GenderIndicatorTool:
                         (np.where(HEA_ras != -9999, HEA_ras, 0) * HEA_weight / 100) +
                         (np.where(FIF_ras != -9999, FIF_ras, 0) * FIF_weight / 100)
                 )
-                result[np.logical_or(WTP_ras == -9999, PBT_ras == -9999, ETF_ras == -9999, HEA_ras == -9999,
-                                     FIF_ras == -9999)] = -9999
+
+                # Corrected logical_or operation
+                nodata_mask = np.logical_or.reduce((
+                    WTP_ras == -9999,
+                    PBT_ras == -9999,
+                    ETF_ras == -9999,
+                    HEA_ras == -9999,
+                    FIF_ras == -9999
+                ))
+                result[nodata_mask] = -9999
 
                 meta1.update(dtype=rasterio.float32, nodata=-9999)
 
@@ -6293,8 +6308,18 @@ class GenderIndicatorTool:
                         (np.where(FCV_ras != -9999, FCV_ras, 0) * FCV_weight / 100) +
                         (np.where(WAS_ras != -9999, WAS_ras, 0) * WAS_weight / 100)
                 )
-                result[np.logical_or(WLK_ras == -9999, SAF_ras == -9999, DIG_ras == -9999, ENV_ras == -9999,
-                                     EDU_ras == -9999, FCV_ras == -9999, WAS_ras == -9999)] = -9999
+
+                # Corrected logical_or operation
+                nodata_mask = np.logical_or.reduce((
+                    WLK_ras == -9999,
+                    SAF_ras == -9999,
+                    DIG_ras == -9999,
+                    ENV_ras == -9999,
+                    EDU_ras == -9999,
+                    FCV_ras == -9999,
+                    WAS_ras == -9999
+                ))
+                result[nodata_mask] = -9999
 
                 meta1.update(dtype=rasterio.float32, nodata=-9999)
 
@@ -6418,7 +6443,14 @@ class GenderIndicatorTool:
                         (np.where(AD_ras != -9999, AD_ras, 0) * AD_weight / 100) +
                         (np.where(PD_ras != -9999, PD_ras, 0) * PD_weight / 100)
                 )
-                result[np.logical_or(CD_ras == -9999, AD_ras == -9999, PD_ras == -9999)] = -9999
+
+                # Corrected logical_or operation
+                nodata_mask = np.logical_or.reduce((
+                    CD_ras == -9999,
+                    AD_ras == -9999,
+                    PD_ras == -9999
+                ))
+                result[nodata_mask] = -9999
 
                 meta1.update(dtype=rasterio.float32, nodata=-9999)
 
