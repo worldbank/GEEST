@@ -7243,14 +7243,12 @@ class GenderIndicatorTool:
         self.dlg.REpoint_status.setText("RE point proximity complete!")
         self.dlg.REpoint_status.repaint()
 
-    def processCallback(self):
-        print("Call back")
 
     def walkabilityAggregate(self):
         """
         This function is used in combination with the "walkability" function.
-        This function aggregates each of the active transport relating to
-        active transport into a single standardized raster file.
+        This function now performs a UNION (maximum value) of the active transport
+        rasters instead of averaging them.
 
         Factors it is applied:
             Accessibility Dimension
@@ -7281,21 +7279,40 @@ class GenderIndicatorTool:
 
         for ras in tif_list:
             with rasterio.open(ras) as src:
-                raster_list.append(src.read(1))
+                raster_data = src.read(1)
+                raster_list.append(raster_data)
                 meta1 = src.meta
 
+        # Initialize the union result with the first raster
+        union_result = raster_list[0].copy()
+
+        # Perform UNION operation (taking the maximum value for each pixel)
+        for raster in raster_list[1:]:
+            union_result = np.maximum(union_result, raster)
+
+        # Set nodata values to -9999
+        union_result = np.where(union_result == meta1['nodata'], -9999, union_result)
+
+        # Commented out average calculation
+        """
         len_raster_list = len(raster_list)
-        cumulative_sum = 0
+        cumulative_sum = np.zeros_like(raster_list[0], dtype=np.float32)
 
         for i in range(len_raster_list):
             value = raster_list[i]
-            cumulative_sum += value
+            cumulative_sum += np.where(value != meta1['nodata'], value, 0)
 
-        aggregation = cumulative_sum / 4
+        valid_count = np.sum([np.where(raster != meta1['nodata'], 1, 0) for raster in raster_list], axis=0)
+        aggregation = np.where(valid_count > 0, cumulative_sum / valid_count, -9999)
+        """
+
         os.chdir("..")
 
+        # Update metadata for the new nodata value
+        meta1.update(nodata=-9999, dtype=rasterio.float32)
+
         with rasterio.open(rasOutput, "w", **meta1) as dst:
-            dst.write(aggregation, 1)
+            dst.write(union_result.astype(rasterio.float32), 1)
 
         self.dlg.AT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
