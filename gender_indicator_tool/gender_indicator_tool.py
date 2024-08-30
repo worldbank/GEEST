@@ -321,7 +321,7 @@ class GenderIndicatorTool:
         self.dlg.HEA_Aggregate_TB.clicked.connect(lambda: self.getFile(9))
         self.dlg.FIF_Aggregate_TB.clicked.connect(lambda: self.getFile(10))
         self.dlg.Accessibility_AggregateExecute_PB.clicked.connect(
-            self.accessibiltyAggregation
+            self.accessibilty_aggregation
         )
 
         ## TAB 4 - Place Charqacterization **************************************************************
@@ -6010,7 +6010,7 @@ class GenderIndicatorTool:
 
         os.chdir(workingDir)
 
-    def accessibiltyAggregation(self):
+    def accessibilty_aggregation(self):
         """
         This function performs a raster calculation aggregating all the accessibilty dimension factors according to their weightings
         """
@@ -6070,6 +6070,7 @@ class GenderIndicatorTool:
                     WTP_ras = src.read(1)
                     WTP_weight = factorWeighting[0]
                     meta1 = src.meta
+                    meta1.update(nodata=-9999)  # Set nodata to -9999
 
                 with rasterio.open(rasLayers[1]) as src:
                     PBT_ras = src.read(1)
@@ -6088,16 +6089,17 @@ class GenderIndicatorTool:
                     FIF_weight = factorWeighting[4]
 
                 # Raster Calculation
-
                 result = (
-                        (WTP_ras * WTP_weight / 100)
-                        + (PBT_ras * PBT_weight / 100)
-                        + (ETF_ras * ETF_weight / 100)
-                        + (HEA_ras * HEA_weight / 100)
-                        + (FIF_ras * FIF_weight / 100)
+                        (np.where(WTP_ras != -9999, WTP_ras, 0) * WTP_weight / 100) +
+                        (np.where(PBT_ras != -9999, PBT_ras, 0) * PBT_weight / 100) +
+                        (np.where(ETF_ras != -9999, ETF_ras, 0) * ETF_weight / 100) +
+                        (np.where(HEA_ras != -9999, HEA_ras, 0) * HEA_weight / 100) +
+                        (np.where(FIF_ras != -9999, FIF_ras, 0) * FIF_weight / 100)
                 )
+                result[np.logical_or(WTP_ras == -9999, PBT_ras == -9999, ETF_ras == -9999, HEA_ras == -9999,
+                                     FIF_ras == -9999)] = -9999
 
-                meta1.update(dtype=rasterio.float32)
+                meta1.update(dtype=rasterio.float32, nodata=-9999)
 
                 Dimension = "Accessibility"
                 if os.path.exists(Dimension):
@@ -6107,7 +6109,7 @@ class GenderIndicatorTool:
                     os.chdir(Dimension)
 
                 with rasterio.open(aggregation, "w", **meta1) as dst:
-                    dst.write(result, 1)
+                    dst.write(result.astype(rasterio.float32), 1)
 
                 self.dlg.AD_Aggregate_Field.setText(
                     f"{workingDir}{Dimension}/{aggregation}"
