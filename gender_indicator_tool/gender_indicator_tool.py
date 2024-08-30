@@ -370,7 +370,7 @@ class GenderIndicatorTool:
         self.dlg.FCV_Aggregate_TB.clicked.connect(lambda: self.getFile(26))
         self.dlg.WAS_Aggregate_TB.clicked.connect(lambda: self.getFile(27))
         self.dlg.PlaceCharacterization_AggregateExecute_PB.clicked.connect(
-            self.placeCharacterizationAggregation
+            self.place_characterization_aggregation
         )
 
         ## TAB 5 - Dimension Aggregation ************************************************************************
@@ -6156,7 +6156,7 @@ class GenderIndicatorTool:
 
         os.chdir(workingDir)
 
-    def placeCharacterizationAggregation(self):
+    def place_characterization_aggregation(self):
         """
         This function performs a raster calculation aggregating all the place characterization dimension factors according to their weightings
         """
@@ -6168,7 +6168,6 @@ class GenderIndicatorTool:
 
         # INPUT
         WLK_ras = self.dlg.AT_Aggregate_Field.text().strip(" ")
-        # CYC_ras = self.dlg.CYC_Aggregate_Field.text().strip(" ")
         SAF_ras = self.dlg.SAF_Aggregate_Field.text().strip(" ")
         DIG_ras = self.dlg.DIG_Aggregate_Field.text().strip(" ")
         ENV_ras = self.dlg.ENV_Aggregate_Field.text().strip(" ")
@@ -6177,7 +6176,6 @@ class GenderIndicatorTool:
         WAS_ras = self.dlg.WAS_Aggregate_Field.text().strip(" ")
 
         WLK_weight = self.dlg.WLK_Aggregate_SB.value()
-        # CYC_weight = self.dlg.CYC_Aggregate_SB.value()
         SAF_weight = self.dlg.SAF_Aggregate_SB.value()
         DIG_weight = self.dlg.DIG_Aggregate_SB.value()
         ENV_weight = self.dlg.ENV_Aggregate_SB.value()
@@ -6228,11 +6226,11 @@ class GenderIndicatorTool:
 
             weightingSum = round(sum(factorWeighting))
             if weightingSum == 100:
-
                 with rasterio.open(rasLayers[0]) as src:
                     WLK_ras = src.read(1)
                     WLK_weight = factorWeighting[0]
                     meta1 = src.meta
+                    meta1.update(nodata=-9999)  # Set nodata to -9999
 
                 with rasterio.open(rasLayers[1]) as src:
                     SAF_ras = src.read(1)
@@ -6259,18 +6257,19 @@ class GenderIndicatorTool:
                     WAS_weight = factorWeighting[6]
 
                 # Raster Calculation
-
                 result = (
-                        (WLK_ras * WLK_weight / 100)
-                        + (SAF_ras * SAF_weight / 100)
-                        + (DIG_ras * DIG_weight / 100)
-                        + (ENV_ras * ENV_weight / 100)
-                        + (EDU_ras * EDU_weight / 100)
-                        + (FCV_ras * FCV_weight / 100)
-                        + (WAS_ras * WAS_weight / 100)
+                        (np.where(WLK_ras != -9999, WLK_ras, 0) * WLK_weight / 100) +
+                        (np.where(SAF_ras != -9999, SAF_ras, 0) * SAF_weight / 100) +
+                        (np.where(DIG_ras != -9999, DIG_ras, 0) * DIG_weight / 100) +
+                        (np.where(ENV_ras != -9999, ENV_ras, 0) * ENV_weight / 100) +
+                        (np.where(EDU_ras != -9999, EDU_ras, 0) * EDU_weight / 100) +
+                        (np.where(FCV_ras != -9999, FCV_ras, 0) * FCV_weight / 100) +
+                        (np.where(WAS_ras != -9999, WAS_ras, 0) * WAS_weight / 100)
                 )
+                result[np.logical_or(WLK_ras == -9999, SAF_ras == -9999, DIG_ras == -9999, ENV_ras == -9999,
+                                     EDU_ras == -9999, FCV_ras == -9999, WAS_ras == -9999)] = -9999
 
-                meta1.update(dtype=rasterio.float32)
+                meta1.update(dtype=rasterio.float32, nodata=-9999)
 
                 Dimension = "Place Characterization"
                 if os.path.exists(Dimension):
@@ -6280,7 +6279,7 @@ class GenderIndicatorTool:
                     os.chdir(Dimension)
 
                 with rasterio.open(aggregation, "w", **meta1) as dst:
-                    dst.write(result, 1)
+                    dst.write(result.astype(rasterio.float32), 1)
 
                 self.dlg.PD_Aggregate_Field.setText(
                     f"{workingDir}{Dimension}/{aggregation}"
