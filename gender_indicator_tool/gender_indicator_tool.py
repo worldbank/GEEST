@@ -270,7 +270,7 @@ class GenderIndicatorTool:
         self.dlg.FIN_Aggregate_TB.clicked.connect(lambda: self.getFile(4))
 
         self.dlg.Contextual_AggregateExecute_PB.clicked.connect(
-            self.contextualAggregation
+            self.contextual_aggregation
         )
 
         ## TAB 3 - Accessibility ************************************************************************
@@ -5885,7 +5885,7 @@ class GenderIndicatorTool:
 
     # *************************** Factor Aggregation Functions ************************************ #
 
-    def contextualAggregation(self):
+    def contextual_aggregation(self):
         """
         This function performs a raster calculation aggregating all the contextual dimension factors according to their weightings
         """
@@ -5931,26 +5931,29 @@ class GenderIndicatorTool:
 
             weightingSum = round(sum(factorWeighting))
             if weightingSum == 100:
-
                 with rasterio.open(rasLayers[0]) as src:
                     WD_ras = src.read(1)
                     WD_weight = factorWeighting[0]
                     meta1 = src.meta
+                    meta1.update(nodata=-9999)  # Set nodata to -9999
 
                 with rasterio.open(rasLayers[1]) as src:
                     RF_ras = src.read(1)
                     RF_weight = factorWeighting[1]
-                    meta1 = src.meta
 
                 with rasterio.open(rasLayers[2]) as src:
                     FIN_ras = src.read(1)
                     FIN_weight = factorWeighting[2]
 
                 # Raster Calculation
+                result = (
+                        (np.where(WD_ras != -9999, WD_ras, 0) * WD_weight / 100) +
+                        (np.where(RF_ras != -9999, RF_ras, 0) * RF_weight / 100) +
+                        (np.where(FIN_ras != -9999, FIN_ras, 0) * FIN_weight / 100)
+                )
+                result[np.logical_or(WD_ras == -9999, RF_ras == -9999, FIN_ras == -9999)] = -9999
 
-                result = (WD_ras * WD_weight / 100) + (RF_ras * RF_weight / 100) + (FIN_ras * FIN_weight / 100)
-
-                meta1.update(dtype=rasterio.float32)
+                meta1.update(dtype=rasterio.float32, nodata=-9999)
 
                 Dimension = "Contextual"
                 if os.path.exists(Dimension):
@@ -5960,7 +5963,7 @@ class GenderIndicatorTool:
                     os.chdir(Dimension)
 
                 with rasterio.open(aggregation, "w", **meta1) as dst:
-                    dst.write(result, 1)
+                    dst.write(result.astype(rasterio.float32), 1)
 
                 self.dlg.CD_Aggregate_Field.setText(
                     f"{workingDir}{Dimension}/{aggregation}"
