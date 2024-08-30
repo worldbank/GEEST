@@ -1914,9 +1914,9 @@ class GenderIndicatorTool:
 
             ranges = self.dlg.WTP_Ranges_Field.text()
             rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()}"
-            mergeOutput = (
-                f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_Service_Area.shp"
-            )
+            #mergeOutput = (
+            #    f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_{shapefile_name}_Service_Area.shp"
+            #)
 
             if self.dlg.WTP_mode_CB.currentText() == "Driving":
                 mode = 0
@@ -1946,8 +1946,12 @@ class GenderIndicatorTool:
             for FaciltyPointlayer in FaciltyPointlayerList:
                 os.chdir(workingDir)
                 rasOutput = ""
+                rasOutput = f"{self.dlg.WTP_FacilityOutput_Field.text()}"
                 base_name = os.path.basename(FaciltyPointlayer)
                 shapefile_name, _ = os.path.splitext(base_name)
+                mergeOutput = (
+                f"{workingDir}{Dimension}/SA_SHP/{rasOutput[:-4]}_{shapefile_name}_Service_Area.shp"
+                )
                 gdf = gpd.read_file(FaciltyPointlayer)
 
                 subset_size = 5
@@ -1999,7 +2003,7 @@ class GenderIndicatorTool:
                         self.dlg.FIF_status.setText(f"Processing... {batch} of {len(gdf)}")
                         self.dlg.FIF_status.repaint()
                     elif factor_no == 5:
-                        self.dlg.WTP_status.setText(f"Processing... {batch} of {len(gdf)}")
+                        self.dlg.WTP_status.setText(f"Processing... {batch} of {len(gdf)} for {shapefile_name}")
                         self.dlg.WTP_status.repaint()
 
                 Merge = processing.run(
@@ -2230,7 +2234,7 @@ class GenderIndicatorTool:
                         self.dlg.FIF_status.repaint()
 
                     elif factor_no == 5:
-                        self.dlg.WTP_status.setText("Processing Complete!")
+                        self.dlg.WTP_status.setText(f"Processing Complete for {shapefile_name}!")
                         self.dlg.WTP_status.repaint()
                 else:
                     print(f"Processing failed")
