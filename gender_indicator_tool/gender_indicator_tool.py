@@ -379,7 +379,7 @@ class GenderIndicatorTool:
         self.dlg.AD_Aggregate_TB.clicked.connect(lambda: self.getFile(24))
         self.dlg.PD_Aggregate_TB.clicked.connect(lambda: self.getFile(25))
         self.dlg.Dimensions_AggregateExecute_PB.clicked.connect(
-            self.dimesnionsAggregation
+            self.dimensions_aggregation
         )
 
         ## TAB 6 - Insights ************************************************************************
@@ -6321,7 +6321,7 @@ class GenderIndicatorTool:
 
         os.chdir(workingDir)
 
-    def dimesnionsAggregation(self):
+    def dimensions_aggregation(self):
         """
         This function performs a final raster calculation aggregating all the dimension aggregation output raster according to their weightings
         """
@@ -6332,12 +6332,10 @@ class GenderIndicatorTool:
         os.chdir(workingDir)
 
         # INPUT
-        #ID_ras = self.dlg.ID_Aggregate_Field.text().strip(" ")
         CD_ras = self.dlg.CD_Aggregate_Field.text().strip(" ")
         AD_ras = self.dlg.AD_Aggregate_Field.text().strip(" ")
         PD_ras = self.dlg.PD_Aggregate_Field.text().strip(" ")
 
-        #ID_weight = self.dlg.ID_Aggregate_SB.value()
         CD_weight = self.dlg.CD_Aggregate_SB.value()
         AD_weight = self.dlg.AD_Aggregate_SB.value()
         PD_weight = self.dlg.PD_Aggregate_SB.value()
@@ -6368,11 +6366,11 @@ class GenderIndicatorTool:
 
             weightingSum = round(sum(dimensionWeighting))
             if weightingSum == 100:
-
                 with rasterio.open(rasLayers[0]) as src:
                     CD_ras = src.read(1)
                     CD_weight = dimensionWeighting[0]
                     meta1 = src.meta
+                    meta1.update(nodata=-9999)  # Set nodata to -9999
 
                 with rasterio.open(rasLayers[1]) as src:
                     AD_ras = src.read(1)
@@ -6383,15 +6381,14 @@ class GenderIndicatorTool:
                     PD_weight = dimensionWeighting[2]
 
                 # Raster Calculation
-
                 result = (
-                        (CD_ras * CD_weight / 100)
-                        + (AD_ras * AD_weight / 100)
-                        + (PD_ras * PD_weight / 100)
+                        (np.where(CD_ras != -9999, CD_ras, 0) * CD_weight / 100) +
+                        (np.where(AD_ras != -9999, AD_ras, 0) * AD_weight / 100) +
+                        (np.where(PD_ras != -9999, PD_ras, 0) * PD_weight / 100)
                 )
-                result[result == 0] = src.nodata
+                result[np.logical_or(CD_ras == -9999, AD_ras == -9999, PD_ras == -9999)] = -9999
 
-                meta1.update(dtype=rasterio.float32)
+                meta1.update(dtype=rasterio.float32, nodata=-9999)
 
                 Final_output = "Final_output"
                 if os.path.exists(Final_output):
@@ -6401,7 +6398,7 @@ class GenderIndicatorTool:
                     os.chdir(Final_output)
 
                 with rasterio.open(aggregation, "w", **meta1) as dst:
-                    dst.write(result, 1)
+                    dst.write(result.astype(rasterio.float32), 1)
 
                 styleTemplate = f"{current_script_path}/Style/Final.qml"
                 styleFileDestination = f"{workingDir}{Final_output}/"
