@@ -1405,18 +1405,14 @@ class GenderIndicatorTool:
                 grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
                 grid_layer.updateFields()
 
-            radius = self.dlg.FCV_Input_Radius.value()
+            radius = self.dlg.FCV_Input_Radius.value() or 5000
 
-            if radius > 0:
-                radius = radius
-            else:
-                radius = 5000
 
             buffer_result = processing.run(
                 "native:buffer",
                 {
                     "INPUT": csvFileLayerUTM,
-                    "DISTANCE": 5000,
+                    "DISTANCE": radius,
                     "SEGMENTS": 5,
                     "END_CAP_STYLE": 0,
                     "JOIN_STYLE": 0,
