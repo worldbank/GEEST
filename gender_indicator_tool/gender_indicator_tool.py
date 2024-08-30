@@ -2584,7 +2584,7 @@ class GenderIndicatorTool:
 
         os.chdir(workingDir)
 
-    def secAggregate(self):
+    def sec_aggregate(self):
         """
         This function is used in combination with the "Rasterization" function. Due to security, or lack thereof, involving numerous incident types, rasterization of each type
         has to be conducted. This function aggregates each of the rasterized incident types relating to security into a single standardized raster file.
@@ -2615,24 +2615,33 @@ class GenderIndicatorTool:
 
         tif_list = [f for f in os.listdir(os.getcwd()) if f.endswith(".tif")]
         raster_list = []
+        nodata_masks = []
 
         for ras in tif_list:
             with rasterio.open(ras) as src:
-                raster_list.append(src.read(1))
+                raster_data = src.read(1)
+                raster_list.append(raster_data)
+                nodata_masks.append(raster_data == src.nodata)
                 meta1 = src.meta
 
         len_raster_list = len(raster_list)
-        cumulative_sum = 0
+        cumulative_sum = np.zeros_like(raster_list[0], dtype=np.float32)
+        valid_count = np.zeros_like(raster_list[0], dtype=np.float32)
 
         for i in range(len_raster_list):
             value = raster_list[i]
-            cumulative_sum += value
+            mask = ~nodata_masks[i]  # Invert the nodata mask
+            cumulative_sum += np.where(mask, value, 0)
+            valid_count += mask.astype(np.float32)
 
-        aggregation = cumulative_sum / len_raster_list
+        # Avoid division by zero and set nodata value to -9999
+        aggregation = np.where(valid_count > 0, cumulative_sum / valid_count, -9999)
         os.chdir("..")
 
+        meta1.update(dtype=rasterio.float32, nodata=-9999)
+
         with rasterio.open(rasOutput, "w", **meta1) as dst:
-            dst.write(aggregation, 1)
+            dst.write(aggregation.astype(rasterio.float32), 1)
 
         self.dlg.SEC_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
