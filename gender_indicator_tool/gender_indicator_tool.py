@@ -1957,7 +1957,7 @@ class GenderIndicatorTool:
                     subset = gdf.iloc[i: i + subset_size]
                     subset = QgsVectorLayer(subset.to_json(), "mygeojson", "ogr")
                     subset_outfile = (
-                        f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}.shp"
+                        f"{tempDir}/SA_subset_{i + subset_size}_{rasOutput[:-4]}_{shapefile_name}.shp"
                     )
 
                     Service_Area = processing.run(
