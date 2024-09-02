@@ -3022,7 +3022,7 @@ class GenderIndicatorTool:
                 {
                     "INPUT": merge,
                     "OVERLAY": countryUTMLayer,
-                    "OUTPUT": dif_out,
+                    "OUTPUT": "memory:",
                 }
             )
 
