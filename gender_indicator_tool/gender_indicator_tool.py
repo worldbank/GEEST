@@ -2705,6 +2705,11 @@ class GenderIndicatorTool:
         self.convertCRS(countryLayer, UTM_crs)
         shp_utm[rasField] = [0]
         countryUTMLayer = QgsVectorLayer(shp_utm.to_json(), "countryUTMLayer", "ogr")
+        
+        # Call the common setup function
+        setup = self.CommonRasterizerSetup()
+        # Get the extent of the buffered country layer
+        xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
 
         if lineLayerList is not None:
             for lineLayer in lineLayerList:
@@ -2869,10 +2874,10 @@ class GenderIndicatorTool:
                         "FIELD": field_name,
                         "BURN": 0,
                         "USE_Z": False,
-                        "UNITS": 0,
-                        "WIDTH": raster_width,
-                        "HEIGHT": raster_height,
-                        "EXTENT": None,
+                        "UNITS": 1,
+                        "WIDTH": pixelSize,
+                        "HEIGHT": pixelSize,
+                        "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                         "NODATA": -9999,
                         "OPTIONS": "",
                         "DATA_TYPE": 5,
@@ -2935,7 +2940,7 @@ class GenderIndicatorTool:
                 'EXTENT': gridExtent,
                 'HSPACING': 100,  # Horizontal spacing
                 'VSPACING': 100,  # Vertical spacing
-                'CRS': UTM_crs,
+                'CRS': QgsCoordinateReferenceSystem(UTM_crs),
                 'OUTPUT': "memory:"
             }
 
@@ -3017,11 +3022,15 @@ class GenderIndicatorTool:
                 {
                     "INPUT": merge,
                     "OVERLAY": countryUTMLayer,
-                    "OUTPUT": "memory:",
+                    "OUTPUT": dif_out,
                 }
             )
 
             mergeOutput = mergeClip["OUTPUT"]
+            
+            setup = self.CommonRasterizerSetup()
+            # Get the extent of the buffered country layer
+            xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
 
             # Get the width and height of the extent
             extent = countryUTMLayerBuf.extent()
@@ -3044,10 +3053,10 @@ class GenderIndicatorTool:
                     "FIELD": field_name,
                     "BURN": 0,
                     "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                     "NODATA": -9999,
                     "OPTIONS": "",
                     "DATA_TYPE": 5,
@@ -3241,10 +3250,10 @@ class GenderIndicatorTool:
                     "FIELD": field_name,
                     "BURN": 0,
                     "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                     "NODATA": -9999,
                     "OPTIONS": "",
                     "DATA_TYPE": 5,
