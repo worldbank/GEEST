@@ -5529,7 +5529,7 @@ class GenderIndicatorTool:
                     'MASK': countryLayer,
                     'SOURCE_CRS': None,
                     'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                    'NODATA': None,
+                    'NODATA': -9999,
                     'ALPHA_BAND': False,
                     'CROP_TO_CUTLINE': False,
                     'KEEP_RESOLUTION': True,
