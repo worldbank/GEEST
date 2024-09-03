@@ -4718,6 +4718,9 @@ class GenderIndicatorTool:
                 buffer_layer.updateFeature(feature)
             buffer_layer.commitChanges()
 
+            # Get the extent for rasterization
+            xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
+
             # Rasterize
             temp_raster = os.path.join(tempDir, "temp_WAS.tif")
             print(f"Temporary raster path: {temp_raster}")
@@ -4731,9 +4734,9 @@ class GenderIndicatorTool:
                     "BURN": 0,
                     "USE_Z": False,
                     "UNITS": 1,
-                    "WIDTH": pixelSize,
-                    "HEIGHT": pixelSize,
-                    "EXTENT": country_extent,
+                    "WIDTH": setup['pixelSize'],
+                    "HEIGHT": setup['pixelSize'],
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                     "NODATA": -9999,
                     "OPTIONS": "",
                     "DATA_TYPE": 5,  # Float32
@@ -7352,7 +7355,7 @@ class GenderIndicatorTool:
                 raster_data = src.read(1)
                 raster_list.append(raster_data)
                 meta1 = src.meta
-
+        """
         # Initialize the union result with the first raster
         union_result = raster_list[0].copy()
 
@@ -7374,7 +7377,7 @@ class GenderIndicatorTool:
 
         valid_count = np.sum([np.where(raster != meta1['nodata'], 1, 0) for raster in raster_list], axis=0)
         aggregation = np.where(valid_count > 0, cumulative_sum / valid_count, -9999)
-        """
+
 
         os.chdir("..")
 
@@ -7382,7 +7385,8 @@ class GenderIndicatorTool:
         meta1.update(nodata=-9999, dtype=rasterio.float32)
 
         with rasterio.open(rasOutput, "w", **meta1) as dst:
-            dst.write(union_result.astype(rasterio.float32), 1)
+            #dst.write(union_result.astype(rasterio.float32), 1)
+            dst.write(aggregation.astype(rasterio.float32), 1)
 
         self.dlg.AT_Aggregate_Field.setText(f"{workingDir}{Dimension}/{rasOutput}")
 
