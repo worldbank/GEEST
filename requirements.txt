@@ -1,0 +1,9 @@
+PyQt5
+pytest
+pytest-qt
+black
+jsonschema
+mkdocs
+mkdocs-material
+mkdocstrings
+
