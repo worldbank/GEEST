@@ -4763,12 +4763,13 @@ class GenderIndicatorTool:
                 'MASK': countryLayer,
                 'SOURCE_CRS': None,
                 'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
+                #"TARGET_EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                 'NODATA': -9999,
                 'ALPHA_BAND': False,
-                'CROP_TO_CUTLINE': False,
-                'KEEP_RESOLUTION': True,
+                'CROP_TO_CUTLINE': True,
+                'KEEP_RESOLUTION': False,
                 'SET_RESOLUTION': False,
-                'DATA_TYPE': 5,
+                'DATA_TYPE': 0,
                 'OUTPUT': rasOutput
             })
 
@@ -4780,7 +4781,7 @@ class GenderIndicatorTool:
 
             # Clean up temporary file
             if os.path.exists(temp_raster):
-                os.remove(temp_raster)
+                #os.remove(temp_raster)
                 print(f"Temporary file removed: {temp_raster}")
 
             # Set output field and apply style
@@ -5381,8 +5382,8 @@ class GenderIndicatorTool:
                     'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
                     'NODATA': -9999,
                     'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': False,
-                    'KEEP_RESOLUTION': True,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': False,
                     'SET_RESOLUTION': False,
                     'X_RESOLUTION': None,
                     'Y_RESOLUTION': None,
@@ -5459,8 +5460,8 @@ class GenderIndicatorTool:
                     'NODATA': -9999,
                     'ALPHA_BAND': False,
                     'CROP_TO_CUTLINE': False,
-                    'KEEP_RESOLUTION': True,
-                    'SET_RESOLUTION': False,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': False,
                     'X_RESOLUTION': None,
                     'Y_RESOLUTION': None,
                     'MULTITHREADING': False,
@@ -5534,8 +5535,8 @@ class GenderIndicatorTool:
                     'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
                     'NODATA': -9999,
                     'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': False,
-                    'KEEP_RESOLUTION': True,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': False,
                     'SET_RESOLUTION': False,
                     'X_RESOLUTION': None,
                     'Y_RESOLUTION': None,
@@ -5610,8 +5611,8 @@ class GenderIndicatorTool:
                     'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
                     'NODATA': -9999,
                     'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': False,
-                    'KEEP_RESOLUTION': True,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': False,
                     'SET_RESOLUTION': False,
                     'X_RESOLUTION': None,
                     'Y_RESOLUTION': None,
@@ -5688,8 +5689,8 @@ class GenderIndicatorTool:
                     'TARGET_CRS': QgsCoordinateReferenceSystem(UTM_crs),
                     'NODATA': -9999,
                     'ALPHA_BAND': False,
-                    'CROP_TO_CUTLINE': False,
-                    'KEEP_RESOLUTION': True,
+                    'CROP_TO_CUTLINE': True,
+                    'KEEP_RESOLUTION': False,
                     'SET_RESOLUTION': False,
                     'X_RESOLUTION': None,
                     'Y_RESOLUTION': None,
