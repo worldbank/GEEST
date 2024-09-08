@@ -1387,18 +1387,22 @@ class GenderIndicatorTool:
 
             csvFileLayerUTM = clipCsvFileUTM["OUTPUT"]
 
-            gridExtent = countryUTMLayerBuf.extent()
-            grid_params = {
-                'TYPE': 2,  # Rectangle (polygon)
-                'EXTENT': gridExtent,
-                'HSPACING': 100,  # Horizontal spacing
-                'VSPACING': 100,  # Vertical spacing
-                'CRS': UTM_crs,
-                'OUTPUT': "memory:"
-            }
+            # Define the output grid path (merged GeoPackage)
+            merged_grid_output = f"{workingDir}{temp}/merged_grid.gpkg"
+            grid_ouput_dir = f"{workingDir}/{temp}"
 
-            grid_result = processing.run('native:creategrid', grid_params)
-            grid_layer = grid_result['OUTPUT']
+            # Call the function to create and merge grids
+            grid_layer = self.create_grids(
+                countryUTMLayer, 
+                grid_ouput_dir,  # Output directory
+                QgsCoordinateReferenceSystem(UTM_crs),  # CRS
+                merged_grid_output,  # Path for the merged grid
+            )
+            
+            if isinstance(grid_layer, QgsVectorLayer):
+                pass
+            else:
+                grid_layer = QgsVectorLayer(grid_layer, 'merged_grid', 'ogr')  # Use the merged grid for further operations
 
             field_name = 'reclass_va'
             if not grid_layer.fields().indexFromName(field_name) >= 0:
@@ -2648,6 +2652,84 @@ class GenderIndicatorTool:
 
         os.chdir(workingDir)
 
+
+    # Function to create grids for each part of a multipart feature or single feature and merge them
+    def create_grids(self, layer, output_dir, crs, merged_output_path, h_spacing=100, v_spacing=100):
+        
+        # Check if the merged grid already exists
+        if os.path.exists(merged_output_path):
+            print(f"Merged grid already exists: {merged_output_path}")
+            return QgsVectorLayer(merged_output_path, 'merged_grid', 'ogr')  # Load the existing merged grid layer
+        
+        all_grids = []
+
+        # Loop through each feature in the polygon layer
+        for feature in layer.getFeatures():
+            geom = feature.geometry()
+
+            # Check if the geometry is multipart
+            if geom.isMultipart():
+                # Separate the multipart geometry into single parts
+                parts = geom.asGeometryCollection()
+            else:
+                # If not multipart, treat it as a single-part geometry
+                parts = [geom]
+
+            # Loop through each part of the geometry (whether multipart or single part)
+            for part_id, part in enumerate(parts):
+                # Get the extent of each part
+                part_extent = part.boundingBox()
+
+                # Define the output grid path (as GeoPackage) for each part
+                grid_output_path = f"{output_dir}/grid_{feature.id()}_part_{part_id}.gpkg"
+
+                # Check if the grid already exists
+                if os.path.exists(grid_output_path):
+                    print(f"Grid file already exists: {grid_output_path}")
+                    grid_layer = QgsVectorLayer(grid_output_path, 'grid_layer', 'ogr')  # Load the existing grid layer
+                else:
+                    print(f"Creating grid: {grid_output_path}")
+                    # Define grid creation parameters
+                    grid_params = {
+                        'TYPE': 2,  # Rectangle (polygon)
+                        'EXTENT': part_extent,  # Use the extent of the current part
+                        'HSPACING': h_spacing,  # Horizontal spacing (100m)
+                        'VSPACING': v_spacing,  # Vertical spacing (100m)
+                        'CRS': crs,  # Coordinate reference system (CRS)
+                        'OUTPUT': grid_output_path  # Output path for the grid file
+                    }
+
+                    # Create the grid using QGIS processing
+                    grid_result = processing.run('native:creategrid', grid_params)
+                    grid_layer = grid_result['OUTPUT']  # Get the grid layer
+                    
+                    # Clip the grid to the polygon feature (to restrict it to the boundaries)
+                    clipped_grid_output_path = f"{output_dir}/clipped_grid_{feature.id()}_part_{part_id}.gpkg"
+                    clip_params = {
+                        'INPUT': grid_layer,  # The grid we just created
+                        'OVERLAY': layer,  # The layer we're clipping to (e.g., countryUTMLayer)
+                        'OUTPUT': clipped_grid_output_path
+                    }
+                    clip_result = processing.run('native:clip', clip_params)
+                    grid_layer = clip_result['OUTPUT']  # The clipped grid
+
+                # Add the generated or loaded grid to the list
+                all_grids.append(grid_layer)
+
+        # Merge all grids into one if necessary
+        if len(all_grids) > 1:
+            print(f"Merging grids into: {merged_output_path}")
+            merge_params = {
+                'LAYERS': all_grids,
+                'CRS': crs,
+                'OUTPUT': merged_output_path
+            }
+            merged_grid = processing.run('native:mergevectorlayers', merge_params)['OUTPUT']
+            return merged_grid  # Return the merged grid
+        else:
+            return all_grids[0]  # If only one grid, return it directly
+
+
     def walkability(self):
         """
         This function is used in combination with the "TypeSet" and "uniqueValue" functions to execute the Active Transports rasterization algorithm.
@@ -2699,6 +2781,7 @@ class GenderIndicatorTool:
         self.dlg.WLK_status_2.setText("Variables Set")
         self.dlg.WLK_status_2.repaint()
         time.sleep(0.5)
+        self.dlg.WLK_status_2.repaint()
         self.dlg.WLK_status_2.setText("Processing...")
         self.dlg.WLK_status_2.repaint()
 
@@ -2745,24 +2828,21 @@ class GenderIndicatorTool:
                 #shp_utm[rasField] = shp_utm[rasField].astype(int)
                 shp_utm.to_file(scoredRoads)
 
-                gridOutput = f"{workingDir}{tempDir}/grid.shp"
-                gridExtent = countryUTMLayer.extent()
-                grid_params = {
-                    'TYPE': 2,  # Rectangle (polygon)
-                    'EXTENT': gridExtent,
-                    'HSPACING': 100,  # Horizontal spacing
-                    'VSPACING': 100,  # Vertical spacing
-                    'CRS': UTM_crs,
-                    'OUTPUT': "memory:"
-                }
+                # Define the output grid path (merged GeoPackage)
+                merged_grid_output = f"{workingDir}{tempDir}/merged_grid.gpkg"
+                grid_ouput_dir = f"{workingDir}/{tempDir}"
 
-                grid_result = processing.run('native:creategrid', grid_params)
-                grid_layer = grid_result['OUTPUT']
-
-                field_name = 'reclass_va'
-                if not grid_layer.fields().indexFromName(field_name) >= 0:
-                    grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
-                    grid_layer.updateFields()
+                # Call the function to create and merge grids
+                grid_layer = self.create_grids(
+                    countryUTMLayer, 
+                    grid_ouput_dir,  # Output directory
+                    QgsCoordinateReferenceSystem(UTM_crs),  # CRS
+                    merged_grid_output,  # Path for the merged grid
+                )
+                if isinstance(grid_layer, QgsVectorLayer):
+                    pass
+                else:
+                    grid_layer = QgsVectorLayer(grid_layer, 'merged_grid', 'ogr')  # Use the merged grid for further operations
 
                 # scoredRoadsUTM = QgsVectorLayer(shp_utm.to_json(), "linebufUTM", "ogr")
                 roadBuf_out = f"{workingDir}/{tempDir}/roadBuf.shp"
@@ -2788,6 +2868,14 @@ class GenderIndicatorTool:
                 line_layer = QgsVectorLayer(scoredRoads, 'buffer', 'ogr')
                 index = QgsSpatialIndex(line_layer.getFeatures())
                 reclass_vals = {}
+                
+                # Define field_name and ensure it is assigned before using it
+                field_name = 'reclass_va'  # Assign the field name
+                
+                # Check if the field exists, if not, add it
+                if not grid_layer.fields().indexFromName(field_name) >= 0:
+                    grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
+                    grid_layer.updateFields()
 
                 for grid_feat in grid_layer.getFeatures():
                     intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
@@ -2906,7 +2994,9 @@ class GenderIndicatorTool:
             base_name = os.path.basename(streetCrossingLayer)
             shapefile_name, _ = os.path.splitext(base_name)
             scoredRoads = f"{workingDir}/{tempDir}/Scored_{shapefile_name}.shp"
+            countryBuffer = f"{workingDir}{tempDir}/countryUTMBuffer.shp"
 
+            # Create buffer around the country layer
             buffer = processing.run(
                 "native:buffer",
                 {
@@ -2918,69 +3008,57 @@ class GenderIndicatorTool:
                     "MITER_LIMIT": 2,
                     "DISSOLVE": True,
                     "SEPARATE_DISJOINT": False,
-                    "OUTPUT": "memory:",
+                    "OUTPUT": countryBuffer,
                 },
             )
 
             countryUTMLayerBuf = buffer["OUTPUT"]
 
+            # Convert the CRS of the street crossing layer to UTM
             self.convertCRS(streetCrossingLayer, UTM_crs)
-            #shp_utm[rasField] = [0]
-
-            #for i in roadType_Score:
-            #    shp_utm.loc[shp_utm[roadTypeField] == i[0], "Score"] = i[1]
-
-            #shp_utm[rasField] = shp_utm[rasField].astype(int)
             shp_utm.to_file(scoredRoads)
+            
+            # Define the output grid path (merged GeoPackage)
+            merged_grid_output = f"{workingDir}{tempDir}/merged_grid.gpkg"
+            grid_ouput_dir = f"{workingDir}/{tempDir}"
 
-            gridOutput = f"{workingDir}{tempDir}/grid.shp"
-            gridExtent = countryUTMLayer.extent()
-            grid_params = {
-                'TYPE': 2,  # Rectangle (polygon)
-                'EXTENT': gridExtent,
-                'HSPACING': 100,  # Horizontal spacing
-                'VSPACING': 100,  # Vertical spacing
-                'CRS': QgsCoordinateReferenceSystem(UTM_crs),
-                'OUTPUT': "memory:"
-            }
+            # Call the function to create and merge grids
+            grid_layer = self.create_grids(
+                countryUTMLayer, 
+                grid_ouput_dir,  # Output directory
+                QgsCoordinateReferenceSystem(UTM_crs),  # CRS
+                merged_grid_output,  # Path for the merged grid
+            )
+            
+            if isinstance(grid_layer, QgsVectorLayer):
+                pass
+            else:
+                grid_layer = QgsVectorLayer(grid_layer, 'merged_grid', 'ogr')  # Use the merged grid for further operations
 
-            grid_result = processing.run('native:creategrid', grid_params)
-            grid_layer = grid_result['OUTPUT']
+            # Update status in GUI
+            self.dlg.WLK_status_2.repaint()
+            self.dlg.WLK_status_2.setText(f"Processing... {shapefile_name}")
+            self.dlg.WLK_status_2.repaint()
 
-            field_name = 'reclass_va'
+            # Create spatial index for scoredRoads
+            point_layer = QgsVectorLayer(scoredRoads, 'buffer', 'ogr')
+            index = QgsSpatialIndex(point_layer.getFeatures())
+            reclass_vals = {}
+            
+            # Define field_name and ensure it is assigned before using it
+            field_name = 'reclass_va'  # Assign the field name
+
+            # Check if the field exists, if not, add it
             if not grid_layer.fields().indexFromName(field_name) >= 0:
                 grid_layer.dataProvider().addAttributes([QgsField(field_name, QVariant.Int)])
                 grid_layer.updateFields()
 
-            # scoredRoadsUTM = QgsVectorLayer(shp_utm.to_json(), "linebufUTM", "ogr")
-            #roadBuf_out = f"{workingDir}/{tempDir}/roadBuf.shp"
-
-            self.dlg.WLK_status_2.setText(f"Processing... {shapefile_name}")
-            self.dlg.WLK_status_2.repaint()
-
-            #Buffer = processing.run(
-            #    "gdal:buffervectors",
-            #    {
-            #        "INPUT": scoredRoads,
-            #        "GEOMETRY": "geometry",
-            #        "DISTANCE": 50,
-            #        "FIELD": "",
-            #        "DISSOLVE": False,
-            #        "EXPLODE_COLLECTIONS": False,
-            #        "OPTIONS": "",
-            #        "OUTPUT": roadBuf_out,
-            #    },
-            #)
-
-            # Count the number of buffers within each grid cell
-            point_layer = QgsVectorLayer(scoredRoads, 'buffer', 'ogr')
-            index = QgsSpatialIndex(point_layer.getFeatures())
-            reclass_vals = {}
-
+            # Reclassify the grid cells based on the number of intersecting features
             for grid_feat in grid_layer.getFeatures():
                 intersecting_ids = index.intersects(grid_feat.geometry().boundingBox())
                 num_footpaths = len(intersecting_ids)
 
+                # Reclassification logic
                 if num_footpaths >= 2:
                     reclass_val = 5
                 elif num_footpaths == 1:
@@ -2990,11 +3068,14 @@ class GenderIndicatorTool:
 
                 reclass_vals[grid_feat.id()] = reclass_val
 
+            # Apply the reclassification values to the grid
             grid_layer.startEditing()
             for grid_feat in grid_layer.getFeatures():
                 grid_layer.changeAttributeValue(grid_feat.id(), grid_layer.fields().indexFromName(field_name),
                                                 reclass_vals[grid_feat.id()])
             grid_layer.commitChanges()
+
+
 
             dif_out = f"{workingDir}/{tempDir}/Dif.shp"
 
@@ -3033,9 +3114,9 @@ class GenderIndicatorTool:
             xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
 
             # Get the width and height of the extent
-            extent = countryUTMLayerBuf.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
+            #extent = countryUTMLayerBuf.extent()
+            #raster_width = int(extent.width() / pixelSize)
+            #raster_height = int(extent.height() / pixelSize)
 
             os.chdir(Dimension)
             Output_Folder = "AT"
@@ -3112,19 +3193,22 @@ class GenderIndicatorTool:
             #shp_utm[rasField] = shp_utm[rasField].astype(int)
             shp_utm.to_file(scoredBlocks)
 
-            gridOutput = f"{workingDir}{tempDir}/grid.shp"
-            gridExtent = countryUTMLayer.extent()
-            grid_params = {
-                'TYPE': 2,  # Rectangle (polygon)
-                'EXTENT': gridExtent,
-                'HSPACING': 100,  # Horizontal spacing
-                'VSPACING': 100,  # Vertical spacing
-                'CRS': UTM_crs,
-                'OUTPUT': "memory:"
-            }
+            # Define the output grid path (merged GeoPackage)
+            merged_grid_output = f"{workingDir}{tempDir}/merged_grid.gpkg"
+            grid_ouput_dir = f"{workingDir}/{tempDir}"
 
-            grid_result = processing.run('native:creategrid', grid_params)
-            grid_layer = grid_result['OUTPUT']
+            # Call the function to create and merge grids
+            grid_layer = self.create_grids(
+                countryUTMLayer, 
+                grid_ouput_dir,  # Output directory
+                QgsCoordinateReferenceSystem(UTM_crs),  # CRS
+                merged_grid_output,  # Path for the merged grid
+            )
+            
+            if isinstance(grid_layer, QgsVectorLayer):
+                pass
+            else:
+                grid_layer = QgsVectorLayer(grid_layer, 'merged_grid', 'ogr')  # Use the merged grid for further operations
 
             field_name = 'reclass_va'
             if not grid_layer.fields().indexFromName(field_name) >= 0:
