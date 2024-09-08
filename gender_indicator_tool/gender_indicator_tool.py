@@ -3008,7 +3008,7 @@ class GenderIndicatorTool:
                     "MITER_LIMIT": 2,
                     "DISSOLVE": True,
                     "SEPARATE_DISJOINT": False,
-                    "OUTPUT": countryBuffer,
+                    "OUTPUT":"memory:",
                 },
             )
 
