@@ -715,6 +715,11 @@ class GenderIndicatorTool:
         countryLayer = self.dlg.countryLayer_Field.filePath()
         pixelSize = self.dlg.pixelSize_SB.value()
         UTM_crs = str(self.dlg.mQgsProjectionSelectionWidget.crs()).split(":")[-1][:-1]
+        
+        # Call the common setup function
+        setup = self.CommonRasterizerSetup()
+        # Get the extent of the buffered country layer
+        xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
 
         # INPUT
         if factor_no == 0:
@@ -1395,7 +1400,7 @@ class GenderIndicatorTool:
             grid_layer = self.create_grids(
                 countryUTMLayer, 
                 grid_ouput_dir,  # Output directory
-                QgsCoordinateReferenceSystem(UTM_crs),  # CRS
+                QgsCoordinateReferenceSystem(f"EPSG:{UTM_crs}"),  # CRS
                 merged_grid_output,  # Path for the merged grid
             )
             
@@ -1457,11 +1462,15 @@ class GenderIndicatorTool:
             grid_layer.updateFields()
 
 
+            extent = countryUTMLayer.extent()  # Get the extent of the study area
+
+            # Pre-calculate buffer scores and store in a dictionary
+            buffer_scores = {buffer_feat.id(): buffer_feat['score'] for buffer_feat in buffer_layer.getFeatures()}
+
             # Create a spatial index for the buffer layer
             spatial_index = QgsSpatialIndex(buffer_layer.getFeatures())
-
-            # Start editing the grid layer
             grid_layer.startEditing()
+            changes = []
 
             for grid_feature in grid_layer.getFeatures():
                 grid_geom = grid_feature.geometry()
@@ -1469,60 +1478,26 @@ class GenderIndicatorTool:
 
                 min_score = event_type_scores['no_event']
 
-                # Check intersections and find the minimum score (most serious event)
                 for buffer_id in intersecting_ids:
                     buffer_feature = buffer_layer.getFeature(buffer_id)
                     buffer_geom = buffer_feature.geometry()
 
                     if grid_geom.intersects(buffer_geom):
-                        buffer_score = buffer_feature['score']
+                        buffer_score = buffer_scores.get(buffer_id, event_type_scores['no_event'])  # Lookup pre-calculated score
                         if buffer_score < min_score:
                             min_score = buffer_score
 
-                # Set the minimum score (most serious event) to the grid cell
-                grid_feature.setAttribute('score', min_score)
-                grid_layer.updateFeature(grid_feature)
+                changes.append((grid_feature.id(), min_score))
+
+            for feature_id, score in changes:
+                grid_layer.changeAttributeValue(feature_id, grid_layer.fields().indexFromName('score'), score)
+
             grid_layer.commitChanges()
 
-            outputPath1 = f"{workingDir}{temp}/clipBuff.shp"
-
-            clipBuffer = processing.run(
-                "native:clip",
-                {
-                    "INPUT": grid_layer,
-                    "OVERLAY": countryUTMLayer,
-                    "OUTPUT": "memory:",
-                }
-            )
-
-            grid_layer = clipBuffer["OUTPUT"]
-
-            outputPath2 = f"{workingDir}{temp}/difference.shp"
-            Difference = processing.run(
-                "native:difference",
-                {
-                    "INPUT": countryUTMLayerBuf,
-                    "OVERLAY": grid_layer,
-                    "OUTPUT": "memory:",
-                    "GRID_SIZE": None,
-                },
-            )
-
-            difference = Difference["OUTPUT"]
-            outputPath3 = f"{workingDir}{temp}/merge.shp"
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [difference, grid_layer], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            grid_layer = Merge["OUTPUT"]
-
-            mergeOutput = grid_layer
-
             # Get the width and height of the extent
-            extent = mergeOutput.extent()
-            raster_width = int(extent.width() / pixelSize)
-            raster_height = int(extent.height() / pixelSize)
+            #extent = mergeOutput.extent()
+            #raster_width = int(extent.width() / pixelSize)
+            #raster_height = int(extent.height() / pixelSize)
 
             Dimension = "Place Characterization"
             if os.path.exists(Dimension):
@@ -1536,14 +1511,14 @@ class GenderIndicatorTool:
             rasterize = processing.run(
                 "gdal:rasterize",
                 {
-                    "INPUT": mergeOutput,
+                    "INPUT": grid_layer,
                     "FIELD": "score",
                     "BURN": 0,
                     "USE_Z": False,
-                    "UNITS": 0,
-                    "WIDTH": raster_width,
-                    "HEIGHT": raster_height,
-                    "EXTENT": None,
+                    "UNITS": 1,
+                    "WIDTH": pixelSize,
+                    "HEIGHT": pixelSize,
+                    "EXTENT": f"{xmin},{xmax},{ymin},{ymax}",
                     "NODATA": -9999,
                     "OPTIONS": "",
                     "DATA_TYPE": 5,
@@ -2716,18 +2691,16 @@ class GenderIndicatorTool:
                 # Add the generated or loaded grid to the list
                 all_grids.append(grid_layer)
 
-        # Merge all grids into one if necessary
-        if len(all_grids) > 1:
-            print(f"Merging grids into: {merged_output_path}")
-            merge_params = {
-                'LAYERS': all_grids,
-                'CRS': crs,
-                'OUTPUT': merged_output_path
-            }
-            merged_grid = processing.run('native:mergevectorlayers', merge_params)['OUTPUT']
-            return merged_grid  # Return the merged grid
-        else:
-            return all_grids[0]  # If only one grid, return it directly
+        
+        print(f"Merging grids into: {merged_output_path}")
+        merge_params = {
+            'LAYERS': all_grids,
+            'CRS': crs,
+            'OUTPUT': merged_output_path
+        }
+        merged_grid = processing.run('native:mergevectorlayers', merge_params)['OUTPUT']
+        return merged_grid
+        
 
 
     def walkability(self):
