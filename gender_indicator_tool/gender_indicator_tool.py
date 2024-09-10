@@ -1400,7 +1400,7 @@ class GenderIndicatorTool:
             grid_layer = self.create_grids(
                 countryUTMLayer, 
                 grid_ouput_dir,  # Output directory
-                QgsCoordinateReferenceSystem(UTM_crs),  # CRS
+                QgsCoordinateReferenceSystem(f"EPSG:{UTM_crs}"),  # CRS
                 merged_grid_output,  # Path for the merged grid
             )
             
@@ -1458,7 +1458,7 @@ class GenderIndicatorTool:
             buffer_layer.commitChanges()
 
             grid_layer_provider = grid_layer.dataProvider()
-            grid_layer_provider.addAttributes([QgsField("min_score", QVariant.Int)])
+            grid_layer_provider.addAttributes([QgsField("score", QVariant.Int)])
             grid_layer.updateFields()
 
 
@@ -2691,18 +2691,16 @@ class GenderIndicatorTool:
                 # Add the generated or loaded grid to the list
                 all_grids.append(grid_layer)
 
-        # Merge all grids into one if necessary
-        if len(all_grids) > 1:
-            print(f"Merging grids into: {merged_output_path}")
-            merge_params = {
-                'LAYERS': all_grids,
-                'CRS': crs,
-                'OUTPUT': merged_output_path
-            }
-            merged_grid = processing.run('native:mergevectorlayers', merge_params)['OUTPUT']
-            return merged_grid  # Return the merged grid
-        else:
-            return all_grids[0]  # If only one grid, return it directly
+        
+        print(f"Merging grids into: {merged_output_path}")
+        merge_params = {
+            'LAYERS': all_grids,
+            'CRS': crs,
+            'OUTPUT': merged_output_path
+        }
+        merged_grid = processing.run('native:mergevectorlayers', merge_params)['OUTPUT']
+        return merged_grid
+        
 
 
     def walkability(self):
