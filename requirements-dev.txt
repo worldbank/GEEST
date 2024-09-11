@@ -48,6 +48,9 @@ regex==2024.7.24
 requests==2.32.3
 rpds-py==0.17.1
 six==1.16.0
+toml == 0.10.2
+typer == 0.4.0
 urllib3==2.2.2
 virtualenv==20.25.3
 watchdog==5.0.2
+zipp == 3.7.0
