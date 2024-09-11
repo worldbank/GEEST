@@ -1,0 +1,17 @@
+format: jb-book
+root: README
+
+parts:
+  - caption: GEEST
+    chapters:
+      - file: docs/user_guide
+  - caption: Additional Resources
+    chapters:
+      - url: https://datacatalog.worldbank.org/search/collections/genderspatial
+        title: Data Gap Analysis
+      - url: https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42
+        title: Methodology Report
+      - url: https://www.qgis.org/en/site/
+        title: QGIS
+      - url: https://openrouteservice.org/
+        title: Open Route Service
