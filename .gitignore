@@ -54,8 +54,11 @@ pip-delete-this-directory.txt
 
 # VS Code
 .vscode/
+.vscode-extensions/
 
 # Nix
 result/
 nix-result/
 
+# nix
+.direnv/
