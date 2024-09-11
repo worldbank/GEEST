@@ -20,7 +20,7 @@ jobs:
           cache: "pip"
       - name: Dependencies
         run: |
-          pip install -r docs/requirements-dev.txt
+          pip install -r docs/requirements.txt
       - name: Build Jupyter Book
         run: |
           jupyter-book build . --config docs/_config.yml --toc docs/_toc.yml
