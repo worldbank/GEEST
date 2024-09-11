@@ -310,7 +310,6 @@ def generate_metadata(
     # https://docs.python.org/3/library/configparser.html#customizing-parser-behaviour
     config.optionxform = lambda option: option
     config["general"] = metadata['general']
-    config["python"] = metadata['python']
     with target_path.open(mode="w") as fh:
         config.write(fh)
 
