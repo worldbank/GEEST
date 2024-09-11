@@ -393,7 +393,6 @@ def _get_metadata() -> typing.Dict:
     with config_path.open("r") as fh:
         conf = json.load(fh)
     general_plugin_config = conf["general"]
-    python_plugin_config = conf["python"]
 
     general_metadata = general_plugin_config
 
@@ -405,8 +404,7 @@ def _get_metadata() -> typing.Dict:
     )
 
     metadata = {
-        'general': general_metadata,
-        'python': python_plugin_config
+        'general': general_metadata
     }
 
     return metadata
