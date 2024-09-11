@@ -282,8 +282,8 @@ def add_requirements_file(
         context: typer.Context,
         output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
 ):
-    resources_path = LOCAL_ROOT_DIR / "requirements.txt"
-    target_path = output_directory / "requirements.txt"
+    resources_path = LOCAL_ROOT_DIR / "requirements-dev.txt"
+    target_path = output_directory / "requirements-dev.txt"
 
     shutil.copy(str(resources_path.resolve()), str(target_path))
 
