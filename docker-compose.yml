@@ -2,7 +2,7 @@ services:
   qgis-testing-environment:
     image: ${IMAGE}:${QGIS_VERSION_TAG}
     volumes:
-      - ./build/plugin_name:/tests_directory:rw
+      - ./build/qgis-gender-indicator-tool:/tests_directory:rw
     environment:
       QGIS_VERSION_TAG: "${QGIS_VERSION_TAG}"
       WITH_PYTHON_PEP: "${WITH_PYTHON_PEP}"
