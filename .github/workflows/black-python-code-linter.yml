@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "**.py"
   pull_request:
     types:
       - edited
@@ -12,8 +14,8 @@ on:
       - synchronize
     branches:
       - main
-  paths:
-    - "**.py"
+    paths:
+      - "**.py"
 
 jobs:
   lint:
