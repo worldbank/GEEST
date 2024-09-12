@@ -17,6 +17,7 @@ import jsonschema
 from jsonschema import validate, ValidationError, SchemaError
 import sys
 
+
 def load_json_schema(schema_file):
     """
     Loads a JSON schema from a file.
@@ -27,8 +28,9 @@ def load_json_schema(schema_file):
     Returns:
         dict: JSON schema.
     """
-    with open(schema_file, 'r') as f:
+    with open(schema_file, "r") as f:
         return json.load(f)
+
 
 def validate_json(json_data, schema):
     """
@@ -43,6 +45,7 @@ def validate_json(json_data, schema):
     """
     validate(instance=json_data, schema=schema)
 
+
 def main(json_file, schema_file):
     """
     Main function to validate JSON file against a schema.
@@ -53,7 +56,7 @@ def main(json_file, schema_file):
     """
     try:
         schema = load_json_schema(schema_file)
-        with open(json_file, 'r') as f:
+        with open(json_file, "r") as f:
             json_data = json.load(f)
         validate_json(json_data, schema)
         print(f"{json_file} is valid.")
@@ -62,9 +65,9 @@ def main(json_file, schema_file):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python validate_json.py <json_file> <schema_file>")
     else:
         main(sys.argv[1], sys.argv[2])
-

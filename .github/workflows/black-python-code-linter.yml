@@ -1,0 +1,20 @@
+name: Black Python Code Linter
+
+on:
+  push:
+    branches:
+      - main
+    
+    paths:
+      - "**.py"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./src/qgis_gender_indicator_tool"

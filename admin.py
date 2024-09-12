@@ -151,7 +151,7 @@ def generate_zip(
     :type context: Path
     """
     build_dir = build(context)
-    metadata = _get_metadata()['general']
+    metadata = _get_metadata()["general"]
     plugin_version = metadata["version"] if version is None else version
     output_directory.mkdir(parents=True, exist_ok=True)
     zip_path = output_directory / f"{SRC_NAME}.{plugin_version}.zip"
@@ -217,7 +217,7 @@ def copy_icon(
     :rtype: Path
     """
 
-    metadata = _get_metadata()['general']
+    metadata = _get_metadata()["general"]
     icon_path = LOCAL_ROOT_DIR / "resources" / metadata["icon"]
     if icon_path.is_file():
         target_path = output_directory / icon_path.name
@@ -277,15 +277,17 @@ def compile_resources(
     _log(f"compile_resources target_path: {target_path}", context=context)
     subprocess.run(shlex.split(f"pyrcc5 -o {target_path} {resources_path}"))
 
+
 @app.command()
 def add_requirements_file(
-        context: typer.Context,
-        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
+    context: typer.Context,
+    output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
 ):
     resources_path = LOCAL_ROOT_DIR / "requirements-dev.txt"
     target_path = output_directory / "requirements-dev.txt"
 
     shutil.copy(str(resources_path.resolve()), str(target_path))
+
 
 @app.command()
 def generate_metadata(
@@ -309,7 +311,7 @@ def generate_metadata(
     # do not modify case of parameters, as per
     # https://docs.python.org/3/library/configparser.html#customizing-parser-behaviour
     config.optionxform = lambda option: option
-    config["general"] = metadata['general']
+    config["general"] = metadata["general"]
     with target_path.open(mode="w") as fh:
         config.write(fh)
 
@@ -326,7 +328,7 @@ def generate_plugin_repo_xml(
     """
     repo_base_dir = LOCAL_ROOT_DIR / "docs" / "repository"
     repo_base_dir.mkdir(parents=True, exist_ok=True)
-    metadata = _get_metadata()['general']
+    metadata = _get_metadata()["general"]
     fragment_template = """
             <pyqgis_plugin name="{name}" version="{version}">
                 <description><![CDATA[{description}]]></description>
@@ -402,9 +404,7 @@ def _get_metadata() -> typing.Dict:
         }
     )
 
-    metadata = {
-        'general': general_metadata
-    }
+    metadata = {"general": general_metadata}
 
     return metadata
 

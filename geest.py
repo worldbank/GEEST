@@ -9,12 +9,23 @@ This file is part of the GEEST QGIS Plugin. It is available under the terms of t
 See the LICENSE file in the project root for more information.
 """
 
-from PyQt5.QtWidgets import QDockWidget, QTreeView, QDialog, QVBoxLayout, QScrollArea, QPushButton, QWidget, QLabel, QProgressBar
+from PyQt5.QtWidgets import (
+    QDockWidget,
+    QTreeView,
+    QDialog,
+    QVBoxLayout,
+    QScrollArea,
+    QPushButton,
+    QWidget,
+    QLabel,
+    QProgressBar,
+)
 from PyQt5.QtCore import Qt
 from PyQt5 import uic
 from qgis.core import QgsApplication
 from .tree_view_model import TreeViewModel
 from .queue_manager import QueueManager
+
 
 class GEEST:
     """
@@ -84,10 +95,10 @@ class GEEST:
         schema_files = {
             "group": "path/to/group_schema.json",
             "factor": "path/to/factor_schema.json",
-            "sub-factor": "path/to/sub_factor_schema.json"
+            "sub-factor": "path/to/sub_factor_schema.json",
         }
 
-        self.model = TreeViewModel('path/to/your/json_file.json', schema_files)
+        self.model = TreeViewModel("path/to/your/json_file.json", schema_files)
         self.tree_view.setModel(self.model)
 
         self.model.layoutChanged.connect(self.update_action_button_state)
@@ -100,10 +111,10 @@ class GEEST:
             node_name (str): The name of the node for which the dialog is shown.
         """
         self.config_dialog = QDialog(self.iface.mainWindow())
-        uic.loadUi('path/to/config_dialog.ui', self.config_dialog)
-        
+        uic.loadUi("path/to/config_dialog.ui", self.config_dialog)
+
         # Set the banner text
-        banner_label = self.config_dialog.findChild(QLabel, 'bannerLabel')
+        banner_label = self.config_dialog.findChild(QLabel, "bannerLabel")
         if banner_label:
             banner_label.setText(f"{node_name} Configuration")
 
@@ -174,4 +185,3 @@ class GEEST:
         Unloads the plugin from QGIS.
         """
         self.iface.removeDockWidget(self.dock_widget)
-
