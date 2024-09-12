@@ -25,7 +25,7 @@ class TestRasterizer(unittest.TestCase):
 
     def setUp(self):
         # Setup real parameters for the Rasterizer class
-        self.vector_layer_path = "data/admin/Admin0.shp"  # Use a real shapefile path
+        self.vector_layer_path = os.path.join(os.path.dirname(__file__), "data/admin/Admin0.shp")  # Use a real shapefile path
         self.output_dir = "/output"
         self.pixel_size = 100
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
