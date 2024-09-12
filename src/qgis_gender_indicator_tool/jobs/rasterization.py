@@ -99,7 +99,7 @@ class Rasterizer:
 
         self.rasterized_layer = rasterize_result["OUTPUT"]
         if not os.path.exists(self.rasterized_layer):
-            raise ValueError("Rasterization failed. Output file not created.")
+            raise ValueError(f"Rasterization failed. Output file not created. {self.rasterized_layer}")
 
     def get_rasterized_layer_path(self):
         """
