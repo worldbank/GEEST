@@ -6,6 +6,7 @@ from processing.core.Processing import Processing
 from qgis.core import QgsProcessingFeedback
 from qgis_gender_indicator_tool.jobs.rasterization import Rasterizer
 
+
 class TestRasterizer(unittest.TestCase):
 
     @classmethod
@@ -14,10 +15,10 @@ class TestRasterizer(unittest.TestCase):
         # Start a QGIS application instance for testing
         cls.qgs = QgsApplication([], False)
         cls.qgs.initQgis()
-        
+
         # Initialize processing
         Processing.initialize()
-        
+
         # Add native algorithms for testing (this is important for running processing algorithms)
         QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
 
@@ -28,8 +29,10 @@ class TestRasterizer(unittest.TestCase):
 
     def setUp(self):
         # Setup real parameters for the Rasterizer class
-        self.vector_layer_path = os.path.join(os.path.dirname(__file__), "data/admin/Admin0.shp")  # Use a real shapefile path
-        self.output_dir = "/output"
+        self.vector_layer_path = os.path.join(
+            os.path.dirname(__file__), "data/admin/Admin0.shp"
+        )
+        self.output_dir = os.path.join(os.path.dirname(__file__), "output")
         self.pixel_size = 100
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.field = "score"
@@ -49,28 +52,33 @@ class TestRasterizer(unittest.TestCase):
             pixel_size=self.pixel_size,
             utm_crs=self.utm_crs,
             field=self.field,
-            dimension=self.dimension
+            dimension=self.dimension,
         )
 
         # Load the vector layer and check if it is valid
         rasterizer._load_and_preprocess_vector_layer()  # Assuming this method exists to load the layer
-        self.assertTrue(rasterizer.vector_layer.isValid(), "The vector layer is not valid")
+        self.assertTrue(
+            rasterizer.vector_layer.isValid(), "The vector layer is not valid"
+        )
 
         # Run the real rasterization process
         rasterizer.rasterize_vector_layer()
 
         # Check that the rasterized output file was created
         rasterized_output = rasterizer.get_rasterized_layer_path()
-        self.assertTrue(os.path.exists(rasterized_output), "Rasterized output file does not exist")
+        self.assertTrue(
+            os.path.exists(rasterized_output), "Rasterized output file does not exist"
+        )
 
     def tearDown(self):
         # Clean up after tests by removing the output directory and its contents
-        rasterized_output = os.path.join(self.output_dir, 'rasterized_output.tif')
+        rasterized_output = os.path.join(self.output_dir, "rasterized_output.tif")
         if os.path.exists(rasterized_output):
             os.remove(rasterized_output)
 
         if os.path.exists(self.output_dir) and not os.listdir(self.output_dir):
             os.rmdir(self.output_dir)
+
 
 if __name__ == "__main__":
     unittest.main()
