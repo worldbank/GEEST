@@ -12,6 +12,7 @@ See the LICENSE file in the project root for more information.
 from qgis.core import QgsApplication
 from .task import GEESTTask
 
+
 class QueueManager:
     """
     Manages the queue of tasks for processing GEEST nodes.
@@ -34,23 +35,22 @@ class QueueManager:
     def process_tasks(self):
         self.generate_tasks()
         for task in self.tasks:
-            self.model.update_node_status(task.node, 'running')
+            self.model.update_node_status(task.node, "running")
             QgsApplication.taskManager().addTask(task)
 
     def cancel_tasks(self):
         for task in self.tasks:
             if not task.isCanceled():
                 task.cancel()
-            self.model.update_node_status(task.node, 'idle')
+            self.model.update_node_status(task.node, "idle")
 
     def on_task_finished(self, result):
         self.completed_tasks += 1
-        status = 'success' if result else 'error'
+        status = "success" if result else "error"
         self.model.update_node_status(self.sender().node, status)
         self.progress_callback(self.completed_tasks, len(self.tasks))
 
     def on_task_error(self):
         self.completed_tasks += 1
-        self.model.update_node_status(self.sender().node, 'error')
+        self.model.update_node_status(self.sender().node, "error")
         self.progress_callback(self.completed_tasks, len(self.tasks))
-

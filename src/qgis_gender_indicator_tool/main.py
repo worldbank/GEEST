@@ -232,6 +232,3 @@ class GenderIndicatorTool:
 
         # show the dialog
         self.dlg.show()
-
-
-    

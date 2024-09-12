@@ -13,10 +13,12 @@ from qgis.core import QgsTask, QgsMessageLog
 from PyQt5.QtCore import pyqtSignal
 import os
 
+
 class GEESTTask(QgsTask):
     """
     Custom task for running GEEST plugin operations as a background job.
     """
+
     finished = pyqtSignal(bool)
     error = pyqtSignal()
 
@@ -29,20 +31,30 @@ class GEESTTask(QgsTask):
         Executes the task. This is the main work method that performs the background operation.
         """
         try:
-            output_path = self.node['output_path']
-            if self.node.get('processed', False) and os.path.exists(output_path):
-                QgsMessageLog.logMessage(f"{self.node['name']} already processed", "GEEST", QgsMessageLog.INFO)
+            output_path = self.node["output_path"]
+            if self.node.get("processed", False) and os.path.exists(output_path):
+                QgsMessageLog.logMessage(
+                    f"{self.node['name']} already processed",
+                    "GEEST",
+                    QgsMessageLog.INFO,
+                )
                 self.finished.emit(True)
                 return True
-            
+
             # Simulate processing
             self.process_node()
-            self.node['processed'] = True
-            QgsMessageLog.logMessage(f"Processed {self.node['name']}", "GEEST", QgsMessageLog.INFO)
+            self.node["processed"] = True
+            QgsMessageLog.logMessage(
+                f"Processed {self.node['name']}", "GEEST", QgsMessageLog.INFO
+            )
             self.finished.emit(True)
             return True
         except Exception as e:
-            QgsMessageLog.logMessage(f"Task failed for {self.node['name']}: {str(e)}", "GEEST", QgsMessageLog.CRITICAL)
+            QgsMessageLog.logMessage(
+                f"Task failed for {self.node['name']}: {str(e)}",
+                "GEEST",
+                QgsMessageLog.CRITICAL,
+            )
             self.error.emit()
             return False
 
@@ -50,15 +62,16 @@ class GEESTTask(QgsTask):
         """
         Simulates the processing of the node.
         """
-        output_path = self.node['output_path']
+        output_path = self.node["output_path"]
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write(f"Processed output for {self.node['name']}")
 
     def cancel(self):
         """
         Handles task cancellation.
         """
-        QgsMessageLog.logMessage(f"{self.node['name']} task was cancelled", "GEEST", QgsMessageLog.INFO)
+        QgsMessageLog.logMessage(
+            f"{self.node['name']} task was cancelled", "GEEST", QgsMessageLog.INFO
+        )
         super().cancel()
-

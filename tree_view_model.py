@@ -17,22 +17,30 @@ This file is part of the GEEST QGIS Plugin. It is available under the terms of t
 See the LICENSE file in the project root for more information.
 """
 
-from PyQt5.QtCore import QAbstractItemModel, Qt, QModelIndex, QVariant, QFileSystemWatcher
+from PyQt5.QtCore import (
+    QAbstractItemModel,
+    Qt,
+    QModelIndex,
+    QVariant,
+    QFileSystemWatcher,
+)
 from PyQt5.QtGui import QIcon
 import json
 from jsonschema import validate, ValidationError, SchemaError
+
 
 class TreeNode:
     """
     Represents a node in the tree.
     """
+
     def __init__(self, name, node_type, status="orange"):
         self.name = name
         self.node_type = node_type
         self.status = status
         self.children = []
         self.parent = None
-        self.task_status = 'idle'  # 'idle', 'running', 'success', 'error'
+        self.task_status = "idle"  # 'idle', 'running', 'success', 'error'
 
     def append_child(self, child):
         child.parent = self
@@ -52,10 +60,12 @@ class TreeNode:
     def column_count(self):
         return 1
 
+
 class TreeViewModel(QAbstractItemModel):
     """
     Custom model for a tree view, loaded from a JSON file.
     """
+
     def __init__(self, json_file, schema_files, parent=None):
         super(TreeViewModel, self).__init__(parent)
         self.root_node = TreeNode("Root", "root")
@@ -73,19 +83,19 @@ class TreeViewModel(QAbstractItemModel):
     def _validate_node(self, node, node_type):
         try:
             schema_path = self.schema_files[node_type]
-            with open(schema_path, 'r') as schema_file:
+            with open(schema_path, "r") as schema_file:
                 schema = json.load(schema_file)
             validate(instance=node, schema=schema)
         except (ValidationError, SchemaError) as e:
             raise ValidationError(f"Invalid {node_type} node: {e.message}")
 
-        if 'children' in node:
+        if "children" in node:
             child_type = "factor" if node_type == "group" else "sub-factor"
-            for child in node['children']:
+            for child in node["children"]:
                 self._validate_node(child, child_type)
 
     def load_json(self, json_file):
-        with open(json_file, 'r') as f:
+        with open(json_file, "r") as f:
             data = json.load(f)
         self.validate_json(data)
         self.setup_model_data(data, self.root_node)
@@ -93,10 +103,10 @@ class TreeViewModel(QAbstractItemModel):
     def setup_model_data(self, data, parent_node):
         parent_node.children.clear()
         for item in data:
-            node = TreeNode(item['name'], item['type'], item.get('status', 'orange'))
+            node = TreeNode(item["name"], item["type"], item.get("status", "orange"))
             parent_node.append_child(node)
-            if 'children' in item:
-                self.setup_model_data(item['children'], node)
+            if "children" in item:
+                self.setup_model_data(item["children"], node)
         self.layoutChanged.emit()
 
     def reload_json(self):
@@ -104,7 +114,7 @@ class TreeViewModel(QAbstractItemModel):
 
     def is_valid(self):
         try:
-            with open(self.json_file, 'r') as f:
+            with open(self.json_file, "r") as f:
                 data = json.load(f)
             self.validate_json(data)
             return True
@@ -125,10 +135,10 @@ class TreeViewModel(QAbstractItemModel):
             return node.name
         elif role == Qt.DecorationRole:
             icons = {
-                'running': QIcon("path/to/running_icon.png"),
-                'success': QIcon("path/to/success_icon.png"),
-                'error': QIcon("path/to/error_icon.png"),
-                'idle': QIcon(f"resources/icons/{node.status}.png")
+                "running": QIcon("path/to/running_icon.png"),
+                "success": QIcon("path/to/success_icon.png"),
+                "error": QIcon("path/to/error_icon.png"),
+                "idle": QIcon(f"resources/icons/{node.status}.png"),
             }
             return icons[node.task_status]
         return QVariant()
@@ -158,6 +168,3 @@ class TreeViewModel(QAbstractItemModel):
 
         child_node = index.internalPointer()
         parent_node = child_node.parent
-
-        if parent_node == self.root_node:
-

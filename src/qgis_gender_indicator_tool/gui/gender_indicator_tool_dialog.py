@@ -24,13 +24,16 @@
 
 import os
 from qgis.core import QgsMessageLog, Qgis
+
 try:
     import geopandas as gpd
     import rasterio
     from rasterio.features import rasterize
     from rasterio.transform import from_origin
 except Exception:
-    QgsMessageLog.logMessage("Problem importing packages in a dialog...", 'GEEST', level=Qgis.Info)
+    QgsMessageLog.logMessage(
+        "Problem importing packages in a dialog...", "GEEST", level=Qgis.Info
+    )
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
@@ -39,8 +42,11 @@ from PyQt5.QtWidgets import QFileDialog
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
-    os.path.join(os.path.dirname(__file__), "../ui/gender_indicator_tool_dialog_base.ui")
+    os.path.join(
+        os.path.dirname(__file__), "../ui/gender_indicator_tool_dialog_base.ui"
+    )
 )
+
 
 class GenderIndicatorToolDialog(QtWidgets.QDialog, FORM_CLASS):
     def __init__(self, parent=None):
