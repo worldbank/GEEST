@@ -2,7 +2,7 @@ import unittest
 import os
 from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsApplication
 from qgis.analysis import QgsNativeAlgorithms
-import processing
+from processing.core.Processing import Processing
 from qgis.core import QgsProcessingFeedback
 from qgis_gender_indicator_tool.jobs.rasterization import Rasterizer
 
@@ -14,6 +14,9 @@ class TestRasterizer(unittest.TestCase):
         # Start a QGIS application instance for testing
         cls.qgs = QgsApplication([], False)
         cls.qgs.initQgis()
+        
+        # Initialize processing
+        Processing.initialize()
         
         # Add native algorithms for testing (this is important for running processing algorithms)
         QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
