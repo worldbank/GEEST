@@ -31,6 +31,7 @@ in pkgs.mkShell rec {
     pinnedPkgs.vim
     git
     qgis
+    qt5.full # so we get designer
     qt5.qtbase
     qt5.qtsvg
     qt5.qttools
