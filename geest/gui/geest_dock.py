@@ -188,11 +188,29 @@ class GeestDock(QDockWidget):
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
 
     def show_layer_properties(self, item):
-        """Open a dialog showing layer properties."""
-        layer_name = item.data(0)
-        layer_data = item.data(4)  # The 4th column stores the whole layer data dict
+        """Open a dialog showing layer properties and update the tree upon changes."""
+        # Get the current layer name and layer data from the item
+        layer_name = item.data(0)  # Column 0: layer name
+        layer_data = item.data(4)  # Column 4: layer data (stored as a dict)
+
+        # Create and show the LayerDetailDialog
         dialog = LayerDetailDialog(layer_name, layer_data, self)
+
+        # Connect the dialog's dataUpdated signal to handle data updates
+        def update_layer_data(updated_data):
+            # Update the layer data in the item (column 4)
+            item.setData(4, updated_data)
+
+            # Check if the layer name has changed, and if so, update it in column 0
+            if updated_data.get('name', layer_name) != layer_name:
+                item.setData(0, updated_data.get('name', layer_name))
+
+        # Connect the signal emitted from the dialog to update the item
+        dialog.dataUpdated.connect(update_layer_data)
+
+        # Show the dialog (exec_ will block until the dialog is closed)
         dialog.exec_()
+
 
     def process_leaves(self):
         """

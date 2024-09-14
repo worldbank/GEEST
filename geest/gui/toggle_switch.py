@@ -10,7 +10,7 @@ class ToggleSwitch(QWidget):
 
     def __init__(self, initial_value=False, parent=None):
         super().__init__(parent)
-        self.setFixedSize(QSize(60, 30))  # Size of the toggle switch
+        self.setFixedSize(QSize(40, 20))  # Size of the toggle switch
         self.checked = initial_value
 
     def paintEvent(self, event):
@@ -20,7 +20,7 @@ class ToggleSwitch(QWidget):
 
         # Background color based on state
         if self.checked:
-            painter.setBrush(QColor("#0082C8"))  # Active state color (blue)
+            painter.setBrush(QColor("#002244"))  # Active state color (blue) from WB Style Guide
         else:
             painter.setBrush(QColor("#ADB5BD"))  # Inactive state color (gray)
 
@@ -31,7 +31,7 @@ class ToggleSwitch(QWidget):
         # Draw the circle (slider knob)
         knob_radius = rect.height() - 6
         knob_x = rect.x() + 3 if not self.checked else rect.right() - knob_radius - 3
-        painter.setBrush(QColor("#FFFFFF"))  # White color for the knob
+        painter.setBrush(QColor("#009CA7"))  # From WB Style Guide
         painter.drawEllipse(knob_x, rect.y() + 3, knob_radius, knob_radius)
 
     def mousePressEvent(self, event):

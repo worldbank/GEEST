@@ -1,3 +1,4 @@
+import re
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -13,12 +14,15 @@ from qgis.PyQt.QtWidgets import (
     QComboBox,
     QHBoxLayout,
     QTextEdit,
+    QWidget,
+    QSplitter,
 )
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
 
+
 class LayerDetailDialog(QDialog):
-    """Dialog to show layer properties, with a Markdown editor for the 'indicator' field."""
+    """Dialog to show layer properties, with a Markdown editor and preview for the 'indicator' field."""
 
     # Signal to emit the updated data as a dictionary
     dataUpdated = pyqtSignal(dict)
@@ -36,26 +40,24 @@ class LayerDetailDialog(QDialog):
         heading_label = QLabel(layer_name)
         layout.addWidget(heading_label)
 
-        # Create the QTextEdit for Markdown editing
-        self.text_edit = QTextEdit()
-        self.text_edit.setPlainText(layer_data.get("indicator", ""))
-        self.text_edit.setMinimumHeight(100)  # Set at least 5 lines high
-        layout.addWidget(self.text_edit)
+        # Create a horizontal splitter to hold both the Markdown editor and the preview
+        splitter = QSplitter(Qt.Horizontal)
 
-        # Create a layout for the toggle and label at the bottom-right of the text edit
-        toggle_layout = QHBoxLayout()
-        toggle_layout.addStretch()  # Push to the right
+        # Create the QTextEdit for Markdown editing (left side)
+        self.text_edit_left = QTextEdit()
+        self.text_edit_left.setPlainText(layer_data.get("indicator", ""))
+        self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
+        splitter.addWidget(self.text_edit_left)
 
-        # Add the toggle switch and "Edit" label
-        self.edit_mode_toggle = ToggleSwitch(initial_value=True)
-        self.edit_mode_toggle.toggled.connect(self.toggle_edit_mode)
-        toggle_layout.addWidget(QLabel("Edit"))
-        toggle_layout.addWidget(self.edit_mode_toggle)
+        # Create the QTextEdit for HTML preview (right side)
+        self.text_edit_right = QTextEdit()
+        self.text_edit_right.setReadOnly(True)  # Set as read-only for preview
+        splitter.addWidget(self.text_edit_right)
 
-        layout.addLayout(toggle_layout)
+        layout.addWidget(splitter)
 
-        # Set the initial mode to edit mode
-        self.is_edit_mode = True
+        # Connect the Markdown editor (left) to update the preview (right) in real-time
+        self.text_edit_left.textChanged.connect(self.update_preview)
 
         # Create the QTableWidget for other properties
         self.table = QTableWidget()
@@ -80,6 +82,9 @@ class LayerDetailDialog(QDialog):
 
         self.setLayout(layout)
 
+        # Initial call to update the preview with existing content
+        self.update_preview()
+
     def populate_table(self):
         """Populate the table with all key-value pairs except 'indicator'."""
         filtered_data = {k: v for k, v in self.layer_data.items() if k != "indicator"}
@@ -95,23 +100,14 @@ class LayerDetailDialog(QDialog):
             value_widget = self.get_widget_for_value(key, value)
             self.table.setCellWidget(row, 1, value_widget)
 
-    def toggle_edit_mode(self, checked):
-        """Switch between edit mode (plain text) and display mode (render as HTML)."""
-        if checked:
-            # In Edit Mode: Show plain text to allow Markdown writing
-            self.is_edit_mode = True
-            self.text_edit.setReadOnly(False)
-            self.text_edit.setPlainText(self.text_edit.toPlainText())  # Reset to plain text
-        else:
-            # In Display Mode: Render Markdown as HTML
-            self.is_edit_mode = False
-            self.text_edit.setReadOnly(True)
-            markdown_text = self.text_edit.toPlainText()
 
-            # Render basic Markdown elements as HTML
-            rendered_html = markdown_text.replace("# ", "<h1>").replace("\n", "<br>")
-            rendered_html = rendered_html.replace("**", "<b>").replace("_", "<i>")
-            self.text_edit.setHtml(rendered_html)  # Render as HTML
+
+    def update_preview(self):
+        """Update the right text edit to show a live HTML preview of the Markdown, ensuring headings are terminated at the first line feed."""
+        markdown_text = self.text_edit_left.toPlainText()
+        # Set the rendered HTML into the right text edit
+        self.text_edit_right.setMarkdown(markdown_text)
+
 
     def get_widget_for_value(self, key, value):
         """
@@ -147,19 +143,16 @@ class LayerDetailDialog(QDialog):
         """Handle the dialog close event by writing the edited data back to the TreeView item."""
         updated_data = self.get_updated_data_from_table()
         self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
-
-        # Write the Markdown or plain text back to the TreeView column 4
-        if self.is_edit_mode:
-            updated_text = self.text_edit.toPlainText()
-        else:
-            updated_text = self.text_edit.toHtml()
-        self.tree_item.setText(4, updated_text)  # Update the TreeView item's 4th column
-
         self.close()
 
     def get_updated_data_from_table(self):
-        """Convert the table back into a dictionary with any changes made."""
+        """Convert the table back into a dictionary with any changes made, including the Markdown text."""
         updated_data = {}
+
+        # Include the Markdown text from the left text edit
+        updated_data["indicator"] = self.text_edit_left.toPlainText()
+
+        # Loop through the table and collect other data
         for row in range(self.table.rowCount()):
             key = self.table.item(row, 0).text()  # Get the key (read-only)
             value_widget = self.table.cellWidget(row, 1)  # Get the widget from the second column
@@ -175,5 +168,7 @@ class LayerDetailDialog(QDialog):
             else:
                 updated_value = value_widget.text()  # Default to text value
 
-            updated_data[key] = updated_value  # Update the dictionary
+            updated_data[key] = updated_value  # Update the dictionary with the key-value pair
+
         return updated_data
+
