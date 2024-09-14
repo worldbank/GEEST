@@ -11,5 +11,6 @@ from .settings import setting, set_setting
 #    InvalidAnimationParametersException,
 #)
 from .default_settings import default_settings
+from .json_validator import JSONValidator
 #from .movie_creator import MovieFormat, MovieCommandGenerator, MovieCreationTask
 #from .render_queue import RenderJob, RenderQueue

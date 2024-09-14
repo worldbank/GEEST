@@ -28,9 +28,9 @@ from qgis.core import Qgis
 
 #from .geest import Geest
 #from .core import RenderQueue, setting
-from .core import setting
+from .core import setting, JSONValidator
 from .utilities import resources_path
-from .gui import GeestOptionsFactory
+from .gui import GeestOptionsFactory, GeestDock
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
@@ -53,12 +53,16 @@ class GeestPlugin:
     def initGui(self):  # pylint: disable=missing-function-docstring
 
         #self.render_queue = RenderQueue()
-        icon = QIcon(resources_path("icons", "geest-main.svg"))
+        icon = QIcon(resources_path("resources", "geest-main.svg"))
+
+        # Validate our json schema first
+        #validator = JSONValidator('resources/schema.json', 'resources/model.json')
+        #validator.validate_json()
 
         self.run_action = QAction(icon, "GEEST", self.iface.mainWindow())
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
-        self.dock_widget = QDockWidget("GEEST", self.iface.mainWindow())
+        self.dock_widget = GeestDock(parent=self.iface.mainWindow(), json_file=resources_path("resources", "model.json"))
         self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         #self.dock_widget.setWidget(Geest(self.iface.mainWindow(), self.iface))
         self.dock_widget.setFloating(False)

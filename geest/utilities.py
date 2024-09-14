@@ -27,9 +27,9 @@ from qgis.PyQt import uic
 def resources_path(*args):
     """Get the path to our resources folder.
 
-    .. versionadded:: 1.0
+    .. versionadded:: 2.0
 
-    Note that in version 1.0 we removed the use of Qt Resource files in
+    Note that in version 2.0 we removed the use of Qt Resource files in
     favour of directly accessing on-disk resources.
 
     :param args List of path elements e.g. ['img', 'logos', 'image.png']
