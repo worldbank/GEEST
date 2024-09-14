@@ -20,6 +20,8 @@ import json
 import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
 from .layer_details_dialog import LayerDetailDialog
+from ..utilities import resources_path
+
 
 class GeestDock(QDockWidget):
     def __init__(self, parent=None, json_file=None):
@@ -80,9 +82,9 @@ class GeestDock(QDockWidget):
         button_bar.addWidget(add_dimension_button)
         button_bar.addStretch()
 
-        prepare_button = QPushButton("🛸 Prepare")
-        prepare_button.clicked.connect(self.process_leaves)
-        button_bar.addWidget(prepare_button)
+        self.prepare_button = QPushButton("🛸 Prepare")
+        self.prepare_button.clicked.connect(self.process_leaves)
+        button_bar.addWidget(self.prepare_button)
         button_bar.addStretch()
 
         button_bar.addWidget(load_json_button)
@@ -91,6 +93,14 @@ class GeestDock(QDockWidget):
 
         widget.setLayout(layout)
         self.setWidget(widget)
+
+        # Prepare the throbber for the button (hidden initially)
+        self.prepare_throbber = QLabel(self)
+        movie = QMovie(resources_path("resources", "throbber.gif"))
+        self.prepare_throbber.setMovie(movie)
+        self.prepare_throbber.setScaledContents(True)
+        self.prepare_throbber.setVisible(False)  # Hide initially
+        movie.start()
 
     def load_json(self):
         """Load the JSON data from the file."""
@@ -211,61 +221,69 @@ class GeestDock(QDockWidget):
         # Show the dialog (exec_ will block until the dialog is closed)
         dialog.exec_()
 
-
     def process_leaves(self):
         """
-        This function processes all the leaf nodes in the QTreeView.
-        Each leaf node is processed by changing its text to red, showing an animated icon,
-        waiting for 2 seconds, and then reverting the text color back to black.
+        This function processes all nodes in the QTreeView that have the 'layer' role.
+        It iterates over the entire tree, collecting nodes with the 'layer' role, and
+        processes each one by showing an animated icon, waiting for 2 seconds, and 
+        then removing the animation.
         """
         model = self.treeView.model()  # Get the model from the tree_view
 
-        # Find all leaf nodes
-        leaf_nodes = []
+        # Disable the prepare button and show the throbber during processing
+        self.prepare_button.setEnabled(False)
+        self.prepare_throbber.setVisible(True)
 
-        def find_leaves(index):
-            """Recursively find all leaf nodes starting from the given index."""
-            if model.hasChildren(index):
-                for row in range(model.rowCount(index)):
-                    child_index = model.index(row, 0, index)
-                    find_leaves(child_index)
-            else:
-                leaf_nodes.append(index)
+        # Iterate over all items in the tree and find nodes with the 'layer' role
+        layer_nodes = []
+        row_count = model.rowCount()
 
-        # Populate the leaf_nodes list
-        # Start from the root index of the model
-        root_index = model.index(0, 0)
-        for row in range(model.rowCount()):
-            find_leaves(model.index(row, 0, root_index))
+        for row in range(row_count):
+            parent_index = model.index(row, 0)  # Start from the root level
+            self.collect_layer_nodes(model, parent_index, layer_nodes)
 
-        # Process each leaf node
-        self.process_each_leaf(leaf_nodes, 0)
+        # Process each 'layer' node
+        self.process_each_layer(layer_nodes, 0)
 
-    def process_each_leaf(self, leaf_nodes, index):
+    def collect_layer_nodes(self, model, parent_index, layer_nodes):
         """
-        Processes each leaf node by changing the text to red, showing an animated icon,
-        waiting for 2 seconds, and then reverting the text color to black.
+        Recursively collects all 'layer' nodes from the tree starting from the given parent index.
+        Nodes with the 'layer' role are added to the layer_nodes list.
         """
-        # Base case: if all nodes are processed, return
-        if index >= len(leaf_nodes):
+        # Get the item from the model
+        item = parent_index.internalPointer()
+
+        # If the item is a 'layer', add it to the list of nodes to process
+        if item and getattr(item, 'role', None) == 'layer':
+            layer_nodes.append(parent_index)
+
+        # Process all child items recursively
+        for row in range(model.rowCount(parent_index)):
+            child_index = model.index(row, 0, parent_index)
+            self.collect_layer_nodes(model, child_index, layer_nodes)
+
+    def process_each_layer(self, layer_nodes, index):
+        """
+        Processes each 'layer' node by showing an animated icon, waiting for 2 seconds,
+        and then removing the animation.
+        """
+        # Base case: if all nodes are processed, enable the button and hide the throbber
+        if index >= len(layer_nodes):
+            self.prepare_button.setEnabled(True)
+            self.prepare_throbber.setVisible(False)
             return
 
-        # Get the current leaf node index
-        node_index = leaf_nodes[index]
+        # Get the current 'layer' node index
+        node_index = layer_nodes[index]
         model = self.treeView.model()
 
         # Create a QModelIndex for the second column of the current row
         second_column_index = model.index(node_index.row(), 1, node_index.parent())
+
         # Set an animated icon (using a QLabel and QMovie to simulate animation)
-        movie = QMovie("throbber.gif")  # Use a valid path to an animated gif
-        # Get the height of the current row
-        row_height = self.treeView.rowHeight(node_index)
-        # Scale the movie to the row height
-        movie.setScaledSize(
-            movie.currentPixmap()
-            .size()
-            .scaled(row_height, row_height, Qt.KeepAspectRatio)
-        )
+        movie = QMovie(resources_path("resources", "throbber.gif"))  # Use a valid path to an animated gif
+        row_height = self.treeView.rowHeight(node_index)  # Get the height of the current row
+        movie.setScaledSize(movie.currentPixmap().size().scaled(row_height, row_height, Qt.KeepAspectRatio))
 
         label = QLabel()
         label.setMovie(movie)
@@ -273,23 +291,19 @@ class GeestDock(QDockWidget):
 
         # Set the animated icon in the second column of the node
         self.treeView.setIndexWidget(second_column_index, label)
-        # Wait for 2 seconds to simulate processing
-        QTimer.singleShot(
-            2000,
-            lambda: self.finish_processing(
-                second_column_index, leaf_nodes, index, movie
-            ),
-        )
 
-    def finish_processing(self, second_column_index, leaf_nodes, index, movie):
+        # Wait for 2 seconds to simulate processing
+        QTimer.singleShot(2000, lambda: self.finish_processing(second_column_index, layer_nodes, index, movie))
+
+    def finish_processing(self, second_column_index, layer_nodes, index, movie):
         """
-        Finishes processing by reverting text color to black and removing the animated icon.
-        Then it proceeds to the next node.
+        Finishes processing by removing the animated icon and proceeds to the next node.
         """
         model = self.treeView.model()
+
         # Stop the animation and remove the animated icon
         movie.stop()
         self.treeView.setIndexWidget(second_column_index, None)
 
-        # Move to the next node
-        self.process_each_leaf(leaf_nodes, index + 1)
+        # Move to the next 'layer' node
+        self.process_each_layer(layer_nodes, index + 1)
