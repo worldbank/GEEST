@@ -19,6 +19,7 @@ from qgis.PyQt.QtGui import QMovie
 import json
 import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
+from .layer_details_dialog import LayerDetailDialog
 
 class GeestDock(QDockWidget):
     def __init__(self, parent=None, json_file=None):
@@ -65,10 +66,7 @@ class GeestDock(QDockWidget):
         # Set layout
         layout.addWidget(self.treeView)
 
-        # Add a button bar at the bottom with a Close button and Add Dimension button
         button_bar = QHBoxLayout()
-        close_button = QPushButton("Close")
-        close_button.clicked.connect(self.close)
 
         add_dimension_button = QPushButton("⭐️ Add Dimension")
         add_dimension_button.clicked.connect(self.add_dimension)
@@ -89,8 +87,6 @@ class GeestDock(QDockWidget):
 
         button_bar.addWidget(load_json_button)
         button_bar.addWidget(export_json_button)
-        button_bar.addStretch()
-        button_bar.addWidget(close_button)
         layout.addLayout(button_bar)
 
         widget.setLayout(layout)
