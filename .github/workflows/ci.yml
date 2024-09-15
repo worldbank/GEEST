@@ -16,7 +16,7 @@ env:
   # Global environment variable
   IMAGE: qgis/qgis
   WITH_PYTHON_PEP: "true"
-  MUTE_LOGS: "true"
+  MUTE_LOGS: "false"
 
 jobs:
   test:
