@@ -20,7 +20,7 @@ from qgis.PyQt.QtGui import QMovie
 import json
 import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
-from .setup_panel import GeospatialWidget 
+from .setup_panel import SetupPanel 
 from .layer_details_dialog import LayerDetailDialog
 from ..utilities import resources_path
 
@@ -41,7 +41,7 @@ class GeestDock(QDockWidget):
             self.json_data = {"dimensions": []}
 
         # setup instance (hidden by default)
-        self.setup_widget = GeospatialWidget()
+        self.setup_widget = SetupPanel()
         self.setup_widget.setVisible(False)  # Initially hide the GeospatialWidget
         layout.addWidget(self.setup_widget)
 
@@ -82,11 +82,11 @@ class GeestDock(QDockWidget):
         self.add_dimension_button.clicked.connect(self.add_dimension)
 
         # Load and Save buttons
-        load_json_button = QPushButton("📂 Load")
-        load_json_button.clicked.connect(self.load_json_from_file)
+        self.load_json_button = QPushButton("📂 Load")
+        self.load_json_button.clicked.connect(self.load_json_from_file)
 
-        export_json_button = QPushButton("💾 Save")
-        export_json_button.clicked.connect(self.export_json_to_file)
+        self.export_json_button = QPushButton("💾 Save")
+        self.export_json_button.clicked.connect(self.export_json_to_file)
 
         # Prepare the throbber for the button (hidden initially)
         self.prepare_throbber = QLabel(self)
@@ -100,7 +100,7 @@ class GeestDock(QDockWidget):
         movie.start()
         
         # Button to toggle between Tree View and Setup Panel
-        self.toggle_view_button = QPushButton("Setup")
+        self.toggle_view_button = QPushButton("⚙️ Setup")
         self.toggle_view_button.clicked.connect(self.toggle_view)
         
         button_bar.addWidget(self.toggle_view_button)
@@ -115,23 +115,34 @@ class GeestDock(QDockWidget):
         button_bar.addWidget(self.prepare_button)
         button_bar.addStretch()
 
-        button_bar.addWidget(load_json_button)
-        button_bar.addWidget(export_json_button)
+        button_bar.addWidget(self.load_json_button)
+        button_bar.addWidget(self.export_json_button)
         button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
         layout.addLayout(button_bar)
 
         widget.setLayout(layout)
         self.setWidget(widget)
+        self.toggle_view() # start in on start panel
 
     def toggle_view(self):
         """Toggle between the tree view and the GeospatialWidget."""
         if self.tree_view_visible:
             self.treeView.setVisible(False)
             self.setup_widget.setVisible(True)
+            self.prepare_button.setVisible(False)
+            self.add_dimension_button.setVisible(False)
+            self.edit_toggle.setVisible(False)
+            self.load_json_button.setVisible(False)
+            self.export_json_button.setVisible(False)
             self.toggle_view_button.setText("Tree")
         else:
             self.treeView.setVisible(True)
             self.setup_widget.setVisible(False)
+            self.prepare_button.setVisible(True)
+            self.add_dimension_button.setVisible(True)          
+            self.edit_toggle.setVisible(True)
+            self.load_json_button.setVisible(True)
+            self.export_json_button.setVisible(True)            
             self.toggle_view_button.setText("Setup")
 
         self.tree_view_visible = not self.tree_view_visible

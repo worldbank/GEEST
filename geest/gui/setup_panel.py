@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
 from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
     QgsMapLayerProxyModel,
+    QgsFieldProxyModel,
     QgsWkbTypes,
     QgsProject,
     QgsVectorLayer,
@@ -26,7 +27,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QFileInfo, QSettings, QVariant
 
 
-class GeospatialWidget(QWidget):
+class SetupPanel(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("GEEST")
@@ -60,7 +61,7 @@ class GeospatialWidget(QWidget):
         layout.addWidget(self.study_area_label)
 
         self.layer_combo = QgsMapLayerComboBox()
-        self.layer_combo.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
         layout.addWidget(self.layer_combo)
 
         # Area Name Field ComboBox
@@ -68,6 +69,10 @@ class GeospatialWidget(QWidget):
         layout.addWidget(self.area_name_label)
 
         self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
+        # Set filter to show only text fields (QVariant.String)
+        # All, Date, Double, Int, LongLong, Numeric, String, Time
+        self.field_combo.setFilters(QgsFieldProxyModel.String) 
+        
         layout.addWidget(self.field_combo)
 
         # Link the map layer combo box with the field combo box
@@ -78,7 +83,7 @@ class GeospatialWidget(QWidget):
         layout.addWidget(self.dir_label)
 
         dir_layout = QHBoxLayout()
-        self.dir_display = QLabel("/path/to/working/dir")
+        self.dir_display = QLabel("Choose a working directory")
         self.dir_button = QPushButton("Select Directory")
         self.dir_button.clicked.connect(self.select_directory)
         dir_layout.addWidget(self.dir_display)
@@ -91,7 +96,7 @@ class GeospatialWidget(QWidget):
             self.working_dir = last_used_dir
             self.dir_display.setText(self.working_dir)
         else:
-            self.dir_display.setText("/path/to/working/dir")
+            self.dir_display.setText("Choose a working directory")
 
         # Text for analysis preparation
         self.preparation_label = QLabel(
