@@ -30,11 +30,11 @@ class TestGridCreator(unittest.TestCase):
     def setUp(self):
         # Setup parameters for the GridCreator class
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/polygon/polygon_layer.shp"
+            os.path.dirname(__file__), "data/admin/admin0.shp"
         )
         self.output_dir = os.path.join(os.path.dirname(__file__), "output")
         self.merged_output_path = os.path.join(self.output_dir, "merged_grid.gpkg")
-        self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32633")  # UTM Zone 33N
+        self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.h_spacing = 100
         self.v_spacing = 100
 

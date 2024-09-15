@@ -1,6 +1,6 @@
 import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsApplication
+from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsApplication, QgsRectangle
 from qgis.analysis import QgsNativeAlgorithms
 from processing.core.Processing import Processing
 from qgis.core import QgsProcessingFeedback
@@ -25,7 +25,7 @@ class TestExtents(unittest.TestCase):
     def setUp(self):
         # Setup parameters for the Extents class
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/admin.shp"
+            os.path.dirname(__file__), "data/admin/admin0.shp"
         )
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.pixel_size = 100
