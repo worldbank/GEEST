@@ -62,3 +62,7 @@ nix-result/
 
 # nix
 .direnv/
+
+data
+core
+app.py

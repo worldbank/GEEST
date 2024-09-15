@@ -20,8 +20,10 @@ from qgis.core import (
     QgsFeature,
     QgsGeometry,
     QgsVectorFileWriter,
+    QgsCoordinateTransform,
+    QgsField,
 )
-from qgis.PyQt.QtCore import QFileInfo
+from qgis.PyQt.QtCore import QFileInfo, QSettings, QVariant
 
 
 class GeospatialWidget(QWidget):
@@ -29,6 +31,7 @@ class GeospatialWidget(QWidget):
         super().__init__()
         self.setWindowTitle("GEEST")
         self.working_dir = ""
+        self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
         self.initUI()
 
     def initUI(self):
@@ -58,9 +61,6 @@ class GeospatialWidget(QWidget):
 
         self.layer_combo = QgsMapLayerComboBox()
         self.layer_combo.setFilters(QgsMapLayerProxyModel.VectorLayer)
-        #self.layer_combo.setFilterExpression(
-        #    f"geometry_type={QgsWkbTypes.PolygonGeometry} OR geometry_type={QgsWkbTypes.MultiPolygonGeometry}"
-        #)
         layout.addWidget(self.layer_combo)
 
         # Area Name Field ComboBox
@@ -85,6 +85,14 @@ class GeospatialWidget(QWidget):
         dir_layout.addWidget(self.dir_button)
         layout.addLayout(dir_layout)
 
+        # Set the last used working directory from QSettings
+        last_used_dir = self.settings.value("last_working_directory", "")
+        if last_used_dir and os.path.exists(last_used_dir):
+            self.working_dir = last_used_dir
+            self.dir_display.setText(self.working_dir)
+        else:
+            self.dir_display.setText("/path/to/working/dir")
+
         # Text for analysis preparation
         self.preparation_label = QLabel(
             "After selecting your study area layer, we will prepare the analysis region."
@@ -99,11 +107,14 @@ class GeospatialWidget(QWidget):
         self.setLayout(layout)
 
     def select_directory(self):
-        """Opens a file dialog to select the working directory."""
-        directory = QFileDialog.getExistingDirectory(self, "Select Working Directory")
+        """Opens a file dialog to select the working directory and saves it using QSettings."""
+        directory = QFileDialog.getExistingDirectory(self, "Select Working Directory", self.working_dir)
         if directory:
             self.working_dir = directory
             self.dir_display.setText(directory)
+
+            # Save the selected directory to QSettings
+            self.settings.setValue("last_working_directory", directory)
 
     def on_continue(self):
         """Triggered when the Continue button is pressed. Handles analysis preparation."""
@@ -131,7 +142,12 @@ class GeospatialWidget(QWidget):
             os.makedirs(study_area_dir)
 
         # Deconstruct polygons into parts and process each
-        features = layer.getFeatures()
+        # Check if there are any selected features
+        selected_features = layer.selectedFeatures()
+
+        # If there are no selected features, fall back to processing all features
+        features = selected_features if selected_features else layer.getFeatures()
+        
         for feature in features:
             geom = feature.geometry()
 
@@ -156,19 +172,27 @@ class GeospatialWidget(QWidget):
 
     def create_bbox_multiple_100m(self, bbox):
         """Adjusts bounding box dimensions to be a multiple of 100m."""
-        # Convert coordinates to EPSG:3857 (meters)
-        crs = QgsCoordinateReferenceSystem("EPSG:3857")
-        bbox = bbox.reproject(crs)
+        # Define the source CRS (assumed to be in the layer's CRS) and target CRS (EPSG:3857)
+        crs_src = QgsCoordinateReferenceSystem(self.layer_combo.currentLayer().crs())  # Get the CRS of the selected layer
+        crs_dst = QgsCoordinateReferenceSystem("EPSG:3857")  # EPSG:3857 (meters)
+
+        # Create the coordinate transformation
+        transform = QgsCoordinateTransform(crs_src, crs_dst, QgsProject.instance())
+
+        # Transform the bounding box to the target CRS (EPSG:3857)
+        x_min, y_min = transform.transform(bbox.xMinimum(), bbox.yMinimum())
+        x_max, y_max = transform.transform(bbox.xMaximum(), bbox.yMaximum())
 
         # Adjust bbox dimensions to be exact multiples of 100m
         def make_multiple(val, mult):
             return mult * round(val / mult)
 
-        x_min = make_multiple(bbox.xMinimum(), 100)
-        y_min = make_multiple(bbox.yMinimum(), 100)
-        x_max = make_multiple(bbox.xMaximum(), 100)
-        y_max = make_multiple(bbox.yMaximum(), 100)
+        x_min = make_multiple(x_min, 100)
+        y_min = make_multiple(y_min, 100)
+        x_max = make_multiple(x_max, 100)
+        y_max = make_multiple(y_max, 100)
 
+        # Create and return the adjusted bounding box in EPSG:3857
         return QgsRectangle(x_min, y_min, x_max, y_max)
 
     def save_bbox_to_geojson(self, bbox, filepath, area_name):
@@ -190,12 +214,38 @@ class GeospatialWidget(QWidget):
 
     def create_and_save_grid(self, bbox, filepath):
         """Creates a 100m grid over the bounding box and saves it to a GeoJSON file."""
-        grid_layer = QgsGridGenerator.createGridLayer(
-            bbox, 100, 100, QgsCoordinateReferenceSystem("EPSG:3857")
-        )
-        QgsVectorFileWriter.writeAsVectorFormat(
-            grid_layer, filepath, "utf-8", driverName="GeoJSON"
-        )
+        
+        # Create an in-memory vector layer for the grid (Polygon type)
+        grid_layer = QgsVectorLayer("Polygon?crs=EPSG:3857", "grid", "memory")
+        provider = grid_layer.dataProvider()
+
+        # Set up attributes
+        provider.addAttributes([QgsField("id", QVariant.Int)])
+        grid_layer.updateFields()
+
+        # Create a grid by iterating over the bounding box and generating 100x100m squares
+        x_min = bbox.xMinimum()
+        x_max = bbox.xMaximum()
+        y_min = bbox.yMinimum()
+        y_max = bbox.yMaximum()
+
+        step = 100  # 100m grid size
+        feature_id = 0
+
+        for x in range(int(x_min), int(x_max), step):
+            for y in range(int(y_min), int(y_max), step):
+                rect = QgsRectangle(x, y, x + step, y + step)
+                feature = QgsFeature()
+                feature.setGeometry(QgsGeometry.fromRect(rect))
+                feature.setAttributes([feature_id])
+                provider.addFeature(feature)
+                feature_id += 1
+
+        # Commit the changes to the in-memory layer
+        grid_layer.updateExtents()
+
+        # Save the grid layer to a GeoJSON file
+        QgsVectorFileWriter.writeAsVectorFormat(grid_layer, filepath, "utf-8", driverName="GeoJSON")
 
     def add_layers_to_qgis(self, directory):
         """Adds the generated layers to QGIS in a new layer group."""
