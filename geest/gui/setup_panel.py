@@ -147,7 +147,7 @@ class GeospatialWidget(QWidget):
 
         # If there are no selected features, fall back to processing all features
         features = selected_features if selected_features else layer.getFeatures()
-        
+
         for feature in features:
             geom = feature.geometry()
 
@@ -155,17 +155,35 @@ class GeospatialWidget(QWidget):
             area_name = feature[field_name]
             normalized_name = re.sub(r"\s+", "_", area_name.lower())
 
-            # Calculate bounding box and ensure it's a multiple of 100m
-            bbox = geom.boundingBox()
-            bbox_100m = self.create_bbox_multiple_100m(bbox)
+            if geom.isMultipart():
+                parts = geom.asGeometryCollection()  # Get all parts of the multipart
+                part_count = 1  # Start counting parts for filename suffixes
+                for part in parts:
+                    # Calculate bounding box for each part
+                    bbox = part.boundingBox()
+                    bbox_100m = self.create_bbox_multiple_100m(bbox)
 
-            # Save the bounding box as a GeoJSON file
-            bbox_file = os.path.join(study_area_dir, f"{normalized_name}.geojson")
-            self.save_bbox_to_geojson(bbox_100m, bbox_file, area_name)
+                    # Save each part with a unique filename suffix (e.g., _1.geojson, _2.geojson)
+                    bbox_file = os.path.join(study_area_dir, f"{normalized_name}_{part_count}.geojson")
+                    self.save_bbox_to_geojson(bbox_100m, bbox_file, area_name)
 
-            # Generate and save the 100m grid
-            grid_file = os.path.join(study_area_dir, f"{normalized_name}_grid.geojson")
-            self.create_and_save_grid(bbox_100m, grid_file)
+                    # Generate and save the 100m grid for each part
+                    grid_file = os.path.join(study_area_dir, f"{normalized_name}_{part_count}_grid.geojson")
+                    self.create_and_save_grid(bbox_100m, grid_file)
+
+                    part_count += 1
+            else:
+                # Singlepart geometry, process as usual
+                bbox = geom.boundingBox()
+                bbox_100m = self.create_bbox_multiple_100m(bbox)
+
+                # Save the bounding box as a GeoJSON file
+                bbox_file = os.path.join(study_area_dir, f"{normalized_name}.geojson")
+                self.save_bbox_to_geojson(bbox_100m, bbox_file, area_name)
+
+                # Generate and save the 100m grid
+                grid_file = os.path.join(study_area_dir, f"{normalized_name}_grid.geojson")
+                self.create_and_save_grid(bbox_100m, grid_file)
 
         # Add the created layers to QGIS in a new layer group
         self.add_layers_to_qgis(study_area_dir)
