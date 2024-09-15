@@ -13,12 +13,14 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QTreeView,
     QMenu,
+    QCheckBox,  # Add QCheckBox for Edit Toggle
 )
 from qgis.PyQt.QtCore import QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
 import json
 import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
+from .setup_panel import GeospatialWidget 
 from .layer_details_dialog import LayerDetailDialog
 from ..utilities import resources_path
 
@@ -28,6 +30,7 @@ class GeestDock(QDockWidget):
         super().__init__(parent)
 
         self.json_file = json_file
+        self.tree_view_visible = True
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
@@ -36,6 +39,11 @@ class GeestDock(QDockWidget):
             self.load_json()
         else:
             self.json_data = {"dimensions": []}
+
+        # setup instance (hidden by default)
+        self.setup_widget = GeospatialWidget()
+        self.setup_widget.setVisible(False)  # Initially hide the GeospatialWidget
+        layout.addWidget(self.setup_widget)
 
         # Create a CustomTreeView widget to handle editing and reverts
         self.treeView = CustomTreeView()
@@ -46,9 +54,8 @@ class GeestDock(QDockWidget):
         self.model = JsonTreeModel(self.json_data)
         self.treeView.setModel(self.model)
 
-        self.treeView.setEditTriggers(
-            QTreeView.DoubleClicked
-        )  # Only allow editing on double-click
+        # Only allow editing on double-click (initially enabled)
+        self.treeView.setEditTriggers(QTreeView.DoubleClicked)
 
         # Enable custom context menu
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -70,37 +77,64 @@ class GeestDock(QDockWidget):
 
         button_bar = QHBoxLayout()
 
-        add_dimension_button = QPushButton("⭐️ Add Dimension")
-        add_dimension_button.clicked.connect(self.add_dimension)
+        # "Add Dimension" button (initially enabled)
+        self.add_dimension_button = QPushButton("⭐️ Add Dimension")
+        self.add_dimension_button.clicked.connect(self.add_dimension)
 
-        load_json_button = QPushButton("📂 Load Template")
+        # Load and Save buttons
+        load_json_button = QPushButton("📂 Load")
         load_json_button.clicked.connect(self.load_json_from_file)
 
-        export_json_button = QPushButton("📦️ Save Template")
+        export_json_button = QPushButton("💾 Save")
         export_json_button.clicked.connect(self.export_json_to_file)
 
-        button_bar.addWidget(add_dimension_button)
+        # Prepare the throbber for the button (hidden initially)
+        self.prepare_throbber = QLabel(self)
+        movie = QMovie(resources_path("resources", "throbber-small.gif"))
+        self.prepare_throbber.setMovie(movie)
+        self.prepare_throbber.setVisible(False)  # Hide initially
+        button_bar.addWidget(self.prepare_throbber)
+
+        self.prepare_button = QPushButton("▶️ Prepare")
+        self.prepare_button.clicked.connect(self.process_leaves)
+        movie.start()
+        
+        # Button to toggle between Tree View and Setup Panel
+        self.toggle_view_button = QPushButton("Setup")
+        self.toggle_view_button.clicked.connect(self.toggle_view)
+        
+        button_bar.addWidget(self.toggle_view_button)
+        # Add Edit Toggle checkbox
+        self.edit_toggle = QCheckBox("Edit")
+        self.edit_toggle.setChecked(True)  # Initially enabled
+        self.edit_toggle.stateChanged.connect(self.toggle_edit_mode)
+
+        button_bar.addWidget(self.add_dimension_button)
         button_bar.addStretch()
 
-        self.prepare_button = QPushButton("🛸 Prepare")
-        self.prepare_button.clicked.connect(self.process_leaves)
         button_bar.addWidget(self.prepare_button)
         button_bar.addStretch()
 
         button_bar.addWidget(load_json_button)
         button_bar.addWidget(export_json_button)
+        button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
         layout.addLayout(button_bar)
 
         widget.setLayout(layout)
         self.setWidget(widget)
 
-        # Prepare the throbber for the button (hidden initially)
-        self.prepare_throbber = QLabel(self)
-        movie = QMovie(resources_path("resources", "throbber.gif"))
-        self.prepare_throbber.setMovie(movie)
-        self.prepare_throbber.setScaledContents(True)
-        self.prepare_throbber.setVisible(False)  # Hide initially
-        movie.start()
+    def toggle_view(self):
+        """Toggle between the tree view and the GeospatialWidget."""
+        if self.tree_view_visible:
+            self.treeView.setVisible(False)
+            self.setup_widget.setVisible(True)
+            self.toggle_view_button.setText("Tree")
+        else:
+            self.treeView.setVisible(True)
+            self.setup_widget.setVisible(False)
+            self.toggle_view_button.setText("Setup")
+
+        self.tree_view_visible = not self.tree_view_visible
 
     def load_json(self):
         """Load the JSON data from the file."""
@@ -131,6 +165,9 @@ class GeestDock(QDockWidget):
 
     def open_context_menu(self, position: QPoint):
         """Handle right-click context menu."""
+        if not self.edit_toggle.isChecked():  # Disable context menu if not in edit mode
+            return
+
         index = self.treeView.indexAt(position)
         if not index.isValid():
             return
@@ -220,6 +257,19 @@ class GeestDock(QDockWidget):
 
         # Show the dialog (exec_ will block until the dialog is closed)
         dialog.exec_()
+
+    def toggle_edit_mode(self):
+        """Enable or disable edit mode based on the 'Edit' toggle state."""
+        edit_mode = self.edit_toggle.isChecked()
+
+        # Enable or disable the "Add Dimension" button
+        self.add_dimension_button.setVisible(edit_mode)
+
+        # Enable or disable double-click editing in the tree view
+        if edit_mode:
+            self.treeView.setEditTriggers(QTreeView.DoubleClicked)
+        else:
+            self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
     def process_leaves(self):
         """
