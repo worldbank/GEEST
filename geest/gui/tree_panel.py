@@ -23,7 +23,7 @@ from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel 
 from .layer_detail_dialog import LayerDetailDialog
 from ..utilities import resources_path
-
+from geest.core import set_setting, setting
 
 class TreePanel(QWidget):
     def __init__(self, parent=None, json_file=None):
@@ -98,7 +98,12 @@ class TreePanel(QWidget):
         self.edit_toggle = QCheckBox("Edit")
         self.edit_toggle.setChecked(False)
         self.edit_toggle.stateChanged.connect(self.toggle_edit_mode)
-
+        edit_mode = int(setting(key="edit_mode", default=0))
+        if edit_mode:
+            self.edit_toggle.setVisible(True)
+        else:
+            self.edit_toggle.setVisible(False)   
+                
         button_bar.addWidget(self.add_dimension_button)
         button_bar.addStretch()
 

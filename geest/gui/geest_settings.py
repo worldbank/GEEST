@@ -34,6 +34,13 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         self.spin_thread_pool_size.setValue(
             int(setting(key="render_thread_pool_size", default=1))
         )
+        # This is for ESMAP staff to edit the tree directly in QGIS
+        edit_mode = int(setting(key="edit_mode", default=0))
+        if edit_mode:
+            self.edit_mode_checkbox.setChecked(True)
+        else:
+            self.edit_mode_checkbox.setChecked(False)        
+        
         # This is intended for developers to attach to the plugin using a
         # remote debugger so that they can step through the code. Do not
         # enable it if you do not have a remote debugger set up as it will
@@ -60,6 +67,12 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             key="render_thread_pool_size",
             value=self.spin_thread_pool_size.value(),
         )
+        
+        if self.edit_mode_checkbox.isChecked():
+            set_setting(key="edit_mode", value=1)
+        else:
+            set_setting(key="edit_mode", value=0)   
+                 
         if self.debug_mode_checkbox.isChecked():
             set_setting(key="debug_mode", value=1)
         else:
@@ -81,7 +94,7 @@ class GeestOptionsFactory(QgsOptionsWidgetFactory):
         self.setTitle("Geest")
 
     def icon(self):  # pylint: disable=missing-function-docstring
-        return QIcon(resources_path("icons", "geest-settings.svg"))
+        return QIcon(resources_path("resources", "geest-settings.svg"))
 
     def createWidget(self, parent):  # pylint: disable=missing-function-docstring
         return GeestSettings(parent)

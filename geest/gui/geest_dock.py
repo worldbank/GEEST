@@ -41,7 +41,7 @@ class GeestDock(QDockWidget):
         self.setup_widget.setVisible(True)
         layout.addWidget(self.setup_widget)
 
-        self.tree_widget = TreePanel()
+        self.tree_widget = TreePanel(json_file=self.json_file)
         self.tree_widget.setVisible(False)
         layout.addWidget(self.tree_widget)
         # Button to toggle between Tree View and Setup Panel

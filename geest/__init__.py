@@ -115,15 +115,13 @@ class GeestPlugin:
 
     def run(self):
         """
-        Shows the workbench dialog
+        Shows the settings dialog
         """
-        dialog = Geest(
-            parent=self.iface.mainWindow(),
-            iface=self.iface,
-            render_queue=self.render_queue,
-        )
-        dialog.setAttribute(Qt.WA_DeleteOnClose)
-        dialog.show()
+        # Create the settings dialog
+        self.iface.showOptionsDialog(
+            parent=self.iface.mainWindow(), 
+            currentPage='geest')
+        
 
     def display_information_message_bar(
         self,
