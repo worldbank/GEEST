@@ -27,13 +27,13 @@ class LayerDetailDialog(QDialog):
     # Signal to emit the updated data as a dictionary
     dataUpdated = pyqtSignal(dict)
 
-    def __init__(self, layer_name, layer_data, tree_item, parent=None):
+    def __init__(self, layer_name, layer_data, tree_item, editing=False, parent=None):
         super().__init__(parent)
 
         self.setWindowTitle(layer_name)
         self.layer_data = layer_data
         self.tree_item = tree_item  # Reference to the QTreeView item to update
-
+        self.editing = editing
         layout = QVBoxLayout()
 
         # Heading for the dialog
@@ -47,7 +47,8 @@ class LayerDetailDialog(QDialog):
         self.text_edit_left = QTextEdit()
         self.text_edit_left.setPlainText(layer_data.get("indicator", ""))
         self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
-        splitter.addWidget(self.text_edit_left)
+        if self.editing:
+            splitter.addWidget(self.text_edit_left)
 
         # Create the QTextEdit for HTML preview (right side)
         self.text_edit_right = QTextEdit()
@@ -73,7 +74,8 @@ class LayerDetailDialog(QDialog):
         header.setSectionResizeMode(1, QHeaderView.Stretch)  # Value column
 
         # Add the table to the layout
-        layout.addWidget(self.table)
+        if self.editing:
+            layout.addWidget(self.table)
 
         # Close button
         close_button = QPushButton("Close")

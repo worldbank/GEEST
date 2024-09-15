@@ -21,7 +21,7 @@ import json
 import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel 
-from .layer_details_dialog import LayerDetailDialog
+from .layer_detail_dialog import LayerDetailDialog
 from ..utilities import resources_path
 
 
@@ -96,7 +96,7 @@ class TreePanel(QWidget):
     
         # Add Edit Toggle checkbox
         self.edit_toggle = QCheckBox("Edit")
-        self.edit_toggle.setChecked(True)  # Initially enabled
+        self.edit_toggle.setChecked(False)
         self.edit_toggle.stateChanged.connect(self.toggle_edit_mode)
 
         button_bar.addWidget(self.add_dimension_button)
@@ -140,8 +140,7 @@ class TreePanel(QWidget):
 
     def open_context_menu(self, position: QPoint):
         """Handle right-click context menu."""
-        if not self.edit_toggle.isChecked():  # Disable context menu if not in edit mode
-            return
+        editing = self.edit_toggle.isChecked()
 
         index = self.treeView.indexAt(position)
         if not index.isValid():
@@ -150,7 +149,7 @@ class TreePanel(QWidget):
         item = index.internalPointer()
 
         # Check the role of the item directly from the stored role
-        if item.role == "dimension":
+        if item.role == "dimension" and editing:
             # Context menu for dimensions
             add_factor_action = QAction("Add Factor", self)
             remove_dimension_action = QAction("Remove Dimension", self)
@@ -166,7 +165,7 @@ class TreePanel(QWidget):
             menu.addAction(add_factor_action)
             menu.addAction(remove_dimension_action)
 
-        elif item.role == "factor":
+        elif item.role == "factor" and editing:
             # Context menu for factors
             add_layer_action = QAction("Add Layer", self)
             remove_factor_action = QAction("Remove Factor", self)
@@ -204,19 +203,22 @@ class TreePanel(QWidget):
             # Add actions to menu
             menu = QMenu(self)
             menu.addAction(show_properties_action)
-            menu.addAction(remove_layer_action)
+            if editing:
+                menu.addAction(remove_layer_action)
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
 
     def show_layer_properties(self, item):
         """Open a dialog showing layer properties and update the tree upon changes."""
+        editing = self.edit_toggle.isChecked()
         # Get the current layer name and layer data from the item
         layer_name = item.data(0)  # Column 0: layer name
         layer_data = item.data(4)  # Column 4: layer data (stored as a dict)
 
         # Create and show the LayerDetailDialog
-        dialog = LayerDetailDialog(layer_name, layer_data, self)
+        dialog = LayerDetailDialog(
+            layer_name, layer_data, item, editing=editing, parent=self)
 
         # Connect the dialog's dataUpdated signal to handle data updates
         def update_layer_data(updated_data):
