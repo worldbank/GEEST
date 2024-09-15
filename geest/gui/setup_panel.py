@@ -5,9 +5,12 @@ from PyQt5.QtWidgets import (
     QLabel,
     QVBoxLayout,
     QPushButton,
+    QToolButton,
     QHBoxLayout,
     QFileDialog,
     QMessageBox,
+    QSpacerItem,
+    QSizePolicy,
 )
 from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
@@ -25,6 +28,8 @@ from qgis.core import (
     QgsField,
 )
 from qgis.PyQt.QtCore import QFileInfo, QSettings, QVariant
+from qgis.PyQt.QtGui import QPixmap
+from ..utilities import resources_path
 
 
 class SetupPanel(QWidget):
@@ -32,29 +37,27 @@ class SetupPanel(QWidget):
         super().__init__()
         self.setWindowTitle("GEEST")
         self.working_dir = ""
-        self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
+        self.settings = (
+            QSettings()
+        )  # Initialize QSettings to store and retrieve settings
         self.initUI()
 
     def initUI(self):
         layout = QVBoxLayout()
 
         # Title
+        # geest-banner.png
+        self.banner_label = QLabel()
+        self.banner_label.setPixmap(
+            QPixmap(resources_path("resources", "geest-banner.png"))
+        )
+        layout.addWidget(self.banner_label)
         self.title_label = QLabel(
             "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
             self,
         )
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
-
-        # Description
-        self.description_label = QLabel(
-            "With support from the [Canada Clean Energy and Forest Climate Facility (CCEFCFy)], "
-            "the [Geospatial Operational Support Team (GOST, DECSC)] launched the project "
-            '"Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector."',
-            self,
-        )
-        self.description_label.setWordWrap(True)
-        layout.addWidget(self.description_label)
 
         # Study Area Combobox - Filtered to polygon/multipolygon layers
         self.study_area_label = QLabel("Study Area Layer:")
@@ -71,20 +74,23 @@ class SetupPanel(QWidget):
         self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         # Set filter to show only text fields (QVariant.String)
         # All, Date, Double, Int, LongLong, Numeric, String, Time
-        self.field_combo.setFilters(QgsFieldProxyModel.String) 
-        
+        self.field_combo.setFilters(QgsFieldProxyModel.String)
+
         layout.addWidget(self.field_combo)
 
         # Link the map layer combo box with the field combo box
         self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
 
         # Directory Selector for Working Directory
-        self.dir_label = QLabel("Working Directory:")
+        self.dir_label = QLabel(
+            "Working Directory: This folder will store all the inputs and outputs for your model."
+        )
         layout.addWidget(self.dir_label)
 
         dir_layout = QHBoxLayout()
         self.dir_display = QLabel("Choose a working directory")
-        self.dir_button = QPushButton("Select Directory")
+        self.dir_button = QToolButton()
+        self.dir_button.setText("📂")
         self.dir_button.clicked.connect(self.select_directory)
         dir_layout.addWidget(self.dir_display)
         dir_layout.addWidget(self.dir_button)
@@ -103,7 +109,17 @@ class SetupPanel(QWidget):
             "After selecting your study area layer, we will prepare the analysis region."
         )
         layout.addWidget(self.preparation_label)
-
+        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        layout.addItem(spacer)
+        # Description
+        self.description_label = QLabel(
+            "This plugin is built with support from the Canada Clean Energy and Forest Climate Facility (CCEFCFy), "
+            "the Geospatial Operational Support Team (GOST, DECSC) for the project "
+            "'Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector'.",
+            self,
+        )
+        self.description_label.setWordWrap(True)
+        layout.addWidget(self.description_label)
         # Continue Button
         self.continue_button = QPushButton("Continue")
         self.continue_button.clicked.connect(self.on_continue)
@@ -113,7 +129,9 @@ class SetupPanel(QWidget):
 
     def select_directory(self):
         """Opens a file dialog to select the working directory and saves it using QSettings."""
-        directory = QFileDialog.getExistingDirectory(self, "Select Working Directory", self.working_dir)
+        directory = QFileDialog.getExistingDirectory(
+            self, "Select Working Directory", self.working_dir
+        )
         if directory:
             self.working_dir = directory
             self.dir_display.setText(directory)
@@ -169,11 +187,15 @@ class SetupPanel(QWidget):
                     bbox_100m = self.create_bbox_multiple_100m(bbox)
 
                     # Save each part with a unique filename suffix (e.g., _1.geojson, _2.geojson)
-                    bbox_file = os.path.join(study_area_dir, f"{normalized_name}_{part_count}.geojson")
+                    bbox_file = os.path.join(
+                        study_area_dir, f"{normalized_name}_{part_count}.geojson"
+                    )
                     self.save_bbox_to_geojson(bbox_100m, bbox_file, area_name)
 
                     # Generate and save the 100m grid for each part
-                    grid_file = os.path.join(study_area_dir, f"{normalized_name}_{part_count}_grid.geojson")
+                    grid_file = os.path.join(
+                        study_area_dir, f"{normalized_name}_{part_count}_grid.geojson"
+                    )
                     self.create_and_save_grid(bbox_100m, grid_file)
 
                     part_count += 1
@@ -187,7 +209,9 @@ class SetupPanel(QWidget):
                 self.save_bbox_to_geojson(bbox_100m, bbox_file, area_name)
 
                 # Generate and save the 100m grid
-                grid_file = os.path.join(study_area_dir, f"{normalized_name}_grid.geojson")
+                grid_file = os.path.join(
+                    study_area_dir, f"{normalized_name}_grid.geojson"
+                )
                 self.create_and_save_grid(bbox_100m, grid_file)
 
         # Add the created layers to QGIS in a new layer group
@@ -196,7 +220,9 @@ class SetupPanel(QWidget):
     def create_bbox_multiple_100m(self, bbox):
         """Adjusts bounding box dimensions to be a multiple of 100m."""
         # Define the source CRS (assumed to be in the layer's CRS) and target CRS (EPSG:3857)
-        crs_src = QgsCoordinateReferenceSystem(self.layer_combo.currentLayer().crs())  # Get the CRS of the selected layer
+        crs_src = QgsCoordinateReferenceSystem(
+            self.layer_combo.currentLayer().crs()
+        )  # Get the CRS of the selected layer
         crs_dst = QgsCoordinateReferenceSystem("EPSG:3857")  # EPSG:3857 (meters)
 
         # Create the coordinate transformation
@@ -237,7 +263,7 @@ class SetupPanel(QWidget):
 
     def create_and_save_grid(self, bbox, filepath):
         """Creates a 100m grid over the bounding box and saves it to a GeoJSON file."""
-        
+
         # Create an in-memory vector layer for the grid (Polygon type)
         grid_layer = QgsVectorLayer("Polygon?crs=EPSG:3857", "grid", "memory")
         provider = grid_layer.dataProvider()
@@ -268,7 +294,9 @@ class SetupPanel(QWidget):
         grid_layer.updateExtents()
 
         # Save the grid layer to a GeoJSON file
-        QgsVectorFileWriter.writeAsVectorFormat(grid_layer, filepath, "utf-8", driverName="GeoJSON")
+        QgsVectorFileWriter.writeAsVectorFormat(
+            grid_layer, filepath, "utf-8", driverName="GeoJSON"
+        )
 
     def add_layers_to_qgis(self, directory):
         """Adds the generated layers to QGIS in a new layer group."""
