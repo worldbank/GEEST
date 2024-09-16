@@ -14,10 +14,12 @@ from qgis_gender_indicator_tool.jobs.create_grids import GridCreator
 class TestGridCreator(unittest.TestCase):
     """Test the GridCreator class."""
 
-    def setUp(self):
+    def test_create_grids(self):
+        """Test the create_grids method with real data to ensure the grid creation process works."""
+        
         # Setup parameters for the GridCreator class
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/admin0.shp"
+            os.path.dirname(__file__), "data/admin/Admin0.shp"
         )
         self.output_dir = os.path.join(os.path.dirname(__file__), "output")
         self.merged_output_path = os.path.join(self.output_dir, "merged_grid.gpkg")
@@ -27,9 +29,7 @@ class TestGridCreator(unittest.TestCase):
 
         # Create the output directory if it doesn't exist
         os.makedirs(self.output_dir, exist_ok=True)
-
-    def test_create_grids(self):
-        """Test the create_grids method with real data to ensure the grid creation process works."""
+        
         # Load the vector layer
         layer = QgsVectorLayer(self.vector_layer_path, "polygon_layer", "ogr")
         self.assertTrue(layer.isValid(), "The vector layer is not valid")

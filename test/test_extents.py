@@ -14,15 +14,16 @@ class TestExtents(unittest.TestCase):
         """Test the get_country_extent method to ensure extent calculation is correct."""
         
         # Setup parameters for the Extents class
+        self.workingDir = os.path.join(os.path.dirname(__file__))
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/admin0.shp"
+            os.path.dirname(__file__), "data/admin/Admin0.shp"
         )
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.pixel_size = 100
         
         # Initialize the Extents class
         extents_processor = Extents(
-            self.vector_layer_path, self.pixel_size, self.utm_crs
+            self.workingDir, self.vector_layer_path, self.pixel_size, self.utm_crs
         )
 
         # Get the extent of the vector layer
