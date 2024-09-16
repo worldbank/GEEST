@@ -1,7 +1,7 @@
 {
     "dimensions": [
         {
-            "name": "CONTEXTUAL",
+            "name": "contextual",
             "factors": [
                 {
                     "name": "Workplace Discrimination",
@@ -10,24 +10,24 @@
                             "layer": "WBL 2024 Workplace Index Score",
                             "Text": "Women, Business and the Law",
                             "Default Weighting": 0.33,
-                            "Use Aggregate": 1.0,
+                            "Use Aggregate": true,
                             "Default Index Score": 83.8,
-                            "Index Score": 100,
-                            "Use default Idex Score": 1,
-                            "Rasterise Raster": 0.0,
-                            "Rasterise Polygon": 0,
-                            "Rasterise Polyline": 0.0,
-                            "Rasterise Point": 0,
+                            "Index Score": 99,
+                            "Use default Idex Score": true,
+                            "Rasterise Raster": true,
+                            "Rasterise Polygon": true,
+                            "Rasterise Polyline": true,
+                            "Rasterise Point": true,
                             "Default Buffer Distances": "0,0,0",
-                            "Use Buffer point": 0,
+                            "Use Buffer point": true,
                             "Default pixel": 0,
-                            "Use Create Grid": 0,
+                            "Use Create Grid": false,
                             "Default Mode": "",
                             "Default Measurement": "",
                             "Default Increments": "0,0,0",
-                            "Use Mode of Travel": 0.0,
+                            "Use Mode of Travel": false,
                             "source": "Women, Business and the Law",
-                            "indicator": "This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100.",
+                            "indicator": "This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100. Test",
                             "query": "WBL 2024 index score: 83.8"
                         }
                     ]
@@ -93,7 +93,7 @@
             ]
         },
         {
-            "name": "ACCESSIBILITY",
+            "name": "accessibility",
             "factors": [
                 {
                     "name": "Women's Travel Patterns",
@@ -339,7 +339,7 @@
             ]
         },
         {
-            "name": "PLACE CHARACTERIZATION",
+            "name": "place characterization",
             "factors": [
                 {
                     "name": "Active Transport",
@@ -691,7 +691,7 @@
             ]
         },
         {
-            "name": "About ",
+            "name": "about ",
             "factors": [
                 {
                     "name": "Water sanitation",
@@ -725,7 +725,7 @@
             ]
         },
         {
-            "name": "Setup",
+            "name": "setup",
             "factors": [
                 {
                     "name": "Water sanitation",
@@ -759,7 +759,7 @@
             ]
         },
         {
-            "name": "AGGREGATE",
+            "name": "aggregate",
             "factors": [
                 {
                     "name": "Contextual",
@@ -851,7 +851,7 @@
             ]
         },
         {
-            "name": "Insignts",
+            "name": "insignts",
             "factors": [
                 {
                     "name": "Enablement",

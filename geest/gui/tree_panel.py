@@ -19,9 +19,9 @@ from qgis.PyQt.QtCore import QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
 import json
 import os
-from geest.gui import CustomTreeView, JsonTreeModel
-from geest.gui import SetupPanel 
-from geest.gui import LayerDetailDialog
+from .geest_treeview import CustomTreeView, JsonTreeModel
+from .setup_panel import SetupPanel 
+from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
 from geest.core import set_setting, setting
 
