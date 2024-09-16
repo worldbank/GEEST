@@ -43,7 +43,7 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
 
         # Define bbox and CRS
         bbox = country_boundary.extent()
-        pixelSize = 100  # 100m grid
+        pixel_size = 100  # 100m grid
         crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         index_value = 80  # Index value
         index_scale = 100
@@ -52,7 +52,7 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
         raster_gen = RasterizeIndexScoreValue(
             bbox,
             country_boundary,
-            pixelSize,
+            pixel_size,
             output_path,
             crs,
             index_value,

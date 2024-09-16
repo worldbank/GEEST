@@ -13,7 +13,7 @@ class RasterizeIndexScoreValue:
         self,
         bbox,
         country_boundary,
-        pixelSize,
+        pixel_size,
         output_path,
         crs,
         index_value,
@@ -25,7 +25,7 @@ class RasterizeIndexScoreValue:
         Args:
             bbox (QgsRectangle): The bounding box for the analysis area.
             country_boundary (QgsVectorLayer): A polygon layer defining the country boundary.
-            pixelSize (int): The size of each cell in the raster (e.g., 100m).
+            pixel_size (int): The size of each cell in the raster (e.g., 100m).
             output_path (str): Path where the output raster should be saved.
             crs (QgsCoordinateReferenceSystem): CRS for the raster (e.g., UTM).
             index_value (float): The score value to assign to each pixel inside the boundary.
@@ -33,7 +33,7 @@ class RasterizeIndexScoreValue:
         """
         self.bbox = bbox
         self.country_boundary = country_boundary
-        self.pixelSize = pixelSize
+        self.pixel_size = pixel_size
         self.output_path = output_path
         self.crs = crs
         self.index_value = index_value
@@ -70,8 +70,8 @@ class RasterizeIndexScoreValue:
                 "FIELD": None,
                 "BURN": raster_value,  # Burn the score value
                 "UNITS": 1,  # Pixel size in CRS units
-                "WIDTH": self.pixelSize,
-                "HEIGHT": self.pixelSize,
+                "WIDTH": self.pixel_size,
+                "HEIGHT": self.pixel_size,
                 "EXTENT": extent_str,
                 "NODATA": -9999,  # NoData value for non-land pixels
                 "DATA_TYPE": 5,  # Float32
