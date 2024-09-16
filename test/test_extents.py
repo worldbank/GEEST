@@ -8,19 +8,7 @@ from qgis_gender_indicator_tool.jobs.extents import Extents
 
 
 class TestExtents(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        """Sets up the QGIS environment before all tests."""
-        cls.qgs = QgsApplication([], False)
-        cls.qgs.initQgis()
-        Processing.initialize()
-        QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
-
-    @classmethod
-    def tearDownClass(cls):
-        """Cleans up the QGIS environment after all tests."""
-        cls.qgs.exitQgis()
+    """Test the Extents class."""
 
     def setUp(self):
         # Setup parameters for the Extents class
@@ -50,10 +38,6 @@ class TestExtents(unittest.TestCase):
         self.assertGreater(
             country_extent.height(), 0, "Extent height is not greater than zero"
         )
-
-    def tearDown(self):
-        # No cleanup required for Extents tests
-        pass
 
 
 if __name__ == "__main__":

@@ -13,19 +13,7 @@ from qgis_processing_test.extents import Extents
 
 
 class TestGridCreator(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        """Sets up the QGIS environment before all tests."""
-        cls.qgs = QgsApplication([], False)
-        cls.qgs.initQgis()
-        Processing.initialize()
-        QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
-
-    @classmethod
-    def tearDownClass(cls):
-        """Cleans up the QGIS environment after all tests."""
-        cls.qgs.exitQgis()
+    """Test the GridCreator class."""
 
     def setUp(self):
         # Setup parameters for the GridCreator class
@@ -60,14 +48,6 @@ class TestGridCreator(unittest.TestCase):
             os.path.exists(self.merged_output_path),
             "Merged grid output file does not exist",
         )
-
-    def tearDown(self):
-        # Clean up after tests by removing the output directory and its contents
-        if os.path.exists(self.merged_output_path):
-            os.remove(self.merged_output_path)
-
-        if os.path.exists(self.output_dir) and not os.listdir(self.output_dir):
-            os.rmdir(self.output_dir)
 
 
 if __name__ == "__main__":

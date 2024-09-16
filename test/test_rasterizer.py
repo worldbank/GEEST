@@ -8,24 +8,7 @@ from qgis_gender_indicator_tool.jobs.rasterization import Rasterizer
 
 
 class TestRasterizer(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        """Sets up the QGIS environment before all tests."""
-        # Start a QGIS application instance for testing
-        cls.qgs = QgsApplication([], False)
-        cls.qgs.initQgis()
-
-        # Initialize processing
-        Processing.initialize()
-
-        # Add native algorithms for testing (this is important for running processing algorithms)
-        QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
-
-    @classmethod
-    def tearDownClass(cls):
-        """Cleans up the QGIS environment after all tests."""
-        cls.qgs.exitQgis()
+    """Test the Rasterizer class."""
 
     def setUp(self):
         # Setup real parameters for the Rasterizer class
@@ -69,15 +52,6 @@ class TestRasterizer(unittest.TestCase):
         self.assertTrue(
             os.path.exists(rasterized_output), "Rasterized output file does not exist"
         )
-
-    def tearDown(self):
-        # Clean up after tests by removing the output directory and its contents
-        rasterized_output = os.path.join(self.output_dir, "rasterized_output.tif")
-        if os.path.exists(rasterized_output):
-            os.remove(rasterized_output)
-
-        if os.path.exists(self.output_dir) and not os.listdir(self.output_dir):
-            os.rmdir(self.output_dir)
 
 
 if __name__ == "__main__":
