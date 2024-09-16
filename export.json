@@ -1,0 +1,946 @@
+{
+    "dimensions": [
+        {
+            "name": "contextual",
+            "factors": [
+                {
+                    "name": "Workplace Discrimination",
+                    "layers": [
+                        {
+                            "layer": "WBL 2024 Workplace Index Score",
+                            "Text": "Women, Business and the Law",
+                            "Default Weighting": 0.33,
+                            "Use Aggregate": true,
+                            "Default Index Score": 83.8,
+                            "Index Score": 99,
+                            "Use default Idex Score": true,
+                            "Rasterise Raster": true,
+                            "Rasterise Polygon": true,
+                            "Rasterise Polyline": true,
+                            "Rasterise Point": true,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": true,
+                            "Default pixel": 0,
+                            "Use Create Grid": false,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": false,
+                            "source": "Women, Business and the Law",
+                            "indicator": "This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100. Test",
+                            "query": "WBL 2024 index score: 83.8"
+                        }
+                    ]
+                },
+                {
+                    "name": "Regulatory Frameworks",
+                    "layers": [
+                        {
+                            "layer": "WBL 2024 Pay+Parenthood Index Score",
+                            "Text": "Women, Business and the Law",
+                            "Default Weighting": 0.33,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 100,
+                            "Use default Idex Score": 1,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "Women, Business and the Law",
+                            "indicator": "This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by aggregating the Parenthood and Pay Index scores of the WBL 2024. The data is already formatted on scale from 1 to 100.",
+                            "query": "WBL 2024 Pay (100)+Parenthood(40) Index Score"
+                        }
+                    ]
+                },
+                {
+                    "name": "Financial Inclusion",
+                    "layers": [
+                        {
+                            "layer": "WBL 2024 Entrepeneurship Index Score",
+                            "Text": "Women, Business and the Law",
+                            "Default Weighting": 0.33,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 100,
+                            "Use default Idex Score": 1,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "Women, Business and the Law",
+                            "indicator": "This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. The data is already formatted on scale from 1 to 100. It comes from the Entrepeneurship rating of the 2024 WBL Index. ",
+                            "query": "WBL 2024 Entrepeneurship Index Score: 75"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "accessibility",
+            "factors": [
+                {
+                    "name": "Women's Travel Patterns",
+                    "layers": [
+                        {
+                            "layer": "Location of kindergartens/childcare",
+                            "Text": "OSM, Humdata",
+                            "Default Weighting": 0.2,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "Walking",
+                            "Default Measurement": "Disctance",
+                            "Default Increments": "250, 500, 750, 1000, 1250",
+                            "Use Mode of Travel": 1.0,
+                            "source": "OSM, Humdata",
+                            "indicator": "This factor is assessed through network analyses to calculate catchment areas using Open Route Service. After each analysis, the territory is divided into 100m x 100m rasters, and the factor score is calculated as the average score within each raster. The scoring for each type of facility is categorized by distance as follows:0 to 400 meters: 5401 to 800 meters: 4801 to 1200 meters: 31201 to 1500 meters: 21501 to 2000 meters: 1Over 2000 meters: 0",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"amenity\"=\"kindergarten\"](area.area_0);    way[\"amenity\"=\"kindergarten\"](area.area_0);    relation[\"amenity\"=\"kindergarten\"](area.area_0););(._;>;);out body;"
+                        },
+                        {
+                            "layer": "Location of primary schools ",
+                            "Text": "OSM, Humdata",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "",
+                            "Use Mode of Travel": "",
+                            "source": "OSM, Humdata",
+                            "indicator": "",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"amenity\"=\"school\"](area.area_0);    way[\"amenity\"=\"school\"](area.area_0);    relation[\"amenity\"=\"school\"](area.area_0););(._;>;);out body;"
+                        },
+                        {
+                            "layer": "Location of groceries",
+                            "Text": "OSM",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "",
+                            "Use Mode of Travel": "",
+                            "source": "OSM",
+                            "indicator": "",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"shop\"=\"greengrocer\"](area.area_0);    way[\"shop\"=\"greengrocer\"](area.area_0);    relation[\"shop\"=\"greengrocer\"](area.area_0););(._;>;);out body;"
+                        },
+                        {
+                            "layer": "Location of pharmacies",
+                            "Text": "OSM, NDVI",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "",
+                            "Use Mode of Travel": "",
+                            "source": "OSM, NDVI",
+                            "indicator": "",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"amenity\"=\"pharmacy\"](area.area_0);       way[\"amenity\"=\"pharmacy\"](area.area_0);       relation[\"amenity\"=\"pharmacy\"](area.area_0); );(._;>;);out body;"
+                        },
+                        {
+                            "layer": "Location of green spaces ",
+                            "Text": "",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "",
+                            "Use Mode of Travel": "",
+                            "source": "",
+                            "indicator": "",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"leisure\"=\"park\"](area.area_0);    node[\"boundary\"=\"national_park\"](area.area_0);    way[\"leisure\"=\"park\"](area.area_0);    way[\"boundary\"=\"national_park\"](area.area_0);    relation[\"leisure\"=\"park\"](area.area_0);    relation[\"boundary\"=\"national_park\"](area.area_0););(._;>;);out body;"
+                        }
+                    ]
+                },
+                {
+                    "name": "Access to Public Transport",
+                    "layers": [
+                        {
+                            "layer": "Location of public transportation stops, including maritime (OSM)",
+                            "Text": "OSM",
+                            "Default Weighting": 0.2,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "Walking",
+                            "Default Measurement": "Disctance",
+                            "Default Increments": "250, 500, 750, 1000, 1250",
+                            "Use Mode of Travel": 1.0,
+                            "source": "OSM",
+                            "indicator": "This factor is evaluated using the same methodology as for women's travel patterns, but with public transport stops as the points of interest. Additionally, the suggested thresholds should be adjusted to:0 to 250 meters: 5251 to 500 meters: 4501 to 750 meters: 3751 to 1,000 meters: 21,001 to 1,250 meters: 1Over 1,250 meters: 0",
+                            "query": "\"[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"\"public_transport\"\"=\"\"stop_position\"\"](area.area_0);    node[\"\"public_transport\"\"=\"\"platform\"\"](area.area_0);    node[\"\"public_transport\"\"=\"\"station\"\"](area.area_0);    node[\"\"public_transport\"\"=\"\"stop_area\"\"](area.area_0);    node[\"\"highway\"\"=\"\"bus_stop\"\"](area.area_0);    node[\"\"highway\"\"=\"\"platform\"\"](area.area_0);    way[\"\"public_transport\"\"=\"\"stop_position\"\"](area.area_0);    way[\"\"public_transport\"\"=\"\"platform\"\"](area.area_0);    way[\"\"public_transport\"\"=\"\"station\"\"](area.area_0);    way[\"\"public_transport\"\"=\"\"stop_area\"\"](area.area_0);    way[\"\"highway\"\"=\"\"bus_stop\"\"](area.area_0);    way[\"\"highway\"\"=\"\"platform\"\"](area.area_0);    relation[\"\"public_transport\"\"=\"\"stop_position\"\"](area.area_0);    relation[\"\"public_transport\"\"=\"\"platform\"\"](area.area_0);    relation[\"\"public_transport\"\"=\"\"station\"\"](area.area_0);    relation[\"\"public_transport\"\"=\"\"stop_area\"\"](area.area_0);    relation[\"\"highway\"\"=\"\"bus_stop\"\"](area.area_0);    relation[\"\"highway\"\"=\"\"platform\"\"](area.area_0); node[\"amenity\"=\"ferry_terminal\"](area.area_0);    way[\"amenity\"=\"ferry_terminal\"](area.area_0);    relation[\"amenity\"=\"ferry_terminal\"](area.area_0);););(._;>;);out body;\""
+                        }
+                    ]
+                },
+                {
+                    "name": "Access to Health Facilities",
+                    "layers": [
+                        {
+                            "layer": "Location of hospitals and clinics (OSM)",
+                            "Text": "OSM",
+                            "Default Weighting": 0.2,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "Walking",
+                            "Default Measurement": "Disctance",
+                            "Default Increments": "250, 500, 750, 1000, 1250",
+                            "Use Mode of Travel": 1.0,
+                            "source": "OSM",
+                            "indicator": "The methodology is the same as for all Accessibility factors, but using hospitals and clinics as the points of interest. This time, the suggested thresholds should be adjusted to:0 to 1,000 meters: 51,001 to 2,000 meters: 42,001 to 3,000 meters: 33,001 to 4,000 meters: 24,001 to 5,000 meters: 1Over 5,000 meters: 0",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"amenity\"=\"dentist\"](area.area_0);    node[\"amenity\"=\"doctors\"](area.area_0);    node[\"amenity\"=\"hospital\"](area.area_0);    node[\"amenity\"=\"pharmacy\"](area.area_0);    node[\"amenity\"=\"clinic\"](area.area_0);    way[\"amenity\"=\"dentist\"](area.area_0);    way[\"amenity\"=\"doctors\"](area.area_0);    way[\"amenity\"=\"hospital\"](area.area_0);    way[\"amenity\"=\"pharmacy\"](area.area_0);    way[\"amenity\"=\"clinic\"](area.area_0);    relation[\"amenity\"=\"dentist\"](area.area_0);    relation[\"amenity\"=\"doctors\"](area.area_0);    relation[\"amenity\"=\"hospital\"](area.area_0);    relation[\"amenity\"=\"pharmacy\"](area.area_0);    relation[\"amenity\"=\"clinic\"](area.area_0););(._;>;);out body;"
+                        }
+                    ]
+                },
+                {
+                    "name": "Access to Education and Training Facilities",
+                    "layers": [
+                        {
+                            "layer": "Location of universities and technical schools (OSM, Hummanitarian Data Exchange)",
+                            "Text": "OSM, Humdata",
+                            "Default Weighting": 0.2,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "Walking",
+                            "Default Measurement": "Disctance",
+                            "Default Increments": "250, 500, 750, 1000, 1250",
+                            "Use Mode of Travel": 1.0,
+                            "source": "OSM, Humdata",
+                            "indicator": "The methodology is the same as for all Accessibility factors, but using universities and trainning facilities as the points of interest. This time, the suggested thresholds should be adjusted to:0 to 2,000 meters: 52,001 to 4,000 meters: 44,001 to 6,000 meters: 36,001 to 8,000 meters: 28,001 to 10,000 meters: 1Over 10,000 meters: 0",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"amenity\"=\"university\"](area.area_0);    way[\"amenity\"=\"university\"](area.area_0);    relation[\"amenity\"=\"university\"](area.area_0););(._;>;);out body;"
+                        }
+                    ]
+                },
+                {
+                    "name": "Access to Financial Facilities",
+                    "layers": [
+                        {
+                            "layer": "Location of Banks and other FF (OSM)",
+                            "Text": "OSM",
+                            "Default Weighting": 0.2,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "250, 500, 750, 1000, 1250",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "Walking",
+                            "Default Measurement": "Disctance",
+                            "Default Increments": "250, 500, 750, 1000, 1250",
+                            "Use Mode of Travel": 1.0,
+                            "source": "OSM",
+                            "indicator": "The methodology is the same as for all Accessibility factors, but using financial facilities (except for ATMs) as the points of interest. This time, the suggested thresholds should be adjusted to:0 to 400 meters: 5401 to 800 meters: 4801 to 1,200 meters: 31,201 to 2,000 meters: 22,001 to 3,000 meters: 1Over 3,000 meters: 0",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"amenity\"=\"bank\"](area.area_0);    node[\"office\"=\"financial\"](area.area_0);    way[\"amenity\"=\"bank\"](area.area_0);    way[\"office\"=\"financial\"](area.area_0);    relation[\"amenity\"=\"bank\"](area.area_0);    relation[\"office\"=\"financial\"](area.area_0););(._;>;);out body;"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "place characterization",
+            "factors": [
+                {
+                    "name": "Active Transport",
+                    "layers": [
+                        {
+                            "layer": "Location of street crossings",
+                            "Text": "OSM",
+                            "Default Weighting": 0.14,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "OSM",
+                            "indicator": "This indicator is composed by calculating the average of these four factors. First, the territory needs to be divided into 100m x 100m rasters.1. Street Crossings (indicates safety and accessibility; measured by availability/presence per raster cell)\u20220: No crossings\u20223: 1 crossing \u20225: 2 or more crossings2. Cycle Paths (measured by availability/presence per raster)\u20220: No cycle paths\u20223: 1 cycle path \u20225: 2 or more cycle paths3. Footpaths (measured by availability/presence per raster)\u20220: No footpaths\u20223: 1 footpath \u20225: 2 or more footpaths4. Block Sizes(indicates encouraged walkability)\u20221: Very large block sizes (>1 km)\u20222: Large block sizes (751m - 1 km)\u20223: Moderate block sizes (501m - 750m)\u20224: Small block sizes (251m - 500m)\u20225: Very small block sizes (<250m)",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"highway\"=\"crossing\"](area.area_0);    node[\"railway\"=\"crossing\"](area.area_0);    way[\"highway\"=\"crossing\"](area.area_0);    way[\"railway\"=\"crossing\"](area.area_0);    relation[\"highway\"=\"crossing\"](area.area_0);    relation[\"railway\"=\"crossing\"](area.area_0););(._;>;);out body;"
+                        },
+                        {
+                            "layer": NaN,
+                            "Text": "Mapillary",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "Mapillary",
+                            "indicator": "",
+                            "query": "endpoints: construction--flat--crosswalk-plain and marking--discrete--crosswalk-zebra"
+                        },
+                        {
+                            "layer": "Location of cycle paths (OSM)",
+                            "Text": "OSM",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "OSM",
+                            "indicator": "",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"highway\"=\"cycleway\"](area.area_0);    node[\"highway\"=\"track\"](area.area_0);    node[\"cycleway\"=\"track\"](area.area_0);    node[\"cycleway\"=\"lane\"](area.area_0);    node[\"cycleway\"=\"share_busway\"](area.area_0);    node[\"cycleway\"=\"shared_lane\"](area.area_0);    way[\"highway\"=\"cycleway\"](area.area_0);    way[\"highway\"=\"track\"](area.area_0);    way[\"cycleway\"=\"track\"](area.area_0);    way[\"cycleway\"=\"lane\"](area.area_0);    way[\"cycleway\"=\"share_busway\"](area.area_0);    way[\"cycleway\"=\"shared_lane\"](area.area_0);    relation[\"highway\"=\"cycleway\"](area.area_0);    relation[\"highway\"=\"track\"](area.area_0);    relation[\"cycleway\"=\"track\"](area.area_0);    relation[\"cycleway\"=\"lane\"](area.area_0);    relation[\"cycleway\"=\"share_busway\"](area.area_0);    relation[\"cycleway\"=\"shared_lane\"](area.area_0););(._;>;);out body;"
+                        },
+                        {
+                            "layer": "Location of footpaths (OSM)",
+                            "Text": "OSM",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "OSM",
+                            "indicator": "",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"highway\"=\"footway\"](area.area_0);    way[\"highway\"=\"footway\"](area.area_0);    relation[\"highway\"=\"footway\"](area.area_0););(._;>;);out body;"
+                        },
+                        {
+                            "layer": "Block Layout (OSM)",
+                            "Text": "OSM",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "OSM",
+                            "indicator": "",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"landuse\"=\"residential\"](area.area_0);    node[\"landuse\"=\"commercial\"](area.area_0);    node[\"landuse\"=\"industrial\"](area.area_0);    node[\"boundary\"=\"administrative\"](area.area_0);    way[\"landuse\"=\"residential\"](area.area_0);    way[\"landuse\"=\"commercial\"](area.area_0);    way[\"landuse\"=\"industrial\"](area.area_0);    way[\"boundary\"=\"administrative\"](area.area_0);    relation[\"landuse\"=\"residential\"](area.area_0);    relation[\"landuse\"=\"commercial\"](area.area_0);    relation[\"landuse\"=\"industrial\"](area.area_0);    relation[\"boundary\"=\"administrative\"](area.area_0););(._;>;);out body;"
+                        }
+                    ]
+                },
+                {
+                    "name": "Safety",
+                    "layers": [
+                        {
+                            "layer": "Street lights/Nigthttime ligths",
+                            "Text": "Mapillary",
+                            "Default Weighting": 0.14,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 100,
+                            "Use default Idex Score": 1,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "Mapillary",
+                            "indicator": "This indicator should be calculated by creating 20-meter buffers around streetlights. Raster cells in which 80-100% of their area intersects with the buffers should receive a score of 5. Rasters with 60-79% intersection should be scored as 4, 40-59% as 3, 20-39% as 2, and 1-19% as 1. Areas without any overlap with streetlight buffers should be scored as 0. NOTE: Use nighttime lights only if street lights are absent/ If no spatial features are available, the user should have the option to use disaggregated statistics on crime rates or perceptions of safety as input.",
+                            "query": "endpoint: object--street-light"
+                        },
+                        {
+                            "layer": NaN,
+                            "Text": "Nightime lights",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "Nightime lights",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "FCV",
+                    "layers": [
+                        {
+                            "layer": "ACLED data (Violence Estimated Events)",
+                            "Text": "ACLED",
+                            "Default Weighting": 0.14,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "check (input radius)",
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "ACLED",
+                            "indicator": "This indicator should be structured by assigning scores to rasters based on their overlap with buffers indicating different types of events. Using point locations of FCV events, generate circular buffers with a radius of 5 km to estimate the spatial impact of these events. If the impact radius of an event is known, it should be used instead. Any raster intersecting with the buffer should be scored as follows:\u2022Rasters overlapping with buffers indicating battles and explosions: score 0\u2022Rasters overlapping with buffers indicating explosions and remote violence: score 1\u2022Rasters overlapping with buffers indicating violence against civilians: score 2\u2022Rasters overlapping with buffers indicating protests and riots: score 4\u2022Areas that do not overlap with any event: score 5",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Education",
+                    "layers": [
+                        {
+                            "layer": "percentage of the labor force comprising women with university degrees ",
+                            "Text": " Central Statistics Office/Humdata",
+                            "Default Weighting": 0.14,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 100,
+                            "Use default Idex Score": 1,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": " Central Statistics Office/Humdata",
+                            "indicator": "Reclassify the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a score of 5 represents areas where all women have a university degree, while a score of 0 represents areas where no women have a university degree. Users should have the option to upload disaggregated data at various administrative levels or at the country level.",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Digital Inclusion",
+                    "layers": [
+                        {
+                            "layer": "Individuals using the Internet (% of population)",
+                            "Text": "World Bank",
+                            "Default Weighting": 0.14,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 100,
+                            "Use default Idex Score": 1,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "World Bank",
+                            "indicator": "Reclassify input data to a standardized scale of 0 to 5 using a linear scaling process, such that 5 represents areas where 100% of houses have Internet access, and 0 represents areas where no houses have Internet access. Users should have the option to upload disaggregated data at various administrative levels or at the country level.",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Environmental Hazards",
+                    "layers": [
+                        {
+                            "layer": "Global Natural Hazards Data",
+                            "Text": "National Centers for Environmental Information",
+                            "Default Weighting": 0.14,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "National Centers for Environmental Information",
+                            "indicator": "Reclassify input data to a standardized scale of 0 to 5 using a linear scaling process, such that 5 represents areas where there are no environmental hazards and 0 represents the areas with the highest level of hazard.",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Water sanitation",
+                    "layers": [
+                        {
+                            "layer": "Water points (OSM), catch basins, water valves and fire hydrants (Mapillary) ",
+                            "Text": "OSM",
+                            "Default Weighting": 0.14,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": 1000,
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "OSM",
+                            "indicator": "This indicator is composed by assessing the presence of any of these four factors in a raster cell. First, the territory needs to be divided into 100m x 100m rasters. The scoring for each cell is as follows:Raster cell with no water points: score 0Raster cell with 1 water point: score 3Raster cell with 2 or more water points: score 5",
+                            "query": "[out:xml] [timeout:25]; {{geocodeArea:Saint Lucia}} -> .area_0;(    node[\"emergency\"=\"fire_hydrant\"](area.area_0);    node[\"emergency\"=\"water_tank\"](area.area_0);    node[\"amenity\"=\"drinking_water\"](area.area_0);    node[\"amenity\"=\"water_point\"](area.area_0);    way[\"emergency\"=\"fire_hydrant\"](area.area_0);    way[\"emergency\"=\"water_tank\"](area.area_0);    way[\"amenity\"=\"drinking_water\"](area.area_0);    way[\"amenity\"=\"water_point\"](area.area_0);    relation[\"emergency\"=\"fire_hydrant\"](area.area_0);    relation[\"emergency\"=\"water_tank\"](area.area_0);    relation[\"amenity\"=\"drinking_water\"](area.area_0);    relation[\"amenity\"=\"water_point\"](area.area_0););(._;>;);out body;"
+                        },
+                        {
+                            "layer": NaN,
+                            "Text": "Mapillary",
+                            "Default Weighting": "",
+                            "Use Aggregate": "",
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": "",
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": "",
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": 1000,
+                            "Use Buffer point": 1,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": "",
+                            "source": "Mapillary",
+                            "indicator": "",
+                            "query": "endpoints: object--catch-basin object--water-valve and object--fire-hydrant"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "about ",
+            "factors": [
+                {
+                    "name": "Water sanitation",
+                    "layers": [
+                        {
+                            "layer": NaN,
+                            "Text": "",
+                            "Default Weighting": 0.0,
+                            "Use Aggregate": 0.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "setup",
+            "factors": [
+                {
+                    "name": "Water sanitation",
+                    "layers": [
+                        {
+                            "layer": NaN,
+                            "Text": "",
+                            "Default Weighting": 0.0,
+                            "Use Aggregate": 0.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 100,
+                            "Use Create Grid": 1,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "aggregate",
+            "factors": [
+                {
+                    "name": "Contextual",
+                    "layers": [
+                        {
+                            "layer": "Contectual Score",
+                            "Text": "",
+                            "Default Weighting": 0.33,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Accessibility",
+                    "layers": [
+                        {
+                            "layer": "Accessibility Score",
+                            "Text": "",
+                            "Default Weighting": 0.33,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Place Characherisation",
+                    "layers": [
+                        {
+                            "layer": "Place Score",
+                            "Text": "",
+                            "Default Weighting": 0.33,
+                            "Use Aggregate": 1.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "insignts",
+            "factors": [
+                {
+                    "name": "Enablement",
+                    "layers": [
+                        {
+                            "layer": NaN,
+                            "Text": "",
+                            "Default Weighting": 0.0,
+                            "Use Aggregate": 0.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Re Zone Raster Locations",
+                    "layers": [
+                        {
+                            "layer": NaN,
+                            "Text": "",
+                            "Default Weighting": 0.0,
+                            "Use Aggregate": 0.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Re Point Locations",
+                    "layers": [
+                        {
+                            "layer": NaN,
+                            "Text": "",
+                            "Default Weighting": 0.0,
+                            "Use Aggregate": 0.0,
+                            "Default Index Score": 0.0,
+                            "Index Score": 0,
+                            "Use default Idex Score": 0,
+                            "Rasterise Raster": 0.0,
+                            "Rasterise Polygon": 0,
+                            "Rasterise Polyline": 0.0,
+                            "Rasterise Point": 0,
+                            "Default Buffer Distances": "0,0,0",
+                            "Use Buffer point": 0,
+                            "Default pixel": 0,
+                            "Use Create Grid": 0,
+                            "Default Mode": "",
+                            "Default Measurement": "",
+                            "Default Increments": "0,0,0",
+                            "Use Mode of Travel": 0.0,
+                            "source": "",
+                            "indicator": "",
+                            "query": ""
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

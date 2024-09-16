@@ -66,3 +66,4 @@ nix-result/
 data
 core
 app.py
+/geest.zip

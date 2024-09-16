@@ -28,7 +28,7 @@ from qgis.core import Qgis
 
 #from .geest import Geest
 #from .core import RenderQueue, setting
-from .core import setting, JSONValidator
+from .core import setting #, JSONValidator
 from .utilities import resources_path
 from .gui import GeestOptionsFactory, GeestDock
 
