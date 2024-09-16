@@ -67,3 +67,4 @@ data
 core
 app.py
 /geest.zip
+.~lock.*

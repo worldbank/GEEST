@@ -114,28 +114,20 @@ class JsonTreeModel(QAbstractItemModel):
                 )
                 dimension_item.appendChild(factor_item)
 
-                num_layers = len(factor.get("layers", []))
-                if num_layers == 0:
-                    continue
-
-                layer_weighting = 1 / num_layers
                 factor_weighting_sum = 0.0
 
                 for layer in factor.get("layers", []):
-                    try:
-                        weight = layer.get("weighting", "")
-                    except:
-                        weight = 0.0
+
                     layer_item = JsonTreeItem(
                         # We store the whole json layer object in the last column
                         # so that we can pull out any of the additional properties
                         # from it later
-                        [layer["layer"], "🔴", f"{layer_weighting:.2f}", weight, layer],
+                        # Layers dont have weightings, only dimensions and factors
+                        [layer["Layer"], "🔴", "", layer],
                         "layer",
                         factor_item,
                     )
                     factor_item.appendChild(layer_item)
-                    factor_weighting_sum += layer_weighting
 
                 # Set the factor's total weighting
                 factor_item.setData(2, f"{factor_weighting_sum:.2f}")
@@ -186,6 +178,7 @@ class JsonTreeModel(QAbstractItemModel):
             return Qt.ItemIsEditable | Qt.ItemIsSelectable | Qt.ItemIsEnabled
 
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled        
+        
         
     def update_font_color(self, item, color):
         """Update the font color of an item."""
