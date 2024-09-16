@@ -73,7 +73,7 @@ class GeestPlugin:
         # to the remote debugger
         debug_mode = int(setting(key="debug_mode", default=0))
         if debug_mode:
-            debug_icon = QIcon(resources_path("icons", "geest-debug.svg"))
+            debug_icon = QIcon(resources_path("resources", "geest-debug.svg"))
             self.debug_action = QAction(
                 debug_icon, "GEEST Debug Mode", self.iface.mainWindow()
             )

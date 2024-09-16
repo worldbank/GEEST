@@ -26,7 +26,9 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         """
         QgsOptionsPageWidget.__init__(self, parent)
         self.setupUi(self)
-
+        # We need this so we can open the settings to our own 
+        # page from the plugin button bar.
+        self.setObjectName('geest')
         # The maximum number of concurrent threads to allow
         # during rendering. Probably setting to the same number
         # of CPU cores you have would be a good conservative approach
