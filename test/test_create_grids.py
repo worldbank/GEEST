@@ -16,7 +16,7 @@ class TestGridCreator(unittest.TestCase):
 
     def test_create_grids(self):
         """Test the create_grids method with real data to ensure the grid creation process works."""
-        
+
         # Setup parameters for the GridCreator class
         self.vector_layer_path = os.path.join(
             os.path.dirname(__file__), "data/admin/Admin0.shp"
@@ -29,7 +29,7 @@ class TestGridCreator(unittest.TestCase):
 
         # Create the output directory if it doesn't exist
         os.makedirs(self.output_dir, exist_ok=True)
-        
+
         # Load the vector layer
         layer = QgsVectorLayer(self.vector_layer_path, "polygon_layer", "ogr")
         self.assertTrue(layer.isValid(), "The vector layer is not valid")
