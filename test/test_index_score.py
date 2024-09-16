@@ -18,7 +18,7 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
         """
         # Prepare test data
         working_dir = os.path.dirname(__file__)
-        boundary_path = os.path.join(working_dir, "data", "admin" "Admin0.shp")
+        boundary_path = os.path.join(working_dir, "data", "admin", "Admin0.shp")
         output_path = os.path.join(working_dir, "output", "test_raster.tif")
 
         # Ensure output directory exists
