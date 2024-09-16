@@ -1,13 +1,13 @@
 {
     "dimensions": [
         {
-            "name": "CONTEXTUAL",
+            "name": "Contextual",
             "factors": [
                 {
                     "name": "Workplace Discrimination",
                     "layers": [
                         {
-                            "layer": "WBL 2024 Workplace Index Score",
+                            "Layer": "WBL 2024 Workplace Index Score",
                             "Text": "Women, Business and the Law",
                             "Default Weighting": 0.33,
                             "Use Aggregate": 1.0,
@@ -26,10 +26,14 @@
                             "Default Measurement": "",
                             "Default Increments": "0,0,0",
                             "Use Mode of Travel": 0.0,
-                            "source": "Women, Business and the Law",
-                            "indicator": "This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100.",
-                            "query": "WBL 2024 index score: 83.8"
+                            "Source": "Women, Business and the Law",
+                            "Indicator": "This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100.",
+                            "Query": "WBL 2024 index score: 83.8"
                         }
+                    ],
+                    "weighting": 0.33,
+                    "required_layers": [
+                        "workplace_score"
                     ]
                 },
                 {
@@ -90,10 +94,14 @@
                         }
                     ]
                 }
+            ],
+            "weighting": 0.33,
+            "required_factors": [
+                "workplace_discrimination"
             ]
         },
         {
-            "name": "ACCESSIBILITY",
+            "name": "Accessibility",
             "factors": [
                 {
                     "name": "Women's Travel Patterns",
@@ -310,10 +318,10 @@
                 {
                     "name": "Access to Financial Facilities",
                     "layers": [
-                        {
-                            "layer": "Location of Banks and other FF (OSM)",
+                        {   
+                            "ID": "bank_locations",
+                            "Layer": "Location of Banks and other FF (OSM)",
                             "Text": "OSM",
-                            "Default Weighting": 0.2,
                             "Use Aggregate": 1.0,
                             "Default Index Score": 0.0,
                             "Index Score": 0,
@@ -323,8 +331,8 @@
                             "Rasterise Polyline": 0.0,
                             "Rasterise Point": 0,
                             "Default Buffer Distances": "250, 500, 750, 1000, 1250",
-                            "Use Buffer point": 1,
-                            "Default pixel": 0,
+                            "Use Buffer Point": 1,
+                            "Default Pixel": 0,
                             "Use Create Grid": 0,
                             "Default Mode": "Walking",
                             "Default Measurement": "Disctance",

@@ -29,7 +29,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QFileInfo, QSettings, QVariant
 from qgis.PyQt.QtGui import QPixmap
-from ..utilities import resources_path
+from geest.utilities import resources_path
 
 
 class SetupPanel(QWidget):

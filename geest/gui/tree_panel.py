@@ -19,10 +19,10 @@ from qgis.PyQt.QtCore import QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
 import json
 import os
-from .geest_treeview import CustomTreeView, JsonTreeModel
-from .setup_panel import SetupPanel 
-from .layer_detail_dialog import LayerDetailDialog
-from ..utilities import resources_path
+from geest.gui import CustomTreeView, JsonTreeModel
+from geest.gui import SetupPanel 
+from geest.gui import LayerDetailDialog
+from geest.utilities import resources_path
 from geest.core import set_setting, setting
 
 class TreePanel(QWidget):
@@ -115,6 +115,22 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
         layout.addLayout(button_bar)
         self.setLayout(layout)
+        
+    def edit(self, index, trigger, event):
+        """
+        Override the edit method to enable editing only on the column that was clicked.
+        """
+        # Get the column that was clicked
+        column = index.column()
+
+        # Only allow editing on specific columns (e.g., column 0, 1, etc.)
+        if column == 0:  # Only make the first column editable
+            return super().edit(index, trigger, event)
+        elif column == 2:  # And the third column editable
+            return super().edit(index, trigger, event)
+
+        # Return False if the column shouldn't be editable
+        return False
 
     def load_json(self):
         """Load the JSON data from the file."""
