@@ -8,33 +8,22 @@ from qgis_gender_indicator_tool.jobs.extents import Extents
 
 
 class TestExtents(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        """Sets up the QGIS environment before all tests."""
-        cls.qgs = QgsApplication([], False)
-        cls.qgs.initQgis()
-        Processing.initialize()
-        QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
-
-    @classmethod
-    def tearDownClass(cls):
-        """Cleans up the QGIS environment after all tests."""
-        cls.qgs.exitQgis()
-
-    def setUp(self):
-        # Setup parameters for the Extents class
-        self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/admin0.shp"
-        )
-        self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
-        self.pixel_size = 100
+    """Test the Extents class."""
 
     def test_get_extent(self):
         """Test the get_country_extent method to ensure extent calculation is correct."""
+        
+        # Setup parameters for the Extents class
+        self.workingDir = os.path.join(os.path.dirname(__file__))
+        self.vector_layer_path = os.path.join(
+            os.path.dirname(__file__), "data/admin/Admin0.shp"
+        )
+        self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
+        self.pixel_size = 100
+        
         # Initialize the Extents class
         extents_processor = Extents(
-            self.vector_layer_path, self.pixel_size, self.utm_crs
+            self.workingDir, self.vector_layer_path, self.pixel_size, self.utm_crs
         )
 
         # Get the extent of the vector layer
@@ -50,10 +39,6 @@ class TestExtents(unittest.TestCase):
         self.assertGreater(
             country_extent.height(), 0, "Extent height is not greater than zero"
         )
-
-    def tearDown(self):
-        # No cleanup required for Extents tests
-        pass
 
 
 if __name__ == "__main__":

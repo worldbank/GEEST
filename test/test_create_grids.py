@@ -8,29 +8,18 @@ from qgis.core import (
 )
 from qgis.analysis import QgsNativeAlgorithms
 from processing.core.Processing import Processing
-from qgis_processing_test.grid_creator import GridCreator
-from qgis_processing_test.extents import Extents
+from qgis_gender_indicator_tool.jobs.create_grids import GridCreator
 
 
 class TestGridCreator(unittest.TestCase):
+    """Test the GridCreator class."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Sets up the QGIS environment before all tests."""
-        cls.qgs = QgsApplication([], False)
-        cls.qgs.initQgis()
-        Processing.initialize()
-        QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
-
-    @classmethod
-    def tearDownClass(cls):
-        """Cleans up the QGIS environment after all tests."""
-        cls.qgs.exitQgis()
-
-    def setUp(self):
+    def test_create_grids(self):
+        """Test the create_grids method with real data to ensure the grid creation process works."""
+        
         # Setup parameters for the GridCreator class
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/admin0.shp"
+            os.path.dirname(__file__), "data/admin/Admin0.shp"
         )
         self.output_dir = os.path.join(os.path.dirname(__file__), "output")
         self.merged_output_path = os.path.join(self.output_dir, "merged_grid.gpkg")
@@ -40,9 +29,7 @@ class TestGridCreator(unittest.TestCase):
 
         # Create the output directory if it doesn't exist
         os.makedirs(self.output_dir, exist_ok=True)
-
-    def test_create_grids(self):
-        """Test the create_grids method with real data to ensure the grid creation process works."""
+        
         # Load the vector layer
         layer = QgsVectorLayer(self.vector_layer_path, "polygon_layer", "ogr")
         self.assertTrue(layer.isValid(), "The vector layer is not valid")
@@ -60,14 +47,6 @@ class TestGridCreator(unittest.TestCase):
             os.path.exists(self.merged_output_path),
             "Merged grid output file does not exist",
         )
-
-    def tearDown(self):
-        # Clean up after tests by removing the output directory and its contents
-        if os.path.exists(self.merged_output_path):
-            os.remove(self.merged_output_path)
-
-        if os.path.exists(self.output_dir) and not os.listdir(self.output_dir):
-            os.rmdir(self.output_dir)
 
 
 if __name__ == "__main__":
