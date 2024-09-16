@@ -174,12 +174,19 @@ class JsonTreeModel(QAbstractItemModel):
 
     def flags(self, index):
         """Allow editing of the name and weighting columns."""
+       
+        #Override the flags method to allow specific columns to be editable.
+        
+        if not index.isValid():
+            return Qt.NoItemFlags
+        
         item = index.internalPointer()
-        if index.column() == 0 or index.column() == 2:
-            # Allow editing for the first column (name) and third column (weighting)
-            return Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled
-        return Qt.ItemIsSelectable | Qt.ItemIsEnabled
+        # For example, only allow editing for the first and second columns
+        if index.column() == 0 or index.column() == 1:
+            return Qt.ItemIsEditable | Qt.ItemIsSelectable | Qt.ItemIsEnabled
 
+        return Qt.ItemIsSelectable | Qt.ItemIsEnabled        
+        
     def update_font_color(self, item, color):
         """Update the font color of an item."""
         item.font_color = color
