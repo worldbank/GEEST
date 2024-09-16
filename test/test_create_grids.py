@@ -8,8 +8,7 @@ from qgis.core import (
 )
 from qgis.analysis import QgsNativeAlgorithms
 from processing.core.Processing import Processing
-from qgis_processing_test.grid_creator import GridCreator
-from qgis_processing_test.extents import Extents
+from qgis_gender_indicator_tool.jobs.create_grids import GridCreator
 
 
 class TestGridCreator(unittest.TestCase):

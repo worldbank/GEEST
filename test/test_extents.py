@@ -10,16 +10,16 @@ from qgis_gender_indicator_tool.jobs.extents import Extents
 class TestExtents(unittest.TestCase):
     """Test the Extents class."""
 
-    def setUp(self):
+    def test_get_extent(self):
+        """Test the get_country_extent method to ensure extent calculation is correct."""
+        
         # Setup parameters for the Extents class
         self.vector_layer_path = os.path.join(
             os.path.dirname(__file__), "data/admin/admin0.shp"
         )
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.pixel_size = 100
-
-    def test_get_extent(self):
-        """Test the get_country_extent method to ensure extent calculation is correct."""
+        
         # Initialize the Extents class
         extents_processor = Extents(
             self.vector_layer_path, self.pixel_size, self.utm_crs
