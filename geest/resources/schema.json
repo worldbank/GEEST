@@ -1,0 +1,137 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "dimensions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "factors": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "layers": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "layer": {
+                                                "type": "string"
+                                            },
+                                            "Text": {
+                                                "type": "string"
+                                            },
+                                            "Default Weighting": {
+                                                "type": "number"
+                                            },
+                                            "Use Aggregate": {
+                                                "type": "number"
+                                            },
+                                            "Default Index Score": {
+                                                "type": "number"
+                                            },
+                                            "Index Score": {
+                                                "type": "integer"
+                                            },
+                                            "Use default Idex Score": {
+                                                "type": "integer"
+                                            },
+                                            "Rasterise Raster": {
+                                                "type": "number"
+                                            },
+                                            "Rasterise Polygon": {
+                                                "type": "integer"
+                                            },
+                                            "Rasterise Polyline": {
+                                                "type": "number"
+                                            },
+                                            "Rasterise Point": {
+                                                "type": "integer"
+                                            },
+                                            "Default Buffer Distances": {
+                                                "type": "string"
+                                            },
+                                            "Use Buffer point": {
+                                                "type": "integer"
+                                            },
+                                            "Default pixel": {
+                                                "type": "integer"
+                                            },
+                                            "Use Create Grid": {
+                                                "type": "integer"
+                                            },
+                                            "Default Mode": {
+                                                "type": "string"
+                                            },
+                                            "Default Measurement": {
+                                                "type": "string"
+                                            },
+                                            "Default Increments": {
+                                                "type": "string"
+                                            },
+                                            "Use Mode of Travel": {
+                                                "type": "number"
+                                            },
+                                            "source": {
+                                                "type": "string"
+                                            },
+                                            "indicator": {
+                                                "type": "string"
+                                            },
+                                            "query": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "layer",
+                                            "Text",
+                                            "Default Weighting",
+                                            "Use Aggregate",
+                                            "Default Index Score",
+                                            "Index Score",
+                                            "Use default Idex Score",
+                                            "Rasterise Raster",
+                                            "Rasterise Polygon",
+                                            "Rasterise Polyline",
+                                            "Rasterise Point",
+                                            "Default Buffer Distances",
+                                            "Use Buffer point",
+                                            "Default pixel",
+                                            "Use Create Grid",
+                                            "Default Mode",
+                                            "Default Measurement",
+                                            "Default Increments",
+                                            "Use Mode of Travel",
+                                            "source",
+                                            "indicator",
+                                            "query"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "layers"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "factors"
+                ]
+            }
+        }
+    },
+    "required": [
+        "dimensions"
+    ]
+}
