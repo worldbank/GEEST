@@ -3,9 +3,9 @@ import os
 from qgis.core import (
     QgsVectorLayer,
     QgsCoordinateReferenceSystem,
-    QgsRectangle,
-    QgsApplication,
+    QgsProcessingFeedback,
 )
+import processing
 from qgis_gender_indicator_tool.jobs.index_score import RasterizeIndexScoreValue
 
 
@@ -27,6 +27,19 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
         # Load the country boundary layer
         country_boundary = QgsVectorLayer(boundary_path, "test_boundary", "ogr")
         self.assertTrue(country_boundary.isValid(), "The boundary layer is not valid.")
+        
+        # Reproject the vector layer if necessary
+        if country_boundary.crs() != self.utm_crs:
+            reprojected_result = processing.run(
+                "native:reprojectlayer",
+                {
+                    "INPUT": country_boundary,
+                    "TARGET_CRS": self.utm_crs,
+                    "OUTPUT": "memory:",
+                },
+                feedback=QgsProcessingFeedback(),
+            )
+            country_boundary = reprojected_result["OUTPUT"]
 
         # Define bbox and CRS
         bbox = country_boundary.extent()
