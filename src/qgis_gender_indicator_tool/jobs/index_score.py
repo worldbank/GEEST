@@ -81,21 +81,8 @@ class RasterizeIndexScoreValue:
             feedback=QgsProcessingFeedback(),
         )
 
-        # Clip the raster to the country boundary to assign NoData to non-land areas
-        clip_result = processing.run(
-            "gdal:cliprasterbymasklayer",
-            {
-                "INPUT": temp_raster_path,
-                "MASK": self.country_boundary,
-                "NODATA": -9999,  # NoData for non-land areas
-                "CROP_TO_CUTLINE": True,
-                "OUTPUT": self.output_path,
-            },
-            feedback=QgsProcessingFeedback(),
-        )
-
         # Load the output raster as a QgsRasterLayer
-        raster_layer = QgsRasterLayer(self.output_path, "generated_raster")
+        raster_layer = QgsRasterLayer(temp_raster_path, "generated_raster")
 
         if not raster_layer.isValid():
             raise ValueError("Raster layer creation failed.")
