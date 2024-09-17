@@ -28,13 +28,15 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
         country_boundary = QgsVectorLayer(boundary_path, "test_boundary", "ogr")
         self.assertTrue(country_boundary.isValid(), "The boundary layer is not valid.")
         
+        crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
+        
         # Reproject the vector layer if necessary
-        if country_boundary.crs() != self.utm_crs:
+        if country_boundary.crs() != crs:
             reprojected_result = processing.run(
                 "native:reprojectlayer",
                 {
                     "INPUT": country_boundary,
-                    "TARGET_CRS": self.utm_crs,
+                    "TARGET_CRS": crs,
                     "OUTPUT": "memory:",
                 },
                 feedback=QgsProcessingFeedback(),
