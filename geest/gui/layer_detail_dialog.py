@@ -19,6 +19,7 @@ from qgis.PyQt.QtWidgets import (
     QFrame,
     QRadioButton,
     QButtonGroup,
+    QDialogButtonBox
 )
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
@@ -47,8 +48,12 @@ class LayerDetailDialog(QDialog):
 
         # Heading for the dialog
         heading_label = QLabel(layer_name)
-        heading_label.setStyleSheet("font-size: 18px; font-weight: bold;")  # Bold heading
-        layout.addWidget(heading_label)
+        heading_label.setStyleSheet(
+            "font-size: 18px; font-weight: bold;"
+        )  # Bold heading
+        layout.addWidget(
+            heading_label, alignment=Qt.AlignTop
+        )  # Align heading at the top
 
         # Line separator between heading and text edits
         line = QFrame()
@@ -70,7 +75,9 @@ class LayerDetailDialog(QDialog):
         self.text_edit_right = QTextEdit()
         self.text_edit_right.setReadOnly(True)  # Set as read-only for preview
         self.text_edit_right.setFrameStyle(QFrame.NoFrame)  # Remove the frame
-        self.text_edit_right.setStyleSheet("background-color: transparent;")  # Match form background
+        self.text_edit_right.setStyleSheet(
+            "background-color: transparent;"
+        )  # Match form background
         splitter.addWidget(self.text_edit_right)
 
         layout.addWidget(splitter)
@@ -98,10 +105,11 @@ class LayerDetailDialog(QDialog):
         # Add the configuration frame with radio buttons
         self.add_config_widgets(layout)
 
-        # Close button
-        close_button = QPushButton("Close")
-        close_button.clicked.connect(self.on_close)  # Connect close button to custom close handler
-        layout.addWidget(close_button)
+        # Create a QDialogButtonBox for OK/Cancel buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept_changes)  # Connect OK to accept_changes
+        button_box.rejected.connect(self.reject)  # Connect Cancel to reject the dialog
+        layout.addWidget(button_box, alignment=Qt.AlignBottom)  # Place at the bottom
 
         self.setLayout(layout)
 
@@ -112,11 +120,13 @@ class LayerDetailDialog(QDialog):
         """Populate the table with all key-value pairs except 'indicator'."""
         filtered_data = {k: v for k, v in self.layer_data.items() if k != "indicator"}
         self.table.setRowCount(len(filtered_data))
-        
+
         for row, (key, value) in enumerate(filtered_data.items()):
             # Column 1: Key (Property name, read-only)
             key_item = QTableWidgetItem(str(key))
-            key_item.setFlags(key_item.flags() & ~Qt.ItemIsEditable)  # Make it read-only
+            key_item.setFlags(
+                key_item.flags() & ~Qt.ItemIsEditable
+            )  # Make it read-only
             self.table.setItem(row, 0, key_item)
 
             # Column 2: Value (use appropriate widgets based on data type)
@@ -167,7 +177,9 @@ class LayerDetailDialog(QDialog):
         frame_layout = QVBoxLayout()
 
         # Find all keys that start with 'Use' and have a value of True
-        use_keys = {k: v for k, v in self.layer_data.items() if k.startswith("Use") and v}
+        use_keys = {
+            k: v for k, v in self.layer_data.items() if k.startswith("Use") and v
+        }
 
         if use_keys:
             for i, key in enumerate(use_keys):
@@ -189,8 +201,8 @@ class LayerDetailDialog(QDialog):
         frame.setLayout(frame_layout)
         layout.addWidget(frame)
 
-    def on_close(self):
-        """Handle the dialog close event by writing the edited data back to the TreeView item."""
+    def accept_changes(self):
+        """Handle the OK button by applying changes and closing the dialog."""
         updated_data = self.get_updated_data_from_table()
 
         # Set 'Analysis Mode' based on the selected radio button
@@ -199,7 +211,7 @@ class LayerDetailDialog(QDialog):
             updated_data["Analysis Mode"] = selected_button.text()
 
         self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
-        self.close()
+        self.accept()  # Close the dialog
 
     def get_updated_data_from_table(self):
         """Convert the table back into a dictionary with any changes made, including the Markdown text."""
@@ -208,20 +220,26 @@ class LayerDetailDialog(QDialog):
         # Loop through the table and collect other data
         for row in range(self.table.rowCount()):
             key = self.table.item(row, 0).text()  # Get the key (read-only)
-            value_widget = self.table.cellWidget(row, 1)  # Get the widget from the second column
+            value_widget = self.table.cellWidget(
+                row, 1
+            )  # Get the widget from the second column
 
             if isinstance(value_widget, ToggleSwitch):
                 updated_value = value_widget.isChecked()
             elif isinstance(value_widget, QCheckBox):
                 updated_value = value_widget.isChecked()
-            elif isinstance(value_widget, QSpinBox) or isinstance(value_widget, QDoubleSpinBox):
+            elif isinstance(value_widget, QSpinBox) or isinstance(
+                value_widget, QDoubleSpinBox
+            ):
                 updated_value = value_widget.value()
             elif isinstance(value_widget, QComboBox):
                 updated_value = value_widget.currentText()
             else:
                 updated_value = value_widget.text()  # Default to text value
 
-            updated_data[key] = updated_value  # Update the dictionary with the key-value pair
+            updated_data[key] = (
+                updated_value  # Update the dictionary with the key-value pair
+            )
 
         # Include the Markdown text from the left text edit
         updated_data["Text"] = self.text_edit_left.toPlainText()
