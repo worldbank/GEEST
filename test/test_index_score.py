@@ -27,9 +27,9 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
         # Load the country boundary layer
         country_boundary = QgsVectorLayer(boundary_path, "test_boundary", "ogr")
         self.assertTrue(country_boundary.isValid(), "The boundary layer is not valid.")
-        
+
         crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
-        
+
         # Reproject the vector layer if necessary
         if country_boundary.crs() != crs:
             reprojected_result = processing.run(
@@ -77,9 +77,19 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
         expected_max = 4
         expected_mean = 4
 
-        self.assertAlmostEqual(stats.minimumValue, expected_min, msg=f"Minimum value does not match: {stats.minimumValue}")
-        self.assertAlmostEqual(stats.maximumValue, expected_max, msg=f"Maximum value does not match: {stats.maximumValue}")
-        self.assertAlmostEqual(stats.mean, expected_mean, msg=f"Mean value does not match: {stats.mean}")
+        self.assertAlmostEqual(
+            stats.minimumValue,
+            expected_min,
+            msg=f"Minimum value does not match: {stats.minimumValue}",
+        )
+        self.assertAlmostEqual(
+            stats.maximumValue,
+            expected_max,
+            msg=f"Maximum value does not match: {stats.maximumValue}",
+        )
+        self.assertAlmostEqual(
+            stats.mean, expected_mean, msg=f"Mean value does not match: {stats.mean}"
+        )
 
 
 if __name__ == "__main__":

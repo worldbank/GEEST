@@ -34,10 +34,8 @@ class GridCreator:
             return QgsVectorLayer(
                 merged_output_path, "merged_grid", "ogr"
             )  # Load the existing merged grid layer
-            
-        layer = QgsVectorLayer(
-            layer, "country_layer", "ogr"
-        )
+
+        layer = QgsVectorLayer(layer, "country_layer", "ogr")
         if not layer.isValid():
             raise ValueError("Invalid country layer")
 

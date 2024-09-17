@@ -35,7 +35,10 @@ class TestGridCreator(unittest.TestCase):
 
         # Run the grid creation process
         merged_grid = grid_creator.create_grids(
-            self.vector_layer_path, self.output_dir, self.utm_crs, self.merged_output_path
+            self.vector_layer_path,
+            self.output_dir,
+            self.utm_crs,
+            self.merged_output_path,
         )
 
         # Check that the merged grid output file was created
