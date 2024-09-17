@@ -69,6 +69,12 @@ class SpreadsheetToJsonParser:
             dimension = row["Dimension"]
             factor = row["Factor"]
             layer_data = {
+                # These are initially blank for the user to make choices
+                "Analysis Mode": "",
+                "Points Per Cell Layer": "",
+                "Lines Per Cell Layer": "",
+                "Polygons Per Cell Layer": "",
+                # These are all parsed from the spreadsheet
                 "Layer": row["Layer"] if not pd.isna(row["Layer"]) else "",
                 "ID": row["ID"] if not pd.isna(row["ID"]) else "",
                 "Text": row["Text"] if not pd.isna(row["Text"]) else "",
@@ -95,9 +101,9 @@ class SpreadsheetToJsonParser:
                     if not pd.isna(row["Use Multi Buffer Point"])
                     else ""
                 ),
-                "Default Single Buffer Distances": (
-                    row["Default Single Buffer Distances"]
-                    if not pd.isna(row["Default Single Buffer Distances"])
+                "Default Single Buffer Distance": (
+                    row["Default Single Buffer Distance"]
+                    if not pd.isna(row["Default Single Buffer Distance"])
                     else ""
                 ),
                 "Use Single Buffer Point": (
