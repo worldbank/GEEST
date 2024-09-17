@@ -7,6 +7,10 @@
                     "name": "Workplace Discrimination",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "WBL 2024 Workplace Index Score",
                             "ID": "Workplace_Index",
                             "Text": "Workplace DiscriminationThis tab represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100.Input: The input field takes in the WBL index score.Output:  A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of workplace discrimination afforded to women, whereas a value of 0 indicates areas where no workplace discrimination are afforded to women. ",
@@ -15,7 +19,7 @@
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -39,6 +43,10 @@
                     "name": "Regulatory Frameworks",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "WBL 2024 Pay+Parenthood Index Score",
                             "ID": "Pay_Parenthood_Index",
                             "Text": "Regulatory FrameworksThis tab computes a raster containing a standardized measure of the regulatory frameworks afforded to women in the country of interest. Input: The input fields take in the WBL Pay and Parenthood Index Scores percentage that represents the level of protective policies afforded to women. The calculation of this percentage is described in detail in the methodological framework document. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of protective policies afforded to women, whereas a value of 0 indicates areas where no protective policies are afforded to women. ",
@@ -47,7 +55,7 @@
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -71,6 +79,10 @@
                     "name": "Financial Inclusion",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "WBL 2024 Entrepeneurship Index Score",
                             "ID": "Entrepeneurship_Index ",
                             "Text": "Financial InclusionThis tab computes a raster containing a standardized measure of the percentage of women who have a bank account or have borrowed from a formal financial institution.   Input: The input field takes in the percentage of women who have a bank account (WBL Entrepeneurship Index Score). Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 signifies areas where all women possess a bank account or have borrowed from a formal financial institution, whereas  a value of 0 represents areas where no women have a bank account or have borrowed from a formal institution. ",
@@ -79,7 +91,7 @@
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -108,6 +120,10 @@
                     "name": "Women's Travel Patterns",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of kindergartens/childcare",
                             "ID": "Kindergartens_Location",
                             "Text": "Women's Travel PatternsThis tab estimates the ease with which women can access amenities related to their role as caregivers through a service area network anaysis facilitated using Openrouteservices' (ORS) isochrones service. Isochrones are derived from the OpenStreetMap (OSM) road network with the use of travel distances or times as input to estimate ease of access to the input locations at five incrementally increasing measurement intervals. The largest interval being the maximum distance or time women would travel to reach these locations. The algorithm produces five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero.Step 1: This step is repeated for each facility type.  Input: Point locations (.shp) of amenities related to women's role as caregivers, including childcare, primary and secondary schools, markets, grocery stores and recreational areas. Travel mode: The user can select walking or driving as a travel mode and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature. Measurement: The default measurement for travel is distance in meters which is most appropriate for walking. If driving is selected as travel mode, time in minutes is a more appropriate measurement. Travel increments: The travel increments for walking are loaded by default and based on evidence from literature. If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these default values. If the selected travel mode is driving the equal measurement increments should be in minutes, and informed by the local context  (for example, if the user knows that the maximum time that women spend driving is 30 minutes, the increment input would be 6, 12, 18, 24, 30). Step 2: The algorithm aggregates all raster layers created in step 1 by calculating the mean score for each pixel. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 identifies areas that are within the catchment defined by the smallest travel increment for all amenities (i.e., the areas where accessibility for women is highest). A value of 0 indicates areas that are outside of the catchment defined by the maximum travel increment for all amenities (i.e., no amenities are accessible to women from these areas). Service Area Analysis is undertaken using the openrouteservice API and OpenStreetMap data. \u00a9 openrouteservice.org by HeiGIT | Road network data \u00a9 OpenStreetMap contributors",
@@ -116,7 +132,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -135,6 +151,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of primary schools ",
                             "ID": "Primary_School_Location",
                             "Text": "",
@@ -143,7 +163,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -162,6 +182,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of groceries",
                             "ID": "Groceries_Location",
                             "Text": "",
@@ -170,7 +194,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -189,6 +213,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of pharmacies",
                             "ID": "Pharmacies_Location",
                             "Text": "",
@@ -197,7 +225,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -216,6 +244,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of green spaces ",
                             "ID": "Green_Space_location",
                             "Text": "",
@@ -224,7 +256,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -248,6 +280,10 @@
                     "name": "Access to Public Transport",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of public transportation stops, including maritime",
                             "ID": "Pulic_Transport_location",
                             "Text": "Access to Public TransportThis tab estimates the ease with which women can access public transport stops through a service area network anaysis facilitated using Openrouteservices' (ORS) isochrones service. Isochrones are derived from the OpenStreetMap (OSM) road network with the use of travel distances or times as input to estimate ease of access to the public transport stops at five incrementally increasing measurement intervals. The largest interval being the maximum distance or time women would travel to reach these locations. The algorithm produces five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero. Input: Point locations (.shp) of public transport stops. Travel mode: The user can select walking or driving as a travel mode and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature. Measurement: The default measurement for travel is distance in meters which is most appropriate for walking. If driving is selected as travel mode, time in minutes is a more appropriate measurement. Travel increments: The travel increments for walking are loaded by default and based on evidence from literature. If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these default values. If the selected travel mode is driving the equal measurement increments should be in minutes, and informed by the local context (for example, if the user knows that the maximum time that women spend driving is 30 minutes, the increment input would be 6, 12, 18, 24, 30). Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 identifies areas that are within the catchment defined by the smallest travel increment for transport stops (i.e., the areas where transport accessibility for women is highest). A value of 0 indicates areas that are outside of the catchment defined by the maximum travel increment for transport stops (i.e., no transport stops are accessible to women from these areas). Service Area Analysis is undertaken using the openrouteservice API and OpenStreetMap data. \u00a9 openrouteservice.org by HeiGIT | Road network data \u00a9 OpenStreetMap contributors",
@@ -256,7 +292,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -280,6 +316,10 @@
                     "name": "Access to Health Facilities",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of hospitals and clinics",
                             "ID": "Hospital_Location",
                             "Text": "Health FacilitiesThis algorithm estimates the ease with which women can access health facilities such as hospitals and women's health clinics through a service area network anaysis facilitated using Openrouteservices' (ORS) isochrones service. Isochrones are derived from the OpenStreetMap (OSM) road network with the use of travel distances or times as input to estimate ease of access to health facilities at five incrementally increasing measurement intervals. The largest interval being the maximum distance or time women would travel to reach these locations. The algorithm produces five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero. Input: Point locations (.shp) of health facilities such as hospitals and women's health clinics. Travel mode: The user can select walking or driving as a travel mode and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature. Measurement: The default measurement for travel is distance in meters which is most appropriate for walking. If driving is selected as travel mode, time in minutes is a more appropriate measurement. Travel increments: The travel increments for walking are loaded by default and based on evidence from literature. If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these default values. If the selected travel mode is driving the equal measurement increments should be in minutes, and informed by the local context (for example, if the user knows that the maximum time that women spend driving is 30 minutes, the increment input would be 6, 12, 18, 24, 30). Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 identifies areas that are within the catchment defined by the smallest travel increment for a health facility (i.e., the areas where access to health facilities for women is highest). A value of 0 indicates areas that are outside of the catchment defined by the maximum travel increment for health facilities (i.e., no health facilities are accessible to women from these areas). Service Area Analysis is undertaken using the openrouteservice API and OpenStreetMap data. \u00a9 openrouteservice.org by HeiGIT | Road network data \u00a9 OpenStreetMap contributors",
@@ -288,7 +328,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -312,6 +352,10 @@
                     "name": "Access to Education and Training Facilities",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of universities and technical schools",
                             "ID": "Universities_Location",
                             "Text": "Education and Training FacilitiesThis tab estimates the ease with which women can access universities and technical training facilities through a service area network anaysis facilitated using Openrouteservices' (ORS) isochrones service. Isochrones are derived from the OpenStreetMap (OSM) road network with the use of travel distances or times as input to estimate ease of access to the education facilities at five incrementally increasing measurement intervals. The largest interval being the maximum distance or time women would travel to reach these locations. The algorithm produces five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero. Input: Point locations (.shp) of universities and technical training facilities. Travel mode: The user can select walking or driving as a travel mode and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature. Measurement: The default measurement for travel is distance in meters which is most appropriate for walking. If driving is selected as travel mode, time in minutes is a more appropriate measurement. Travel increments: The travel increments for walking are loaded by default and based on evidence from literature. If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these default values. If the selected travel mode is driving the equal measurement increments should be in minutes, and informed by the local context (for example, if the user knows that the maximum time that women spend driving is 30 minutes, the increment input would be 6, 12, 18, 24, 30). Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 identifies areas that are within the catchment defined by the smallest travel increment for an education facility (i.e., the areas where access to education facilities for women is highest). A value of 0 indicates areas that are outside of the catchment defined by the maximum travel increment for education facilities (i.e., no education facilities are accessible to women from these areas). Service Area Analysis is undertaken using the openrouteservice API and OpenStreetMap data. \u00a9 openrouteservice.org by HeiGIT | Road network data \u00a9 OpenStreetMap contributors",
@@ -320,7 +364,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -344,6 +388,10 @@
                     "name": "Access to Financial Facilities",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of Banks and other FF",
                             "ID": "Banks_Location",
                             "Text": "Financial FacilitiesThis algorithm estimates the ease with which women can access financial facilities such as banks and ATMs through a service area network anaysis facilitated using Openrouteservices' (ORS) isochrones service. Isochrones are derived from the OpenStreetMap (OSM) road network with the use of travel distances or times as input to estimate ease of access to financial facilities at five incrementally increasing measurement intervals. The largest interval being the maximum distance or time women would travel to reach these locations. The algorithm produces five catchment areas based on the road network. A scoring system ranging from 5 to 1 is assigned to the catchment area polygons, reflecting the decreasing order of accessibility. Areas outside these catchment areas receive a score of zero. Input: Point locations (.shp) of financial facilities such as banks and ATMs. Travel mode: The user can select walking or driving as a travel mode and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature. Measurement: The default measurement for travel is distance in meters which is most appropriate for walking. If driving is selected as travel mode, time in minutes is a more appropriate measurement. Travel increments: The travel increments for walking are loaded by default and based on evidence from literature. If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these default values. If the selected travel mode is driving the equal measurement increments should be in minutes, and informed by the local context (for example, if the user knows that the maximum time that women spend driving is 30 minutes, the increment input would be 6, 12, 18, 24, 30). Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 identifies areas that are within the catchment defined by the smallest travel increment for a financial facility (i.e., the areas where access to financial facilities for women is highest). A value of 0 indicates areas that are outside of the catchment defined by the maximum travel increment for financial facilities (i.e., no financial facilities are accessible to women from these areas). Service Area Analysis is undertaken using the openrouteservice API and OpenStreetMap data. \u00a9 openrouteservice.org by HeiGIT | Road network data \u00a9 OpenStreetMap contributors",
@@ -352,7 +400,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "250, 500, 750, 1000, 1250",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -381,6 +429,10 @@
                     "name": "Active Transport",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of street crossings",
                             "ID": "Street_Crossing_Location",
                             "Text": "Active TransportThis tab defines areas based on the degree to which they support safe and efficient active transport (walking, cycling and other forms of non-motorized transport) for women, through the classification of road type. Input: A road network polyline layer (.shp) such as cycle paths, and pathways.  A point layer (.shp) such as crosswalks points. A polygon (.shp) for blocks.Process: The user inputs all the required layers. The territory is then divided into 100m by 100m rasters.If there:- No features in a raster cell, a value of 0 is assigned.- Is 1 feature in a raster cell, a value of 3 is assigned.- Are 2 or more features in a raster cell, a value of 5 is assigned.Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas that are most conducive to active transport. A value of 3 indicates areas that are least conducive to active transport. A value of 0 indicates areas where there are no roads at all, and thus active transport is assumed to be impossible.",
@@ -389,7 +441,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -408,6 +460,10 @@
                             "Use Point per Cell": 1
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of cycle paths",
                             "ID": "Cycle_Paths_Location",
                             "Text": "",
@@ -416,7 +472,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -435,6 +491,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Location of footpaths",
                             "ID": "Footpaths_Location",
                             "Text": "",
@@ -443,7 +503,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -462,6 +522,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Block Layout",
                             "ID": "Block_Layout",
                             "Text": "",
@@ -470,7 +534,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -494,6 +558,10 @@
                     "name": "Safety",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Street lights/Nigthttime ligths",
                             "ID": "Street_Lights",
                             "Text": "SafetyThis tab defines areas based on how brightly lit they are and assumes that brightly lit areas are safer than areas with no lights.nput: Streetlight Locations (.shp, Point) or, if unavailable, VIIRS Nighttime Lights dataset (.tif) may be used as proxy data for streetlight locations. Alternatively, Perceived Safety data (.shp, Polygon) can be used if other data is unavailable. (Important note: If used for assessing safe urban design, nighttime lights should be excluded from the calculation of Electrical access.)Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates the most brightly lit areas and by assumption the safest areas. 0 represents areas with no nighttime lights and by assumption the least safe areas.",
@@ -502,7 +570,7 @@
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -526,6 +594,10 @@
                     "name": "FCV",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "ACLED data (Violence Estimated Events)",
                             "ID": "FCV",
                             "Text": "Fragility, conflict, and violenceThis indicator is structured by assigning scores to rasters based on their overlap with buffers indicating different types of events.  Input: ACLED data as a csv file (.csv). If the impact radius of an event is known, it should be used instead.Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. Regions with score of 0 overlap with bufers of serious events. Regions with a score of 5 do not overlap with buffers of any event/s.Warning: The processing may take a very long time to complete, during which QGIS might become unresponsive.  ",
@@ -534,7 +606,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "check (input radius)",
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": "?",
+                            "Default Single Buffer Distance": "?",
                             "Use Single Buffer Point": 1,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -558,6 +630,10 @@
                     "name": "Education",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "percentage of the labor force comprising women with university degrees ",
                             "ID": "Education",
                             "Text": "EducationThis tab computes a raster containing a standardized measure of the percentage of women who have achieved a post-secondary education in the country of interest.   Input: A Polygon layer (.shp) containing a field reporting the percentage of women who have achieved a post-secondary education. If a polygon layer is not available, the Education Level Value may be set manually, in which case the entirity of the administrative area will be assigned the supplied value.Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates regions where all women have completed post-secondary education, whereas a value of 0 indicates areas where no women have attained post-secondary education. ",
@@ -566,7 +642,7 @@
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -590,6 +666,10 @@
                     "name": "Digital Inclusion",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Individuals using the Internet (% of population)",
                             "ID": "Digital_Inclusion",
                             "Text": "Digital InclusionThis tab characterizes areas based on the percentage of houses with access to the Internet. Input: A polygon (.shp) with the value or a value representing the percentage of houses with Internet access (The Internet Access value can be used if there is no polygon input). If your input is a polygon, click on set to populate the fields of interest then select the specific field.Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where all houses have access to the Internet while 0 indicates areas where no houses have Internet access. ",
@@ -598,7 +678,7 @@
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -622,6 +702,10 @@
                     "name": "Environmental Hazards",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Fire Hazards",
                             "ID": "Fire",
                             "Text": "Environmental HazardsThis tab characterizes areas based on their vulnerability to environmental hazards.Input: One or many raster layers.The hazard datasets used are:1. Forest Fire: Active Fires Density (2003 - 2004)2. Flood: Flood Hazard3. Landslide: Landslide Susceptibility4. Tropical Cyclone: Frequency of Tropical Cyclones5. Drought: Global Drought Hazard based on the Standardized Precipitation Evapotranspiration Index (SPEI)Step 1 For each layer representing a different class of environmental hazard, the input layer is set. The algorithm reclassifies the input field such that low-risk areas are assigned a score of 5, medium-risk areas are assigned a score of 2, and high-risk areas are assigned a score of 0. Step 2 The algorithm identifies all raster layers created in step 1 and aggregates them by calculating the mean score for each pixel. The default raster output filename does not need to be altered unless the user wishes. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas where natural disaster risk is lowest. A value of 0 indicates areas where environmental hazard risk is highest. ",
@@ -630,7 +714,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -649,6 +733,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Flood Hazards",
                             "ID": "Flood",
                             "Text": "",
@@ -657,7 +745,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -676,6 +764,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Landslide",
                             "ID": "Landslide",
                             "Text": "",
@@ -684,7 +776,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -703,6 +795,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Tropical Cyclone",
                             "ID": "Cyclone",
                             "Text": "",
@@ -711,7 +807,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -730,6 +826,10 @@
                             "Use Point per Cell": 0
                         },
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Drought",
                             "ID": "Drought",
                             "Text": "",
@@ -738,7 +838,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": "0,0,0",
                             "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
+                            "Default Single Buffer Distance": 0,
                             "Use Single Buffer Point": 0,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -762,6 +862,10 @@
                     "name": "Water sanitation",
                     "layers": [
                         {
+                            "Analysis Mode": "",
+                            "Points Per Cell Layer": "",
+                            "Lines Per Cell Layer": "",
+                            "Polygons Per Cell Layer": "",
                             "Layer": "Water points (OSM), catch basins, water valves and fire hydrants",
                             "ID": "",
                             "Text": "Water and SanitationThis tab generates a raster map representing the spatial distribution of water and sanitation services across the country of interest.Input: Point layer (.shp) of water and sanitation facility locationsProcess: The tool creates a 1000-meter buffer around each water/sanitation point, assigns a score of 5 to each, then rasterizes this data. The output raster is composed of cells at the prefered resolution specified in the Setup tab. Each cell is assigned a value based on proximity to water/sanitation points:5: Within 1000 meters of one or more water/sanitation points0: No water/sanitation points within 1000 metersOutput: A raster file with values ranging from 0 to 5, where higher values indicate areas with better access to water and sanitation services.",
@@ -770,7 +874,7 @@
                             "Use Default Index Score": 0,
                             "Default Multi Buffer Distances": 1000,
                             "Use Multi Buffer Point": 1,
-                            "Default Single Buffer Distances": 1000,
+                            "Default Single Buffer Distance": 1000,
                             "Use Single Buffer Point": 1,
                             "Default pixel": 0,
                             "Use Create Grid": 0,
@@ -780,282 +884,6 @@
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 1,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "About ",
-            "factors": [
-                {
-                    "name": "Water sanitation",
-                    "layers": [
-                        {
-                            "Layer": "",
-                            "ID": "",
-                            "Text": "AboutGEEST effectively identifies areas where conditions are conducive for women to attain employment or business oportunitier by implementing the framework described in \u201cA Methodological Framework for a Geospatial Assessment of Women\u2019s Employment and Business Opportunities in the Renewable Energy Sector\u201d which can be accessed in the tools GitHub repository.For information on how to use the tool, consult the tool manual maintained in the tools GitHub repository. Brief summary of the framework The framework identifies 23 factors that are considered key to women\u2019s ability to access employment opportunities. Due to data constraints only 21 of the 23 could be incorporated into the tool. These 21 factors are evaluated individually to create a single raster output layer for each factor with scores ranging from 0 to 5. Factor layers are aggregated into 4 dimensions (individual, contextual, accessibility and place characterization) using a multicriteria evaluation as described in the methodology document. Dimensions are also represented by a single raster layer with scores ranging from 0 to 5. Finally, dimensions can be further combined to produce a final aggregate output of scores ranging from 0 to 5. The range of scores within each layer can broadly be interpreted as follows:  Score range      Class     Interpretation0.00 - 0.50        0            Not enabling 0.51 - 1.50        1            Very low enabling 1.51 - 2.50        2            Low enabling 2.51 - 3.50        3           Moderately enabling3.51 - 4.50        4           Enabling 4.51 - 5.00        5           Highly enabling   Confidence Level An overall confidence level is assigned to the final aggregate output based on the percentage of factors included in the aggregation. The level of confidence in the overall result can be interpreted as follows: 0-24% = Very low confidence 25-49% = Low confidence 50-74% = Medium confidence 75-89% = High confidence 90-100% = Very high confidence InsightsThe raw aggregate scores can be used in combination with information relating to the distribution of women and renewable energy sites to draw further insights. The insights tab groups population counts into three categories based on the lower, median, and upper quartile range of data to identify areas, of low, medium, and high numbers of women. These groupings are then combined with score classes to create 15 score-population classes listed below: 1 - Very low enablement, low population 2 - Very low enablement, medium population 3 - Very low enablement, high population 4 - Low enablement, low population 5 - Low enablement, medium population 6 - Low enablement, high population 7 - Moderately enabling, low population 8 - Moderately enabling, medium population 9 - Moderately enabling, high population 10 - Enabling, low population 11 - Enabling, medium population 12 - Enabling, high population 13 - Highly enabling, low population 14 - Highly enabling, medium population 15 - Highly enabling, high population ",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 1,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Setup",
-            "factors": [
-                {
-                    "name": "Water sanitation",
-                    "layers": [
-                        {
-                            "Layer": "",
-                            "ID": "",
-                            "Text": "GEEST - SetupIn this tab, the user must: Step 1: Set  the output directory. The output directory must be created by the user prior to setup and it is where all outputs from the tool will be stored; Step 2: Locate the boundary layer of the administrative level of analysis. The boundary layer must be in vector format (.shp); Step 3: Set the CRS by selecting the EPSG code for the region from the drop-down list. The recommended CRS for the tool to function optimally is the UTM Zone for the region.  A list of valid UTMs for SIDS can be found in the user manual; Step 4:  Set the preferred resolution of the raster output. The default and recommended resolution for the raster output is 100m, but this can be altered if preferred. A higher resolution (smaller pixel) will produce more detailed outputs but will require more processing power. ",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 100,
-                            "Use Create Grid": 1,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Aggregate",
-            "factors": [
-                {
-                    "name": "Contextual",
-                    "layers": [
-                        {
-                            "Layer": "Contectual Score",
-                            "ID": "",
-                            "Text": "Contextual Factor Aggregation This tab aggregates the raster outputs of all available factors within the contextual dimension by assuming equal weighting of all factors within the dimension. If equal weights are not appropriate for the specific context of the analysis, the user can adjust weights as necessary provided all weights still sum to 100%. If a factor was not calculated (perhaps due to missing data, or because it was deemed to be unimportant) that factor should be assigned a weight of 0%, and the remaining factor weights adjusted such that they add up to 100%. Factor outputs that are created during the current working session are automatically loaded. Users can choose to load previously generated factor outputs from the output directory set up at tool initiation. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory and loaded into the workspace. Scores should be interpreted as outlined in the \u201cAbout\u201d tab.   ",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                },
-                {
-                    "name": "Accessibility",
-                    "layers": [
-                        {
-                            "Layer": "Accessibility Score",
-                            "ID": "",
-                            "Text": "Accessibility Factor Aggregation This tab aggregates the raster outputs of all available factors within the accessibility dimension by assuming equal weighting of all factors within the dimension. If equal weights are not appropriate for the specific context of the analysis, the user can adjust weights as necessary provided all weights still sum to 100%. If a factor was not calculated (perhaps due to missing data, or because it was deemed to be unimportant) that factor should be assigned a weight of 0%, and the remaining factor weights adjusted such that they add up to 100%. Factor outputs that are created during the current working session are automatically loaded. Users can choose to load previously generated factor outputs from the output directory set up at tool initiation. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory and loaded into the workspace. Scores should be interpreted as outlined in the \u201cAbout\u201d tab.   ",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                },
-                {
-                    "name": "Place Characherisation",
-                    "layers": [
-                        {
-                            "Layer": "Place Score",
-                            "ID": "",
-                            "Text": "Place Characterization Factor Aggregation This tab aggregates the raster outputs of all available factors within the place characterization dimension by assuming equal weighting of all factors within the dimension. If equal weights are not appropriate for the specific context of the analysis, the user can adjust weights as necessary provided all weights still sum to 100%. If a factor was not calculated (perhaps due to missing data, or because it was deemed to be unimportant) that factor should be assigned a weight of 0%, and the remaining factor weights adjusted such that they add up to 100%. Factor outputs that are created during the current working session are automatically loaded. Users can choose to load previously generated factor outputs from the output directory set up at tool initiation. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory and loaded into the workspace. Scores should be interpreted as outlined in the \u201cAbout\u201d tab. ",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Insignts",
-            "factors": [
-                {
-                    "name": "Enablement",
-                    "layers": [
-                        {
-                            "Layer": "",
-                            "ID": "",
-                            "Text": "Insights - EnablementThis tab enables the user to obtain further refined insights from the score rasters produced in the previous tabs based on discrete descriptive classes. Population data can also be combined with the discrete score output dataset, allowing for more nuanced insights that account for both the level of enablement and population. Additionally, this tab provides the option to aggregate results based on specific boundaries of interest.Step 1: Classify into discrete classesEnablement Score Input layer (required): The dimension or final weighted aggregated score layer of interest (.tif). Scores are grouped into five discrete classes as defined in the 'About' Tab.Output (Level of Enablment):  The enablement score input layer classified into five discrete level of enablement classes.Population Input layer (required): A population count layer (.tif). This should be represented as the count of women in each raster cell.Output (Relative Population Count): The population input layer classified into three discrete classes based on the lower quartile range, interquartile range, and upper quartile range of data to identify areas of relatively low, medium, and high population per region.Step 2: Combine score and population classificationsLevel of Enablment Input Layer: The level of enablement output raster layer produced in step 1.Relative Population Count Input Layer: The relative population count raster layer produced in step 1.Output (Combine Classification):  A single raster layer which combines the five levels of enablement classes and three population classes. This layer contains 15 classes defined in the \u2018About\u2019 tab. This output covers the entire country or region of interest. Step 3: AggregationCombine Classification Input Layer: The combine classification output raster layer produced in step 2.Aggregation Input Layer: A polygon layer representing boundaries of interest for aggregation (e.g. municipal boundary layer) Output (Aggregation): A polygon layer showing the 15 score-population classes produced in step 2 aggregated to the scale of the aggregation input layer using the majority class. ",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                },
-                {
-                    "name": "Re Zone Raster Locations",
-                    "layers": [
-                        {
-                            "Layer": "",
-                            "ID": "",
-                            "Text": "Insights - Raster LocationsThis tab enables the user to obtain further insights from the results based on proximity to potential RE zones. The outputs from this tab are assigned the combine classification score to the RE zones input raster and extract the aggregated polygon/admin units that intersect with RE zones.Combine Classification Input Layer: The combine classification output raster layer produced in step 2 of the \"Enablement\" tab.Aggregated Combine Classification Input Layer: The aggregated combine classification output polygon layer produced in step 3 of the \"Enablement\" tab.Potential RE Zones Input Layer: A raster layer highlighting the potetial RE zones. Pixels of zones in the region that have no RE potential needs to be represented with \"no data\" or \"inf\" values in the raster file.Output (RE zones):  A raster layer of the RE zones with the combine classification scores assigned to the highlited RE zones. Additionally, the aggregated polygon/admin units that intersect with RE zones are extracted along with their majority combine classification class to a new polygon layer.",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0
-                        }
-                    ]
-                },
-                {
-                    "name": "Re Point Locations",
-                    "layers": [
-                        {
-                            "Layer": "",
-                            "ID": "",
-                            "Text": "Insights - Point LocationsThis tab enables the user to obtain further insights from the results based on proximity to RE point locations. The first output from this tab aggregates the combine classification score based on the majority class that falls within the RE point location buffers. The second output extracts the aggregated polygon/admin units that intersect with RE point location buffers. The majority class extraction for the buffers is conducted using the original combine classification raster produced in step 2 of the \"Enablement\" tab.Combine Classification Input Layer: The combine classification output raster layer produced in step 2 of the  \"Enablement\" tab.Aggregated Combine Classification Input Layer: The aggregated combine classification output polygon layer produced in step 3 of the  \"Enablement\" tab.RE Point Location Input Layer: Point locations of interest (.shp). This could be existing RE job locations or other points of interest.Buffer Distance: Maximum radial distance of circular buffer from point location in meters.Output (RE Point): A polygon layer showing the 15 score-population classes aggregated to the RE point buffers scale using the majority class that fall within the buffers. Additionally, the aggregated polygon/admin units that intersect with RE point location buffers are extracted along with their majority class to a new polygon layer.",
-                            "Default Index Score": 0.0,
-                            "Index Score": 0,
-                            "Use Default Index Score": 0,
-                            "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
-                            "Default Single Buffer Distances": 0,
-                            "Use Single Buffer Point": 0,
-                            "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 0,
-                            "Use WBL Downloader": 0,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
                             "Use Other Downloader": 0,
                             "Use Add Layers Manually": 0,
                             "Use Classify Poly into Classes": 0,
