@@ -21,6 +21,7 @@ class SpreadsheetToJsonParser:
         """
         # Load the ODS spreadsheet
         self.dataframe = pd.read_excel(self.spreadsheet_path, engine="odf", skiprows=1)
+        print(self.dataframe.columns)
 
         # Select only the relevant columns
         self.dataframe = self.dataframe[
@@ -35,7 +36,7 @@ class SpreadsheetToJsonParser:
                 "Use Default Index Score",
                 "Default Multi Buffer Distances",
                 "Use Multi Buffer Point",
-                "Default Single Buffer Distances",
+                "Default Single Buffer Distance",
                 "Use Single Buffer Point",
                 "Default pixel",
                 "Use Create Grid",
