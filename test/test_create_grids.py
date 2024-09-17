@@ -19,7 +19,7 @@ class TestGridCreator(unittest.TestCase):
 
         # Setup parameters for the GridCreator class
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/Admin0.shp"
+            os.path.dirname(__file__), "test_data/admin/Admin0.shp"
         )
         self.output_dir = os.path.join(os.path.dirname(__file__), "output")
         self.merged_output_path = os.path.join(self.output_dir, "merged_grid.gpkg")

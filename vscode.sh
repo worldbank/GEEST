@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 echo "🪛 Installing VSCode Extensions:"
 echo "--------------------------------"
+
 code --extensions-dir=.vscode-extensions --install-extension batisteo.vscode-django
 code --extensions-dir=.vscode-extensions --install-extension donjayamanne.python-environment-manager
 code --extensions-dir=.vscode-extensions --install-extension donjayamanne.python-extension-pack

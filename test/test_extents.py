@@ -21,7 +21,7 @@ class TestExtents(unittest.TestCase):
         # Setup parameters for the Extents class
         self.workingDir = os.path.join(os.path.dirname(__file__))
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/Admin0.shp"
+            os.path.dirname(__file__), "test_data/admin/Admin0.shp"
         )
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.pixel_size = 100

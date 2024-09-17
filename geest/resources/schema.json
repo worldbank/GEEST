@@ -1,0 +1,149 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "dimensions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "factors": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "layers": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "Layer": {
+                                                "type": "string"
+                                            },
+                                            "ID": {
+                                                "type": "string"
+                                            },
+                                            "Text": {
+                                                "type": "string"
+                                            },
+                                            "Default Index Score": {
+                                                "type": "number"
+                                            },
+                                            "Index Score": {
+                                                "type": "integer"
+                                            },
+                                            "Use Default Index Score": {
+                                                "type": "integer"
+                                            },
+                                            "Default Multi Buffer Distances": {
+                                                "type": "string"
+                                            },
+                                            "Use Multi Buffer Point": {
+                                                "type": "integer"
+                                            },
+                                            "Default Single Buffer Distances": {
+                                                "type": "integer"
+                                            },
+                                            "Use Single Buffer Point": {
+                                                "type": "integer"
+                                            },
+                                            "Default pixel": {
+                                                "type": "integer"
+                                            },
+                                            "Use Create Grid": {
+                                                "type": "integer"
+                                            },
+                                            "Use OSM Downloader": {
+                                                "type": "integer"
+                                            },
+                                            "Use Bbox for AOI": {
+                                                "type": "integer"
+                                            },
+                                            "Use Rasterize Layer": {
+                                                "type": "integer"
+                                            },
+                                            "Use WBL Downloader": {
+                                                "type": "integer"
+                                            },
+                                            "Use Humdata Downloader": {
+                                                "type": "integer"
+                                            },
+                                            "Use Mapillary Downloader": {
+                                                "type": "integer"
+                                            },
+                                            "Use Other Downloader": {
+                                                "type": "integer"
+                                            },
+                                            "Use Add Layers Manually": {
+                                                "type": "integer"
+                                            },
+                                            "Use Classify Poly into Classes": {
+                                                "type": "integer"
+                                            },
+                                            "Use CSV to Point Layer": {
+                                                "type": "integer"
+                                            },
+                                            "Use Poly per Cell": {
+                                                "type": "integer"
+                                            },
+                                            "Use Polyline per Cell": {
+                                                "type": "integer"
+                                            },
+                                            "Use Point per Cell": {
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "required": [
+                                            "Layer",
+                                            "ID",
+                                            "Text",
+                                            "Default Index Score",
+                                            "Index Score",
+                                            "Use Default Index Score",
+                                            "Default Multi Buffer Distances",
+                                            "Use Multi Buffer Point",
+                                            "Default Single Buffer Distances",
+                                            "Use Single Buffer Point",
+                                            "Default pixel",
+                                            "Use Create Grid",
+                                            "Use OSM Downloader",
+                                            "Use Bbox for AOI",
+                                            "Use Rasterize Layer",
+                                            "Use WBL Downloader",
+                                            "Use Humdata Downloader",
+                                            "Use Mapillary Downloader",
+                                            "Use Other Downloader",
+                                            "Use Add Layers Manually",
+                                            "Use Classify Poly into Classes",
+                                            "Use CSV to Point Layer",
+                                            "Use Poly per Cell",
+                                            "Use Polyline per Cell",
+                                            "Use Point per Cell"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "layers"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "factors"
+                ]
+            }
+        }
+    },
+    "required": [
+        "dimensions"
+    ]
+}
