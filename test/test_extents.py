@@ -1,6 +1,11 @@
 import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsApplication, QgsRectangle
+from qgis.core import (
+    QgsVectorLayer,
+    QgsCoordinateReferenceSystem,
+    QgsApplication,
+    QgsRectangle,
+)
 from qgis.analysis import QgsNativeAlgorithms
 from processing.core.Processing import Processing
 from qgis.core import QgsProcessingFeedback
@@ -12,15 +17,15 @@ class TestExtents(unittest.TestCase):
 
     def test_get_extent(self):
         """Test the get_country_extent method to ensure extent calculation is correct."""
-        
+
         # Setup parameters for the Extents class
         self.workingDir = os.path.join(os.path.dirname(__file__))
         self.vector_layer_path = os.path.join(
-            os.path.dirname(__file__), "data/admin/Admin0.shp"
+            os.path.dirname(__file__), "test_data/admin/Admin0.shp"
         )
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.pixel_size = 100
-        
+
         # Initialize the Extents class
         extents_processor = Extents(
             self.workingDir, self.vector_layer_path, self.pixel_size, self.utm_crs
