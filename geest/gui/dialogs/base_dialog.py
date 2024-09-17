@@ -22,14 +22,14 @@ class BaseDialog(QDialog, ABC):
 
     def init_ui(self):
         # Set dialog properties
-        self.setWindowTitle(self.input_specs.get('title', 'Dialog'))
+        self.setWindowTitle(self.input_specs.get("title", "Dialog"))
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
         # Iterate over input specifications to create widgets
-        for element in self.input_specs.get('elements', []):
-            widget_type = element.get('type')
-            label_text = element.get('label', '')
+        for element in self.input_specs.get("elements", []):
+            widget_type = element.get("type")
+            label_text = element.get("label", "")
             widget = self.create_widget(widget_type, element)
 
             if label_text:
@@ -39,7 +39,7 @@ class BaseDialog(QDialog, ABC):
 
             if widget:
                 self.layout.addWidget(widget)
-                self.widgets[element.get('name')] = widget
+                self.widgets[element.get("name")] = widget
 
         # Add dialog buttons
         self.add_buttons()
@@ -61,7 +61,10 @@ class BaseDialog(QDialog, ABC):
     def get_inputs(self):
         inputs = {}
         for name, widget in self.widgets.items():
-            spec = next((elem for elem in self.input_specs['elements'] if elem['name'] == name), None)
+            spec = next(
+                (elem for elem in self.input_specs["elements"] if elem["name"] == name),
+                None,
+            )
             if spec:
                 inputs[name] = WidgetFactory.get_widget_value(widget, spec)
         return inputs

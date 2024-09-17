@@ -244,7 +244,7 @@ class TreePanel(QWidget):
         # Connect the dialog's dataUpdated signal to handle data updates
         def update_layer_data(updated_data):
             # Update the layer data in the item (column 4)
-            item.setData(4, updated_data)
+            item.setData(3, updated_data)
 
             # Check if the layer name has changed, and if so, update it in column 0
             if updated_data.get('name', layer_name) != layer_name:
