@@ -18,6 +18,7 @@ __revision__ = "$Format:%H$"
 # (at your option) any later version.
 # ---------------------------------------------------------------------
 
+import os
 import time
 from typing import Optional
 
@@ -73,13 +74,18 @@ class GeestPlugin:
         # to the remote debugger
         debug_mode = int(setting(key="debug_mode", default=0))
         if debug_mode:
-            debug_icon = QIcon(resources_path("icons", "geest-debug.svg"))
+            debug_icon = QIcon(resources_path("resources", "geest-debug.svg"))
             self.debug_action = QAction(
                 debug_icon, "GEEST Debug Mode", self.iface.mainWindow()
             )
             self.debug_action.triggered.connect(self.debug)
             self.iface.addToolBarIcon(self.debug_action)
-
+        # Alternatively, if the env var GEEST_DEBUG is set to 1
+        # then we will also enter debug mode
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.debug()
+            
         self.options_factory = GeestOptionsFactory()
         self.iface.registerOptionsWidgetFactory(self.options_factory)
 

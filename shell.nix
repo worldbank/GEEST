@@ -18,6 +18,8 @@ in pkgs.mkShell rec {
     python3Packages.pytest-qt
     python3Packages.black
     python3Packages.jsonschema
+    python3Packages.pandas
+    python3Packages.odfpy
 
     # This executes some shell code to initialize a venv in $venvDir before
     # dropping into the shell

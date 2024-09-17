@@ -22,7 +22,6 @@ import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
 from .tree_panel import TreePanel
-from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
 
 
