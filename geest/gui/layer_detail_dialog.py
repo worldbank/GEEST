@@ -16,6 +16,9 @@ from qgis.PyQt.QtWidgets import (
     QTextEdit,
     QWidget,
     QSplitter,
+    QFrame,
+    QRadioButton,
+    QButtonGroup,
 )
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
@@ -34,6 +37,8 @@ class LayerDetailDialog(QDialog):
         self.layer_data = layer_data
         self.tree_item = tree_item  # Reference to the QTreeView item to update
         self.editing = editing
+        self.radio_buttons = []  # To keep track of the radio buttons for later
+        self.button_group = QButtonGroup()  # To group radio buttons
         layout = QVBoxLayout()
 
         # Heading for the dialog
@@ -77,6 +82,9 @@ class LayerDetailDialog(QDialog):
         if self.editing:
             layout.addWidget(self.table)
 
+        # Add the configuration frame with radio buttons
+        self.add_config_widgets(layout)
+
         # Close button
         close_button = QPushButton("Close")
         close_button.clicked.connect(self.on_close)  # Connect close button to custom close handler
@@ -102,14 +110,11 @@ class LayerDetailDialog(QDialog):
             value_widget = self.get_widget_for_value(key, value)
             self.table.setCellWidget(row, 1, value_widget)
 
-
-
     def update_preview(self):
-        """Update the right text edit to show a live HTML preview of the Markdown, ensuring headings are terminated at the first line feed."""
+        """Update the right text edit to show a live HTML preview of the Markdown."""
         markdown_text = self.text_edit_left.toPlainText()
         # Set the rendered HTML into the right text edit
         self.text_edit_right.setMarkdown(markdown_text)
-
 
     def get_widget_for_value(self, key, value):
         """
@@ -141,9 +146,45 @@ class LayerDetailDialog(QDialog):
             line_edit = QLineEdit(str(value))
             return line_edit
 
+    def add_config_widgets(self, layout):
+        """
+        Add a frame widget containing radio buttons for 'Use' attributes that are True.
+        """
+        frame = QFrame()
+        frame_layout = QVBoxLayout()
+
+        # Find all keys that start with 'Use' and have a value of True
+        use_keys = {k: v for k, v in self.layer_data.items() if k.startswith("Use") and v}
+
+        if use_keys:
+            for i, key in enumerate(use_keys):
+                radio_button = QRadioButton(key)
+                self.radio_buttons.append(radio_button)
+                frame_layout.addWidget(radio_button)
+
+                # Check the first radio button by default
+                if i == 0:
+                    radio_button.setChecked(True)
+
+                # Add the radio button to the button group
+                self.button_group.addButton(radio_button)
+
+                # Add a label next to the radio button with the key's name
+                label = QLabel(key)
+                frame_layout.addWidget(label)
+
+        frame.setLayout(frame_layout)
+        layout.addWidget(frame)
+
     def on_close(self):
         """Handle the dialog close event by writing the edited data back to the TreeView item."""
         updated_data = self.get_updated_data_from_table()
+
+        # Set 'Analysis Mode' based on the selected radio button
+        selected_button = self.button_group.checkedButton()
+        if selected_button:
+            updated_data["Analysis Mode"] = selected_button.text()
+
         self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
         self.close()
 
@@ -152,7 +193,7 @@ class LayerDetailDialog(QDialog):
         updated_data = {}
 
         # Include the Markdown text from the left text edit
-        updated_data["indicator"] = self.text_edit_left.toPlainText()
+        updated_data["text"] = self.text_edit_left.toPlainText()
 
         # Loop through the table and collect other data
         for row in range(self.table.rowCount()):
@@ -173,4 +214,3 @@ class LayerDetailDialog(QDialog):
             updated_data[key] = updated_value  # Update the dictionary with the key-value pair
 
         return updated_data
-
