@@ -23,17 +23,14 @@
                                     "items": {
                                         "type": "object",
                                         "properties": {
-                                            "layer": {
+                                            "Layer": {
+                                                "type": "string"
+                                            },
+                                            "ID": {
                                                 "type": "string"
                                             },
                                             "Text": {
                                                 "type": "string"
-                                            },
-                                            "Default Weighting": {
-                                                "type": "number"
-                                            },
-                                            "Use Aggregate": {
-                                                "type": "number"
                                             },
                                             "Default Index Score": {
                                                 "type": "number"
@@ -41,25 +38,19 @@
                                             "Index Score": {
                                                 "type": "integer"
                                             },
-                                            "Use default Idex Score": {
+                                            "Use Default Index Score": {
                                                 "type": "integer"
                                             },
-                                            "Rasterise Raster": {
-                                                "type": "number"
-                                            },
-                                            "Rasterise Polygon": {
-                                                "type": "integer"
-                                            },
-                                            "Rasterise Polyline": {
-                                                "type": "number"
-                                            },
-                                            "Rasterise Point": {
-                                                "type": "integer"
-                                            },
-                                            "Default Buffer Distances": {
+                                            "Default Multi Buffer Distances": {
                                                 "type": "string"
                                             },
-                                            "Use Buffer point": {
+                                            "Use Multi Buffer Point": {
+                                                "type": "integer"
+                                            },
+                                            "Default Single Buffer Distances": {
+                                                "type": "integer"
+                                            },
+                                            "Use Single Buffer Point": {
                                                 "type": "integer"
                                             },
                                             "Default pixel": {
@@ -68,51 +59,72 @@
                                             "Use Create Grid": {
                                                 "type": "integer"
                                             },
-                                            "Default Mode": {
-                                                "type": "string"
+                                            "Use OSM Downloader": {
+                                                "type": "integer"
                                             },
-                                            "Default Measurement": {
-                                                "type": "string"
+                                            "Use Bbox for AOI": {
+                                                "type": "integer"
                                             },
-                                            "Default Increments": {
-                                                "type": "string"
+                                            "Use Rasterize Layer": {
+                                                "type": "integer"
                                             },
-                                            "Use Mode of Travel": {
-                                                "type": "number"
+                                            "Use WBL Downloader": {
+                                                "type": "integer"
                                             },
-                                            "source": {
-                                                "type": "string"
+                                            "Use Humdata Downloader": {
+                                                "type": "integer"
                                             },
-                                            "indicator": {
-                                                "type": "string"
+                                            "Use Mapillary Downloader": {
+                                                "type": "integer"
                                             },
-                                            "query": {
-                                                "type": "string"
+                                            "Use Other Downloader": {
+                                                "type": "integer"
+                                            },
+                                            "Use Add Layers Manually": {
+                                                "type": "integer"
+                                            },
+                                            "Use Classify Poly into Classes": {
+                                                "type": "integer"
+                                            },
+                                            "Use CSV to Point Layer": {
+                                                "type": "integer"
+                                            },
+                                            "Use Poly per Cell": {
+                                                "type": "integer"
+                                            },
+                                            "Use Polyline per Cell": {
+                                                "type": "integer"
+                                            },
+                                            "Use Point per Cell": {
+                                                "type": "integer"
                                             }
                                         },
                                         "required": [
-                                            "layer",
+                                            "Layer",
+                                            "ID",
                                             "Text",
-                                            "Default Weighting",
-                                            "Use Aggregate",
                                             "Default Index Score",
                                             "Index Score",
-                                            "Use default Idex Score",
-                                            "Rasterise Raster",
-                                            "Rasterise Polygon",
-                                            "Rasterise Polyline",
-                                            "Rasterise Point",
-                                            "Default Buffer Distances",
-                                            "Use Buffer point",
+                                            "Use Default Index Score",
+                                            "Default Multi Buffer Distances",
+                                            "Use Multi Buffer Point",
+                                            "Default Single Buffer Distances",
+                                            "Use Single Buffer Point",
                                             "Default pixel",
                                             "Use Create Grid",
-                                            "Default Mode",
-                                            "Default Measurement",
-                                            "Default Increments",
-                                            "Use Mode of Travel",
-                                            "source",
-                                            "indicator",
-                                            "query"
+                                            "Use OSM Downloader",
+                                            "Use Bbox for AOI",
+                                            "Use Rasterize Layer",
+                                            "Use WBL Downloader",
+                                            "Use Humdata Downloader",
+                                            "Use Mapillary Downloader",
+                                            "Use Other Downloader",
+                                            "Use Add Layers Manually",
+                                            "Use Classify Poly into Classes",
+                                            "Use CSV to Point Layer",
+                                            "Use Poly per Cell",
+                                            "Use Polyline per Cell",
+                                            "Use Point per Cell"
                                         ]
                                     }
                                 }

@@ -18,6 +18,7 @@ __revision__ = "$Format:%H$"
 # (at your option) any later version.
 # ---------------------------------------------------------------------
 
+import os
 import time
 from typing import Optional
 
@@ -79,7 +80,12 @@ class GeestPlugin:
             )
             self.debug_action.triggered.connect(self.debug)
             self.iface.addToolBarIcon(self.debug_action)
-
+        # Alternatively, if the env var GEEST_DEBUG is set to 1
+        # then we will also enter debug mode
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.debug()
+            
         self.options_factory = GeestOptionsFactory()
         self.iface.registerOptionsWidgetFactory(self.options_factory)
 

@@ -235,7 +235,7 @@ class TreePanel(QWidget):
         editing = self.edit_toggle.isChecked()
         # Get the current layer name and layer data from the item
         layer_name = item.data(0)  # Column 0: layer name
-        layer_data = item.data(4)  # Column 4: layer data (stored as a dict)
+        layer_data = item.data(3)  # Column 3: layer data (stored as a dict)
 
         # Create and show the LayerDetailDialog
         dialog = LayerDetailDialog(
