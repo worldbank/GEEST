@@ -34,6 +34,24 @@ class GridCreator:
             return QgsVectorLayer(
                 merged_output_path, "merged_grid", "ogr"
             )  # Load the existing merged grid layer
+            
+        layer = QgsVectorLayer(
+            layer, "country_layer", "ogr"
+        )
+        if not layer.isValid():
+            raise ValueError("Invalid country layer")
+
+        # Reproject the country layer if necessary
+        if layer.crs() != crs:
+            layer = processing.run(
+                "native:reprojectlayer",
+                {
+                    "INPUT": layer,
+                    "TARGET_CRS": crs,
+                    "OUTPUT": "memory:",
+                },
+                feedback=QgsProcessingFeedback(),
+            )["OUTPUT"]
 
         all_grids = []
 
@@ -52,13 +70,6 @@ class GridCreator:
             # Loop through each part of the geometry
             for part_id, part in enumerate(parts):
                 part_area = part.area()
-
-                # Skip parts that are less than 1 hectare (10,000 square meters)
-                if part_area < 10000:
-                    print(
-                        f"Skipping part {part_id} of feature {feature.id()} - Area is less than 1 hectare ({part_area} square meters)"
-                    )
-                    continue
 
                 # Get the extent of each part
                 part_extent = part.boundingBox()

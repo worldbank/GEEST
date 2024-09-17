@@ -30,16 +30,12 @@ class TestGridCreator(unittest.TestCase):
         # Create the output directory if it doesn't exist
         os.makedirs(self.output_dir, exist_ok=True)
 
-        # Load the vector layer
-        layer = QgsVectorLayer(self.vector_layer_path, "polygon_layer", "ogr")
-        self.assertTrue(layer.isValid(), "The vector layer is not valid")
-
         # Initialize the GridCreator class with the real parameters
         grid_creator = GridCreator(h_spacing=self.h_spacing, v_spacing=self.v_spacing)
 
         # Run the grid creation process
         merged_grid = grid_creator.create_grids(
-            layer, self.output_dir, self.utm_crs, self.merged_output_path
+            self.vector_layer_path, self.output_dir, self.utm_crs, self.merged_output_path
         )
 
         # Check that the merged grid output file was created
