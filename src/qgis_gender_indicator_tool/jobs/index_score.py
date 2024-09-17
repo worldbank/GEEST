@@ -51,10 +51,9 @@ class RasterizeIndexScoreValue:
             print(
                 f"Warning: {self.output_path} already exists. It will be overwritten."
             )
-            os.remove(self.output_path)
 
         # Calculate the raster value based on index_value and index_scale
-        raster_value = int(self.index_value / self.index_scale) * 5
+        raster_value = int((self.index_value / self.index_scale) * 5)
 
         # Create a temporary raster filled with the raster_value
         extent_str = f"{self.bbox.xMinimum()},{self.bbox.xMaximum()},{self.bbox.yMinimum()},{self.bbox.yMaximum()}"
@@ -75,14 +74,14 @@ class RasterizeIndexScoreValue:
                 "EXTENT": extent_str,
                 "NODATA": -9999,  # NoData value for non-land pixels
                 "DATA_TYPE": 5,  # Float32
-                "OUTPUT": temp_raster_path,
+                "OUTPUT": self.output_path,
                 "CRS": self.crs,
             },
             feedback=QgsProcessingFeedback(),
         )
 
         # Load the output raster as a QgsRasterLayer
-        raster_layer = QgsRasterLayer(temp_raster_path, "generated_raster")
+        raster_layer = QgsRasterLayer(self.output_path, "generated_raster")
 
         if not raster_layer.isValid():
             raise ValueError("Raster layer creation failed.")

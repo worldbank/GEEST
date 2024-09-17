@@ -69,19 +69,17 @@ class TestRasterizeIndexScoreValue(unittest.TestCase):
         self.assertTrue(raster_layer.isValid(), "The raster layer is not valid.")
 
         # Verify the checksum of the generated raster
-        checksum = raster_layer.dataProvider().checksum(
+        stats = raster_layer.dataProvider().bandStatistics(
             1
         )  # Checksum for the first band
-        expected_checksum = 4  # Expected checksum for the test data
-        self.assertEqual(
-            checksum,
-            expected_checksum,
-            f"Checksum {checksum} does not match expected {expected_checksum}.",
-        )
+        # Assert the statistics match expected values
+        expected_min = 4
+        expected_max = 4
+        expected_mean = 4
 
-        # Clean up generated raster
-        if os.path.exists(output_path):
-            os.remove(output_path)
+        self.assertAlmostEqual(stats.minimumValue, expected_min, msg=f"Minimum value does not match: {stats.minimumValue}")
+        self.assertAlmostEqual(stats.maximumValue, expected_max, msg=f"Maximum value does not match: {stats.maximumValue}")
+        self.assertAlmostEqual(stats.mean, expected_mean, msg=f"Mean value does not match: {stats.mean}")
 
 
 if __name__ == "__main__":
