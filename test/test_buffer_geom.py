@@ -13,7 +13,9 @@ class TestSinglePointBuffer(unittest.TestCase):
         """
         # Prepare test data
         working_dir = os.path.dirname(__file__)
-        input_layer_path = os.path.join(working_dir, "test_data", "points", "points.shp")
+        input_layer_path = os.path.join(
+            working_dir, "test_data", "points", "points.shp"
+        )
         output_path = os.path.join(working_dir, "output", "buffered_layer.shp")
 
         # Ensure output directory exists
