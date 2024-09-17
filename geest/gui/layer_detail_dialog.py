@@ -41,9 +41,20 @@ class LayerDetailDialog(QDialog):
         self.button_group = QButtonGroup()  # To group radio buttons
         layout = QVBoxLayout()
 
+        # Make the dialog wider and add padding
+        self.resize(800, 600)  # Set a wider dialog size
+        layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
+
         # Heading for the dialog
         heading_label = QLabel(layer_name)
+        heading_label.setStyleSheet("font-size: 18px; font-weight: bold;")  # Bold heading
         layout.addWidget(heading_label)
+
+        # Line separator between heading and text edits
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        layout.addWidget(line)
 
         # Create a horizontal splitter to hold both the Markdown editor and the preview
         splitter = QSplitter(Qt.Horizontal)
@@ -55,9 +66,11 @@ class LayerDetailDialog(QDialog):
         if self.editing:
             splitter.addWidget(self.text_edit_left)
 
-        # Create the QTextEdit for HTML preview (right side)
+        # Create the QTextEdit for HTML preview (right side, styled to look like a label)
         self.text_edit_right = QTextEdit()
         self.text_edit_right.setReadOnly(True)  # Set as read-only for preview
+        self.text_edit_right.setFrameStyle(QFrame.NoFrame)  # Remove the frame
+        self.text_edit_right.setStyleSheet("background-color: transparent;")  # Match form background
         splitter.addWidget(self.text_edit_right)
 
         layout.addWidget(splitter)
@@ -170,7 +183,6 @@ class LayerDetailDialog(QDialog):
                 self.button_group.addButton(radio_button)
 
                 # Add a label next to the radio button with the key's name
-                # Todo @hennie replace this with widget factory
                 label = QLabel(key)
                 frame_layout.addWidget(label)
 
@@ -212,7 +224,7 @@ class LayerDetailDialog(QDialog):
             updated_data[key] = updated_value  # Update the dictionary with the key-value pair
 
         # Include the Markdown text from the left text edit
-        # Special case so we need to write it last
         updated_data["Text"] = self.text_edit_left.toPlainText()
         
         return updated_data
+
