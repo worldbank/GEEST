@@ -170,6 +170,7 @@ class LayerDetailDialog(QDialog):
                 self.button_group.addButton(radio_button)
 
                 # Add a label next to the radio button with the key's name
+                # Todo @hennie replace this with widget factory
                 label = QLabel(key)
                 frame_layout.addWidget(label)
 
@@ -190,10 +191,7 @@ class LayerDetailDialog(QDialog):
 
     def get_updated_data_from_table(self):
         """Convert the table back into a dictionary with any changes made, including the Markdown text."""
-        updated_data = {}
-
-        # Include the Markdown text from the left text edit
-        updated_data["text"] = self.text_edit_left.toPlainText()
+        updated_data = self.layer_data
 
         # Loop through the table and collect other data
         for row in range(self.table.rowCount()):
@@ -213,4 +211,8 @@ class LayerDetailDialog(QDialog):
 
             updated_data[key] = updated_value  # Update the dictionary with the key-value pair
 
+        # Include the Markdown text from the left text edit
+        # Special case so we need to write it last
+        updated_data["Text"] = self.text_edit_left.toPlainText()
+        
         return updated_data
