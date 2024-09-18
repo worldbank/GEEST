@@ -232,9 +232,22 @@ class LayerDetailDialog(QDialog):
                 self.button_group.addButton(radio_button)
 
                 # Add a label next to the radio button with the key's name
-                label = QLabel(key)
-                frame_layout.addWidget(label)
+                #label = QLabel(key)
+                #frame_layout.addWidget(label)
 
+                # Check the first radio button by default
+                if key == self.layer_data.get("Analysis Mode"):
+                    radio_button.setChecked(True)
+
+                # Add the radio button to the button group
+                self.button_group.addButton(radio_button)
+
+        if not self.layer_data.get("Layer Required"):
+            radio_button = QRadioButton("Don't use")
+            self.radio_buttons.append(radio_button)
+            frame_layout.addWidget(radio_button)
+            #label = QLabel( "Don't use this layer")
+            #frame_layout.addWidget(label)            
         frame.setLayout(frame_layout)
         layout.addWidget(frame)
 
