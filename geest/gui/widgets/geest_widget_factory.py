@@ -248,7 +248,6 @@ class GeestWidgetFactory:
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
-
         elif widget_type == "csv_to_point":
             container = QWidget()
             layout = QHBoxLayout()
@@ -279,17 +278,10 @@ class GeestWidgetFactory:
             )
             return container
 
-
         elif widget_type == "download_option":
             container = QWidget()
             layout = QVBoxLayout()
             container.setLayout(layout)
-
-            # Description label
-            description_label = QLabel(mapping.get("description", ""))
-            description_label.setWordWrap(True)
-            layout.addWidget(description_label)
-
             return container
 
         else:
