@@ -31,9 +31,7 @@ class GridCreator:
         # Check if the merged grid already exists
         if os.path.exists(merged_output_path):
             print(f"Merged grid already exists: {merged_output_path}")
-            return QgsVectorLayer(
-                merged_output_path, "merged_grid", "ogr"
-            )  # Load the existing merged grid layer
+            return merged_output_path
 
         layer = QgsVectorLayer(layer, "country_layer", "ogr")
         if not layer.isValid():
@@ -118,4 +116,12 @@ class GridCreator:
         print(f"Merging grids into: {merged_output_path}")
         merge_params = {"LAYERS": all_grids, "CRS": crs, "OUTPUT": merged_output_path}
         merged_grid = processing.run("native:mergevectorlayers", merge_params)["OUTPUT"]
+        lock_files = [
+            f"{merged_output_path}-journal",
+            f"{merged_output_path}-wal",
+            f"{merged_output_path}-shm",
+        ]
+        for lock_file in lock_files:
+            if os.path.exists(lock_file):
+                os.remove(lock_file)
         return merged_grid
