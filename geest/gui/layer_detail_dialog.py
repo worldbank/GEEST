@@ -1,28 +1,32 @@
 import re
 from qgis.PyQt.QtWidgets import (
+    QButtonGroup,
+    QCheckBox,
+    QComboBox,
     QDialog,
-    QVBoxLayout,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QFrame,
+    QHBoxLayout,
+    QHeaderView,
     QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QSizePolicy,
+    QSpacerItem,
+    QSpinBox,
+    QSplitter,
     QTableWidget,
     QTableWidgetItem,
-    QPushButton,
-    QHeaderView,
-    QLineEdit,
-    QCheckBox,
-    QSpinBox,
-    QDoubleSpinBox,
-    QComboBox,
-    QHBoxLayout,
     QTextEdit,
+    QVBoxLayout,
     QWidget,
-    QSplitter,
-    QFrame,
-    QRadioButton,
-    QButtonGroup,
-    QDialogButtonBox
 )
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
+from geest.utilities import resources_path
 
 
 class LayerDetailDialog(QDialog):
@@ -46,6 +50,28 @@ class LayerDetailDialog(QDialog):
         self.resize(800, 600)  # Set a wider dialog size
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
+        self.title_label = QLabel(
+            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
+            self,
+        )
+        self.title_label.setWordWrap(True)
+        layout.addWidget(self.title_label)
+        # Get the grandparent and parent items
+        grandparent_item = tree_item.parent().parent() if tree_item.parent() else None
+        parent_item = tree_item.parent()
+
+        # If both grandparent and parent exist, create the label
+        if grandparent_item and parent_item:
+            hierarchy_label = QLabel(
+                f"{grandparent_item.data(0)} :: {parent_item.data(0)}"
+            )
+            hierarchy_label.setStyleSheet(
+                "font-size: 14px; font-weight: bold; color: gray;"
+            )
+            layout.addWidget(
+                hierarchy_label, alignment=Qt.AlignTop
+            )  # Add the label above the heading
+
         # Heading for the dialog
         heading_label = QLabel(layer_name)
         heading_label.setStyleSheet(
@@ -55,11 +81,16 @@ class LayerDetailDialog(QDialog):
             heading_label, alignment=Qt.AlignTop
         )  # Align heading at the top
 
-        # Line separator between heading and text edits
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setFrameShadow(QFrame.Sunken)
-        layout.addWidget(line)
+        self.banner_label = QLabel()
+        self.banner_label.setPixmap(
+            QPixmap(resources_path("resources", "geest-banner.png"))
+        )
+        self.banner_label.setScaledContents(True)  # Allow image scaling
+        self.banner_label.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Fixed
+        )  # Stretch horizontally, fixed vertically
+
+        layout.addWidget(self.banner_label)
 
         # Create a horizontal splitter to hold both the Markdown editor and the preview
         splitter = QSplitter(Qt.Horizontal)
@@ -84,6 +115,12 @@ class LayerDetailDialog(QDialog):
 
         # Connect the Markdown editor (left) to update the preview (right) in real-time
         self.text_edit_left.textChanged.connect(self.update_preview)
+
+        # Add an expanding spacer to push content above it upwards and below it downwards
+        expanding_spacer = QSpacerItem(
+            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
+        )
+        layout.addSpacerItem(expanding_spacer)
 
         # Create the QTableWidget for other properties
         self.table = QTableWidget()
@@ -243,6 +280,5 @@ class LayerDetailDialog(QDialog):
 
         # Include the Markdown text from the left text edit
         updated_data["Text"] = self.text_edit_left.toPlainText()
-        
-        return updated_data
 
+        return updated_data
