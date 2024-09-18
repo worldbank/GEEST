@@ -248,34 +248,37 @@ class GeestWidgetFactory:
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
+
         elif widget_type == "csv_to_point":
             container = QWidget()
             layout = QHBoxLayout()
             container.setLayout(layout)
 
+            # Create QgsFileWidget
             file_widget = QgsFileWidget(parent=container)
             file_widget.setFilter("CSV Files (*.csv);;All Files (*.*)")
             file_widget.setToolTip(
                 mapping.get("tooltip", "Select a CSV file containing longitude and latitude columns."))
             layout.addWidget(file_widget)
 
+            # Create ComboBoxes for Longitude and Latitude
             longitude_combo = QComboBox()
             longitude_combo.setPlaceholderText("Longitude Column")
             longitude_combo.setEnabled(False)
             longitude_combo.setToolTip("Select the column for longitude.")
             layout.addWidget(longitude_combo)
-
             latitude_combo = QComboBox()
             latitude_combo.setPlaceholderText("Latitude Column")
             latitude_combo.setEnabled(False)
             latitude_combo.setToolTip("Select the column for latitude.")
             layout.addWidget(latitude_combo)
 
+            # Connect file selection to populate and auto-fill combo boxes
             file_widget.fileChanged.connect(
                 lambda path: GeestWidgetFactory.populate_csv_columns(path, longitude_combo, latitude_combo)
             )
-
             return container
+
 
         elif widget_type == "download_option":
             container = QWidget()
@@ -297,10 +300,7 @@ class GeestWidgetFactory:
     def populate_csv_columns(file_path: str, lon_combo: QComboBox, lat_combo: QComboBox):
         """
         Populate the longitude and latitude combo boxes based on the CSV file's headers.
-
-        :param file_path: Path to the CSV file.
-        :param lon_combo: QComboBox for longitude columns.
-        :param lat_combo: QComboBox for latitude columns.
+        Auto-select columns if 'longitude'/'lon' and 'latitude'/'lat' are found.
         """
         import csv
 
@@ -315,12 +315,27 @@ class GeestWidgetFactory:
                 lat_combo.clear()
                 lon_combo.addItems(headers)
                 lat_combo.addItems(headers)
+
+                # Auto-select longitude column
+                lon_candidates = ['longitude', 'lon']
+                selected_lon = next((header for header in headers if header.lower() in lon_candidates), None)
+                if selected_lon:
+                    index = headers.index(selected_lon)
+                    lon_combo.setCurrentIndex(index)
+
+                # Auto-select latitude column
+                lat_candidates = ['latitude', 'lat']
+                selected_lat = next((header for header in headers if header.lower() in lat_candidates), None)
+                if selected_lat:
+                    index = headers.index(selected_lat)
+                    lat_combo.setCurrentIndex(index)
+
                 lon_combo.setEnabled(True)
                 lat_combo.setEnabled(True)
         except Exception as e:
-            # Handle errors (e.g., invalid CSV format)
             print(f"Error reading CSV file: {e}")
             lon_combo.clear()
             lat_combo.clear()
             lon_combo.setEnabled(False)
             lat_combo.setEnabled(False)
+
