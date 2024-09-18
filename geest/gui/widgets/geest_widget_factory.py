@@ -294,17 +294,6 @@ class GeestWidgetFactory:
             return None
 
     @staticmethod
-    def browse_csv_file(line_edit: QLineEdit):
-        """
-        Open a file dialog to browse CSV files and set the selected file path to the line edit.
-
-        :param line_edit: QLineEdit widget to set the file path.
-        """
-        file_path, _ = QFileDialog.getOpenFileName(None, "Select CSV File", "", "CSV Files (*.csv);;All Files (*.*)")
-        if file_path:
-            line_edit.setText(file_path)
-
-    @staticmethod
     def populate_csv_columns(file_path: str, lon_combo: QComboBox, lat_combo: QComboBox):
         """
         Populate the longitude and latitude combo boxes based on the CSV file's headers.
