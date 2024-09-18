@@ -1,3 +1,3 @@
-from .widget_factory import WidgetFactory
+from .geest_widget_factory import GeestWidgetFactory
 
-__all__ = ['WidgetFactory']
+__all__ = ['GeestWidgetFactory']
