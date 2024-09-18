@@ -68,3 +68,8 @@ core
 app.py
 /geest.zip
 .~lock.*
+/.idea/GEEST2-main.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
