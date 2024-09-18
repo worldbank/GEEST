@@ -1,27 +1,32 @@
 import re
 from qgis.PyQt.QtWidgets import (
+    QButtonGroup,
+    QCheckBox,
+    QComboBox,
     QDialog,
-    QVBoxLayout,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QFrame,
+    QHBoxLayout,
+    QHeaderView,
     QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QSizePolicy,
+    QSpacerItem,
+    QSpinBox,
+    QSplitter,
     QTableWidget,
     QTableWidgetItem,
-    QPushButton,
-    QHeaderView,
-    QLineEdit,
-    QCheckBox,
-    QSpinBox,
-    QDoubleSpinBox,
-    QComboBox,
-    QHBoxLayout,
     QTextEdit,
+    QVBoxLayout,
     QWidget,
-    QSplitter,
-    QFrame,
-    QRadioButton,
-    QButtonGroup,
 )
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
+from geest.utilities import resources_path
 
 
 class LayerDetailDialog(QDialog):
@@ -41,9 +46,51 @@ class LayerDetailDialog(QDialog):
         self.button_group = QButtonGroup()  # To group radio buttons
         layout = QVBoxLayout()
 
+        # Make the dialog wider and add padding
+        self.resize(800, 600)  # Set a wider dialog size
+        layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
+
+        self.title_label = QLabel(
+            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
+            self,
+        )
+        self.title_label.setWordWrap(True)
+        layout.addWidget(self.title_label)
+        # Get the grandparent and parent items
+        grandparent_item = tree_item.parent().parent() if tree_item.parent() else None
+        parent_item = tree_item.parent()
+
+        # If both grandparent and parent exist, create the label
+        if grandparent_item and parent_item:
+            hierarchy_label = QLabel(
+                f"{grandparent_item.data(0)} :: {parent_item.data(0)}"
+            )
+            hierarchy_label.setStyleSheet(
+                "font-size: 14px; font-weight: bold; color: gray;"
+            )
+            layout.addWidget(
+                hierarchy_label, alignment=Qt.AlignTop
+            )  # Add the label above the heading
+
         # Heading for the dialog
         heading_label = QLabel(layer_name)
-        layout.addWidget(heading_label)
+        heading_label.setStyleSheet(
+            "font-size: 18px; font-weight: bold;"
+        )  # Bold heading
+        layout.addWidget(
+            heading_label, alignment=Qt.AlignTop
+        )  # Align heading at the top
+
+        self.banner_label = QLabel()
+        self.banner_label.setPixmap(
+            QPixmap(resources_path("resources", "geest-banner.png"))
+        )
+        self.banner_label.setScaledContents(True)  # Allow image scaling
+        self.banner_label.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Fixed
+        )  # Stretch horizontally, fixed vertically
+
+        layout.addWidget(self.banner_label)
 
         # Create a horizontal splitter to hold both the Markdown editor and the preview
         splitter = QSplitter(Qt.Horizontal)
@@ -55,15 +102,25 @@ class LayerDetailDialog(QDialog):
         if self.editing:
             splitter.addWidget(self.text_edit_left)
 
-        # Create the QTextEdit for HTML preview (right side)
+        # Create the QTextEdit for HTML preview (right side, styled to look like a label)
         self.text_edit_right = QTextEdit()
         self.text_edit_right.setReadOnly(True)  # Set as read-only for preview
+        self.text_edit_right.setFrameStyle(QFrame.NoFrame)  # Remove the frame
+        self.text_edit_right.setStyleSheet(
+            "background-color: transparent;"
+        )  # Match form background
         splitter.addWidget(self.text_edit_right)
 
         layout.addWidget(splitter)
 
         # Connect the Markdown editor (left) to update the preview (right) in real-time
         self.text_edit_left.textChanged.connect(self.update_preview)
+
+        # Add an expanding spacer to push content above it upwards and below it downwards
+        expanding_spacer = QSpacerItem(
+            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
+        )
+        layout.addSpacerItem(expanding_spacer)
 
         # Create the QTableWidget for other properties
         self.table = QTableWidget()
@@ -85,10 +142,11 @@ class LayerDetailDialog(QDialog):
         # Add the configuration frame with radio buttons
         self.add_config_widgets(layout)
 
-        # Close button
-        close_button = QPushButton("Close")
-        close_button.clicked.connect(self.on_close)  # Connect close button to custom close handler
-        layout.addWidget(close_button)
+        # Create a QDialogButtonBox for OK/Cancel buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept_changes)  # Connect OK to accept_changes
+        button_box.rejected.connect(self.reject)  # Connect Cancel to reject the dialog
+        layout.addWidget(button_box, alignment=Qt.AlignBottom)  # Place at the bottom
 
         self.setLayout(layout)
 
@@ -99,11 +157,13 @@ class LayerDetailDialog(QDialog):
         """Populate the table with all key-value pairs except 'indicator'."""
         filtered_data = {k: v for k, v in self.layer_data.items() if k != "indicator"}
         self.table.setRowCount(len(filtered_data))
-        
+
         for row, (key, value) in enumerate(filtered_data.items()):
             # Column 1: Key (Property name, read-only)
             key_item = QTableWidgetItem(str(key))
-            key_item.setFlags(key_item.flags() & ~Qt.ItemIsEditable)  # Make it read-only
+            key_item.setFlags(
+                key_item.flags() & ~Qt.ItemIsEditable
+            )  # Make it read-only
             self.table.setItem(row, 0, key_item)
 
             # Column 2: Value (use appropriate widgets based on data type)
@@ -154,7 +214,9 @@ class LayerDetailDialog(QDialog):
         frame_layout = QVBoxLayout()
 
         # Find all keys that start with 'Use' and have a value of True
-        use_keys = {k: v for k, v in self.layer_data.items() if k.startswith("Use") and v}
+        use_keys = {
+            k: v for k, v in self.layer_data.items() if k.startswith("Use") and v
+        }
 
         if use_keys:
             for i, key in enumerate(use_keys):
@@ -170,15 +232,27 @@ class LayerDetailDialog(QDialog):
                 self.button_group.addButton(radio_button)
 
                 # Add a label next to the radio button with the key's name
-                # Todo @hennie replace this with widget factory
-                label = QLabel(key)
-                frame_layout.addWidget(label)
+                #label = QLabel(key)
+                #frame_layout.addWidget(label)
 
+                # Check the first radio button by default
+                if key == self.layer_data.get("Analysis Mode"):
+                    radio_button.setChecked(True)
+
+                # Add the radio button to the button group
+                self.button_group.addButton(radio_button)
+
+        if not self.layer_data.get("Layer Required"):
+            radio_button = QRadioButton("Don't use")
+            self.radio_buttons.append(radio_button)
+            frame_layout.addWidget(radio_button)
+            #label = QLabel( "Don't use this layer")
+            #frame_layout.addWidget(label)            
         frame.setLayout(frame_layout)
         layout.addWidget(frame)
 
-    def on_close(self):
-        """Handle the dialog close event by writing the edited data back to the TreeView item."""
+    def accept_changes(self):
+        """Handle the OK button by applying changes and closing the dialog."""
         updated_data = self.get_updated_data_from_table()
 
         # Set 'Analysis Mode' based on the selected radio button
@@ -187,7 +261,7 @@ class LayerDetailDialog(QDialog):
             updated_data["Analysis Mode"] = selected_button.text()
 
         self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
-        self.close()
+        self.accept()  # Close the dialog
 
     def get_updated_data_from_table(self):
         """Convert the table back into a dictionary with any changes made, including the Markdown text."""
@@ -196,23 +270,28 @@ class LayerDetailDialog(QDialog):
         # Loop through the table and collect other data
         for row in range(self.table.rowCount()):
             key = self.table.item(row, 0).text()  # Get the key (read-only)
-            value_widget = self.table.cellWidget(row, 1)  # Get the widget from the second column
+            value_widget = self.table.cellWidget(
+                row, 1
+            )  # Get the widget from the second column
 
             if isinstance(value_widget, ToggleSwitch):
                 updated_value = value_widget.isChecked()
             elif isinstance(value_widget, QCheckBox):
                 updated_value = value_widget.isChecked()
-            elif isinstance(value_widget, QSpinBox) or isinstance(value_widget, QDoubleSpinBox):
+            elif isinstance(value_widget, QSpinBox) or isinstance(
+                value_widget, QDoubleSpinBox
+            ):
                 updated_value = value_widget.value()
             elif isinstance(value_widget, QComboBox):
                 updated_value = value_widget.currentText()
             else:
                 updated_value = value_widget.text()  # Default to text value
 
-            updated_data[key] = updated_value  # Update the dictionary with the key-value pair
+            updated_data[key] = (
+                updated_value  # Update the dictionary with the key-value pair
+            )
 
         # Include the Markdown text from the left text edit
-        # Special case so we need to write it last
         updated_data["Text"] = self.text_edit_left.toPlainText()
-        
+
         return updated_data
