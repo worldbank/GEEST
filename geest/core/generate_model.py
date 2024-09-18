@@ -13,7 +13,7 @@ class SpreadsheetToJsonParser:
         """
         self.spreadsheet_path = spreadsheet_path
         self.dataframe = None
-        self.result = {"dimensions": []}  # Correct capitalization to match the usage
+        self.result = {"dimensions": []}
 
     def load_spreadsheet(self):
         """
@@ -23,11 +23,15 @@ class SpreadsheetToJsonParser:
         self.dataframe = pd.read_excel(self.spreadsheet_path, engine="odf", skiprows=1)
         print(self.dataframe.columns)
 
-        # Select only the relevant columns
+        # Select only the relevant columns, including the new layer columns
         self.dataframe = self.dataframe[
             [
                 "Dimension",
+                "Dimension Required",
+                "Default Dimension Analysis Weighting",
                 "Factor",
+                "Factor Required",
+                "Default Factor Dimension Weighting",
                 "Layer",
                 "ID",
                 "Text",
@@ -53,12 +57,20 @@ class SpreadsheetToJsonParser:
                 "Use Poly per Cell",
                 "Use Polyline per Cell",
                 "Use Point per Cell",
+                "Analysis Mode",  # New column
+                "Layer Required"  # New column
             ]
         ]
 
         # Fill NaN values in 'Dimension' and 'Factor' columns to propagate their values downwards for hierarchical grouping
         self.dataframe["Dimension"] = self.dataframe["Dimension"].ffill()
         self.dataframe["Factor"] = self.dataframe["Factor"].ffill()
+
+    def create_id(self, name):
+        """
+        Helper method to create a lowercase, underscore-separated id from the name.
+        """
+        return name.lower().replace(" ", "_")
 
     def parse_to_json(self):
         """
@@ -69,12 +81,44 @@ class SpreadsheetToJsonParser:
         for _, row in self.dataframe.iterrows():
             dimension = row["Dimension"]
             factor = row["Factor"]
+
+            # Prepare dimension data
+            dimension_id = self.create_id(dimension)
+            dimension_required = row["Dimension Required"] if not pd.isna(row["Dimension Required"]) else ""
+            default_dimension_analysis_weighting = row["Default Dimension Analysis Weighting"] if not pd.isna(row["Default Dimension Analysis Weighting"]) else ""
+
+            # If the Dimension doesn't exist yet, create it
+            if dimension not in dimension_map:
+                new_dimension = {
+                    "id": dimension_id,
+                    "name": dimension,
+                    "required": dimension_required,
+                    "default_analysis_weighting": default_dimension_analysis_weighting,
+                    "factors": []
+                }
+                self.result["dimensions"].append(new_dimension)
+                dimension_map[dimension] = new_dimension
+
+            # Prepare factor data
+            factor_id = self.create_id(factor)
+            factor_required = row["Factor Required"] if not pd.isna(row["Factor Required"]) else ""
+            default_factor_dimension_weighting = row["Default Factor Dimension Weighting"] if not pd.isna(row["Default Factor Dimension Weighting"]) else ""
+
+            # If the Factor doesn't exist in the current dimension, add it
+            factor_map = {f["name"]: f for f in dimension_map[dimension]["factors"]}
+            if factor not in factor_map:
+                new_factor = {
+                    "id": factor_id,
+                    "name": factor,
+                    "required": factor_required,
+                    "default_dimension_weighting": default_factor_dimension_weighting,
+                    "layers": []
+                }
+                dimension_map[dimension]["factors"].append(new_factor)
+                factor_map[factor] = new_factor
+
+            # Add layer data to the current Factor, including new columns
             layer_data = {
-                # These are initially blank for the user to make choices
-                "Analysis Mode": "",
-                "Points Per Cell Layer": "",
-                "Lines Per Cell Layer": "",
-                "Polygons Per Cell Layer": "",
                 # These are all parsed from the spreadsheet
                 "Layer": row["Layer"] if not pd.isna(row["Layer"]) else "",
                 "ID": row["ID"] if not pd.isna(row["ID"]) else "",
@@ -185,22 +229,10 @@ class SpreadsheetToJsonParser:
                     if not pd.isna(row["Use Point per Cell"])
                     else ""
                 ),
+                "Analysis Mode": row["Analysis Mode"] if not pd.isna(row["Analysis Mode"]) else "",  # New column
+                "Layer Required": row["Layer Required"] if not pd.isna(row["Layer Required"]) else ""  # New column
             }
 
-            # If the Dimension doesn't exist yet, create it
-            if dimension not in dimension_map:
-                new_dimension = {"name": dimension, "factors": []}
-                self.result["dimensions"].append(new_dimension)
-                dimension_map[dimension] = new_dimension
-
-            # If the Factor doesn't exist in the current dimension, add it
-            factor_map = {f["name"]: f for f in dimension_map[dimension]["factors"]}
-            if factor not in factor_map:
-                new_factor = {"name": factor, "layers": []}
-                dimension_map[dimension]["factors"].append(new_factor)  # Correct variable name
-                factor_map[factor] = new_factor
-
-            # Add layer data to the current Factor
             factor_map[factor]["layers"].append(layer_data)
 
     def get_json(self):
