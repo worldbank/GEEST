@@ -27,7 +27,7 @@ from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
-from geest.gui.widgets import GeestWidgetFactory
+from geest.gui.widgets import GeestConfigWidget
 
 
 class LayerDetailDialog(QDialog):
@@ -208,13 +208,19 @@ class LayerDetailDialog(QDialog):
             return line_edit
 
     def add_config_widgets(self, layout):
-                #---------
-        widgets_container = GeestWidgetFactory.create_widgets(self.layer_data, self)
-        if widgets_container and widgets_container.layout().count() > 0:
-            layout.addWidget(widgets_container)
+        config_widget = GeestConfigWidget(self.layer_data)
+        if config_widget.widgets:
+            layout.addWidget(config_widget)
+            # connect to the stateChanged signal
+            config_widget.stateChanged.connect(self.handle_config_change)
         else:
             print("No configuration widgets were created for this layer.")
-        #----------
+
+    # Optionally, add this method to handle configuration changes
+    def handle_config_change(self, new_config):
+        # Update your layer_data or perform any other necessary actions
+        self.layer_data = new_config
+        print("Configuration updated:", new_config)
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
