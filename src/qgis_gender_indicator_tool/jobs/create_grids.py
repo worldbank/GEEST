@@ -81,6 +81,17 @@ class GridCreator:
                     grid_layer = QgsVectorLayer(
                         grid_output_path, "grid_layer", "ogr"
                     )  # Load the existing grid layer
+                    # Clip the grid to the polygon feature (to restrict it to the boundaries)
+                    clipped_grid_output_path = (
+                        f"{output_dir}/clipped_grid_{feature.id()}_part_{part_id}.gpkg"
+                    )
+                    clip_params = {
+                        "INPUT": grid_layer,  # The grid we just created
+                        "OVERLAY": layer,  # The layer we're clipping to
+                        "OUTPUT": clipped_grid_output_path,
+                    }
+                    clip_result = processing.run("native:clip", clip_params)
+                    grid_layer = clip_result["OUTPUT"]  # The clipped grid
                 else:
                     print(f"Creating grid: {grid_output_path}")
                     # Define grid creation parameters
@@ -116,12 +127,5 @@ class GridCreator:
         print(f"Merging grids into: {merged_output_path}")
         merge_params = {"LAYERS": all_grids, "CRS": crs, "OUTPUT": merged_output_path}
         merged_grid = processing.run("native:mergevectorlayers", merge_params)["OUTPUT"]
-        lock_files = [
-            f"{merged_output_path}-journal",
-            f"{merged_output_path}-wal",
-            f"{merged_output_path}-shm",
-        ]
-        for lock_file in lock_files:
-            if os.path.exists(lock_file):
-                os.remove(lock_file)
+
         return merged_grid

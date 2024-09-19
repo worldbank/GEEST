@@ -2,21 +2,20 @@ import unittest
 import os
 from qgis.core import (
     QgsVectorLayer,
+    QgsRasterLayer,
     QgsCoordinateReferenceSystem,
-    QgsProject,
-    QgsRectangle,
 )
 from qgis_gender_indicator_tool.jobs.points_per_grid_cell import (
-    RasterFromScore,
+    RasterPointGridScore,
 )  # Adjust the path to your class
 
 
-class TestRasterFromScore(unittest.TestCase):
-    """Test the RasterFromScore class."""
+class TestRasterPointGridScore(unittest.TestCase):
+    """Test the RasterPointGridScore class."""
 
-    def test_raster_from_score(self):
+    def test_raster_point_grid_score(self):
         """
-        Test raster generation using the RasterFromScore class.
+        Test raster generation using the RasterPointGridScore class.
         """
         self.working_dir = os.path.dirname(__file__)
         self.test_data_dir = os.path.join(self.working_dir, "test_data")
@@ -39,8 +38,8 @@ class TestRasterFromScore(unittest.TestCase):
         self.crs = QgsCoordinateReferenceSystem("EPSG:32620")
         self.pixel_size = 100  # 100m grid
 
-        # Create an instance of the RasterFromScore class
-        rasterizer = RasterFromScore(
+        # Create an instance of the RasterPointGridScore class
+        rasterizer = RasterPointGridScore(
             country_boundary=self.country_boundary,
             pixel_size=self.pixel_size,
             output_path=self.output_path,
@@ -48,15 +47,15 @@ class TestRasterFromScore(unittest.TestCase):
             input_points=self.point_layer,
         )
 
-        # Run the raster_from_score method
-        rasterizer.raster_from_score()
+        # Run the raster_point_grid_score method
+        rasterizer.raster_point_grid_score()
 
         # Load the generated raster layer to verify its validity
         # Verify that the raster file was created
         self.assertTrue(
             os.path.exists(self.output_path), "The raster output file was not created."
         )
-        raster_layer = QgsVectorLayer(self.output_path, "test_raster", "gdal")
+        raster_layer = QgsRasterLayer(self.output_path, "test_raster", "gdal")
         self.assertTrue(
             raster_layer.isValid(), "The generated raster layer is not valid."
         )
