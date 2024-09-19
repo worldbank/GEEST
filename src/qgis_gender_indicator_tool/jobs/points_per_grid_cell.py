@@ -11,7 +11,7 @@ from .create_grids import GridCreator
 from .extents import Extents
 
 
-class RasterFromScore:
+class RasterPointGridScore:
     def __init__(self, country_boundary, pixel_size, output_path, crs, input_points):
         self.country_boundary = country_boundary
         self.pixel_size = pixel_size
@@ -19,7 +19,7 @@ class RasterFromScore:
         self.crs = crs
         self.input_points = input_points
 
-    def raster_from_score(self):
+    def raster_point_grid_score(self):
         """
         Generates a raster based on the number of input points within each grid cell.
         :param country_boundary: Layer defining the country boundary to clip the grid.
@@ -89,6 +89,13 @@ class RasterFromScore:
             )
         grid_layer.commitChanges()
 
+        Merge = processing.run(
+            "native:mergevectorlayers",
+            {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
+        )
+
+        merge = Merge["OUTPUT"]
+
         extents_processor = Extents(
             output_dir, self.country_boundary, self.pixel_size, self.crs
         )
@@ -104,7 +111,7 @@ class RasterFromScore:
 
         # Rasterize the clipped grid layer to generate the raster
         rasterize_params = {
-            "INPUT": grid_layer,
+            "INPUT": merge,
             "FIELD": field_name,
             "BURN": 0,
             "USE_Z": False,
