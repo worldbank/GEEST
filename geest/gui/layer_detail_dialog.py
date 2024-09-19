@@ -27,6 +27,7 @@ from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
+from geest.gui.widgets import GeestWidgetFactory
 
 
 class LayerDetailDialog(QDialog):
@@ -207,49 +208,13 @@ class LayerDetailDialog(QDialog):
             return line_edit
 
     def add_config_widgets(self, layout):
-        """
-        Add a frame widget containing radio buttons for 'Use' attributes that are True.
-        """
-        frame = QFrame()
-        frame_layout = QVBoxLayout()
-
-        # Find all keys that start with 'Use' and have a value of True
-        use_keys = {
-            k: v for k, v in self.layer_data.items() if k.startswith("Use") and v
-        }
-
-        if use_keys:
-            for i, key in enumerate(use_keys):
-                radio_button = QRadioButton(key)
-                self.radio_buttons.append(radio_button)
-                frame_layout.addWidget(radio_button)
-
-                # Check the first radio button by default
-                if i == 0:
-                    radio_button.setChecked(True)
-
-                # Add the radio button to the button group
-                self.button_group.addButton(radio_button)
-
-                # Add a label next to the radio button with the key's name
-                #label = QLabel(key)
-                #frame_layout.addWidget(label)
-
-                # Check the first radio button by default
-                if key == self.layer_data.get("Analysis Mode"):
-                    radio_button.setChecked(True)
-
-                # Add the radio button to the button group
-                self.button_group.addButton(radio_button)
-
-        if not self.layer_data.get("Layer Required"):
-            radio_button = QRadioButton("Don't use")
-            self.radio_buttons.append(radio_button)
-            frame_layout.addWidget(radio_button)
-            #label = QLabel( "Don't use this layer")
-            #frame_layout.addWidget(label)            
-        frame.setLayout(frame_layout)
-        layout.addWidget(frame)
+                #---------
+        widgets_container = GeestWidgetFactory.create_widgets(self.layer_data, self)
+        if widgets_container and widgets_container.layout().count() > 0:
+            layout.addWidget(widgets_container)
+        else:
+            print("No configuration widgets were created for this layer.")
+        #----------
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
