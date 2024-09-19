@@ -17,6 +17,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
+from qgis.core import QgsMessageLog, Qgis, QgsLogger
 import json
 import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
@@ -24,11 +25,17 @@ from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
 from geest.core import set_setting, setting
+from geest.core.workflow_factory import WorkflowFactory
+from geest.core.queue_manager import QueueManager
+
 
 class TreePanel(QWidget):
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)
 
+        # Initialize the QueueManager
+        self.queue_manager = QueueManager()
+        
         self.json_file = json_file
         self.tree_view_visible = True
 
@@ -269,6 +276,34 @@ class TreePanel(QWidget):
         else:
             self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
+    def start_workflows(self):
+        """Start a workflow for each 'layer' node in the tree."""
+        self._start_workflows_from_tree(self.treeView.model().rootItem)
+
+    def _start_workflows_from_tree(self, parent_item):
+        """Recursively start workflows for each 'layer' in the tree."""
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+
+            # If the child is a layer, we queue a workflow task
+            if child_item.role == "layer":
+                factory = WorkflowFactory()
+                layer_data = child_item.data(3)  # Column 3: layer data (stored as a dict)
+                layer_data["task"] = "A"
+                workflow = factory.create_workflow(layer_data)
+                self.queue_manager.add_task(workflow)
+
+            # Recursively process children (dimensions, factors)
+            self._start_workflows_from_tree(child_item)
+
+    def on_task_started(self, message):
+        print(message)
+
+    def on_task_completed(self, message, success):
+        status = "Success" if success else "Failure"
+        print(f"{message}: {status}")
+
+
     def process_leaves(self):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
@@ -276,6 +311,8 @@ class TreePanel(QWidget):
         processes each one by showing an animated icon, waiting for 2 seconds, and 
         then removing the animation.
         """
+        self.start_workflows()
+        
         model = self.treeView.model()  # Get the model from the tree_view
 
         # Disable the prepare button and show the throbber during processing
@@ -355,3 +392,4 @@ class TreePanel(QWidget):
 
         # Move to the next 'layer' node
         self.process_each_layer(layer_nodes, index + 1)
+
