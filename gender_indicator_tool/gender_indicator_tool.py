@@ -2652,6 +2652,15 @@ class GenderIndicatorTool:
 
             # Loop through each part of the geometry (whether multipart or single part)
             for part_id, part in enumerate(parts):
+                
+                # Calculate the area of the part in square meters
+                part_area = part.area()
+                
+                # Skip parts that are less than 1 hectare (10,000 square meters)
+                if part_area < 10000:
+                    print(f"Skipping part {part_id} of feature {feature.id()} - Area is less than 1 hectare ({part_area} square meters)")
+                    continue
+                
                 # Get the extent of each part
                 part_extent = part.boundingBox()
 
@@ -3962,6 +3971,9 @@ class GenderIndicatorTool:
 
             # Input parameters
             input_file = self.dlg.SAF_Input_Field.filePath()
+            countryLayer = self.dlg.countryLayer_Field.filePath()
+            workingDir = self.dlg.workingDir_Field.text()
+            tempDir = "temp"
 
             self.dlg.SAF_status.setText("Variables Set")
             self.dlg.SAF_status.repaint()
@@ -3979,29 +3991,47 @@ class GenderIndicatorTool:
                     'TARGET_CRS': setup['UTM_crs'],
                     'OUTPUT': 'memory:'
                 }, feedback=QgsProcessingFeedback())['OUTPUT']
+                
+            countryLayer = QgsVectorLayer(countryLayer, "countrylayer", "ogr")
+            if not countryLayer.isValid():
+                raise ValueError("Invalid vector input. Please check the file.")
+            if countryLayer.crs() != setup['UTM_crs']:
+                countryUTMLayer = processing.run("native:reprojectlayer", {
+                    'INPUT': countryLayer,
+                    'TARGET_CRS': setup['UTM_crs'],
+                    'OUTPUT': 'memory:'
+                }, feedback=QgsProcessingFeedback())['OUTPUT']
 
             # Generate grid and count points
-            grid = processing.run("native:creategrid", {
-                'TYPE': 2,
-                'EXTENT': setup['country_extent'],
-                'HSPACING': setup['pixelSize'],
-                'VSPACING': setup['pixelSize'],
-                'CRS': setup['UTM_crs'],
-                'OUTPUT': 'memory:'
-            }, feedback=QgsProcessingFeedback())['OUTPUT']
-
-            clipped_grid = processing.run("native:clip", {
-                'INPUT': grid,
-                'OVERLAY': setup['buffered_country_layer'],
-                'OUTPUT': 'memory:'
-            }, feedback=QgsProcessingFeedback())['OUTPUT']
+            
+            # Define the output grid path (merged GeoPackage)
+            merged_grid_output = f"{workingDir}{tempDir}/merged_grid.gpkg"
+            grid_ouput_dir = f"{workingDir}/{tempDir}"
+            
+            grid = self.create_grids(
+                    countryUTMLayer, 
+                    grid_ouput_dir,  # Output directory
+                    QgsCoordinateReferenceSystem(setup['UTM_crs']),  # CRS
+                    merged_grid_output,  # Path for the merged grid
+                )
+            if isinstance(grid, QgsVectorLayer):
+                pass
+            else:
+                grid = QgsVectorLayer(grid, 'merged_grid', 'ogr')
+            
+            overlap_count_output_path = f"{workingDir}/{tempDir}/overlap_count.gpkg"
 
             overlap_count = processing.run("qgis:countpointsinpolygon", {
-                'POLYGONS': clipped_grid,
+                'POLYGONS': grid,
                 'POINTS': vector_layer,
                 'FIELD': 'OVERLAP',
-                'OUTPUT': 'memory:'
+                'OUTPUT': overlap_count_output_path
             }, feedback=QgsProcessingFeedback())['OUTPUT']
+            
+            if isinstance(overlap_count, QgsVectorLayer):
+                pass
+            else:
+                overlap_count = QgsVectorLayer(overlap_count, 'overlap count', 'ogr')
 
             # Prepare raster data
             xmin, ymin, xmax, ymax = setup['country_extent'].toRectF().getCoords()
