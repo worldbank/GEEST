@@ -2653,14 +2653,6 @@ class GenderIndicatorTool:
             # Loop through each part of the geometry (whether multipart or single part)
             for part_id, part in enumerate(parts):
                 
-                # Calculate the area of the part in square meters
-                part_area = part.area()
-                
-                # Skip parts that are less than 1 hectare (10,000 square meters)
-                if part_area < 10000:
-                    print(f"Skipping part {part_id} of feature {feature.id()} - Area is less than 1 hectare ({part_area} square meters)")
-                    continue
-                
                 # Get the extent of each part
                 part_extent = part.boundingBox()
 
