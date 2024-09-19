@@ -34,7 +34,9 @@ class RasterPointGridScore:
         self.v_spacing = 100
         create_grid = GridCreator(h_spacing=self.h_spacing, v_spacing=self.v_spacing)
         output_dir = os.path.join("output")
-        merged_output_path = os.path.join(output_dir, "merged_grid.gpkg")
+        merged_output_path = os.path.join(output_dir, "merged_grid.shp")  # Use Shapefile
+
+        # Create grid layer using Shapefile
         grid_layer = create_grid.create_grids(
             self.country_boundary, output_dir, self.crs, merged_output_path
         )
@@ -79,7 +81,7 @@ class RasterPointGridScore:
 
             reclass_vals[grid_feat.id()] = reclass_val
 
-        # Step 5: Apply the score values to the grid
+        # Apply the score values to the grid
         grid_layer.startEditing()
         for grid_feat in grid_layer.getFeatures():
             grid_layer.changeAttributeValue(
@@ -89,9 +91,12 @@ class RasterPointGridScore:
             )
         grid_layer.commitChanges()
 
+        merged_output_vector = os.path.join(output_dir, "merged_grid_vector.shp")  # Use Shapefile for merged output
+
+        # Merge grids into a single Shapefile layer
         Merge = processing.run(
             "native:mergevectorlayers",
-            {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
+            {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": 'memory:'},
         )
 
         merge = Merge["OUTPUT"]

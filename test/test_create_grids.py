@@ -22,7 +22,7 @@ class TestGridCreator(unittest.TestCase):
             os.path.dirname(__file__), "test_data/admin/Admin0.shp"
         )
         self.output_dir = os.path.join(os.path.dirname(__file__), "output")
-        self.merged_output_path = os.path.join(self.output_dir, "merged_grid.gpkg")
+        self.merged_output_path = os.path.join(self.output_dir, "merged_grid.shp")
         self.utm_crs = QgsCoordinateReferenceSystem("EPSG:32620")  # UTM Zone 20N
         self.h_spacing = 100
         self.v_spacing = 100
