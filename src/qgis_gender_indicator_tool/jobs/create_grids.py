@@ -82,9 +82,7 @@ class GridCreator:
                             grid_output_path, "grid_layer", "ogr"
                         )  # Load the existing grid layer
                         # Clip the grid to the polygon feature (to restrict it to the boundaries)
-                        clipped_grid_output_path = (
-                            f"{output_dir}/clipped_grid_{feature.id()}_part_{part_id}.shp"
-                        )
+                        clipped_grid_output_path = f"{output_dir}/clipped_grid_{feature.id()}_part_{part_id}.shp"
                         clip_params = {
                             "INPUT": grid_layer,  # The grid we just created
                             "OVERLAY": layer,  # The layer we're clipping to
@@ -109,9 +107,7 @@ class GridCreator:
                         grid_layer = grid_result["OUTPUT"]  # Get the grid layer
 
                         # Clip the grid to the polygon feature (to restrict it to the boundaries)
-                        clipped_grid_output_path = (
-                            f"{output_dir}/clipped_grid_{feature.id()}_part_{part_id}.shp"
-                        )
+                        clipped_grid_output_path = f"{output_dir}/clipped_grid_{feature.id()}_part_{part_id}.shp"
                         clip_params = {
                             "INPUT": grid_layer,  # The grid we just created
                             "OVERLAY": layer,  # The layer we're clipping to
@@ -125,7 +121,13 @@ class GridCreator:
 
             # Merge all grids into a single layer
             print(f"Merging grids into: {merged_output_path}")
-            merge_params = {"LAYERS": all_grids, "CRS": crs, "OUTPUT": merged_output_path}
-            merged_grid = processing.run("native:mergevectorlayers", merge_params)["OUTPUT"]
+            merge_params = {
+                "LAYERS": all_grids,
+                "CRS": crs,
+                "OUTPUT": merged_output_path,
+            }
+            merged_grid = processing.run("native:mergevectorlayers", merge_params)[
+                "OUTPUT"
+            ]
 
             return merged_grid
