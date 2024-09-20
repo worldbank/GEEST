@@ -109,13 +109,15 @@ class GeestConfigWidget(QWidget):
             field = field_selector.currentText()
             if path:
                 value = f"{path};{field}" if field else path
-                self.update_sub_widget_state(key, value)
+                self.modified_config[key] = value
             else:
                 print(f"Unable to determine path for layer {layer.name()} with provider {provider_key}")
-                self.update_sub_widget_state(key, f"{uri};{field}" if field else uri)
+                self.modified_config[key] = f"{uri};{field}" if field else uri
         else:
             print(f"No layer selected for {key}")
-            self.update_sub_widget_state(key, None)
+            self.modified_config[key] = ""
+
+        self.stateChanged.emit(self.get_state())
 
     def update_layer_path(self, key, layer):
         print(f"update_layer_path called for {key}")  # Debug print
@@ -144,7 +146,18 @@ class GeestConfigWidget(QWidget):
                     widget.setEnabled(key == option)
 
             for key in self.widgets.keys():
-                self.modified_config[key] = 1 if key == option else 0
+                if key == option:
+                    if isinstance(self.widgets[key]["widget"], QWidget) and \
+                       self.widgets[key]["widget"].findChild(QgsMapLayerComboBox) and \
+                       self.widgets[key]["widget"].findChild(QComboBox):
+                        # handling polygon_layer_with_field_selector
+                        layer_selector = self.widgets[key]["widget"].findChild(QgsMapLayerComboBox)
+                        field_selector = self.widgets[key]["widget"].findChild(QComboBox)
+                        self.update_polygon_layer_and_field(key, layer_selector.currentLayer(), field_selector)
+                    else:
+                        self.modified_config[key] = 1
+                else:
+                    self.modified_config[key] = 0
 
         self.stateChanged.emit(self.get_state())
 
