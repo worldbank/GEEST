@@ -27,9 +27,9 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QMessageBox, QPushButton, QAction, QDockWidget
 from qgis.core import Qgis
 
-#from .geest import Geest
-#from .core import RenderQueue, setting
-from .core import setting #, JSONValidator
+# from .geest import Geest
+# from .core import RenderQueue, setting
+from .core import setting  # , JSONValidator
 from .utilities import resources_path
 from .gui import GeestOptionsFactory, GeestDock
 
@@ -46,26 +46,29 @@ class GeestPlugin:
     def __init__(self, iface):
         self.iface = iface
 
-        #self.render_queue: Optional[RenderQueue] = None
+        # self.render_queue: Optional[RenderQueue] = None
         self.run_action: Optional[QAction] = None
         self.debug_action: Optional[QAction] = None
         self.options_factory = None
 
     def initGui(self):  # pylint: disable=missing-function-docstring
 
-        #self.render_queue = RenderQueue()
+        # self.render_queue = RenderQueue()
         icon = QIcon(resources_path("resources", "geest-main.svg"))
 
         # Validate our json schema first
-        #validator = JSONValidator('resources/schema.json', 'resources/model.json')
-        #validator.validate_json()
+        # validator = JSONValidator('resources/schema.json', 'resources/model.json')
+        # validator.validate_json()
 
         self.run_action = QAction(icon, "GEEST", self.iface.mainWindow())
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
-        self.dock_widget = GeestDock(parent=self.iface.mainWindow(), json_file=resources_path("resources", "model.json"))
+        self.dock_widget = GeestDock(
+            parent=self.iface.mainWindow(),
+            json_file=resources_path("resources", "model.json"),
+        )
         self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        #self.dock_widget.setWidget(Geest(self.iface.mainWindow(), self.iface))
+        # self.dock_widget.setWidget(Geest(self.iface.mainWindow(), self.iface))
         self.dock_widget.setFloating(False)
         self.dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
@@ -85,7 +88,7 @@ class GeestPlugin:
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
             self.debug()
-            
+
         self.options_factory = GeestOptionsFactory()
         self.iface.registerOptionsWidgetFactory(self.options_factory)
 
@@ -125,9 +128,8 @@ class GeestPlugin:
         """
         # Create the settings dialog
         self.iface.showOptionsDialog(
-            parent=self.iface.mainWindow(), 
-            currentPage='geest')
-        
+            parent=self.iface.mainWindow(), currentPage="geest"
+        )
 
     def display_information_message_bar(
         self,
