@@ -64,7 +64,6 @@ nix-result/
 .direnv/
 
 data
-core
 app.py
 /geest.zip
 .~lock.*
