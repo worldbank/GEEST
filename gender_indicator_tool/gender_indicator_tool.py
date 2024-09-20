@@ -2897,29 +2897,6 @@ class GenderIndicatorTool:
 
                 # difference = Difference["OUTPUT"]
 
-                Merge = processing.run(
-                    "native:mergevectorlayers",
-                    {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
-                )
-
-                merge = Merge["OUTPUT"]
-
-                mergeClip = processing.run(
-                    "native:clip",
-                    {
-                        "INPUT": merge,
-                        "OVERLAY": countryUTMLayer,
-                        "OUTPUT": "memory:",
-                    }
-                )
-
-                mergeOutput = mergeClip["OUTPUT"]
-
-                # Get the width and height of the extent
-                extent = countryUTMLayerBuf.extent()
-                raster_width = int(extent.width() / pixelSize)
-                raster_height = int(extent.height() / pixelSize)
-
                 os.chdir(Dimension)
                 Output_Folder = "AT"
                 if os.path.exists(Output_Folder):
@@ -2932,7 +2909,7 @@ class GenderIndicatorTool:
                 rasterize = processing.run(
                     "gdal:rasterize",
                     {
-                        "INPUT": mergeOutput,
+                        "INPUT": grid_layer,
                         "FIELD": field_name,
                         "BURN": 0,
                         "USE_Z": False,
@@ -3065,22 +3042,6 @@ class GenderIndicatorTool:
 
             # difference = Difference["OUTPUT"]
 
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            merge = Merge["OUTPUT"]
-
-            mergeClip = processing.run(
-                "native:clip",
-                {
-                    "INPUT": merge,
-                    "OVERLAY": countryUTMLayer,
-                    "OUTPUT": "memory:",
-                }
-            )
-
             mergeOutput = mergeClip["OUTPUT"]
             
             setup = self.CommonRasterizerSetup()
@@ -3104,7 +3065,7 @@ class GenderIndicatorTool:
             rasterize = processing.run(
                 "gdal:rasterize",
                 {
-                    "INPUT": mergeOutput,
+                    "INPUT": grid_layer,
                     "FIELD": field_name,
                     "BURN": 0,
                     "USE_Z": False,
@@ -3269,24 +3230,6 @@ class GenderIndicatorTool:
 
             # difference = Difference["OUTPUT"]
 
-            Merge = processing.run(
-                "native:mergevectorlayers",
-                {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
-            )
-
-            merge = Merge["OUTPUT"]
-
-            mergeClip = processing.run(
-                "native:clip",
-                {
-                    "INPUT": merge,
-                    "OVERLAY": countryUTMLayer,
-                    "OUTPUT": "memory:",
-                }
-            )
-
-            mergeOutput = mergeClip["OUTPUT"]
-
             # Get the width and height of the extent
             extent = countryUTMLayerBuf.extent()
             raster_width = int(extent.width() / pixelSize)
@@ -3304,7 +3247,7 @@ class GenderIndicatorTool:
             rasterize = processing.run(
                 "gdal:rasterize",
                 {
-                    "INPUT": mergeOutput,
+                    "INPUT": grid_layer,
                     "FIELD": field_name,
                     "BURN": 0,
                     "USE_Z": False,
