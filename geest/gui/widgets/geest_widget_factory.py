@@ -50,7 +50,7 @@ class GeestWidgetFactory:
                 "type": "spinbox",
                 "min": 0,
                 "max": 10000,
-                "default": layer_data.get("Default Single Buffer Distances", 0),
+                "default": layer_data.get("Default Single Buffer Distance", 0),
                 "tooltip": "Enter buffer distance."
             },
             "Use Create Grid": {
@@ -202,10 +202,14 @@ class GeestWidgetFactory:
 
         if widget_type == "doublespinbox":
             widget = QDoubleSpinBox()
-            widget.setMinimum(mapping.get("min", 0.0))
-            widget.setMaximum(mapping.get("max", 100.0))
-            widget.setDecimals(mapping.get("decimals", 1))
-            widget.setValue(mapping.get("default", 0.0))
+            min_value = mapping.get("min", 0.0)
+            widget.setMinimum(float(min_value) if min_value != '' else 0.0)
+            max_value = mapping.get("max", 100.0)
+            widget.setMaximum(float(max_value) if max_value != '' else 100.0)
+            decimals = mapping.get("decimals", 1)
+            widget.setDecimals(int(float(decimals)) if decimals != '' else 1)
+            default_value = mapping.get("default", 0.0)
+            widget.setValue(float(default_value) if default_value != '' else 0.0)
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
@@ -213,13 +217,15 @@ class GeestWidgetFactory:
             widget = QSpinBox()
             widget.setMinimum(mapping.get("min", 0))
             widget.setMaximum(mapping.get("max", 10000))
-            widget.setValue(mapping.get("default", 0))
+            default_value = mapping.get("default", 0)
+            widget.setValue(int(float(default_value)) if default_value != '' else 0)
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
         elif widget_type == "lineedit":
             widget = QLineEdit()
-            widget.setText(mapping.get("default", ""))
+            default_value = mapping.get("default", "")
+            widget.setText(str(default_value))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
