@@ -5,7 +5,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.gui import QgsMapLayerComboBox
 #from qgis.core import QgsVectorLayer, QgsRasterLayer
-from qgis.core import QgsProviderRegistry
+from qgis.core import QgsProviderRegistry, QgsVectorLayer
 from .geest_widget_factory import GeestWidgetFactory
 
 
@@ -98,24 +98,46 @@ class GeestConfigWidget(QWidget):
                         QComboBox):
                     layer_selector = widget.findChild(QgsMapLayerComboBox)
                     field_selector = widget.findChild(QComboBox)
-                    layer_selector.layerChanged.connect(
-                        lambda layer, k=key: self.update_polygon_layer_and_field(k, layer, field_selector))
+                    def update_fields(layer):
+                        self.populate_field_selector(layer, field_selector)
+                        self.update_polygon_layer_and_field(key, layer, field_selector)
+
+                    layer_selector.layerChanged.connect(update_fields)
                     field_selector.currentTextChanged.connect(
                         lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k, ls.currentLayer(),
                                                                                                    field_selector))
+
                 print(f"Set up widget connection for {key}: {type(widget).__name__}")
+
+    def populate_field_selector(self, layer, field_selector):
+        if isinstance(layer, QgsVectorLayer):
+            field_selector.clear()
+            field_selector.addItems([field.name() for field in layer.fields()])
+            print(f"Populated field selector with: {[field.name() for field in layer.fields()]}")
+        else:
+            print(f"Invalid layer type for populating field selector: {type(layer)}")
 
     def update_polygon_layer_and_field(self, key, layer, field_selector):
         print(f"update_polygon_layer_and_field called for {key}")
-        if layer:
+        print(f"Layer: {layer}")
+        print(f"Field selector: {field_selector}")
+
+        if layer and isinstance(layer, QgsVectorLayer):
             provider_key = layer.providerType()
             uri = layer.dataProvider().dataSourceUri()
             print(f"Layer URI: {uri}")
             decoded = QgsProviderRegistry.instance().decodeUri(provider_key, uri)
             print(f"Decoded URI: {decoded}")
             path = decoded.get('path') or decoded.get('url') or decoded.get('layerName')
+
+            # Ensure field selector is populated
+            self.populate_field_selector(layer, field_selector)
+
             field = field_selector.currentText()
+            print(
+                f"Current field selector items: {[field_selector.itemText(i) for i in range(field_selector.count())]}")
             print(f"Selected field: {field}")
+
             if path:
                 value = f"{path};{field}"
                 print(f"Setting {key} to {value}")
@@ -126,7 +148,7 @@ class GeestConfigWidget(QWidget):
                 print(f"Setting {key} to {value}")
                 self.modified_config[key] = value
         else:
-            print(f"No layer selected for {key}")
+            print(f"No valid layer selected for {key}")
             self.modified_config[key] = ""
 
         print(f"Modified config after update_polygon_layer_and_field: {self.modified_config}")
