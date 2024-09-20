@@ -161,7 +161,7 @@ class GeestConfigWidget(QWidget):
                         self.modified_config[key] = 1
                 else:
                     self.modified_config[key] = 0
-        self.stateChanged.emit(self.get_state()
+        self.stateChanged.emit(self.get_state())
 
     def update_sub_widget_state(self, option, value):
         if value is not None:
