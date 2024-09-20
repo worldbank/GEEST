@@ -25,17 +25,15 @@ from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
 from geest.core import set_setting, setting
-from geest.core.workflow_factory import WorkflowFactory
-from geest.core.queue_manager import QueueManager
-
+from geest.core.workflow_queue_manager import WorkflowQueueManager
 
 class TreePanel(QWidget):
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)
 
         # Initialize the QueueManager
-        self.queue_manager = QueueManager()
-        
+        self.queue_manager = WorkflowQueueManager(pool_size=1)
+    
         self.json_file = json_file
         self.tree_view_visible = True
 
@@ -287,11 +285,7 @@ class TreePanel(QWidget):
 
             # If the child is a layer, we queue a workflow task
             if child_item.role == "layer":
-                factory = WorkflowFactory()
-                layer_data = child_item.data(3)  # Column 3: layer data (stored as a dict)
-                layer_data["task"] = "A"
-                workflow = factory.create_workflow(layer_data)
-                self.queue_manager.add_task(workflow)
+                self.queue_manager.add_task(child_item.data(3))
 
             # Recursively process children (dimensions, factors)
             self._start_workflows_from_tree(child_item)
@@ -312,6 +306,11 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.start_workflows()
+        self.queue_manager.start_processing()
+        
+        
+        # old implementation to be removed soone
+        # follows below.
         
         model = self.treeView.model()  # Get the model from the tree_view
 
