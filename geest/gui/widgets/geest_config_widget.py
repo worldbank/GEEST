@@ -144,22 +144,24 @@ class GeestConfigWidget(QWidget):
                 widget = widgets.get("widget")
                 if widget:
                     widget.setEnabled(key == option)
-
             for key in self.widgets.keys():
                 if key == option:
-                    if isinstance(self.widgets[key]["widget"], QWidget) and \
-                       self.widgets[key]["widget"].findChild(QgsMapLayerComboBox) and \
-                       self.widgets[key]["widget"].findChild(QComboBox):
-                        # handling polygon_layer_with_field_selector
-                        layer_selector = self.widgets[key]["widget"].findChild(QgsMapLayerComboBox)
-                        field_selector = self.widgets[key]["widget"].findChild(QComboBox)
-                        self.update_polygon_layer_and_field(key, layer_selector.currentLayer(), field_selector)
+                    widget = self.widgets[key].get("widget")
+                    if widget:
+                        if isinstance(widget, QWidget) and \
+                                widget.findChild(QgsMapLayerComboBox) and \
+                                widget.findChild(QComboBox):
+                            # handle polygon_layer_with_field_selector
+                            layer_selector = widget.findChild(QgsMapLayerComboBox)
+                            field_selector = widget.findChild(QComboBox)
+                            self.update_polygon_layer_and_field(key, layer_selector.currentLayer(), field_selector)
+                        else:
+                            self.modified_config[key] = 1
                     else:
                         self.modified_config[key] = 1
                 else:
                     self.modified_config[key] = 0
-
-        self.stateChanged.emit(self.get_state())
+        self.stateChanged.emit(self.get_state()
 
     def update_sub_widget_state(self, option, value):
         if value is not None:
