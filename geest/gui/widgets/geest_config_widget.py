@@ -58,22 +58,23 @@ class GeestConfigWidget(QWidget):
         print("  " * depth + f"Examining widget: {type(widget).__name__}")
         use_key = widget.property("use_key")
         if use_key:
+            if use_key not in self.widgets:
+                self.widgets[use_key] = {}
             if isinstance(widget, QRadioButton):
-                if use_key not in self.widgets:
-                    self.widgets[use_key] = {}
                 self.widgets[use_key]["radio"] = widget
                 print("  " * depth + f"Stored QRadioButton for key: {use_key}")
             elif isinstance(widget, (QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QgsMapLayerComboBox)):
-                if use_key not in self.widgets:
-                    self.widgets[use_key] = {}
                 self.widgets[use_key]["widget"] = widget
                 print("  " * depth + f"Stored {type(widget).__name__} for key: {use_key}")
-
+            elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(QComboBox):
+                self.widgets[use_key]["widget"] = widget
+                print("  " * depth + f"Stored composite widget (polygon_layer_with_field_selector) for key: {use_key}")
         if widget.layout():
             for i in range(widget.layout().count()):
                 item = widget.layout().itemAt(i)
                 if item.widget():
                     self.recursive_find_and_store_widgets(item.widget(), depth + 1)
+        print(f"Current widgets dictionary: {self.widgets}")
 
     def setup_connections(self):
         print("Setting up connections")
@@ -84,8 +85,8 @@ class GeestConfigWidget(QWidget):
                 radio.toggled.connect(lambda checked, k=key: self.handle_option_change(k, checked))
                 print(f"Set up radio connection for {key}")
             if widget:
+                print(f"Setting up connection for widget type: {type(widget).__name__} for key: {key}")
                 if isinstance(widget, QgsMapLayerComboBox):
-                    print(f"Setting up connection for QgsMapLayerComboBox: {key}")
                     widget.layerChanged.connect(lambda layer, k=key: self.update_layer_path(k, layer))
                 elif isinstance(widget, QLineEdit):
                     widget.textChanged.connect(lambda text, k=key: self.update_sub_widget_state(k, text))
@@ -93,30 +94,42 @@ class GeestConfigWidget(QWidget):
                     widget.valueChanged.connect(lambda value, k=key: self.update_sub_widget_state(k, value))
                 elif isinstance(widget, QComboBox):
                     widget.currentTextChanged.connect(lambda text, k=key: self.update_sub_widget_state(k, text))
-                elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(QComboBox):
+                elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(
+                        QComboBox):
                     layer_selector = widget.findChild(QgsMapLayerComboBox)
                     field_selector = widget.findChild(QComboBox)
-                    layer_selector.layerChanged.connect(lambda layer, k=key: self.update_polygon_layer_and_field(k, layer, field_selector))
-                    field_selector.currentTextChanged.connect(lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k, ls.currentLayer(), field_selector))
+                    layer_selector.layerChanged.connect(
+                        lambda layer, k=key: self.update_polygon_layer_and_field(k, layer, field_selector))
+                    field_selector.currentTextChanged.connect(
+                        lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k, ls.currentLayer(),
+                                                                                                   field_selector))
                 print(f"Set up widget connection for {key}: {type(widget).__name__}")
 
     def update_polygon_layer_and_field(self, key, layer, field_selector):
+        print(f"update_polygon_layer_and_field called for {key}")
         if layer:
             provider_key = layer.providerType()
             uri = layer.dataProvider().dataSourceUri()
+            print(f"Layer URI: {uri}")
             decoded = QgsProviderRegistry.instance().decodeUri(provider_key, uri)
+            print(f"Decoded URI: {decoded}")
             path = decoded.get('path') or decoded.get('url') or decoded.get('layerName')
             field = field_selector.currentText()
+            print(f"Selected field: {field}")
             if path:
-                value = f"{path};{field}" if field else path
+                value = f"{path};{field}"
+                print(f"Setting {key} to {value}")
                 self.modified_config[key] = value
             else:
                 print(f"Unable to determine path for layer {layer.name()} with provider {provider_key}")
-                self.modified_config[key] = f"{uri};{field}" if field else uri
+                value = f"{uri};{field}"
+                print(f"Setting {key} to {value}")
+                self.modified_config[key] = value
         else:
             print(f"No layer selected for {key}")
             self.modified_config[key] = ""
 
+        print(f"Modified config after update_polygon_layer_and_field: {self.modified_config}")
         self.stateChanged.emit(self.get_state())
 
     def update_layer_path(self, key, layer):
@@ -139,28 +152,40 @@ class GeestConfigWidget(QWidget):
             self.update_sub_widget_state(key, None)
 
     def handle_option_change(self, option, checked):
+        print(f"handle_option_change called for {option}, checked={checked}")
         if checked:
             for key, widgets in self.widgets.items():
                 widget = widgets.get("widget")
                 if widget:
                     widget.setEnabled(key == option)
+                    print(f"Enabled widget for {key}: {key == option}")
             for key in self.widgets.keys():
                 if key == option:
                     widget = self.widgets[key].get("widget")
                     if widget:
-                        if isinstance(widget, QWidget) and \
-                                widget.findChild(QgsMapLayerComboBox) and \
-                                widget.findChild(QComboBox):
-                            # handle polygon_layer_with_field_selector
+                        print(f"Widget type for {key}: {type(widget)}")
+                        if isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(
+                                QComboBox):
+                            print(f"Handling polygon_layer_with_field_selector for {key}")
                             layer_selector = widget.findChild(QgsMapLayerComboBox)
                             field_selector = widget.findChild(QComboBox)
                             self.update_polygon_layer_and_field(key, layer_selector.currentLayer(), field_selector)
+                        elif isinstance(widget, QgsMapLayerComboBox):
+                            print(f"Handling QgsMapLayerComboBox for {key}")
+                            self.update_layer_path(key, widget.currentLayer())
                         else:
+                            print(f"Setting {key} to 1")
                             self.modified_config[key] = 1
                     else:
+                        print(f"No widget found for {key}, setting to 1")
                         self.modified_config[key] = 1
                 else:
+                    print(f"Setting {key} to 0")
                     self.modified_config[key] = 0
+        else:
+            print(f"Setting {option} to 0 (unchecked)")
+            self.modified_config[option] = 0
+        print(f"Modified config after handle_option_change: {self.modified_config}")
         self.stateChanged.emit(self.get_state())
 
     def update_sub_widget_state(self, option, value):
