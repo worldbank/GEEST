@@ -50,7 +50,7 @@ class GeestWidgetFactory:
                 "type": "spinbox",
                 "min": 0,
                 "max": 10000,
-                "default": layer_data.get("Default Single Buffer Distances", 0),
+                "default": layer_data.get("Default Single Buffer Distance", 0),
                 "tooltip": "Enter buffer distance."
             },
             "Use Create Grid": {
@@ -200,26 +200,41 @@ class GeestWidgetFactory:
         """
         widget_type = mapping["type"]
 
+        #-- guard against GIGO
+        def safe_float(value, default):
+            try:
+                return float(value) if value != '' else default
+            except (ValueError, TypeError):
+                return default
+
+        # -- guard against GIGO
+        def safe_int(value, default):
+            try:
+                return int(float(value)) if value != '' else default
+            except (ValueError, TypeError):
+                return default
+
         if widget_type == "doublespinbox":
             widget = QDoubleSpinBox()
-            widget.setMinimum(mapping.get("min", 0.0))
-            widget.setMaximum(mapping.get("max", 100.0))
-            widget.setDecimals(mapping.get("decimals", 1))
-            widget.setValue(mapping.get("default", 0.0))
+            widget.setMinimum(safe_float(mapping.get("min"), 0.0))
+            widget.setMaximum(safe_float(mapping.get("max"), 100.0))
+            widget.setDecimals(safe_int(mapping.get("decimals"), 1))
+            widget.setValue(safe_float(mapping.get("default"), 0.0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
         elif widget_type == "spinbox":
             widget = QSpinBox()
-            widget.setMinimum(mapping.get("min", 0))
-            widget.setMaximum(mapping.get("max", 10000))
-            widget.setValue(mapping.get("default", 0))
+            widget.setMinimum(safe_int(mapping.get("min"), 0))
+            widget.setMaximum(safe_int(mapping.get("max"), 10000))
+            widget.setValue(safe_int(mapping.get("default"), 0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
         elif widget_type == "lineedit":
             widget = QLineEdit()
-            widget.setText(mapping.get("default", ""))
+            default_value = mapping.get("default", "")
+            widget.setText(str(default_value))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
