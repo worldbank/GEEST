@@ -9,7 +9,7 @@ from qgis.core import (
 from qgis.analysis import QgsNativeAlgorithms
 from processing.core.Processing import Processing
 from qgis.core import QgsProcessingFeedback
-from qgis_gender_indicator_tool.jobs.extents import Extents
+from geest.core.extents import Extents
 
 
 class TestExtents(unittest.TestCase):

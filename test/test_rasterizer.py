@@ -4,7 +4,7 @@ from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsApplicati
 from qgis.analysis import QgsNativeAlgorithms
 from processing.core.Processing import Processing
 from qgis.core import QgsProcessingFeedback
-from qgis_gender_indicator_tool.jobs.rasterization import Rasterizer
+from geest.core.rasterization import Rasterizer
 
 
 class TestRasterizer(unittest.TestCase):

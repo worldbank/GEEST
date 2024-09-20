@@ -22,7 +22,7 @@ import toml
 import typer
 
 LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
-SRC_NAME = "qgis_gender_indicator_tool"
+SRC_NAME = "geest"
 PACKAGE_NAME = SRC_NAME.replace("_", "")
 TEST_FILES = ["test", "test_suite.py", "docker-compose.yml", "scripts"]
 app = typer.Typer()
@@ -245,7 +245,7 @@ def copy_source_files(
 
     """
     output_directory.mkdir(parents=True, exist_ok=True)
-    for child in (LOCAL_ROOT_DIR / "src" / SRC_NAME).iterdir():
+    for child in (LOCAL_ROOT_DIR / SRC_NAME).iterdir():
         if child.name != "__pycache__":
             target_path = output_directory / child.name
             handler = shutil.copytree if child.is_dir() else shutil.copy

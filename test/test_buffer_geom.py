@@ -1,7 +1,7 @@
 import unittest
 import os
 from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem
-from qgis_gender_indicator_tool.jobs.buffering import SinglePointBuffer
+from geest.core.buffering import SinglePointBuffer
 
 
 class TestSinglePointBuffer(unittest.TestCase):
