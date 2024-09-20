@@ -37,13 +37,13 @@ class GeestWidgetFactory:
                 "max": 100.0,
                 "decimals": 1,
                 "default": layer_data.get("Default Index Score", 0.0),
-                "tooltip": "The default index score value."
+                "tooltip": "The default index score value.",
             },
             "Use Multi Buffer Point": {
                 "label": "Multi Buffer Distances",
                 "type": "lineedit",
                 "default": layer_data.get("Default Multi Buffer Distances", ""),
-                "tooltip": "Enter comma-separated buffer distances."
+                "tooltip": "Enter comma-separated buffer distances.",
             },
             "Use Single Buffer Point": {
                 "label": "Single Buffer Distance",
@@ -51,7 +51,7 @@ class GeestWidgetFactory:
                 "min": 0,
                 "max": 10000,
                 "default": layer_data.get("Default Single Buffer Distance", 0),
-                "tooltip": "Enter buffer distance."
+                "tooltip": "Enter buffer distance.",
             },
             "Use Create Grid": {
                 "label": "Pixel Size",
@@ -59,90 +59,91 @@ class GeestWidgetFactory:
                 "min": 0,
                 "max": 10000,
                 "default": layer_data.get("Default pixel", 0),
-                "tooltip": "Enter pixel size for grid creation."
+                "tooltip": "Enter pixel size for grid creation.",
             },
             "Use Add Layers Manually": {
                 "label": "Add Layers Manually",
                 "description": "Using this option, you can add layers manually.",
                 "type": "layer_selector",
                 "layer_type": "vector",
-                "tooltip": "Select a vector layer."
+                "tooltip": "Select a vector layer.",
             },
             "Use Classify Poly into Classes": {
                 "label": "Classify Polygons into Classes",
                 "description": "Using this option, you can classify polygons into classes.",
                 "type": "layer_selector",
                 "layer_type": "polygon",
-                "tooltip": "Select a polygon layer."
+                "tooltip": "Select a polygon layer.",
             },
             "Use CSV to Point Layer": {
                 "label": "Use CSV File",
                 "description": "Using this option, you can convert a CSV file to a point layer.",
                 "type": "csv_to_point",
-                "tooltip": "Select a CSV file and specify longitude and latitude columns."
+                "tooltip": "Select a CSV file and specify longitude and latitude columns.",
             },
             "Use Poly per Cell": {
                 "label": "Use Polygon Layer",
                 "description": "Using this option, create a polygon per grid cell.",
                 "type": "layer_selector",
                 "layer_type": "polygon",
-                "tooltip": "Select a polygon layer."
+                "tooltip": "Select a polygon layer.",
             },
             "Use Polyline per Cell": {
                 "label": "Use Polyline Layer",
                 "description": "Using this option, create a polyline per grid cell.",
                 "type": "layer_selector",
                 "layer_type": "line",
-                "tooltip": "Select a line layer."
+                "tooltip": "Select a line layer.",
             },
             "Use Point per Cell": {
                 "label": "Use Points Layer",
                 "description": "Using this option, create a point per grid cell.",
                 "type": "layer_selector",
                 "layer_type": "point",
-                "tooltip": "Select a point layer."
+                "tooltip": "Select a point layer.",
             },
             "Use Rasterize Layer": {
                 "label": "Rasterize Layer",
                 "description": "Using this option, you can rasterize a vector layer.",
                 "type": "layer_selector",
                 "layer_type": "all",
-                "tooltip": "Select a raster layer to rasterize."
+                "tooltip": "Select a raster layer to rasterize.",
             },
-
             "Use OSM Downloader": {
                 "label": "Fetch the data from OSM",
                 "description": "Using this option, we will try to fetch the data needed for this indicator directly from OSM.",
                 "type": "download_option",
-                "tooltip": "Download data from OSM."
+                "tooltip": "Download data from OSM.",
             },
             "Use WBL Downloader": {
                 "label": "Fetch the data from WBL",
                 "description": "Using this option, we will try to fetch the data needed for this indicator directly from WBL.",
                 "type": "download_option",
-                "tooltip": "Download data from WBL."
+                "tooltip": "Download data from WBL.",
             },
             "Use Humdata Downloader": {
                 "label": "Fetch the data from HumData",
                 "description": "Using this option, we will try to fetch the data needed for this indicator directly from HumData.",
                 "type": "download_option",
-                "tooltip": "Download data from HumData."
+                "tooltip": "Download data from HumData.",
             },
             "Use Mapillary Downloader": {
                 "label": "Fetch the data from Mapillary",
                 "description": "Using this option, we will try to fetch the data needed for this indicator directly from Mapillary.",
                 "type": "download_option",
-                "tooltip": "Download data from Mapillary."
+                "tooltip": "Download data from Mapillary.",
             },
             "Use Other Downloader": {
                 "label": "Fetch the data from specified source",
                 "description": f"Using this option, we will try to fetch the data needed for this indicator directly from {layer_data.get('Use Other Downloader', '')}.",
                 "type": "download_option",
-                "tooltip": f"Download data from {layer_data.get('Use Other Downloader', 'Other Source')}."
-            }
+                "tooltip": f"Download data from {layer_data.get('Use Other Downloader', 'Other Source')}.",
+            },
         }
 
-        use_keys_enabled = {k: v for k, v in layer_data.items() if k.startswith("Use") and v}
+        use_keys_enabled = {
+            k: v for k, v in layer_data.items() if k.startswith("Use") and v
+        }
 
         if not use_keys_enabled:
             return QWidget()
@@ -181,7 +182,9 @@ class GeestWidgetFactory:
 
             main_layout.addWidget(option_container)
 
-            radio_button.toggled.connect(lambda checked, w=widget: w.setEnabled(checked))
+            radio_button.toggled.connect(
+                lambda checked, w=widget: w.setEnabled(checked)
+            )
             widget.setEnabled(False)  # Initially disable all widgets
 
         if radio_group.buttons():
@@ -200,17 +203,17 @@ class GeestWidgetFactory:
         """
         widget_type = mapping["type"]
 
-        #-- guard against GIGO
+        # -- guard against GIGO
         def safe_float(value, default):
             try:
-                return float(value) if value != '' else default
+                return float(value) if value != "" else default
             except (ValueError, TypeError):
                 return default
 
         # -- guard against GIGO
         def safe_int(value, default):
             try:
-                return int(float(value)) if value != '' else default
+                return int(float(value)) if value != "" else default
             except (ValueError, TypeError):
                 return default
 
@@ -256,10 +259,14 @@ class GeestWidgetFactory:
                 elif subtype_mapped == "point":
                     widget.setFilters(QgsMapLayerProxyModel.PointLayer)
                 else:
-                    print(f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all vector layers.")
+                    print(
+                        f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all vector layers."
+                    )
                     widget.setFilters(QgsMapLayerProxyModel.VectorLayer)
             else:
-                print(f"Unknown layer type '{layer_type}' for '{mapping.get('label')}'. Defaulting to all layers.")
+                print(
+                    f"Unknown layer type '{layer_type}' for '{mapping.get('label')}'. Defaulting to all layers."
+                )
                 widget.setFilters(QgsMapLayerProxyModel.All)
 
             # Check if layers are available
@@ -280,7 +287,11 @@ class GeestWidgetFactory:
             file_widget = QgsFileWidget(parent=container)
             file_widget.setFilter("CSV Files (*.csv);;All Files (*.*)")
             file_widget.setToolTip(
-                mapping.get("tooltip", "Select a CSV file containing longitude and latitude columns."))
+                mapping.get(
+                    "tooltip",
+                    "Select a CSV file containing longitude and latitude columns.",
+                )
+            )
             layout.addWidget(file_widget)
 
             # Create layouts for longitude and latitude columns
@@ -315,7 +326,9 @@ class GeestWidgetFactory:
 
             # Connect file selection to populate and auto-fill combo boxes
             file_widget.fileChanged.connect(
-                lambda path: GeestWidgetFactory.populate_csv_columns(path, longitude_combo, latitude_combo)
+                lambda path: GeestWidgetFactory.populate_csv_columns(
+                    path, longitude_combo, latitude_combo
+                )
             )
             return container
 
@@ -330,7 +343,9 @@ class GeestWidgetFactory:
             return None
 
     @staticmethod
-    def populate_csv_columns(file_path: str, lon_combo: QComboBox, lat_combo: QComboBox):
+    def populate_csv_columns(
+        file_path: str, lon_combo: QComboBox, lat_combo: QComboBox
+    ):
         """
         Populate the longitude and latitude combo boxes based on the CSV file's headers.
         Auto-select columns if 'longitude'/'lon' and 'latitude'/'lat' are found.
@@ -341,7 +356,7 @@ class GeestWidgetFactory:
             return
 
         try:
-            with open(file_path, newline='', encoding='utf-8') as csvfile:
+            with open(file_path, newline="", encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
                 headers = next(reader)
                 lon_combo.clear()
@@ -350,15 +365,21 @@ class GeestWidgetFactory:
                 lat_combo.addItems(headers)
 
                 # Auto-select longitude column
-                lon_candidates = ['longitude', 'lon']
-                selected_lon = next((header for header in headers if header.lower() in lon_candidates), None)
+                lon_candidates = ["longitude", "lon"]
+                selected_lon = next(
+                    (header for header in headers if header.lower() in lon_candidates),
+                    None,
+                )
                 if selected_lon:
                     index = headers.index(selected_lon)
                     lon_combo.setCurrentIndex(index)
 
                 # Auto-select latitude column
-                lat_candidates = ['latitude', 'lat']
-                selected_lat = next((header for header in headers if header.lower() in lat_candidates), None)
+                lat_candidates = ["latitude", "lat"]
+                selected_lat = next(
+                    (header for header in headers if header.lower() in lat_candidates),
+                    None,
+                )
                 if selected_lat:
                     index = headers.index(selected_lat)
                     lat_combo.setCurrentIndex(index)
