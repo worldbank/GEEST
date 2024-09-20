@@ -93,7 +93,29 @@ class GeestConfigWidget(QWidget):
                     widget.valueChanged.connect(lambda value, k=key: self.update_sub_widget_state(k, value))
                 elif isinstance(widget, QComboBox):
                     widget.currentTextChanged.connect(lambda text, k=key: self.update_sub_widget_state(k, text))
+                elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(QComboBox):
+                    layer_selector = widget.findChild(QgsMapLayerComboBox)
+                    field_selector = widget.findChild(QComboBox)
+                    layer_selector.layerChanged.connect(lambda layer, k=key: self.update_polygon_layer_and_field(k, layer, field_selector))
+                    field_selector.currentTextChanged.connect(lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k, ls.currentLayer(), field_selector))
                 print(f"Set up widget connection for {key}: {type(widget).__name__}")
+
+    def update_polygon_layer_and_field(self, key, layer, field_selector):
+        if layer:
+            provider_key = layer.providerType()
+            uri = layer.dataProvider().dataSourceUri()
+            decoded = QgsProviderRegistry.instance().decodeUri(provider_key, uri)
+            path = decoded.get('path') or decoded.get('url') or decoded.get('layerName')
+            field = field_selector.currentText()
+            if path:
+                value = f"{path};{field}" if field else path
+                self.update_sub_widget_state(key, value)
+            else:
+                print(f"Unable to determine path for layer {layer.name()} with provider {provider_key}")
+                self.update_sub_widget_state(key, f"{uri};{field}" if field else uri)
+        else:
+            print(f"No layer selected for {key}")
+            self.update_sub_widget_state(key, None)
 
     def update_layer_path(self, key, layer):
         print(f"update_layer_path called for {key}")  # Debug print
@@ -158,6 +180,15 @@ class GeestConfigWidget(QWidget):
                         widget.setValue(float(value) if isinstance(widget, QDoubleSpinBox) else int(value))
                     elif isinstance(widget, (QComboBox, QgsMapLayerComboBox)):
                         widget.setCurrentText(str(value))
+                    elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(QComboBox):
+                        # Handle polygon_layer_with_field_selector widget
+                        if value and ';' in value:
+                            layer_path, field = value.split(';')
+                            field_selector = widget.findChild(QComboBox)
+                            # Set layer --- maybe necessary?
+                            # layer_selector = widget.findChild(QgsMapLayerComboBox)
+                            # layer_selector.setLayer(layer_path)
+                            field_selector.setCurrentText(field)
 
     def dump_widget_hierarchy(self, widget, level=0):
         output = []
