@@ -165,6 +165,7 @@ class GeestWidgetFactory:
             option_container.setLayout(option_layout)
 
             radio_button = QRadioButton(mapping["label"])
+            radio_button.setProperty("use_key", use_key)  # Set property here
             radio_group.addButton(radio_button, id=idx)
             option_layout.addWidget(radio_button)
 
@@ -175,6 +176,7 @@ class GeestWidgetFactory:
 
             widget = GeestWidgetFactory.create_specific_widget(mapping, layer_data)
             if widget:
+                widget.setProperty("use_key", use_key)
                 option_layout.addWidget(widget)
 
             main_layout.addWidget(option_container)
@@ -239,18 +241,24 @@ class GeestWidgetFactory:
                 elif subtype_mapped == "point":
                     widget.setFilters(QgsMapLayerProxyModel.PointLayer)
                 else:
-                    print(
-                        f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all vector layers.")
+                    print(f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all vector layers.")
                     widget.setFilters(QgsMapLayerProxyModel.VectorLayer)
             else:
                 print(f"Unknown layer type '{layer_type}' for '{mapping.get('label')}'. Defaulting to all layers.")
                 widget.setFilters(QgsMapLayerProxyModel.All)
-            widget.setToolTip(mapping.get("tooltip", ""))
-            return widget
+
+            # Check if layers are available
+            if widget.count() == 0:
+                label = QLabel("<No appropriate layer found>")
+                return label
+
+            else:
+                widget.setToolTip(mapping.get("tooltip", ""))
+                return widget
 
         elif widget_type == "csv_to_point":
             container = QWidget()
-            layout = QHBoxLayout()
+            layout = QVBoxLayout()
             container.setLayout(layout)
 
             # Create QgsFileWidget
@@ -260,17 +268,35 @@ class GeestWidgetFactory:
                 mapping.get("tooltip", "Select a CSV file containing longitude and latitude columns."))
             layout.addWidget(file_widget)
 
-            # Create ComboBoxes for Longitude and Latitude
+            # Create layouts for longitude and latitude columns
+            lon_layout = QVBoxLayout()
+            lat_layout = QVBoxLayout()
+
+            # Create and add label for Longitude
+            lon_label = QLabel("Longitude column")
+            lon_layout.addWidget(lon_label)
+
+            # Create ComboBox for Longitude
             longitude_combo = QComboBox()
             longitude_combo.setPlaceholderText("Longitude Column")
             longitude_combo.setEnabled(False)
             longitude_combo.setToolTip("Select the column for longitude.")
-            layout.addWidget(longitude_combo)
+            lon_layout.addWidget(longitude_combo)
+
+            # Create and add label for Latitude
+            lat_label = QLabel("Latitude column")
+            lat_layout.addWidget(lat_label)
+
+            # Create ComboBox for Latitude
             latitude_combo = QComboBox()
             latitude_combo.setPlaceholderText("Latitude Column")
             latitude_combo.setEnabled(False)
             latitude_combo.setToolTip("Select the column for latitude.")
-            layout.addWidget(latitude_combo)
+            lat_layout.addWidget(latitude_combo)
+
+            # Add the longitude and latitude layouts to the main layout
+            layout.addLayout(lon_layout)
+            layout.addLayout(lat_layout)
 
             # Connect file selection to populate and auto-fill combo boxes
             file_widget.fileChanged.connect(
@@ -330,4 +356,3 @@ class GeestWidgetFactory:
             lat_combo.clear()
             lon_combo.setEnabled(False)
             lat_combo.setEnabled(False)
-
