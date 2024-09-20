@@ -1,3 +1,4 @@
+import time
 from qgis.core import QgsMessageLog, Qgis, QgsFeedback
 from .workflow_base import WorkflowBase
 
@@ -22,15 +23,15 @@ class DontUseWorkflow(WorkflowBase):
 
         steps = 10
         for i in range(steps):
-            if self._feedback.isCanceled():
+            if self.feedback.isCanceled():
                 QgsMessageLog.logMessage("Dont use workflow canceled.", 'Custom Workflows', Qgis.Warning)
                 return False
 
             # Simulate progress and work
-            self._attributes['progress'] = f"Dont use workflow Step {i + 1} completed"
-            self._feedback.setProgress((i + 1) / steps * 100)  # Report progress in percentage
+            self.attributes['progress'] = f"Dont use workflow Step {i + 1} completed"
+            self.feedback.setProgress((i + 1) / steps * 100)  # Report progress in percentage
             time.sleep(1)  # Simulate a task
 
-        self._attributes['result'] = 'Dont use workflow completed'
+        self.attributes['result'] = 'Dont use workflow completed'
         QgsMessageLog.logMessage("Dont use workflow workflow completed", 'Custom Workflows', Qgis.Info)
         return True

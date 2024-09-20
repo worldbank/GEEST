@@ -1,3 +1,4 @@
+from functools import partial
 from qgis.core import QgsMessageLog, Qgis, QgsApplication
 from PyQt5.QtCore import QObject, pyqtSignal
 from typing import List, Optional
@@ -102,7 +103,7 @@ class WorkflowQueue(QObject):
                 partial(self.finalize_task, job_name=job.description())
             )
 
-            QgsApplication.taskManager().addTask(task)
+            QgsApplication.taskManager().addTask(job)
 
         self.update_status()
 

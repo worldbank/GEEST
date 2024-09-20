@@ -1,4 +1,5 @@
 from qgis.core import QgsTask, QgsMessageLog, QgsFeedback, Qgis
+from PyQt5.QtCore import QObject, pyqtSignal
 from .workflow_factory import WorkflowFactory
 
 
