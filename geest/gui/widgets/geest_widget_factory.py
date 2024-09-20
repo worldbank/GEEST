@@ -200,25 +200,34 @@ class GeestWidgetFactory:
         """
         widget_type = mapping["type"]
 
+        #-- guard against GIGO
+        def safe_float(value, default):
+            try:
+                return float(value) if value != '' else default
+            except (ValueError, TypeError):
+                return default
+
+        # -- guard against GIGO
+        def safe_int(value, default):
+            try:
+                return int(float(value)) if value != '' else default
+            except (ValueError, TypeError):
+                return default
+
         if widget_type == "doublespinbox":
             widget = QDoubleSpinBox()
-            min_value = mapping.get("min", 0.0)
-            widget.setMinimum(float(min_value) if min_value != '' else 0.0)
-            max_value = mapping.get("max", 100.0)
-            widget.setMaximum(float(max_value) if max_value != '' else 100.0)
-            decimals = mapping.get("decimals", 1)
-            widget.setDecimals(int(float(decimals)) if decimals != '' else 1)
-            default_value = mapping.get("default", 0.0)
-            widget.setValue(float(default_value) if default_value != '' else 0.0)
+            widget.setMinimum(safe_float(mapping.get("min"), 0.0))
+            widget.setMaximum(safe_float(mapping.get("max"), 100.0))
+            widget.setDecimals(safe_int(mapping.get("decimals"), 1))
+            widget.setValue(safe_float(mapping.get("default"), 0.0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
         elif widget_type == "spinbox":
             widget = QSpinBox()
-            widget.setMinimum(mapping.get("min", 0))
-            widget.setMaximum(mapping.get("max", 10000))
-            default_value = mapping.get("default", 0)
-            widget.setValue(int(float(default_value)) if default_value != '' else 0)
+            widget.setMinimum(safe_int(mapping.get("min"), 0))
+            widget.setMaximum(safe_int(mapping.get("max"), 10000))
+            widget.setValue(safe_int(mapping.get("default"), 0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
