@@ -186,7 +186,7 @@ class SetupPanel(QWidget):
                 self.process_singlepart_geometry(geom, normalized_name, area_name, processor, study_area_dir)
 
         # After processing, add layers to QGIS
-        processor.add_layers_to_qgis(study_area_dir)
+        processor.add_layers_to_qgis()
 
     def process_singlepart_geometry(self, geom, normalized_name, area_name, processor, study_area_dir):
         """Processes a singlepart geometry feature."""
