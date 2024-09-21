@@ -5,7 +5,7 @@ from qgis.core import (
     QgsRasterLayer,
     QgsCoordinateReferenceSystem,
 )
-from qgis_gender_indicator_tool.jobs.polylines_per_grid_cell import (
+from geest.core.polylines_per_grid_cell import (
     RasterPolylineGridScore,
 )  # Adjust the path to your class
 

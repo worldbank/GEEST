@@ -1,10 +1,16 @@
 from qgis.PyQt.QtWidgets import (
-    QWidget, QVBoxLayout, QRadioButton, QLineEdit,
-    QSpinBox, QDoubleSpinBox, QComboBox
+    QWidget,
+    QVBoxLayout,
+    QRadioButton,
+    QLineEdit,
+    QSpinBox,
+    QDoubleSpinBox,
+    QComboBox,
 )
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.gui import QgsMapLayerComboBox
-#from qgis.core import QgsVectorLayer, QgsRasterLayer
+
+# from qgis.core import QgsVectorLayer, QgsRasterLayer
 from qgis.core import QgsProviderRegistry
 from .geest_widget_factory import GeestWidgetFactory
 
@@ -26,14 +32,18 @@ class GeestConfigWidget(QWidget):
         self.setLayout(layout)
 
         print("Calling GeestWidgetFactory.create_widgets")
-        widgets_container = GeestWidgetFactory.create_widgets(self.original_config, self)
+        widgets_container = GeestWidgetFactory.create_widgets(
+            self.original_config, self
+        )
 
         if widgets_container is None:
             print("GeestWidgetFactory.create_widgets returned None")
             return
 
         if not isinstance(widgets_container, QWidget):
-            print(f"GeestWidgetFactory.create_widgets returned unexpected type: {type(widgets_container)}")
+            print(
+                f"GeestWidgetFactory.create_widgets returned unexpected type: {type(widgets_container)}"
+            )
             return
 
         if widgets_container.layout() is None:
@@ -63,11 +73,16 @@ class GeestConfigWidget(QWidget):
                     self.widgets[use_key] = {}
                 self.widgets[use_key]["radio"] = widget
                 print("  " * depth + f"Stored QRadioButton for key: {use_key}")
-            elif isinstance(widget, (QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QgsMapLayerComboBox)):
+            elif isinstance(
+                widget,
+                (QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QgsMapLayerComboBox),
+            ):
                 if use_key not in self.widgets:
                     self.widgets[use_key] = {}
                 self.widgets[use_key]["widget"] = widget
-                print("  " * depth + f"Stored {type(widget).__name__} for key: {use_key}")
+                print(
+                    "  " * depth + f"Stored {type(widget).__name__} for key: {use_key}"
+                )
 
         if widget.layout():
             for i in range(widget.layout().count()):
@@ -81,18 +96,28 @@ class GeestConfigWidget(QWidget):
             radio = widgets.get("radio")
             widget = widgets.get("widget")
             if radio:
-                radio.toggled.connect(lambda checked, k=key: self.handle_option_change(k, checked))
+                radio.toggled.connect(
+                    lambda checked, k=key: self.handle_option_change(k, checked)
+                )
                 print(f"Set up radio connection for {key}")
             if widget:
                 if isinstance(widget, QgsMapLayerComboBox):
                     print(f"Setting up connection for QgsMapLayerComboBox: {key}")
-                    widget.layerChanged.connect(lambda layer, k=key: self.update_layer_path(k, layer))
+                    widget.layerChanged.connect(
+                        lambda layer, k=key: self.update_layer_path(k, layer)
+                    )
                 elif isinstance(widget, QLineEdit):
-                    widget.textChanged.connect(lambda text, k=key: self.update_sub_widget_state(k, text))
+                    widget.textChanged.connect(
+                        lambda text, k=key: self.update_sub_widget_state(k, text)
+                    )
                 elif isinstance(widget, (QSpinBox, QDoubleSpinBox)):
-                    widget.valueChanged.connect(lambda value, k=key: self.update_sub_widget_state(k, value))
+                    widget.valueChanged.connect(
+                        lambda value, k=key: self.update_sub_widget_state(k, value)
+                    )
                 elif isinstance(widget, QComboBox):
-                    widget.currentTextChanged.connect(lambda text, k=key: self.update_sub_widget_state(k, text))
+                    widget.currentTextChanged.connect(
+                        lambda text, k=key: self.update_sub_widget_state(k, text)
+                    )
                 print(f"Set up widget connection for {key}: {type(widget).__name__}")
 
     def update_layer_path(self, key, layer):
@@ -103,12 +128,14 @@ class GeestConfigWidget(QWidget):
             print(f"Layer URI: {uri}")
             decoded = QgsProviderRegistry.instance().decodeUri(provider_key, uri)
             print(f"Decoded URI: {decoded}")
-            path = decoded.get('path') or decoded.get('url') or decoded.get('layerName')
+            path = decoded.get("path") or decoded.get("url") or decoded.get("layerName")
             if path:
                 print(f"Path found: {path}")
                 self.update_sub_widget_state(key, path)
             else:
-                print(f"Unable to determine path for layer {layer.name()} with provider {provider_key}")
+                print(
+                    f"Unable to determine path for layer {layer.name()} with provider {provider_key}"
+                )
                 self.update_sub_widget_state(key, uri)  # Fallback to using the full URI
         else:
             print(f"No layer selected for {key}")
@@ -155,14 +182,18 @@ class GeestConfigWidget(QWidget):
                     if isinstance(widget, QLineEdit):
                         widget.setText(str(value))
                     elif isinstance(widget, (QSpinBox, QDoubleSpinBox)):
-                        widget.setValue(float(value) if isinstance(widget, QDoubleSpinBox) else int(value))
+                        widget.setValue(
+                            float(value)
+                            if isinstance(widget, QDoubleSpinBox)
+                            else int(value)
+                        )
                     elif isinstance(widget, (QComboBox, QgsMapLayerComboBox)):
                         widget.setCurrentText(str(value))
 
     def dump_widget_hierarchy(self, widget, level=0):
         output = []
         output.append("  " * level + f"{widget.__class__.__name__}")
-        if hasattr(widget, 'layout') and widget.layout():
+        if hasattr(widget, "layout") and widget.layout():
             for i in range(widget.layout().count()):
                 item = widget.layout().itemAt(i)
                 if item.widget():
