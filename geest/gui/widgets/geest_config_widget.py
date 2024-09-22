@@ -222,36 +222,6 @@ class GeestConfigWidget(QWidget):
     def get_state(self):
         return self.modified_config.copy()
 
-    def reset_to_original(self):
-        self.modified_config = self.original_config.copy()
-        self.update_widgets_from_config()
-        self.stateChanged.emit(self.get_state())
-
-    def update_widgets_from_config(self):
-        for key, value in self.modified_config.items():
-            if key in self.widgets:
-                widgets = self.widgets[key]
-                radio = widgets.get("radio")
-                widget = widgets.get("widget")
-                if radio:
-                    radio.setChecked(bool(value))
-                if widget:
-                    if isinstance(widget, QLineEdit):
-                        widget.setText(str(value))
-                    elif isinstance(widget, (QSpinBox, QDoubleSpinBox)):
-                        widget.setValue(float(value) if isinstance(widget, QDoubleSpinBox) else int(value))
-                    elif isinstance(widget, (QComboBox, QgsMapLayerComboBox)):
-                        widget.setCurrentText(str(value))
-                    elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(QComboBox):
-                        # Handle polygon_layer_with_field_selector widget
-                        if value and ';' in value:
-                            layer_path, field = value.split(';')
-                            field_selector = widget.findChild(QComboBox)
-                            # Set layer --- maybe necessary?
-                            # layer_selector = widget.findChild(QgsMapLayerComboBox)
-                            # layer_selector.setLayer(layer_path)
-                            field_selector.setCurrentText(field)
-
     def dump_widget_hierarchy(self, widget, level=0):
         output = []
         output.append("  " * level + f"{widget.__class__.__name__}")
