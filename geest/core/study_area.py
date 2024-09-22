@@ -1,4 +1,3 @@
-# core/study_area.py
 import os
 import re
 from qgis.core import (
@@ -28,6 +27,10 @@ class StudyAreaProcessor:
         self.gpkg_path = os.path.join(self.working_dir, "study_area.gpkg")
         self.create_study_area_directory(self.working_dir)
 
+        # Calculate the UTM zone based on the layer's bounding box
+        layer_bbox = self.layer.extent()
+        self.utm_epsg_code = self.calculate_utm_zone(layer_bbox)
+
     def create_study_area_directory(self, working_dir):
         """Creates the 'study_area' directory."""
         study_area_dir = os.path.join(working_dir, "study_area")
@@ -38,48 +41,44 @@ class StudyAreaProcessor:
                 raise (f"Error creating directory: {e}")
         return study_area_dir
 
-    def create_bbox_multiple_100m(self, bbox):
-        """Adjusts bounding box dimensions to be a multiple of 100m."""
-        crs_src = QgsCoordinateReferenceSystem(self.layer.crs())  # Source CRS
-        crs_dst = QgsCoordinateReferenceSystem("EPSG:3857")  # EPSG:3857 (meters)
-        transform = QgsCoordinateTransform(crs_src, crs_dst, QgsProject.instance())
-        do_transform = True
-        if crs_src == crs_dst:
-            do_transform = False
+    def calculate_utm_zone(self, bbox):
+        """Calculates the UTM zone based on the centroid of the bounding box."""
+        centroid = bbox.center()
+        lon = centroid.x()
+        lat = centroid.y()
 
-        # Transform the bounding box
-        if do_transform:
-            x_min, y_min = transform.transform(bbox.xMinimum(), bbox.yMinimum())
-            x_max, y_max = transform.transform(bbox.xMaximum(), bbox.yMaximum())
+        # Calculate the UTM zone based on the longitude
+        utm_zone = int((lon + 180) / 6) + 1
+
+        # EPSG code for the UTM zone
+        if lat >= 0:
+            epsg_code = 32600 + utm_zone  # Northern Hemisphere
         else:
-            x_min, y_min, x_max, y_max = (
-                bbox.xMinimum(),
-                bbox.yMinimum(),
-                bbox.xMaximum(),
-                bbox.yMaximum(),
-            )
+            epsg_code = 32700 + utm_zone  # Southern Hemisphere
 
-        # Adjust bbox dimensions to be exact multiples of 100m
-        def make_multiple(val, mult):
-            return mult * round(val / mult)
-
-        x_min = make_multiple(x_min, 100)
-        y_min = make_multiple(y_min, 100)
-        x_max = make_multiple(x_max, 100)
-        y_max = make_multiple(y_max, 100)
-
-        return QgsRectangle(x_min, y_min, x_max, y_max)
+        return epsg_code
 
     def create_layer_if_not_exists(self, layer_name, fields, geometry_type):
         """Create a new layer in the GeoPackage if it doesn't already exist."""
         gpkg_layer_path = f"{self.gpkg_path}|layername={layer_name}"
         layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
-
-        if not layer.isValid():  # Layer does not exist, create it
-            crs = QgsCoordinateReferenceSystem("EPSG:3857")
+        append = True
+        # Check if the GeoPackage file exists
+        if not os.path.exists(self.gpkg_path):
+            append = False
+            QgsMessageLog.logMessage(f"GeoPackage does not exist. Creating: {self.gpkg_path}")
+        
+        # If the layer doesn't exist, create it
+        # See https://gis.stackexchange.com/questions/417916/creating-empty-layers-in-geopackage-using-pyqgis
+        if not layer.isValid():
+            QgsMessageLog.logMessage(f"Layer '{layer_name}' does not exist. Creating it.")
+            crs = QgsCoordinateReferenceSystem(f"EPSG:{self.utm_epsg_code}")
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "GPKG"
             options.fileEncoding = "UTF-8"
+            options.layerName = layer_name
+            if append:
+                options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
 
             # Convert list of QgsField objects to QgsFields object
             qgs_fields = QgsFields()
@@ -102,12 +101,15 @@ class StudyAreaProcessor:
         gpkg_layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
 
         if gpkg_layer.isValid():
+            QgsMessageLog.logMessage(f"Appending to existing layer: {layer_name}")
             provider = gpkg_layer.dataProvider()
             provider.addFeatures(features)
             gpkg_layer.updateExtents()
+        else:
+            QgsMessageLog.logMessage(f"Layer '{layer_name}' is not valid for appending.")
 
     def save_to_geopackage(self, features, layer_name, fields, geometry_type):
-        """Save features to GeoPackage."""
+        """Save features to GeoPackage. Create or append the layer as necessary."""
         self.create_layer_if_not_exists(layer_name, fields, geometry_type)
         self.append_to_layer(layer_name, features)
 
@@ -141,7 +143,7 @@ class StudyAreaProcessor:
                     excluded_cell_count += 1
 
         QgsMessageLog.logMessage(
-            f"{excluded_cell_count} did not intersect with the study area."
+            f"{excluded_cell_count} grid cells did not intersect with the study area."
         )  # Debugging statement
 
         # Debugging: Print the number of grid features created
@@ -209,9 +211,9 @@ class StudyAreaProcessor:
         selected_features = self.layer.selectedFeatures()
         features = selected_features if selected_features else self.layer.getFeatures()
 
-        # Get the source CRS (from the layer) and destination CRS (EPSG:3857)
+        # Get the source CRS (from the layer) and destination CRS (UTM EPSG code)
         crs_src = self.layer.crs()
-        crs_dst = QgsCoordinateReferenceSystem("EPSG:3857")
+        crs_dst = QgsCoordinateReferenceSystem(f"EPSG:{self.utm_epsg_code}")
         transform = QgsCoordinateTransform(crs_src, crs_dst, QgsProject.instance())
 
         for feature in features:
@@ -220,7 +222,7 @@ class StudyAreaProcessor:
             normalized_name = re.sub(r"\s+", "_", area_name.lower())
 
             try:
-                # Transform geometry to EPSG:3857
+                # Transform geometry to the UTM zone CRS
                 geom.transform(transform)
 
                 # Get the bounding box of the transformed geometry
@@ -249,6 +251,40 @@ class StudyAreaProcessor:
                 QgsMessageLog.logMessage(
                     f"Error transforming geometry for feature {feature.id()}: {e}"
                 )
+
+    def create_bbox_multiple_100m(self, bbox):
+        """Adjusts bounding box dimensions to be a multiple of 100m, using the relevant UTM zone."""
+        crs_src = QgsCoordinateReferenceSystem(self.layer.crs())  # Source CRS
+
+        # Use the pre-calculated UTM EPSG code
+        crs_dst = QgsCoordinateReferenceSystem(f"EPSG:{self.utm_epsg_code}")  # UTM zone CRS
+        transform = QgsCoordinateTransform(crs_src, crs_dst, QgsProject.instance())
+        do_transform = True
+        if crs_src == crs_dst:
+            do_transform = False
+
+        # Transform the bounding box
+        if do_transform:
+            x_min, y_min = transform.transform(bbox.xMinimum(), bbox.yMinimum())
+            x_max, y_max = transform.transform(bbox.xMaximum(), bbox.yMaximum())
+        else:
+            x_min, y_min, x_max, y_max = (
+                bbox.xMinimum(),
+                bbox.yMinimum(),
+                bbox.xMaximum(),
+                bbox.yMaximum(),
+            )
+
+        # Adjust bbox dimensions to be exact multiples of 100m
+        def make_multiple(val, mult):
+            return mult * round(val / mult)
+
+        x_min = make_multiple(x_min, 100)
+        y_min = make_multiple(y_min, 100)
+        x_max = make_multiple(x_max, 100)
+        y_max = make_multiple(y_max, 100)
+
+        return QgsRectangle(x_min, y_min, x_max, y_max)
 
     def add_layers_to_qgis(self):
         """Adds the generated layers from the GeoPackage to QGIS."""
