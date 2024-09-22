@@ -150,51 +150,18 @@ class SetupPanel(QWidget):
             QMessageBox.critical(self, "Error", f"Invalid area name field '{field_name}'.")
             return
 
-        study_area_dir = self.create_study_area_directory(self.working_dir)
-        if not study_area_dir:
-            QMessageBox.critical(self, "Error", "Failed to create study area directory.")
+        # Create the processor instance and process the features
+        try:
+            processor = StudyAreaProcessor(
+                layer = layer,
+                field_name = field_name,
+                working_dir = self.working_dir
+            )
+            processor.process_study_area()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
             return
 
-        # Create the processor instance and process the features
-        self.process_study_area(layer, field_name, study_area_dir)
 
-    def create_study_area_directory(self, working_dir):
-        """Creates the 'study_area' directory."""
-        study_area_dir = os.path.join(working_dir, "study_area")
-        if not os.path.exists(study_area_dir):
-            try:
-                os.makedirs(study_area_dir)
-            except Exception as e:
-                print(f"Error creating directory: {e}")
-                return None
-        return study_area_dir
+   
 
-    def process_study_area(self, layer, field_name, study_area_dir):
-        """Processes each feature in the layer to create bounding boxes and grids."""
-        processor = StudyAreaProcessor(layer, self.working_dir)
-        selected_features = layer.selectedFeatures()
-        features = selected_features if selected_features else layer.getFeatures()
-
-        for feature in features:
-            geom = feature.geometry()
-            area_name = feature[field_name]
-            normalized_name = re.sub(r"\s+", "_", area_name.lower())
-
-            if geom.isMultipart():
-                processor.process_multipart_geometry(geom, normalized_name, area_name, study_area_dir)
-            else:
-                self.process_singlepart_geometry(geom, normalized_name, area_name, processor, study_area_dir)
-
-        # After processing, add layers to QGIS
-        processor.add_layers_to_qgis()
-
-    def process_singlepart_geometry(self, geom, normalized_name, area_name, processor, study_area_dir):
-        """Processes a singlepart geometry feature."""
-        bbox = geom.boundingBox()
-        bbox_100m = processor.create_bbox_multiple_100m(bbox)
-
-        bbox_file = os.path.join(study_area_dir, f"{normalized_name}.geojson")
-        processor.save_bbox_to_geojson(bbox_100m, bbox_file, area_name)
-
-        grid_file = os.path.join(study_area_dir, f"{normalized_name}_grid.geojson")
-        processor.create_and_save_grid(bbox_100m, grid_file)
