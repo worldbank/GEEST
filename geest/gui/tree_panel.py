@@ -34,7 +34,7 @@ class TreePanel(QWidget):
 
         # Initialize the QueueManager
         self.queue_manager = WorkflowQueueManager(pool_size=1)
-    
+
         self.json_file = json_file
         self.tree_view_visible = True
 
@@ -299,7 +299,6 @@ class TreePanel(QWidget):
         status = "Success" if success else "Failure"
         print(f"{message}: {status}")
 
-
     def process_leaves(self):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
@@ -309,11 +308,10 @@ class TreePanel(QWidget):
         """
         self.start_workflows()
         self.queue_manager.start_processing()
-        
-        
+
         # old implementation to be removed soone
         # follows below.
-        
+
         model = self.treeView.model()  # Get the model from the tree_view
 
         # Disable the prepare button and show the throbber during processing
@@ -406,4 +404,3 @@ class TreePanel(QWidget):
 
         # Move to the next 'layer' node
         self.process_each_layer(layer_nodes, index + 1)
-
