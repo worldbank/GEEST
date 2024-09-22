@@ -1,3 +1,5 @@
+import json
+import os
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QTreeView,
@@ -18,8 +20,6 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtCore import QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import QgsMessageLog, Qgis, QgsLogger
-import json
-import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
