@@ -28,6 +28,20 @@ class GeestWidgetFactory:
     }
 
     @staticmethod
+    def safe_float(value, default):
+        try:
+            return float(value) if value != '' else default
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
+    def safe_int(value, default):
+        try:
+            return int(float(value)) if value != '' else default
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
     def create_widgets(layer_data: dict, parent=None):
         use_keys_mapping = {
             "Use Default Index Score": {
@@ -200,34 +214,20 @@ class GeestWidgetFactory:
         """
         widget_type = mapping["type"]
 
-        #-- guard against GIGO
-        def safe_float(value, default):
-            try:
-                return float(value) if value != '' else default
-            except (ValueError, TypeError):
-                return default
-
-        # -- guard against GIGO
-        def safe_int(value, default):
-            try:
-                return int(float(value)) if value != '' else default
-            except (ValueError, TypeError):
-                return default
-
         if widget_type == "doublespinbox":
             widget = QDoubleSpinBox()
-            widget.setMinimum(safe_float(mapping.get("min"), 0.0))
-            widget.setMaximum(safe_float(mapping.get("max"), 100.0))
-            widget.setDecimals(safe_int(mapping.get("decimals"), 1))
-            widget.setValue(safe_float(mapping.get("default"), 0.0))
+            widget.setMinimum(GeestWidgetFactory.safe_float(mapping.get("min"), 0.0))
+            widget.setMaximum(GeestWidgetFactory.safe_float(mapping.get("max"), 100.0))
+            widget.setDecimals(GeestWidgetFactory.safe_int(mapping.get("decimals"), 1))
+            widget.setValue(GeestWidgetFactory.safe_float(mapping.get("default"), 0.0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
         elif widget_type == "spinbox":
             widget = QSpinBox()
-            widget.setMinimum(safe_int(mapping.get("min"), 0))
-            widget.setMaximum(safe_int(mapping.get("max"), 10000))
-            widget.setValue(safe_int(mapping.get("default"), 0))
+            widget.setMinimum(GeestWidgetFactory.safe_int(mapping.get("min"), 0))
+            widget.setMaximum(GeestWidgetFactory.safe_int(mapping.get("max"), 10000))
+            widget.setValue(GeestWidgetFactory.safe_int(mapping.get("default"), 0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
