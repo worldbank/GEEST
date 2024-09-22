@@ -178,9 +178,9 @@ class GeestConfigWidget(QWidget):
         if checked:
             for key, widgets in self.widgets.items():
                 widget = widgets.get("widget")
-                if widget:
-                    widget.setEnabled(key == option)
-                    print(f"Enabled widget for {key}: {key == option}")
+                #if widget:
+                    #widget.setEnabled(key == option)
+                    #print(f"Enabled widget for {key}: {key == option}")
             for key in self.widgets.keys():
                 if key == option:
                     widget = self.widgets[key].get("widget")

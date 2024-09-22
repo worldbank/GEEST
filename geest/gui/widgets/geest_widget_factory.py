@@ -195,8 +195,8 @@ class GeestWidgetFactory:
 
             main_layout.addWidget(option_container)
 
-            radio_button.toggled.connect(lambda checked, w=widget: w.setEnabled(checked))
-            widget.setEnabled(False)  # Initially disable all widgets
+            #radio_button.toggled.connect(lambda checked, w=widget: w.setEnabled(checked))
+            #widget.setEnabled(False)  # Initially disable all widgets
 
         if radio_group.buttons():
             radio_group.buttons()[0].setChecked(True)
