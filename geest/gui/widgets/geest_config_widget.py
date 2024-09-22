@@ -117,12 +117,12 @@ class GeestConfigWidget(QWidget):
         else:
             print(f"Invalid layer type for populating field selector: {type(layer)}")
 
-    def update_polygon_layer_and_field(self, key, layer, field_selector):
+    def update_polygon_layer_and_field(self, key, layer, field):
         print(f"update_polygon_layer_and_field called for {key}")
-        print(f"Layer: {layer}")
-        print(f"Field selector: {field_selector}")
+        print(f"Layer: {layer.name() if layer else 'None'}")
+        print(f"Field: {field}")
 
-        if layer and isinstance(layer, QgsVectorLayer):
+        if layer and isinstance(layer, QgsVectorLayer) and field:
             provider_key = layer.providerType()
             uri = layer.dataProvider().dataSourceUri()
             print(f"Layer URI: {uri}")
@@ -130,25 +130,15 @@ class GeestConfigWidget(QWidget):
             print(f"Decoded URI: {decoded}")
             path = decoded.get('path') or decoded.get('url') or decoded.get('layerName')
 
-            # Ensure field selector is populated
-            self.populate_field_selector(layer, field_selector)
-
-            field = field_selector.currentText()
-            print(
-                f"Current field selector items: {[field_selector.itemText(i) for i in range(field_selector.count())]}")
-            print(f"Selected field: {field}")
-
             if path:
                 value = f"{path};{field}"
                 print(f"Setting {key} to {value}")
                 self.modified_config[key] = value
             else:
                 print(f"Unable to determine path for layer {layer.name()} with provider {provider_key}")
-                value = f"{uri};{field}"
-                print(f"Setting {key} to {value}")
-                self.modified_config[key] = value
+                self.modified_config[key] = ""
         else:
-            print(f"No valid layer selected for {key}")
+            print(f"No valid layer or field selected for {key}")
             self.modified_config[key] = ""
 
         print(f"Modified config after update_polygon_layer_and_field: {self.modified_config}")
@@ -178,28 +168,19 @@ class GeestConfigWidget(QWidget):
         if checked:
             for key, widgets in self.widgets.items():
                 widget = widgets.get("widget")
-                #if widget:
-                    #widget.setEnabled(key == option)
-                    #print(f"Enabled widget for {key}: {key == option}")
-            for key in self.widgets.keys():
                 if key == option:
-                    widget = self.widgets[key].get("widget")
-                    if widget:
-                        print(f"Widget type for {key}: {type(widget)}")
-                        if isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(
-                                QComboBox):
-                            print(f"Handling polygon_layer_with_field_selector for {key}")
-                            layer_selector = widget.findChild(QgsMapLayerComboBox)
-                            field_selector = widget.findChild(QComboBox)
-                            self.update_polygon_layer_and_field(key, layer_selector.currentLayer(), field_selector)
-                        elif isinstance(widget, QgsMapLayerComboBox):
-                            print(f"Handling QgsMapLayerComboBox for {key}")
-                            self.update_layer_path(key, widget.currentLayer())
+                    if isinstance(widget, QWidget) and hasattr(widget, 'get_selections'):
+                        print(f"Handling polygon_layer_with_field_selector for {key}")
+                        layer, field = widget.get_selections()
+                        if layer and field:
+                            self.update_polygon_layer_and_field(key, layer, field)
                         else:
-                            print(f"Setting {key} to 1")
-                            self.modified_config[key] = 1
+                            print(f"No layer or field selected for {key}")
+                    elif isinstance(widget, QgsMapLayerComboBox):
+                        print(f"Handling QgsMapLayerComboBox for {key}")
+                        self.update_layer_path(key, widget.currentLayer())
                     else:
-                        print(f"No widget found for {key}, setting to 1")
+                        print(f"Setting {key} to 1")
                         self.modified_config[key] = 1
                 else:
                     print(f"Setting {key} to 0")

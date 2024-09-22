@@ -290,18 +290,36 @@ class GeestWidgetFactory:
             layout.addWidget(field_selector)
 
             # Update field selector when layer changes
-            def update_fields():
+            def update_fields(layer):
+                print(f"Updating fields for layer: {layer.name() if layer else 'None'}")
                 field_selector.clear()
-                layer = layer_selector.currentLayer()
                 if isinstance(layer, QgsVectorLayer):
-                    field_selector.addItems([field.name() for field in layer.fields()])
+                    fields = [field.name() for field in layer.fields()]
+                    field_selector.addItems(fields)
+                    print(f"Fields added: {fields}")
+                else:
+                    print("Layer is not a vector layer")
 
+            # Connect the layer changed signal
             layer_selector.layerChanged.connect(update_fields)
 
-            # Initial population of fields
-            update_fields()
+            # Initial update
+            initial_layer = layer_selector.currentLayer()
+            if initial_layer:
+                update_fields(initial_layer)
+            else:
+                print("No initial layer selected")
 
+            # Store references to selectors
+            container.layer_selector = layer_selector
+            container.field_selector = field_selector
+
+            # Create a method to get the current selections
+            def get_selections():
+                return layer_selector.currentLayer(), field_selector.currentText()
+            container.get_selections = get_selections
             container.setToolTip(mapping.get("tooltip", ""))
+
             return container
 
         elif widget_type == "csv_to_point":
