@@ -46,13 +46,19 @@ class StudyAreaProcessor:
         do_transform = True
         if crs_src == crs_dst:
             do_transform = False
-            
+
         # Transform the bounding box
         if do_transform:
             x_min, y_min = transform.transform(bbox.xMinimum(), bbox.yMinimum())
             x_max, y_max = transform.transform(bbox.xMaximum(), bbox.yMaximum())
         else:
-            x_min, y_min, x_max, y_max = bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum()
+            x_min, y_min, x_max, y_max = (
+                bbox.xMinimum(),
+                bbox.yMinimum(),
+                bbox.xMaximum(),
+                bbox.yMaximum(),
+            )
+
         # Adjust bbox dimensions to be exact multiples of 100m
         def make_multiple(val, mult):
             return mult * round(val / mult)

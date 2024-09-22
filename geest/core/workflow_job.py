@@ -8,9 +8,10 @@ class WorkflowJob(QgsTask):
     Represents an individual workflow task. Uses QgsFeedback for progress reporting
     and cancellation, and the WorkflowFactory to create the appropriate workflow.
     """
+
     # Custom signal to emit when the job is finished
     job_finished = pyqtSignal(bool, dict)
-    
+
     def __init__(self, description: str, attributes: dict):
         """
         Initialize the workflow job.
@@ -21,7 +22,9 @@ class WorkflowJob(QgsTask):
         self._attributes = attributes
         self._feedback = QgsFeedback()  # Feedback object for progress and cancellation
         workflow_factory = WorkflowFactory()
-        self._workflow = workflow_factory.create_workflow(attributes, self._feedback)  # Create the workflow
+        self._workflow = workflow_factory.create_workflow(
+            attributes, self._feedback
+        )  # Create the workflow
 
     def run(self) -> bool:
         """
@@ -30,23 +33,39 @@ class WorkflowJob(QgsTask):
         :return: True if the task was successful, False otherwise
         """
         if not self._workflow:
-            QgsMessageLog.logMessage(f"Error: No workflow assigned to {self.description()}", "Custom Workflows", Qgis.Critical)
+            QgsMessageLog.logMessage(
+                f"Error: No workflow assigned to {self.description()}",
+                "Custom Workflows",
+                Qgis.Critical,
+            )
             return False
 
         try:
-            QgsMessageLog.logMessage(f"Running workflow: {self.description()}", "Custom Workflows", Qgis.Info)
+            QgsMessageLog.logMessage(
+                f"Running workflow: {self.description()}", "Custom Workflows", Qgis.Info
+            )
 
             result = self._workflow.execute()
 
             if result:
-                QgsMessageLog.logMessage(f"Workflow {self.description()} completed.", "Custom Workflows", Qgis.Info)
+                QgsMessageLog.logMessage(
+                    f"Workflow {self.description()} completed.",
+                    "Custom Workflows",
+                    Qgis.Info,
+                )
                 return True
             else:
-                QgsMessageLog.logMessage(f"Workflow {self.description()} did not complete successfully.", "Custom Workflows", Qgis.Warning)
+                QgsMessageLog.logMessage(
+                    f"Workflow {self.description()} did not complete successfully.",
+                    "Custom Workflows",
+                    Qgis.Warning,
+                )
                 return False
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error during task execution: {e}", "Custom Workflows", Qgis.Critical)
+            QgsMessageLog.logMessage(
+                f"Error during task execution: {e}", "Custom Workflows", Qgis.Critical
+            )
             return False
 
     def feedback(self) -> QgsFeedback:

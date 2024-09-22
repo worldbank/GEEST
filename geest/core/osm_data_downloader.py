@@ -1,10 +1,21 @@
 import xml.etree.ElementTree as ET
 from qgis.core import (
-    QgsProject, QgsVectorLayer, QgsFeature, QgsGeometry,
-    QgsPointXY, QgsPolygon, QgsFields, QgsField, QgsCoordinateReferenceSystem,
-    QgsVectorFileWriter, QgsApplication, QgsBlockingNetworkRequest, QgsNetworkRequest
+    QgsProject,
+    QgsVectorLayer,
+    QgsFeature,
+    QgsGeometry,
+    QgsPointXY,
+    QgsPolygon,
+    QgsFields,
+    QgsField,
+    QgsCoordinateReferenceSystem,
+    QgsVectorFileWriter,
+    QgsApplication,
+    QgsBlockingNetworkRequest,
+    QgsNetworkRequest,
 )
 from qgis.PyQt.QtCore import QByteArray, QUrl, QObject, QVariant
+
 
 # Please see https://gis.stackexchange.com/questions/343126/performing-sync-or-async-network-request-in-pyqgis
 # for the QgsBlockingNetworkRequest class and QgsNetworkRequest class
@@ -30,7 +41,7 @@ class OsmDataDownloader(QObject):
 
         # Send the POST request using QgsBlockingNetworkRequest
         blocking_request = QgsBlockingNetworkRequest()
-        reply = blocking_request.fetch(request, QByteArray(self.query.encode('utf-8')))
+        reply = blocking_request.fetch(request, QByteArray(self.query.encode("utf-8")))
 
         # Check for errors in the reply
         if reply.error():
@@ -38,7 +49,7 @@ class OsmDataDownloader(QObject):
             return None
         else:
             # Return the response data
-            return reply.content().data().decode('utf-8')
+            return reply.content().data().decode("utf-8")
 
     def download_line_data(self):
         """
@@ -62,13 +73,13 @@ class OsmDataDownloader(QObject):
 
         # Iterate over the ways and extract coordinates
         for way in root.findall(".//way"):
-            osm_id = way.get('id')
+            osm_id = way.get("id")
             coords = []
             for nd in way.findall("nd"):
-                ref = nd.get('ref')
+                ref = nd.get("ref")
                 node = root.find(f".//node[@id='{ref}']")
-                lat = float(node.get('lat'))
-                lon = float(node.get('lon'))
+                lat = float(node.get("lat"))
+                lon = float(node.get("lon"))
                 coords.append(QgsPointXY(lon, lat))
 
             # Create a feature
@@ -81,7 +92,9 @@ class OsmDataDownloader(QObject):
         QgsProject.instance().addMapLayer(layer)
 
         # Save to a shapefile
-        QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", crs, "ESRI Shapefile")
+        QgsVectorFileWriter.writeAsVectorFormat(
+            layer, self.output_path, "UTF-8", crs, "ESRI Shapefile"
+        )
         print(f"Line-based shapefile saved to {self.output_path}")
 
     def download_polygon_data(self):
@@ -106,13 +119,13 @@ class OsmDataDownloader(QObject):
 
         # Iterate over the ways and extract coordinates (forming polygons)
         for way in root.findall(".//way"):
-            osm_id = way.get('id')
+            osm_id = way.get("id")
             coords = []
             for nd in way.findall("nd"):
-                ref = nd.get('ref')
+                ref = nd.get("ref")
                 node = root.find(f".//node[@id='{ref}']")
-                lat = float(node.get('lat'))
-                lon = float(node.get('lon'))
+                lat = float(node.get("lat"))
+                lon = float(node.get("lon"))
                 coords.append(QgsPointXY(lon, lat))
 
             # Close the polygon (by connecting the first and last points)
@@ -129,5 +142,7 @@ class OsmDataDownloader(QObject):
         QgsProject.instance().addMapLayer(layer)
 
         # Save to a shapefile
-        QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", crs, "ESRI Shapefile")
+        QgsVectorFileWriter.writeAsVectorFormat(
+            layer, self.output_path, "UTF-8", crs, "ESRI Shapefile"
+        )
         print(f"Polygon-based shapefile saved to {self.output_path}")

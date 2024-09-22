@@ -38,7 +38,9 @@ class SetupPanel(QWidget):
         super().__init__()
         self.setWindowTitle("GEEST")
         self.working_dir = ""
-        self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
+        self.settings = (
+            QSettings()
+        )  # Initialize QSettings to store and retrieve settings
         self.initUI()
 
     def initUI(self):
@@ -128,7 +130,9 @@ class SetupPanel(QWidget):
 
     def select_directory(self):
         """Opens a file dialog to select the working directory and saves it using QSettings."""
-        directory = QFileDialog.getExistingDirectory(self, "Select Working Directory", self.working_dir)
+        directory = QFileDialog.getExistingDirectory(
+            self, "Select Working Directory", self.working_dir
+        )
         if directory:
             self.working_dir = directory
             self.dir_display.setText(directory)
@@ -147,21 +151,17 @@ class SetupPanel(QWidget):
 
         field_name = self.field_combo.currentField()
         if not field_name or field_name not in layer.fields().names():
-            QMessageBox.critical(self, "Error", f"Invalid area name field '{field_name}'.")
+            QMessageBox.critical(
+                self, "Error", f"Invalid area name field '{field_name}'."
+            )
             return
 
         # Create the processor instance and process the features
         try:
             processor = StudyAreaProcessor(
-                layer = layer,
-                field_name = field_name,
-                working_dir = self.working_dir
+                layer=layer, field_name=field_name, working_dir=self.working_dir
             )
             processor.process_study_area()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
             return
-
-
-   
-
