@@ -12,7 +12,7 @@ from qgis.PyQt.QtWidgets import (
     QComboBox,
     QFileDialog,
 )
-from qgis.PyQt.QtCore import Qt
+
 from qgis.gui import QgsMapLayerComboBox, QgsFileWidget
 from qgis.core import QgsMapLayer, QgsMapLayerProxyModel, QgsVectorLayer
 
@@ -126,31 +126,36 @@ class GeestWidgetFactory:
 
             "Use OSM Downloader": {
                 "label": "Fetch the data from OSM",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly from OSM.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
+                               "from OSM.",
                 "type": "download_option",
                 "tooltip": "Download data from OSM."
             },
             "Use WBL Downloader": {
                 "label": "Fetch the data from WBL",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly from WBL.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
+                               "from WBL.",
                 "type": "download_option",
                 "tooltip": "Download data from WBL."
             },
             "Use Humdata Downloader": {
                 "label": "Fetch the data from HumData",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly from HumData.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
+                               "from HumData.",
                 "type": "download_option",
                 "tooltip": "Download data from HumData."
             },
             "Use Mapillary Downloader": {
                 "label": "Fetch the data from Mapillary",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly from Mapillary.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
+                               "from Mapillary.",
                 "type": "download_option",
                 "tooltip": "Download data from Mapillary."
             },
             "Use Other Downloader": {
                 "label": "Fetch the data from specified source",
-                "description": f"Using this option, we will try to fetch the data needed for this indicator directly from {layer_data.get('Use Other Downloader', '')}.",
+                "description": f"Using this option, we will try to fetch the data needed for this indicator directly "
+                               f"from {layer_data.get('Use Other Downloader', '')}.",
                 "type": "download_option",
                 "tooltip": f"Download data from {layer_data.get('Use Other Downloader', 'Other Source')}."
             }
@@ -256,7 +261,8 @@ class GeestWidgetFactory:
                 elif subtype_mapped == "point":
                     widget.setFilters(QgsMapLayerProxyModel.PointLayer)
                 else:
-                    print(f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all vector layers.")
+                    print(f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all "
+                          f"vector layers.")
                     widget.setFilters(QgsMapLayerProxyModel.VectorLayer)
             else:
                 print(f"Unknown layer type '{layer_type}' for '{mapping.get('label')}'. Defaulting to all layers.")
