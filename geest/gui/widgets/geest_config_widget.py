@@ -97,6 +97,7 @@ class GeestConfigWidget(QWidget):
                         QComboBox):
                     layer_selector = widget.findChild(QgsMapLayerComboBox)
                     field_selector = widget.findChild(QComboBox)
+
                     def update_fields(layer):
                         self.populate_field_selector(layer, field_selector)
                         self.update_polygon_layer_and_field(key, layer, field_selector)
