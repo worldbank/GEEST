@@ -58,7 +58,7 @@ class SpreadsheetToJsonParser:
                 "Use Polyline per Cell",
                 "Use Point per Cell",
                 "Analysis Mode",  # New column
-                "Layer Required"  # New column
+                "Layer Required",  # New column
             ]
         ]
 
@@ -84,8 +84,16 @@ class SpreadsheetToJsonParser:
 
             # Prepare dimension data
             dimension_id = self.create_id(dimension)
-            dimension_required = row["Dimension Required"] if not pd.isna(row["Dimension Required"]) else ""
-            default_dimension_analysis_weighting = row["Default Dimension Analysis Weighting"] if not pd.isna(row["Default Dimension Analysis Weighting"]) else ""
+            dimension_required = (
+                row["Dimension Required"]
+                if not pd.isna(row["Dimension Required"])
+                else ""
+            )
+            default_dimension_analysis_weighting = (
+                row["Default Dimension Analysis Weighting"]
+                if not pd.isna(row["Default Dimension Analysis Weighting"])
+                else ""
+            )
 
             # If the Dimension doesn't exist yet, create it
             if dimension not in dimension_map:
@@ -94,15 +102,21 @@ class SpreadsheetToJsonParser:
                     "name": dimension,
                     "required": dimension_required,
                     "default_analysis_weighting": default_dimension_analysis_weighting,
-                    "factors": []
+                    "factors": [],
                 }
                 self.result["dimensions"].append(new_dimension)
                 dimension_map[dimension] = new_dimension
 
             # Prepare factor data
             factor_id = self.create_id(factor)
-            factor_required = row["Factor Required"] if not pd.isna(row["Factor Required"]) else ""
-            default_factor_dimension_weighting = row["Default Factor Dimension Weighting"] if not pd.isna(row["Default Factor Dimension Weighting"]) else ""
+            factor_required = (
+                row["Factor Required"] if not pd.isna(row["Factor Required"]) else ""
+            )
+            default_factor_dimension_weighting = (
+                row["Default Factor Dimension Weighting"]
+                if not pd.isna(row["Default Factor Dimension Weighting"])
+                else ""
+            )
 
             # If the Factor doesn't exist in the current dimension, add it
             factor_map = {f["name"]: f for f in dimension_map[dimension]["factors"]}
@@ -112,7 +126,7 @@ class SpreadsheetToJsonParser:
                     "name": factor,
                     "required": factor_required,
                     "default_dimension_weighting": default_factor_dimension_weighting,
-                    "layers": []
+                    "layers": [],
                 }
                 dimension_map[dimension]["factors"].append(new_factor)
                 factor_map[factor] = new_factor
@@ -229,8 +243,12 @@ class SpreadsheetToJsonParser:
                     if not pd.isna(row["Use Point per Cell"])
                     else ""
                 ),
-                "Analysis Mode": row["Analysis Mode"] if not pd.isna(row["Analysis Mode"]) else "",  # New column
-                "Layer Required": row["Layer Required"] if not pd.isna(row["Layer Required"]) else ""  # New column
+                "Analysis Mode": (
+                    row["Analysis Mode"] if not pd.isna(row["Analysis Mode"]) else ""
+                ),  # New column
+                "Layer Required": (
+                    row["Layer Required"] if not pd.isna(row["Layer Required"]) else ""
+                ),  # New column
             }
 
             factor_map[factor]["layers"].append(layer_data)

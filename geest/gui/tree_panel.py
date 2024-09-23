@@ -1,3 +1,5 @@
+import json
+import os
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QTreeView,
@@ -17,18 +19,22 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
-import json
-import os
+from qgis.core import QgsMessageLog, Qgis, QgsLogger
 from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
 from geest.core import set_setting, setting
+from geest.core.workflow_queue_manager import WorkflowQueueManager
+
 
 
 class TreePanel(QWidget):
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)
+
+        # Initialize the QueueManager
+        self.queue_manager = WorkflowQueueManager(pool_size=1)
 
         self.json_file = json_file
         self.tree_view_visible = True
@@ -271,6 +277,29 @@ class TreePanel(QWidget):
         else:
             self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
+    def start_workflows(self):
+        """Start a workflow for each 'layer' node in the tree."""
+        self._start_workflows_from_tree(self.treeView.model().rootItem)
+
+    def _start_workflows_from_tree(self, parent_item):
+        """Recursively start workflows for each 'layer' in the tree."""
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+
+            # If the child is a layer, we queue a workflow task
+            if child_item.role == "layer":
+                self.queue_manager.add_task(child_item.data(3))
+
+            # Recursively process children (dimensions, factors)
+            self._start_workflows_from_tree(child_item)
+
+    def on_task_started(self, message):
+        print(message)
+
+    def on_task_completed(self, message, success):
+        status = "Success" if success else "Failure"
+        print(f"{message}: {status}")
+
     def process_leaves(self):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
@@ -278,6 +307,12 @@ class TreePanel(QWidget):
         processes each one by showing an animated icon, waiting for 2 seconds, and
         then removing the animation.
         """
+        self.start_workflows()
+        self.queue_manager.start_processing()
+
+        # old implementation to be removed soone
+        # follows below.
+
         model = self.treeView.model()  # Get the model from the tree_view
 
         # Disable the prepare button and show the throbber during processing
