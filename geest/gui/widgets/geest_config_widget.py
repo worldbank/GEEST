@@ -1,6 +1,12 @@
 from qgis.PyQt.QtWidgets import (
-    QWidget, QVBoxLayout, QRadioButton, QLineEdit,
-    QSpinBox, QDoubleSpinBox, QComboBox
+    QWidget,
+    QVBoxLayout,
+    QRadioButton,
+    QLineEdit,
+    QSpinBox,
+    QDoubleSpinBox,
+    QComboBox,
+    QButtonGroup
 )
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.gui import QgsMapLayerComboBox
@@ -65,6 +71,9 @@ class GeestConfigWidget(QWidget):
             elif isinstance(widget, (QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QgsMapLayerComboBox)):
                 self.widgets[use_key]["widget"] = widget
                 print("  " * depth + f"Stored {type(widget).__name__} for key: {use_key}")
+            elif isinstance(widget, QWidget) and widget.property("widget_type") == "multibuffer":
+                self.widgets[use_key]["widget"] = widget
+                print("  " * depth + f"Stored multibuffer widget for key: {use_key}")
             elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(QComboBox):
                 self.widgets[use_key]["widget"] = widget
                 print("  " * depth + f"Stored composite widget (polygon_layer_with_field_selector) for key: {use_key}")
@@ -107,6 +116,14 @@ class GeestConfigWidget(QWidget):
                         lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k,
                                                                                                    ls.currentLayer(),
                                                                                                    field_selector))
+                elif widget.property("widget_type") == "multibuffer":
+                    travel_mode_group = widget.travel_mode_group
+                    measurement_group = widget.measurement_group
+                    increment_edit = widget.increment_edit
+
+                    travel_mode_group.buttonClicked.connect(lambda btn, k=key: self.update_multibuffer_state(k))
+                    measurement_group.buttonClicked.connect(lambda btn, k=key: self.update_multibuffer_state(k))
+                    increment_edit.textChanged.connect(lambda text, k=key: self.update_multibuffer_state(k))
 
                 print(f"Set up widget connection for {key}: {type(widget).__name__}")
 
@@ -170,7 +187,10 @@ class GeestConfigWidget(QWidget):
             for key, widgets in self.widgets.items():
                 widget = widgets.get("widget")
                 if key == option:
-                    if isinstance(widget, QWidget) and hasattr(widget, 'get_selections'):
+                    if widget is None:
+                        print(f"No widget found for {key}")
+                        self.modified_config[key] = 1
+                    elif isinstance(widget, QWidget) and hasattr(widget, 'get_selections'):
                         print(f"Handling polygon_layer_with_field_selector for {key}")
                         layer, field = widget.get_selections()
                         if layer and field:
@@ -180,6 +200,9 @@ class GeestConfigWidget(QWidget):
                     elif isinstance(widget, QgsMapLayerComboBox):
                         print(f"Handling QgsMapLayerComboBox for {key}")
                         self.update_layer_path(key, widget.currentLayer())
+                    elif isinstance(widget, QWidget) and widget.property("widget_type") == "multibuffer":
+                        print(f"Handling multibuffer for {key}")
+                        self.update_multibuffer_state(key)
                     else:
                         print(f"Setting {key} to 1")
                         self.modified_config[key] = 1
@@ -200,6 +223,19 @@ class GeestConfigWidget(QWidget):
             print(f"Received None value for option: {option}")
             self.modified_config[option] = "0"
             self.stateChanged.emit(self.get_state())
+
+    def update_multibuffer_state(self, key):
+        widget = self.widgets[key]["widget"]
+        travel_mode = "Driving" if widget.travel_mode_group.checkedButton().text() == "Driving" else "Walking"
+        measurement = "Distance" if widget.measurement_group.checkedButton().text() == "Distance" else "Time"
+        increments = widget.increment_edit.text()
+
+        # If increments is empty, use the default value
+        if not increments:
+            increments = self.original_config.get("Default Multi Buffer Distances", "")
+
+        self.modified_config[key] = f"{travel_mode};{measurement};{increments}"
+        self.stateChanged.emit(self.get_state())
 
     def get_state(self):
         return self.modified_config.copy()

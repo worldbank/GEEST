@@ -1,6 +1,7 @@
 from qgis.PyQt.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QRadioButton,
     QLabel,
     QButtonGroup,
@@ -15,6 +16,7 @@ from qgis.core import QgsMapLayerProxyModel, QgsVectorLayer
 
 
 class GeestWidgetFactory:
+
     valid_subtypes = {
         "point": "point",
         "line": "line",
@@ -52,7 +54,7 @@ class GeestWidgetFactory:
             },
             "Use Multi Buffer Point": {
                 "label": "Multi Buffer Distances",
-                "type": "lineedit",
+                "type": "multibuffer",
                 "default": layer_data.get("Default Multi Buffer Distances", ""),
                 "tooltip": "Enter comma-separated buffer distances."
             },
@@ -200,8 +202,8 @@ class GeestWidgetFactory:
             # radio_button.toggled.connect(lambda checked, w=widget: w.setEnabled(checked))
             # widget.setEnabled(False)  # Initially disable all widgets
 
-        if radio_group.buttons():
-            radio_group.buttons()[0].setChecked(True)
+        # if radio_group.buttons():
+        #    radio_group.buttons()[0].setChecked(True)
 
         return container
 
@@ -233,12 +235,75 @@ class GeestWidgetFactory:
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
-        elif widget_type == "lineedit":
-            widget = QLineEdit()
+        elif widget_type == "multibuffer":
+            container = QWidget()
+            main_layout = QVBoxLayout()  # Change to QVBoxLayout for overall vertical arrangement
+            container.setLayout(main_layout)
+
+            # Container for travel mode and measurement radio buttons
+            radio_buttons_container = QHBoxLayout()  # Use QHBoxLayout to place them side by side
+
+            # Left VBox for Travel Mode
+            left_vbox = QVBoxLayout()
+            travel_mode_label = QLabel("Travel Mode:")
+            travel_mode_label.setStyleSheet("font-weight: bold;")
+            left_vbox.addWidget(travel_mode_label)
+            travel_mode_group = QButtonGroup(container)
+            walking_radio = QRadioButton("Walking")
+            driving_radio = QRadioButton("Driving")
+            walking_radio.setChecked(True)  # Set Walking as default
+            travel_mode_group.addButton(walking_radio)
+            travel_mode_group.addButton(driving_radio)
+            left_vbox.addWidget(walking_radio)
+            left_vbox.addWidget(driving_radio)
+
+            # Right VBox for Measurement
+            right_vbox = QVBoxLayout()
+            measurement_label = QLabel("Measurement:")
+            measurement_label.setStyleSheet("font-weight: bold;")
+            right_vbox.addWidget(measurement_label)
+            measurement_group = QButtonGroup(container)
+            distance_radio = QRadioButton("Distance")
+            time_radio = QRadioButton("Time")
+            distance_radio.setChecked(True)  # Set Distance as default
+            measurement_group.addButton(distance_radio)
+            measurement_group.addButton(time_radio)
+            right_vbox.addWidget(distance_radio)
+            right_vbox.addWidget(time_radio)
+
+            # Add left and right vboxes to radio_buttons_container
+            radio_buttons_container.addLayout(left_vbox)
+            radio_buttons_container.addLayout(right_vbox)
+
+            # Add radio_buttons_container to main layout
+            main_layout.addLayout(radio_buttons_container)
+
+            # Add QLineEdit for travel increments
+            increment_label = QLabel("Travel Increments:")
+            increment_label.setStyleSheet("font-weight: bold;")
+            increment_edit = QLineEdit()
             default_value = mapping.get("default", "")
-            widget.setText(str(default_value))
-            widget.setToolTip(mapping.get("tooltip", ""))
-            return widget
+            increment_edit.setText(str(default_value))
+            increment_edit.setToolTip(mapping.get("tooltip", ""))
+
+            # Set default values
+            default_increments = mapping.get("default", "")
+            increment_edit.setText(default_increments)
+
+            # Add label and QLineEdit directly to main layout
+            main_layout.addWidget(increment_label)
+            main_layout.addWidget(increment_edit)
+
+            # Store references to widgets
+            container.travel_mode_group = travel_mode_group
+            container.measurement_group = measurement_group
+            container.increment_edit = increment_edit
+
+            # Identifier
+            container.setProperty("widget_type", "multibuffer")
+            container.setProperty("use_key", mapping.get("use_key", ""))
+
+            return container
 
         elif widget_type == "layer_selector":
             widget = QgsMapLayerComboBox()
