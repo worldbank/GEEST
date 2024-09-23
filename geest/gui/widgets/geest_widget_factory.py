@@ -14,6 +14,8 @@ from qgis.PyQt.QtWidgets import (
 from qgis.gui import QgsMapLayerComboBox, QgsFileWidget
 from qgis.core import QgsMapLayerProxyModel, QgsVectorLayer
 
+from .classify_poly_into_classes_widget import ClassifyPolyIntoClassesWidget
+
 
 class GeestWidgetFactory:
 
@@ -84,7 +86,7 @@ class GeestWidgetFactory:
             "Use Classify Poly into Classes": {
                 "label": "Classify Polygons into Classes",
                 "description": "Using this option, you can classify polygons into classes.",
-                "type": "polygon_layer_with_field_selector",
+                "type": "classify_poly_into_classes",
                 "layer_type": "polygon",
                 "tooltip": "Select a polygon layer."
             },
@@ -339,56 +341,11 @@ class GeestWidgetFactory:
                 widget.setToolTip(mapping.get("tooltip", ""))
                 return widget
 
-        elif widget_type == "polygon_layer_with_field_selector":
-            container = QWidget()
-            layout = QVBoxLayout()
-            container.setLayout(layout)
-
-            # Layer selector
-            layer_label = QLabel("Select Polygon Layer:")
-            layout.addWidget(layer_label)
-            layer_selector = QgsMapLayerComboBox()
-            layer_selector.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-            layout.addWidget(layer_selector)
-
-            # Field selector
-            field_label = QLabel("Select Field of Interest:")
-            layout.addWidget(field_label)
-            field_selector = QComboBox()
-            layout.addWidget(field_selector)
-
-            # Update field selector when layer changes
-            def update_fields(layer):
-                print(f"Updating fields for layer: {layer.name() if layer else 'None'}")
-                field_selector.clear()
-                if isinstance(layer, QgsVectorLayer):
-                    fields = [field.name() for field in layer.fields()]
-                    field_selector.addItems(fields)
-                    print(f"Fields added: {fields}")
-                else:
-                    print("Layer is not a vector layer")
-
-            # Connect the layer changed signal
-            layer_selector.layerChanged.connect(update_fields)
-
-            # Initial update
-            initial_layer = layer_selector.currentLayer()
-            if initial_layer:
-                update_fields(initial_layer)
-            else:
-                print("No initial layer selected")
-
-            # Store references to selectors
-            container.layer_selector = layer_selector
-            container.field_selector = field_selector
-
-            # Create a method to get the current selections
-            def get_selections():
-                return layer_selector.currentLayer(), field_selector.currentText()
-            container.get_selections = get_selections
-            container.setToolTip(mapping.get("tooltip", ""))
-
-            return container
+        elif widget_type == "classify_poly_into_classes":
+            widget = ClassifyPolyIntoClassesWidget()
+            widget.set_tooltip(mapping.get("tooltip", ""))
+            widget.set_use_key(mapping.get("use_key", ""))
+            return widget
 
         elif widget_type == "csv_to_point":
             container = QWidget()
