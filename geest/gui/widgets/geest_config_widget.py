@@ -6,11 +6,13 @@ from qgis.PyQt.QtWidgets import (
     QSpinBox,
     QDoubleSpinBox,
     QComboBox,
-    QButtonGroup
+    QButtonGroup,
+    QLayout
 )
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.gui import QgsMapLayerComboBox
 from qgis.core import QgsProviderRegistry, QgsVectorLayer
+
 from .geest_widget_factory import GeestWidgetFactory
 
 
@@ -74,14 +76,21 @@ class GeestConfigWidget(QWidget):
             elif isinstance(widget, QWidget) and widget.property("widget_type") == "multibuffer":
                 self.widgets[use_key]["widget"] = widget
                 print("  " * depth + f"Stored multibuffer widget for key: {use_key}")
+            elif isinstance(widget, QWidget) and widget.property("widget_type") == "classify_poly_into_classes":
+                self.widgets[use_key]["widget"] = widget
+                print("  " * depth + f"Stored classify_poly_into_classes widget for key: {use_key}")
             elif isinstance(widget, QWidget) and widget.findChild(QgsMapLayerComboBox) and widget.findChild(QComboBox):
                 self.widgets[use_key]["widget"] = widget
                 print("  " * depth + f"Stored composite widget (polygon_layer_with_field_selector) for key: {use_key}")
-        if widget.layout():
-            for i in range(widget.layout().count()):
-                item = widget.layout().itemAt(i)
+
+        # Check if the widget has a layout
+        layout = widget.layout() if callable(getattr(widget, 'layout', None)) else None
+        if layout:
+            for i in range(layout.count()):
+                item = layout.itemAt(i)
                 if item.widget():
                     self.recursive_find_and_store_widgets(item.widget(), depth + 1)
+
         print(f"Current widgets dictionary: {self.widgets}")
 
     def setup_connections(self):
@@ -89,9 +98,24 @@ class GeestConfigWidget(QWidget):
         for key, widgets in self.widgets.items():
             radio = widgets.get("radio")
             widget = widgets.get("widget")
+
+            # Always set up the radio button connection
             if radio:
                 radio.toggled.connect(lambda checked, k=key: self.handle_option_change(k, checked))
                 print(f"Set up radio connection for {key}")
+
+            # Retrieve the widget_type property, if set
+            widget_type = widget.property("widget_type") if widget else None
+
+            # Handle specific widget types
+            if widget_type == "classify_poly_into_classes":
+                print(f"Setting up specific connections for widget_type: {widget_type} (key: {key})")
+                if hasattr(widget, 'selectionsChanged'):
+                    # Connect the custom signal to update_classify_poly_config
+                    widget.selectionsChanged.connect(lambda k=key: self.update_classify_poly_config(k))
+                    print(f"Connected selectionsChanged signal for key: {key}")
+
+            # Existing generic connection logic
             if widget:
                 print(f"Setting up connection for widget type: {type(widget).__name__} for key: {key}")
                 if isinstance(widget, QgsMapLayerComboBox):
@@ -108,15 +132,16 @@ class GeestConfigWidget(QWidget):
                     field_selector = widget.findChild(QComboBox)
 
                     def update_fields(layer):
+                        print(
+                            f"[setup_connections] populate_field_selector called for key: {key} with layer: {layer.name() if layer else 'None'}")
                         self.populate_field_selector(layer, field_selector)
                         self.update_polygon_layer_and_field(key, layer, field_selector)
 
                     layer_selector.layerChanged.connect(update_fields)
                     field_selector.currentTextChanged.connect(
-                        lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k,
-                                                                                                   ls.currentLayer(),
+                        lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k, ls.currentLayer(),
                                                                                                    field_selector))
-                elif widget.property("widget_type") == "multibuffer":
+                elif widget_type == "multibuffer":
                     travel_mode_group = widget.travel_mode_group
                     measurement_group = widget.measurement_group
                     increment_edit = widget.increment_edit
@@ -127,7 +152,8 @@ class GeestConfigWidget(QWidget):
 
                 print(f"Set up widget connection for {key}: {type(widget).__name__}")
 
-    def populate_field_selector(self, layer, field_selector):
+    @staticmethod
+    def populate_field_selector(layer, field_selector):
         if isinstance(layer, QgsVectorLayer):
             field_selector.clear()
             field_selector.addItems([field.name() for field in layer.fields()])
@@ -160,6 +186,35 @@ class GeestConfigWidget(QWidget):
             self.modified_config[key] = ""
 
         print(f"Modified config after update_polygon_layer_and_field: {self.modified_config}")
+        self.stateChanged.emit(self.get_state())
+
+    def update_classify_poly_config(self, key):
+        print(f"update_classify_poly_config called for {key}")
+        widget = self.widgets[key].get("widget")
+        if widget and widget.property("widget_type") == "classify_poly_into_classes":
+            layer, field = widget.get_selections()
+            if layer and field:
+                provider_key = layer.providerType()
+                uri = layer.dataProvider().dataSourceUri()
+                print(f"Layer URI: {uri}")
+                decoded = QgsProviderRegistry.instance().decodeUri(provider_key, uri)
+                print(f"Decoded URI: {decoded}")
+                path = decoded.get('path') or decoded.get('url') or decoded.get('layerName')
+
+                if path:
+                    value = f"{path};{field}"
+                    print(f"Setting {key} to {value}")
+                    self.modified_config[key] = value
+                else:
+                    print(f"Unable to determine path for layer {layer.name()} with provider {provider_key}")
+                    self.modified_config[key] = ""
+            else:
+                print(f"No layer or field selected for {key}")
+                self.modified_config[key] = ""
+        else:
+            print(f"Widget for {key} is not a ClassifyPolyIntoClassesWidget")
+            self.modified_config[key] = ""
+        print(f"Modified config after update_classify_poly_config: {self.modified_config}")
         self.stateChanged.emit(self.get_state())
 
     def update_layer_path(self, key, layer):
@@ -203,6 +258,9 @@ class GeestConfigWidget(QWidget):
                     elif isinstance(widget, QWidget) and widget.property("widget_type") == "multibuffer":
                         print(f"Handling multibuffer for {key}")
                         self.update_multibuffer_state(key)
+                    elif isinstance(widget, QWidget) and widget.property("widget_type") == "classify_poly_into_classes":
+                        print(f"Handling ClassifyPolyIntoClassesWidget for {key}")
+                        self.update_classify_poly_config(key)
                     else:
                         print(f"Setting {key} to 1")
                         self.modified_config[key] = 1
@@ -243,9 +301,12 @@ class GeestConfigWidget(QWidget):
     def dump_widget_hierarchy(self, widget, level=0):
         output = []
         output.append("  " * level + f"{widget.__class__.__name__}")
-        if hasattr(widget, 'layout') and widget.layout():
-            for i in range(widget.layout().count()):
-                item = widget.layout().itemAt(i)
+
+        layout = widget.layout() if callable(getattr(widget, 'layout', None)) else getattr(widget, 'layout', None)
+
+        if isinstance(layout, QLayout):
+            for i in range(layout.count()):
+                item = layout.itemAt(i)
                 if item.widget():
                     output.append(self.dump_widget_hierarchy(item.widget(), level + 1))
         return "\n".join(output)
