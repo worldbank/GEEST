@@ -43,7 +43,9 @@ class ClassifyPolyIntoClassesWidget(QWidget):
             print("[ClassifyPolyIntoClassesWidget] No initial layer selected")
 
     def update_fields(self, layer):
-        print(f"[ClassifyPolyIntoClassesWidget] Updating fields for layer: {layer.name() if layer else 'None'}")
+        print(
+            f"[ClassifyPolyIntoClassesWidget] Updating fields for layer: {layer.name() if layer else 'None'}"
+        )
         self.field_selector.clear()
         if isinstance(layer, QgsVectorLayer):
             fields = [field.name() for field in layer.fields()]
