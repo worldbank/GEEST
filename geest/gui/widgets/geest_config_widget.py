@@ -4,7 +4,6 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.gui import QgsMapLayerComboBox
-#from qgis.core import QgsVectorLayer, QgsRasterLayer
 from qgis.core import QgsProviderRegistry, QgsVectorLayer
 from .geest_widget_factory import GeestWidgetFactory
 
