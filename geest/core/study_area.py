@@ -66,19 +66,25 @@ class StudyAreaProcessor:
         # Check if the GeoPackage file exists
         if not os.path.exists(self.gpkg_path):
             append = False
-            QgsMessageLog.logMessage(f"GeoPackage does not exist. Creating: {self.gpkg_path}")
-        
+            QgsMessageLog.logMessage(
+                f"GeoPackage does not exist. Creating: {self.gpkg_path}"
+            )
+
         # If the layer doesn't exist, create it
         # See https://gis.stackexchange.com/questions/417916/creating-empty-layers-in-geopackage-using-pyqgis
         if not layer.isValid():
-            QgsMessageLog.logMessage(f"Layer '{layer_name}' does not exist. Creating it.")
+            QgsMessageLog.logMessage(
+                f"Layer '{layer_name}' does not exist. Creating it."
+            )
             crs = QgsCoordinateReferenceSystem(f"EPSG:{self.utm_epsg_code}")
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "GPKG"
             options.fileEncoding = "UTF-8"
             options.layerName = layer_name
             if append:
-                options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+                options.actionOnExistingFile = (
+                    QgsVectorFileWriter.CreateOrOverwriteLayer
+                )
 
             # Convert list of QgsField objects to QgsFields object
             qgs_fields = QgsFields()
@@ -106,7 +112,9 @@ class StudyAreaProcessor:
             provider.addFeatures(features)
             gpkg_layer.updateExtents()
         else:
-            QgsMessageLog.logMessage(f"Layer '{layer_name}' is not valid for appending.")
+            QgsMessageLog.logMessage(
+                f"Layer '{layer_name}' is not valid for appending."
+            )
 
     def save_to_geopackage(self, features, layer_name, fields, geometry_type):
         """Save features to GeoPackage. Create or append the layer as necessary."""
@@ -257,7 +265,9 @@ class StudyAreaProcessor:
         crs_src = QgsCoordinateReferenceSystem(self.layer.crs())  # Source CRS
 
         # Use the pre-calculated UTM EPSG code
-        crs_dst = QgsCoordinateReferenceSystem(f"EPSG:{self.utm_epsg_code}")  # UTM zone CRS
+        crs_dst = QgsCoordinateReferenceSystem(
+            f"EPSG:{self.utm_epsg_code}"
+        )  # UTM zone CRS
         transform = QgsCoordinateTransform(crs_src, crs_dst, QgsProject.instance())
         do_transform = True
         if crs_src == crs_dst:
