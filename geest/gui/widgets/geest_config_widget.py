@@ -104,7 +104,8 @@ class GeestConfigWidget(QWidget):
 
                     layer_selector.layerChanged.connect(update_fields)
                     field_selector.currentTextChanged.connect(
-                        lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k, ls.currentLayer(),
+                        lambda text, k=key, ls=layer_selector: self.update_polygon_layer_and_field(k,
+                                                                                                   ls.currentLayer(),
                                                                                                    field_selector))
 
                 print(f"Set up widget connection for {key}: {type(widget).__name__}")
