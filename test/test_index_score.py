@@ -6,7 +6,7 @@ from qgis.core import (
     QgsProcessingFeedback,
 )
 import processing
-from qgis_gender_indicator_tool.jobs.index_score import RasterizeIndexScoreValue
+from geest.core.index_score import RasterizeIndexScoreValue
 
 
 class TestRasterizeIndexScoreValue(unittest.TestCase):

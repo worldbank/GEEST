@@ -20,10 +20,11 @@ from qgis.PyQt.QtGui import QMovie
 import json
 import os
 from .geest_treeview import CustomTreeView, JsonTreeModel
-from .setup_panel import SetupPanel 
+from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
 from geest.core import set_setting, setting
+
 
 class TreePanel(QWidget):
     def __init__(self, parent=None, json_file=None):
@@ -40,7 +41,7 @@ class TreePanel(QWidget):
         else:
             self.json_data = {"dimensions": []}
 
-          # Create a CustomTreeView widget to handle editing and reverts
+        # Create a CustomTreeView widget to handle editing and reverts
         self.treeView = CustomTreeView()
         self.treeView.setDragDropMode(QTreeView.InternalMove)
         self.treeView.setDefaultDropAction(Qt.MoveAction)
@@ -93,7 +94,7 @@ class TreePanel(QWidget):
         self.prepare_button = QPushButton("▶️ Prepare")
         self.prepare_button.clicked.connect(self.process_leaves)
         movie.start()
-    
+
         # Add Edit Toggle checkbox
         self.edit_toggle = QCheckBox("Edit")
         self.edit_toggle.setChecked(False)
@@ -102,8 +103,8 @@ class TreePanel(QWidget):
         if edit_mode:
             self.edit_toggle.setVisible(True)
         else:
-            self.edit_toggle.setVisible(False)   
-                
+            self.edit_toggle.setVisible(False)
+
         button_bar.addWidget(self.add_dimension_button)
         button_bar.addStretch()
 
@@ -115,7 +116,7 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
         layout.addLayout(button_bar)
         self.setLayout(layout)
-        
+
     def edit(self, index, trigger, event):
         """
         Override the edit method to enable editing only on the column that was clicked.
@@ -239,7 +240,8 @@ class TreePanel(QWidget):
 
         # Create and show the LayerDetailDialog
         dialog = LayerDetailDialog(
-            layer_name, layer_data, item, editing=editing, parent=self)
+            layer_name, layer_data, item, editing=editing, parent=self
+        )
 
         # Connect the dialog's dataUpdated signal to handle data updates
         def update_layer_data(updated_data):
@@ -247,8 +249,8 @@ class TreePanel(QWidget):
             item.setData(3, updated_data)
 
             # Check if the layer name has changed, and if so, update it in column 0
-            if updated_data.get('name', layer_name) != layer_name:
-                item.setData(0, updated_data.get('name', layer_name))
+            if updated_data.get("name", layer_name) != layer_name:
+                item.setData(0, updated_data.get("name", layer_name))
 
         # Connect the signal emitted from the dialog to update the item
         dialog.dataUpdated.connect(update_layer_data)
@@ -273,7 +275,7 @@ class TreePanel(QWidget):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
         It iterates over the entire tree, collecting nodes with the 'layer' role, and
-        processes each one by showing an animated icon, waiting for 2 seconds, and 
+        processes each one by showing an animated icon, waiting for 2 seconds, and
         then removing the animation.
         """
         model = self.treeView.model()  # Get the model from the tree_view
@@ -302,7 +304,7 @@ class TreePanel(QWidget):
         item = parent_index.internalPointer()
 
         # If the item is a 'layer', add it to the list of nodes to process
-        if item and getattr(item, 'role', None) == 'layer':
+        if item and getattr(item, "role", None) == "layer":
             layer_nodes.append(parent_index)
 
         # Process all child items recursively
@@ -329,9 +331,17 @@ class TreePanel(QWidget):
         second_column_index = model.index(node_index.row(), 1, node_index.parent())
 
         # Set an animated icon (using a QLabel and QMovie to simulate animation)
-        movie = QMovie(resources_path("resources", "throbber.gif"))  # Use a valid path to an animated gif
-        row_height = self.treeView.rowHeight(node_index)  # Get the height of the current row
-        movie.setScaledSize(movie.currentPixmap().size().scaled(row_height, row_height, Qt.KeepAspectRatio))
+        movie = QMovie(
+            resources_path("resources", "throbber.gif")
+        )  # Use a valid path to an animated gif
+        row_height = self.treeView.rowHeight(
+            node_index
+        )  # Get the height of the current row
+        movie.setScaledSize(
+            movie.currentPixmap()
+            .size()
+            .scaled(row_height, row_height, Qt.KeepAspectRatio)
+        )
 
         label = QLabel()
         label.setMovie(movie)
@@ -341,7 +351,12 @@ class TreePanel(QWidget):
         self.treeView.setIndexWidget(second_column_index, label)
 
         # Wait for 2 seconds to simulate processing
-        QTimer.singleShot(2000, lambda: self.finish_processing(second_column_index, layer_nodes, index, movie))
+        QTimer.singleShot(
+            2000,
+            lambda: self.finish_processing(
+                second_column_index, layer_nodes, index, movie
+            ),
+        )
 
     def finish_processing(self, second_column_index, layer_nodes, index, movie):
         """

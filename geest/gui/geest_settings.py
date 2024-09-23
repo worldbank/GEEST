@@ -26,9 +26,9 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         """
         QgsOptionsPageWidget.__init__(self, parent)
         self.setupUi(self)
-        # We need this so we can open the settings to our own 
+        # We need this so we can open the settings to our own
         # page from the plugin button bar.
-        self.setObjectName('geest')
+        self.setObjectName("geest")
         # The maximum number of concurrent threads to allow
         # during rendering. Probably setting to the same number
         # of CPU cores you have would be a good conservative approach
@@ -41,8 +41,8 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         if edit_mode:
             self.edit_mode_checkbox.setChecked(True)
         else:
-            self.edit_mode_checkbox.setChecked(False)        
-        
+            self.edit_mode_checkbox.setChecked(False)
+
         # This is intended for developers to attach to the plugin using a
         # remote debugger so that they can step through the code. Do not
         # enable it if you do not have a remote debugger set up as it will
@@ -69,12 +69,12 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             key="render_thread_pool_size",
             value=self.spin_thread_pool_size.value(),
         )
-        
+
         if self.edit_mode_checkbox.isChecked():
             set_setting(key="edit_mode", value=1)
         else:
-            set_setting(key="edit_mode", value=0)   
-                 
+            set_setting(key="edit_mode", value=0)
+
         if self.debug_mode_checkbox.isChecked():
             set_setting(key="debug_mode", value=1)
         else:

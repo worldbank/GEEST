@@ -5,7 +5,7 @@ from qgis.core import (
     QgsRasterLayer,
     QgsCoordinateReferenceSystem,
 )
-from qgis_gender_indicator_tool.jobs.points_per_grid_cell import (
+from geest.core.points_per_grid_cell import (
     RasterPointGridScore,
 )  # Adjust the path to your class
 
