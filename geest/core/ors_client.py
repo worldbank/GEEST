@@ -13,7 +13,9 @@ class ORSClient:
 
         # Ensure the API key is available
         if not self.api_key:
-            raise EnvironmentError("ORS API key is missing. Set it in the environment variable 'ORS_API_KEY'.")
+            raise EnvironmentError(
+                "ORS API key is missing. Set it in the environment variable 'ORS_API_KEY'."
+            )
 
     def make_request(self, endpoint, params):
         url = f"{self.base_url}/{endpoint}"
@@ -24,7 +26,9 @@ class ORSClient:
         if self.api_key:
             request.setRawHeader(b"Authorization", self.api_key.encode())
         else:
-            QgsMessageLog.logMessage("API Key is missing", "ORS", QgsMessageLog.CRITICAL)
+            QgsMessageLog.logMessage(
+                "API Key is missing", "ORS", QgsMessageLog.CRITICAL
+            )
             return
 
         # Convert parameters (Python dict) to JSON
@@ -41,7 +45,9 @@ class ORSClient:
                 # Parse the JSON response
                 response_json = json.loads(response_data)
                 QgsMessageLog.logMessage(f"ORS Response: {response_json}", "ORS")
-                return response_json  # Return the parsed response for further processing
+                return (
+                    response_json  # Return the parsed response for further processing
+                )
             except json.JSONDecodeError as e:
                 QgsMessageLog.logMessage(
                     f"Failed to decode JSON: {e}", "ORS", QgsMessageLog.CRITICAL
