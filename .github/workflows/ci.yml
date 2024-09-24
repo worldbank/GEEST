@@ -51,6 +51,7 @@ jobs:
           ON_TRAVIS=true
           MUTE_LOGS=${MUTE_LOGS}
           WITH_PYTHON_PEP=${WITH_PYTHON_PEP}
+          ORS_API_KEY=${ORS_API_KEY}
           EOF
       - name: Install python
         uses: actions/setup-python@v4
