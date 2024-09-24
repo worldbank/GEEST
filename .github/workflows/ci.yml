@@ -17,12 +17,13 @@ env:
   IMAGE: qgis/qgis
   WITH_PYTHON_PEP: "true"
   MUTE_LOGS: "false"
-  ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     name: Running tests on ${{ matrix.os }} using QGIS ${{ matrix.qgis_version_tag }}
+    environment:
+      ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
 
     strategy:
       fail-fast: false
@@ -51,7 +52,6 @@ jobs:
           ON_TRAVIS=true
           MUTE_LOGS=${MUTE_LOGS}
           WITH_PYTHON_PEP=${WITH_PYTHON_PEP}
-          ORS_API_KEY=${ORS_API_KEY}
           EOF
       - name: Install python
         uses: actions/setup-python@v4
@@ -68,6 +68,9 @@ jobs:
           python admin.py build --tests
           docker compose up -d
           sleep 10
+
+      - name: Debug environment
+        run: printenv
 
       - name: Run test suite
         run: |
