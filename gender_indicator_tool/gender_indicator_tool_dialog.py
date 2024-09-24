@@ -23,15 +23,11 @@
 """
 
 import os
-import geopandas as gpd
-import rasterio
-from rasterio.features import rasterize
-from rasterio.transform import from_origin
 
 from qgis.PyQt import uic
-from qgis.PyQt import QtWidgets
-from PyQt5.QtWidgets import QFileDialog
-
+from qgis.PyQt import QtWidgets 
+from qgis.PyQt.QtCore import QSettings
+from qgis.PyQt.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox, QRadioButton
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -49,3 +45,77 @@ class GenderIndicatorToolDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+        # Create QSettings instance (Organization and App name should be changed as per your app)
+        self.settings = QSettings("ESMAP", "Geest")
+        
+        # Call the function to restore previous state
+        self.restore_ui_state()
+        
+        # Call the function to connect signals for state saving
+        self.watch_ui_changes()        
+
+    def watch_ui_changes(self):
+        """
+        Connects signals from UI elements to a save_state function that stores changes.
+        """
+        # Loop through all children (UI elements)
+        for widget in self.findChildren(QWidget):
+            # Handle QLineEdit
+            if isinstance(widget, QLineEdit):
+                widget.textChanged.connect(lambda _, w=widget: self.save_ui_state(w))
+
+            # Handle QCheckBox
+            elif isinstance(widget, QCheckBox):
+                widget.stateChanged.connect(lambda _, w=widget: self.save_ui_state(w))
+
+            # Handle QComboBox
+            elif isinstance(widget, QComboBox):
+                widget.currentIndexChanged.connect(lambda _, w=widget: self.save_ui_state(w))
+
+            # Handle QRadioButton
+            elif isinstance(widget, QRadioButton):
+                widget.toggled.connect(lambda _, w=widget: self.save_ui_state(w))
+
+    def save_ui_state(self, widget):
+        """
+        Saves the state of the given widget to QSettings.
+        """
+        widget_name = widget.objectName()  # Get the name of the widget
+
+        # Save based on widget type
+        if isinstance(widget, QLineEdit):
+            self.settings.setValue(widget_name, widget.text())
+        elif isinstance(widget, QCheckBox):
+            self.settings.setValue(widget_name, widget.isChecked())
+        elif isinstance(widget, QComboBox):
+            self.settings.setValue(widget_name, widget.currentIndex())
+        elif isinstance(widget, QRadioButton):
+            self.settings.setValue(widget_name, widget.isChecked())
+    
+    def restore_ui_state(self):
+        """
+        Restores the state of UI elements from QSettings.
+        """
+        # Loop through all children (UI elements)
+        for widget in self.findChildren(QWidget):
+            try:
+                widget_name = widget.objectName()  # Get the name of the widget
+
+                if not widget_name:
+                    continue
+
+                # Restore based on widget type
+                if isinstance(widget, QLineEdit):
+                    widget.setText(self.settings.value(widget_name, ""))
+                elif isinstance(widget, QCheckBox):
+                    widget.setChecked(self.settings.value(widget_name, False, type=bool))
+                elif isinstance(widget, QComboBox):
+                    widget.setCurrentIndex(self.settings.value(widget_name, 0, type=int))
+                elif isinstance(widget, QRadioButton):
+                    widget.setChecked(self.settings.value(widget_name, False, type=bool))
+
+            except RuntimeError:
+                # Ignore widgets that have been deleted
+                continue
+
