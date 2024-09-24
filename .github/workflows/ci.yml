@@ -17,6 +17,7 @@ env:
   IMAGE: qgis/qgis
   WITH_PYTHON_PEP: "true"
   MUTE_LOGS: "false"
+  ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
 
 jobs:
   test:
