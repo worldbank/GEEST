@@ -6,15 +6,15 @@ from qgis.PyQt.QtWidgets import (
     QLabel,
     QButtonGroup,
     QLineEdit,
+    QCheckBox,
     QSpinBox,
     QDoubleSpinBox,
     QComboBox,
+    QFileDialog,
 )
 
 from qgis.gui import QgsMapLayerComboBox, QgsFileWidget
-from qgis.core import QgsMapLayerProxyModel, QgsVectorLayer
-
-from .classify_poly_into_classes_widget import ClassifyPolyIntoClassesWidget
+from qgis.core import QgsMapLayer, QgsMapLayerProxyModel, QgsMessageLog, Qgis
 
 
 class GeestWidgetFactory:
@@ -27,20 +27,6 @@ class GeestWidgetFactory:
         "raster": "raster",
         "vector": "vector",
     }
-
-    @staticmethod
-    def safe_float(value, default):
-        try:
-            return float(value) if value != "" else default
-        except (ValueError, TypeError):
-            return default
-
-    @staticmethod
-    def safe_int(value, default):
-        try:
-            return int(float(value)) if value != "" else default
-        except (ValueError, TypeError):
-            return default
 
     @staticmethod
     def create_widgets(layer_data: dict, parent=None):
@@ -56,7 +42,7 @@ class GeestWidgetFactory:
             },
             "Use Multi Buffer Point": {
                 "label": "Multi Buffer Distances",
-                "type": "multibuffer",
+                "type": "lineedit",
                 "default": layer_data.get("Default Multi Buffer Distances", ""),
                 "tooltip": "Enter comma-separated buffer distances.",
             },
@@ -86,7 +72,7 @@ class GeestWidgetFactory:
             "Use Classify Poly into Classes": {
                 "label": "Classify Polygons into Classes",
                 "description": "Using this option, you can classify polygons into classes.",
-                "type": "classify_poly_into_classes",
+                "type": "layer_selector",
                 "layer_type": "polygon",
                 "tooltip": "Select a polygon layer.",
             },
@@ -126,36 +112,36 @@ class GeestWidgetFactory:
             },
             "Use OSM Downloader": {
                 "label": "Fetch the data from OSM",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
-                "from OSM.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly"
+                               " from OSM.",
                 "type": "download_option",
                 "tooltip": "Download data from OSM.",
             },
             "Use WBL Downloader": {
                 "label": "Fetch the data from WBL",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
-                "from WBL.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly"
+                               " from WBL.",
                 "type": "download_option",
                 "tooltip": "Download data from WBL.",
             },
             "Use Humdata Downloader": {
                 "label": "Fetch the data from HumData",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
-                "from HumData.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly"
+                               " from HumData.",
                 "type": "download_option",
                 "tooltip": "Download data from HumData.",
             },
             "Use Mapillary Downloader": {
                 "label": "Fetch the data from Mapillary",
-                "description": "Using this option, we will try to fetch the data needed for this indicator directly "
-                "from Mapillary.",
+                "description": "Using this option, we will try to fetch the data needed for this indicator directly"
+                               " from Mapillary.",
                 "type": "download_option",
                 "tooltip": "Download data from Mapillary.",
             },
             "Use Other Downloader": {
                 "label": "Fetch the data from specified source",
-                "description": f"Using this option, we will try to fetch the data needed for this indicator directly "
-                f"from {layer_data.get('Use Other Downloader', '')}.",
+                "description": f"Using this option, we will try to fetch the data needed for this indicator directly"
+                               f" from {layer_data.get('Use Other Downloader', '')}.",
                 "type": "download_option",
                 "tooltip": f"Download data from {layer_data.get('Use Other Downloader', 'Other Source')}.",
             },
@@ -178,7 +164,11 @@ class GeestWidgetFactory:
         for idx, (use_key, value) in enumerate(use_keys_enabled.items()):
             mapping = use_keys_mapping.get(use_key)
             if not mapping:
-                print(f"No mapping found for key: {use_key}. Skipping.")
+                QgsMessageLog.logMessage(
+                    f"No mapping found for key: {use_key}. Skipping.",
+                    "GeestWidgetFactory",
+                    Qgis.Warning,
+                )
                 continue
 
             option_container = QWidget()
@@ -202,11 +192,13 @@ class GeestWidgetFactory:
 
             main_layout.addWidget(option_container)
 
-            # radio_button.toggled.connect(lambda checked, w=widget: w.setEnabled(checked))
-            # widget.setEnabled(False)  # Initially disable all widgets
+            radio_button.toggled.connect(
+                lambda checked, w=widget: w.setEnabled(checked)
+            )
+            widget.setEnabled(False)  # Initially disable all widgets
 
-        # if radio_group.buttons():
-        #    radio_group.buttons()[0].setChecked(True)
+        if radio_group.buttons():
+            radio_group.buttons()[0].setChecked(True)
 
         return container
 
@@ -221,96 +213,53 @@ class GeestWidgetFactory:
         """
         widget_type = mapping["type"]
 
+        # -- guard against GIGO
+        def safe_float(value, default):
+            try:
+                return float(value) if value != "" else default
+            except (ValueError, TypeError):
+                QgsMessageLog.logMessage(
+                    f"Invalid float value '{value}' for {mapping.get('label')}. Using default {default}.",
+                    "GeestWidgetFactory",
+                    Qgis.Warning,
+                )
+                return default
+
+        # -- guard against GIGO
+        def safe_int(value, default):
+            try:
+                return int(float(value)) if value != "" else default
+            except (ValueError, TypeError):
+                QgsMessageLog.logMessage(
+                    f"Invalid integer value '{value}' for {mapping.get('label')}. Using default {default}.",
+                    "GeestWidgetFactory",
+                    Qgis.Warning,
+                )
+                return default
+
         if widget_type == "doublespinbox":
             widget = QDoubleSpinBox()
-            widget.setMinimum(GeestWidgetFactory.safe_float(mapping.get("min"), 0.0))
-            widget.setMaximum(GeestWidgetFactory.safe_float(mapping.get("max"), 100.0))
-            widget.setDecimals(GeestWidgetFactory.safe_int(mapping.get("decimals"), 1))
-            widget.setValue(GeestWidgetFactory.safe_float(mapping.get("default"), 0.0))
+            widget.setMinimum(safe_float(mapping.get("min"), 0.0))
+            widget.setMaximum(safe_float(mapping.get("max"), 100.0))
+            widget.setDecimals(safe_int(mapping.get("decimals"), 1))
+            widget.setValue(safe_float(mapping.get("default"), 0.0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
         elif widget_type == "spinbox":
             widget = QSpinBox()
-            widget.setMinimum(GeestWidgetFactory.safe_int(mapping.get("min"), 0))
-            widget.setMaximum(GeestWidgetFactory.safe_int(mapping.get("max"), 10000))
-            widget.setValue(GeestWidgetFactory.safe_int(mapping.get("default"), 0))
+            widget.setMinimum(safe_int(mapping.get("min"), 0))
+            widget.setMaximum(safe_int(mapping.get("max"), 10000))
+            widget.setValue(safe_int(mapping.get("default"), 0))
             widget.setToolTip(mapping.get("tooltip", ""))
             return widget
 
-        elif widget_type == "multibuffer":
-            container = QWidget()
-            main_layout = (
-                QVBoxLayout()
-            )  # Change to QVBoxLayout for overall vertical arrangement
-            container.setLayout(main_layout)
-
-            # Container for travel mode and measurement radio buttons
-            radio_buttons_container = (
-                QHBoxLayout()
-            )  # Use QHBoxLayout to place them side by side
-
-            # Left VBox for Travel Mode
-            left_vbox = QVBoxLayout()
-            travel_mode_label = QLabel("Travel Mode:")
-            travel_mode_label.setStyleSheet("font-weight: bold;")
-            left_vbox.addWidget(travel_mode_label)
-            travel_mode_group = QButtonGroup(container)
-            walking_radio = QRadioButton("Walking")
-            driving_radio = QRadioButton("Driving")
-            walking_radio.setChecked(True)  # Set Walking as default
-            travel_mode_group.addButton(walking_radio)
-            travel_mode_group.addButton(driving_radio)
-            left_vbox.addWidget(walking_radio)
-            left_vbox.addWidget(driving_radio)
-
-            # Right VBox for Measurement
-            right_vbox = QVBoxLayout()
-            measurement_label = QLabel("Measurement:")
-            measurement_label.setStyleSheet("font-weight: bold;")
-            right_vbox.addWidget(measurement_label)
-            measurement_group = QButtonGroup(container)
-            distance_radio = QRadioButton("Distance")
-            time_radio = QRadioButton("Time")
-            distance_radio.setChecked(True)  # Set Distance as default
-            measurement_group.addButton(distance_radio)
-            measurement_group.addButton(time_radio)
-            right_vbox.addWidget(distance_radio)
-            right_vbox.addWidget(time_radio)
-
-            # Add left and right vboxes to radio_buttons_container
-            radio_buttons_container.addLayout(left_vbox)
-            radio_buttons_container.addLayout(right_vbox)
-
-            # Add radio_buttons_container to main layout
-            main_layout.addLayout(radio_buttons_container)
-
-            # Add QLineEdit for travel increments
-            increment_label = QLabel("Travel Increments:")
-            increment_label.setStyleSheet("font-weight: bold;")
-            increment_edit = QLineEdit()
+        elif widget_type == "lineedit":
+            widget = QLineEdit()
             default_value = mapping.get("default", "")
-            increment_edit.setText(str(default_value))
-            increment_edit.setToolTip(mapping.get("tooltip", ""))
-
-            # Set default values
-            default_increments = mapping.get("default", "")
-            increment_edit.setText(default_increments)
-
-            # Add label and QLineEdit directly to main layout
-            main_layout.addWidget(increment_label)
-            main_layout.addWidget(increment_edit)
-
-            # Store references to widgets
-            container.travel_mode_group = travel_mode_group
-            container.measurement_group = measurement_group
-            container.increment_edit = increment_edit
-
-            # Identifier
-            container.setProperty("widget_type", "multibuffer")
-            container.setProperty("use_key", mapping.get("use_key", ""))
-
-            return container
+            widget.setText(str(default_value))
+            widget.setToolTip(mapping.get("tooltip", ""))
+            return widget
 
         elif widget_type == "layer_selector":
             widget = QgsMapLayerComboBox()
@@ -330,14 +279,18 @@ class GeestWidgetFactory:
                 elif subtype_mapped == "point":
                     widget.setFilters(QgsMapLayerProxyModel.PointLayer)
                 else:
-                    print(
-                        f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all "
-                        f"vector layers."
+                    QgsMessageLog.logMessage(
+                        f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. "
+                        f"Defaulting to all vector layers.",
+                        "GeestWidgetFactory",
+                        Qgis.Warning,
                     )
                     widget.setFilters(QgsMapLayerProxyModel.VectorLayer)
             else:
-                print(
-                    f"Unknown layer type '{layer_type}' for '{mapping.get('label')}'. Defaulting to all layers."
+                QgsMessageLog.logMessage(
+                    f"Unknown layer type '{layer_type}' for '{mapping.get('label')}'. Defaulting to all layers.",
+                    "GeestWidgetFactory",
+                    Qgis.Warning,
                 )
                 widget.setFilters(QgsMapLayerProxyModel.All)
 
@@ -349,12 +302,6 @@ class GeestWidgetFactory:
             else:
                 widget.setToolTip(mapping.get("tooltip", ""))
                 return widget
-
-        elif widget_type == "classify_poly_into_classes":
-            widget = ClassifyPolyIntoClassesWidget()
-            widget.set_tooltip(mapping.get("tooltip", ""))
-            widget.set_use_key(mapping.get("use_key", ""))
-            return widget
 
         elif widget_type == "csv_to_point":
             container = QWidget()
@@ -417,7 +364,11 @@ class GeestWidgetFactory:
             return container
 
         else:
-            print(f"Unknown widget type: {widget_type}")
+            QgsMessageLog.logMessage(
+                f"Unknown widget type: {widget_type}",
+                "GeestWidgetFactory",
+                Qgis.Warning,
+            )
             return None
 
     @staticmethod
@@ -465,7 +416,11 @@ class GeestWidgetFactory:
                 lon_combo.setEnabled(True)
                 lat_combo.setEnabled(True)
         except Exception as e:
-            print(f"Error reading CSV file: {e}")
+            QgsMessageLog.logMessage(
+                f"Error reading CSV file '{file_path}': {e}",
+                "GeestWidgetFactory",
+                Qgis.Critical,
+            )
             lon_combo.clear()
             lat_combo.clear()
             lon_combo.setEnabled(False)
