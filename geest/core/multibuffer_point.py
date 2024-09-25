@@ -56,12 +56,14 @@ class MultiBufferCreator:
 
         # Process features in subsets to handle large datasets
         for i in range(0, total_features, self.subset_size):
-            subset_features = features[i: i + self.subset_size]
+            subset_features = features[i : i + self.subset_size]
             subset_layer = self._create_subset_layer(subset_features, point_layer, crs)
 
             # Make API calls using ORSClient for the subset
             try:
-                isochrone_layer = self._fetch_isochrones(subset_layer, mode, measurement)
+                isochrone_layer = self._fetch_isochrones(
+                    subset_layer, mode, measurement
+                )
                 if isochrone_layer:
                     temp_layers.append(isochrone_layer)
 
@@ -69,14 +71,14 @@ class MultiBufferCreator:
                 QgsMessageLog.logMessage(
                     f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
                     "MultiBufferCreator",
-                    Qgis.Info
+                    Qgis.Info,
                 )
 
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error processing subset {i + 1} to {min(i + self.subset_size, total_features)}: {e}",
                     "MultiBufferCreator",
-                    Qgis.Critical
+                    Qgis.Critical,
                 )
                 continue
 
@@ -86,11 +88,9 @@ class MultiBufferCreator:
             self._create_bands(merged_layer, output_path, crs)
         else:
             QgsMessageLog.logMessage(
-                "No isochrones were created.",
-                "MultiBufferCreator",
-                Qgis.Warning
+                "No isochrones were created.", "MultiBufferCreator", Qgis.Warning
             )
-            
+
     def _create_subset_layer(self, subset_features, point_layer, crs):
         """
         Create a subset layer for processing.
@@ -132,9 +132,9 @@ class MultiBufferCreator:
         params = {
             "locations": coordinates,
             "range": self.distance_list,  # Distances or times in the list
-            "range_type": measurement
+            "range_type": measurement,
         }
-        
+
         # Make the request to ORS API using ORSClient
         reply = self.ors_client.make_request(mode, params)
         reply.finished.connect(lambda: self._handle_ors_response(reply))
@@ -152,8 +152,9 @@ class MultiBufferCreator:
             isochrone_layer = self._create_isochrone_layer(response_json)
             return isochrone_layer
         else:
-            raise QgsProcessingException(f"Error fetching isochrones: {reply.errorString()}")
-
+            raise QgsProcessingException(
+                f"Error fetching isochrones: {reply.errorString()}"
+            )
 
     def _create_isochrone_layer(self, isochrone_data):
         """
@@ -162,7 +163,9 @@ class MultiBufferCreator:
         :param isochrone_data: JSON data returned from ORS
         :return: QgsVectorLayer containing the isochrones
         """
-        isochrone_layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "isochrones", "memory")
+        isochrone_layer = QgsVectorLayer(
+            "Polygon?crs=EPSG:4326", "isochrones", "memory"
+        )
         provider = isochrone_layer.dataProvider()
 
         # Parse the features from ORS response
@@ -171,7 +174,9 @@ class MultiBufferCreator:
             geom = QgsGeometry.fromWkt(feature_data["geometry"]["coordinates"])
             feat = QgsFeature()
             feat.setGeometry(geom)
-            feat.setAttributes([feature_data["properties"].get("value", 0)])  # Add attributes as needed
+            feat.setAttributes(
+                [feature_data["properties"].get("value", 0)]
+            )  # Add attributes as needed
             features.append(feat)
 
         provider.addFeatures(features)
