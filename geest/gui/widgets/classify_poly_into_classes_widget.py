@@ -1,7 +1,7 @@
 from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.gui import QgsMapLayerComboBox
-from qgis.core import QgsMapLayerProxyModel, QgsVectorLayer
+from qgis.core import QgsMapLayerProxyModel, QgsVectorLayer, QgsMessageLog, Qgis
 
 
 class ClassifyPolyIntoClassesWidget(QWidget):
@@ -40,24 +40,37 @@ class ClassifyPolyIntoClassesWidget(QWidget):
         if initial_layer:
             self.update_fields(initial_layer)
         else:
-            print("[ClassifyPolyIntoClassesWidget] No initial layer selected")
+            QgsMessageLog.logMessage(
+                "[ClassifyPolyIntoClassesWidget] No initial layer selected",
+                "ClassifyPolyIntoClassesWidget",
+                Qgis.Warning,
+            )
 
     def update_fields(self, layer):
-        print(
-            f"[ClassifyPolyIntoClassesWidget] Updating fields for layer: {layer.name() if layer else 'None'}"
+        QgsMessageLog.logMessage(
+            f"[ClassifyPolyIntoClassesWidget] Updating fields for layer: {layer.name() if layer else 'None'}",
+            "ClassifyPolyIntoClassesWidget",
+            Qgis.Info,
         )
         self.field_selector.clear()
         if isinstance(layer, QgsVectorLayer):
             fields = [field.name() for field in layer.fields()]
             self.field_selector.addItems(fields)
-            print(f"[ClassifyPolyIntoClassesWidget] Fields added: {fields}")
+            QgsMessageLog.logMessage(
+                f"[ClassifyPolyIntoClassesWidget] Fields added: {fields}",
+                "ClassifyPolyIntoClassesWidget",
+                Qgis.Info,
+            )
         else:
-            print("[ClassifyPolyIntoClassesWidget] Layer is not a vector layer")
+            QgsMessageLog.logMessage(
+                "[ClassifyPolyIntoClassesWidget] Layer is not a vector layer",
+                "ClassifyPolyIntoClassesWidget",
+                Qgis.Warning,
+            )
         # Emit signal since fields have been updated
         self.selectionsChanged.emit()
 
     def emit_selections_changed(self):
-        print("[ClassifyPolyIntoClassesWidget] Selections changed")
         self.selectionsChanged.emit()
 
     def get_selections(self):
