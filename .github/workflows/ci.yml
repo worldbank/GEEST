@@ -43,6 +43,7 @@ jobs:
       - name: Preparing docker-compose environment
         env:
           QGIS_VERSION_TAG: ${{ matrix.qgis_version_tag }}
+          ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
         run: |
           cat << EOF > .env
           QGIS_VERSION_TAG=${QGIS_VERSION_TAG}
@@ -50,6 +51,7 @@ jobs:
           ON_TRAVIS=true
           MUTE_LOGS=${MUTE_LOGS}
           WITH_PYTHON_PEP=${WITH_PYTHON_PEP}
+          ORS_API_KEY=${ORS_API_KEY}
           EOF
       - name: Install python
         uses: actions/setup-python@v4
@@ -61,7 +63,6 @@ jobs:
 
       - name: Preparing test environment
         run: |
-          cat .env
           docker pull "${IMAGE}":${{ matrix.qgis_version_tag }}
           python admin.py build --tests
           docker compose up -d

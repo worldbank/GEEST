@@ -29,9 +29,7 @@ class TestRasterPolygonGridScore(unittest.TestCase):
         )
         self.country_boundary = os.path.join(self.test_data_dir, "admin/Admin0.shp")
 
-        self.assertTrue(
-            self.polygon_layer.isValid(), "The polygon layer is not valid."
-        )
+        self.assertTrue(self.polygon_layer.isValid(), "The polygon layer is not valid.")
 
         # Define output path for the generated raster
         self.output_path = os.path.join(

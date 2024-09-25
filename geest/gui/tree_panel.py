@@ -28,7 +28,6 @@ from geest.core import set_setting, setting
 from geest.core.workflow_queue_manager import WorkflowQueueManager
 
 
-
 class TreePanel(QWidget):
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)

@@ -9,6 +9,7 @@ services:
       ON_TRAVIS: "${ON_TRAVIS}"
       MUTE_LOGS: "${MUTE_LOGS}"
       DISPLAY: ":99"
+      ORS_API_KEY: "${ORS_API_KEY}"
     working_dir: /tests_directory
     entrypoint: /tests_directory/scripts/docker/qgis-testing-entrypoint.sh
     # Enable "command:" line below to immediately run unittests upon docker-compose up
