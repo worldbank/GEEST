@@ -1,6 +1,6 @@
-from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox
+from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QLabel
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.gui import QgsMapLayerComboBox
+from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import QgsMapLayerProxyModel, QgsVectorLayer, QgsMessageLog, Qgis
 
 
@@ -26,14 +26,17 @@ class ClassifyPolyIntoClassesWidget(QWidget):
         # Field selector
         self.field_label = QLabel("Select Field of Interest:")
         self._layout.addWidget(self.field_label)
-        self.field_selector = QComboBox()
+        self.field_selector = QgsFieldComboBox()
         self._layout.addWidget(self.field_selector)
+
+        # Connect the layer selector to the field selector
+        self.field_selector.setLayer(self.layer_selector.currentLayer())
 
         # Connect the layer changed signal
         self.layer_selector.layerChanged.connect(self.update_fields)
 
         # Connect the field changed signal to emit selectionsChanged
-        self.field_selector.currentTextChanged.connect(self.emit_selections_changed)
+        self.field_selector.fieldChanged.connect(self.emit_selections_changed)
 
         # Initial update
         initial_layer = self.layer_selector.currentLayer()
@@ -50,11 +53,9 @@ class ClassifyPolyIntoClassesWidget(QWidget):
             "ClassifyPolyIntoClassesWidget",
             level=Qgis.Info
         )
-        self.field_selector.clear()
         if isinstance(layer, QgsVectorLayer):
-            fields = [field.name() for field in layer.fields()]
-            self.field_selector.addItems(fields)
-            QgsMessageLog.logMessage(f"Fields added: {fields}",
+            self.field_selector.setLayer(layer)
+            QgsMessageLog.logMessage(f"Fields updated for layer: {layer.name()}",
                                      "ClassifyPolyIntoClassesWidget",
                                      level=Qgis.Info)
         else:
@@ -71,7 +72,7 @@ class ClassifyPolyIntoClassesWidget(QWidget):
         self.selectionsChanged.emit()
 
     def get_selections(self):
-        return self.layer_selector.currentLayer(), self.field_selector.currentText()
+        return self.layer_selector.currentLayer(), self.field_selector.currentField()
 
     def set_tooltip(self, tooltip):
         self.setToolTip(tooltip)

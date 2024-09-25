@@ -205,6 +205,7 @@ class GeestConfigWidget(QWidget):
                     isinstance(widget, QWidget)
                     and widget.findChild(QgsMapLayerComboBox)
                     and widget.findChild(QComboBox)
+                    and not widget_type == "classify_poly_into_classes"
                 ):
                     layer_selector = widget.findChild(QgsMapLayerComboBox)
                     field_selector = widget.findChild(QComboBox)
