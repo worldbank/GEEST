@@ -178,9 +178,11 @@ class GeestWidgetFactory:
         for idx, (use_key, value) in enumerate(use_keys_enabled.items()):
             mapping = use_keys_mapping.get(use_key)
             if not mapping:
-                QgsMessageLog.logMessage(f"No mapping found for key: {use_key}. Skipping.",
-                                         "GeestWidgetFactory",
-                                         level=Qgis.Warning)
+                QgsMessageLog.logMessage(
+                    f"No mapping found for key: {use_key}. Skipping.",
+                    "GeestWidgetFactory",
+                    level=Qgis.Warning,
+                )
                 continue
 
             option_container = QWidget()
@@ -316,14 +318,14 @@ class GeestWidgetFactory:
                         f"Invalid layer subtype '{layer_type}' for '{mapping.get('label')}'. Defaulting to all "
                         f"vector layers.",
                         "GeestWidgetFactory",
-                        level=Qgis.Warning
+                        level=Qgis.Warning,
                     )
                     widget.setFilters(QgsMapLayerProxyModel.VectorLayer)
             else:
                 QgsMessageLog.logMessage(
                     f"Unknown layer type '{layer_type}' for '{mapping.get('label')}'. Defaulting to all layers.",
                     "GeestWidgetFactory",
-                    level=Qgis.Warning
+                    level=Qgis.Warning,
                 )
                 widget.setFilters(QgsMapLayerProxyModel.All)
 
@@ -397,9 +399,11 @@ class GeestWidgetFactory:
             return container
 
         else:
-            QgsMessageLog.logMessage(f"Unknown widget type: {widget_type}",
-                                     "GeestWidgetFactory",
-                                     level=Qgis.Warning)
+            QgsMessageLog.logMessage(
+                f"Unknown widget type: {widget_type}",
+                "GeestWidgetFactory",
+                level=Qgis.Warning,
+            )
             return None
 
     @staticmethod
@@ -447,9 +451,11 @@ class GeestWidgetFactory:
                 lon_combo.setEnabled(True)
                 lat_combo.setEnabled(True)
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error reading CSV file: {e}",
-                                     "GeestWidgetFactory",
-                                     level=Qgis.Critical)
+            QgsMessageLog.logMessage(
+                f"Error reading CSV file: {e}",
+                "GeestWidgetFactory",
+                level=Qgis.Critical,
+            )
             lon_combo.clear()
             lat_combo.clear()
             lon_combo.setEnabled(False)

@@ -43,32 +43,38 @@ class ClassifyPolyIntoClassesWidget(QWidget):
         if initial_layer:
             self.update_fields(initial_layer)
         else:
-            QgsMessageLog.logMessage("No initial layer selected",
-                                     "ClassifyPolyIntoClassesWidget",
-                                     level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                "No initial layer selected",
+                "ClassifyPolyIntoClassesWidget",
+                level=Qgis.Info,
+            )
 
     def update_fields(self, layer):
         QgsMessageLog.logMessage(
             f"Updating fields for layer: {layer.name() if layer else 'None'}",
             "ClassifyPolyIntoClassesWidget",
-            level=Qgis.Info
+            level=Qgis.Info,
         )
         if isinstance(layer, QgsVectorLayer):
             self.field_selector.setLayer(layer)
-            QgsMessageLog.logMessage(f"Fields updated for layer: {layer.name()}",
-                                     "ClassifyPolyIntoClassesWidget",
-                                     level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                f"Fields updated for layer: {layer.name()}",
+                "ClassifyPolyIntoClassesWidget",
+                level=Qgis.Info,
+            )
         else:
-            QgsMessageLog.logMessage("Layer is not a vector layer",
-                                     "ClassifyPolyIntoClassesWidget",
-                                     level=Qgis.Warning)
+            QgsMessageLog.logMessage(
+                "Layer is not a vector layer",
+                "ClassifyPolyIntoClassesWidget",
+                level=Qgis.Warning,
+            )
         # Emit signal since fields have been updated
         self.selectionsChanged.emit()
 
     def emit_selections_changed(self):
-        QgsMessageLog.logMessage("Selections changed",
-                                 "ClassifyPolyIntoClassesWidget",
-                                 level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            "Selections changed", "ClassifyPolyIntoClassesWidget", level=Qgis.Info
+        )
         self.selectionsChanged.emit()
 
     def get_selections(self):
