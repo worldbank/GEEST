@@ -1,7 +1,7 @@
 import os
-from PyQt5.QtCore import QUrl, QByteArray
-from PyQt5.QtNetwork import QNetworkRequest
-from qgis.core import QgsMessageLog, QgsNetworkAccessManager
+from qgis.PyQt.QtCore import QUrl, QByteArray
+from qgis.PyQt.QtNetwork import QNetworkRequest
+from qgis.core import QgsMessageLog, QgsNetworkAccessManager, Qgis
 import json
 
 
@@ -25,18 +25,13 @@ class ORSClient:
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
         if self.api_key:
             request.setRawHeader(b"Authorization", self.api_key.encode())
-        else:
-            QgsMessageLog.logMessage(
-                "API Key is missing", "ORS", QgsMessageLog.CRITICAL
-            )
-            return
 
         # Convert parameters (Python dict) to JSON
         data = QByteArray(json.dumps(params).encode("utf-8"))
 
-        # Send the request and connect to the response handler
+        # Send the request and return the reply object
         reply = self.network_manager.post(request, data)
-        reply.finished.connect(lambda: self.handle_response(reply))
+        return reply
 
     def handle_response(self, reply):
         if reply.error() == reply.NoError:
@@ -50,13 +45,13 @@ class ORSClient:
                 )
             except json.JSONDecodeError as e:
                 QgsMessageLog.logMessage(
-                    f"Failed to decode JSON: {e}", "ORS", QgsMessageLog.CRITICAL
+                    f"Failed to decode JSON: {e}", "ORS", Qgis.CRITICAL
                 )
                 return None  # Return None in case of failure
         else:
             # Handle error
             QgsMessageLog.logMessage(
-                f"Error: {reply.errorString()}", "ORS", QgsMessageLog.CRITICAL
+                f"Error: {reply.errorString()}", "ORS", Qgis.CRITICAL
             )
             return None  # Return None in case of error
         reply.deleteLater()
