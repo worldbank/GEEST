@@ -64,7 +64,7 @@ Pull Request Checklist
 
 Coding Standards
 
-See CODING.md
+See [CODING.md](CODING.md)
 
 Testing
 1. Write tests: Include unit tests for new features or bug fixes.

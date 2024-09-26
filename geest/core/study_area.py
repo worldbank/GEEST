@@ -110,6 +110,11 @@ class StudyAreaProcessor:
         # Add the study_area_bbox layer to the map
         self.add_layer_to_map("study_area_bbox")
 
+        # Initialize counters for tracking valid and invalid features
+        invalid_feature_count = 0
+        valid_feature_count = 0
+        fixed_feature_count = 0
+
         # Process individual features
         selected_features = self.layer.selectedFeatures()
         features = selected_features if selected_features else self.layer.getFeatures()
@@ -119,34 +124,67 @@ class StudyAreaProcessor:
             area_name: str = feature[self.field_name]
             normalized_name: str = re.sub(r"\s+", "_", area_name.lower())
 
-            try:
-                if not geom.isEmpty() and geom.isGeosValid():
-                    if geom.isMultipart():
-                        self.process_multipart_geometry(
-                            geom, normalized_name, area_name
-                        )
-                    else:
-                        self.process_singlepart_geometry(
-                            geom, normalized_name, area_name
-                        )
-                else:
+            # Check for geometry validity
+            if geom.isEmpty() or not geom.isGeosValid():
+                QgsMessageLog.logMessage(
+                    f"Feature ID {feature.id()} has an invalid geometry. Attempting to fix.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+                # Try to fix the geometry
+                fixed_geom = geom.makeValid()
+
+                # Check if the fixed geometry is valid
+                if fixed_geom.isEmpty() or not fixed_geom.isGeosValid():
+                    invalid_feature_count += 1
                     QgsMessageLog.logMessage(
-                        f"Invalid geometry for feature {feature.id()}. Skipping.",
+                        f"Feature ID {feature.id()} could not be fixed. Skipping.",
                         tag="Geest",
                         level=Qgis.Critical,
                     )
-            except Exception as e:
+                    continue
+
+                # Use the fixed geometry if it is valid
+                geom = fixed_geom
+                fixed_feature_count += 1
                 QgsMessageLog.logMessage(
-                    f"Error transforming geometry for feature {feature.id()}: {e}",
+                    f"Feature ID {feature.id()} geometry fixed successfully.",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+
+            # Process valid geometry
+            try:
+                valid_feature_count += 1
+                if geom.isMultipart():
+                    self.process_multipart_geometry(geom, normalized_name, area_name)
+                else:
+                    self.process_singlepart_geometry(geom, normalized_name, area_name)
+
+            except Exception as e:
+                # Log any unexpected errors during processing
+                invalid_feature_count += 1
+                QgsMessageLog.logMessage(
+                    f"Error processing geometry for feature {feature.id()}: {e}",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
 
+        # Log the count of valid, fixed, and invalid features processed
+        QgsMessageLog.logMessage(
+            f"Processing completed. Valid features: {valid_feature_count}, Fixed features: {fixed_feature_count}, Invalid features: {invalid_feature_count}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
         # Add the 'study_area_bboxes' layer to the QGIS map after processing is complete
         self.add_layer_to_map("study_area_bboxes")
-        # Create and add the VRT of all generated raster masks
+
+        # Create and add the VRT of all generated raster masks if in raster mode
         if self.mode == "raster":
             self.create_raster_vrt()
+
 
     def add_layer_to_map(self, layer_name: str) -> None:
         """
