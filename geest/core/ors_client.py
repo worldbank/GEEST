@@ -1,12 +1,16 @@
 import os
-from qgis.PyQt.QtCore import QUrl, QByteArray
+from qgis.PyQt.QtCore import QUrl, QByteArray, QObject, pyqtSignal
 from qgis.PyQt.QtNetwork import QNetworkRequest
-from qgis.core import QgsMessageLog, QgsNetworkAccessManager, Qgis
+from qgis.core import QgsNetworkAccessManager, Qgis
 import json
 
 
-class ORSClient:
+class ORSClient(QObject):
+    # Signal to emit when the request is finished
+    request_finished = pyqtSignal(object)
+
     def __init__(self, base_url):
+        super().__init__()
         self.base_url = base_url
         self.network_manager = QgsNetworkAccessManager.instance()
         self.api_key = os.getenv("ORS_API_KEY")
@@ -18,40 +22,34 @@ class ORSClient:
             )
 
     def make_request(self, endpoint, params):
+        """Make a request to the ORS API."""
         url = f"{self.base_url}/{endpoint}"
         request = QNetworkRequest(QUrl(url))
 
         # Set necessary headers for the ORS API
         request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
-        if self.api_key:
-            request.setRawHeader(b"Authorization", self.api_key.encode())
+        request.setRawHeader(b"Authorization", self.api_key.encode())
 
         # Convert parameters (Python dict) to JSON
         data = QByteArray(json.dumps(params).encode("utf-8"))
 
-        # Send the request and return the reply object
+        # Send the request and connect the finished signal
         reply = self.network_manager.post(request, data)
-        return reply
+        reply.finished.connect(lambda: self.handle_response(reply))
 
     def handle_response(self, reply):
+        """Handle the response from ORS API."""
         if reply.error() == reply.NoError:
             response_data = reply.readAll().data().decode()
             try:
                 # Parse the JSON response
                 response_json = json.loads(response_data)
-                QgsMessageLog.logMessage(f"ORS Response: {response_json}", "ORS")
-                return (
-                    response_json  # Return the parsed response for further processing
-                )
-            except json.JSONDecodeError as e:
-                QgsMessageLog.logMessage(
-                    f"Failed to decode JSON: {e}", "ORS", Qgis.CRITICAL
-                )
-                return None  # Return None in case of failure
+                self.request_finished.emit(response_json)
+            except json.JSONDecodeError:
+                # Log or print the raw content if it is not valid JSON
+                self.request_finished.emit(None)  # Emit None in case of failure
         else:
-            # Handle error
-            QgsMessageLog.logMessage(
-                f"Error: {reply.errorString()}", "ORS", Qgis.CRITICAL
-            )
-            return None  # Return None in case of error
+            # Emit None in case of error
+            self.request_finished.emit(None)
+
         reply.deleteLater()
