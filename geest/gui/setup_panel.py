@@ -1,5 +1,4 @@
 import os
-import re
 from PyQt5.QtWidgets import (
     QWidget,
     QLabel,
@@ -15,19 +14,9 @@ from PyQt5.QtWidgets import (
 from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
     QgsMapLayerProxyModel,
-    QgsFieldProxyModel,
-    QgsWkbTypes,
-    QgsProject,
-    QgsVectorLayer,
-    QgsCoordinateReferenceSystem,
-    QgsRectangle,
-    QgsFeature,
-    QgsGeometry,
-    QgsVectorFileWriter,
-    QgsCoordinateTransform,
-    QgsField,
+    QgsFieldProxyModel
 )
-from qgis.PyQt.QtCore import QFileInfo, QSettings, QVariant
+from qgis.PyQt.QtCore import QSettings, QVariant
 from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import resources_path
 from geest.core.study_area import StudyAreaProcessor
@@ -49,6 +38,10 @@ class SetupPanel(QWidget):
         # Title
         # geest-banner.png
         self.banner_label = QLabel()
+        self.banner_label.setScaledContents(True)  # Allow image scaling
+        self.banner_label.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Fixed
+        )         
         self.banner_label.setPixmap(
             QPixmap(resources_path("resources", "geest-banner.png"))
         )
