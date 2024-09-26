@@ -420,17 +420,17 @@ class StudyAreaProcessor:
             "FIELD": None,
             "BURN": 1,
             "USE_Z": False,
-            "UNITS": 0,
-            "WIDTH": aligned_box.xMaximum() - aligned_box.xMinimum(),
-            "HEIGHT": aligned_box.yMaximum() - aligned_box.yMinimum(),
+            "UNITS": 1,
+            "WIDTH": x_res,
+            "HEIGHT": y_res,
             "EXTENT": f"{aligned_box.xMinimum()},{aligned_box.xMaximum()},"
                     f"{aligned_box.yMinimum()},{aligned_box.yMaximum()}",  # Extent of the aligned bbox
             "NODATA": 0,
             "OPTIONS": "",
-            "DATA_TYPE": 1,  # Byte data type (1-bit), representing binary values 0 and 1
+            "DATA_TYPE": 0, # byte
             "INIT": None,
             "INVERT": False,
-            "EXTRA": "",
+            "EXTRA": "-co NBITS=1",
             "OUTPUT": mask_filepath,
         }
         # Run the rasterize algorithm
