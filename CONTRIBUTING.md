@@ -63,10 +63,8 @@ Pull Request Checklist
 3. Update documentation: If your change affects documentation, update it accordingly.
 
 Coding Standards
-1. Follow PEP 8: Adhere to the Python PEP 8 style guide for Python code.
-2. Use Black for formatting: Ensure your code is formatted using Black.
-3. Write docstrings: Include docstrings for all functions and classes to describe their purpose.
-4. Type hints: Use type hints for function signatures.
+
+See CODING.md
 
 Testing
 1. Write tests: Include unit tests for new features or bug fixes.
