@@ -312,3 +312,5 @@ To improve the quality and availability of data for GEEST input in Saint Lucia, 
 
 By implementing these refined strategies, the accessibility and quality of data for GEEST inputs in Saint Lucia can be significantly enhanced, leading to more informed analyses and decision-making processes.
 
+### Citation
+World Bank. A Methodological Framework for the Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector: Methodology Report (English). Washington, D.C. World Bank Group. http://documents.worldbank.org/curated/en/099121123091527675/P1792121dc820d04419928140a279022b42
