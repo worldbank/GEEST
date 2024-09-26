@@ -9,15 +9,16 @@ from qgis.core import (
     QgsMessageLog,
     QgsGeometry,
     QgsFeature,
-    QgsProcessingException,
+    QgsPointXY,
 )
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant, QEventLoop
 import processing
-import json
 from geest.core.ors_client import ORSClient
 
 
 class MultiBufferCreator:
+    """Creates multiple buffers around point features using the OpenRouteService API."""
+
     def __init__(self, distance_list, subset_size=5):
         """
         Initialize the MultiBufferCreator class.
@@ -29,8 +30,11 @@ class MultiBufferCreator:
         self.subset_size = subset_size
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = os.getenv("ORS_API_KEY")
+        self.temp_layers = []  # Store intermediate layers
 
-    # TODO: refactor function
+        # Create an event loop to handle asynchronous responses
+        self.loop = QEventLoop()
+
     def create_multibuffers(
         self,
         point_layer,
@@ -49,8 +53,11 @@ class MultiBufferCreator:
         :param crs: Coordinate reference system (default is WGS84)
         :return: QgsVectorLayer containing the buffers as polygons
         """
+        output_dir = os.path.dirname(output_path)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         # Prepare to collect intermediate layers
-        temp_layers = []
         features = list(point_layer.getFeatures())
         total_features = len(features)
 
@@ -59,13 +66,15 @@ class MultiBufferCreator:
             subset_features = features[i : i + self.subset_size]
             subset_layer = self._create_subset_layer(subset_features, point_layer, crs)
 
+            # Connect to the ORSClient's request_finished signal to handle responses
+            self.ors_client.request_finished.connect(self._handle_ors_response)
+
             # Make API calls using ORSClient for the subset
             try:
-                isochrone_layer = self._fetch_isochrones(
-                    subset_layer, mode, measurement
-                )
-                if isochrone_layer:
-                    temp_layers.append(isochrone_layer)
+                self._fetch_isochrones(subset_layer, mode, measurement)
+
+                # Start the event loop to wait for the asynchronous response
+                self.loop.exec_()
 
                 # Log progress using QgsMessageLog
                 QgsMessageLog.logMessage(
@@ -83,8 +92,8 @@ class MultiBufferCreator:
                 continue
 
         # Merge all isochrone layers into one
-        if temp_layers:
-            merged_layer = self._merge_layers(temp_layers, crs)
+        if self.temp_layers:
+            merged_layer = self._merge_layers(self.temp_layers, crs, output_dir)
             self._create_bands(merged_layer, output_path, crs)
         else:
             QgsMessageLog.logMessage(
@@ -92,14 +101,7 @@ class MultiBufferCreator:
             )
 
     def _create_subset_layer(self, subset_features, point_layer, crs):
-        """
-        Create a subset layer for processing.
-
-        :param subset_features: List of QgsFeature objects to be processed
-        :param point_layer: Original point layer
-        :param crs: CRS of the subset layer
-        :return: QgsVectorLayer representing the subset
-        """
+        """Create a subset layer for processing."""
         subset_layer = QgsVectorLayer(f"Point?crs={crs}", "subset", "memory")
         subset_layer_data = subset_layer.dataProvider()
         subset_layer_data.addAttributes(point_layer.fields())
@@ -114,14 +116,13 @@ class MultiBufferCreator:
         :param subset_layer: QgsVectorLayer containing the subset of features
         :param mode: Travel mode for ORS API (e.g., 'driving-car')
         :param measurement: 'distance' or 'time'
-        :param crs: CRS of the layer
-        :return: QgsVectorLayer containing the isochrones
+        :return: None (Response will be handled asynchronously)
         """
         # Prepare the coordinates for the API request
         coordinates = []
         for feature in subset_layer.getFeatures():
             geom = feature.geometry()
-            if geom and geom.isMultipart() is False:  # Single point geometry
+            if geom and not geom.isMultipart():  # Single point geometry
                 coords = geom.asPoint()
                 coordinates.append([coords.x(), coords.y()])
 
@@ -136,25 +137,35 @@ class MultiBufferCreator:
         }
 
         # Make the request to ORS API using ORSClient
-        reply = self.ors_client.make_request(mode, params)
-        reply.finished.connect(lambda: self._handle_ors_response(reply))
+        self.ors_client.make_request(mode, params)
 
-    def _handle_ors_response(self, reply):
+    def _handle_ors_response(self, response):
         """
-        Handles the response from ORS and creates a QgsVectorLayer.
+        Handles the response from ORS API and creates a QgsVectorLayer.
 
-        :param reply: The network reply from ORSClient
-        :return: QgsVectorLayer containing the isochrones, or raises an exception on failure.
+        :param response: JSON response from the ORS API
+        :return: None
         """
-        if reply.error() == reply.NoError:
-            response_data = reply.readAll().data().decode()
-            response_json = json.loads(response_data)
-            isochrone_layer = self._create_isochrone_layer(response_json)
-            return isochrone_layer
+        if response:
+            try:
+                # Create isochrone layer from the ORS response
+                isochrone_layer = self._create_isochrone_layer(response)
+                self.temp_layers.append(isochrone_layer)
+            except Exception as e:
+                QgsMessageLog.logMessage(
+                    f"Error creating isochrone layer: {e}",
+                    "MultiBufferCreator",
+                    Qgis.Critical,
+                )
         else:
-            raise QgsProcessingException(
-                f"Error fetching isochrones: {reply.errorString()}"
+            QgsMessageLog.logMessage(
+                "No response or invalid response from ORS API.",
+                "MultiBufferCreator",
+                Qgis.Critical,
             )
+
+        # Stop the event loop after the response is handled
+        self.loop.quit()
 
     def _create_isochrone_layer(self, isochrone_data):
         """
@@ -168,12 +179,35 @@ class MultiBufferCreator:
         )
         provider = isochrone_layer.dataProvider()
 
+        # Add the 'value' field to the layer's attribute table
+        isochrone_layer.startEditing()
+        isochrone_layer.addAttribute(QgsField("value", QVariant.Int))
+        isochrone_layer.commitChanges()
+
         # Parse the features from ORS response
         features = []
         for feature_data in isochrone_data["features"]:
-            geom = QgsGeometry.fromWkt(feature_data["geometry"]["coordinates"])
+            geometry = feature_data["geometry"]
+            # Check if the geometry type is Polygon or MultiPolygon
+            if geometry["type"] == "Polygon":
+                coordinates = geometry["coordinates"]
+                # Create QgsPolygon from the coordinate array
+                qgs_geometry = QgsGeometry.fromPolygonXY(
+                    [[QgsPointXY(pt[0], pt[1]) for pt in ring] for ring in coordinates]
+                )
+            elif geometry["type"] == "MultiPolygon":
+                coordinates = geometry["coordinates"]
+                # Create QgsMultiPolygon from the coordinate array
+                qgs_geometry = QgsGeometry.fromMultiPolygonXY(
+                    [
+                        [[QgsPointXY(pt[0], pt[1]) for pt in ring] for ring in polygon]
+                        for polygon in coordinates
+                    ]
+                )
+            else:
+                raise ValueError(f"Unsupported geometry type: {geometry['type']}")
             feat = QgsFeature()
-            feat.setGeometry(geom)
+            feat.setGeometry(qgs_geometry)
             feat.setAttributes(
                 [feature_data["properties"].get("value", 0)]
             )  # Add attributes as needed
@@ -182,21 +216,18 @@ class MultiBufferCreator:
         provider.addFeatures(features)
         return isochrone_layer
 
-    def _merge_layers(self, temp_layers, crs):
-        """
-        Merges all temporary isochrone layers.
-
-        :param temp_layers: List of QgsVectorLayer containing the isochrones
-        :param crs: CRS of the merged layer
-        :return: Merged QgsVectorLayer
-        """
+    def _merge_layers(self, temp_layers, crs, output_dir):
+        """Merges all temporary isochrone layers."""
+        merge_output = os.path.join(output_dir, "merged_isochrones.shp")
         merge_params = {
             "LAYERS": temp_layers,
             "CRS": QgsCoordinateReferenceSystem(crs),
-            "OUTPUT": "memory:",
+            "OUTPUT": merge_output,
         }
         merged_result = processing.run("native:mergevectorlayers", merge_params)
-        return merged_result["OUTPUT"]
+        # return merged_result["OUTPUT"]
+        merge = QgsVectorLayer(merged_result["OUTPUT"], "merge", "ogr")
+        return merge
 
     def _create_bands(self, merged_layer, output_path, crs):
         """
@@ -208,6 +239,13 @@ class MultiBufferCreator:
         """
         # Extract unique ranges from the 'value' field added by ORS
         ranges_field = "value"
+        # Verify that the field exists in the merged_layer
+        field_index = merged_layer.fields().indexFromName(ranges_field)
+        if field_index == -1:
+            raise KeyError(
+                f"Field '{ranges_field}' does not exist in the merged layer."
+            )
+
         unique_ranges = sorted(
             {feat[ranges_field] for feat in merged_layer.getFeatures()}
         )
@@ -294,5 +332,6 @@ class MultiBufferCreator:
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
         QgsMessageLog.logMessage(
             f"Multi-buffer layer created at {output_path}",
+            "MultiBufferCreator",
             Qgis.Info,
         )
