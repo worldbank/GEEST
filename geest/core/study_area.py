@@ -1,5 +1,6 @@
 import os
 import re
+import glob
 from typing import List, Optional
 from qgis.core import (
     QgsRectangle,
@@ -9,6 +10,7 @@ from qgis.core import (
     QgsProject,
     QgsCoordinateTransform,
     QgsCoordinateReferenceSystem,
+    QgsRasterLayer,
     QgsWkbTypes,
     QgsVectorLayer,
     QgsVectorFileWriter,
@@ -142,6 +144,9 @@ class StudyAreaProcessor:
 
         # Add the 'study_area_bboxes' layer to the QGIS map after processing is complete
         self.add_layer_to_map("study_area_bboxes")
+        # Create and add the VRT of all generated raster masks
+        if self.mode == "raster":
+            self.create_raster_vrt()
 
     def add_layer_to_map(self, layer_name: str) -> None:
         """
@@ -176,6 +181,7 @@ class StudyAreaProcessor:
         :param normalized_name: Name normalized for file storage.
         :param area_name: Name of the study area.
         """
+       
         # Compute the aligned bounding box based on the transformed geometry
         # This will do the CRS transform too
         bbox: QgsRectangle = self.grid_aligned_bbox(geom.boundingBox())
@@ -391,7 +397,7 @@ class StudyAreaProcessor:
         :param geom: Geometry to be rasterized.
         :param aligned_box: Aligned bounding box for the geometry.
         :param mask_name: Name for the output raster file.
-        """
+        """    
         mask_filepath = os.path.join(self.working_dir, "study_area", f"{mask_name}.tif")
 
         # Create a memory layer to hold the geometry
@@ -487,3 +493,52 @@ class StudyAreaProcessor:
                 QgsMessageLog.logMessage(f"Created study area directory: {study_area_dir}", tag="Geest", level=Qgis.Info)
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error creating directory: {e}", tag="Geest", level=Qgis.Critical)
+
+
+    def create_raster_vrt(self, output_vrt_name: str = "combined_mask.vrt") -> None:
+            """
+            Creates a VRT file from all generated raster masks and adds it to the QGIS map.
+
+            :param output_vrt_name: The name of the VRT file to create.
+            """
+            QgsMessageLog.logMessage(
+                f"Creating VRT of masks '{output_vrt_name}' layer to the map.",
+                tag="Geest",
+                level=Qgis.Info,
+            )              
+            # Directory containing raster masks
+            raster_dir = os.path.join(self.working_dir, "study_area")
+            raster_files = glob.glob(os.path.join(raster_dir, "*.tif"))
+
+            if not raster_files:
+                QgsMessageLog.logMessage("No raster masks found to combine into VRT.", tag="Geest", level=Qgis.Warning)
+                return
+
+            vrt_filepath = os.path.join(raster_dir, output_vrt_name)
+
+            # Define the VRT parameters
+            params = {
+                "INPUT": raster_files,
+                "RESOLUTION": 0,  # Use highest resolution among input files
+                "SEPARATE": False,  # Combine all input rasters as a single band
+                "OUTPUT": vrt_filepath,
+                'PROJ_DIFFERENCE':False,
+                'ADD_ALPHA':False,
+                'ASSIGN_CRS':None,
+                'RESAMPLING':0,
+                'SRC_NODATA':'0',
+                'EXTRA':''
+            }
+
+            # Run the gdal:buildvrt processing algorithm to create the VRT
+            processing.run("gdal:buildvirtualraster", params)
+            QgsMessageLog.logMessage(f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info)
+
+            # Add the VRT to the QGIS map
+            vrt_layer = QgsRasterLayer(vrt_filepath, "Combined Mask VRT")
+
+            if vrt_layer.isValid():
+                QgsProject.instance().addMapLayer(vrt_layer)
+                QgsMessageLog.logMessage("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
+            else:
+                QgsMessageLog.logMessage("Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical)
