@@ -27,7 +27,7 @@ class StudyAreaProcessor:
         layer: QgsVectorLayer,
         field_name: str,
         working_dir: str,
-        mode: str = "vector",
+        mode: str = "raster",
         epsg_code: Optional[int] = None,
     ):
         """
@@ -36,9 +36,9 @@ class StudyAreaProcessor:
         :param layer: The vector layer containing study area features.
         :param field_name: The name of the field containing area names.
         :param working_dir: Directory path where outputs will be saved.
-        :param mode: Processing mode, either 'vector' or 'raster'.
+        :param mode: Processing mode, either 'vector' or 'raster'. Default is raster.
         :param epsg_code: Optional EPSG code for the output CRS. If None, a UTM zone
-                          is calculated based on layer extent.
+                          is calculated based on layer extent or extent of selected features.
         """
         self.layer: QgsVectorLayer = layer
         self.field_name: str = field_name
@@ -201,8 +201,18 @@ class StudyAreaProcessor:
 
         # Process the geometry based on the selected mode
         if self.mode == "vector":
+            QgsMessageLog.logMessage(
+                f"Creating vector grid for {area_name}.",
+                tag="Geest",
+                level=Qgis.Info,
+            )            
             self.create_and_save_grid(geom, bbox)
         elif self.mode == "raster":
+            QgsMessageLog.logMessage(
+                f"Creating raster mask for {area_name}.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             self.create_raster_mask(geom, normalized_name)
 
     def process_multipart_geometry(
