@@ -418,7 +418,7 @@ class StudyAreaProcessor:
         params = {
             "INPUT": temp_layer,
             "FIELD": None,
-            "BURN": 0,
+            "BURN": 1,
             "USE_Z": False,
             "UNITS": 0,
             "WIDTH": aligned_box.xMaximum() - aligned_box.xMinimum(),
