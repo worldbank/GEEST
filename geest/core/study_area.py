@@ -202,18 +202,18 @@ class StudyAreaProcessor:
         # Process the geometry based on the selected mode
         if self.mode == "vector":
             QgsMessageLog.logMessage(
-                f"Creating vector grid for {area_name}.",
+                f"Creating vector grid for {normalized_name}.",
                 tag="Geest",
                 level=Qgis.Info,
             )            
             self.create_and_save_grid(geom, bbox)
         elif self.mode == "raster":
             QgsMessageLog.logMessage(
-                f"Creating raster mask for {area_name}.",
+                f"Creating raster mask for {normalized_name}.",
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.create_raster_mask(geom, normalized_name)
+            self.create_raster_mask(geom, bbox, normalized_name)
 
     def process_multipart_geometry(
         self, geom: QgsGeometry, normalized_name: str, area_name: str
@@ -384,36 +384,59 @@ class StudyAreaProcessor:
         provider.addFeatures(feature_batch)
         gpkg_layer.updateExtents()
 
-    def create_raster_mask(self, geom: QgsGeometry, mask_name: str) -> None:
+    def create_raster_mask(self, geom: QgsGeometry, aligned_box: QgsRectangle, mask_name: str) -> None:
         """
         Creates a 1-bit raster mask for a single geometry.
 
         :param geom: Geometry to be rasterized.
+        :param aligned_box: Aligned bounding box for the geometry.
         :param mask_name: Name for the output raster file.
         """
-        bbox = geom.boundingBox()
-        aligned_bbox = self.grid_aligned_bbox(bbox)
-
         mask_filepath = os.path.join(self.working_dir, "study_area", f"{mask_name}.tif")
 
-        # Define rasterization parameters
+        # Create a memory layer to hold the geometry
+        temp_layer = QgsVectorLayer(
+            f"Polygon?crs={self.output_crs.authid()}", "temp_mask_layer", "memory"
+        )
+        temp_layer_data_provider = temp_layer.dataProvider()
+
+        # Define a field to store the mask value
+        temp_layer_data_provider.addAttributes([QgsField(self.field_name, QVariant.String)])
+        temp_layer.updateFields()
+
+        # Add the geometry to the memory layer
+        temp_feature = QgsFeature()
+        temp_feature.setGeometry(geom)
+        temp_feature.setAttributes(["1"])  # Setting an arbitrary value for the mask
+        temp_layer_data_provider.addFeature(temp_feature)
+
+        # Ensure resolution parameters are properly formatted as float values
+        x_res = 100.0  # 100m pixel size in X direction
+        y_res = 100.0  # 100m pixel size in Y direction
+
+        # Define rasterization parameters for the temporary layer
         params = {
-            "INPUT": self.layer,           # Input polygon layer
-            "FIELD": self.field_name,      # Field to use for raster values (could also use a fixed value like 1)
-            "BURN": 1,                     # Burn value for polygon area (all areas will be set to 1)
-            "UNITS": 1,                    # Use pixel size in map units
-            "X_RESOLUTION": 100,           # Pixel size in the X direction
-            "Y_RESOLUTION": 100,           # Pixel size in the Y direction
-            "EXTENT": f"{aligned_bbox.xMinimum()},{aligned_bbox.xMaximum()},"
-                      f"{aligned_bbox.yMinimum()},{aligned_bbox.yMaximum()}",  # Extent of the aligned bbox
-            "NODATA": 0,                   # No data value (background/outside area)
-            "DATA_TYPE": 1,                # Byte data type (1-bit), representing binary values 0 and 1
+            "INPUT": temp_layer,
+            "FIELD": None,
+            "BURN": 0,
+            "USE_Z": False,
+            "UNITS": 0,
+            "WIDTH": aligned_box.xMaximum() - aligned_box.xMinimum(),
+            "HEIGHT": aligned_box.yMaximum() - aligned_box.yMinimum(),
+            "EXTENT": f"{aligned_box.xMinimum()},{aligned_box.xMaximum()},"
+                    f"{aligned_box.yMinimum()},{aligned_box.yMaximum()}",  # Extent of the aligned bbox
+            "NODATA": 0,
+            "OPTIONS": "",
+            "DATA_TYPE": 1,  # Byte data type (1-bit), representing binary values 0 and 1
+            "INIT": None,
+            "INVERT": False,
+            "EXTRA": "",
             "OUTPUT": mask_filepath,
         }
-
         # Run the rasterize algorithm
         processing.run("gdal:rasterize", params)
         QgsMessageLog.logMessage(f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info)
+
 
     def calculate_utm_zone(self, bbox: QgsRectangle) -> int:
         """
