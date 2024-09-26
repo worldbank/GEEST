@@ -84,14 +84,8 @@ class StudyAreaProcessor:
         QgsMessageLog.logMessage(
             f"Project CRS Set to: EPSG:{self.epsg_code}", tag="Geest", level=Qgis.Info
         )
-        # Transform layer_bbox to the output CRS
-        crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
-        transform: QgsCoordinateTransform = QgsCoordinateTransform(
-            crs_src, self.output_crs, QgsProject.instance()
-        )
-        self.layer_bbox = transform.transformBoundingBox(self.layer_bbox)
 
-        # Align the transformed layer_bbox to a 100m grid
+        # Reproject and align the transformed layer_bbox to a 100m grid and output crs
         self.layer_bbox = self.grid_aligned_bbox(self.layer_bbox)
 
     def process_study_area(self) -> None:
@@ -118,20 +112,12 @@ class StudyAreaProcessor:
         selected_features = self.layer.selectedFeatures()
         features = selected_features if selected_features else self.layer.getFeatures()
 
-        crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
-        transform: QgsCoordinateTransform = QgsCoordinateTransform(
-            crs_src, self.output_crs, QgsProject.instance()
-        )
-
         for feature in features:
             geom: QgsGeometry = feature.geometry()
             area_name: str = feature[self.field_name]
             normalized_name: str = re.sub(r"\s+", "_", area_name.lower())
 
             try:
-                # Transform geometry to the correct CRS once at the start
-                geom.transform(transform)
-
                 if not geom.isEmpty() and geom.isGeosValid():
                     if geom.isMultipart():
                         self.process_multipart_geometry(
@@ -190,21 +176,14 @@ class StudyAreaProcessor:
         :param normalized_name: Name normalized for file storage.
         :param area_name: Name of the study area.
         """
-        # Transform the geometry to the output CRS
-        crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
-        transform: QgsCoordinateTransform = QgsCoordinateTransform(
-            crs_src, self.output_crs, QgsProject.instance()
-        )
-        geom.transform(transform)
-
         # Compute the aligned bounding box based on the transformed geometry
+        # This will do the CRS transform too
         bbox: QgsRectangle = self.grid_aligned_bbox(geom.boundingBox())
 
         # Create a feature for the aligned bounding box
         study_area_feature: QgsFeature = QgsFeature()
         study_area_feature.setGeometry(QgsGeometry.fromRect(bbox))
-        study_area_feature.setAttributes([area_name])
-
+        study_area_feature.setAttributes([area_name])        
         # Always save the study area bounding boxes regardless of mode
         self.save_to_geopackage(
             [study_area_feature],
@@ -212,6 +191,13 @@ class StudyAreaProcessor:
             [QgsField("area_name", QVariant.String)],
             QgsWkbTypes.Polygon,
         )
+        
+        # Transform the geometry to the output CRS
+        crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
+        transform: QgsCoordinateTransform = QgsCoordinateTransform(
+            crs_src, self.output_crs, QgsProject.instance()
+        )
+        geom.transform(transform)
 
         # Process the geometry based on the selected mode
         if self.mode == "vector":
@@ -242,18 +228,32 @@ class StudyAreaProcessor:
 
     def grid_aligned_bbox(self, bbox: QgsRectangle) -> QgsRectangle:
         """
-        Aligns the bounding box to a 100m grid so that its dimensions are divisible by 100m.
+        Transforms and aligns the bounding box to a 100m grid in the output CRS.
+        The alignment ensures that the bbox aligns with the study area grid, offset by an exact multiple of 100m.
 
-        :param bbox: The bounding box to be aligned.
-        :return: A new bounding box aligned to the grid.
+        :param bbox: The bounding box to be aligned, in the CRS of the input layer.
+        :return: A new bounding box aligned to the grid, in the output CRS.
         """
-        # Align the bounding box to a grid aligned at 100m intervals
-        x_min = int(bbox.xMinimum() // 100) * 100
-        y_min = int(bbox.yMinimum() // 100) * 100
-        x_max = (int(bbox.xMaximum() // 100) + 1) * 100
-        y_max = (int(bbox.yMaximum() // 100) + 1) * 100
+        # Transform the bounding box to the output CRS
+        crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
+        transform: QgsCoordinateTransform = QgsCoordinateTransform(
+            crs_src, self.output_crs, QgsProject.instance()
+        )
+        bbox_transformed = transform.transformBoundingBox(bbox)
 
+        # Align the bounding box to a grid aligned at 100m intervals, offset by the study area origin
+        study_area_origin_x = int(self.layer_bbox.xMinimum() // 100) * 100
+        study_area_origin_y = int(self.layer_bbox.yMinimum() // 100) * 100
+
+        # Align bbox to the grid based on the study area origin
+        x_min = study_area_origin_x + int((bbox_transformed.xMinimum() - study_area_origin_x) // 100) * 100
+        y_min = study_area_origin_y + int((bbox_transformed.yMinimum() - study_area_origin_y) // 100) * 100
+        x_max = study_area_origin_x + (int((bbox_transformed.xMaximum() - study_area_origin_x) // 100) + 1) * 100
+        y_max = study_area_origin_y + (int((bbox_transformed.yMaximum() - study_area_origin_y) // 100) + 1) * 100
+
+        # Return the aligned bbox in the output CRS
         return QgsRectangle(x_min, y_min, x_max, y_max)
+
 
     def save_to_geopackage(self, features: List[QgsFeature], layer_name: str, fields: List[QgsField], geometry_type: QgsWkbTypes) -> None:
         """
