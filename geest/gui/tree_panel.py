@@ -140,18 +140,26 @@ class TreePanel(QWidget):
                 self.load_json()
                 self.model.loadJsonData(self.json_data)
                 self.treeView.expandAll()
-                QgsMessageLog.logMessage(f"Loaded model.json from {model_path}", "Geest", level=Qgis.Info)
+                QgsMessageLog.logMessage(
+                    f"Loaded model.json from {model_path}", "Geest", level=Qgis.Info
+                )
             except Exception as e:
-                QgsMessageLog.logMessage(f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical)
+                QgsMessageLog.logMessage(
+                    f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical
+                )
         else:
-            QgsMessageLog.logMessage(f"No model.json found in {new_directory}, using default.", "Geest", level=Qgis.Warning)
+            QgsMessageLog.logMessage(
+                f"No model.json found in {new_directory}, using default.",
+                "Geest",
+                level=Qgis.Warning,
+            )
             self.load_json()
             self.model.loadJsonData(self.json_data)
             self.treeView.expandAll()
-    
+
     @pyqtSlot()
     def set_working_directory(self, working_directory):
-        
+
         if working_directory:
             self.working_directory = working_directory
             self.working_directory_changed(working_directory)
@@ -160,16 +168,23 @@ class TreePanel(QWidget):
     def save_json_to_working_directory(self):
         """Automatically save the current JSON model to the working directory."""
         if not self.working_directory:
-            QgsMessageLog.logMessage("No working directory set, cannot save JSON.", "Geest", level=Qgis.Warning)
+            QgsMessageLog.logMessage(
+                "No working directory set, cannot save JSON.",
+                "Geest",
+                level=Qgis.Warning,
+            )
         try:
             json_data = self.model.to_json()
             save_path = os.path.join(self.working_directory, "model.json")
             with open(save_path, "w") as f:
                 json.dump(json_data, f, indent=4)
-            QgsMessageLog.logMessage(f"Saved JSON model to {save_path}", "Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                f"Saved JSON model to {save_path}", "Geest", level=Qgis.Info
+            )
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error saving JSON: {str(e)}", "Geest", level=Qgis.Critical)
-           
+            QgsMessageLog.logMessage(
+                f"Error saving JSON: {str(e)}", "Geest", level=Qgis.Critical
+            )
 
     def edit(self, index, trigger, event):
         """
@@ -342,11 +357,11 @@ class TreePanel(QWidget):
             self._start_workflows_from_tree(child_item)
 
     def on_task_started(self, message):
-        QgsMessageLog.logMessage(message,tag="Geest",level=Qgis.Info)
+        QgsMessageLog.logMessage(message, tag="Geest", level=Qgis.Info)
 
     def on_task_completed(self, message, success):
         status = "Success" if success else "Failure"
-        QgsMessageLog.logMessage(f"{message}: {status}",tag="Geest",level=Qgis.Info)
+        QgsMessageLog.logMessage(f"{message}: {status}", tag="Geest", level=Qgis.Info)
 
     def process_leaves(self):
         """
