@@ -18,7 +18,7 @@ class WorkflowFactory:
         if analysis_mode == "Spatial Analysis":
             return RasterLayerWorkflow(attributes, feedback)
         elif analysis_mode == "Use Default Index Score":
-            return DefaultIndexScoreWorkflow(attributes, feedback)        
+            return DefaultIndexScoreWorkflow(attributes, feedback)
         elif analysis_mode == "Don’t Use":
             return DontUseWorkflow(attributes, feedback)
         elif analysis_mode == "Temporal Analysis":
