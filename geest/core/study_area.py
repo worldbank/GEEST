@@ -180,6 +180,7 @@ class StudyAreaProcessor:
 
         # Add the 'study_area_bboxes' layer to the QGIS map after processing is complete
         self.add_layer_to_map("study_area_bboxes")
+        self.add_layer_to_map("study_area_polygons")
 
         # Create and add the VRT of all generated raster masks if in raster mode
         if self.mode == "raster":
@@ -235,13 +236,26 @@ class StudyAreaProcessor:
             [QgsField("area_name", QVariant.String)],
             QgsWkbTypes.Polygon,
         )
-        
+               
         # Transform the geometry to the output CRS
         crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
         transform: QgsCoordinateTransform = QgsCoordinateTransform(
             crs_src, self.output_crs, QgsProject.instance()
         )
         geom.transform(transform)
+
+        # Create a feature for the original part
+        study_area_polygon: QgsFeature = QgsFeature()
+        study_area_polygon.setGeometry(geom)
+        study_area_polygon.setAttributes([area_name])        
+        # Always save the study area bounding boxes regardless of mode
+        self.save_to_geopackage(
+            [study_area_polygon],
+            "study_area_polygons",
+            [QgsField("area_name", QVariant.String)],
+            QgsWkbTypes.Polygon,
+        )
+
 
         # Process the geometry based on the selected mode
         if self.mode == "vector":

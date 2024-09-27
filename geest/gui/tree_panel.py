@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import (
     QMenu,
     QCheckBox,  # Add QCheckBox for Edit Toggle
 )
-from qgis.PyQt.QtCore import QPoint, Qt, QTimer
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import QgsMessageLog, Qgis, QgsLogger
 from .geest_treeview import CustomTreeView, JsonTreeModel
@@ -33,6 +33,8 @@ class TreePanel(QWidget):
         super().__init__(parent)
 
         # Initialize the QueueManager
+        self.working_directory = None
+
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
         self.json_file = json_file
@@ -54,6 +56,10 @@ class TreePanel(QWidget):
         # Create a model for the QTreeView using custom JsonTreeModel
         self.model = JsonTreeModel(self.json_data)
         self.treeView.setModel(self.model)
+        # Connect signals to track changes in the model and save automatically
+        self.model.dataChanged.connect(self.save_json_to_working_directory)
+        self.model.rowsInserted.connect(self.save_json_to_working_directory)
+        self.model.rowsRemoved.connect(self.save_json_to_working_directory)
 
         # Only allow editing on double-click (initially enabled)
         self.treeView.setEditTriggers(QTreeView.DoubleClicked)
@@ -121,6 +127,64 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
         layout.addLayout(button_bar)
         self.setLayout(layout)
+
+    @pyqtSlot(str)
+    def working_directory_changed(self, new_directory):
+        """Change the working directory and load the model.json if available."""
+        self.working_directory = new_directory
+        model_path = os.path.join(new_directory, "model.json")
+
+        if os.path.exists(model_path):
+            try:
+                self.json_file = model_path
+                self.load_json()
+                self.model.loadJsonData(self.json_data)
+                self.treeView.expandAll()
+                QgsMessageLog.logMessage(
+                    f"Loaded model.json from {model_path}", "Geest", level=Qgis.Info
+                )
+            except Exception as e:
+                QgsMessageLog.logMessage(
+                    f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical
+                )
+        else:
+            QgsMessageLog.logMessage(
+                f"No model.json found in {new_directory}, using default.",
+                "Geest",
+                level=Qgis.Warning,
+            )
+            self.load_json()
+            self.model.loadJsonData(self.json_data)
+            self.treeView.expandAll()
+
+    @pyqtSlot()
+    def set_working_directory(self, working_directory):
+
+        if working_directory:
+            self.working_directory = working_directory
+            self.working_directory_changed(working_directory)
+
+    @pyqtSlot()
+    def save_json_to_working_directory(self):
+        """Automatically save the current JSON model to the working directory."""
+        if not self.working_directory:
+            QgsMessageLog.logMessage(
+                "No working directory set, cannot save JSON.",
+                "Geest",
+                level=Qgis.Warning,
+            )
+        try:
+            json_data = self.model.to_json()
+            save_path = os.path.join(self.working_directory, "model.json")
+            with open(save_path, "w") as f:
+                json.dump(json_data, f, indent=4)
+            QgsMessageLog.logMessage(
+                f"Saved JSON model to {save_path}", "Geest", level=Qgis.Info
+            )
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Error saving JSON: {str(e)}", "Geest", level=Qgis.Critical
+            )
 
     def edit(self, index, trigger, event):
         """
@@ -293,11 +357,11 @@ class TreePanel(QWidget):
             self._start_workflows_from_tree(child_item)
 
     def on_task_started(self, message):
-        print(message)
+        QgsMessageLog.logMessage(message, tag="Geest", level=Qgis.Info)
 
     def on_task_completed(self, message, success):
         status = "Success" if success else "Failure"
-        print(f"{message}: {status}")
+        QgsMessageLog.logMessage(f"{message}: {status}", tag="Geest", level=Qgis.Info)
 
     def process_leaves(self):
         """
@@ -312,22 +376,22 @@ class TreePanel(QWidget):
         # old implementation to be removed soone
         # follows below.
 
-        model = self.treeView.model()  # Get the model from the tree_view
+        ### model = self.treeView.model()  # Get the model from the tree_view
 
         # Disable the prepare button and show the throbber during processing
         self.prepare_button.setEnabled(False)
         self.prepare_throbber.setVisible(True)
 
         # Iterate over all items in the tree and find nodes with the 'layer' role
-        layer_nodes = []
-        row_count = model.rowCount()
+        ### layer_nodes = []
+        ### row_count = model.rowCount()
 
-        for row in range(row_count):
-            parent_index = model.index(row, 0)  # Start from the root level
-            self.collect_layer_nodes(model, parent_index, layer_nodes)
+        ### for row in range(row_count):
+        ###     parent_index = model.index(row, 0)  # Start from the root level
+        ###     self.collect_layer_nodes(model, parent_index, layer_nodes)
 
         # Process each 'layer' node
-        self.process_each_layer(layer_nodes, 0)
+        ### self.process_each_layer(layer_nodes, 0)
 
     def collect_layer_nodes(self, model, parent_index, layer_nodes):
         """

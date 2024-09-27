@@ -49,7 +49,7 @@ in pkgs.mkShell rec {
   ];
   # Run this command, only after creating the virtual environment
   PROJECT_ROOT = builtins.getEnv "PWD";
-
+   
   postVenvCreation = ''
     unset SOURCE_DATE_EPOCH
     pip install -r requirements-dev.txt

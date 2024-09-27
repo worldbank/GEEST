@@ -1,4 +1,5 @@
-import re
+import json
+import os
 from qgis.PyQt.QtWidgets import (
     QButtonGroup,
     QCheckBox,
@@ -7,12 +8,9 @@ from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QDoubleSpinBox,
     QFrame,
-    QHBoxLayout,
     QHeaderView,
     QLabel,
     QLineEdit,
-    QPushButton,
-    QRadioButton,
     QSizePolicy,
     QSpacerItem,
     QSpinBox,
@@ -21,7 +19,8 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QTextEdit,
     QVBoxLayout,
-    QWidget,
+    QTabWidget,  # Added for tabs
+    QWidget,  # Added for tab contents
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
@@ -51,15 +50,54 @@ class LayerDetailDialog(QDialog):
         self.resize(800, 600)  # Set a wider dialog size
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
+        # Main widget with tabs
+        self.tab_widget = QTabWidget()
+
+        # Left-hand tab for Markdown editor and preview
+        self.markdown_tab = QWidget()
+        self.setup_markdown_tab(layer_name)
+
+        # Right-hand tab for editing properties (table)
+        self.edit_tab = QWidget()
+        self.setup_edit_tab()
+
+        # Add tabs to the QTabWidget
+        self.tab_widget.addTab(self.markdown_tab, "Preview")
+        self.tab_widget.addTab(self.edit_tab, "Edit")
+
+        # Show or hide the "Edit" tab based on `editing`
+        self.tab_widget.setTabVisible(1, self.editing)
+
+        # Add the tab widget to the main layout
+        layout.addWidget(self.tab_widget)
+
+        # Create a QDialogButtonBox for OK/Cancel buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept_changes)  # Connect OK to accept_changes
+        button_box.rejected.connect(self.reject)  # Connect Cancel to reject the dialog
+        layout.addWidget(button_box, alignment=Qt.AlignBottom)  # Place at the bottom
+
+        self.setLayout(layout)
+
+        # Initial call to update the preview with existing content
+        self.update_preview()
+
+    def setup_markdown_tab(self, layer_name):
+        """Sets up the left-hand tab for the Markdown editor and preview."""
+        markdown_layout = QVBoxLayout(self.markdown_tab)
+
         self.title_label = QLabel(
             "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
             self,
         )
         self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
+        markdown_layout.addWidget(self.title_label)
+
         # Get the grandparent and parent items
-        grandparent_item = tree_item.parent().parent() if tree_item.parent() else None
-        parent_item = tree_item.parent()
+        grandparent_item = (
+            self.tree_item.parent().parent() if self.tree_item.parent() else None
+        )
+        parent_item = self.tree_item.parent()
 
         # If both grandparent and parent exist, create the label
         if grandparent_item and parent_item:
@@ -69,7 +107,7 @@ class LayerDetailDialog(QDialog):
             hierarchy_label.setStyleSheet(
                 "font-size: 14px; font-weight: bold; color: gray;"
             )
-            layout.addWidget(
+            markdown_layout.addWidget(
                 hierarchy_label, alignment=Qt.AlignTop
             )  # Add the label above the heading
 
@@ -78,7 +116,7 @@ class LayerDetailDialog(QDialog):
         heading_label.setStyleSheet(
             "font-size: 18px; font-weight: bold;"
         )  # Bold heading
-        layout.addWidget(
+        markdown_layout.addWidget(
             heading_label, alignment=Qt.AlignTop
         )  # Align heading at the top
 
@@ -91,14 +129,14 @@ class LayerDetailDialog(QDialog):
             QSizePolicy.Expanding, QSizePolicy.Fixed
         )  # Stretch horizontally, fixed vertically
 
-        layout.addWidget(self.banner_label)
+        markdown_layout.addWidget(self.banner_label)
 
         # Create a horizontal splitter to hold both the Markdown editor and the preview
         splitter = QSplitter(Qt.Horizontal)
 
         # Create the QTextEdit for Markdown editing (left side)
         self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(layer_data.get("Text", ""))
+        self.text_edit_left.setPlainText(self.layer_data.get("Text", ""))
         self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
         if self.editing:
             splitter.addWidget(self.text_edit_left)
@@ -112,7 +150,7 @@ class LayerDetailDialog(QDialog):
         )  # Match form background
         splitter.addWidget(self.text_edit_right)
 
-        layout.addWidget(splitter)
+        markdown_layout.addWidget(splitter)
 
         # Connect the Markdown editor (left) to update the preview (right) in real-time
         self.text_edit_left.textChanged.connect(self.update_preview)
@@ -121,7 +159,14 @@ class LayerDetailDialog(QDialog):
         expanding_spacer = QSpacerItem(
             20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
         )
-        layout.addSpacerItem(expanding_spacer)
+        markdown_layout.addSpacerItem(expanding_spacer)
+
+        # Add the configuration frame with radio buttons
+        self.add_config_widgets(markdown_layout)
+
+    def setup_edit_tab(self):
+        """Sets up the right-hand tab for editing layer properties (table)."""
+        edit_layout = QVBoxLayout(self.edit_tab)
 
         # Create the QTableWidget for other properties
         self.table = QTableWidget()
@@ -136,23 +181,7 @@ class LayerDetailDialog(QDialog):
         header.setSectionResizeMode(0, QHeaderView.Stretch)  # Key column
         header.setSectionResizeMode(1, QHeaderView.Stretch)  # Value column
 
-        # Add the table to the layout
-        if self.editing:
-            layout.addWidget(self.table)
-
-        # Add the configuration frame with radio buttons
-        self.add_config_widgets(layout)
-
-        # Create a QDialogButtonBox for OK/Cancel buttons
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        button_box.accepted.connect(self.accept_changes)  # Connect OK to accept_changes
-        button_box.rejected.connect(self.reject)  # Connect Cancel to reject the dialog
-        layout.addWidget(button_box, alignment=Qt.AlignBottom)  # Place at the bottom
-
-        self.setLayout(layout)
-
-        # Initial call to update the preview with existing content
-        self.update_preview()
+        edit_layout.addWidget(self.table)
 
     def populate_table(self):
         """Populate the table with all key-value pairs except 'indicator'."""
@@ -216,9 +245,8 @@ class LayerDetailDialog(QDialog):
         else:
             print("No configuration widgets were created for this layer.")
 
-    # Optionally, add this method to handle configuration changes
     def handle_config_change(self, new_config):
-        # Update your layer_data or perform any other necessary actions
+        """Optionally handle configuration changes."""
         self.layer_data = new_config
         print("Configuration updated:", new_config)
 
