@@ -12,7 +12,9 @@ from .tree_panel import TreePanel
 
 
 class GeestDock(QDockWidget):
-    def __init__(self, parent: Optional[QWidget] = None, json_file: Optional[str] = None) -> None:
+    def __init__(
+        self, parent: Optional[QWidget] = None, json_file: Optional[str] = None
+    ) -> None:
         """
         Initializes the GeestDock with a parent and an optional JSON file.
         Sets up the main widget, tabs, and restores previous geometry.
@@ -65,7 +67,9 @@ class GeestDock(QDockWidget):
 
             # Customize allowed areas for docking
             self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-            self.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
+            self.setFeatures(
+                QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable
+            )
 
             # Connect tab change event if custom logic is needed when switching tabs
             self.tab_widget.currentChanged.connect(self.on_tab_changed)
@@ -76,7 +80,11 @@ class GeestDock(QDockWidget):
             QgsMessageLog.logMessage("GeestDock initialized successfully.", "Geest")
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error initializing GeestDock: {str(e)}", "Geest", level=QgsMessageLog.CRITICAL)
+            QgsMessageLog.logMessage(
+                f"Error initializing GeestDock: {str(e)}",
+                "Geest",
+                level=QgsMessageLog.CRITICAL,
+            )
 
     def on_tab_changed(self, index: int) -> None:
         """
@@ -101,7 +109,11 @@ class GeestDock(QDockWidget):
             self.tree_widget.load_data_from_json(json_file)
             QgsMessageLog.logMessage(f"Loaded JSON file: {json_file}", "Geest")
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error loading JSON file: {str(e)}", "Geest", level=QgsMessageLog.CRITICAL)
+            QgsMessageLog.logMessage(
+                f"Error loading JSON file: {str(e)}",
+                "Geest",
+                level=QgsMessageLog.CRITICAL,
+            )
 
     def restore_geometry(self) -> None:
         """
@@ -117,7 +129,11 @@ class GeestDock(QDockWidget):
                 QgsMessageLog.logMessage("No geometry to restore.", "Geest")
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error restoring geometry: {str(e)}", "Geest", level=QgsMessageLog.CRITICAL)
+            QgsMessageLog.logMessage(
+                f"Error restoring geometry: {str(e)}",
+                "Geest",
+                level=QgsMessageLog.CRITICAL,
+            )
 
     def closeEvent(self, event) -> None:
         """
@@ -129,7 +145,11 @@ class GeestDock(QDockWidget):
             self.save_geometry()
             QgsMessageLog.logMessage("Saved geometry on close.", "Geest")
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error saving geometry: {str(e)}", "Geest", level=QgsMessageLog.CRITICAL)
+            QgsMessageLog.logMessage(
+                f"Error saving geometry: {str(e)}",
+                "Geest",
+                level=QgsMessageLog.CRITICAL,
+            )
         super().closeEvent(event)
 
     def save_geometry(self) -> None:
@@ -141,4 +161,8 @@ class GeestDock(QDockWidget):
             settings.setValue("GeestDock/geometry", self.saveGeometry())
             QgsMessageLog.logMessage("Geometry saved successfully.", "Geest")
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error saving geometry: {str(e)}", "Geest", level=QgsMessageLog.CRITICAL)
+            QgsMessageLog.logMessage(
+                f"Error saving geometry: {str(e)}",
+                "Geest",
+                level=QgsMessageLog.CRITICAL,
+            )
