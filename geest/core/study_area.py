@@ -101,10 +101,8 @@ class StudyAreaProcessor:
         study_area_bbox_feature.setAttributes(["Layer Bounding Box"])
 
         self.save_to_geopackage(
-            [study_area_bbox_feature],
-            "study_area_bbox",
-            [QgsField("area_name", QVariant.String)],
-            QgsWkbTypes.Polygon,
+            study_area_bbox_feature,
+            "study_area_bbox"
         )
 
         # Add the study_area_bbox layer to the map
@@ -231,10 +229,8 @@ class StudyAreaProcessor:
         study_area_feature.setAttributes([area_name])        
         # Always save the study area bounding boxes regardless of mode
         self.save_to_geopackage(
-            [study_area_feature],
-            "study_area_bboxes",
-            [QgsField("area_name", QVariant.String)],
-            QgsWkbTypes.Polygon,
+            study_area_feature,
+            "study_area_bboxes"
         )
                
         # Transform the geometry to the output CRS
@@ -250,10 +246,8 @@ class StudyAreaProcessor:
         study_area_polygon.setAttributes([area_name])        
         # Always save the study area bounding boxes regardless of mode
         self.save_to_geopackage(
-            [study_area_polygon],
-            "study_area_polygons",
-            [QgsField("area_name", QVariant.String)],
-            QgsWkbTypes.Polygon,
+            study_area_polygon,
+            "study_area_polygons"
         )
 
 
@@ -329,24 +323,24 @@ class StudyAreaProcessor:
         return QgsRectangle(x_min, y_min, x_max, y_max)
 
 
-    def save_to_geopackage(self, features: List[QgsFeature], layer_name: str, fields: List[QgsField], geometry_type: QgsWkbTypes) -> None:
+    def save_to_geopackage(self, feature: QgsFeature, layer_name: str) -> None:
         """
         Save features to GeoPackage. Create or append the layer as necessary.
 
-        :param features: List of features to save.
+        :param features: Feature to save.
         :param layer_name: Name of the layer in the GeoPackage.
-        :param fields: Fields for the layer.
-        :param geometry_type: Geometry type for the layer.
+        
         """
-        self.create_layer_if_not_exists(layer_name, fields, geometry_type)
-        self.append_to_layer(layer_name, features)
 
-    def append_to_layer(self, layer_name: str, features: List[QgsFeature]) -> None:
+        self.create_layer_if_not_exists(layer_name)
+        self.append_to_layer(layer_name, feature)
+
+    def append_to_layer(self, layer_name: str, feature: QgsFeature) -> None:
         """
-        Append features to an existing layer in the GeoPackage.
+        Append feature to an existing layer in the GeoPackage.
 
         :param layer_name: Name of the layer in the GeoPackage.
-        :param features: List of features to append.
+        :param features: Feature to append.
         """
         gpkg_layer_path = f"{self.gpkg_path}|layername={layer_name}"
         gpkg_layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
@@ -354,30 +348,43 @@ class StudyAreaProcessor:
         if gpkg_layer.isValid():
             QgsMessageLog.logMessage(f"Appending to existing layer: {layer_name}", tag="Geest", level=Qgis.Info)
             provider = gpkg_layer.dataProvider()
-            provider.addFeatures(features)
+            provider.addFeatures([feature])
             gpkg_layer.updateExtents()
         else:
             QgsMessageLog.logMessage(f"Layer '{layer_name}' is not valid for appending.", tag="Geest", level=Qgis.Critical)
 
-    def create_layer_if_not_exists(self, layer_name: str, fields: List[QgsField], geometry_type: QgsWkbTypes) -> None:
+    def create_layer_if_not_exists(self, layer_name: str) -> None:
         """
         Create a new layer in the GeoPackage if it doesn't already exist.
 
+        It is assumed that all layers have the same structure of 
+
+        fid, area_name, geometry (Polygon)
+        
         :param layer_name: Name of the layer to create.
-        :param fields: Fields for the layer.
-        :param geometry_type: Geometry type for the layer.
         """
+
+        fields = QgsFields()
+        fields.append(QgsField("id", QVariant.Int))
+        fields.append(QgsField("area_name", QVariant.String))
+        geometry_type = QgsWkbTypes.Polygon
+
         gpkg_layer_path = f"{self.gpkg_path}|layername={layer_name}"
         layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
+        
         append = True
         # Check if the GeoPackage file exists
         if not os.path.exists(self.gpkg_path):
             append = False
-            QgsMessageLog.logMessage(f"GeoPackage does not exist. Creating: {self.gpkg_path}", tag="Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                f"GeoPackage does not exist. Creating: {self.gpkg_path}", 
+                tag="Geest", level=Qgis.Info)
 
         # If the layer doesn't exist, create it
         if not layer.isValid():
-            QgsMessageLog.logMessage(f"Layer '{layer_name}' does not exist. Creating it.", tag="Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                f"Layer '{layer_name}' does not exist. Creating it.", 
+                tag="Geest", level=Qgis.Info)
             crs = QgsCoordinateReferenceSystem(f"EPSG:{self.epsg_code}")
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "GPKG"
@@ -386,15 +393,10 @@ class StudyAreaProcessor:
             if append:
                 options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
 
-            # Convert list of QgsField objects to QgsFields object
-            qgs_fields = QgsFields()
-            for field in fields:
-                qgs_fields.append(field)
-
             # Create a new GeoPackage layer
             QgsVectorFileWriter.create(
                 fileName=self.gpkg_path,
-                fields=qgs_fields,
+                fields=fields,
                 geometryType=geometry_type,
                 srs=crs,
                 transformContext=QgsCoordinateTransformContext(),
