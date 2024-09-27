@@ -47,7 +47,7 @@ class StudyAreaProcessor:
         self.working_dir: str = working_dir
         self.mode: str = mode
         self.gpkg_path: str = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
-
+        self.counter: int = 0
         # Remove the GeoPackage if it already exists to start with a clean state
         if os.path.exists(self.gpkg_path):
             try:
@@ -272,6 +272,7 @@ class StudyAreaProcessor:
                 level=Qgis.Info,
             )
             self.create_raster_mask(geom, bbox, normalized_name)
+        self.counter += 1
 
     def process_multipart_geometry(
         self, geom: QgsGeometry, normalized_name: str, area_name: str
@@ -318,6 +319,11 @@ class StudyAreaProcessor:
         y_min = study_area_origin_y + int((bbox_transformed.yMinimum() - study_area_origin_y) // 100) * 100
         x_max = study_area_origin_x + (int((bbox_transformed.xMaximum() - study_area_origin_x) // 100) + 1) * 100
         y_max = study_area_origin_y + (int((bbox_transformed.yMaximum() - study_area_origin_y) // 100) + 1) * 100
+
+        y_min -= 100  # Offset by 100m to ensure the grid covers the entire geometry
+        y_max += 100  # Offset by 100m to ensure the grid covers the entire geometry
+        x_min -= 100  # Offset by 100m to ensure the grid covers the entire geometry
+        x_max += 100  # Offset by 100m to ensure the grid covers the entire geometry     
 
         # Return the aligned bbox in the output CRS
         return QgsRectangle(x_min, y_min, x_max, y_max)
