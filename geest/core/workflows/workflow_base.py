@@ -1,6 +1,6 @@
 import os
 from abc import ABC, abstractmethod
-from qgis.core import QgsFeedback, QgsVectorLayer
+from qgis.core import QgsFeedback, QgsVectorLayer, QgsMessageLog, Qgis
 from qgis.PyQt.QtCore import QSettings
 
 
@@ -26,13 +26,20 @@ class WorkflowBase(ABC):
             raise ValueError("Working directory not set.")
         # This is the lower level directory for this workflow
         self.workflow_directory = self._create_workflow_directory()
-        self.gpkg_path: str = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        self.gpkg_path: str = os.path.join(
+            self.working_directory, "study_area", "study_area.gpkg"
+        )
         if not os.path.exists(self.gpkg_path):
             raise ValueError(f"Study area geopackage not found at {self.gpkg_path}.")
-        self.bboxes_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr")
-        self.areas_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_polygons", "study_area_polygons", "ogr")
+        self.bboxes_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr"
+        )
+        self.areas_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_polygons",
+            "study_area_polygons",
+            "ogr",
+        )
         self.output_crs = self.bboxes_layer.crs()
-
 
     @abstractmethod
     def execute(self) -> bool:
@@ -50,12 +57,21 @@ class WorkflowBase(ABC):
         :return: The path to the workflow directory
         """
         workflow_dir = os.path.join(
-            self.working_directory, "contextual", "workplace_discrimination", "wbl_2024_workplace_index_score")
+            self.working_directory,
+            "contextual",
+            "workplace_discrimination",
+            "wbl_2024_workplace_index_score",
+        )
         if not os.path.exists(workflow_dir):
             try:
                 os.makedirs(workflow_dir)
-                QgsMessageLog.logMessage(f"Created study area directory: {workflow_dir}", tag="Geest", level=Qgis.Info)
+                QgsMessageLog.logMessage(
+                    f"Created study area directory: {workflow_dir}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
             except Exception as e:
-                QgsMessageLog.logMessage(f"Error creating directory: {e}", tag="Geest", level=Qgis.Critical)
+                QgsMessageLog.logMessage(
+                    f"Error creating directory: {e}", tag="Geest", level=Qgis.Critical
+                )
         return workflow_dir
-
