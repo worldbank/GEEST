@@ -33,27 +33,27 @@ class WorkflowQueueManager(QObject):
         task = WorkflowJob(description="Workflow Task", attributes=attributes)
         self.workflow_queue.add_job(task)
         QgsMessageLog.logMessage(
-            f"Task added: {task.description()}", "Workflow Manager", Qgis.Info
+            f"Task added: {task.description()}", tag="Geest", level=Qgis.Info
         )
 
     def start_processing(self) -> None:
         """Start processing the tasks in the WorkflowQueue."""
         QgsMessageLog.logMessage(
-            "Starting workflow queue processing...", "Workflow Manager", Qgis.Info
+            "Starting workflow queue processing...", tag="Geest", level=Qgis.Info
         )
         self.workflow_queue.start_processing()
 
     def cancel_processing(self) -> None:
         """Cancels all tasks in the WorkflowQueue."""
         QgsMessageLog.logMessage(
-            "Cancelling workflow queue...", "Workflow Manager", Qgis.Warning
+            "Cancelling workflow queue...", tag="Geest", level=Qgis.Info
         )
         self.workflow_queue.cancel_processing()
 
     def update_status(self) -> None:
         """Update the status of the workflow queue (for UI updates, etc.)."""
         QgsMessageLog.logMessage(
-            "Workflow queue status updated.", "Workflow Manager", Qgis.Info
+            "Workflow queue status updated.", tag="Geest", level=Qgis.Info
         )
 
     def on_processing_completed(self, success: bool) -> None:
@@ -64,12 +64,12 @@ class WorkflowQueueManager(QObject):
         if success:
             QgsMessageLog.logMessage(
                 "All workflow tasks completed successfully.",
-                "Workflow Manager",
-                Qgis.Success,
+                tag="Geest",
+                level=Qgis.Info,
             )
         else:
             QgsMessageLog.logMessage(
-                "Workflow processing was canceled.", "Workflow Manager", Qgis.Warning
+                "Workflow processing was canceled.", tag="Geest", level=Qgis.Info
             )
 
     def log_status_message(self, message: str) -> None:
@@ -77,4 +77,4 @@ class WorkflowQueueManager(QObject):
         Logs status messages from the WorkflowQueue.
         :param message: Status message to log
         """
-        QgsMessageLog.logMessage(message, "Workflow Manager", Qgis.Info)
+        QgsMessageLog.logMessage(message, tag="Geest", level=Qgis.Info)

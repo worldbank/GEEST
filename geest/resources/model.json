@@ -15,7 +15,7 @@
                         {
                             "Layer": "WBL 2024 Workplace Index Score",
                             "ID": "Workplace_Index",
-                            "Text": "Workplace DiscriminationThis tab represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100.Input: The input field takes in the WBL index score.Output:  A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of workplace discrimination afforded to women, whereas a value of 0 indicates areas where no workplace discrimination are afforded to women. ",
+                            "Text": "Workplace Discrimination\n\nThis tab represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100.Input: The input field takes in the WBL index score.Output:  A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of workplace discrimination afforded to women, whereas a value of 0 indicates areas where no workplace discrimination are afforded to women. ",
                             "Default Index Score": 83.8,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
@@ -38,7 +38,7 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
-                            "Analysis Mode": "Don\u2019t Use",
+                            "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1
                         }
                     ]
@@ -52,8 +52,8 @@
                         {
                             "Layer": "WBL 2024 Pay+Parenthood Index Score",
                             "ID": "Pay_Parenthood_Index",
-                            "Text": "Regulatory FrameworksThis tab computes a raster containing a standardized measure of the regulatory frameworks afforded to women in the country of interest. Input: The input fields take in the WBL Pay and Parenthood Index Scores percentage that represents the level of protective policies afforded to women. The calculation of this percentage is described in detail in the methodological framework document. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of protective policies afforded to women, whereas a value of 0 indicates areas where no protective policies are afforded to women. ",
-                            "Default Index Score": 0.0,
+                            "Text": "Regulatory Frameworks\n\nThis tab computes a raster containing a standardized measure of the regulatory frameworks afforded to women in the country of interest. Input: The input fields take in the WBL Pay and Parenthood Index Scores percentage that represents the level of protective policies afforded to women. The calculation of this percentage is described in detail in the methodological framework document. Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of protective policies afforded to women, whereas a value of 0 indicates areas where no protective policies are afforded to women. ",
+                            "Default Index Score": 80.0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
@@ -75,7 +75,7 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
-                            "Analysis Mode": "Don\u2019t Use",
+                            "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1
                         }
                     ]
@@ -89,8 +89,8 @@
                         {
                             "Layer": "WBL 2024 Entrepeneurship Index Score",
                             "ID": "Entrepeneurship_Index ",
-                            "Text": "Financial InclusionThis tab computes a raster containing a standardized measure of the percentage of women who have a bank account or have borrowed from a formal financial institution.   Input: The input field takes in the percentage of women who have a bank account (WBL Entrepeneurship Index Score). Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 signifies areas where all women possess a bank account or have borrowed from a formal financial institution, whereas  a value of 0 represents areas where no women have a bank account or have borrowed from a formal institution. ",
-                            "Default Index Score": 0.0,
+                            "Text": "Financial Inclusion\n\nThis tab computes a raster containing a standardized measure of the percentage of women who have a bank account or have borrowed from a formal financial institution.   Input: The input field takes in the percentage of women who have a bank account (WBL Entrepeneurship Index Score). Output: A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 signifies areas where all women possess a bank account or have borrowed from a formal financial institution, whereas  a value of 0 represents areas where no women have a bank account or have borrowed from a formal institution. ",
+                            "Default Index Score": 80.0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
                             "Default Multi Buffer Distances": "0,0,0",
@@ -112,7 +112,7 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
-                            "Analysis Mode": "Don\u2019t Use",
+                            "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1
                         }
                     ]

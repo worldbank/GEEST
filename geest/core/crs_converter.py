@@ -1,5 +1,11 @@
-from qgis.core import QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProcessingFeedback, QgsVectorLayer
+from qgis.core import (
+    QgsCoordinateTransform,
+    QgsCoordinateReferenceSystem,
+    QgsProcessingFeedback,
+    QgsVectorLayer,
+)
 from qgis import processing
+
 
 class CRSConverter:
     def __init__(self, layer):
@@ -22,7 +28,9 @@ class CRSConverter:
 
         # Check if the current CRS is the same as the target CRS
         if current_crs != target_crs:
-            print(f"Converting layer from {current_crs.authid()} to {target_crs.authid()}")
+            print(
+                f"Converting layer from {current_crs.authid()} to {target_crs.authid()}"
+            )
 
             layer = processing.run(
                 "native:reprojectlayer",

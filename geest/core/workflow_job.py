@@ -35,14 +35,14 @@ class WorkflowJob(QgsTask):
         if not self._workflow:
             QgsMessageLog.logMessage(
                 f"Error: No workflow assigned to {self.description()}",
-                "Custom Workflows",
-                Qgis.Critical,
+                tag="Geest",
+                level=Qgis.Critical,
             )
             return False
 
         try:
             QgsMessageLog.logMessage(
-                f"Running workflow: {self.description()}", "Custom Workflows", Qgis.Info
+                f"Running workflow: {self.description()}", tag="Geest", level=Qgis.Info
             )
 
             result = self._workflow.execute()
@@ -50,21 +50,21 @@ class WorkflowJob(QgsTask):
             if result:
                 QgsMessageLog.logMessage(
                     f"Workflow {self.description()} completed.",
-                    "Custom Workflows",
-                    Qgis.Info,
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
                 return True
             else:
                 QgsMessageLog.logMessage(
                     f"Workflow {self.description()} did not complete successfully.",
-                    "Custom Workflows",
-                    Qgis.Warning,
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
                 return False
 
         except Exception as e:
             QgsMessageLog.logMessage(
-                f"Error during task execution: {e}", "Custom Workflows", Qgis.Critical
+                f"Error during task execution: {e}", tag="Geest", level=Qgis.Critical
             )
             return False
 
