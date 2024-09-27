@@ -12,11 +12,8 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
 )
 from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
-from qgis.core import (
-    QgsMapLayerProxyModel,
-    QgsFieldProxyModel
-)
-from qgis.PyQt.QtCore import QSettings, QVariant
+from qgis.core import QgsMapLayerProxyModel, QgsFieldProxyModel
+from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import resources_path
 from geest.core.study_area import StudyAreaProcessor
@@ -39,9 +36,7 @@ class SetupPanel(QWidget):
         # geest-banner.png
         self.banner_label = QLabel()
         self.banner_label.setScaledContents(True)  # Allow image scaling
-        self.banner_label.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Fixed
-        )         
+        self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.banner_label.setPixmap(
             QPixmap(resources_path("resources", "geest-banner.png"))
         )

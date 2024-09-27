@@ -342,11 +342,11 @@ class TreePanel(QWidget):
             self._start_workflows_from_tree(child_item)
 
     def on_task_started(self, message):
-        print(message)
+        QgsMessageLog.logMessage(message,tag="Geest",level=Qgis.Info)
 
     def on_task_completed(self, message, success):
         status = "Success" if success else "Failure"
-        print(f"{message}: {status}")
+        QgsMessageLog.logMessage(f"{message}: {status}",tag="Geest",level=Qgis.Info)
 
     def process_leaves(self):
         """
@@ -361,22 +361,22 @@ class TreePanel(QWidget):
         # old implementation to be removed soone
         # follows below.
 
-        model = self.treeView.model()  # Get the model from the tree_view
+        ### model = self.treeView.model()  # Get the model from the tree_view
 
         # Disable the prepare button and show the throbber during processing
         self.prepare_button.setEnabled(False)
         self.prepare_throbber.setVisible(True)
 
         # Iterate over all items in the tree and find nodes with the 'layer' role
-        layer_nodes = []
-        row_count = model.rowCount()
+        ### layer_nodes = []
+        ### row_count = model.rowCount()
 
-        for row in range(row_count):
-            parent_index = model.index(row, 0)  # Start from the root level
-            self.collect_layer_nodes(model, parent_index, layer_nodes)
+        ### for row in range(row_count):
+        ###     parent_index = model.index(row, 0)  # Start from the root level
+        ###     self.collect_layer_nodes(model, parent_index, layer_nodes)
 
         # Process each 'layer' node
-        self.process_each_layer(layer_nodes, 0)
+        ### self.process_each_layer(layer_nodes, 0)
 
     def collect_layer_nodes(self, model, parent_index, layer_nodes):
         """

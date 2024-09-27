@@ -52,7 +52,7 @@ class LayerDetailDialog(QDialog):
 
         # Main widget with tabs
         self.tab_widget = QTabWidget()
-        
+
         # Left-hand tab for Markdown editor and preview
         self.markdown_tab = QWidget()
         self.setup_markdown_tab(layer_name)
@@ -94,7 +94,9 @@ class LayerDetailDialog(QDialog):
         markdown_layout.addWidget(self.title_label)
 
         # Get the grandparent and parent items
-        grandparent_item = self.tree_item.parent().parent() if self.tree_item.parent() else None
+        grandparent_item = (
+            self.tree_item.parent().parent() if self.tree_item.parent() else None
+        )
         parent_item = self.tree_item.parent()
 
         # If both grandparent and parent exist, create the label
@@ -180,7 +182,6 @@ class LayerDetailDialog(QDialog):
         header.setSectionResizeMode(1, QHeaderView.Stretch)  # Value column
 
         edit_layout.addWidget(self.table)
-
 
     def populate_table(self):
         """Populate the table with all key-value pairs except 'indicator'."""
