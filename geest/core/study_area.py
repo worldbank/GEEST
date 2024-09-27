@@ -46,7 +46,7 @@ class StudyAreaProcessor:
         self.field_name: str = field_name
         self.working_dir: str = working_dir
         self.mode: str = mode
-        self.gpkg_path: str = os.path.join(self.working_dir, "study_area.gpkg")
+        self.gpkg_path: str = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
 
         # Remove the GeoPackage if it already exists to start with a clean state
         if os.path.exists(self.gpkg_path):
