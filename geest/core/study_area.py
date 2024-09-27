@@ -224,7 +224,7 @@ class StudyAreaProcessor:
         self.save_to_geopackage(
             layer_name="study_area_bboxes",
             geom=QgsGeometry.fromRect(bbox),
-            area_name=area_name)
+            area_name=normalized_name)
                
         # Transform the geometry to the output CRS
         crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
@@ -238,7 +238,7 @@ class StudyAreaProcessor:
         self.save_to_geopackage(
             layer_name="study_area_polygons",
             geom=geom,
-            area_name=area_name)
+            area_name=normalized_name)
         # Process the geometry based on the selected mode
         if self.mode == "vector":
             QgsMessageLog.logMessage(
