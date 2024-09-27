@@ -63,7 +63,10 @@ class WorkflowQueueManager(QObject):
         """
         if success:
             QgsMessageLog.logMessage(
-                "All workflow tasks completed successfully.", tag="Geest", level=Qgis.Info)
+                "All workflow tasks completed successfully.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
         else:
             QgsMessageLog.logMessage(
                 "Workflow processing was canceled.", tag="Geest", level=Qgis.Info

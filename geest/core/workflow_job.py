@@ -34,7 +34,9 @@ class WorkflowJob(QgsTask):
         """
         if not self._workflow:
             QgsMessageLog.logMessage(
-                f"Error: No workflow assigned to {self.description()}", tag="Geest", level=Qgis.Critical,
+                f"Error: No workflow assigned to {self.description()}",
+                tag="Geest",
+                level=Qgis.Critical,
             )
             return False
 
@@ -47,12 +49,16 @@ class WorkflowJob(QgsTask):
 
             if result:
                 QgsMessageLog.logMessage(
-                    f"Workflow {self.description()} completed.", tag="Geest", level=Qgis.Info
+                    f"Workflow {self.description()} completed.",
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
                 return True
             else:
                 QgsMessageLog.logMessage(
-                    f"Workflow {self.description()} did not complete successfully.", tag="Geest", level=Qgis.Info
+                    f"Workflow {self.description()} did not complete successfully.",
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
                 return False
 
