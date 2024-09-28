@@ -1,6 +1,6 @@
 from qgis.PyQt.QtWidgets import QLabel
 from .base_indicator_widget import BaseIndicatorWidget
-from qgis.core import QgsMessageLog
+from qgis.core import QgsMessageLog, Qgis
 
 
 class WidgetRadioButton(BaseIndicatorWidget):

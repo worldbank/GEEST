@@ -1,6 +1,6 @@
 from qgis.PyQt.QtWidgets import QRadioButton, QHBoxLayout, QWidget
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import QgsMessageLog
+from qgis.core import QgsMessageLog, Qgis
 
 
 class BaseIndicatorWidget(QRadioButton):
@@ -9,12 +9,26 @@ class BaseIndicatorWidget(QRadioButton):
     """
     data_changed = pyqtSignal(dict)
 
-    def __init__(self, label_text: str) -> None:
+    def __init__(self, label_text: str, attributes: dict) -> None:
         super().__init__(label_text)
+        self.label_text = label_text
+        self.attributes = attributes
         self.container: QWidget = QWidget()
         self.layout: QHBoxLayout = QHBoxLayout(self.container)
         self.layout.addWidget(self)
-
+        QgsMessageLog.logMessage(
+            "Creating Indicator Configuration Widget", tag="Geest", level=Qgis.Info
+        )
+        QgsMessageLog.logMessage(
+            "----------------------------------", tag="Geest", level=Qgis.Info
+        )
+        for item in self.attributes.items():
+            QgsMessageLog.logMessage(
+                f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
+            )
+        QgsMessageLog.logMessage(
+            "----------------------------------", tag="Geest", level=Qgis.Info
+        )
         try:
             self.add_internal_widgets()
         except Exception as e:

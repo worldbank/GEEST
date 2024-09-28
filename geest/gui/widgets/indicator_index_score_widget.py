@@ -1,6 +1,6 @@
-from qgis.PyQt.QtWidgets import QLabel, QLineEdit
+from qgis.PyQt.QtWidgets import QLabel, QDoubleSpinBox
 from .base_indicator_widget import BaseIndicatorWidget
-from qgis.core import QgsMessageLog
+from qgis.core import QgsMessageLog, Qgis
 
 
 class IndexScoreRadioButton(BaseIndicatorWidget):
@@ -9,11 +9,11 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
     """
     def add_internal_widgets(self) -> None:
         try:
-            self.info_label: QLabel = QLabel("Index:")
-            self.index_input: QLineEdit = QLineEdit()
+            self.info_label: QLabel = QLabel(self.label_text)
+            self.index_input: QDoubleSpinBox = QDoubleSpinBox()
             self.layout.addWidget(self.info_label)
             self.layout.addWidget(self.index_input)
-            self.index_input.textChanged.connect(self.update_data)
+            self.index_input.valueChanged.connect(self.update_data)
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
 
@@ -21,4 +21,5 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
         """
         Return the data as a dictionary.
         """
-        return {"IndexScore": self.index_input.text()}
+        self.attributes["IndexScore"] = f"{self.index_input.value()}"
+        return {self.attributes}

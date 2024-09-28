@@ -25,7 +25,8 @@ class IndicatorConfigWidget(QWidget):
         Uses the factory to create radio buttons from attributes dictionary.
         """
         for key, value in attributes_dict.items():
-            radio_button_widget = RadioButtonFactory.create_radio_button(key, value)
+            radio_button_widget = RadioButtonFactory.create_radio_button(
+                key, value, attributes_dict)
             if radio_button_widget:
                 self.button_group.addButton(radio_button_widget)
                 self.layout.addWidget(radio_button_widget.get_container())
