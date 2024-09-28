@@ -237,8 +237,8 @@ class LayerDetailDialog(QDialog):
 
     def add_config_widgets(self, layout):
         config_widget = IndicatorConfigWidget(self.layer_data)
-        #if config_widget.widgets:
-        #    layout.addWidget(config_widget)
+        if config_widget:
+            layout.addWidget(config_widget)
         #    # connect to the stateChanged signal
         #    #config_widget.stateChanged.connect(self.handle_config_change)
         #else:
