@@ -26,8 +26,7 @@ from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from .toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
-from geest.gui.widgets import GeestConfigWidget
-
+from .indicator_config_widget import IndicatorConfigWidget
 
 class LayerDetailDialog(QDialog):
     """Dialog to show layer properties, with a Markdown editor and preview for the 'indicator' field."""
@@ -237,13 +236,15 @@ class LayerDetailDialog(QDialog):
             return line_edit
 
     def add_config_widgets(self, layout):
-        config_widget = GeestConfigWidget(self.layer_data)
-        if config_widget.widgets:
-            layout.addWidget(config_widget)
-            # connect to the stateChanged signal
-            config_widget.stateChanged.connect(self.handle_config_change)
-        else:
-            print("No configuration widgets were created for this layer.")
+        config_widget = IndicatorConfigWidget(self.layer_data)
+        #if config_widget.widgets:
+        #    layout.addWidget(config_widget)
+        #    # connect to the stateChanged signal
+        #    #config_widget.stateChanged.connect(self.handle_config_change)
+        #else:
+        #    QgsMessageLog.logMessage(
+        #        "No configuration widgets were created for this layer.",
+        #        tag="Geest", level=Qgis.CRITICAL)
 
     def handle_config_change(self, new_config):
         """Optionally handle configuration changes."""
