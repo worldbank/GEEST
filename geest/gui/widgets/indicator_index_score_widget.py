@@ -22,4 +22,4 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
         Return the data as a dictionary.
         """
         self.attributes["IndexScore"] = f"{self.index_input.value()}"
-        return {self.attributes}
+        return self.attributes

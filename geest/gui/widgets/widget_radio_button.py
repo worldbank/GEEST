@@ -18,4 +18,4 @@ class WidgetRadioButton(BaseIndicatorWidget):
         """
         Return the data as a dictionary.
         """
-        return {"Widget": "Details"}
+        return self.attributes
