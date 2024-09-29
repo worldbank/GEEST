@@ -16,6 +16,8 @@ class BaseIndicatorWidget(QRadioButton):
         self.container: QWidget = QWidget()
         self.layout: QHBoxLayout = QHBoxLayout(self.container)
         self.layout.addWidget(self)
+        
+        # Log creation of widget
         QgsMessageLog.logMessage(
             "Creating Indicator Configuration Widget", tag="Geest", level=Qgis.Info
         )
@@ -29,10 +31,17 @@ class BaseIndicatorWidget(QRadioButton):
         QgsMessageLog.logMessage(
             "----------------------------------", tag="Geest", level=Qgis.Info
         )
+
         try:
             self.add_internal_widgets()
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+        
+        # Connect toggled signal to enable/disable internal widgets
+        self.toggled.connect(self.on_toggled)
+        
+        # Initially disable internal widgets if not checked
+        self.set_internal_widgets_enabled(self.isChecked())
 
     def add_internal_widgets(self) -> None:
         """
@@ -57,8 +66,27 @@ class BaseIndicatorWidget(QRadioButton):
         """
         Gathers data from internal widgets and emits the data_changed signal.
         """
-        try:
-            data = self.get_data()
-            self.data_changed.emit(data)
-        except Exception as e:
-            QgsMessageLog.logMessage(f"Error in update_data: {e}", "Geest")
+        if self.isChecked():
+            try:
+                data = self.get_data()
+                self.data_changed.emit(data)
+            except Exception as e:
+                QgsMessageLog.logMessage(f"Error in update_data: {e}", "Geest")
+
+    def on_toggled(self, checked: bool) -> None:
+        """
+        Slot for when the radio button is toggled.
+        Enables/disables internal widgets based on the radio button state.
+        """
+        self.set_internal_widgets_enabled(checked)
+        
+        # Emit data changed only if the radio button is checked
+        if checked:
+            self.update_data()
+
+    def set_internal_widgets_enabled(self, enabled: bool) -> None:
+        """
+        Enables or disables the internal widgets based on the radio button state.
+        To be implemented by subclasses to manage their internal widgets.
+        """
+        raise NotImplementedError("Subclasses must implement set_internal_widgets_enabled.")

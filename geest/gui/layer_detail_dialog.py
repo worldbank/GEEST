@@ -24,6 +24,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.core import QgsMessageLog, Qgis
 from .toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
 from .indicator_config_widget import IndicatorConfigWidget
@@ -41,6 +42,7 @@ class LayerDetailDialog(QDialog):
         self.layer_data = layer_data
         self.tree_item = tree_item  # Reference to the QTreeView item to update
         self.editing = editing
+        self.config_widget = None  # To hold the configuration from widget factory
         self.radio_buttons = []  # To keep track of the radio buttons for later
         self.button_group = QButtonGroup()  # To group radio buttons
         layout = QVBoxLayout()
@@ -161,7 +163,10 @@ class LayerDetailDialog(QDialog):
         markdown_layout.addSpacerItem(expanding_spacer)
 
         # Add the configuration frame with radio buttons
-        self.add_config_widgets(markdown_layout)
+        # If you are in edit mode you will not be preparing analysis
+        # but rather editing the json model document
+        if not self.editing:
+            self.add_config_widgets(markdown_layout)
 
     def setup_edit_tab(self):
         """Sets up the right-hand tab for editing layer properties (table)."""
@@ -236,24 +241,31 @@ class LayerDetailDialog(QDialog):
             return line_edit
 
     def add_config_widgets(self, layout):
-        config_widget = IndicatorConfigWidget(self.layer_data)
-        if config_widget:
-            layout.addWidget(config_widget)
-        #    # connect to the stateChanged signal
-        #    #config_widget.stateChanged.connect(self.handle_config_change)
-        #else:
-        #    QgsMessageLog.logMessage(
-        #        "No configuration widgets were created for this layer.",
-        #        tag="Geest", level=Qgis.CRITICAL)
+        if not self.editing:
+            
+            self.config_widget = IndicatorConfigWidget(self.layer_data)
+            if self.config_widget:
+                layout.addWidget(self.config_widget)
+                # connect to the stateChanged signal
+                # config_widget.stateChanged.connect(self.handle_config_change)
+            else:
+                QgsMessageLog.logMessage(
+                    "No configuration widgets were created for this layer.",
+                    tag="Geest", level=Qgis.CRITICAL)
 
     def handle_config_change(self, new_config):
         """Optionally handle configuration changes."""
         self.layer_data = new_config
-        print("Configuration updated:", new_config)
+        QgsMessageLog.logMessage(f"LayerDetailDialog config set to: {new_config}", tag="Geest", level=Qgis.Critical)
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
-        updated_data = self.get_updated_data_from_table()
+        if self.editing:
+            # In editing mode, the edit table is canonical
+            updated_data = self.get_updated_data_from_table()
+        else:
+            # Otherwise, the Markdown editor is canonical
+            updated_data = self.config_widget.attributes_dict
 
         # Set 'Analysis Mode' based on the selected radio button
         selected_button = self.button_group.checkedButton()

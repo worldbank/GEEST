@@ -1,5 +1,6 @@
 from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QButtonGroup
-from qgis.core import QgsMessageLog
+from qgis.core import QgsMessageLog, Qgis
+from qgis.PyQt.QtCore import pyqtSignal
 from .indicator_widget_factory import RadioButtonFactory
 
 
@@ -7,6 +8,7 @@ class IndicatorConfigWidget(QWidget):
     """
     Widget for configuring indicators based on a dictionary.
     """
+    data_changed = pyqtSignal(dict)
     def __init__(self, attributes_dict: dict) -> None:
         super().__init__()
         self.attributes_dict = attributes_dict
@@ -16,7 +18,7 @@ class IndicatorConfigWidget(QWidget):
         try:
             self.create_radio_buttons(attributes_dict)
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in create_radio_buttons: {e}", "Geest")
+            QgsMessageLog.logMessage(f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical)
 
         self.setLayout(self.layout)
 
@@ -36,5 +38,8 @@ class IndicatorConfigWidget(QWidget):
         """
         Updates the attributes dictionary with new data from radio buttons.
         """
+        new_data["Analysis Mode"] = self.button_group.checkedButton().label_text
         self.attributes_dict.update(new_data)
-        QgsMessageLog.logMessage(f"Updated attributes dictionary: {self.attributes_dict}", "Geest")
+        self.data_changed.emit(self.attributes_dict)
+        QgsMessageLog.logMessage(
+            f"Updated attributes dictionary: {self.attributes_dict}", "Geest", level=Qgis.Info)

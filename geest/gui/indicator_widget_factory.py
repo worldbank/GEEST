@@ -22,7 +22,7 @@ class RadioButtonFactory:
         try:
             if key == "Use Default Index Score" and value == 1:
                 return IndexScoreRadioButton(
-                    label_text="Index Score",
+                    label_text=key,
                     attributes=attributes
                     )
             elif key == "UseWidget" and value == 1:

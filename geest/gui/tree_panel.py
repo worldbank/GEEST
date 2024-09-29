@@ -320,6 +320,9 @@ class TreePanel(QWidget):
             # Check if the layer name has changed, and if so, update it in column 0
             if updated_data.get("name", layer_name) != layer_name:
                 item.setData(0, updated_data.get("name", layer_name))
+            
+            # Save the JSON data to the working directory
+            self.save_json_to_working_directory()
 
         # Connect the signal emitted from the dialog to update the item
         dialog.dataUpdated.connect(update_layer_data)
