@@ -1,8 +1,8 @@
 from qgis.core import (
-    QgsCoordinateTransform,
     QgsCoordinateReferenceSystem,
     QgsProcessingFeedback,
-    QgsVectorLayer,
+    QgsMessageLog,
+    Qgis,
 )
 from qgis import processing
 
@@ -28,8 +28,10 @@ class CRSConverter:
 
         # Check if the current CRS is the same as the target CRS
         if current_crs != target_crs:
-            print(
-                f"Converting layer from {current_crs.authid()} to {target_crs.authid()}"
+            QgsMessageLog.logMessage(
+                f"Converting layer from {current_crs.authid()} to {target_crs.authid()}",
+                tag="Geest",
+                level=Qgis.Info,
             )
 
             layer = processing.run(
@@ -41,8 +43,18 @@ class CRSConverter:
                 },
                 feedback=QgsProcessingFeedback(),
             )["OUTPUT"]
-            print(f"Layer successfully converted to {target_crs.authid()}")
+            QgsMessageLog.logMessage(
+                f"Layer successfully converted to {target_crs.authid()}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
             return layer
         else:
-            print(f"Layer is already in the target CRS: {target_crs.authid()}")
+            QgsMessageLog.logMessage(
+                f"Layer is already in the target CRS: {target_crs.authid()}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
             return self.layer
