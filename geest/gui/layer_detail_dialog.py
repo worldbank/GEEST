@@ -29,6 +29,7 @@ from .toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
 from .indicator_config_widget import IndicatorConfigWidget
 
+
 class LayerDetailDialog(QDialog):
     """Dialog to show layer properties, with a Markdown editor and preview for the 'indicator' field."""
 
@@ -242,7 +243,7 @@ class LayerDetailDialog(QDialog):
 
     def add_config_widgets(self, layout):
         if not self.editing:
-            
+
             self.config_widget = IndicatorConfigWidget(self.layer_data)
             if self.config_widget:
                 layout.addWidget(self.config_widget)
@@ -251,12 +252,18 @@ class LayerDetailDialog(QDialog):
             else:
                 QgsMessageLog.logMessage(
                     "No configuration widgets were created for this layer.",
-                    tag="Geest", level=Qgis.CRITICAL)
+                    tag="Geest",
+                    level=Qgis.CRITICAL,
+                )
 
     def handle_config_change(self, new_config):
         """Optionally handle configuration changes."""
         self.layer_data = new_config
-        QgsMessageLog.logMessage(f"LayerDetailDialog config set to: {new_config}", tag="Geest", level=Qgis.Critical)
+        QgsMessageLog.logMessage(
+            f"LayerDetailDialog config set to: {new_config}",
+            tag="Geest",
+            level=Qgis.Critical,
+        )
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
@@ -268,9 +275,9 @@ class LayerDetailDialog(QDialog):
             updated_data = self.config_widget.attributes_dict
 
         # Set 'Analysis Mode' based on the selected radio button
-        # Taken from IndicatorConfigWidget now 
-        #selected_button = self.button_group.checkedButton()
-        #if selected_button:
+        # Taken from IndicatorConfigWidget now
+        # selected_button = self.button_group.checkedButton()
+        # if selected_button:
         #    updated_data["Analysis Mode"] = selected_button.text()
 
         self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary

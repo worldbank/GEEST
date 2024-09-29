@@ -8,7 +8,9 @@ class IndicatorConfigWidget(QWidget):
     """
     Widget for configuring indicators based on a dictionary.
     """
+
     data_changed = pyqtSignal(dict)
+
     def __init__(self, attributes_dict: dict) -> None:
         super().__init__()
         self.attributes_dict = attributes_dict
@@ -18,7 +20,9 @@ class IndicatorConfigWidget(QWidget):
         try:
             self.create_radio_buttons(attributes_dict)
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical)
+            QgsMessageLog.logMessage(
+                f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical
+            )
 
         self.setLayout(self.layout)
 
@@ -29,12 +33,17 @@ class IndicatorConfigWidget(QWidget):
         analysis_mode = attributes_dict.get("Analysis Mode", "")
         for key, value in attributes_dict.items():
             radio_button_widget = RadioButtonFactory.create_radio_button(
-                key, value, attributes_dict)
+                key, value, attributes_dict
+            )
             if radio_button_widget:
                 if key == analysis_mode:
                     radio_button_widget.setChecked(True)
                 # Special case for "Don't Use" radio button
-                if key == "Layer Required" and value == 0 and analysis_mode == "Don't Use":
+                if (
+                    key == "Layer Required"
+                    and value == 0
+                    and analysis_mode == "Don't Use"
+                ):
                     radio_button_widget.setChecked(True)
                 self.button_group.addButton(radio_button_widget)
                 self.layout.addWidget(radio_button_widget.get_container())
@@ -48,4 +57,7 @@ class IndicatorConfigWidget(QWidget):
         self.attributes_dict.update(new_data)
         self.data_changed.emit(self.attributes_dict)
         QgsMessageLog.logMessage(
-            f"Updated attributes dictionary: {self.attributes_dict}", "Geest", level=Qgis.Info)
+            f"Updated attributes dictionary: {self.attributes_dict}",
+            "Geest",
+            level=Qgis.Info,
+        )

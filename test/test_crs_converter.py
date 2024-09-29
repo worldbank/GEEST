@@ -53,7 +53,9 @@ class TestCRSConverter(unittest.TestCase):
 
         # Check that the CRS remains the same
         self.assertEqual(
-            reprojected_layer.crs().authid(), "EPSG:4326", "Layer CRS should remain unchanged!"
+            reprojected_layer.crs().authid(),
+            "EPSG:4326",
+            "Layer CRS should remain unchanged!",
         )
 
 

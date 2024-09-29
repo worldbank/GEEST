@@ -7,6 +7,7 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
     """
     A specialized radio button with additional widgets for IndexScore.
     """
+
     def add_internal_widgets(self) -> None:
         """
         Adds internal widgets specific to IndexScore.
@@ -20,7 +21,9 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
             # Connect the valueChanged signal to update data
             self.index_input.valueChanged.connect(self.update_data)
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical)
+            QgsMessageLog.logMessage(
+                f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical
+            )
 
     def get_data(self) -> dict:
         """
@@ -38,4 +41,8 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
             self.info_label.setEnabled(enabled)
             self.index_input.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in set_internal_widgets_enabled: {e}", "Geest", level=Qgis.Critical)
+            QgsMessageLog.logMessage(
+                f"Error in set_internal_widgets_enabled: {e}",
+                "Geest",
+                level=Qgis.Critical,
+            )

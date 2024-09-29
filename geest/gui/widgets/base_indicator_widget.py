@@ -7,6 +7,7 @@ class BaseIndicatorWidget(QRadioButton):
     """
     Abstract base class for radio buttons with internal widgets.
     """
+
     data_changed = pyqtSignal(dict)
 
     def __init__(self, label_text: str, attributes: dict) -> None:
@@ -16,7 +17,7 @@ class BaseIndicatorWidget(QRadioButton):
         self.container: QWidget = QWidget()
         self.layout: QHBoxLayout = QHBoxLayout(self.container)
         self.layout.addWidget(self)
-        
+
         # Log creation of widget
         QgsMessageLog.logMessage(
             "Creating Indicator Configuration Widget", tag="Geest", level=Qgis.Info
@@ -36,10 +37,10 @@ class BaseIndicatorWidget(QRadioButton):
             self.add_internal_widgets()
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
-        
+
         # Connect toggled signal to enable/disable internal widgets
         self.toggled.connect(self.on_toggled)
-        
+
         # Initially disable internal widgets if not checked
         self.set_internal_widgets_enabled(self.isChecked())
 
@@ -79,7 +80,7 @@ class BaseIndicatorWidget(QRadioButton):
         Enables/disables internal widgets based on the radio button state.
         """
         self.set_internal_widgets_enabled(checked)
-        
+
         # Emit data changed only if the radio button is checked
         if checked:
             self.update_data()
@@ -89,4 +90,6 @@ class BaseIndicatorWidget(QRadioButton):
         Enables or disables the internal widgets based on the radio button state.
         To be implemented by subclasses to manage their internal widgets.
         """
-        raise NotImplementedError("Subclasses must implement set_internal_widgets_enabled.")
+        raise NotImplementedError(
+            "Subclasses must implement set_internal_widgets_enabled."
+        )
