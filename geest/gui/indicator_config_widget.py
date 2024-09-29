@@ -33,6 +33,9 @@ class IndicatorConfigWidget(QWidget):
             if radio_button_widget:
                 if key == analysis_mode:
                     radio_button_widget.setChecked(True)
+                # Special case for "Don't Use" radio button
+                if key == "Layer Required" and value == 0 and analysis_mode == "Don't Use":
+                    radio_button_widget.setChecked(True)
                 self.button_group.addButton(radio_button_widget)
                 self.layout.addWidget(radio_button_widget.get_container())
                 radio_button_widget.data_changed.connect(self.update_attributes)

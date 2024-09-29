@@ -1,7 +1,7 @@
 from qgis.core import QgsMessageLog, Qgis
 from .widgets.base_indicator_widget import BaseIndicatorWidget
-from .widgets.indicator_index_score_widget import IndexScoreRadioButton
-from .widgets.widget_radio_button import WidgetRadioButton
+from .widgets import IndexScoreRadioButton
+from .widgets import DontUseRadioButton
 
 
 class RadioButtonFactory:
@@ -16,17 +16,20 @@ class RadioButtonFactory:
         QgsMessageLog.logMessage("Dialog widget factory called", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage("----------------------------", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage(f"Key: {key}", tag="Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(f"Value: {key}", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(f"Value: {value}", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage("----------------------------", tag="Geest", level=Qgis.Info)
 
         try:
+            if key == "Layer Required" and value == 0:
+                return DontUseRadioButton(
+                    label_text="Don't Use",
+                    attributes=attributes
+                    )
             if key == "Use Default Index Score" and value == 1:
                 return IndexScoreRadioButton(
                     label_text=key,
                     attributes=attributes
                     )
-            elif key == "UseWidget" and value == 1:
-                return WidgetRadioButton(label_text="Generic Widget", attributes=attributes)
             else:
                 QgsMessageLog.logMessage(f"Factory did not match any widgets", tag="Geest", level=Qgis.Critical)
                 return None

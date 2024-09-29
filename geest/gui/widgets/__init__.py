@@ -1,1 +1,3 @@
 # Widgets package initialization file
+from .indicator_index_score_widget import IndexScoreRadioButton
+from .dont_use_widget import DontUseRadioButton
