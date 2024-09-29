@@ -49,6 +49,11 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "----------------------------------", tag="Geest", level=Qgis.Info
         )
 
+        self.workflow_directory = self._create_workflow_directory(
+            "contextual",
+            self.attributes["ID"].lower(),
+        )
+
         # loop through self.bboxes_layer and the self.areas_layer  and create a raster mask for each feature
         index_score = self.attributes["Default Index Score"]
         for feature in self.bboxes_layer.getFeatures():
