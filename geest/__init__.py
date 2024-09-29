@@ -24,7 +24,13 @@ from typing import Optional
 
 from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QMessageBox, QPushButton, QAction, QDockWidget
+from qgis.PyQt.QtWidgets import (
+    QMessageBox,
+    QPushButton,
+    QAction,
+    QDockWidget,
+    QSizePolicy,
+)
 from qgis.core import Qgis
 
 # Import your plugin components here
@@ -57,19 +63,46 @@ class GeestPlugin:
         self.run_action = QAction(icon, "GEEST", self.iface.mainWindow())
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
-        
+
         # Create the dock widget
         self.dock_widget = GeestDock(
             parent=self.iface.mainWindow(),
             json_file=resources_path("resources", "model.json"),
         )
-        self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        self.dock_widget.setFloating(False)
-        self.dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
+        self.dock_widget.setFeatures(
+            QDockWidget.DockWidgetClosable
+            | QDockWidget.DockWidgetMovable
+            | QDockWidget.DockWidgetFloatable
+        )
 
-        # Restore geometry of dock widget
+        # Restore geometry and dock area before adding to the main window
         self.restore_geometry()
+
+        # Check the dock area; default to right dock if not set
+        settings = QSettings("ESMAP", "Geest")
+        dock_area = settings.value("GeestDock/area", Qt.RightDockWidgetArea, type=int)
+
+        # Add the dock widget to the restored or default dock area
+        self.iface.addDockWidget(dock_area, self.dock_widget)
+
+        # Find all existing dock widgets in the target dock area
+        existing_docks = [
+            dw
+            for dw in self.iface.mainWindow().findChildren(QDockWidget)
+            if self.iface.mainWindow().dockWidgetArea(dw) == dock_area
+        ]
+
+        # Tabify the new dock before the first found dock widget, if available
+        if existing_docks:
+            self.iface.mainWindow().tabifyDockWidget(
+                existing_docks[0], self.dock_widget
+            )
+        else:
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
+            legend_tab = self.iface.mainWindow().findChild(QApplication, "Legend")
+            if legend_tab:
+                self.iface.mainWindow().tabifyDockWidget(legend_tab, self.dock_widget)
+        self.dock_widget.raise_()
 
         # Handle debug mode and additional settings
         debug_mode = int(setting(key="debug_mode", default=0))
@@ -80,7 +113,7 @@ class GeestPlugin:
             )
             self.debug_action.triggered.connect(self.debug)
             self.iface.addToolBarIcon(self.debug_action)
-        
+
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
             self.debug()
@@ -90,25 +123,34 @@ class GeestPlugin:
 
     def save_geometry(self) -> None:
         """
-        Saves the geometry of all relevant widgets to QSettings.
+        Saves the geometry and dock area of GeestDock to QSettings.
         """
-        settings = QSettings()
-        
+        settings = QSettings("ESMAP", "Geest")
+
         if self.dock_widget:
-            # Save geometry of the dock widget
-            settings.setValue("Geest/dockWidgetGeometry", self.dock_widget.saveGeometry())
+            # Save geometry
+            settings.setValue("GeestDock/geometry", self.dock_widget.saveGeometry())
+
+            # Save dock area (left or right)
+            dock_area = self.iface.mainWindow().dockWidgetArea(self.dock_widget)
+            settings.setValue("GeestDock/area", dock_area)
 
     def restore_geometry(self) -> None:
         """
-        Restores the geometry of all relevant widgets from QSettings.
+        Restores the geometry and dock area of GeestDock from QSettings.
         """
-        settings = QSettings()
+        settings = QSettings("ESMAP", "Geest")
 
         if self.dock_widget:
-            geometry = settings.value("Geest/dockWidgetGeometry")
+            # Restore geometry
+            geometry = settings.value("GeestDock/geometry")
             if geometry:
                 self.dock_widget.restoreGeometry(geometry)
 
+            # Restore dock area (left or right)
+            dock_area = settings.value("GeestDock/area", type=int)
+            if dock_area is not None:
+                self.iface.addDockWidget(dock_area, self.dock_widget)
 
     def unload(self):  # pylint: disable=missing-function-docstring
         """
@@ -117,8 +159,8 @@ class GeestPlugin:
         """
         # Save geometry before unloading
         self.save_geometry()
-        
-        # Remove toolbar icons
+
+        # Remove toolbar icons and clean up
         if self.run_action:
             self.iface.removeToolBarIcon(self.run_action)
             self.run_action.deleteLater()
