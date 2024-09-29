@@ -57,6 +57,15 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # loop through self.bboxes_layer and the self.areas_layer  and create a raster mask for each feature
         index_score = self.attributes["Default Index Score"]
         for feature in self.bboxes_layer.getFeatures():
+            if (
+                self.feedback.isCanceled()
+            ):  # Check for cancellation before each major step
+                QgsMessageLog.logMessage(
+                    "Workflow canceled before processing feature.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                return False
             geom = feature.geometry()  # todo this shoudl come from the areas layer
             aligned_box = geom
             mask_name = f"bbox_{feature.id()}"
@@ -71,25 +80,6 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         self.create_raster_vrt(
             output_vrt_name=os.path.join(self.workflow_directory, "combined_mask.vrt")
         )
-
-        steps = 10
-        for i in range(steps):
-            if self.feedback.isCanceled():
-                QgsMessageLog.logMessage(
-                    "Dont use workflow canceled.", tag="Geest", level=Qgis.Warning
-                )
-                return False
-
-            # Simulate progress and work
-            self.attributes["progress"] = f"Dont use workflow Step {i + 1} completed"
-            self.feedback.setProgress(
-                (i + 1) / steps * 100
-            )  # Report progress in percentage
-            QgsMessageLog.logMessage(
-                f"Assigning index score: {self.attributes['Default Index Score']}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
 
         self.attributes["result"] = "Use Default Index Score Workflow Completed"
         QgsMessageLog.logMessage(
@@ -113,6 +103,14 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         :param aligned_box: Aligned bounding box geometry for the geometry.
         :param mask_name: Name for the output raster file.
         """
+        if self.feedback.isCanceled():  # Check for cancellation before starting
+            QgsMessageLog.logMessage(
+                "Workflow canceled before creating raster.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
         aligned_box = QgsRectangle(aligned_box.boundingBox())
         mask_filepath = os.path.join(self.workflow_directory, f"{mask_name}.tif")
         index_score = (self.attributes["Default Index Score"] / 100) * 5
@@ -168,6 +166,14 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
 
         :param output_vrt_name: The name of the VRT file to create.
         """
+        if self.feedback.isCanceled():  # Check for cancellation before starting
+            QgsMessageLog.logMessage(
+                "Workflow canceled before creating VRT.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
         QgsMessageLog.logMessage(
             f"Creating VRT of masks '{output_vrt_name}' layer to the map.",
             tag="Geest",
