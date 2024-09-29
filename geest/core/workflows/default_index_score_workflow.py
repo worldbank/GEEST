@@ -213,8 +213,10 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
         )
 
+        layer_id = self.attributes["ID"].replace("_", " ")
+
         # Add the VRT to the QGIS map
-        vrt_layer = QgsRasterLayer(vrt_filepath, "Combined Mask VRT")
+        vrt_layer = QgsRasterLayer(vrt_filepath, f"Combined Mask VRT ({layer_id})")
 
         if vrt_layer.isValid():
             QgsProject.instance().addMapLayer(vrt_layer)

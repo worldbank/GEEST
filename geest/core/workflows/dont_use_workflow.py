@@ -20,6 +20,12 @@ class DontUseWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
+        if self.feedback.isCanceled():
+            QgsMessageLog.logMessage(
+                "Dont use workflow canceled.", tag="Geest", level=Qgis.Warning
+            )
+            return False
+
         QgsMessageLog.logMessage("Executing 'dont use'", tag="Geest", level=Qgis.Info)
 
         steps = 10
