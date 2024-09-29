@@ -22,13 +22,18 @@ import os
 import time
 from typing import Optional
 
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QMessageBox, QPushButton, QAction, QDockWidget
+from qgis.PyQt.QtWidgets import (
+    QMessageBox,
+    QPushButton,
+    QAction,
+    QDockWidget,
+    QSizePolicy,
+)
 from qgis.core import Qgis
 
-# from .geest import Geest
-# from .core import RenderQueue, setting
+# Import your plugin components here
 from .core import setting  # , JSONValidator
 from .utilities import resources_path
 from .gui import GeestOptionsFactory, GeestDock
@@ -45,36 +50,61 @@ class GeestPlugin:
 
     def __init__(self, iface):
         self.iface = iface
-
-        # self.render_queue: Optional[RenderQueue] = None
         self.run_action: Optional[QAction] = None
         self.debug_action: Optional[QAction] = None
         self.options_factory = None
+        self.dock_widget = None
 
     def initGui(self):  # pylint: disable=missing-function-docstring
-
-        # self.render_queue = RenderQueue()
+        """
+        Initialize the GUI elements of the plugin.
+        """
         icon = QIcon(resources_path("resources", "geest-main.svg"))
-
-        # Validate our json schema first
-        # validator = JSONValidator('resources/schema.json', 'resources/model.json')
-        # validator.validate_json()
-
         self.run_action = QAction(icon, "GEEST", self.iface.mainWindow())
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
+
+        # Create the dock widget
         self.dock_widget = GeestDock(
             parent=self.iface.mainWindow(),
             json_file=resources_path("resources", "model.json"),
         )
-        self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        # self.dock_widget.setWidget(Geest(self.iface.mainWindow(), self.iface))
-        self.dock_widget.setFloating(False)
-        self.dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
-        # If you change debug_mode to true, after clicking
-        # this toolbutton, QGIS will block until it can attach
-        # to the remote debugger
+        self.dock_widget.setFeatures(
+            QDockWidget.DockWidgetClosable
+            | QDockWidget.DockWidgetMovable
+            | QDockWidget.DockWidgetFloatable
+        )
+
+        # Restore geometry and dock area before adding to the main window
+        self.restore_geometry()
+
+        # Check the dock area; default to right dock if not set
+        settings = QSettings("ESMAP", "Geest")
+        dock_area = settings.value("GeestDock/area", Qt.RightDockWidgetArea, type=int)
+
+        # Add the dock widget to the restored or default dock area
+        self.iface.addDockWidget(dock_area, self.dock_widget)
+
+        # Find all existing dock widgets in the target dock area
+        existing_docks = [
+            dw
+            for dw in self.iface.mainWindow().findChildren(QDockWidget)
+            if self.iface.mainWindow().dockWidgetArea(dw) == dock_area
+        ]
+
+        # Tabify the new dock before the first found dock widget, if available
+        if existing_docks:
+            self.iface.mainWindow().tabifyDockWidget(
+                existing_docks[0], self.dock_widget
+            )
+        else:
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
+            legend_tab = self.iface.mainWindow().findChild(QApplication, "Legend")
+            if legend_tab:
+                self.iface.mainWindow().tabifyDockWidget(legend_tab, self.dock_widget)
+        self.dock_widget.raise_()
+
+        # Handle debug mode and additional settings
         debug_mode = int(setting(key="debug_mode", default=0))
         if debug_mode:
             debug_icon = QIcon(resources_path("resources", "geest-debug.svg"))
@@ -83,8 +113,7 @@ class GeestPlugin:
             )
             self.debug_action.triggered.connect(self.debug)
             self.iface.addToolBarIcon(self.debug_action)
-        # Alternatively, if the env var GEEST_DEBUG is set to 1
-        # then we will also enter debug mode
+
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
             self.debug()
@@ -92,9 +121,71 @@ class GeestPlugin:
         self.options_factory = GeestOptionsFactory()
         self.iface.registerOptionsWidgetFactory(self.options_factory)
 
+    def save_geometry(self) -> None:
+        """
+        Saves the geometry and dock area of GeestDock to QSettings.
+        """
+        settings = QSettings("ESMAP", "Geest")
+
+        if self.dock_widget:
+            # Save geometry
+            settings.setValue("GeestDock/geometry", self.dock_widget.saveGeometry())
+
+            # Save dock area (left or right)
+            dock_area = self.iface.mainWindow().dockWidgetArea(self.dock_widget)
+            settings.setValue("GeestDock/area", dock_area)
+
+    def restore_geometry(self) -> None:
+        """
+        Restores the geometry and dock area of GeestDock from QSettings.
+        """
+        settings = QSettings("ESMAP", "Geest")
+
+        if self.dock_widget:
+            # Restore geometry
+            geometry = settings.value("GeestDock/geometry")
+            if geometry:
+                self.dock_widget.restoreGeometry(geometry)
+
+            # Restore dock area (left or right)
+            dock_area = settings.value("GeestDock/area", type=int)
+            if dock_area is not None:
+                self.iface.addDockWidget(dock_area, self.dock_widget)
+
+    def unload(self):  # pylint: disable=missing-function-docstring
+        """
+        Unload the plugin from QGIS.
+        Removes all added actions, widgets, and options to ensure a clean unload.
+        """
+        # Save geometry before unloading
+        self.save_geometry()
+
+        # Remove toolbar icons and clean up
+        if self.run_action:
+            self.iface.removeToolBarIcon(self.run_action)
+            self.run_action.deleteLater()
+            self.run_action = None
+
+        if self.debug_action:
+            self.iface.removeToolBarIcon(self.debug_action)
+            self.debug_action.deleteLater()
+            self.debug_action = None
+
+        # Unregister options widget factory
+        if self.options_factory:
+            self.iface.unregisterOptionsWidgetFactory(self.options_factory)
+            self.options_factory = None
+
+        # Remove dock widget if it exists
+        if self.dock_widget:
+            self.iface.removeDockWidget(self.dock_widget)
+            self.dock_widget.deleteLater()
+            self.dock_widget = None
+
     def debug(self):
         """
-        Enters debug mode
+        Enters debug mode.
+        Shows a message to attach a debugger to the process.
         """
         self.display_information_message_box(
             title="GEEST",
@@ -113,44 +204,29 @@ class GeestPlugin:
                 message="Visual Studio Code debugger is now attached on port 9000",
             )
 
-    def unload(self):  # pylint: disable=missing-function-docstring
-        self.iface.removeToolBarIcon(self.run_action)
-        self.iface.unregisterOptionsWidgetFactory(self.options_factory)
-        self.options_factory = None
-        del self.run_action
-        if self.debug_action:
-            self.iface.removeToolBarIcon(self.debug_action)
-            del self.debug_action
-
     def run(self):
         """
-        Shows the settings dialog
+        Shows the settings dialog.
         """
-        # Create the settings dialog
         self.iface.showOptionsDialog(
             parent=self.iface.mainWindow(), currentPage="geest"
         )
 
     def display_information_message_bar(
         self,
-        title=None,
-        message=None,
-        more_details=None,
-        button_text="Show details ...",
-        duration=8,
-    ):
+        title: Optional[str] = None,
+        message: Optional[str] = None,
+        more_details: Optional[str] = None,
+        button_text: str = "Show details ...",
+        duration: int = 8,
+    ) -> None:
         """
         Display an information message bar.
         :param title: The title of the message bar.
-        :type title: basestring
         :param message: The message inside the message bar.
-        :type message: basestring
         :param more_details: The message inside the 'Show details' button.
-        :type more_details: basestring
         :param button_text: Text of the button if 'more_details' is not empty.
-        :type button_text: basestring
         :param duration: The duration for the display, default is 8 seconds.
-        :type duration: int
         """
         self.iface.messageBar().clearWidgets()
         widget = self.iface.messageBar().createMessage(title, message)
@@ -167,12 +243,12 @@ class GeestPlugin:
 
         self.iface.messageBar().pushWidget(widget, Qgis.Info, duration)
 
-    def display_information_message_box(self, parent=None, title=None, message=None):
+    def display_information_message_box(
+        self, parent=None, title: Optional[str] = None, message: Optional[str] = None
+    ) -> None:
         """
         Display an information message box.
         :param title: The title of the message box.
-        :type title: basestring
         :param message: The message inside the message box.
-        :type message: basestring
         """
         QMessageBox.information(parent, title, message)

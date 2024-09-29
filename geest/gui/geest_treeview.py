@@ -199,34 +199,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "layers": [recurse_tree(child) for child in item.childItems],
                 }
             elif item.role == "layer":
-                # TODO: Add more layer details here
-                # like weighting etc.
-                return {
-                    "layer": item.data(0),
-                    "Text": item.data(4)["Text"],
-                    "Default Weighting": item.data(4)["Default Weighting"],
-                    "Use Aggregate": item.data(4)["Use Aggregate"],
-                    "Default Index Score": item.data(4)["Default Index Score"],
-                    "Index Score": item.data(4)["Index Score"],
-                    "Use default Idex Score": item.data(4)["Use default Idex Score"],
-                    "Rasterise Raster": item.data(4)["Rasterise Raster"],
-                    "Rasterise Polygon": item.data(4)["Rasterise Polygon"],
-                    "Rasterise Polyline": item.data(4)["Rasterise Polyline"],
-                    "Rasterise Point": item.data(4)["Rasterise Point"],
-                    "Default Buffer Distances": item.data(4)[
-                        "Default Buffer Distances"
-                    ],
-                    "Use Buffer point": item.data(4)["Use Buffer point"],
-                    "Default pixel": item.data(4)["Default pixel"],
-                    "Use Create Grid": item.data(4)["Use Create Grid"],
-                    "Default Mode": item.data(4)["Default Mode"],
-                    "Default Measurement": item.data(4)["Default Measurement"],
-                    "Default Increments": item.data(4)["Default Increments"],
-                    "Use Mode of Travel": item.data(4)["Use Mode of Travel"],
-                    "source": item.data(4)["source"],
-                    "indicator": item.data(4)["indicator"],
-                    "query": item.data(4)["query"],
-                }
+                return item.data(3)
 
         json_data = {
             "dimensions": [recurse_tree(child) for child in self.rootItem.childItems]

@@ -31,6 +31,7 @@ in pkgs.mkShell rec {
     pythonPackages.numpy
     pythonPackages.pip
     pinnedPkgs.vim
+    pre-commit
     git
     qgis
     qt5.full # so we get designer

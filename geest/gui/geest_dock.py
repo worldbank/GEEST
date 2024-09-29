@@ -4,7 +4,7 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qgis.PyQt.QtCore import Qt, QSettings, QByteArray
+from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsMessageLog
 from typing import Optional
 from .setup_panel import SetupPanel
@@ -17,7 +17,7 @@ class GeestDock(QDockWidget):
     ) -> None:
         """
         Initializes the GeestDock with a parent and an optional JSON file.
-        Sets up the main widget, tabs, and restores previous geometry.
+        Sets up the main widget and tabs.
 
         :param parent: The parent widget for the dock.
         :param json_file: Path to a JSON file used for the TreePanel.
@@ -74,9 +74,6 @@ class GeestDock(QDockWidget):
             # Connect tab change event if custom logic is needed when switching tabs
             self.tab_widget.currentChanged.connect(self.on_tab_changed)
 
-            # Restore the geometry of the dock
-            self.restore_geometry()
-
             QgsMessageLog.logMessage("GeestDock initialized successfully.", "Geest")
 
         except Exception as e:
@@ -111,58 +108,6 @@ class GeestDock(QDockWidget):
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error loading JSON file: {str(e)}",
-                "Geest",
-                level=QgsMessageLog.CRITICAL,
-            )
-
-    def restore_geometry(self) -> None:
-        """
-        Restore the saved geometry and state using QSettings.
-        """
-        try:
-            settings: QSettings = QSettings("ESMAP", "Geest")
-            geometry: Optional[QByteArray] = settings.value("GeestDock/geometry")
-            if geometry is not None:
-                self.restoreGeometry(geometry)
-                QgsMessageLog.logMessage("Restored geometry from settings.", "Geest")
-            else:
-                QgsMessageLog.logMessage("No geometry to restore.", "Geest")
-
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error restoring geometry: {str(e)}",
-                "Geest",
-                level=QgsMessageLog.CRITICAL,
-            )
-
-    def closeEvent(self, event) -> None:
-        """
-        Save the geometry of the dock when it closes.
-
-        :param event: The close event that triggered this method.
-        """
-        try:
-            self.save_geometry()
-            QgsMessageLog.logMessage("Saved geometry on close.", "Geest")
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error saving geometry: {str(e)}",
-                "Geest",
-                level=QgsMessageLog.CRITICAL,
-            )
-        super().closeEvent(event)
-
-    def save_geometry(self) -> None:
-        """
-        Save the current geometry using QSettings.
-        """
-        try:
-            settings: QSettings = QSettings("ESMAP", "Geest")
-            settings.setValue("GeestDock/geometry", self.saveGeometry())
-            QgsMessageLog.logMessage("Geometry saved successfully.", "Geest")
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error saving geometry: {str(e)}",
                 "Geest",
                 level=QgsMessageLog.CRITICAL,
             )

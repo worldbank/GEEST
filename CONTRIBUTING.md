@@ -35,7 +35,6 @@ git clone https://github.com/your-username/GEEST.git
 
 Create a branch: Create a new branch for your changes.
 
-
 ```bash
 git checkout -b my-feature-branch
 ```
@@ -47,17 +46,16 @@ Commit your changes: Write a clear and concise commit message.
 git commit -m "Add new feature XYZ"
 ```
 
-
 Push your changes: Push the changes to your forked repository.
 
 ```bash
 git push origin my-feature-branch
 ```
 
-
 Open a pull request: Go to the original repository and open a pull request. Include a description of your changes and reference any related issues.
 
 Pull Request Checklist
+
 1. Ensure tests pass: Run all tests locally to confirm they pass.
 2. Adhere to coding standards: Ensure your code complies with the project’s coding standards and guidelines.
 3. Update documentation: If your change affects documentation, update it accordingly.
@@ -66,7 +64,12 @@ Coding Standards
 
 See [CODING.md](CODING.md)
 
+Please also read PRE-COMMIT-README.md
+
+
+
 Testing
+
 1. Write tests: Include unit tests for new features or bug fixes.
 2. Use pytest: Use the pytest framework for testing.
 3. Run tests: Ensure all tests pass before submitting a pull request.
@@ -76,6 +79,7 @@ pytest
 ```
 
 Compliance
+
 1. Pre-commit hooks: Install and configure pre-commit hooks to enforce coding standards and run tests before committing.
 2. GPL-3.0 License: Ensure all contributions comply with the project's GPL-3.0 license.
 
@@ -104,7 +108,6 @@ If you have any questions or need help, feel free to open an issue or contact us
 
 Thank you for contributing to GEEST!
 
-
 ## Setting Up the Project
 
 ### Cloning the Repository
@@ -112,9 +115,11 @@ Thank you for contributing to GEEST!
 1. **Fork the repository**: If you haven't already, fork the GEEST repository on GitHub.
 
 2. **Clone your fork**: Clone the forked repository to your local machine.
+   
    ```bash
    git clone https://github.com/your-username/GEEST.git
-Add the plugin path: In QGIS, go to Plugins > Manage and Install Plugins > Settings > Plugin Paths and add the path to your GEEST folder.
+   Add the plugin path: In QGIS, go to Plugins > Manage and Install Plugins > Settings > Plugin Paths and add the path to your GEEST folder.
+   ```
 
 Load the plugin: Enable the GEEST plugin from the Installed tab.
 

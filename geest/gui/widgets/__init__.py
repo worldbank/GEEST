@@ -1,7 +1,3 @@
-from .geest_config_widget import GeestConfigWidget
-from .geest_widget_factory import GeestWidgetFactory
-
-__all__ = [
-    "GeestConfigWidget",
-    "GeestWidgetFactory",
-]
+# Widgets package initialization file
+from .indicator_index_score_widget import IndexScoreRadioButton
+from .dont_use_widget import DontUseRadioButton
