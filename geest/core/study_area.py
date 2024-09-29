@@ -102,15 +102,10 @@ class StudyAreaProcessor:
         It handles the CRS transformation and calls appropriate processing functions based on geometry type.
         """
         # First, write the layer_bbox to the GeoPackage
-        study_area_bbox_feature = QgsFeature()
-        study_area_bbox_feature.setGeometry(QgsGeometry.fromRect(self.layer_bbox))
-        study_area_bbox_feature.setAttributes(["Layer Bounding Box"])
-
         self.save_to_geopackage(
-            [study_area_bbox_feature],
-            "study_area_bbox",
-            [QgsField("area_name", QVariant.String)],
-            QgsWkbTypes.Polygon,
+            layer_name="study_area_bbox",
+            geom=QgsGeometry.fromRect(self.layer_bbox),
+            area_name="Study Area Bounding Box",
         )
 
         # Add the study_area_bbox layer to the map
@@ -236,10 +231,9 @@ class StudyAreaProcessor:
         study_area_feature.setAttributes([area_name])
         # Always save the study area bounding boxes regardless of mode
         self.save_to_geopackage(
-            [study_area_feature],
-            "study_area_bboxes",
-            [QgsField("area_name", QVariant.String)],
-            QgsWkbTypes.Polygon,
+            layer_name="study_area_bboxes",
+            geom=QgsGeometry.fromRect(bbox),
+            area_name=normalized_name,
         )
 
         # Transform the geometry to the output CRS
@@ -255,10 +249,7 @@ class StudyAreaProcessor:
         study_area_polygon.setAttributes([area_name])
         # Always save the study area bounding boxes regardless of mode
         self.save_to_geopackage(
-            [study_area_polygon],
-            "study_area_polygons",
-            [QgsField("area_name", QVariant.String)],
-            QgsWkbTypes.Polygon,
+            layer_name="study_area_polygons", geom=geom, area_name=normalized_name
         )
 
         # Process the geometry based on the selected mode
@@ -276,6 +267,7 @@ class StudyAreaProcessor:
                 level=Qgis.Info,
             )
             self.create_raster_mask(geom, bbox, normalized_name)
+        self.counter += 1
 
     def process_multipart_geometry(
         self, geom: QgsGeometry, normalized_name: str, area_name: str
@@ -349,24 +341,34 @@ class StudyAreaProcessor:
     ) -> None:
         """
         Save features to GeoPackage. Create or append the layer as necessary.
-
-        :param features: List of features to save.
         :param layer_name: Name of the layer in the GeoPackage.
-        :param fields: Fields for the layer.
-        :param geometry_type: Geometry type for the layer.
-        """
-        self.create_layer_if_not_exists(layer_name, fields, geometry_type)
-        self.append_to_layer(layer_name, features)
+        :param geom: Feature to append.
+        :param area_name: Name of the study area.
 
-    def append_to_layer(self, layer_name: str, features: List[QgsFeature]) -> None:
         """
-        Append features to an existing layer in the GeoPackage.
+        self.create_layer_if_not_exists(layer_name)
+        self.append_to_layer(layer_name, geom, area_name)
+
+    def append_to_layer(
+        self, layer_name: str, geom: QgsGeometry, area_name: str
+    ) -> None:
+        """
+        Append feature to an existing layer in the GeoPackage.
 
         :param layer_name: Name of the layer in the GeoPackage.
-        :param features: List of features to append.
+        :param geom: Feature to append.
+        :param area_name: Name of the study area.
         """
         gpkg_layer_path = f"{self.gpkg_path}|layername={layer_name}"
         gpkg_layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
+        fields = gpkg_layer.fields()
+        # Create a list of placeholder values based on field count
+        attributes = [None] * len(fields)
+
+        feature = QgsFeature()
+        feature.setGeometry(geom)
+        attributes[fields.indexFromName("area_name")] = area_name
+        feature.setAttributes(attributes)
 
         if gpkg_layer.isValid():
             QgsMessageLog.logMessage(
@@ -375,7 +377,7 @@ class StudyAreaProcessor:
                 level=Qgis.Info,
             )
             provider = gpkg_layer.dataProvider()
-            provider.addFeatures(features)
+            provider.addFeatures([feature])
             gpkg_layer.updateExtents()
         else:
             QgsMessageLog.logMessage(
@@ -390,12 +392,20 @@ class StudyAreaProcessor:
         """
         Create a new layer in the GeoPackage if it doesn't already exist.
 
+        It is assumed that all layers have the same structure of
+
+        fid, area_name, geometry (Polygon)
+
         :param layer_name: Name of the layer to create.
-        :param fields: Fields for the layer.
-        :param geometry_type: Geometry type for the layer.
         """
+
+        fields = QgsFields()
+        fields.append(QgsField("area_name", QVariant.String))
+        geometry_type = QgsWkbTypes.Polygon
+
         gpkg_layer_path = f"{self.gpkg_path}|layername={layer_name}"
         layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
+
         append = True
         # Check if the GeoPackage file exists
         if not os.path.exists(self.gpkg_path):
@@ -431,7 +441,7 @@ class StudyAreaProcessor:
             # Create a new GeoPackage layer
             QgsVectorFileWriter.create(
                 fileName=self.gpkg_path,
-                fields=qgs_fields,
+                fields=fields,
                 geometryType=geometry_type,
                 srs=crs,
                 transformContext=QgsCoordinateTransformContext(),
