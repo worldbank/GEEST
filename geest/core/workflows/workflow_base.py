@@ -1,6 +1,6 @@
 import os
 from abc import ABC, abstractmethod
-from qgis.core import QgsFeedback, QgsVectorLayer
+from qgis.core import QgsFeedback, QgsVectorLayer, QgsMessageLog, Qgis
 from qgis.PyQt.QtCore import QSettings
 
 
@@ -49,7 +49,7 @@ class WorkflowBase(ABC):
         """
         pass
 
-    def _create_workflow_directory(self) -> str:
+    def _create_workflow_directory(self, *subdirs: str) -> str:
         """
         Creates the directory for this workflow if it doesn't already exist.
         It will be in the scheme of working_dir/dimension/factor/indicator
@@ -58,9 +58,7 @@ class WorkflowBase(ABC):
         """
         workflow_dir = os.path.join(
             self.working_directory,
-            "contextual",
-            "workplace_discrimination",
-            "wbl_2024_workplace_index_score",
+            *subdirs,
         )
         if not os.path.exists(workflow_dir):
             try:
