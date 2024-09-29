@@ -268,9 +268,10 @@ class LayerDetailDialog(QDialog):
             updated_data = self.config_widget.attributes_dict
 
         # Set 'Analysis Mode' based on the selected radio button
-        selected_button = self.button_group.checkedButton()
-        if selected_button:
-            updated_data["Analysis Mode"] = selected_button.text()
+        # Taken from IndicatorConfigWidget now 
+        #selected_button = self.button_group.checkedButton()
+        #if selected_button:
+        #    updated_data["Analysis Mode"] = selected_button.text()
 
         self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
         self.accept()  # Close the dialog
