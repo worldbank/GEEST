@@ -234,7 +234,7 @@ class TreePanel(QWidget):
         item = index.internalPointer()
 
         # Check the role of the item directly from the stored role
-        if item.role == "dimension" and editing:
+        if item.role == "dimension":
             # Context menu for dimensions
             add_factor_action = QAction("Add Factor", self)
             remove_dimension_action = QAction("Remove Dimension", self)
@@ -244,13 +244,23 @@ class TreePanel(QWidget):
             remove_dimension_action.triggered.connect(
                 lambda: self.model.remove_item(item)
             )
-
+            clear_action = QAction("Clear Factor Weightings", self)
+            auto_assign_action = QAction("Auto Assign Factor Weightings", self)
+            clear_action.triggered.connect(
+                lambda: self.model.clear_factor_weightings(item)
+            )
+            auto_assign_action.triggered.connect(
+                lambda: self.model.auto_assign_factor_weightings(item)
+            )
             # Add actions to menu
             menu = QMenu(self)
-            menu.addAction(add_factor_action)
-            menu.addAction(remove_dimension_action)
+            menu.addAction(clear_action)
+            menu.addAction(auto_assign_action)
+            if editing:
+                menu.addAction(add_factor_action)
+                menu.addAction(remove_dimension_action)
 
-        elif item.role == "factor" and editing:
+        elif item.role == "factor":
             # Context menu for factors
             add_layer_action = QAction("Add Layer", self)
             remove_factor_action = QAction("Remove Factor", self)
@@ -269,8 +279,9 @@ class TreePanel(QWidget):
 
             # Add actions to menu
             menu = QMenu(self)
-            menu.addAction(add_layer_action)
-            menu.addAction(remove_factor_action)
+            if editing:
+                menu.addAction(add_layer_action)
+                menu.addAction(remove_factor_action)
             menu.addAction(clear_action)
             menu.addAction(auto_assign_action)
 
