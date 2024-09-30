@@ -49,7 +49,7 @@ class StudyAreaProcessor:
         self.gpkg_path: str = os.path.join(
             self.working_dir, "study_area", "study_area.gpkg"
         )
-
+        self.counter: int = 0
         # Remove the GeoPackage if it already exists to start with a clean state
         if os.path.exists(self.gpkg_path):
             try:
@@ -226,9 +226,6 @@ class StudyAreaProcessor:
         bbox: QgsRectangle = self.grid_aligned_bbox(geom.boundingBox())
 
         # Create a feature for the aligned bounding box
-        study_area_feature: QgsFeature = QgsFeature()
-        study_area_feature.setGeometry(QgsGeometry.fromRect(bbox))
-        study_area_feature.setAttributes([area_name])
         # Always save the study area bounding boxes regardless of mode
         self.save_to_geopackage(
             layer_name="study_area_bboxes",
@@ -244,14 +241,10 @@ class StudyAreaProcessor:
         geom.transform(transform)
 
         # Create a feature for the original part
-        study_area_polygon: QgsFeature = QgsFeature()
-        study_area_polygon.setGeometry(geom)
-        study_area_polygon.setAttributes([area_name])
         # Always save the study area bounding boxes regardless of mode
         self.save_to_geopackage(
             layer_name="study_area_polygons", geom=geom, area_name=normalized_name
         )
-
         # Process the geometry based on the selected mode
         if self.mode == "vector":
             QgsMessageLog.logMessage(
@@ -329,15 +322,16 @@ class StudyAreaProcessor:
             * 100
         )
 
+        y_min -= 100  # Offset by 100m to ensure the grid covers the entire geometry
+        y_max += 100  # Offset by 100m to ensure the grid covers the entire geometry
+        x_min -= 100  # Offset by 100m to ensure the grid covers the entire geometry
+        x_max += 100  # Offset by 100m to ensure the grid covers the entire geometry
+
         # Return the aligned bbox in the output CRS
         return QgsRectangle(x_min, y_min, x_max, y_max)
 
     def save_to_geopackage(
-        self,
-        features: List[QgsFeature],
-        layer_name: str,
-        fields: List[QgsField],
-        geometry_type: QgsWkbTypes,
+        self, layer_name: str, geom: QgsGeometry, area_name: str
     ) -> None:
         """
         Save features to GeoPackage. Create or append the layer as necessary.
@@ -386,9 +380,7 @@ class StudyAreaProcessor:
                 level=Qgis.Critical,
             )
 
-    def create_layer_if_not_exists(
-        self, layer_name: str, fields: List[QgsField], geometry_type: QgsWkbTypes
-    ) -> None:
+    def create_layer_if_not_exists(self, layer_name: str) -> None:
         """
         Create a new layer in the GeoPackage if it doesn't already exist.
 
@@ -432,11 +424,6 @@ class StudyAreaProcessor:
                 options.actionOnExistingFile = (
                     QgsVectorFileWriter.CreateOrOverwriteLayer
                 )
-
-            # Convert list of QgsField objects to QgsFields object
-            qgs_fields = QgsFields()
-            for field in fields:
-                qgs_fields.append(field)
 
             # Create a new GeoPackage layer
             QgsVectorFileWriter.create(
