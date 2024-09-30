@@ -29,6 +29,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
         super().__init__(attributes, feedback)
+        self.layer_id = self.attributes["ID"].lower()
 
     def execute(self):
         """
@@ -51,12 +52,12 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
 
         self.workflow_directory = self._create_workflow_directory(
             "contextual",
-            self.attributes["ID"].lower(),
+            self.layer_id,
         )
 
         # loop through self.bboxes_layer and the self.areas_layer  and create a raster mask for each feature
         index_score = self.attributes["Default Index Score"]
-        for feature in self.bboxes_layer.getFeatures():
+        for feature in self.areas_layer.getFeatures():
             if (
                 self.feedback.isCanceled()
             ):  # Check for cancellation before each major step
@@ -68,7 +69,10 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
                 return False
             geom = feature.geometry()  # todo this shoudl come from the areas layer
             aligned_box = geom
-            mask_name = f"bbox_{feature.id()}"
+            # Set the 'area_name' from layer
+            area_name = feature.attribute("area_name")
+
+            mask_name = f"{self.layer_id}_score_{area_name}"
             self.create_raster(
                 geom=geom,
                 aligned_box=aligned_box,
@@ -78,7 +82,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # TODO Jeff copy create_raster_vrt from study_area.py
         # Create and add the VRT of all generated raster masks if in raster mode
         self.create_raster_vrt(
-            output_vrt_name=os.path.join(self.workflow_directory, "combined_mask.vrt")
+            output_vrt_name=os.path.join(
+                self.workflow_directory, f"{self.layer_id}_score.vrt"
+            )
         )
 
         self.attributes["result"] = "Use Default Index Score Workflow Completed"
@@ -160,7 +166,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info
         )
 
-    def create_raster_vrt(self, output_vrt_name: str = "combined_mask.vrt") -> None:
+    def create_raster_vrt(self, output_vrt_name: str = None) -> None:
         """
         Creates a VRT file from all generated raster masks and adds it to the QGIS map.
 
@@ -173,6 +179,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             return
+
+        if output_vrt_name is None:
+            output_vrt_name = f"{self.layer_id}_score.vrt"
 
         QgsMessageLog.logMessage(
             f"Creating VRT of masks '{output_vrt_name}' layer to the map.",
@@ -213,10 +222,8 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
         )
 
-        layer_id = self.attributes["ID"].replace("_", " ")
-
         # Add the VRT to the QGIS map
-        vrt_layer = QgsRasterLayer(vrt_filepath, f"Combined Mask VRT ({layer_id})")
+        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}_score")
 
         if vrt_layer.isValid():
             QgsProject.instance().addMapLayer(vrt_layer)
