@@ -1,4 +1,5 @@
 import os
+import shutil
 from PyQt5.QtWidgets import (
     QWidget,
     QLabel,
@@ -235,6 +236,19 @@ class SetupPanel(QWidget):
                 QMessageBox.critical(
                     self, "Error", f"Invalid area name field '{field_name}'."
                 )
+                return
+
+            # Copy default model.json if not present
+            default_model_path = resources_path("resources", "model.json")
+            try:
+                shutil.copy(default_model_path, model_path)
+                QMessageBox.information(
+                    self,
+                    "Model File",
+                    "model.json has been copied to the working directory.",
+                )
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to copy model.json: {e}")
                 return
 
             # Create the processor instance and process the features
