@@ -35,6 +35,7 @@ class WorkflowQueueManager(QObject):
         QgsMessageLog.logMessage(
             f"Task added: {task.description()}", tag="Geest", level=Qgis.Info
         )
+        return task
 
     def start_processing(self) -> None:
         """Start processing the tasks in the WorkflowQueue."""

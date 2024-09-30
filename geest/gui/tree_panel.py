@@ -13,13 +13,12 @@ from qgis.PyQt.QtWidgets import (
     QMessageBox,
     QFileDialog,
     QHeaderView,
-    QTreeView,
-    QMenu,
-    QCheckBox,  # Add QCheckBox for Edit Toggle
+    QCheckBox,
 )
 from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QTimer
 from qgis.PyQt.QtGui import QMovie
-from qgis.core import QgsMessageLog, Qgis, QgsLogger
+from qgis.core import QgsMessageLog, Qgis
+from functools import partial
 from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
@@ -34,9 +33,7 @@ class TreePanel(QWidget):
 
         # Initialize the QueueManager
         self.working_directory = None
-
         self.queue_manager = WorkflowQueueManager(pool_size=1)
-
         self.json_file = json_file
         self.tree_view_visible = True
 
@@ -103,7 +100,7 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.prepare_throbber)
 
         self.prepare_button = QPushButton("▶️ Prepare")
-        self.prepare_button.clicked.connect(self.process_leaves)
+        self.prepare_button.clicked.connect(self.prepare_pressed)
         movie.start()
 
         # Add Edit Toggle checkbox
@@ -159,7 +156,6 @@ class TreePanel(QWidget):
 
     @pyqtSlot()
     def set_working_directory(self, working_directory):
-
         if working_directory:
             self.working_directory = working_directory
             self.working_directory_changed(working_directory)
@@ -190,7 +186,6 @@ class TreePanel(QWidget):
         """
         Override the edit method to enable editing only on the column that was clicked.
         """
-        # Get the column that was clicked
         column = index.column()
 
         # Only allow editing on specific columns (e.g., column 0, 1, etc.)
@@ -199,7 +194,6 @@ class TreePanel(QWidget):
         elif column == 2:  # And the third column editable
             return super().edit(index, trigger, event)
 
-        # Return False if the column shouldn't be editable
         return False
 
     def load_json(self):
@@ -348,25 +342,71 @@ class TreePanel(QWidget):
         self._start_workflows_from_tree(self.treeView.model().rootItem)
 
     def _start_workflows_from_tree(self, parent_item):
-        """Recursively start workflows for each 'layer' in the tree."""
+        """
+        Recursively start workflows for each 'layer' in the tree.
+        Connect workflow signals to the corresponding slots for updates.
+        """
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
 
-            # If the child is a layer, we queue a workflow task
+            # If the child is a layer, queue a workflow task
             if child_item.role == "layer":
-                self.queue_manager.add_task(child_item.data(3))
+                # Create the workflow task
+                task = self.queue_manager.add_task(child_item.data(3))
+
+                # Connect workflow signals to TreePanel slots
+                task.job_queued.connect(partial(self.on_workflow_created, child_item))
+                task.job_started.connect(partial(self.on_workflow_started, child_item))
+                # task.job_completed.connect(partial(self.on_workflow_completed, child_item))
+                task.job_canceled.connect(
+                    partial(self.on_workflow_completed, child_item, False)
+                )
+                task.job_finished.connect(
+                    lambda success, attrs: self.on_workflow_completed(
+                        child_item, success
+                    )
+                )
 
             # Recursively process children (dimensions, factors)
             self._start_workflows_from_tree(child_item)
 
-    def on_task_started(self, message):
-        QgsMessageLog.logMessage(message, tag="Geest", level=Qgis.Info)
+    @pyqtSlot()
+    def on_workflow_created(self, item):
+        """
+        Slot for handling when a workflow is created.
+        Update the tree item to indicate that the workflow is queued.
+        """
+        self.update_tree_item_status(item, "Q")
 
-    def on_task_completed(self, message, success):
-        status = "Success" if success else "Failure"
-        QgsMessageLog.logMessage(f"{message}: {status}", tag="Geest", level=Qgis.Info)
+    @pyqtSlot()
+    def on_workflow_started(self, item):
+        """
+        Slot for handling when a workflow starts.
+        Update the tree item to indicate that the workflow is running.
+        """
+        self.update_tree_item_status(item, "R")
 
-    def process_leaves(self):
+    @pyqtSlot(bool)
+    def on_workflow_completed(self, item, success):
+        """
+        Slot for handling when a workflow is completed.
+        Update the tree item to indicate success or failure.
+        """
+        if success:
+            self.update_tree_item_status(item, "✅")
+        else:
+            self.update_tree_item_status(item, "❌")
+
+    def update_tree_item_status(self, item, status):
+        """
+        Update the tree item to show the workflow status.
+        :param item: The tree item representing the workflow.
+        :param status: The status message or icon to display.
+        """
+        # Assuming column 1 is where status updates are shown
+        item.setData(1, status)
+
+    def prepare_pressed(self):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
         It iterates over the entire tree, collecting nodes with the 'layer' role, and

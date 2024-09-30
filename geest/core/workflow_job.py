@@ -9,6 +9,10 @@ class WorkflowJob(QgsTask):
     and cancellation, and the WorkflowFactory to create the appropriate workflow.
     """
 
+    # Signals for task lifecycle
+    job_queued = pyqtSignal()
+    job_started = pyqtSignal()
+    job_canceled = pyqtSignal()
     # Custom signal to emit when the job is finished
     job_finished = pyqtSignal(bool, dict)
 
@@ -25,6 +29,9 @@ class WorkflowJob(QgsTask):
         self._workflow = workflow_factory.create_workflow(
             attributes, self._feedback
         )  # Create the workflow
+
+        # Emit the 'queued' signal upon initialization
+        self.job_queued.emit()
 
     def run(self) -> bool:
         """
@@ -45,6 +52,9 @@ class WorkflowJob(QgsTask):
                 f"Running workflow: {self.description()}", tag="Geest", level=Qgis.Info
             )
 
+            # Emit the 'started' signal before running the workflow
+            self.job_started.emit()
+
             result = self._workflow.execute()
 
             if result:
@@ -53,6 +63,7 @@ class WorkflowJob(QgsTask):
                     tag="Geest",
                     level=Qgis.Info,
                 )
+
                 return True
             else:
                 QgsMessageLog.logMessage(
