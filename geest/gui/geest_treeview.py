@@ -206,6 +206,30 @@ class JsonTreeModel(QAbstractItemModel):
         }
         return json_data
 
+    def clear_factor_weightings(self, dimension_item):
+        """Clear all weightings for factors under the given dimension."""
+        for i in range(dimension_item.childCount()):
+            factor_item = dimension_item.child(i)
+            factor_item.setData(2, "0.00")
+        # After clearing, update the dimension's total weighting
+        dimension_item.setData(2, "0.00")
+        self.update_font_color(dimension_item, QColor(Qt.red))
+        self.layoutChanged.emit()
+
+    def auto_assign_factor_weightings(self, dimension_item):
+        """Auto-assign weightings evenly across all factors under the dimension."""
+        num_factors = dimension_item.childCount()
+        if num_factors == 0:
+            return
+        factor_weighting = 1 / num_factors
+        for i in range(num_factors):
+            factor_item = dimension_item.child(i)
+            factor_item.setData(2, f"{factor_weighting:.2f}")
+        # Update the dimensions's total weighting
+        dimension_item.setData(2, "1.00")
+        self.update_font_color(dimension_item, QColor(Qt.green))
+        self.layoutChanged.emit()
+
     def clear_layer_weightings(self, factor_item):
         """Clear all weightings for layers under the given factor."""
         for i in range(factor_item.childCount()):

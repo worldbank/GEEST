@@ -41,7 +41,7 @@ class DontUseWorkflow(WorkflowBase):
             self.feedback.setProgress(
                 (i + 1) / steps * 100
             )  # Report progress in percentage
-            time.sleep(1)  # Simulate a task
+            pass
 
         self.attributes["result"] = "Dont use workflow completed"
         QgsMessageLog.logMessage(

@@ -40,6 +40,8 @@ class WorkflowBase(ABC):
             "ogr",
         )
         self.output_crs = self.bboxes_layer.crs()
+        # Will be populated by the workflow
+        self.attributes["Result"] = "Not Run"
 
     @abstractmethod
     def execute(self) -> bool:

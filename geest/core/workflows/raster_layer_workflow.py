@@ -38,7 +38,7 @@ class RasterLayerWorkflow(WorkflowBase):
             self._feedback.setProgress(
                 (i + 1) / steps * 100
             )  # Report progress in percentage
-            time.sleep(1)  # Simulate a task
+            pass
 
         self._attributes["result"] = "Spatial analysis completed"
         QgsMessageLog.logMessage(
