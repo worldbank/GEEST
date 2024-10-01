@@ -37,8 +37,8 @@ class SinglePointBuffer:
         if self.input_layer.crs() != self.crs:
             QgsMessageLog.logMessage(
                 f"Reprojecting layer from {self.input_layer.crs().authid()} to {self.crs.authid()}",
-                'Geest',
-                level=Qgis.Info
+                "Geest",
+                level=Qgis.Info,
             )
             reproject_result = processing.run(
                 "native:reprojectlayer",
@@ -66,8 +66,8 @@ class SinglePointBuffer:
         if os.path.exists(self.output_path):
             QgsMessageLog.logMessage(
                 f"Warning: {self.output_path} already exists. It will be overwritten.",
-                'Geest',
-                level=Qgis.Warning
+                "Geest",
+                level=Qgis.Warning,
             )
             os.remove(self.output_path)
 
