@@ -43,7 +43,7 @@ class DontUseWorkflow(WorkflowBase):
             )  # Report progress in percentage
             pass
 
-        self.attributes["result"] = "Dont use workflow completed"
+        self.attributes["Result"] = "Dont use workflow completed"
         QgsMessageLog.logMessage(
             "Dont use workflow workflow completed", tag="Geest", level=Qgis.Info
         )

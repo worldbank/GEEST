@@ -40,7 +40,7 @@ class RasterLayerWorkflow(WorkflowBase):
             )  # Report progress in percentage
             pass
 
-        self._attributes["result"] = "Spatial analysis completed"
+        self._attributes["Result"] = "Spatial analysis completed"
         QgsMessageLog.logMessage(
             "Spatial analysis workflow completed", "Custom Workflows", Qgis.Info
         )

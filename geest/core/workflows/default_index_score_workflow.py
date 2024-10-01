@@ -87,7 +87,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             )
         )
 
-        self.attributes["result"] = "Use Default Index Score Workflow Completed"
+        self.attributes["Result"] = "Use Default Index Score Workflow Completed"
         QgsMessageLog.logMessage(
             "Use Default Index Score workflow workflow completed",
             tag="Geest",
