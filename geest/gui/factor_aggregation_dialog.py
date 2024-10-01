@@ -35,9 +35,8 @@ class FactorAggregationDialog(QDialog):
             f"Edit Aggregation Weightings for Factor: {self.tree_item.data(0)}"
         )
 
-        self.indicators = (
-            self.tree_item.getIndicators()
-        )  # Assuming getIndicators returns a list of dictionaries with indicator details
+        self.indicators = self.tree_item.getFactorAttributes()["Indicators"]
+        # Assuming getIndicators returns a list of dictionaries with indicator details
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
