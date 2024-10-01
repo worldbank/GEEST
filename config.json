@@ -19,6 +19,5 @@
     "version": "0.1",
     "changelog": "",
     "server": false,
-    "plugin_dependencies": "ORS Tools==1.8.3"
   }
 }
