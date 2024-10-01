@@ -6,23 +6,8 @@ import json
 # from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtWidgets import (
     QAbstractItemDelegate,
-    QApplication,
     QTreeView,
-    QMainWindow,
-    QVBoxLayout,
-    QWidget,
-    QFileDialog,
     QMessageBox,
-    QHeaderView,
-    QPushButton,
-    QHBoxLayout,
-    QTableWidget,
-    QTableWidgetItem,
-    QMenu,
-    QAction,
-    QDialog,
-    QLabel,
-    QTextEdit,
 )
 
 # Change to this when implementing in QGIS
@@ -30,12 +15,6 @@ from qgis.PyQt.QtWidgets import (
 from PyQt5.QtCore import (
     QAbstractItemModel,
     QModelIndex,
-    Qt,
-    QFileSystemWatcher,
-    QPoint,
-    QEvent,
-    QTimer,
-    pyqtSignal,
     Qt,
 )
 
@@ -88,14 +67,17 @@ class JsonTreeItem:
     def isFactor(self):
         return self.role == "factor"
 
-    def getIndicators(self):
-        """Return the list of indicators (or layers) under this factor."""
+    def getFactorAttributes(self):
+        """Return the dict of indicators (or layers) under this factor."""
+        attributes = {}
         if self.isFactor():
-            return [
+            attributes["Analysis Mode"] = "Factor Aggregation"
+            attributes["id"] = self.data(0)
+            attributes["Indicators"] = [
                 {"id": i, "name": child.data(0), "weighting": child.data(2)}
                 for i, child in enumerate(self.childItems)
             ]
-        return []
+        return attributes
 
     def updateIndicatorWeighting(self, indicator_id, new_weighting):
         """Update the weighting of a specific indicator."""

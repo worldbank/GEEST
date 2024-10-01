@@ -4,13 +4,7 @@ from qgis.core import (
     QgsMessageLog,
     Qgis,
     QgsFeedback,
-    QgsFeature,
-    QgsVectorLayer,
-    QgsField,
     QgsGeometry,
-    QgsRectangle,
-    QgsRasterLayer,
-    QgsProject,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
@@ -37,7 +31,7 @@ class FactorAggregationWorkflow(WorkflowBase):
         """
 
         QgsMessageLog.logMessage(
-            "Executing Use Default Index Score", tag="Geest", level=Qgis.Info
+            "Executing Use FactorAggregationWorkflow", tag="Geest", level=Qgis.Info
         )
         QgsMessageLog.logMessage(
             "----------------------------------", tag="Geest", level=Qgis.Info

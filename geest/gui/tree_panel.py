@@ -395,8 +395,15 @@ class TreePanel(QWidget):
             # If the child is a layer, queue a workflow task
             if child_item.role == role:
                 # Create the workflow task
-                task = self.queue_manager.add_task(child_item.data(3))
+                task = None
+                if role == "layer":
+                    task = self.queue_manager.add_task(child_item.data(3))
 
+                elif role == "factor":
+                    task = self.queue_manager.add_task(child_item.getFactorAttributes())
+
+                if task is None:
+                    continue
                 # Connect workflow signals to TreePanel slots
                 task.job_queued.connect(partial(self.on_workflow_created, child_item))
                 task.job_started.connect(partial(self.on_workflow_started, child_item))

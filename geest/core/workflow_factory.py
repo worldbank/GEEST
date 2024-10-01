@@ -1,5 +1,11 @@
-from .workflows import RasterLayerWorkflow, DontUseWorkflow, DefaultIndexScoreWorkflow
+from qgis.core import QgsMessageLog, Qgis
 from qgis.core import QgsFeedback
+from .workflows import (
+    RasterLayerWorkflow,
+    DontUseWorkflow,
+    DefaultIndexScoreWorkflow,
+    FactorAggregationWorkflow,
+)
 
 
 class WorkflowFactory:
@@ -13,6 +19,14 @@ class WorkflowFactory:
         Determines the workflow to return based on 'Analysis Mode' in the attributes.
         Passes the feedback object to the workflow for progress reporting.
         """
+        if not attributes:
+            return DontUseWorkflow({}, feedback)
+        QgsMessageLog.logMessage(f"Workflow Factory Called", "Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(f"-----------------------", "Geest", level=Qgis.Info)
+        for key, value in attributes.items():
+            QgsMessageLog.logMessage(f"{key}: {value}", "Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(f"-----------------------", "Geest", level=Qgis.Info)
+
         analysis_mode = attributes.get("Analysis Mode", "")
 
         if analysis_mode == "Spatial Analysis":
@@ -23,5 +37,7 @@ class WorkflowFactory:
             return DontUseWorkflow(attributes, feedback)
         elif analysis_mode == "Temporal Analysis":
             return RasterLayerWorkflow(attributes, feedback)
+        elif analysis_mode == "Factor Aggregation":
+            return FactorAggregationWorkflow(attributes, feedback)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
