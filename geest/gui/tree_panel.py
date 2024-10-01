@@ -25,6 +25,7 @@ from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
 from geest.core import set_setting, setting
 from geest.core.workflow_queue_manager import WorkflowQueueManager
+from .factor_aggregation_dialog import FactorAggregationDialog
 
 
 class TreePanel(QWidget):
@@ -262,12 +263,18 @@ class TreePanel(QWidget):
 
         elif item.role == "factor":
             # Context menu for factors
+            edit_aggregation_action = QAction(
+                "Edit Aggregation", self
+            )  # New action for editing aggregation
             add_layer_action = QAction("Add Layer", self)
             remove_factor_action = QAction("Remove Factor", self)
             clear_action = QAction("Clear Layer Weightings", self)
             auto_assign_action = QAction("Auto Assign Layer Weightings", self)
 
             # Connect actions
+            edit_aggregation_action.triggered.connect(
+                lambda: self.edit_aggregation(item)
+            )  # Connect to method
             add_layer_action.triggered.connect(lambda: self.model.add_layer(item))
             remove_factor_action.triggered.connect(lambda: self.model.remove_item(item))
             clear_action.triggered.connect(
@@ -279,6 +286,8 @@ class TreePanel(QWidget):
 
             # Add actions to menu
             menu = QMenu(self)
+            menu.addAction(edit_aggregation_action)
+
             if editing:
                 menu.addAction(add_layer_action)
                 menu.addAction(remove_factor_action)
@@ -304,6 +313,20 @@ class TreePanel(QWidget):
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+    def edit_aggregation(self, factor_item):
+        """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
+        editing = self.edit_toggle.isChecked()
+        factor_name = factor_item.data(0)
+        factor_data = factor_item.data(3)
+        if not factor_data:
+            factor_data = {}
+        dialog = FactorAggregationDialog(
+            factor_name, factor_data, factor_item, editing=editing, parent=self
+        )
+        if dialog.exec_():  # If OK was clicked
+            dialog.assignWeightings()
+            self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def show_layer_properties(self, item):
         """Open a dialog showing layer properties and update the tree upon changes."""
