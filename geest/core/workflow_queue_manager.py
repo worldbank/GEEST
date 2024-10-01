@@ -30,7 +30,7 @@ class WorkflowQueueManager(QObject):
         Internally uses the WorkflowFactory to create the appropriate workflow.
         :param attributes: A dictionary of task attributes
         """
-        task = WorkflowJob(description="Workflow Task", attributes=attributes)
+        task = WorkflowJob(description="Geest Task", attributes=attributes)
         self.workflow_queue.add_job(task)
         QgsMessageLog.logMessage(
             f"Task added: {task.description()}", tag="Geest", level=Qgis.Info

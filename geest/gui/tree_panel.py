@@ -372,19 +372,28 @@ class TreePanel(QWidget):
             self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
     def start_workflows(self):
-        """Start a workflow for each 'layer' node in the tree."""
-        self._start_workflows_from_tree(self.treeView.model().rootItem)
+        """Start a workflow for each 'layer' node in the tree.
 
-    def _start_workflows_from_tree(self, parent_item):
+        We process in the order of layers, factors, and dimensions since there
+        is a dependency between them. For example, a factor depends on its layers.
         """
-        Recursively start workflows for each 'layer' in the tree.
+
+        self._start_workflows(self.treeView.model().rootItem, role="layer")
+        self._start_workflows(self.treeView.model().rootItem, role="factor")
+        self._start_workflows(self.treeView.model().rootItem, role="dimension")
+
+    def _start_workflows(self, parent_item, role=None):
+        """
+        Recursively start workflows for each node in the tree.
         Connect workflow signals to the corresponding slots for updates.
+        :param parent_item: The parent item to process.
+        :param role: The role of the item to process (i.e., 'dimension', 'factor', 'layer').
         """
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
 
             # If the child is a layer, queue a workflow task
-            if child_item.role == "layer":
+            if child_item.role == role:
                 # Create the workflow task
                 task = self.queue_manager.add_task(child_item.data(3))
 
@@ -400,9 +409,8 @@ class TreePanel(QWidget):
                         child_item, success
                     )
                 )
-
             # Recursively process children (dimensions, factors)
-            self._start_workflows_from_tree(child_item)
+            self._start_workflows(child_item, role)
 
     @pyqtSlot()
     def on_workflow_created(self, item):

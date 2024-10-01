@@ -13,7 +13,7 @@ class WorkflowFactory:
         Determines the workflow to return based on 'Analysis Mode' in the attributes.
         Passes the feedback object to the workflow for progress reporting.
         """
-        analysis_mode = attributes.get("Analysis Mode")
+        analysis_mode = attributes.get("Analysis Mode", "")
 
         if analysis_mode == "Spatial Analysis":
             return RasterLayerWorkflow(attributes, feedback)
