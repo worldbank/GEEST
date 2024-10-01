@@ -306,7 +306,7 @@ Applying the GEEST in the pilot countries has yielded valuable insights, particu
 
 During the development phase the plugin is available to install via 
 a dedicated plugin repository 
-[https://raw.githubusercontent.com/samweli/GEEST/release/docs/repository/plugins.xml](https://raw.githubusercontent.com/samweli/GEEST/release/docs/repository/plugins.xml)
+[https://raw.githubusercontent.com/kartozs/GEEST2/release/docs/repository/plugins.xml](https://raw.githubusercontent.com/kartoza/GEEST2/release/docs/repository/plugins.xml)
 
 ### Install from QGIS plugin repository
 

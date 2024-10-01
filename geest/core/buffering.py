@@ -2,7 +2,8 @@ import os
 from qgis.core import (
     QgsVectorLayer,
     QgsProcessingFeedback,
-    QgsCoordinateReferenceSystem,
+    QgsMessageLog,
+    Qgis,
 )
 import processing
 
@@ -34,8 +35,10 @@ class SinglePointBuffer:
             QgsVectorLayer: The input layer, either reprojected or unchanged.
         """
         if self.input_layer.crs() != self.crs:
-            print(
-                f"Reprojecting layer from {self.input_layer.crs().authid()} to {self.crs.authid()}"
+            QgsMessageLog.logMessage(
+                f"Reprojecting layer from {self.input_layer.crs().authid()} to {self.crs.authid()}",
+                "Geest",
+                level=Qgis.Info,
             )
             reproject_result = processing.run(
                 "native:reprojectlayer",
@@ -61,8 +64,10 @@ class SinglePointBuffer:
         """
         # Check if the output file already exists and delete it if necessary
         if os.path.exists(self.output_path):
-            print(
-                f"Warning: {self.output_path} already exists. It will be overwritten."
+            QgsMessageLog.logMessage(
+                f"Warning: {self.output_path} already exists. It will be overwritten.",
+                "Geest",
+                level=Qgis.Warning,
             )
             os.remove(self.output_path)
 
