@@ -85,6 +85,27 @@ class JsonTreeItem:
             return self.parentItem.childItems.index(self)
         return 0
 
+    def isFactor(self):
+        return self.role == "factor"
+
+    def getIndicators(self):
+        """Return the list of indicators (or layers) under this factor."""
+        if self.isFactor():
+            return [
+                {"id": i, "name": child.data(0), "weighting": child.data(2)}
+                for i, child in enumerate(self.childItems)
+            ]
+        return []
+
+    def updateIndicatorWeighting(self, indicator_id, new_weighting):
+        """Update the weighting of a specific indicator."""
+        try:
+            indicator_item = self.childItems[indicator_id]
+            indicator_item.setData(2, f"{new_weighting:.2f}")
+        except IndexError:
+            # Handle invalid indicator_id
+            pass
+
 
 class JsonTreeModel(QAbstractItemModel):
     """Custom QAbstractItemModel to manage JSON data."""
