@@ -316,7 +316,14 @@ class TreePanel(QWidget):
 
     def edit_aggregation(self, factor_item):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
-        dialog = FactorAggregationDialog(factor_item, parent=self)
+        editing = self.edit_toggle.isChecked()
+        factor_name = factor_item.data(0)
+        factor_data = factor_item.data(3)
+        if not factor_data:
+            factor_data = {}
+        dialog = FactorAggregationDialog(
+            factor_name, factor_data, factor_item, editing=editing, parent=self
+        )
         if dialog.exec_():  # If OK was clicked
             dialog.assignWeightings()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
