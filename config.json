@@ -18,6 +18,6 @@
     "description": "Gender Enabling Environments Spatial Tool",
     "version": "0.1",
     "changelog": "",
-    "server": false,
+    "server": false
   }
 }
