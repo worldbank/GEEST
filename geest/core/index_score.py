@@ -4,6 +4,8 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsRectangle,
     QgsCoordinateReferenceSystem,
+    QgsMessageLog,
+    Qgis,
 )
 import processing
 
@@ -48,9 +50,11 @@ class RasterizeIndexScoreValue:
         """
         # Check if the output file already exists and delete it if necessary
         if os.path.exists(self.output_path):
-            print(
-                f"Warning: {self.output_path} already exists. It will be overwritten."
-            )
+            QgsMessageLog.logMessage(
+            f"Warning: {self.output_path} already exists. It will be overwritten.",
+            'Geest',
+            level=Qgis.Warning
+        )
 
         # Calculate the raster value based on index_value and index_scale
         raster_value = int((self.index_value / self.index_scale) * 5)

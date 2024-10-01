@@ -1,5 +1,5 @@
 import os
-from qgis.core import QgsVectorLayer, QgsProcessingFeedback
+from qgis.core import QgsVectorLayer, QgsProcessingFeedback, QgsMessageLog, Qgis
 import processing
 
 
@@ -30,7 +30,7 @@ class GridCreator:
         """
         # Check if the merged grid already exists
         if os.path.exists(merged_output_path):
-            print(f"Merged grid already exists: {merged_output_path}")
+            QgsMessageLog.logMessage(f"Merged grid already exists: {merged_output_path}", 'Geest', level=Qgis.Info)
             return merged_output_path
         else:
             layer = QgsVectorLayer(layer, "country_layer", "ogr")
@@ -77,7 +77,7 @@ class GridCreator:
 
                     # Check if the grid already exists
                     if os.path.exists(grid_output_path):
-                        print(f"Grid file already exists: {grid_output_path}")
+                        QgsMessageLog.logMessage(f"Grid file already exists: {grid_output_path}", 'Geest', level=Qgis.Info)
                         grid_layer = QgsVectorLayer(
                             grid_output_path, "grid_layer", "ogr"
                         )  # Load the existing grid layer
@@ -91,7 +91,7 @@ class GridCreator:
                         clip_result = processing.run("native:clip", clip_params)
                         grid_layer = clip_result["OUTPUT"]  # The clipped grid
                     else:
-                        print(f"Creating grid: {grid_output_path}")
+                        QgsMessageLog.logMessage(f"Creating grid: {grid_output_path}", 'Geest', level=Qgis.Info)
                         # Define grid creation parameters
                         grid_params = {
                             "TYPE": 2,  # Rectangle (polygon)
@@ -120,7 +120,7 @@ class GridCreator:
                     all_grids.append(grid_layer)
 
             # Merge all grids into a single layer
-            print(f"Merging grids into: {merged_output_path}")
+            QgsMessageLog.logMessage(f"Merging grids into: {merged_output_path}", 'Geest', level=Qgis.Info)
             merge_params = {
                 "LAYERS": all_grids,
                 "CRS": crs,
