@@ -254,10 +254,28 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            QgsProject.instance().addMapLayer(vrt_layer)
-            QgsMessageLog.logMessage(
-                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-            )
+            if os.path.exists(qml_dest_path):
+
+                result = vrt_layer.loadNamedStyle(qml_dest_path)
+                if result[0]:  # Check if the style was successfully loaded
+                    QgsMessageLog.logMessage(
+                        "Successfully applied QML style.", tag="Geest", level=Qgis.Info
+                    )
+                else:
+                    QgsMessageLog.logMessage(
+                        f"Failed to apply QML style: {result[1]}",
+                        tag="Geest",
+                        level=Qgis.Warning,
+                    )
+
+                QgsProject.instance().addMapLayer(vrt_layer)
+                QgsMessageLog.logMessage(
+                    "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+                )
+            else:
+                QgsMessageLog.logMessage(
+                    "QML not in the directory.", tag="Geest", level=Qgis.Critical
+                )
             return vrt_filepath
         else:
             QgsMessageLog.logMessage(
