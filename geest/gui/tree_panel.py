@@ -1,7 +1,7 @@
 import json
 import os
+import shutil
 from qgis.PyQt.QtWidgets import (
-    QDockWidget,
     QTreeView,
     QVBoxLayout,
     QHBoxLayout,
@@ -15,7 +15,7 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QCheckBox,
 )
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QTimer
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import QgsMessageLog, Qgis
 from functools import partial
@@ -23,7 +23,7 @@ from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
-from geest.core import set_setting, setting
+from geest.core import setting
 from geest.core.workflow_queue_manager import WorkflowQueueManager
 from .factor_aggregation_dialog import FactorAggregationDialog
 
@@ -151,6 +151,22 @@ class TreePanel(QWidget):
                 "Geest",
                 level=Qgis.Warning,
             )
+            # copy the default model.json to the working directory
+            master_model_path = resources_path("resources", "model.json")
+            if os.path.exists(master_model_path):
+                try:
+                    shutil.copy(master_model_path, model_path)
+                    QgsMessageLog.logMessage(
+                        f"Copied master model.json to {model_path}",
+                        "Geest",
+                        level=Qgis.Info,
+                    )
+                except Exception as e:
+                    QgsMessageLog.logMessage(
+                        f"Error copying master model.json: {str(e)}",
+                        "Geest",
+                        level=Qgis.Critical,
+                    )
             self.load_json()
             self.model.loadJsonData(self.json_data)
             self.treeView.expandAll()

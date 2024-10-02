@@ -86,7 +86,7 @@ class FactorAggregationDialog(QDialog):
         In this dialog you can set the weightings for each indicator in the factor.
         """
         self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(self.factor_data.get("Text", default_text))
+        self.text_edit_left.setPlainText(self.factor_data.get("text", default_text))
         self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
         if self.editing:
             splitter.addWidget(self.text_edit_left)
@@ -163,3 +163,12 @@ class FactorAggregationDialog(QDialog):
         markdown_text = self.text_edit_left.toPlainText()
         # Set the rendered HTML into the right text edit
         self.text_edit_right.setMarkdown(markdown_text)
+
+    def accept_changes(self):
+        """Handle the OK button by applying changes and closing the dialog."""
+        if self.editing:
+            updated_data = self.layer_data
+            # Include the Markdown text from the left text edit
+            updated_data["text"] = self.text_edit_left.toPlainText()
+            self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
+        self.accept()  # Close the dialog
