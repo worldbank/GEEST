@@ -221,6 +221,7 @@ class JsonTreeModel(QAbstractItemModel):
                 json = {
                     "name": item.data(0).lower(),
                     "factors": [recurse_tree(child) for child in item.childItems],
+                    "Analysis Weighting": item.data(2),
                 }
                 try:
                     json.update(
@@ -233,6 +234,7 @@ class JsonTreeModel(QAbstractItemModel):
                 json = {
                     "name": item.data(0),
                     "layers": [recurse_tree(child) for child in item.childItems],
+                    "Dimension Weighting": item.data(2),
                 }
                 try:
                     json.update(
@@ -243,7 +245,7 @@ class JsonTreeModel(QAbstractItemModel):
                 return json
             elif item.role == "layer":
                 json = item.data(3)
-                json["Factor Weighting"] = item.parentItem.data(2)
+                json["Factor Weighting"] = item.data(2)
                 return json
 
         json_data = {

@@ -33,7 +33,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "workplace_discrimination",
@@ -71,7 +72,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "regulatory_frameworks",
@@ -109,7 +111,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "financial_inclusion",
@@ -156,7 +159,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.20"
                         },
                         {
                             "Layer": "Location of primary schools ",
@@ -185,7 +189,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.20"
                         },
                         {
                             "Layer": "Location of groceries",
@@ -214,7 +219,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.20"
                         },
                         {
                             "Layer": "Location of pharmacies",
@@ -243,7 +249,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.20"
                         },
                         {
                             "Layer": "Location of green spaces ",
@@ -272,7 +279,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.20"
                         }
                     ],
                     "id": "women's_travel_patterns",
@@ -310,7 +318,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "access_to_public_transport",
@@ -348,7 +357,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "access_to_health_facilities",
@@ -386,7 +396,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "access_to_education_and_training_facilities",
@@ -424,7 +435,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "access_to_financial_facilities",
@@ -471,7 +483,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         },
                         {
                             "Layer": "Location of cycle paths",
@@ -500,7 +513,8 @@
                             "Use Polyline per Cell": 1,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         },
                         {
                             "Layer": "Location of footpaths",
@@ -529,7 +543,8 @@
                             "Use Polyline per Cell": 1,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         },
                         {
                             "Layer": "Block Layout",
@@ -558,7 +573,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "active_transport",
@@ -596,7 +612,8 @@
                             "Use Polyline per Cell": 1,
                             "Use Point per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "safety",
@@ -634,7 +651,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "fcv",
@@ -672,7 +690,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "education",
@@ -710,7 +729,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "digital_inclusion",
@@ -748,7 +768,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         },
                         {
                             "Layer": "Flood Hazards",
@@ -777,7 +798,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         },
                         {
                             "Layer": "Landslide",
@@ -806,7 +828,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         },
                         {
                             "Layer": "Tropical Cyclone",
@@ -835,7 +858,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         },
                         {
                             "Layer": "Drought",
@@ -864,7 +888,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "environmental_hazards",
@@ -902,7 +927,8 @@
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Layer Required": 1,
+                            "Factor Weighting": "0.00"
                         }
                     ],
                     "id": "water_sanitation",
