@@ -85,12 +85,12 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             )
         # TODO Jeff copy create_raster_vrt from study_area.py
         # Create and add the VRT of all generated raster masks if in raster mode
-        self.create_raster_vrt(
+        vrt_filepath = self.create_raster_vrt(
             output_vrt_name=os.path.join(
                 self.workflow_directory, f"{self.layer_id}_score.vrt"
             )
         )
-
+        self.attributes["Result File"] = vrt_filepath
         self.attributes["Result"] = "Use Default Index Score Workflow Completed"
         QgsMessageLog.logMessage(
             "Use Default Index Score workflow workflow completed",
@@ -175,6 +175,8 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         Creates a VRT file from all generated raster masks and adds it to the QGIS map.
 
         :param output_vrt_name: The name of the VRT file to create.
+
+        :return: The path to the created VRT file.
         """
         if self.feedback.isCanceled():  # Check for cancellation before starting
             QgsMessageLog.logMessage(
@@ -274,7 +276,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
                 QgsMessageLog.logMessage(
                     "QML not in the directory.", tag="Geest", level=Qgis.Critical
                 )
+            return vrt_filepath
         else:
             QgsMessageLog.logMessage(
                 "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
             )
+            return None

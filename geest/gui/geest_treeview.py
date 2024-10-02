@@ -74,7 +74,12 @@ class JsonTreeItem:
             attributes["Analysis Mode"] = "Factor Aggregation"
             attributes["id"] = self.data(0)
             attributes["Indicators"] = [
-                {"id": i, "name": child.data(0), "weighting": child.data(2)}
+                {
+                    "id": i,
+                    "name": child.data(0),
+                    "weighting": child.data(2),
+                    "Result File": child.data(3).get("Result File", ""),
+                }
                 for i, child in enumerate(self.childItems)
             ]
         return attributes

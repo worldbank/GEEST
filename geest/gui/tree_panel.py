@@ -100,8 +100,14 @@ class TreePanel(QWidget):
         self.prepare_throbber.setVisible(False)  # Hide initially
         button_bar.addWidget(self.prepare_throbber)
 
-        self.prepare_button = QPushButton("▶️ Prepare")
-        self.prepare_button.clicked.connect(self.prepare_pressed)
+        self.prepare_indicators_button = QPushButton("▶️ 1")
+        self.prepare_indicators_button.clicked.connect(self.prepare_indicators_pressed)
+        self.prepare_factors_button = QPushButton("▶️ 2")
+        self.prepare_factors_button.clicked.connect(self.prepare_factors_pressed)
+        self.prepare_dimensions_button = QPushButton("▶️ 3")
+        self.prepare_dimensions_button.clicked.connect(self.prepare_dimensions_pressed)
+        self.prepare_analysis_button = QPushButton("▶️ 4")
+        self.prepare_analysis_button.clicked.connect(self.prepare_analysis_pressed)
         movie.start()
 
         # Add Edit Toggle checkbox
@@ -117,7 +123,11 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.add_dimension_button)
         button_bar.addStretch()
 
-        button_bar.addWidget(self.prepare_button)
+        button_bar.addWidget(self.prepare_indicators_button)
+        button_bar.addWidget(self.prepare_factors_button)
+        button_bar.addWidget(self.prepare_dimensions_button)
+        button_bar.addWidget(self.prepare_analysis_button)
+
         button_bar.addStretch()
 
         button_bar.addWidget(self.load_json_button)
@@ -249,6 +259,10 @@ class TreePanel(QWidget):
             return
 
         item = index.internalPointer()
+        show_json_attributes_action = QAction("Show Attributes", self)
+        show_json_attributes_action.triggered.connect(
+            lambda: self.show_attributes(item)
+        )
 
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
@@ -273,6 +287,7 @@ class TreePanel(QWidget):
             menu = QMenu(self)
             menu.addAction(clear_action)
             menu.addAction(auto_assign_action)
+            menu.addAction(show_json_attributes_action)
             if editing:
                 menu.addAction(add_factor_action)
                 menu.addAction(remove_dimension_action)
@@ -281,7 +296,7 @@ class TreePanel(QWidget):
             # Context menu for factors
             edit_aggregation_action = QAction(
                 "Edit Aggregation", self
-            )  # New action for editing aggregation
+            )  # New action for contextediting aggregation
             add_layer_action = QAction("Add Layer", self)
             remove_factor_action = QAction("Remove Factor", self)
             clear_action = QAction("Clear Layer Weightings", self)
@@ -303,6 +318,7 @@ class TreePanel(QWidget):
             # Add actions to menu
             menu = QMenu(self)
             menu.addAction(edit_aggregation_action)
+            menu.addAction(show_json_attributes_action)
 
             if editing:
                 menu.addAction(add_layer_action)
@@ -324,11 +340,17 @@ class TreePanel(QWidget):
             # Add actions to menu
             menu = QMenu(self)
             menu.addAction(show_properties_action)
+            menu.addAction(show_json_attributes_action)
+
             if editing:
                 menu.addAction(remove_layer_action)
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+    def show_attributes(self, item):
+        """Show the attributes of the item in a dialog."""
+        QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
 
     def edit_aggregation(self, factor_item):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
@@ -387,16 +409,20 @@ class TreePanel(QWidget):
         else:
             self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
-    def start_workflows(self):
+    def start_workflows(self, type=None):
         """Start a workflow for each 'layer' node in the tree.
 
         We process in the order of layers, factors, and dimensions since there
         is a dependency between them. For example, a factor depends on its layers.
         """
-
-        self._start_workflows(self.treeView.model().rootItem, role="layer")
-        self._start_workflows(self.treeView.model().rootItem, role="factor")
-        self._start_workflows(self.treeView.model().rootItem, role="dimension")
+        if type == "indicators":
+            self._start_workflows(self.treeView.model().rootItem, role="layer")
+        elif type == "factors":
+            self._start_workflows(self.treeView.model().rootItem, role="factor")
+        elif type == "dimensions":
+            self._start_workflows(self.treeView.model().rootItem, role="dimension")
+        elif type == "analysis":
+            self._start_workflows(self.treeView.model().rootItem, role="analysis")
 
     def _start_workflows(self, parent_item, role=None):
         """
@@ -459,6 +485,7 @@ class TreePanel(QWidget):
         """
         if success:
             self.update_tree_item_status(item, "✅")
+
         else:
             self.update_tree_item_status(item, "❌")
 
@@ -471,12 +498,42 @@ class TreePanel(QWidget):
         # Assuming column 1 is where status updates are shown
         item.setData(1, status)
 
-    def prepare_pressed(self):
+    def prepare_indicators_pressed(self):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
         It iterates over the entire tree, collecting nodes with the 'layer' role, and
         processes each one by showing an animated icon, waiting for 2 seconds, and
         then removing the animation.
         """
-        self.start_workflows()
+        self.start_workflows(type="indicators")
+        self.queue_manager.start_processing()
+
+    def prepare_factors_pressed(self):
+        """
+        This function processes all nodes in the QTreeView that have the 'factor' role.
+        It iterates over the entire tree, collecting nodes with the 'layer' role, and
+        processes each one by showing an animated icon, waiting for 2 seconds, and
+        then removing the animation.
+        """
+        self.start_workflows(type="factors")
+        self.queue_manager.start_processing()
+
+    def prepare_dimensions_pressed(self):
+        """
+        This function processes all nodes in the QTreeView that have the 'dimension' role.
+        It iterates over the entire tree, collecting nodes with the 'layer' role, and
+        processes each one by showing an animated icon, waiting for 2 seconds, and
+        then removing the animation.
+        """
+        self.start_workflows(type="dimensions")
+        self.queue_manager.start_processing()
+
+    def prepare_analysis_pressed(self):
+        """
+        This function processes all nodes in the QTreeView that have the 'layer' role.
+        It iterates over the entire tree, collecting nodes with the 'layer' role, and
+        processes each one by showing an animated icon, waiting for 2 seconds, and
+        then removing the animation.
+        """
+        self.start_workflows(type="analysis")
         self.queue_manager.start_processing()

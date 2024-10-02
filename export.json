@@ -35,7 +35,8 @@
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
                             "Factor Weighting": "0.11",
-                            "Result": "Use Default Index Score Workflow Completed"
+                            "Result": "Use Default Index Score Workflow Completed",
+                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/workplace_index/workplace_index_score.vrt"
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -76,7 +77,8 @@
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
                             "Factor Weighting": "1.00",
-                            "Result": "Use Default Index Score Workflow Completed"
+                            "Result": "Use Default Index Score Workflow Completed",
+                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/pay_parenthood_index/pay_parenthood_index_score.vrt"
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -117,7 +119,8 @@
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
                             "Factor Weighting": "1.00",
-                            "Result": "Use Default Index Score Workflow Completed"
+                            "Result": "Use Default Index Score Workflow Completed",
+                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/entrepeneurship_index /entrepeneurship_index _score.vrt"
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -127,7 +130,7 @@
                     "default_dimension_weighting": 0.0
                 }
             ],
-            "Analysis Weighting": "0.00",
+            "Analysis Weighting": "",
             "id": "contextual",
             "text": "",
             "required": 1.0,
