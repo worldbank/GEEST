@@ -67,6 +67,9 @@ class JsonTreeItem:
     def isFactor(self):
         return self.role == "factor"
 
+    def isDimension(self):
+        return self.role == "dimension"
+
     def getFactorAttributes(self):
         """Return the dict of indicators (or layers) under this factor."""
         attributes = {}
@@ -87,7 +90,7 @@ class JsonTreeItem:
     def getDimensionAttributes(self):
         """Return the dict of factors under this dimension."""
         attributes = {}
-        if self.isFactor():
+        if self.isDimension():
             attributes["Analysis Mode"] = "Dimension Aggregation"
             attributes["id"] = self.data(0)
             attributes["Factors"] = [
