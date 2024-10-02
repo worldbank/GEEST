@@ -210,5 +210,5 @@ class FactorAggregationWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             self.attributes["Result"] = "Factor Aggregation Workflow Failed"
-            
+
             return False
