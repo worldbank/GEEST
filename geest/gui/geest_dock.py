@@ -5,7 +5,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 from qgis.PyQt.QtCore import Qt
-from qgis.core import QgsMessageLog
+from qgis.core import QgsMessageLog, Qgis
 from typing import Optional
 from .setup_panel import SetupPanel
 from .tree_panel import TreePanel
@@ -80,7 +80,7 @@ class GeestDock(QDockWidget):
             QgsMessageLog.logMessage(
                 f"Error initializing GeestDock: {str(e)}",
                 "Geest",
-                level=QgsMessageLog.CRITICAL,
+                level=Qgis.Critical,
             )
 
     def on_tab_changed(self, index: int) -> None:
@@ -90,9 +90,9 @@ class GeestDock(QDockWidget):
         :param index: The index of the newly selected tab.
         """
         if index == 0:
-            QgsMessageLog.logMessage("Switched to Project tab", "Geest")
+            QgsMessageLog.logMessage("Switched to Project tab", "Geest", Qgis.Info)
         elif index == 1:
-            QgsMessageLog.logMessage("Switched to Tree tab", "Geest")
+            QgsMessageLog.logMessage("Switched to Tree tab", "Geest", Qgis.Info)
             self.tree_widget.set_working_directory(self.setup_widget.working_dir)
 
     def load_json_file(self, json_file: str) -> None:
@@ -104,10 +104,12 @@ class GeestDock(QDockWidget):
         try:
             self.json_file = json_file
             self.tree_widget.load_data_from_json(json_file)
-            QgsMessageLog.logMessage(f"Loaded JSON file: {json_file}", "Geest")
+            QgsMessageLog.logMessage(
+                f"Loaded JSON file: {json_file}", "Geest", Qgis.Info
+            )
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error loading JSON file: {str(e)}",
-                "Geest",
-                level=QgsMessageLog.CRITICAL,
+                tag="Geest",
+                level=Qgis.Critical,
             )

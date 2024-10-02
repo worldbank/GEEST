@@ -9,7 +9,7 @@ This file is part of the GEEST QGIS Plugin. It is available under the terms of t
 See the LICENSE file in the project root for more information.
 """
 
-from qgis.core import QgsTask, QgsMessageLog
+from qgis.core import QgsTask, QgsMessageLog, Qgis
 from PyQt5.QtCore import pyqtSignal
 import os
 
@@ -35,8 +35,8 @@ class GEESTTask(QgsTask):
             if self.node.get("processed", False) and os.path.exists(output_path):
                 QgsMessageLog.logMessage(
                     f"{self.node['name']} already processed",
-                    "GEEST",
-                    QgsMessageLog.INFO,
+                    "Geest",
+                    Qgis.Info,
                 )
                 self.finished.emit(True)
                 return True
@@ -45,15 +45,15 @@ class GEESTTask(QgsTask):
             self.process_node()
             self.node["processed"] = True
             QgsMessageLog.logMessage(
-                f"Processed {self.node['name']}", "GEEST", QgsMessageLog.INFO
+                f"Processed {self.node['name']}", "Geest", Qgis.Info
             )
             self.finished.emit(True)
             return True
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Task failed for {self.node['name']}: {str(e)}",
-                "GEEST",
-                QgsMessageLog.CRITICAL,
+                "Geest",
+                Qgis.Critical,
             )
             self.error.emit()
             return False
@@ -72,6 +72,6 @@ class GEESTTask(QgsTask):
         Handles task cancellation.
         """
         QgsMessageLog.logMessage(
-            f"{self.node['name']} task was cancelled", "GEEST", QgsMessageLog.INFO
+            f"{self.node['name']} task was cancelled", "GEEST", Qgis.Info
         )
         super().cancel()

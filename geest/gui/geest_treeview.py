@@ -151,8 +151,8 @@ class JsonTreeModel(QAbstractItemModel):
                         # We store the whole json layer object in the last column
                         # so that we can pull out any of the additional properties
                         # from it later
-                        # Layers dont have weightings, only dimensions and factors
-                        [layer["Layer"], "🔴", "", layer],
+                        # layer name, status, weighting, attributes
+                        [layer["Layer"], "🔴", layer.get("Factor Weighting", 0), layer],
                         "layer",
                         factor_item,
                     )
@@ -242,7 +242,9 @@ class JsonTreeModel(QAbstractItemModel):
                     pass
                 return json
             elif item.role == "layer":
-                return item.data(3)
+                json = item.data(3)
+                json["Factor Weighting"] = item.parentItem.data(2)
+                return json
 
         json_data = {
             "dimensions": [recurse_tree(child) for child in self.rootItem.childItems]
