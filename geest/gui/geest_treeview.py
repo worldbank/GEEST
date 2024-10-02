@@ -106,14 +106,40 @@ class JsonTreeModel(QAbstractItemModel):
         # Process dimensions, factors, and layers
         for dimension in json_data.get("dimensions", []):
             dimension_name = dimension["name"].title()  # Show dimensions in title case
+            dimension_attributes = {}
+            dimension_attributes["id"] = dimension.get("id", "")
+            dimension_attributes["name"] = dimension.get("name", "")
+            dimension_attributes["text"] = dimension.get("text", "")
+            dimension_attributes["required"] = dimension.get("required", False)
+            dimension_attributes["default_analysis_weighting"] = dimension.get(
+                "default_analysis_weighting", 0.0
+            )
+            # We store the whole dimension object in the last column (excluding factors)
+            # so that we can pull out any of the additional properties
+            # from it later
             dimension_item = JsonTreeItem(
-                [dimension_name, "🔴", ""], "dimension", self.rootItem
+                [dimension_name, "🔴", "", dimension_attributes],
+                "dimension",
+                self.rootItem,  # parent
             )
             self.rootItem.appendChild(dimension_item)
 
             for factor in dimension.get("factors", []):
+                # We store the whole factor object in the last column (excluding layers)
+                # so that we can pull out any of the additional properties
+                # from it later
+                factor_attributes = {}
+                factor_attributes["id"] = factor.get("id", "")
+                factor_attributes["name"] = factor.get("name", "")
+                factor_attributes["text"] = factor.get("text", "")
+                factor_attributes["required"] = factor.get("required", False)
+                factor_attributes["default_dimension_weighting"] = factor.get(
+                    "default_analysis_weighting", 0.0
+                )
                 factor_item = JsonTreeItem(
-                    [factor["name"], "🔴", ""], "factor", dimension_item
+                    [factor["name"], "🔴", "", factor_attributes],
+                    "factor",
+                    dimension_item,  # parent
                 )
                 dimension_item.appendChild(factor_item)
 
@@ -125,8 +151,8 @@ class JsonTreeModel(QAbstractItemModel):
                         # We store the whole json layer object in the last column
                         # so that we can pull out any of the additional properties
                         # from it later
-                        # Layers dont have weightings, only dimensions and factors
-                        [layer["Layer"], "🔴", "", layer],
+                        # layer name, status, weighting, attributes
+                        [layer["Layer"], "🔴", layer.get("Factor Weighting", 0), layer],
                         "layer",
                         factor_item,
                     )
@@ -192,17 +218,35 @@ class JsonTreeModel(QAbstractItemModel):
 
         def recurse_tree(item):
             if item.role == "dimension":
-                return {
+                json = {
                     "name": item.data(0).lower(),
                     "factors": [recurse_tree(child) for child in item.childItems],
+                    "Analysis Weighting": item.data(2),
                 }
+                try:
+                    json.update(
+                        item.data(3)
+                    )  # merges in the data stored in the third column
+                except:
+                    pass
+                return json
             elif item.role == "factor":
-                return {
+                json = {
                     "name": item.data(0),
                     "layers": [recurse_tree(child) for child in item.childItems],
+                    "Dimension Weighting": item.data(2),
                 }
+                try:
+                    json.update(
+                        item.data(3)
+                    )  # merges in the data stored in the third column
+                except:
+                    pass
+                return json
             elif item.role == "layer":
-                return item.data(3)
+                json = item.data(3)
+                json["Factor Weighting"] = item.data(2)
+                return json
 
         json_data = {
             "dimensions": [recurse_tree(child) for child in self.rootItem.childItems]

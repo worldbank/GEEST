@@ -166,44 +166,29 @@ class FactorAggregationWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
+        # Get the indicators beneath this factor and combine them into a single raster
+        # proportional to the weight of each indicator
+        QgsMessageLog.logMessage(f"Factor attributes", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(f"{self.attributes}", tag="Geest", level=Qgis.Info)
 
         QgsMessageLog.logMessage(
-            "Executing Use FactorAggregationWorkflow", tag="Geest", level=Qgis.Info
+            f"----------------------------", tag="Geest", level=Qgis.Info
         )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
-        for item in self.attributes.items():
-            QgsMessageLog.logMessage(
-                f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
-            )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
+        # Directories where the VRTs are expected to be found
 
+        # for key, value in self.attributes:
+        #    QgsMessageLog.logMessage(
+        #        f"Key: {key}, Value: {value}", tag="Geest", level=Qgis.Info
+        #    )
+        # QgsMessageLog.logMessage(
+        #    f"----------------------------", tag="Geest", level=Qgis.Info
+        # )
+
+        # Directory where the VRTs are expected to be found
         self.workflow_directory = self._create_workflow_directory(
             "contextual",
             self.factor_id,
         )
-
-        # Get the indicators beneath this factor and combine them into a single raster
-        # proportional to the weight of each indicator
-        QgsMessageLog.logMessage(f"Factor attributes", tag="Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(
-            f"----------------------------", tag="Geest", level=Qgis.Info
-        )
-
-        for key, value in self.attributes:
-            QgsMessageLog.logMessage(
-                f"Key: {key}, Value: {value}", tag="Geest", level=Qgis.Info
-            )
-        QgsMessageLog.logMessage(
-            f"----------------------------", tag="Geest", level=Qgis.Info
-        )
-
-        # Directories where the VRTs are expected to be found
-        # Directory where the VRTs are expected to be found
-        self.workflow_directory = self._create_workflow_directory("contextual")
 
         # Scan the working directory for VRT files
         vrt_files = self.scan_working_directory_for_vrt(self.workflow_directory)
@@ -216,6 +201,7 @@ class FactorAggregationWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Info,
             )
+            self.attributes["Result"] = "Factor Aggregation Workflow Completed"
             return True
         else:
             QgsMessageLog.logMessage(
@@ -223,4 +209,6 @@ class FactorAggregationWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
+            self.attributes["Result"] = "Factor Aggregation Workflow Failed"
+            
             return False

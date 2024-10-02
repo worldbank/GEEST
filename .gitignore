@@ -73,3 +73,4 @@ app.py
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/vcs.xml
 
+.shell.nix.swp
