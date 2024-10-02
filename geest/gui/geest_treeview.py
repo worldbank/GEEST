@@ -84,6 +84,40 @@ class JsonTreeItem:
             ]
         return attributes
 
+    def getDimensionAttributes(self):
+        """Return the dict of factors under this dimension."""
+        attributes = {}
+        if self.isFactor():
+            attributes["Analysis Mode"] = "Dimension Aggregation"
+            attributes["id"] = self.data(0)
+            attributes["Factors"] = [
+                {
+                    "id": i,
+                    "name": child.data(0),
+                    "weighting": child.data(2),
+                    "Result File": child.data(3).get("Result File", ""),
+                }
+                for i, child in enumerate(self.childItems)
+            ]
+        return attributes
+
+    def getAnalysisAttributes(self):
+        """Return the dict of dimensions under this analysis."""
+        attributes = {}
+        if self.isFactor():
+            attributes["Analysis Mode"] = "Top Level Aggregation"
+            attributes["id"] = self.data(0)
+            attributes["Dimensions"] = [
+                {
+                    "id": i,
+                    "name": child.data(0),
+                    "weighting": child.data(2),
+                    "Result File": child.data(3).get("Result File", ""),
+                }
+                for i, child in enumerate(self.childItems)
+            ]
+        return attributes
+
     def updateIndicatorWeighting(self, indicator_id, new_weighting):
         """Update the weighting of a specific indicator."""
         try:
