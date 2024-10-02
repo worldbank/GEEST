@@ -78,6 +78,8 @@ class FactorAggregationWorkflow(WorkflowBase):
         Perform weighted raster aggregation on the found VRT files.
 
         :param vrt_files: List of VRT file paths to aggregate.
+
+        :return: Path to the aggregated raster file.
         """
         if len(vrt_files) == 0:  # Expecting 3 VRTs: WD, RF, FIN
             QgsMessageLog.logMessage(
@@ -149,18 +151,21 @@ class FactorAggregationWorkflow(WorkflowBase):
             )
             if aggregated_layer.isValid():
                 QgsProject.instance().addMapLayer(aggregated_layer)
+                return aggregation_output
             else:
                 QgsMessageLog.logMessage(
                     "Failed to add the aggregated raster to the map.",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
+                return None
         else:
             QgsMessageLog.logMessage(
                 "Error occurred during raster aggregation.",
                 tag="Geest",
                 level=Qgis.Critical,
             )
+            return None
 
     def execute(self):
         """
@@ -195,12 +200,13 @@ class FactorAggregationWorkflow(WorkflowBase):
 
         # Perform aggregation only if all necessary VRTs are found
         if len(vrt_files) > 0:  # Ensure we have all three VRT files
-            self.aggregate_vrt_files(vrt_files)
+            result_file = self.aggregate_vrt_files(vrt_files)
             QgsMessageLog.logMessage(
                 "Aggregation Workflow completed successfully.",
                 tag="Geest",
                 level=Qgis.Info,
             )
+            self.attributes["Result File"] = result_file
             self.attributes["Result"] = "Factor Aggregation Workflow Completed"
             return True
         else:
@@ -209,6 +215,7 @@ class FactorAggregationWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
+            self.attributes["Result File"] = None
             self.attributes["Result"] = "Factor Aggregation Workflow Failed"
 
             return False
