@@ -1,5 +1,5 @@
 import os
-import glob
+import shutil
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -8,8 +8,6 @@ from qgis.core import (
     QgsProject,
 )
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
-from qgis.PyQt.QtCore import QVariant
-import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 
 
@@ -26,37 +24,13 @@ class FactorAggregationWorkflow(WorkflowBase):
         """
         super().__init__(attributes, feedback)
         self.factor_id = self.attributes["id"].lower()
-        # self.layer_id = self.attributes["ID"].lower()
+        self.indicators = self.attributes.get("Indicators", [])
+        for indicator in self.indicators:
+            self.indicator_name = indicator.get("name", None).lower().replace(" ", "_")
 
-    def scan_working_directory_for_vrt(self, working_directory: str) -> list:
-        """
-        Scans the provided working directory and its subdirectories recursively for VRT files and returns a list of found VRT file paths.
-
-        :param working_directory: The base directory to scan for VRT files.
-        :return: List of found VRT file paths.
-        """
-        vrt_files = []
-        required_vrt_types = [
-            "workplace_index_score",
-            "pay_parenthood_index_score",
-            "entrepeneurship_index _score",
-        ]  # Example: we expect these VRT types
-
-        # Recursively scan for VRT files in the working directory
-        found_files = glob.glob(
-            os.path.join(working_directory, "**", "*.vrt"), recursive=True
+        self.project_base_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../..")
         )
-
-        # Filter and collect VRT files based on their type (e.g., WD, RF, FIN)
-        for vrt_file in found_files:
-            for vrt_type in required_vrt_types:
-                if vrt_type in os.path.basename(vrt_file):
-                    vrt_files.append(vrt_file)
-                    QgsMessageLog.logMessage(
-                        f"Found VRT file: {vrt_file}", tag="Geest", level=Qgis.Info
-                    )
-
-        return vrt_files
 
     def get_layer_weights(self, num_layers: int) -> list:
         """
@@ -81,13 +55,13 @@ class FactorAggregationWorkflow(WorkflowBase):
 
         :return: Path to the aggregated raster file.
         """
-        if len(vrt_files) == 0:  # Expecting 3 VRTs: WD, RF, FIN
+        if len(vrt_files) == 0:
             QgsMessageLog.logMessage(
                 f"Not all required VRT files found. Found {len(vrt_files)} VRT files. Cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            return
+            return None
 
         # Load the VRT layers
         raster_layers = [
@@ -101,7 +75,7 @@ class FactorAggregationWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            return
+            return None
 
         # Create QgsRasterCalculatorEntries for each VRT layer
         entries = []
@@ -122,7 +96,7 @@ class FactorAggregationWorkflow(WorkflowBase):
 
         # Define output path for the aggregated raster
         aggregation_output = os.path.join(
-            self.workflow_directory, f"contextual_aggregated_score.tif"
+            self.workflow_directory, "contextual", f"{self.indicator_name}.tif"
         )
 
         # Set up the raster calculator
@@ -147,11 +121,59 @@ class FactorAggregationWorkflow(WorkflowBase):
             )
             # Add the aggregated raster to the map
             aggregated_layer = QgsRasterLayer(
-                aggregation_output, f"contextual_aggregated_score"
+                aggregation_output, f"{self.indicator_name}"
             )
             if aggregated_layer.isValid():
-                QgsProject.instance().addMapLayer(aggregated_layer)
-                return aggregation_output
+                # Copy the style (.qml) file to the same directory as the VRT
+                style_folder = os.path.join(
+                    self.project_base_dir, "resources", "qml"
+                )  # assuming 'style' folder path
+                qml_src_path = os.path.join(style_folder, "Contextual.qml")
+
+                if os.path.exists(qml_src_path):
+                    qml_dest_path = os.path.join(
+                        self.workflow_directory,
+                        "contextual",
+                        os.path.basename(aggregation_output).replace(".tif", ".qml"),
+                    )
+                    shutil.copy(qml_src_path, qml_dest_path)
+                    QgsMessageLog.logMessage(
+                        f"Copied QML style file to {qml_dest_path}",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                else:
+                    QgsMessageLog.logMessage(
+                        f"QML style file not found: {qml_src_path}",
+                        tag="Geest",
+                        level=Qgis.Warning,
+                    )
+                if os.path.exists(qml_dest_path):
+
+                    result = aggregated_layer.loadNamedStyle(qml_dest_path)
+                    if result[0]:  # Check if the style was successfully loaded
+                        QgsMessageLog.logMessage(
+                            "Successfully applied QML style.",
+                            tag="Geest",
+                            level=Qgis.Info,
+                        )
+                    else:
+                        QgsMessageLog.logMessage(
+                            f"Failed to apply QML style: {result[1]}",
+                            tag="Geest",
+                            level=Qgis.Warning,
+                        )
+
+                    QgsProject.instance().addMapLayer(aggregated_layer)
+                    QgsMessageLog.logMessage(
+                        "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+                    )
+                else:
+                    QgsMessageLog.logMessage(
+                        "QML not in the directory.", tag="Geest", level=Qgis.Critical
+                    )
+                    QgsProject.instance().addMapLayer(aggregated_layer)
+                    return aggregation_output
             else:
                 QgsMessageLog.logMessage(
                     "Failed to add the aggregated raster to the map.",
@@ -171,36 +193,41 @@ class FactorAggregationWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
-        # Get the indicators beneath this factor and combine them into a single raster
-        # proportional to the weight of each indicator
-        QgsMessageLog.logMessage(f"Factor attributes", tag="Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(f"{self.attributes}", tag="Geest", level=Qgis.Info)
+        # Log the execution
+        QgsMessageLog.logMessage(
+            f"Executing Factor Aggregation Workflow", tag="Geest", level=Qgis.Info
+        )
+
+        # Get VRT file paths from self.attributes["Result File"]
+        vrt_files = []
+
+        # Access the 'Indicators' key in the attributes dictionary
+        indicators = self.attributes.get("Indicators", [])
+
+        # Traverse through each indicator and get the 'Result File'
+        for indicator in indicators:
+            result_file = indicator.get("Result File", None)
+            if result_file:
+                vrt_files.append(result_file)
+
+            if not vrt_files or not isinstance(vrt_files, list):
+                QgsMessageLog.logMessage(
+                    f"No valid VRT files found in '{indicators}'. Cannot proceed with aggregation.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                self.attributes["Result"] = "Factor Aggregation Workflow Failed"
+                return False
 
         QgsMessageLog.logMessage(
-            f"----------------------------", tag="Geest", level=Qgis.Info
-        )
-        # Directories where the VRTs are expected to be found
-
-        # for key, value in self.attributes:
-        #    QgsMessageLog.logMessage(
-        #        f"Key: {key}, Value: {value}", tag="Geest", level=Qgis.Info
-        #    )
-        # QgsMessageLog.logMessage(
-        #    f"----------------------------", tag="Geest", level=Qgis.Info
-        # )
-
-        # Directory where the VRTs are expected to be found
-        self.workflow_directory = self._create_workflow_directory(
-            "contextual",
-            self.factor_id,
+            f"Found {len(vrt_files)} VRT files in 'Result File'. Proceeding with aggregation.",
+            tag="Geest",
+            level=Qgis.Info,
         )
 
-        # Scan the working directory for VRT files
-        vrt_files = self.scan_working_directory_for_vrt(self.workflow_directory)
-
-        # Perform aggregation only if all necessary VRTs are found
-        if len(vrt_files) > 0:  # Ensure we have all three VRT files
-            result_file = self.aggregate_vrt_files(vrt_files)
+        # Perform aggregation only if VRT files are provided
+        result_file = self.aggregate_vrt_files(vrt_files)
+        if result_file:
             QgsMessageLog.logMessage(
                 "Aggregation Workflow completed successfully.",
                 tag="Geest",
@@ -211,11 +238,10 @@ class FactorAggregationWorkflow(WorkflowBase):
             return True
         else:
             QgsMessageLog.logMessage(
-                "Aggregation could not proceed. Missing VRT files.",
+                "Aggregation failed due to missing or invalid VRT files.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             self.attributes["Result File"] = None
             self.attributes["Result"] = "Factor Aggregation Workflow Failed"
-
             return False
