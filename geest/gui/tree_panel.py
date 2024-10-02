@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt
 from qgis.PyQt.QtGui import QMovie
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject
 from functools import partial
 from .geest_treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
@@ -263,7 +263,8 @@ class TreePanel(QWidget):
         show_json_attributes_action.triggered.connect(
             lambda: self.show_attributes(item)
         )
-
+        add_to_map_action = QAction("Add to map", self)
+        add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
             # Context menu for dimensions
@@ -288,6 +289,8 @@ class TreePanel(QWidget):
             menu.addAction(clear_action)
             menu.addAction(auto_assign_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(add_to_map_action)
+
             if editing:
                 menu.addAction(add_factor_action)
                 menu.addAction(remove_dimension_action)
@@ -319,6 +322,7 @@ class TreePanel(QWidget):
             menu = QMenu(self)
             menu.addAction(edit_aggregation_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(add_to_map_action)
 
             if editing:
                 menu.addAction(add_layer_action)
@@ -341,6 +345,7 @@ class TreePanel(QWidget):
             menu = QMenu(self)
             menu.addAction(show_properties_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(add_to_map_action)
 
             if editing:
                 menu.addAction(remove_layer_action)
@@ -351,6 +356,24 @@ class TreePanel(QWidget):
     def show_attributes(self, item):
         """Show the attributes of the item in a dialog."""
         QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
+
+    def add_to_map(self, item):
+        """Add the item to the map."""
+        layer_uri = item.data(3).get("Result File")
+        layer_name = item.data(0)
+        QgsMessageLog.logMessage(
+            f"Adding {layer_uri} to the map.", tag="Geest", level=Qgis.Info
+        )
+        # Add the aggregated raster to the map
+        layer = QgsRasterLayer(layer_uri, layer_name)
+        if layer.isValid():
+            QgsProject.instance().addMapLayer(layer)
+        else:
+            QgsMessageLog.logMessage(
+                f"Failed to add the {layer_name} raster to the map.",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
 
     def edit_aggregation(self, factor_item):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
@@ -443,6 +466,16 @@ class TreePanel(QWidget):
 
                 elif role == "factor":
                     task = self.queue_manager.add_task(child_item.getFactorAttributes())
+
+                elif role == "dimension":
+                    task = self.queue_manager.add_task(
+                        child_item.getDimensionAttributes()
+                    )
+
+                elif role == "analysis":
+                    task = self.queue_manager.add_task(
+                        child_item.getAnalysisAttributes()
+                    )
 
                 if task is None:
                     continue
