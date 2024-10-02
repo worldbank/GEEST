@@ -488,6 +488,7 @@ class TreePanel(QWidget):
 
         else:
             self.update_tree_item_status(item, "❌")
+        self.save_json_to_working_directory()
 
     def update_tree_item_status(self, item, status):
         """
