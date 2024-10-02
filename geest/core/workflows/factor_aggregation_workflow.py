@@ -52,21 +52,23 @@ class FactorAggregationWorkflow(WorkflowBase):
         # Get the indicators beneath this factor and combine them into a single raster
         # proportional to the weight of each indicator
         QgsMessageLog.logMessage(f"Factor attributes", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(f"{self.attributes}", tag="Geest", level=Qgis.Info)
+
         QgsMessageLog.logMessage(
             f"----------------------------", tag="Geest", level=Qgis.Info
         )
 
-        for key, value in self.attributes:
-            QgsMessageLog.logMessage(
-                f"Key: {key}, Value: {value}", tag="Geest", level=Qgis.Info
-            )
-        QgsMessageLog.logMessage(
-            f"----------------------------", tag="Geest", level=Qgis.Info
-        )
+        # for key, value in self.attributes:
+        #    QgsMessageLog.logMessage(
+        #        f"Key: {key}, Value: {value}", tag="Geest", level=Qgis.Info
+        #    )
+        # QgsMessageLog.logMessage(
+        #    f"----------------------------", tag="Geest", level=Qgis.Info
+        # )
 
-        self.attributes["Result"] = "Use Default Index Score Workflow Completed"
+        self.attributes["Result"] = "Factor Aggregation Workflow Completed"
         QgsMessageLog.logMessage(
-            "Use Default Index Score workflow workflow completed",
+            "Factor aggregation workflow completed",
             tag="Geest",
             level=Qgis.Info,
         )
