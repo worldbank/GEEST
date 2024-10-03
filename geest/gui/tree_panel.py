@@ -19,7 +19,7 @@ from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject
 from functools import partial
-from .geest_treeview import CustomTreeView, JsonTreeModel
+from .treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
 from .layer_detail_dialog import LayerDetailDialog
 from geest.utilities import resources_path
