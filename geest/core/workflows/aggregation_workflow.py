@@ -10,9 +10,10 @@ from qgis.core import (
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
 from geest.core.convert_to_8bit import RasterConverter
+from geest.utilities import resources_path
 
 
-class FactorAggregationWorkflow(WorkflowBase):
+class AggregationWorkflow(WorkflowBase):
     """
     Concrete implementation of a 'Use Default Index Score' workflow.
     """
@@ -24,16 +25,21 @@ class FactorAggregationWorkflow(WorkflowBase):
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
         super().__init__(attributes, feedback)
-        self.factor_id = self.attributes["id"].lower()
-        self.indicators = self.attributes.get("Indicators", [])
-        for indicator in self.indicators:
-            self.indicator_name = indicator.get("name", None).lower().replace(" ", "_")
+        self.analysis_mode = self.attributes.get("Analysis Mode", "")
+        self.key_prefix = self.analysis_mode.split(" ")[0]
+
+        self.id = self.attributes[f"{self.key_prefix} ID"].lower()
+        self.aggregation_layers = self.attributes.get(f"{self.key_prefix}s", [])
+        for layer in self.aggregation_layers:
+            self.name = (
+                layer.get(f"{self.key_prefix} Name", None).lower().replace(" ", "_")
+            )
 
         self.project_base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../..")
         )
 
-    def get_layer_weights(self, num_layers: int) -> list:
+    def get_weights(self, num_layers: int) -> list:
         """
         Retrieve default weights based on the number of layers.
         :param num_layers: Number of raster layers to aggregate.
@@ -47,6 +53,36 @@ class FactorAggregationWorkflow(WorkflowBase):
             return [0.33, 0.33, 0.34]
         else:
             return [1.0] * num_layers  # Handle unexpected cases
+
+    def get_aggregation_output_path(self, extension: str) -> str:
+        """
+        Define output path for the aggregated raster based on the analysis mode.
+
+        Parameters:
+            extension (str): The file extension for the output file.
+
+        Returns:
+            str: Path to the aggregated raster file.
+
+        """
+        if self.analysis_mode == "Factor Aggregation":
+            return os.path.join(
+                self.workflow_directory,
+                self.attributes.get("Dimension ID"),
+                self.attributes.get("Factor ID"),
+                f"{self.name}." + f".{extension}",
+            )
+        elif self.analysis_mode == "Dimension Aggregation":
+            return os.path.join(
+                self.workflow_directory,
+                self.attributes.get("Dimension ID"),
+                self.attributes.get("Factor ID") + f".{extension}",
+            )
+        else:  # Analysis level
+            return os.path.join(
+                self.workflow_directory,
+                self.attributes.get("Dimension ID") + f".{extension}",
+            )
 
     def aggregate_vrt_files(self, vrt_files: list) -> None:
         """
@@ -88,17 +124,14 @@ class FactorAggregationWorkflow(WorkflowBase):
             entries.append(entry)
 
         # Assign default weights (you can modify this as needed)
-        weights = self.get_layer_weights(len(vrt_files))
+        weights = self.get_weights(len(vrt_files))
 
         # Build the calculation expression
         expression = " + ".join(
             [f"({weights[i]} * layer_{i+1}@1)" for i in range(len(vrt_files))]
         )
 
-        # Define output path for the aggregated raster
-        aggregation_output = os.path.join(
-            self.workflow_directory, "contextual", f"{self.indicator_name}.tif"
-        )
+        aggregation_output = self.get_aggregation_output_path("tif")
 
         # Set up the raster calculator
         calc = QgsRasterCalculator(
@@ -131,24 +164,15 @@ class FactorAggregationWorkflow(WorkflowBase):
                 level=Qgis.Info,
             )
             # Add the aggregated raster to the map
-            aggregated_layer = QgsRasterLayer(
-                aggregation_output_8bit, f"{self.indicator_name}"
-            )
+            aggregated_layer = QgsRasterLayer(aggregation_output_8bit, f"{self.name}")
             if aggregated_layer.isValid():
-                # Copy the style (.qml) file to the same directory as the VRT
-                style_folder = os.path.join(
-                    self.project_base_dir, "resources", "qml"
-                )  # assuming 'style' folder path
-                qml_src_path = os.path.join(style_folder, "Contextual.qml")
+
+                qml_src_path = resources_path(
+                    "resources", "qml", f"{self.key_prefix}.qml"
+                )
 
                 if os.path.exists(qml_src_path):
-                    qml_dest_path = os.path.join(
-                        self.workflow_directory,
-                        "contextual",
-                        os.path.basename(aggregation_output_8bit).replace(
-                            ".tif", ".qml"
-                        ),
-                    )
+                    qml_dest_path = self.get_aggregation_output_path("qml")
                     shutil.copy(qml_src_path, qml_dest_path)
                     QgsMessageLog.logMessage(
                         f"Copied QML style file to {qml_dest_path}",
@@ -210,22 +234,42 @@ class FactorAggregationWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             f"Executing Factor Aggregation Workflow", tag="Geest", level=Qgis.Info
         )
-
+        QgsMessageLog.logMessage(f"ID: {self.id}", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            f"Key Prefix: {self.key_prefix}", tag="Geest", level=Qgis.Info
+        )
         # Get VRT file paths from self.attributes["Result File"]
         vrt_files = []
 
-        # Access the 'Indicators' key in the attributes dictionary
-        indicators = self.attributes.get("Indicators", [])
+        # Access the 'Dimensions/Factors/Indicators' key in the attributes dictionary
+        QgsMessageLog.logMessage(str(self.attributes), tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            str(self.attributes.get(f"{self.key_prefix}s", [])),
+            tag="Geest",
+            level=Qgis.Info,
+        )
 
-        # Traverse through each indicator and get the 'Result File'
-        for indicator in indicators:
-            result_file = indicator.get("Result File", None)
+        if self.key_prefix == "Factor":
+            layers = self.attributes.get("Indicators", [])
+        elif self.key_prefix == "Dimension":
+            layers = self.attributes.get("Factors", [])
+        elif self.key_prefix == "Analysis":
+            layers = self.attributes.get(f"Dimensions", [])
+
+        # Traverse through each resource and get the 'Result File'
+        for layer in layers:
+            if self.key_prefix == "Factor":
+                result_file = layer.get("Indicator Result File")
+            elif self.key_prefix == "Dimension":
+                result_file = layer.get("Factor Result File")
+            elif self.key_prefix == "Analysis":
+                result_file = layer.get("Dimension Result File")
             if result_file:
                 vrt_files.append(result_file)
 
             if not vrt_files or not isinstance(vrt_files, list):
                 QgsMessageLog.logMessage(
-                    f"No valid VRT files found in '{indicators}'. Cannot proceed with aggregation.",
+                    f"No valid VRT files found in '{layers}'. Cannot proceed with aggregation.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
@@ -233,7 +277,7 @@ class FactorAggregationWorkflow(WorkflowBase):
                 return False
 
         QgsMessageLog.logMessage(
-            f"Found {len(vrt_files)} VRT files in 'Result File'. Proceeding with aggregation.",
+            f"Found {len(vrt_files)} VRT files in '{self.key_prefix} Result File'. Proceeding with aggregation.",
             tag="Geest",
             level=Qgis.Info,
         )
