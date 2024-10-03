@@ -121,6 +121,9 @@ class FactorAggregationWorkflow(WorkflowBase):
         # Convert the aggregated raster to 8-bit
         converter.convert_to_8bit(aggregation_output, aggregation_output_8bit)
 
+        if os.path.exists(aggregation_output_8bit):
+            os.remove(aggregation_output)
+
         if result == 0:
             QgsMessageLog.logMessage(
                 "Raster aggregation completed successfully.",
