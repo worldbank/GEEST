@@ -9,6 +9,7 @@ from qgis.core import (
 )
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
+from geest.core.convert_to_8bit import RasterConverter
 
 
 class FactorAggregationWorkflow(WorkflowBase):
@@ -113,6 +114,13 @@ class FactorAggregationWorkflow(WorkflowBase):
         # Run the calculation
         result = calc.processCalculation()
 
+        converter = RasterConverter()
+
+        aggregation_output_8bit = aggregation_output.replace(".tif", "_8bit.tif")
+
+        # Convert the aggregated raster to 8-bit
+        converter.convert_to_8bit(aggregation_output, aggregation_output_8bit)
+
         if result == 0:
             QgsMessageLog.logMessage(
                 "Raster aggregation completed successfully.",
@@ -121,7 +129,7 @@ class FactorAggregationWorkflow(WorkflowBase):
             )
             # Add the aggregated raster to the map
             aggregated_layer = QgsRasterLayer(
-                aggregation_output, f"{self.indicator_name}"
+                aggregation_output_8bit, f"{self.indicator_name}"
             )
             if aggregated_layer.isValid():
                 # Copy the style (.qml) file to the same directory as the VRT
@@ -134,7 +142,9 @@ class FactorAggregationWorkflow(WorkflowBase):
                     qml_dest_path = os.path.join(
                         self.workflow_directory,
                         "contextual",
-                        os.path.basename(aggregation_output).replace(".tif", ".qml"),
+                        os.path.basename(aggregation_output_8bit).replace(
+                            ".tif", ".qml"
+                        ),
                     )
                     shutil.copy(qml_src_path, qml_dest_path)
                     QgsMessageLog.logMessage(
