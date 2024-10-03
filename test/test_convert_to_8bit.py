@@ -29,6 +29,16 @@ class TestRasterConverter(unittest.TestCase):
             os.path.exists(self.input_raster), "Input raster file does not exist"
         )
 
+        # Check if the input image is 32-bit using QGIS API
+        input_layer = QgsRasterLayer(self.input_raster, "Test Raster")
+        self.assertTrue(input_layer.isValid(), "Raster layer is not valid")
+
+        # Get the raster band data type
+        input_provider = input_layer.dataProvider()
+        input_band_data_type = input_provider.dataType(1)
+
+        self.assertEqual(input_band_data_type, Qgis.Float32, "Input raster is 32-bit")
+
         # Run the conversion
         success = converter.convert_to_8bit(self.input_raster, self.output_raster)
 
@@ -41,9 +51,7 @@ class TestRasterConverter(unittest.TestCase):
 
         # Get the raster band data type
         provider = raster_layer.dataProvider()
-        band_data_type = provider.dataType(
-            1
-        )  # Assuming we're working with the first band (1-indexed)
+        band_data_type = provider.dataType(1)
 
         # Assert if the raster data type is 8-bit
         self.assertEqual(band_data_type, Qgis.Byte, "Output raster is not 8-bit")
