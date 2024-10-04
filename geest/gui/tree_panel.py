@@ -368,6 +368,13 @@ class TreePanel(QWidget):
             QgsMessageLog.logMessage(
                 str(item.getDimensionAttributes()), tag="Geest", level=Qgis.Info
             )
+        elif item.role == "layer":
+            QgsMessageLog.logMessage(
+                "Indicator attributes", tag="Geest", level=Qgis.Info
+            )
+            QgsMessageLog.logMessage(
+                str(item.getIndicatorAttributes()), tag="Geest", level=Qgis.Info
+            )
 
     def add_to_map(self, item):
         """Add the item to the map."""
