@@ -11,32 +11,32 @@
                             "ID": "Workplace_Index",
                             "Text": "Workplace Discrimination\n\nThis tab represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL 2024. The data is already formatted on scale from 1 to 100.Input: The input field takes in the WBL index score.Output:  A raster file containing values ranging from 0 to 5 is saved to the output directory. A value of 5 indicates areas with a high level of workplace discrimination afforded to women, whereas a value of 0 indicates areas where no workplace discrimination are afforded to women. ",
                             "Default Index Score": 83.8,
-                            "Index Score": 100,
-                            "Use Default Index Score": 1,
+                            "Index Score": 99,
+                            "Use Default Index Score": true,
                             "Default Multi Buffer Distances": "0,0,0",
-                            "Use Multi Buffer Point": 0,
+                            "Use Multi Buffer Point": false,
                             "Default Single Buffer Distance": 0,
-                            "Use Single Buffer Point": 0,
+                            "Use Single Buffer Point": false,
                             "Default pixel": 0,
-                            "Use Create Grid": 0,
-                            "Use OSM Downloader": 0,
-                            "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": 1,
-                            "Use WBL Downloader": 1,
-                            "Use Humdata Downloader": 0,
-                            "Use Mapillary Downloader": 0,
-                            "Use Other Downloader": 0,
-                            "Use Add Layers Manually": 0,
-                            "Use Classify Poly into Classes": 0,
-                            "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
-                            "Use Point per Cell": 0,
+                            "Use Create Grid": false,
+                            "Use OSM Downloader": false,
+                            "Use Bbox for AOI": false,
+                            "Use Rasterize Layer": true,
+                            "Use WBL Downloader": true,
+                            "Use Humdata Downloader": false,
+                            "Use Mapillary Downloader": false,
+                            "Use Other Downloader": false,
+                            "Use Add Layers Manually": false,
+                            "Use Classify Poly into Classes": false,
+                            "Use CSV to Point Layer": false,
+                            "Use Poly per Cell": false,
+                            "Use Polyline per Cell": false,
+                            "Use Point per Cell": false,
                             "Analysis Mode": "Use Default Index Score",
-                            "Layer Required": 1,
-                            "Factor Weighting": "0.11",
+                            "Layer Required": 0,
                             "Result": "Use Default Index Score Workflow Completed",
-                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/workplace_index/workplace_index_score.vrt"
+                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Fiji/contextual/wbl_2024_workplace_index_score/wbl_2024_workplace_index_score.vrt",
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -76,9 +76,9 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
-                            "Factor Weighting": "1.00",
                             "Result": "Use Default Index Score Workflow Completed",
-                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/pay_parenthood_index/pay_parenthood_index_score.vrt"
+                            "Factor Weighting": 0,
+                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Fiji/contextual/wbl_2024_pay+parenthood_index_score/wbl_2024_pay+parenthood_index_score.vrt"
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -118,9 +118,9 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
-                            "Factor Weighting": "1.00",
                             "Result": "Use Default Index Score Workflow Completed",
-                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/entrepeneurship_index /entrepeneurship_index _score.vrt"
+                            "Factor Weighting": 0,
+                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Fiji/contextual/wbl_2024_entrepeneurship_index_score/wbl_2024_entrepeneurship_index_score.vrt"
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -170,8 +170,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.30",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -202,8 +202,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -234,8 +234,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -266,8 +266,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -298,8 +298,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -340,8 +340,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -382,8 +382,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -424,8 +424,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -466,8 +466,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -518,8 +518,8 @@
                             "Use Point per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -550,8 +550,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -582,8 +582,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -614,8 +614,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -656,8 +656,8 @@
                             "Use Point per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -698,8 +698,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -740,8 +740,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -782,8 +782,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -824,8 +824,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -856,8 +856,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -888,8 +888,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -920,8 +920,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         },
                         {
@@ -952,8 +952,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],
@@ -994,8 +994,8 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
                             "Result": "Dont use workflow completed",
+                            "Factor Weighting": 0,
                             "progress": "Dont use workflow Step 10 completed"
                         }
                     ],

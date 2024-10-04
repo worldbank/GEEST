@@ -232,6 +232,7 @@ class AggregationWorkflow(WorkflowBase):
                 QgsMessageLog.logMessage(
                     "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
                 )
+                return aggregation_output_8bit
             #    else:
             #        QgsMessageLog.logMessage(
             #            "QML not in the directory.", tag="Geest", level=Qgis.Critical
