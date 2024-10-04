@@ -198,7 +198,7 @@ class FactorAggregationWorkflow(WorkflowBase):
                 f"factor.qml",
             )
         )
-        qml_dest_path = self.get_aggregation_output_path("qml")
+        qml_dest_path = self.output_path("qml")
         for qml_src_path in qml_paths:
             if os.path.exists(qml_src_path):
                 qml_dest_path_8bit = qml_dest_path.replace(".qml", "_8bit.qml")

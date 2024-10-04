@@ -24,7 +24,7 @@ class RasterConverter:
         """
         QgsMessageLog.logMessage(
             f"Converting {input_raster} to 8-bit TIFF at {output_raster}.",
-            tag="RasterConverter",
+            tag="Geest",
             level=Qgis.Info,
         )
 
@@ -44,14 +44,14 @@ class RasterConverter:
             processing.run("gdal:translate", params, feedback=self.feedback)
             QgsMessageLog.logMessage(
                 f"Successfully converted {input_raster} to 8-bit TIFF.",
-                tag="RasterConverter",
+                tag="Geest",
                 level=Qgis.Info,
             )
             return True
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Failed to convert {input_raster} to 8-bit: {str(e)}",
-                tag="RasterConverter",
+                tag="Geest",
                 level=Qgis.Critical,
             )
             return False
