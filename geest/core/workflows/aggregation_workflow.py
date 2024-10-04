@@ -42,7 +42,6 @@ class AggregationWorkflow(WorkflowBase):
     def get_weights(self) -> list:
         """
         Retrieve default weights based on the number of layers.
-        :param num_layers: Number of raster layers to aggregate.
         :return: List of weights for the layers.
         """
         weights = []
