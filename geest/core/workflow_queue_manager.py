@@ -44,6 +44,19 @@ class WorkflowQueueManager(QObject):
         )
         self.workflow_queue.start_processing()
 
+    def start_processing_in_foreground(self) -> None:
+        """Start processing the tasks in the WorkflowQueue in the main thread.
+
+        Used for debugging and testing purposes.
+        """
+        QgsMessageLog.logMessage(
+            "Starting FOREGROUND workflow queue processing...",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        for job in self.workflow_queue.job_queue:
+            job._workflow.execute()
+
     def cancel_processing(self) -> None:
         """Cancels all tasks in the WorkflowQueue."""
         QgsMessageLog.logMessage(

@@ -559,7 +559,11 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.start_workflows(type="indicators")
-        self.queue_manager.start_processing()
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
     def prepare_factors_pressed(self):
         """
@@ -569,7 +573,11 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.start_workflows(type="factors")
-        self.queue_manager.start_processing()
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
     def prepare_dimensions_pressed(self):
         """
@@ -579,7 +587,11 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.start_workflows(type="dimensions")
-        self.queue_manager.start_processing()
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
     def prepare_analysis_pressed(self):
         """

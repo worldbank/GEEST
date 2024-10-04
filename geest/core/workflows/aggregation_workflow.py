@@ -37,31 +37,18 @@ class AggregationWorkflow(WorkflowBase):
             self.sub_key_prefix = "Dimension"
 
         self.id = self.attributes[f"{self.key_prefix} ID"].lower()
-        self.aggregation_layers = self.attributes.get(f"{self.sub_key_prefix}s", [])
-        for layer in self.aggregation_layers:
-            self.name = (
-                layer.get(f"{self.sub_key_prefix} Name", None).lower().replace(" ", "_")
-            )
-        self.dimension_id = self.attributes.get("Dimension ID", None).lower()
+        self.aggregation_layers = self.attributes.get(f"{self.key_prefix}s", [])
 
-        self.project_base_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../..")
-        )
-
-    def get_weights(self, num_layers: int) -> list:
+    def get_weights(self) -> list:
         """
         Retrieve default weights based on the number of layers.
         :param num_layers: Number of raster layers to aggregate.
         :return: List of weights for the layers.
         """
-        if num_layers == 1:
-            return [1.0]
-        elif num_layers == 2:
-            return [0.5, 0.5]
-        elif num_layers == 3:
-            return [0.50, 0.25, 0.25]
-        else:
-            return [1.0] * num_layers  # Handle unexpected cases
+        weights = []
+        for layer in self.aggregation_layers:
+            weights.append(float(layer.get(f"{self.sub_key_prefix} Weight"), 1.0))
+        return weights
 
     def get_aggregation_output_path(self, extension: str) -> str:
         """
@@ -127,6 +114,11 @@ class AggregationWorkflow(WorkflowBase):
         # Create QgsRasterCalculatorEntries for each VRT layer
         entries = []
         for i, raster_layer in enumerate(raster_layers):
+            QgsMessageLog.logMessage(
+                f"Adding raster layer {i+1} to the raster calculator. {raster_layer.source()}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             entry = QgsRasterCalculatorEntry()
             entry.ref = f"layer_{i+1}@1"  # layer_1@1, layer_2@1, etc.
             entry.raster = raster_layer
@@ -134,7 +126,7 @@ class AggregationWorkflow(WorkflowBase):
             entries.append(entry)
 
         # Assign default weights (you can modify this as needed)
-        weights = self.get_weights(len(vrt_files))
+        weights = self.get_weights()
 
         # Number of VRT layers
         num_layers = len(vrt_files)
@@ -151,7 +143,14 @@ class AggregationWorkflow(WorkflowBase):
         expression = f"({expression}) / {sum_weights}"
 
         aggregation_output = self.get_aggregation_output_path("tif")
-
+        QgsMessageLog.logMessage(
+            f"Aggregating {len(vrt_files)} raster layers to {aggregation_output}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        QgsMessageLog.logMessage(
+            f"Aggregation Expression: {expression}", tag="Geest", level=Qgis.Info
+        )
         # Set up the raster calculator
         calc = QgsRasterCalculator(
             expression,
@@ -165,7 +164,9 @@ class AggregationWorkflow(WorkflowBase):
 
         # Run the calculation
         result = calc.processCalculation()
-
+        QgsMessageLog.logMessage(
+            f"Calculator errors: {calc.lastError()}", tag="Geest", level=Qgis.Info
+        )
         converter = RasterConverter()
 
         aggregation_output_8bit = aggregation_output.replace(".tif", "_8bit.tif")
