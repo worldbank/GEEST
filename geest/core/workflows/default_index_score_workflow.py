@@ -30,7 +30,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
         super().__init__(attributes, feedback)
-        self.layer_id = self.attributes["ID"].lower()
+        # self.dimension_id = self.attributes["Dimension ID"].lower()
+        # self.factor_id = self.attributes["Factor ID"].lower().replace(" ", "_")
+        self.layer_id = self.attributes["Layer"].lower().replace(" ", "_")
         self.project_base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../..")
         )
@@ -76,7 +78,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             # Set the 'area_name' from layer
             area_name = feature.attribute("area_name")
 
-            mask_name = f"{self.layer_id}_score_{area_name}"
+            mask_name = f"{self.layer_id}_{area_name}"
             self.create_raster(
                 geom=geom,
                 aligned_box=aligned_box,
@@ -87,7 +89,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Create and add the VRT of all generated raster masks if in raster mode
         vrt_filepath = self.create_raster_vrt(
             output_vrt_name=os.path.join(
-                self.workflow_directory, f"{self.layer_id}_score.vrt"
+                self.workflow_directory, f"{self.layer_id}.vrt"
             )
         )
         self.attributes["Result File"] = vrt_filepath
@@ -187,7 +189,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             return
 
         if output_vrt_name is None:
-            output_vrt_name = f"{self.layer_id}_score.vrt"
+            output_vrt_name = f"{self.layer_id}.vrt"
 
         QgsMessageLog.logMessage(
             f"Creating VRT of masks '{output_vrt_name}' layer to the map.",
@@ -229,14 +231,14 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         )
 
         # Add the VRT to the QGIS map
-        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}_score")
+        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}")
 
         if vrt_layer.isValid():
             # Copy the style (.qml) file to the same directory as the VRT
             style_folder = os.path.join(
                 self.project_base_dir, "resources", "qml"
             )  # assuming 'style' folder path
-            qml_src_path = os.path.join(style_folder, "Contextual.qml")
+            qml_src_path = os.path.join(style_folder, "contextual.qml")
 
             if os.path.exists(qml_src_path):
                 qml_dest_path = os.path.join(

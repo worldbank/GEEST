@@ -1,5 +1,6 @@
 import os
 import shutil
+import glob
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -28,12 +29,20 @@ class AggregationWorkflow(WorkflowBase):
         self.analysis_mode = self.attributes.get("Analysis Mode", "")
         self.key_prefix = self.analysis_mode.split(" ")[0]
 
+        if self.key_prefix == "Factor":
+            self.sub_key_prefix = "Indicator"
+        elif self.key_prefix == "Dimension":
+            self.sub_key_prefix = "Factor"
+        elif self.key_prefix == "Analysis":
+            self.sub_key_prefix = "Dimension"
+
         self.id = self.attributes[f"{self.key_prefix} ID"].lower()
-        self.aggregation_layers = self.attributes.get(f"{self.key_prefix}s", [])
+        self.aggregation_layers = self.attributes.get(f"{self.sub_key_prefix}s", [])
         for layer in self.aggregation_layers:
             self.name = (
-                layer.get(f"{self.key_prefix} Name", None).lower().replace(" ", "_")
+                layer.get(f"{self.sub_key_prefix} Name", None).lower().replace(" ", "_")
             )
+        self.dimension_id = self.attributes.get("Dimension ID", None).lower()
 
         self.project_base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../..")
@@ -50,7 +59,7 @@ class AggregationWorkflow(WorkflowBase):
         elif num_layers == 2:
             return [0.5, 0.5]
         elif num_layers == 3:
-            return [0.33, 0.33, 0.34]
+            return [0.50, 0.25, 0.25]
         else:
             return [1.0] * num_layers  # Handle unexpected cases
 
@@ -69,14 +78,15 @@ class AggregationWorkflow(WorkflowBase):
             return os.path.join(
                 self.workflow_directory,
                 self.attributes.get("Dimension ID"),
-                self.attributes.get("Factor ID"),
-                f"{self.name}." + f".{extension}",
+                # self.attributes.get("Factor ID").lower().replace(" ", "_") +
+                f"aggregate_{self.name}" + f".{extension}",
             )
         elif self.analysis_mode == "Dimension Aggregation":
             return os.path.join(
                 self.workflow_directory,
                 self.attributes.get("Dimension ID"),
-                self.attributes.get("Factor ID") + f".{extension}",
+                self.attributes.get("Factor ID").lower().replace(" ", "_")
+                + f".{extension}",
             )
         else:  # Analysis level
             return os.path.join(
@@ -126,10 +136,19 @@ class AggregationWorkflow(WorkflowBase):
         # Assign default weights (you can modify this as needed)
         weights = self.get_weights(len(vrt_files))
 
-        # Build the calculation expression
+        # Number of VRT layers
+        num_layers = len(vrt_files)
+
+        # Ensure that the sum of weights is calculated
+        sum_weights = sum(weights)
+
+        # Build the calculation expression for weighted average
         expression = " + ".join(
-            [f"({weights[i]} * layer_{i+1}@1)" for i in range(len(vrt_files))]
+            [f"({weights[i]} * layer_{i+1}@1)" for i in range(num_layers)]
         )
+
+        # Wrap the weighted sum and divide by the sum of weights
+        expression = f"({expression}) / {sum_weights}"
 
         aggregation_output = self.get_aggregation_output_path("tif")
 
@@ -164,18 +183,21 @@ class AggregationWorkflow(WorkflowBase):
                 level=Qgis.Info,
             )
             # Add the aggregated raster to the map
-            aggregated_layer = QgsRasterLayer(aggregation_output_8bit, f"{self.name}")
+            aggregated_layer = QgsRasterLayer(
+                aggregation_output_8bit, f"aggregated_{self.name}"
+            )
             if aggregated_layer.isValid():
 
                 qml_src_path = resources_path(
-                    "resources", "qml", f"{self.key_prefix}.qml"
+                    "resources", "qml", f"{self.dimension_id}.qml"
                 )
 
                 if os.path.exists(qml_src_path):
                     qml_dest_path = self.get_aggregation_output_path("qml")
-                    shutil.copy(qml_src_path, qml_dest_path)
+                    qml_dest_path_8bit = qml_dest_path.replace(".qml", "_8bit.qml")
+                    shutil.copy(qml_src_path, qml_dest_path_8bit)
                     QgsMessageLog.logMessage(
-                        f"Copied QML style file to {qml_dest_path}",
+                        f"Copied QML style file to {qml_dest_path_8bit}",
                         tag="Geest",
                         level=Qgis.Info,
                     )
@@ -185,9 +207,9 @@ class AggregationWorkflow(WorkflowBase):
                         tag="Geest",
                         level=Qgis.Warning,
                     )
-                if os.path.exists(qml_dest_path):
+                if os.path.exists(qml_dest_path_8bit):
 
-                    result = aggregated_layer.loadNamedStyle(qml_dest_path)
+                    result = aggregated_layer.loadNamedStyle(qml_dest_path_8bit)
                     if result[0]:  # Check if the style was successfully loaded
                         QgsMessageLog.logMessage(
                             "Successfully applied QML style.",
@@ -226,6 +248,71 @@ class AggregationWorkflow(WorkflowBase):
             )
             return None
 
+    def get_vrt_files_by_analysis_mode(self, base_paths: list) -> list:
+        """
+        Scan directories for VRT files based on the analysis mode (Factor Aggregation, Dimension Aggregation, Analysis).
+
+        Parameters:
+            base_paths (list): List of base paths to search for VRT files.
+
+        Returns:
+            list: List of found VRT file paths.
+        """
+        vrt_files = []
+
+        # Iterate through each provided base path
+        for base_path in base_paths:
+            # Construct the search path based on analysis mode
+            if self.analysis_mode == "Factor Aggregation":
+                search_directory = os.path.join(
+                    base_path,
+                    self.attributes.get("Dimension ID"),
+                )
+            elif self.analysis_mode == "Dimension Aggregation":
+                search_directory = os.path.join(
+                    base_path,
+                    self.attributes.get("Dimension ID"),
+                )
+            else:  # Analysis level
+                search_directory = os.path.join(
+                    base_path,
+                )
+
+            # Debug log to show the directory being searched
+            QgsMessageLog.logMessage(
+                f"Searching directory: {search_directory} for VRT files.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
+            # If the directory exists, look for VRT files recursively
+            if os.path.exists(search_directory):
+                # Use glob to find all VRT files recursively in the search directory
+                search_pattern = os.path.join(search_directory, "**", "*.vrt")
+                found_vrts = glob.glob(search_pattern, recursive=True)
+
+                # Debug log for each found VRT file
+                for vrt_file in found_vrts:
+                    QgsMessageLog.logMessage(
+                        f"Found VRT file: {vrt_file}", tag="Geest", level=Qgis.Info
+                    )
+
+                vrt_files.extend(found_vrts)
+            else:
+                # Log if the directory does not exist
+                QgsMessageLog.logMessage(
+                    f"Directory does not exist: {search_directory}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        # Debug log to show how many VRT files were found
+        QgsMessageLog.logMessage(
+            f"Total VRT files found: {len(vrt_files)}", tag="Geest", level=Qgis.Info
+        )
+
+        return vrt_files
+
     def execute(self):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
@@ -238,8 +325,15 @@ class AggregationWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             f"Key Prefix: {self.key_prefix}", tag="Geest", level=Qgis.Info
         )
-        # Get VRT file paths from self.attributes["Result File"]
-        vrt_files = []
+        QgsMessageLog.logMessage(
+            f"Aggregation Layers: {self.aggregation_layers}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        vrt_files = self.get_vrt_files_by_analysis_mode(
+            base_paths=[self.workflow_directory]
+        )
 
         # Access the 'Dimensions/Factors/Indicators' key in the attributes dictionary
         QgsMessageLog.logMessage(str(self.attributes), tag="Geest", level=Qgis.Info)
@@ -266,15 +360,18 @@ class AggregationWorkflow(WorkflowBase):
                 result_file = layer.get("Dimension Result File")
             if result_file:
                 vrt_files.append(result_file)
-
-            if not vrt_files or not isinstance(vrt_files, list):
                 QgsMessageLog.logMessage(
-                    f"No valid VRT files found in '{layers}'. Cannot proceed with aggregation.",
-                    tag="Geest",
-                    level=Qgis.Warning,
+                    f"Found VRT file: {result_file}", tag="Geest", level=Qgis.Info
                 )
-                self.attributes["Result"] = "Factor Aggregation Workflow Failed"
-                return False
+
+        if not vrt_files or not isinstance(vrt_files, list):
+            QgsMessageLog.logMessage(
+                f"No valid VRT files found in '{layers}'. Cannot proceed with aggregation.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            self.attributes["Result"] = "Factor Aggregation Workflow Failed"
+            return False
 
         QgsMessageLog.logMessage(
             f"Found {len(vrt_files)} VRT files in '{self.key_prefix} Result File'. Proceeding with aggregation.",

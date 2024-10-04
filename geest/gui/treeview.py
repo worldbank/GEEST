@@ -64,11 +64,31 @@ class JsonTreeItem:
             return self.parentItem.childItems.index(self)
         return 0
 
+    def isIndicator(self):
+        return self.role == "layer"
+
     def isFactor(self):
         return self.role == "factor"
 
     def isDimension(self):
         return self.role == "dimension"
+
+    def getIndicatorAttributes(self):
+        """Return the dict of indicators (or layers) under this factor."""
+        attributes = {}
+        if self.isIndicator():
+            attributes["Dimension ID"] = self.parentItem.itemData[3].get("id", "")
+            attributes["Factor ID"] = self.data(0)
+            attributes["Indicators"] = [
+                {
+                    "Indicator ID": i,
+                    "Indicator Name": child.data(0),
+                    "Indicator Weighting": child.data(2),
+                    "Indicator Result File": child.data(3).get("Result File", ""),
+                }
+                for i, child in enumerate(self.childItems)
+            ]
+        return attributes
 
     def getFactorAttributes(self):
         """Return the dict of indicators (or layers) under this factor."""
