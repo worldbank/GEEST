@@ -14,7 +14,7 @@ from geest.core.convert_to_8bit import RasterConverter
 from geest.utilities import resources_path
 
 
-class AggregationWorkflow(WorkflowBase):
+class FactorAggregationWorkflow(WorkflowBase):
     """
     Concrete implementation of a 'Use Default Index Score' workflow.
     """
@@ -27,17 +27,8 @@ class AggregationWorkflow(WorkflowBase):
         """
         super().__init__(attributes, feedback)
         self.analysis_mode = self.attributes.get("Analysis Mode", "")
-        self.key_prefix = self.analysis_mode.split(" ")[0]
-
-        if self.key_prefix == "Factor":
-            self.sub_key_prefix = "Indicator"
-        elif self.key_prefix == "Dimension":
-            self.sub_key_prefix = "Factor"
-        elif self.key_prefix == "Analysis":
-            self.sub_key_prefix = "Dimension"
-
-        self.id = self.attributes[f"{self.key_prefix} ID"].lower()
-        self.aggregation_layers = self.attributes.get(f"{self.sub_key_prefix}s", [])
+        self.id = self.attributes[f"Factor ID"].lower().replace(" ", "_")
+        self.layers = self.attributes.get(f"Indicators", [])
 
     def get_weights(self) -> list:
         """
@@ -45,12 +36,12 @@ class AggregationWorkflow(WorkflowBase):
         :return: List of weights for the layers.
         """
         weights = []
-        weight_key = f"{self.sub_key_prefix} Weight"
-        for layer in self.aggregation_layers:
+        weight_key = f"Indicator Weighting"
+        for layer in self.layers:
             weights.append(float(layer.get(weight_key, 1.0)))
         return weights
 
-    def get_aggregation_output_path(self, extension: str) -> str:
+    def output_path(self, extension: str) -> str:
         """
         Define output path for the aggregated raster based on the analysis mode.
 
@@ -61,27 +52,15 @@ class AggregationWorkflow(WorkflowBase):
             str: Path to the aggregated raster file.
 
         """
-        if self.analysis_mode == "Factor Aggregation":
-            return os.path.join(
-                self.workflow_directory,
-                self.attributes.get("Dimension ID"),
-                # self.attributes.get("Factor ID").lower().replace(" ", "_") +
-                f"aggregate_{self.id}" + f".{extension}",
-            )
-        elif self.analysis_mode == "Dimension Aggregation":
-            return os.path.join(
-                self.workflow_directory,
-                self.attributes.get("Dimension ID"),
-                self.attributes.get("Factor ID").lower().replace(" ", "_")
-                + f".{extension}",
-            )
-        else:  # Analysis level
-            return os.path.join(
-                self.workflow_directory,
-                self.attributes.get("Dimension ID") + f".{extension}",
-            )
+        return os.path.join(
+            self.workflow_directory,
+            self.attributes.get("Dimension ID").lower().replace(" ", "_"),
+            self.attributes.get("Factor ID").lower().replace(" ", "_")
+            + f"aggregate_{self.id}"
+            + f".{extension}",
+        )
 
-    def aggregate_vrt_files(self, vrt_files: list) -> None:
+    def aggregate(self, vrt_files: list) -> None:
         """
         Perform weighted raster aggregation on the found VRT files.
 
@@ -91,7 +70,7 @@ class AggregationWorkflow(WorkflowBase):
         """
         if len(vrt_files) == 0:
             QgsMessageLog.logMessage(
-                f"Not all required VRT files found. Found {len(vrt_files)} VRT files. Cannot proceed with aggregation.",
+                f"Error: Found no VRT files. Cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
@@ -129,20 +108,20 @@ class AggregationWorkflow(WorkflowBase):
         weights = self.get_weights()
 
         # Number of VRT layers
-        num_layers = len(vrt_files)
+        layer_count = len(vrt_files)
 
         # Ensure that the sum of weights is calculated
         sum_weights = sum(weights)
 
         # Build the calculation expression for weighted average
         expression = " + ".join(
-            [f"({weights[i]} * layer_{i+1}@1)" for i in range(num_layers)]
+            [f"({weights[i]} * layer_{i+1}@1)" for i in range(layer_count)]
         )
 
         # Wrap the weighted sum and divide by the sum of weights
         expression = f"({expression}) / {sum_weights}"
 
-        aggregation_output = self.get_aggregation_output_path("tif")
+        aggregation_output = self.output_path("tif")
         QgsMessageLog.logMessage(
             f"Aggregating {len(vrt_files)} raster layers to {aggregation_output}",
             tag="Geest",
@@ -167,92 +146,82 @@ class AggregationWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             f"Calculator errors: {calc.lastError()}", tag="Geest", level=Qgis.Info
         )
-        converter = RasterConverter()
-
-        aggregation_output_8bit = aggregation_output.replace(".tif", "_8bit.tif")
-
-        # Convert the aggregated raster to 8-bit
-        converter.convert_to_8bit(aggregation_output, aggregation_output_8bit)
-
-        if os.path.exists(aggregation_output_8bit):
-            os.remove(aggregation_output)
-
-        if result == 0:
+        if result != 0:
             QgsMessageLog.logMessage(
                 "Raster aggregation completed successfully.",
                 tag="Geest",
                 level=Qgis.Info,
             )
-            # Add the aggregated raster to the map
-            aggregated_layer = QgsRasterLayer(
-                aggregation_output_8bit, f"aggregated_{self.id}.tif"
-            )
-            if aggregated_layer.isValid():
-                self.attributes["Factor Result File"] = aggregation_output_8bit
+            return None
 
-                #    qml_src_path = resources_path(
-                #        # TODO I think this should be factor, dimension, or analysis
-                #        "resources",
-                #        "qml",
-                #        f"{self.dimension_id}.qml",
-                #    )
+        converter = RasterConverter()
+        aggregation_output_8bit = aggregation_output.replace(".tif", "_8bit.tif")
+        # Convert the aggregated raster to 8-bit
+        converter.convert_to_8bit(aggregation_output, aggregation_output_8bit)
+        if os.path.exists(aggregation_output_8bit):
+            # TODO We should check if developer mode is set and keep the 32-bit raster if it is
+            os.remove(aggregation_output)
 
-                #    if os.path.exists(qml_src_path):
-                #        qml_dest_path = self.get_aggregation_output_path("qml")
-                #        qml_dest_path_8bit = qml_dest_path.replace(".qml", "_8bit.qml")
-                #        shutil.copy(qml_src_path, qml_dest_path_8bit)
-                #        QgsMessageLog.logMessage(
-                #            f"Copied QML style file to {qml_dest_path_8bit}",
-                #            tag="Geest",
-                #            level=Qgis.Info,
-                #        )
-                #    else:
-                #        QgsMessageLog.logMessage(
-                #            f"QML style file not found: {qml_src_path}",
-                #            tag="Geest",
-                #            level=Qgis.Warning,
-                #        )
-                #    if os.path.exists(qml_dest_path_8bit):
-                #
-                #        result = aggregated_layer.loadNamedStyle(qml_dest_path_8bit)
-                #        if result[0]:  # Check if the style was successfully loaded
-                #            QgsMessageLog.logMessage(
-                #                "Successfully applied QML style.",
-                #                tag="Geest",
-                #                level=Qgis.Info,
-                #            )
-                #        else:
-                #            QgsMessageLog.logMessage(
-                #                f"Failed to apply QML style: {result[1]}",
-                #                tag="Geest",
-                #                level=Qgis.Warning,
-                #            )
-
-                QgsProject.instance().addMapLayer(aggregated_layer)
-                QgsMessageLog.logMessage(
-                    "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-                )
-                return aggregation_output_8bit
-            #    else:
-            #        QgsMessageLog.logMessage(
-            #            "QML not in the directory.", tag="Geest", level=Qgis.Critical
-            #        )
-            #        QgsProject.instance().addMapLayer(aggregated_layer)
-            #        return aggregation_output
-            else:
-                QgsMessageLog.logMessage(
-                    "Failed to add the aggregated raster to the map.",
-                    tag="Geest",
-                    level=Qgis.Critical,
-                )
-                return None
-        else:
+        QgsMessageLog.logMessage(
+            "Raster aggregation completed successfully.",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        # Add the aggregated raster to the map
+        aggregated_layer = QgsRasterLayer(
+            aggregation_output_8bit, f"aggregated_{self.id}.tif"
+        )
+        if not aggregated_layer.isValid():
             QgsMessageLog.logMessage(
-                "Error occurred during raster aggregation.",
+                "Aggregate layer is not valid.",
                 tag="Geest",
                 level=Qgis.Critical,
             )
             return None
+        self.attributes["Factor Result File"] = aggregation_output_8bit
+
+        # Fallback sequence to copy QML style
+        # qml with same name as factor
+        # qml with generic name of factor.qml
+        qml_paths = []
+        qml_paths.append(
+            resources_path(
+                "resources",
+                "qml",
+                f"{self.id}.qml",
+            )
+        )
+        qml_paths.append(
+            resources_path(
+                "resources",
+                "qml",
+                f"factor.qml",
+            )
+        )
+        qml_dest_path = self.get_aggregation_output_path("qml")
+        for qml_src_path in qml_paths:
+            if os.path.exists(qml_src_path):
+                qml_dest_path_8bit = qml_dest_path.replace(".qml", "_8bit.qml")
+                shutil.copy(qml_src_path, qml_dest_path_8bit)
+                QgsMessageLog.logMessage(
+                    f"Copied QML style file to {qml_dest_path_8bit}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                result = aggregated_layer.loadNamedStyle(qml_dest_path_8bit)
+                if result[0]:  # Check if the style was successfully loaded
+                    QgsMessageLog.logMessage(
+                        "Successfully applied QML style.",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                    break
+
+        QgsProject.instance().addMapLayer(aggregated_layer)
+        QgsMessageLog.logMessage(
+            "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+        )
+        return aggregation_output_8bit
 
     def get_vrt_list(self) -> list:
         """
@@ -262,8 +231,8 @@ class AggregationWorkflow(WorkflowBase):
             list: List of found VRT file paths.
         """
         vrt_files = []
-        path_key = f"{self.sub_key_prefix} Result File"
-        for layer in self.aggregation_layers:
+        path_key = f"Indicator Result File"
+        for layer in self.layers:
             path = layer.get(path_key, "")
             vrt_files.append(path)
             QgsMessageLog.logMessage(
@@ -285,10 +254,7 @@ class AggregationWorkflow(WorkflowBase):
         )
         QgsMessageLog.logMessage(f"ID: {self.id}", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage(
-            f"Key Prefix: {self.key_prefix}", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(
-            f"Aggregation Layers: {self.aggregation_layers}",
+            f"Aggregation Layers: {self.layers}",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -297,7 +263,7 @@ class AggregationWorkflow(WorkflowBase):
 
         if not vrt_files or not isinstance(vrt_files, list):
             QgsMessageLog.logMessage(
-                f"No valid VRT files found in '{layers}'. Cannot proceed with aggregation.",
+                f"No valid VRT files found in '{self.layers}'. Cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
@@ -305,13 +271,13 @@ class AggregationWorkflow(WorkflowBase):
             return False
 
         QgsMessageLog.logMessage(
-            f"Found {len(vrt_files)} VRT files in '{self.key_prefix} Result File'. Proceeding with aggregation.",
+            f"Found {len(vrt_files)} VRT files in 'Indicator Result File'. Proceeding with aggregation.",
             tag="Geest",
             level=Qgis.Info,
         )
 
         # Perform aggregation only if VRT files are provided
-        result_file = self.aggregate_vrt_files(vrt_files)
+        result_file = self.aggregate(vrt_files)
         if result_file:
             QgsMessageLog.logMessage(
                 "Aggregation Workflow completed successfully.",

@@ -74,7 +74,11 @@ class JsonTreeItem:
         return self.role == "dimension"
 
     def getIndicatorAttributes(self):
-        """Return the dict of indicators (or layers) under this factor."""
+        """Return the dict of indicators (or layers) under this factor.
+
+        TODO - do we need this? Doens make sense listing indicators under indicators
+
+        """
         attributes = {}
         if self.isIndicator():
             attributes["Dimension ID"] = self.parentItem.itemData[3].get("id", "")
@@ -84,7 +88,9 @@ class JsonTreeItem:
                     "Indicator ID": i,
                     "Indicator Name": child.data(0),
                     "Indicator Weighting": child.data(2),
-                    "Indicator Result File": child.data(3).get("Result File", ""),
+                    "Indicator Result File": child.data(3).get(
+                        "Indicator Result File", ""
+                    ),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -102,7 +108,9 @@ class JsonTreeItem:
                     "Indicator ID": i,
                     "Indicator Name": child.data(0),
                     "Indicator Weighting": child.data(2),
-                    "Indicator Result File": child.data(3).get("Result File", ""),
+                    "Indicator Result File": child.data(3).get(
+                        "Indicator Result File", ""
+                    ),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -119,7 +127,7 @@ class JsonTreeItem:
                     "Factor ID": i,
                     "Factor Name": child.data(0),
                     "Factor Weighting": child.data(2),
-                    "Factor Result File": child.data(3).get("Result File", ""),
+                    "Factor Result File": child.data(3).get(f"Factor Result File", ""),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -136,7 +144,9 @@ class JsonTreeItem:
                     "Dimension ID": i,
                     "Dimension Name": child.data(0),
                     "Dimension Weighting": child.data(2),
-                    "Dimension Result File": child.data(3).get("Result File", ""),
+                    "Dimension Result File": child.data(3).get(
+                        f"Dimension Result File", ""
+                    ),
                 }
                 for i, child in enumerate(self.childItems)
             ]

@@ -385,7 +385,7 @@ class TreePanel(QWidget):
 
     def add_to_map(self, item):
         """Add the item to the map."""
-        layer_uri = item.data(3).get("Result File")
+        layer_uri = item.data(3).get(f"{item.topic.upper()} Result File")
         layer_name = item.data(0)
         QgsMessageLog.logMessage(
             f"Adding {layer_uri} to the map.", tag="Geest", level=Qgis.Info

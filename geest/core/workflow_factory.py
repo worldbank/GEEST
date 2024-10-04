@@ -4,7 +4,7 @@ from .workflows import (
     RasterLayerWorkflow,
     DontUseWorkflow,
     DefaultIndexScoreWorkflow,
-    AggregationWorkflow,
+    FactorAggregationWorkflow,
 )
 
 
@@ -42,6 +42,6 @@ class WorkflowFactory:
             "Dimension Aggregation",
             "Analysis Aggregation",
         ]:
-            return AggregationWorkflow(attributes, feedback)
+            return FactorAggregationWorkflow(attributes, feedback)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
