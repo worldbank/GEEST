@@ -188,55 +188,56 @@ class AggregationWorkflow(WorkflowBase):
                 aggregation_output_8bit, f"aggregated_{self.id}.tif"
             )
             if aggregated_layer.isValid():
+                self.attributes["Factor Result File"] = aggregation_output_8bit
 
-                qml_src_path = resources_path(
-                    # TODO I think this should be factor, dimension, or analysis
-                    "resources",
-                    "qml",
-                    f"{self.dimension_id}.qml",
+                #    qml_src_path = resources_path(
+                #        # TODO I think this should be factor, dimension, or analysis
+                #        "resources",
+                #        "qml",
+                #        f"{self.dimension_id}.qml",
+                #    )
+
+                #    if os.path.exists(qml_src_path):
+                #        qml_dest_path = self.get_aggregation_output_path("qml")
+                #        qml_dest_path_8bit = qml_dest_path.replace(".qml", "_8bit.qml")
+                #        shutil.copy(qml_src_path, qml_dest_path_8bit)
+                #        QgsMessageLog.logMessage(
+                #            f"Copied QML style file to {qml_dest_path_8bit}",
+                #            tag="Geest",
+                #            level=Qgis.Info,
+                #        )
+                #    else:
+                #        QgsMessageLog.logMessage(
+                #            f"QML style file not found: {qml_src_path}",
+                #            tag="Geest",
+                #            level=Qgis.Warning,
+                #        )
+                #    if os.path.exists(qml_dest_path_8bit):
+                #
+                #        result = aggregated_layer.loadNamedStyle(qml_dest_path_8bit)
+                #        if result[0]:  # Check if the style was successfully loaded
+                #            QgsMessageLog.logMessage(
+                #                "Successfully applied QML style.",
+                #                tag="Geest",
+                #                level=Qgis.Info,
+                #            )
+                #        else:
+                #            QgsMessageLog.logMessage(
+                #                f"Failed to apply QML style: {result[1]}",
+                #                tag="Geest",
+                #                level=Qgis.Warning,
+                #            )
+
+                QgsProject.instance().addMapLayer(aggregated_layer)
+                QgsMessageLog.logMessage(
+                    "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
                 )
-
-                if os.path.exists(qml_src_path):
-                    qml_dest_path = self.get_aggregation_output_path("qml")
-                    qml_dest_path_8bit = qml_dest_path.replace(".qml", "_8bit.qml")
-                    shutil.copy(qml_src_path, qml_dest_path_8bit)
-                    QgsMessageLog.logMessage(
-                        f"Copied QML style file to {qml_dest_path_8bit}",
-                        tag="Geest",
-                        level=Qgis.Info,
-                    )
-                else:
-                    QgsMessageLog.logMessage(
-                        f"QML style file not found: {qml_src_path}",
-                        tag="Geest",
-                        level=Qgis.Warning,
-                    )
-                if os.path.exists(qml_dest_path_8bit):
-
-                    result = aggregated_layer.loadNamedStyle(qml_dest_path_8bit)
-                    if result[0]:  # Check if the style was successfully loaded
-                        QgsMessageLog.logMessage(
-                            "Successfully applied QML style.",
-                            tag="Geest",
-                            level=Qgis.Info,
-                        )
-                    else:
-                        QgsMessageLog.logMessage(
-                            f"Failed to apply QML style: {result[1]}",
-                            tag="Geest",
-                            level=Qgis.Warning,
-                        )
-
-                    QgsProject.instance().addMapLayer(aggregated_layer)
-                    QgsMessageLog.logMessage(
-                        "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-                    )
-                else:
-                    QgsMessageLog.logMessage(
-                        "QML not in the directory.", tag="Geest", level=Qgis.Critical
-                    )
-                    QgsProject.instance().addMapLayer(aggregated_layer)
-                    return aggregation_output
+            #    else:
+            #        QgsMessageLog.logMessage(
+            #            "QML not in the directory.", tag="Geest", level=Qgis.Critical
+            #        )
+            #        QgsProject.instance().addMapLayer(aggregated_layer)
+            #        return aggregation_output
             else:
                 QgsMessageLog.logMessage(
                     "Failed to add the aggregated raster to the map.",
