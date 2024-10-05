@@ -7,25 +7,25 @@ from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.utilities import resources_path
 
 
-class FactorAggregationWorkflow(AggregationWorkflowBase):
+class AnalysisAggregationWorkflow(AggregationWorkflowBase):
     """
-    Concrete implementation of a 'Factor Aggregation' workflow.
+    Concrete implementation of an 'Analysis Aggregation' workflow.
 
-    It will aggregate the indicators within a factor to create a single raster output.
+    It will aggregate the dimensions within an analysis to create a single raster output.
     """
 
     def __init__(self, attributes: dict, feedback: QgsFeedback):
         """
-        Initialize the Factor Aggregation with attributes and feedback.
+        Initialize the Analysis Aggregation with attributes and feedback.
         :param attributes: Dictionary containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
         super().__init__(attributes, feedback)
-        self.id = self.attributes[f"Factor ID"].lower().replace(" ", "_")
-        self.layers = self.attributes.get(f"Indicators", [])
-        self.weight_key = "Indicator Weighting"
-        self.result_file_tag = "Factor Result File"
-        self.vrt_path_key = "Indicator Result File"
+        self.id = "geest_analysis"
+        self.layers = self.attributes.get(f"Dimensions", [])
+        self.weight_key = "Dimension Weighting"
+        self.result_file_tag = "Analysis Result File"
+        self.vrt_path_key = "Dimension Result File"
 
     def output_path(self, extension: str) -> str:
         """
@@ -38,11 +38,7 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
             str: Path to the aggregated raster file.
 
         """
-        directory = os.path.join(
-            self.workflow_directory,
-            self.attributes.get("Dimension ID").lower().replace(" ", "_"),
-            self.attributes.get("Factor ID").lower().replace(" ", "_"),
-        )
+        directory = self.workflow_directory
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):
             os.makedirs(directory)

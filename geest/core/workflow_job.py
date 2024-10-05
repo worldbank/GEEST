@@ -57,6 +57,16 @@ class WorkflowJob(QgsTask):
 
             result = self._workflow.execute()
 
+            QgsMessageLog.logMessage(
+                f"WorkflowJob {self.description()} attributes.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            QgsMessageLog.logMessage(
+                f"{self._attributes}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             if result:
                 QgsMessageLog.logMessage(
                     f"Workflow {self.description()} completed.",
@@ -91,5 +101,10 @@ class WorkflowJob(QgsTask):
         Override the finished method to emit a custom signal when the task is finished.
         :param success: True if the task was completed successfully, False otherwise
         """
+        QgsMessageLog.logMessage(
+            "0000000000000 🏁 Job Finished 000000000000000000",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         # Emit the custom signal job_finished with the success state and the updated attributes
         self.job_finished.emit(success, self._attributes)

@@ -5,6 +5,8 @@ from .workflows import (
     DontUseWorkflow,
     DefaultIndexScoreWorkflow,
     FactorAggregationWorkflow,
+    DimensionAggregationWorkflow,
+    AnalysisAggregationWorkflow,
 )
 
 
@@ -37,11 +39,11 @@ class WorkflowFactory:
             return DontUseWorkflow(attributes, feedback)
         elif analysis_mode == "Temporal Analysis":
             return RasterLayerWorkflow(attributes, feedback)
-        elif analysis_mode in [
-            "Factor Aggregation",
-            "Dimension Aggregation",
-            "Analysis Aggregation",
-        ]:
+        elif analysis_mode == "Factor Aggregation":
             return FactorAggregationWorkflow(attributes, feedback)
+        elif analysis_mode == "Dimension Aggregation":
+            return DimensionAggregationWorkflow(attributes, feedback)
+        elif analysis_mode == "Analysis Aggregation":
+            return AnalysisAggregationWorkflow(attributes, feedback)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")

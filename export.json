@@ -34,9 +34,11 @@
                             "Use Point per Cell": false,
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 0,
-                            "Result": "Use Default Index Score Workflow Completed",
+                            "Result": "Not Run",
                             "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Fiji/contextual/wbl_2024_workplace_index_score/wbl_2024_workplace_index_score.vrt",
-                            "Factor Weighting": 0
+                            "Factor Weighting": 0,
+                            "Indicator Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Fiji/contextual/wbl_2024_workplace_index_score/wbl_2024_workplace_index_score.vrt",
+                            "Indicator Result": "Use Default Index Score Workflow Completed"
                         }
                     ],
                     "Dimension Weighting": "0.00",

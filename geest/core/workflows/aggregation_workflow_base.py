@@ -14,7 +14,7 @@ from geest.core.convert_to_8bit import RasterConverter
 from geest.utilities import resources_path
 
 
-class AggregationBaseWorkflow(WorkflowBase):
+class AggregationWorkflowBase(WorkflowBase):
     """
     Base class for all aggregation workflows (factor, dimension, analysis)
     """
@@ -292,7 +292,7 @@ class AggregationBaseWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.attributes["Result File"] = result_file
+            self.attributes[self.result_file_tag] = result_file
             self.attributes["Result"] = (
                 f"{self.analysis_mode} Factor Aggregation Workflow Completed"
             )
@@ -303,7 +303,7 @@ class AggregationBaseWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            self.attributes["Result File"] = None
+            self.attributes[self.result_file_tag] = None
             self.attributes["Result"] = (
                 f"{self.analysis_mode} Aggregation Workflow Failed"
             )

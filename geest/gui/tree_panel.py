@@ -362,26 +362,44 @@ class TreePanel(QWidget):
 
     def show_attributes(self, item):
         """Show the attributes of the item in a the message log."""
-        QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage("Item Attributes", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            "----------------------------", tag="Geest", level=Qgis.Info
+        )
         if item.role == "factor":
-            QgsMessageLog.logMessage("Factor attributes", tag="Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                "Factor attributes that get passed to workflow:",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             QgsMessageLog.logMessage(
                 str(item.getFactorAttributes()), tag="Geest", level=Qgis.Info
             )
         elif item.role == "dimension":
             QgsMessageLog.logMessage(
-                "Dimension attributes", tag="Geest", level=Qgis.Info
+                "Dimension attributes that get passed to workflow",
+                tag="Geest",
+                level=Qgis.Info,
             )
             QgsMessageLog.logMessage(
                 str(item.getDimensionAttributes()), tag="Geest", level=Qgis.Info
             )
         elif item.role == "layer":
             QgsMessageLog.logMessage(
-                "Indicator attributes", tag="Geest", level=Qgis.Info
+                "Indicator attributes that get passed to workflow",
+                tag="Geest",
+                level=Qgis.Info,
             )
             QgsMessageLog.logMessage(
                 str(item.getIndicatorAttributes()), tag="Geest", level=Qgis.Info
             )
+        QgsMessageLog.logMessage(
+            "Attributes stored in tree:", tag="Geest", level=Qgis.Info
+        )
+        QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            "----------------------------", tag="Geest", level=Qgis.Info
+        )
 
     def add_to_map(self, item):
         """Add the item to the map."""
