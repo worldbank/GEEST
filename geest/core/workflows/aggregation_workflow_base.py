@@ -12,6 +12,7 @@ from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
 from geest.core.convert_to_8bit import RasterConverter
 from geest.utilities import resources_path
+from geest.gui.treeview import JsonTreeItem
 
 
 class AggregationWorkflowBase(WorkflowBase):
@@ -19,13 +20,17 @@ class AggregationWorkflowBase(WorkflowBase):
     Base class for all aggregation workflows (factor, dimension, analysis)
     """
 
-    def __init__(self, attributes: dict, feedback: QgsFeedback):
+    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
         """
         Initialize the Factor Aggregation with attributes and feedback.
-        :param attributes: Dictionary containing workflow parameters.
+        :param item: A reference to a JsonTreeItem object.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
-        super().__init__(attributes, feedback)
+        # ⭐️ Note that the item is a reference to the JsonTreeItem object so any changes
+        # made to the item will be reflected directly in the tree view.
+        super().__init__(item, feedback)
+        self.attributes = item.data(3)
+        self.aggregation_attributes = None  # This should be set by the child class e.g. item.getIndicatorAttributes()
         self.analysis_mode = self.attributes.get("Analysis Mode", "")
         self.id = None  # This should be set by the child class
         self.layers = None  # This should be set by the child class

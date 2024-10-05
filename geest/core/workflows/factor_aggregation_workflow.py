@@ -2,9 +2,9 @@ import os
 from qgis.core import (
     QgsFeedback,
 )
-from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.utilities import resources_path
+from geest.gui.treeview import JsonTreeItem
 
 
 class FactorAggregationWorkflow(AggregationWorkflowBase):
@@ -14,15 +14,20 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
     It will aggregate the indicators within a factor to create a single raster output.
     """
 
-    def __init__(self, attributes: dict, feedback: QgsFeedback):
+    def __init__(self, item: dict, feedback: QgsFeedback):
         """
         Initialize the Factor Aggregation with attributes and feedback.
-        :param attributes: Dictionary containing workflow parameters.
+
+        ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+
+        :param item: JsonTreeItem containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
-        super().__init__(attributes, feedback)
-        self.id = self.attributes[f"Factor ID"].lower().replace(" ", "_")
-        self.layers = self.attributes.get(f"Indicators", [])
+        super().__init__(item, feedback)
+
+        self.aggregation_attributes = self.item.getFactorAttributes()
+        self.id = self.aggregation_attributes[f"Factor ID"].lower().replace(" ", "_")
+        self.layers = self.aggregation_attributes.get(f"Indicators", [])
         self.weight_key = "Indicator Weighting"
         self.result_file_tag = "Factor Result File"
         self.vrt_path_key = "Indicator Result File"
@@ -40,8 +45,8 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         """
         directory = os.path.join(
             self.workflow_directory,
-            self.attributes.get("Dimension ID").lower().replace(" ", "_"),
-            self.attributes.get("Factor ID").lower().replace(" ", "_"),
+            self.aggregation_attributes.get("Dimension ID").lower().replace(" ", "_"),
+            self.aggregation_attributes.get("Factor ID").lower().replace(" ", "_"),
         )
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):

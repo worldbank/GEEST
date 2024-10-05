@@ -5,6 +5,7 @@ from qgis.core import (
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.utilities import resources_path
+from geest.gui.treeview import JsonTreeItem
 
 
 class DimensionAggregationWorkflow(AggregationWorkflowBase):
@@ -15,15 +16,19 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
 
     """
 
-    def __init__(self, attributes: dict, feedback: QgsFeedback):
+    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
         """
         Initialize the Dimension Aggregation with attributes and feedback.
-        :param attributes: Dictionary containing workflow parameters.
+
+        ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+
+        :param item: JsonTreeItem containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
-        super().__init__(attributes, feedback)
-        self.id = self.attributes[f"Dimension ID"].lower().replace(" ", "_")
-        self.layers = self.attributes.get(f"Factors", [])
+        super().__init__(item, feedback)
+        self.aggregation_attributes = self.item.getDimensionAttributes()
+        self.id = self.aggregation_attributes[f"Dimension ID"].lower().replace(" ", "_")
+        self.layers = self.aggregation_attributes.get(f"Factors", [])
         self.weight_key = "Factor Weighting"
         self.result_file_tag = "Dimension Result File"
         self.vrt_path_key = "Factor Result File"

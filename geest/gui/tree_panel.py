@@ -403,7 +403,14 @@ class TreePanel(QWidget):
 
     def add_to_map(self, item):
         """Add the item to the map."""
-        layer_uri = item.data(3).get(f"{item.topic.upper()} Result File")
+        # TODO refactor use of the term Layer everywhere to Indicator
+        # for now, some spaghetti code to get the layer_uri
+        if item.role == "layer":
+            layer_uri = item.data(3).get(f"Indicator Result File")
+        else:
+            layer_uri = item.data(3).get(
+                f"{item.role.title()} Result File"
+            )  # title = title case string
         layer_name = item.data(0)
         QgsMessageLog.logMessage(
             f"Adding {layer_uri} to the map.", tag="Geest", level=Qgis.Info
@@ -514,12 +521,14 @@ class TreePanel(QWidget):
         if role == item.role and role == "layer":
             task = self.queue_manager.add_task(item)
         if role == item.role and role == "factor":
+            item.data(3)["Analysis Mode"] = "Factor Aggregation"
             task = self.queue_manager.add_task(item)
         if role == item.role and role == "dimension":
+            item.data(3)["Analysis Mode"] = "Dimension Aggregation"
             task = self.queue_manager.add_task(item)
         if role == item.role and role == "analysis":
+            item.data(3)["Analysis Mode"] = "Analysis Aggregation"
             task = self.queue_manager.add_task(item)
-
         if task is None:
             return
 
