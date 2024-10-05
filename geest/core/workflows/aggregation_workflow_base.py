@@ -248,7 +248,7 @@ class AggregationWorkflowBase(WorkflowBase):
         )
         return vrt_files
 
-    def execute(self):
+    def do_execute(self):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """

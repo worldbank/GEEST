@@ -21,6 +21,7 @@ from PyQt5.QtCore import (
 # Change to this when implementing in QGIS
 # from qgis.PyQt.QtGui import (
 from PyQt5.QtGui import QColor, QColor, QMovie
+from qgis.core import QgsMessageLog, Qgis
 
 
 class JsonTreeItem:
@@ -51,6 +52,12 @@ class JsonTreeItem:
         return None
 
     def setData(self, column, value):
+        if column == 3:
+            QgsMessageLog.logMessage(
+                f"JsonTreeItem setData: {value} for column {column} ",
+                tag="Geest JsonTreeItem",
+                level=Qgis.Info,
+            )
         if column < len(self.itemData):
             self.itemData[column] = value
             return True

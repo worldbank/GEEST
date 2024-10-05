@@ -505,16 +505,20 @@ class TreePanel(QWidget):
             self._start_workflows(child_item, role)
 
     def queue_workflow_task(self, item, role):
-        """Queue a workflow task based on the role of the item."""
+        """Queue a workflow task based on the role of the item.
+
+        ⭐️ These calls all pass a reference of the item to the workflow task.
+            The task directly modifies the item's properties to update the tree.
+        """
         task = None
         if role == item.role and role == "layer":
-            task = self.queue_manager.add_task(item.data(3))
+            task = self.queue_manager.add_task(item)
         if role == item.role and role == "factor":
-            task = self.queue_manager.add_task(item.getFactorAttributes())
+            task = self.queue_manager.add_task(item)
         if role == item.role and role == "dimension":
-            task = self.queue_manager.add_task(item.getDimensionAttributes())
+            task = self.queue_manager.add_task(item)
         if role == item.role and role == "analysis":
-            task = self.queue_manager.add_task(item.getAnalysisAttributes())
+            task = self.queue_manager.add_task(item)
 
         if task is None:
             return
@@ -524,7 +528,7 @@ class TreePanel(QWidget):
         task.job_started.connect(partial(self.on_workflow_started, item))
         task.job_canceled.connect(partial(self.on_workflow_completed, item, False))
         task.job_finished.connect(
-            lambda success, attrs: self.on_workflow_completed(item, success)
+            lambda success: self.on_workflow_completed(item, success)
         )
 
     def run_item(self, item, role):

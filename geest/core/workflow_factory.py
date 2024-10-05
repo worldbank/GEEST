@@ -8,6 +8,7 @@ from .workflows import (
     DimensionAggregationWorkflow,
     AnalysisAggregationWorkflow,
 )
+from geest.gui.treeview import JsonTreeItem
 
 
 class WorkflowFactory:
@@ -16,13 +17,14 @@ class WorkflowFactory:
     The workflows accept a QgsFeedback object to report progress and handle cancellation.
     """
 
-    def create_workflow(self, attributes, feedback: QgsFeedback):
+    def create_workflow(self, item: JsonTreeItem, feedback: QgsFeedback):
         """
         Determines the workflow to return based on 'Analysis Mode' in the attributes.
         Passes the feedback object to the workflow for progress reporting.
         """
-        if not attributes:
+        if not item:
             return DontUseWorkflow({}, feedback)
+        attributes = item.data(3)
         QgsMessageLog.logMessage(f"Workflow Factory Called", "Geest", level=Qgis.Info)
         QgsMessageLog.logMessage(f"-----------------------", "Geest", level=Qgis.Info)
         for key, value in attributes.items():
@@ -32,18 +34,18 @@ class WorkflowFactory:
         analysis_mode = attributes.get("Analysis Mode", "")
 
         if analysis_mode == "Spatial Analysis":
-            return RasterLayerWorkflow(attributes, feedback)
+            return RasterLayerWorkflow(item, feedback)
         elif analysis_mode == "Use Default Index Score":
-            return DefaultIndexScoreWorkflow(attributes, feedback)
+            return DefaultIndexScoreWorkflow(item, feedback)
         elif analysis_mode == "Don’t Use":
-            return DontUseWorkflow(attributes, feedback)
+            return DontUseWorkflow(item, feedback)
         elif analysis_mode == "Temporal Analysis":
-            return RasterLayerWorkflow(attributes, feedback)
+            return RasterLayerWorkflow(item, feedback)
         elif analysis_mode == "Factor Aggregation":
-            return FactorAggregationWorkflow(attributes, feedback)
+            return FactorAggregationWorkflow(item, feedback)
         elif analysis_mode == "Dimension Aggregation":
-            return DimensionAggregationWorkflow(attributes, feedback)
+            return DimensionAggregationWorkflow(item, feedback)
         elif analysis_mode == "Analysis Aggregation":
-            return AnalysisAggregationWorkflow(attributes, feedback)
+            return AnalysisAggregationWorkflow(item, feedback)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
