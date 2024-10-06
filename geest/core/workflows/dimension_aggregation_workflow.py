@@ -27,7 +27,7 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         """
         super().__init__(item, feedback)
         self.aggregation_attributes = self.item.getDimensionAttributes()
-        self.id = self.aggregation_attributes[f"Dimension ID"].lower().replace(" ", "_")
+        self.id = self.attributes["id"].lower().replace(" ", "_")
         self.layers = self.aggregation_attributes.get(f"Factors", [])
         self.weight_key = "Factor Weighting"
         self.result_file_tag = "Dimension Result File"
@@ -44,10 +44,7 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
             str: Path to the aggregated raster file.
 
         """
-        directory = os.path.join(
-            self.workflow_directory,
-            self.attributes.get("Dimension ID").lower().replace(" ", "_"),
-        )
+        directory = os.path.join(self.workflow_directory, self.id)
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):
             os.makedirs(directory)
