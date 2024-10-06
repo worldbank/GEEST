@@ -87,10 +87,13 @@ class AggregationWorkflowBase(WorkflowBase):
             QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files)
         ]
 
-        # Ensure all raster layers are valid
-        if not all(layer.isValid() for layer in raster_layers):
+        # Ensure all raster layers are valid and print filenames of invalid layers
+        invalid_layers = [
+            layer.source() for layer in raster_layers if not layer.isValid()
+        ]
+        if invalid_layers:
             QgsMessageLog.logMessage(
-                "One or more raster layers are invalid, cannot proceed with aggregation.",
+                f"Invalid raster layers found: {', '.join(invalid_layers)}",
                 tag="Geest",
                 level=Qgis.Critical,
             )
