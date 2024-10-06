@@ -121,12 +121,12 @@ class FactorAggregationDialog(QDialog):
         # Populate the table
         for row, indicator in enumerate(self.indicators):
             # Display indicator name (not editable)
-            name_item = QTableWidgetItem(indicator.get("name"))
+            name_item = QTableWidgetItem(indicator.get("Indicator Name"))
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
-            weighting_item = QLineEdit(str(indicator.get("weighting", 0)))
+            weighting_item = QLineEdit(str(indicator.get("Indicator Weighting", 0)))
             self.table.setCellWidget(row, 1, weighting_item)
             self.weightings[indicator.get("id")] = weighting_item
 

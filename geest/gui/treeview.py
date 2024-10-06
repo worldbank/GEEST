@@ -201,8 +201,8 @@ class JsonTreeModel(QAbstractItemModel):
             dimension_attributes["Execution Start Time"] = dimension.get(
                 "Execution Start Time", ""
             )
-            dimension_attributes["Factor Result File"] = dimension.get(
-                "Factor Result File", ""
+            dimension_attributes["Dimension Result File"] = dimension.get(
+                "Dimension Result File", ""
             )
             dimension_attributes["Execution End Time"] = dimension.get(
                 "Execution End Time", ""
@@ -210,8 +210,12 @@ class JsonTreeModel(QAbstractItemModel):
             # We store the whole dimension object in the last column (excluding factors)
             # so that we can pull out any of the additional properties
             # from it later
+            status = "🔴"
+            result = dimension.get("Result", "")
+            if "Workflow Completed" in result:
+                status = "✔️"
             dimension_item = JsonTreeItem(
-                [dimension_name, "🔴", "", dimension_attributes],
+                [dimension_name, status, "", dimension_attributes],
                 "dimension",
                 self.rootItem,  # parent
             )
@@ -242,8 +246,12 @@ class JsonTreeModel(QAbstractItemModel):
                 factor_attributes["Execution End Time"] = factor.get(
                     "Execution End Time", ""
                 )
+                status = "🔴"
+                result = factor_attributes.get("Result", "")
+                if "Workflow Completed" in result:
+                    status = "✔️"
                 factor_item = JsonTreeItem(
-                    [factor["name"], "🔴", "", factor_attributes],
+                    [factor["name"], status, "", factor_attributes],
                     "factor",
                     dimension_item,  # parent
                 )
@@ -253,12 +261,21 @@ class JsonTreeModel(QAbstractItemModel):
 
                 for layer in factor.get("layers", []):
 
+                    status = "🔴"
+                    result = layer.get("Indicator Result", "")
+                    if "Workflow Completed" in result:
+                        status = "✔️"
                     layer_item = JsonTreeItem(
                         # We store the whole json layer object in the last column
                         # so that we can pull out any of the additional properties
                         # from it later
                         # layer name, status, weighting, attributes
-                        [layer["Layer"], "🔴", layer.get("Factor Weighting", 0), layer],
+                        [
+                            layer["Layer"],
+                            status,
+                            layer.get("Factor Weighting", 0),
+                            layer,
+                        ],
                         "layer",
                         factor_item,
                     )
