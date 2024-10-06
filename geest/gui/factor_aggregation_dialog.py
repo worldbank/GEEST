@@ -13,6 +13,7 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QTextEdit,
     QVBoxLayout,
+    QDialogButtonBox,  # Import the QDialogButtonBox
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
@@ -36,7 +37,6 @@ class FactorAggregationDialog(QDialog):
         )
 
         self.indicators = self.tree_item.getFactorAttributes()["Indicators"]
-        # Assuming getIndicators returns a list of dictionaries with indicator details
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
@@ -52,7 +52,7 @@ class FactorAggregationDialog(QDialog):
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
 
-        # Get the  parent item
+        # Get the parent item
         parent_item = self.tree_item.parent()
 
         # If both grandparent and parent exist, create the label
@@ -134,19 +134,15 @@ class FactorAggregationDialog(QDialog):
 
         layout.addWidget(self.table)
 
-        # Buttons for OK and Cancel
-        button_layout = QHBoxLayout()
-        ok_button = QPushButton("OK", self)
-        ok_button.clicked.connect(self.accept)
-        cancel_button = QPushButton("Cancel", self)
-        cancel_button.clicked.connect(self.reject)
-        button_layout.addWidget(ok_button)
-        button_layout.addWidget(cancel_button)
+        # QDialogButtonBox setup for OK and Cancel
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
 
-        layout.addLayout(button_layout)
+        layout.addWidget(button_box)
 
         self.setLayout(layout)
-        # Initial call to update the preview with existing conupdateIndicatorWeightingtent
+        # Initial call to update the preview with existing content
         self.update_preview()
 
     def assignWeightings(self):

@@ -159,14 +159,31 @@ class JsonTreeItem:
             ]
         return attributes
 
-    def updateIndicatorWeighting(self, indicator_id, new_weighting):
-        """Update the weighting of a specific indicator."""
+    def updateIndicatorWeighting(self, indicator_name, new_weighting):
+        """Update the weighting of a specific indicator by its name."""
         try:
-            indicator_item = self.childItems[indicator_id]
-            indicator_item.setData(2, f"{new_weighting:.2f}")
-        except IndexError:
-            # Handle invalid indicator_id
-            pass
+            # Search for the indicator by name
+            indicator_item = next(
+                (child for child in self.childItems if child.data(0) == indicator_name),
+                None,
+            )
+
+            # If found, update the weighting
+            if indicator_item:
+                indicator_item.setData(2, f"{new_weighting:.2f}")
+            else:
+                # Log if the indicator name is not found
+                QgsMessageLog.logMessage(
+                    f"Indicator '{indicator_name}' not found.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        except Exception as e:
+            # Handle any exceptions and log the error
+            QgsMessageLog.logMessage(
+                f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
+            )
 
 
 class JsonTreeModel(QAbstractItemModel):
