@@ -38,7 +38,7 @@ class AggregationWorkflowBase(WorkflowBase):
         self.result_file_tag = (
             None  # This should be set by the child class e.g. "Factor Result File"
         )
-        self.vrt_path_key = (
+        self.raster_path_key = (
             None  # This should be set by the child class e.g. "Indicator Result File"
         )
 
@@ -66,37 +66,37 @@ class AggregationWorkflowBase(WorkflowBase):
         """
         pass
 
-    def aggregate(self, vrt_files: list) -> None:
+    def aggregate(self, input_files: list) -> None:
         """
-        Perform weighted raster aggregation on the found VRT files.
+        Perform weighted raster aggregation on the found raster files.
 
-        :param vrt_files: List of VRT file paths to aggregate.
+        :param input_files: List of raster file paths to aggregate.
 
         :return: Path to the aggregated raster file.
         """
-        if len(vrt_files) == 0:
+        if len(input_files) == 0:
             QgsMessageLog.logMessage(
-                f"Error: Found no VRT files. Cannot proceed with aggregation.",
+                f"Error: Found no Input files. Cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             return None
 
-        # Load the VRT layers
+        # Load the layers
         raster_layers = [
-            QgsRasterLayer(vf, f"VRT_{i}") for i, vf in enumerate(vrt_files)
+            QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files)
         ]
 
-        # Ensure all VRT layers are valid
+        # Ensure all raster layers are valid
         if not all(layer.isValid() for layer in raster_layers):
             QgsMessageLog.logMessage(
-                "One or more VRT layers are invalid, cannot proceed with aggregation.",
+                "One or more raster layers are invalid, cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Critical,
             )
             return None
 
-        # Create QgsRasterCalculatorEntries for each VRT layer
+        # Create QgsRasterCalculatorEntries for each raster layer
         entries = []
         for i, raster_layer in enumerate(raster_layers):
             QgsMessageLog.logMessage(
@@ -113,8 +113,8 @@ class AggregationWorkflowBase(WorkflowBase):
         # Assign default weights (you can modify this as needed)
         weights = self.get_weights()
 
-        # Number of VRT layers
-        layer_count = len(vrt_files)
+        # Number of raster layers
+        layer_count = len(input_files)
 
         # Ensure that the sum of weights is calculated
         sum_weights = sum(weights)
@@ -129,7 +129,7 @@ class AggregationWorkflowBase(WorkflowBase):
 
         aggregation_output = self.output_path("tif")
         QgsMessageLog.logMessage(
-            f"Aggregating {len(vrt_files)} raster layers to {aggregation_output}",
+            f"Aggregating {len(input_files)} raster layers to {aggregation_output}",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -227,31 +227,33 @@ class AggregationWorkflowBase(WorkflowBase):
 
         QgsProject.instance().addMapLayer(aggregated_layer)
         QgsMessageLog.logMessage(
-            "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+            "Added raster layer to the map.", tag="Geest", level=Qgis.Info
         )
         return aggregation_output_8bit
 
-    def get_vrt_list(self) -> list:
+    def get_raster_list(self) -> list:
         """
-        Get the list of vrts from the attributes that will be aggregated.
+        Get the list of rasters from the attributes that will be aggregated.
 
         (Factor Aggregation, Dimension Aggregation, Analysis).
 
         Returns:
-            list: List of found VRT file paths.
+            list: List of found raster file paths.
         """
-        vrt_files = []
+        raster_files = []
 
         for layer in self.layers:
-            path = layer.get(self.vrt_path_key, "")
-            vrt_files.append(path)
+            path = layer.get(self.raster_path_key, "")
+            raster_files.append(path)
             QgsMessageLog.logMessage(
-                f"Adding VRT: {path}", tag="Geest", level=Qgis.Info
+                f"Adding raster: {path}", tag="Geest", level=Qgis.Info
             )
         QgsMessageLog.logMessage(
-            f"Total VRT files found: {len(vrt_files)}", tag="Geest", level=Qgis.Info
+            f"Total raster files found: {len(raster_files)}",
+            tag="Geest",
+            level=Qgis.Info,
         )
-        return vrt_files
+        return raster_files
 
     def do_execute(self):
         """
@@ -270,11 +272,11 @@ class AggregationWorkflowBase(WorkflowBase):
             level=Qgis.Info,
         )
 
-        vrt_files = self.get_vrt_list()
+        raster_files = self.get_raster_list()
 
-        if not vrt_files or not isinstance(vrt_files, list):
+        if not raster_files or not isinstance(raster_files, list):
             QgsMessageLog.logMessage(
-                f"No valid VRT files found in '{self.layers}'. Cannot proceed with aggregation.",
+                f"No valid raster files found in '{self.layers}'. Cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
@@ -284,13 +286,13 @@ class AggregationWorkflowBase(WorkflowBase):
             return False
 
         QgsMessageLog.logMessage(
-            f"Found {len(vrt_files)} VRT files in 'Indicator Result File'. Proceeding with aggregation.",
+            f"Found {len(raster_files)} raster files in 'Indicator Result File'. Proceeding with aggregation.",
             tag="Geest",
             level=Qgis.Info,
         )
 
-        # Perform aggregation only if VRT files are provided
-        result_file = self.aggregate(vrt_files)
+        # Perform aggregation only if raster files are provided
+        result_file = self.aggregate(raster_files)
         if result_file:
             QgsMessageLog.logMessage(
                 "Aggregation Workflow completed successfully.",
@@ -304,7 +306,7 @@ class AggregationWorkflowBase(WorkflowBase):
             return True
         else:
             QgsMessageLog.logMessage(
-                "Aggregation failed due to missing or invalid VRT files.",
+                "Aggregation failed due to missing or invalid raster files.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
