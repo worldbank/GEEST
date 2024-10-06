@@ -194,6 +194,19 @@ class JsonTreeModel(QAbstractItemModel):
             dimension_attributes["default_analysis_weighting"] = dimension.get(
                 "default_analysis_weighting", 0.0
             )
+            dimension_attributes["Analysis Mode"] = dimension.get(
+                "Factor Aggregation", ""
+            )
+            dimension_attributes["Result"] = dimension.get("Result", "")
+            dimension_attributes["Execution Start Time"] = dimension.get(
+                "Execution Start Time", ""
+            )
+            dimension_attributes["Factor Result File"] = dimension.get(
+                "Factor Result File", ""
+            )
+            dimension_attributes["Execution End Time"] = dimension.get(
+                "Execution End Time", ""
+            )
             # We store the whole dimension object in the last column (excluding factors)
             # so that we can pull out any of the additional properties
             # from it later
@@ -215,6 +228,19 @@ class JsonTreeModel(QAbstractItemModel):
                 factor_attributes["required"] = factor.get("required", False)
                 factor_attributes["default_dimension_weighting"] = factor.get(
                     "default_analysis_weighting", 0.0
+                )
+                factor_attributes["Analysis Mode"] = factor.get(
+                    "Factor Aggregation", ""
+                )
+                factor_attributes["Result"] = factor.get("Result", "")
+                factor_attributes["Execution Start Time"] = factor.get(
+                    "Execution Start Time", ""
+                )
+                factor_attributes["Factor Result File"] = factor.get(
+                    "Factor Result File", ""
+                )
+                factor_attributes["Execution End Time"] = factor.get(
+                    "Execution End Time", ""
                 )
                 factor_item = JsonTreeItem(
                     [factor["name"], "🔴", "", factor_attributes],
