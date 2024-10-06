@@ -1,5 +1,6 @@
 from qgis.core import QgsMessageLog, Qgis, QgsFeedback
 from .workflow_base import WorkflowBase
+from geest.gui.treeview import JsonTreeItem
 
 
 class RasterLayerWorkflow(WorkflowBase):
@@ -7,15 +8,18 @@ class RasterLayerWorkflow(WorkflowBase):
     Concrete implementation of a spatial analysis workflow.
     """
 
-    def __init__(self, attributes: dict, feedback: QgsFeedback):
+    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
         """
         Initialize the TemporalAnalysisWorkflow with attributes and feedback.
-        :param attributes: Dictionary containing workflow parameters.
+
+        ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+
+        :param item: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
-        super().__init__(attributes, feedback)
+        super().__init__(item, feedback)
 
-    def execute(self):
+    def do_execute(self):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """

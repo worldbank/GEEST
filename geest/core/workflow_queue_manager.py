@@ -2,6 +2,7 @@ from PyQt5.QtCore import QObject
 from qgis.core import QgsMessageLog, Qgis
 from .workflow_queue import WorkflowQueue
 from .workflow_job import WorkflowJob
+from geest.gui.treeview import JsonTreeItem
 
 
 class WorkflowQueueManager(QObject):
@@ -19,18 +20,20 @@ class WorkflowQueueManager(QObject):
         super().__init__(parent=parent)
         self.workflow_queue = WorkflowQueue(pool_size)
 
-        # Connect signals to manage task updates
+        # Connect signals to manage queue updates
         self.workflow_queue.status_changed.connect(self.update_status)
         self.workflow_queue.processing_completed.connect(self.on_processing_completed)
         self.workflow_queue.status_message.connect(self.log_status_message)
 
-    def add_task(self, attributes: dict) -> None:
+    def add_task(self, item: JsonTreeItem) -> None:
         """
-        Add a task to the WorkflowQueue for processing using the attributes provided.
+        Add a task to the WorkflowQueue for processing using the item provided.
         Internally uses the WorkflowFactory to create the appropriate workflow.
-        :param attributes: A dictionary of task attributes
+        :param item: A reference to a JsonTreeItem object representing the task
         """
-        task = WorkflowJob(description="Geest Task", attributes=attributes)
+        # ⭐️ Now we are passing the item reference to the WorkflowJob
+        #    any changes made to the item will be reflected in the tree directly
+        task = WorkflowJob(description="Geest Task", item=item)
         self.workflow_queue.add_job(task)
         QgsMessageLog.logMessage(
             f"Task added: {task.description()}", tag="Geest", level=Qgis.Info
@@ -43,6 +46,19 @@ class WorkflowQueueManager(QObject):
             "Starting workflow queue processing...", tag="Geest", level=Qgis.Info
         )
         self.workflow_queue.start_processing()
+
+    def start_processing_in_foreground(self) -> None:
+        """Start processing the tasks in the WorkflowQueue in the main thread.
+
+        Used for debugging and testing purposes.
+        """
+        QgsMessageLog.logMessage(
+            "Starting FOREGROUND workflow queue processing...",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        for job in self.workflow_queue.job_queue:
+            job._workflow.execute()
 
     def cancel_processing(self) -> None:
         """Cancels all tasks in the WorkflowQueue."""

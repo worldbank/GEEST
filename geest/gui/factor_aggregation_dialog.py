@@ -13,6 +13,7 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QTextEdit,
     QVBoxLayout,
+    QDialogButtonBox,  # Import the QDialogButtonBox
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
@@ -36,7 +37,6 @@ class FactorAggregationDialog(QDialog):
         )
 
         self.indicators = self.tree_item.getFactorAttributes()["Indicators"]
-        # Assuming getIndicators returns a list of dictionaries with indicator details
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
@@ -52,7 +52,7 @@ class FactorAggregationDialog(QDialog):
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
 
-        # Get the  parent item
+        # Get the parent item
         parent_item = self.tree_item.parent()
 
         # If both grandparent and parent exist, create the label
@@ -121,27 +121,25 @@ class FactorAggregationDialog(QDialog):
         # Populate the table
         for row, indicator in enumerate(self.indicators):
             # Display indicator name (not editable)
-            name_item = QTableWidgetItem(indicator.get("name"))
+            indicator_id = indicator.get("Indicator Name")
+            indicator_weighting = indicator.get("Indicator Weighting", 0)
+            name_item = QTableWidgetItem(indicator_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
-            weighting_item = QLineEdit(str(indicator.get("weighting", 0)))
+            weighting_item = QLineEdit(str(indicator_weighting))
             self.table.setCellWidget(row, 1, weighting_item)
-            self.weightings[indicator.get("id")] = weighting_item
+            self.weightings[indicator_id] = weighting_item
 
         layout.addWidget(self.table)
 
-        # Buttons for OK and Cancel
-        button_layout = QHBoxLayout()
-        ok_button = QPushButton("OK", self)
-        ok_button.clicked.connect(self.accept)
-        cancel_button = QPushButton("Cancel", self)
-        cancel_button.clicked.connect(self.reject)
-        button_layout.addWidget(ok_button)
-        button_layout.addWidget(cancel_button)
+        # QDialogButtonBox setup for OK and Cancel
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
 
-        layout.addLayout(button_layout)
+        layout.addWidget(button_box)
 
         self.setLayout(layout)
         # Initial call to update the preview with existing content

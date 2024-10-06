@@ -21,6 +21,7 @@ from PyQt5.QtCore import (
 # Change to this when implementing in QGIS
 # from qgis.PyQt.QtGui import (
 from PyQt5.QtGui import QColor, QColor, QMovie
+from qgis.core import QgsMessageLog, Qgis
 
 
 class JsonTreeItem:
@@ -51,6 +52,12 @@ class JsonTreeItem:
         return None
 
     def setData(self, column, value):
+        if column == 3:
+            QgsMessageLog.logMessage(
+                f"JsonTreeItem setData: {value} for column {column} ",
+                tag="Geest JsonTreeItem",
+                level=Qgis.Info,
+            )
         if column < len(self.itemData):
             self.itemData[column] = value
             return True
@@ -74,7 +81,11 @@ class JsonTreeItem:
         return self.role == "dimension"
 
     def getIndicatorAttributes(self):
-        """Return the dict of indicators (or layers) under this factor."""
+        """Return the dict of indicators (or layers) under this factor.
+
+        TODO - do we need this? Doens make sense listing indicators under indicators
+
+        """
         attributes = {}
         if self.isIndicator():
             attributes["Dimension ID"] = self.parentItem.itemData[3].get("id", "")
@@ -84,7 +95,9 @@ class JsonTreeItem:
                     "Indicator ID": i,
                     "Indicator Name": child.data(0),
                     "Indicator Weighting": child.data(2),
-                    "Indicator Result File": child.data(3).get("Result File", ""),
+                    "Indicator Result File": child.data(3).get(
+                        "Indicator Result File", ""
+                    ),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -102,7 +115,9 @@ class JsonTreeItem:
                     "Indicator ID": i,
                     "Indicator Name": child.data(0),
                     "Indicator Weighting": child.data(2),
-                    "Indicator Result File": child.data(3).get("Result File", ""),
+                    "Indicator Result File": child.data(3).get(
+                        "Indicator Result File", ""
+                    ),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -119,7 +134,7 @@ class JsonTreeItem:
                     "Factor ID": i,
                     "Factor Name": child.data(0),
                     "Factor Weighting": child.data(2),
-                    "Factor Result File": child.data(3).get("Result File", ""),
+                    "Factor Result File": child.data(3).get(f"Factor Result File", ""),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -136,20 +151,39 @@ class JsonTreeItem:
                     "Dimension ID": i,
                     "Dimension Name": child.data(0),
                     "Dimension Weighting": child.data(2),
-                    "Dimension Result File": child.data(3).get("Result File", ""),
+                    "Dimension Result File": child.data(3).get(
+                        f"Dimension Result File", ""
+                    ),
                 }
                 for i, child in enumerate(self.childItems)
             ]
         return attributes
 
-    def updateIndicatorWeighting(self, indicator_id, new_weighting):
-        """Update the weighting of a specific indicator."""
+    def updateIndicatorWeighting(self, indicator_name, new_weighting):
+        """Update the weighting of a specific indicator by its name."""
         try:
-            indicator_item = self.childItems[indicator_id]
-            indicator_item.setData(2, f"{new_weighting:.2f}")
-        except IndexError:
-            # Handle invalid indicator_id
-            pass
+            # Search for the indicator by name
+            indicator_item = next(
+                (child for child in self.childItems if child.data(0) == indicator_name),
+                None,
+            )
+
+            # If found, update the weighting
+            if indicator_item:
+                indicator_item.setData(2, f"{new_weighting:.2f}")
+            else:
+                # Log if the indicator name is not found
+                QgsMessageLog.logMessage(
+                    f"Indicator '{indicator_name}' not found.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        except Exception as e:
+            # Handle any exceptions and log the error
+            QgsMessageLog.logMessage(
+                f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
+            )
 
 
 class JsonTreeModel(QAbstractItemModel):
@@ -177,11 +211,28 @@ class JsonTreeModel(QAbstractItemModel):
             dimension_attributes["default_analysis_weighting"] = dimension.get(
                 "default_analysis_weighting", 0.0
             )
+            dimension_attributes["Analysis Mode"] = dimension.get(
+                "Factor Aggregation", ""
+            )
+            dimension_attributes["Result"] = dimension.get("Result", "")
+            dimension_attributes["Execution Start Time"] = dimension.get(
+                "Execution Start Time", ""
+            )
+            dimension_attributes["Dimension Result File"] = dimension.get(
+                "Dimension Result File", ""
+            )
+            dimension_attributes["Execution End Time"] = dimension.get(
+                "Execution End Time", ""
+            )
             # We store the whole dimension object in the last column (excluding factors)
             # so that we can pull out any of the additional properties
             # from it later
+            status = "🔴"
+            result = dimension.get("Result", "")
+            if "Workflow Completed" in result:
+                status = "✔️"
             dimension_item = JsonTreeItem(
-                [dimension_name, "🔴", "", dimension_attributes],
+                [dimension_name, status, "", dimension_attributes],
                 "dimension",
                 self.rootItem,  # parent
             )
@@ -199,8 +250,25 @@ class JsonTreeModel(QAbstractItemModel):
                 factor_attributes["default_dimension_weighting"] = factor.get(
                     "default_analysis_weighting", 0.0
                 )
+                factor_attributes["Analysis Mode"] = factor.get(
+                    "Factor Aggregation", ""
+                )
+                factor_attributes["Result"] = factor.get("Result", "")
+                factor_attributes["Execution Start Time"] = factor.get(
+                    "Execution Start Time", ""
+                )
+                factor_attributes["Factor Result File"] = factor.get(
+                    "Factor Result File", ""
+                )
+                factor_attributes["Execution End Time"] = factor.get(
+                    "Execution End Time", ""
+                )
+                status = "🔴"
+                result = factor_attributes.get("Result", "")
+                if "Workflow Completed" in result:
+                    status = "✔️"
                 factor_item = JsonTreeItem(
-                    [factor["name"], "🔴", "", factor_attributes],
+                    [factor["name"], status, "", factor_attributes],
                     "factor",
                     dimension_item,  # parent
                 )
@@ -210,12 +278,21 @@ class JsonTreeModel(QAbstractItemModel):
 
                 for layer in factor.get("layers", []):
 
+                    status = "🔴"
+                    result = layer.get("Indicator Result", "")
+                    if "Workflow Completed" in result:
+                        status = "✔️"
                     layer_item = JsonTreeItem(
                         # We store the whole json layer object in the last column
                         # so that we can pull out any of the additional properties
                         # from it later
                         # layer name, status, weighting, attributes
-                        [layer["Layer"], "🔴", layer.get("Factor Weighting", 0), layer],
+                        [
+                            layer["Layer"],
+                            status,
+                            layer.get("Factor Weighting", 0),
+                            layer,
+                        ],
                         "layer",
                         factor_item,
                     )

@@ -1,5 +1,6 @@
 from qgis.core import QgsTask, QgsMessageLog, QgsFeedback, Qgis
-from PyQt5.QtCore import QObject, pyqtSignal
+from qgis.PyQt.QtCore import QObject, pyqtSignal
+from geest.gui.treeview import JsonTreeItem
 from .workflow_factory import WorkflowFactory
 
 
@@ -14,20 +15,21 @@ class WorkflowJob(QgsTask):
     job_started = pyqtSignal()
     job_canceled = pyqtSignal()
     # Custom signal to emit when the job is finished
-    job_finished = pyqtSignal(bool, dict)
+    job_finished = pyqtSignal(bool)
 
-    def __init__(self, description: str, attributes: dict):
+    def __init__(self, description: str, item: JsonTreeItem):
         """
         Initialize the workflow job.
         :param description: Task description
-        :param attributes: A dictionary of task attributes
+        :param item: JsonTreeItem object representing the task - this is a reference
+              so it will update the tree directly when modified
         """
         super().__init__(description)
-        self._attributes = attributes
+        self._item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self._feedback = QgsFeedback()  # Feedback object for progress and cancellation
         workflow_factory = WorkflowFactory()
         self._workflow = workflow_factory.create_workflow(
-            attributes, self._feedback
+            item, self._feedback
         )  # Create the workflow
 
         # Emit the 'queued' signal upon initialization
@@ -57,6 +59,17 @@ class WorkflowJob(QgsTask):
 
             result = self._workflow.execute()
 
+            QgsMessageLog.logMessage(
+                f"WorkflowJob {self.description()} attributes.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            attributes = self._item.data(3)
+            QgsMessageLog.logMessage(
+                f"{attributes}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             if result:
                 QgsMessageLog.logMessage(
                     f"Workflow {self.description()} completed.",
@@ -91,5 +104,10 @@ class WorkflowJob(QgsTask):
         Override the finished method to emit a custom signal when the task is finished.
         :param success: True if the task was completed successfully, False otherwise
         """
-        # Emit the custom signal job_finished with the success state and the updated attributes
-        self.job_finished.emit(success, self._attributes)
+        QgsMessageLog.logMessage(
+            "0000000000000 🏁 Job Finished 000000000000000000",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        # Emit the custom signal job_finished with the success state
+        self.job_finished.emit(success)

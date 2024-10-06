@@ -16,6 +16,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
+from geest.gui.treeview import JsonTreeItem
 
 
 class DefaultIndexScoreWorkflow(WorkflowBase):
@@ -23,21 +24,22 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
     Concrete implementation of a 'Use Default Index Score' workflow.
     """
 
-    def __init__(self, attributes: dict, feedback: QgsFeedback):
+    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
         """
         Initialize the TemporalAnalysisWorkflow with attributes and feedback.
         :param attributes: Dictionary containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
-        super().__init__(attributes, feedback)
-        # self.dimension_id = self.attributes["Dimension ID"].lower()
-        # self.factor_id = self.attributes["Factor ID"].lower().replace(" ", "_")
+        super().__init__(
+            item, feedback
+        )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+        self.attributes = item.data(3)
         self.layer_id = self.attributes["Layer"].lower().replace(" ", "_")
         self.project_base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../..")
         )
 
-    def execute(self):
+    def do_execute(self):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
@@ -92,8 +94,16 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
                 self.workflow_directory, f"{self.layer_id}.vrt"
             )
         )
-        self.attributes["Result File"] = vrt_filepath
-        self.attributes["Result"] = "Use Default Index Score Workflow Completed"
+        self.attributes["Indicator Result File"] = vrt_filepath
+        self.attributes["Indicator Result"] = (
+            "Use Default Index Score Workflow Completed"
+        )
+        self.attributes["XXXXXXXXXXXXXXXXXXXXXXXX"] = "XXXXXXXX"
+        QgsMessageLog.logMessage(
+            f"self.attributes after Use Default Index Score workflow\n\n {self.attributes}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         QgsMessageLog.logMessage(
             "Use Default Index Score workflow workflow completed",
             tag="Geest",
@@ -233,54 +243,53 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}")
 
-        if vrt_layer.isValid():
-            # Copy the style (.qml) file to the same directory as the VRT
-            style_folder = os.path.join(
-                self.project_base_dir, "resources", "qml"
-            )  # assuming 'style' folder path
-            qml_src_path = os.path.join(style_folder, "contextual.qml")
+        if not vrt_layer.isValid():
+            QgsMessageLog.logMessage(
+                f"VRT Is not valid", tag="Geest", level=Qgis.Critical
+            )
+            return None
 
-            if os.path.exists(qml_src_path):
-                qml_dest_path = os.path.join(
-                    raster_dir, os.path.basename(vrt_filepath).replace(".vrt", ".qml")
-                )
-                shutil.copy(qml_src_path, qml_dest_path)
+        # Copy the style (.qml) file to the same directory as the VRT
+        style_folder = os.path.join(
+            self.project_base_dir, "resources", "qml"
+        )  # assuming 'style' folder path
+        qml_src_path = os.path.join(style_folder, "Contextual.qml")
+        qml_dest_path = os.path.join(
+            raster_dir, os.path.basename(vrt_filepath).replace(".vrt", ".qml")
+        )
+        if not os.path.exists(qml_src_path):
+            QgsMessageLog.logMessage(
+                f"QML style file not found: {qml_src_path}",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+        shutil.copy(qml_src_path, qml_dest_path)
+        QgsMessageLog.logMessage(
+            f"Copied QML style file to {qml_dest_path}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        if not os.path.exists(qml_dest_path):
+            QgsMessageLog.logMessage(
+                "QML not in the directory.", tag="Geest", level=Qgis.Critical
+            )
+        else:
+            result = vrt_layer.loadNamedStyle(qml_dest_path)
+            if result[0]:  # Check if the style was successfully loaded
                 QgsMessageLog.logMessage(
-                    f"Copied QML style file to {qml_dest_path}",
-                    tag="Geest",
-                    level=Qgis.Info,
+                    "Successfully applied QML style.", tag="Geest", level=Qgis.Info
                 )
             else:
                 QgsMessageLog.logMessage(
-                    f"QML style file not found: {qml_src_path}",
+                    f"Failed to apply QML style: {result[1]}",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            if os.path.exists(qml_dest_path):
 
-                result = vrt_layer.loadNamedStyle(qml_dest_path)
-                if result[0]:  # Check if the style was successfully loaded
-                    QgsMessageLog.logMessage(
-                        "Successfully applied QML style.", tag="Geest", level=Qgis.Info
-                    )
-                else:
-                    QgsMessageLog.logMessage(
-                        f"Failed to apply QML style: {result[1]}",
-                        tag="Geest",
-                        level=Qgis.Warning,
-                    )
+        QgsProject.instance().addMapLayer(vrt_layer)
+        QgsMessageLog.logMessage(
+            "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+        )
 
-                QgsProject.instance().addMapLayer(vrt_layer)
-                QgsMessageLog.logMessage(
-                    "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-                )
-            else:
-                QgsMessageLog.logMessage(
-                    "QML not in the directory.", tag="Geest", level=Qgis.Critical
-                )
-            return vrt_filepath
-        else:
-            QgsMessageLog.logMessage(
-                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
-            )
-            return None
+        return vrt_filepath

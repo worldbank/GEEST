@@ -34,16 +34,25 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.11",
-                            "Result": "Use Default Index Score Workflow Completed",
-                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/workplace_index/workplace_index_score.vrt"
+                            "Result": "Not Run",
+                            "Execution Start Time": "2024-10-06T15:50:50.165434",
+                            "Indicator Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Dominica/contextual/wbl_2024_workplace_index_score/wbl_2024_workplace_index_score.vrt",
+                            "Indicator Result": "Use Default Index Score Workflow Completed",
+                            "XXXXXXXXXXXXXXXXXXXXXXXX": "XXXXXXXX",
+                            "Execution End Time": "2024-10-06T15:50:50.667699",
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
                     "id": "workplace_discrimination",
                     "text": "",
                     "required": 1.0,
-                    "default_dimension_weighting": 0.0
+                    "default_dimension_weighting": 0.0,
+                    "Analysis Mode": "Factor Aggregation",
+                    "Result": "Factor Aggregation Factor Aggregation Workflow Completed",
+                    "Execution Start Time": "2024-10-06T15:50:55.268137",
+                    "Factor Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Dominica/contextual/workplace_discrimination/aggregate_workplace_discrimination_8bit.tif",
+                    "Execution End Time": "2024-10-06T15:50:55.496127"
                 },
                 {
                     "name": "Regulatory Frameworks",
@@ -76,16 +85,25 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
-                            "Factor Weighting": "1.00",
-                            "Result": "Use Default Index Score Workflow Completed",
-                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/pay_parenthood_index/pay_parenthood_index_score.vrt"
+                            "Factor Weighting": 0,
+                            "Result": "Not Run",
+                            "Execution Start Time": "2024-10-06T15:51:10.229320",
+                            "Indicator Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Dominica/contextual/wbl_2024_pay+parenthood_index_score/wbl_2024_pay+parenthood_index_score.vrt",
+                            "Indicator Result": "Use Default Index Score Workflow Completed",
+                            "XXXXXXXXXXXXXXXXXXXXXXXX": "XXXXXXXX",
+                            "Execution End Time": "2024-10-06T15:51:10.659371"
                         }
                     ],
                     "Dimension Weighting": "0.00",
                     "id": "regulatory_frameworks",
                     "text": "",
                     "required": 1.0,
-                    "default_dimension_weighting": 0.0
+                    "default_dimension_weighting": 0.0,
+                    "Analysis Mode": "Factor Aggregation",
+                    "Result": "Factor Aggregation Factor Aggregation Workflow Completed",
+                    "Execution Start Time": "2024-10-06T15:51:15.004321",
+                    "Factor Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Dominica/contextual/regulatory_frameworks/aggregate_regulatory_frameworks_8bit.tif",
+                    "Execution End Time": "2024-10-06T15:51:15.242028"
                 },
                 {
                     "name": "Financial Inclusion",
@@ -118,23 +136,35 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Use Default Index Score",
                             "Layer Required": 1,
-                            "Factor Weighting": "1.00",
-                            "Result": "Use Default Index Score Workflow Completed",
-                            "Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/CaboVerde/contextual/entrepeneurship_index /entrepeneurship_index _score.vrt"
+                            "Factor Weighting": 0,
+                            "Result": "Not Run",
+                            "Execution Start Time": "2024-10-06T15:51:19.636327",
+                            "Indicator Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Dominica/contextual/wbl_2024_entrepeneurship_index_score/wbl_2024_entrepeneurship_index_score.vrt",
+                            "Indicator Result": "Use Default Index Score Workflow Completed",
+                            "XXXXXXXXXXXXXXXXXXXXXXXX": "XXXXXXXX",
+                            "Execution End Time": "2024-10-06T15:51:20.071111"
                         }
                     ],
                     "Dimension Weighting": "0.00",
                     "id": "financial_inclusion",
                     "text": "",
                     "required": 1.0,
-                    "default_dimension_weighting": 0.0
+                    "default_dimension_weighting": 0.0,
+                    "Analysis Mode": "Factor Aggregation",
+                    "Result": "Factor Aggregation Factor Aggregation Workflow Completed",
+                    "Execution Start Time": "2024-10-06T15:51:23.766261",
+                    "Factor Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Dominica/contextual/financial_inclusion/aggregate_financial_inclusion_8bit.tif",
+                    "Execution End Time": "2024-10-06T15:51:23.988556"
                 }
             ],
             "Analysis Weighting": "",
             "id": "contextual",
             "text": "",
             "required": 1.0,
-            "default_analysis_weighting": 0.33
+            "default_analysis_weighting": 0.33,
+            "Analysis Mode": "Dimension Aggregation",
+            "Result": "Not Run",
+            "Execution Start Time": "2024-10-06T15:51:30.483960"
         },
         {
             "name": "Accessibility",
@@ -170,9 +200,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.30",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Location of primary schools ",
@@ -202,9 +230,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Location of groceries",
@@ -234,9 +260,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Location of pharmacies",
@@ -266,9 +290,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Location of green spaces ",
@@ -298,9 +320,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.20",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -340,9 +360,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -382,9 +400,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -424,9 +440,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -466,9 +480,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -518,9 +530,7 @@
                             "Use Point per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Location of cycle paths",
@@ -550,9 +560,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Location of footpaths",
@@ -582,9 +590,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Block Layout",
@@ -614,9 +620,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -656,9 +660,7 @@
                             "Use Point per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -698,9 +700,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -740,9 +740,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -782,9 +780,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -824,9 +820,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Flood Hazards",
@@ -856,9 +850,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Landslide",
@@ -888,9 +880,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Tropical Cyclone",
@@ -920,9 +910,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         },
                         {
                             "Layer": "Drought",
@@ -952,9 +940,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",
@@ -994,9 +980,7 @@
                             "Use Point per Cell": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1,
-                            "Factor Weighting": "0.00",
-                            "Result": "Dont use workflow completed",
-                            "progress": "Dont use workflow Step 10 completed"
+                            "Factor Weighting": 0
                         }
                     ],
                     "Dimension Weighting": "0.00",

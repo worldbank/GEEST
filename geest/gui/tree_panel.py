@@ -265,6 +265,9 @@ class TreePanel(QWidget):
         )
         add_to_map_action = QAction("Add to map", self)
         add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
+
+        run_item_action = QAction("Run Item Workflow", self)
+        run_item_action.triggered.connect(lambda: self.run_item(item, role=item.role))
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
             # Context menu for dimensions
@@ -277,19 +280,21 @@ class TreePanel(QWidget):
                 lambda: self.model.remove_item(item)
             )
             clear_action = QAction("Clear Factor Weightings", self)
-            auto_assign_action = QAction("Auto Assign Factor Weightings", self)
             clear_action.triggered.connect(
                 lambda: self.model.clear_factor_weightings(item)
             )
+            auto_assign_action = QAction("Auto Assign Factor Weightings", self)
             auto_assign_action.triggered.connect(
                 lambda: self.model.auto_assign_factor_weightings(item)
             )
+
             # Add actions to menu
             menu = QMenu(self)
             menu.addAction(clear_action)
             menu.addAction(auto_assign_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(add_to_map_action)
+            menu.addAction(run_item_action)
 
             if editing:
                 menu.addAction(add_factor_action)
@@ -329,6 +334,7 @@ class TreePanel(QWidget):
                 menu.addAction(remove_factor_action)
             menu.addAction(clear_action)
             menu.addAction(auto_assign_action)
+            menu.addAction(run_item_action)
 
         elif item.role == "layer":
             # Context menu for layers
@@ -346,6 +352,7 @@ class TreePanel(QWidget):
             menu.addAction(show_properties_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(add_to_map_action)
+            menu.addAction(run_item_action)
 
             if editing:
                 menu.addAction(remove_layer_action)
@@ -355,30 +362,55 @@ class TreePanel(QWidget):
 
     def show_attributes(self, item):
         """Show the attributes of the item in a the message log."""
-        QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage("Item Attributes", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            "----------------------------", tag="Geest", level=Qgis.Info
+        )
         if item.role == "factor":
-            QgsMessageLog.logMessage("Factor attributes", tag="Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                "Factor attributes that get passed to workflow:",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             QgsMessageLog.logMessage(
                 str(item.getFactorAttributes()), tag="Geest", level=Qgis.Info
             )
         elif item.role == "dimension":
             QgsMessageLog.logMessage(
-                "Dimension attributes", tag="Geest", level=Qgis.Info
+                "Dimension attributes that get passed to workflow",
+                tag="Geest",
+                level=Qgis.Info,
             )
             QgsMessageLog.logMessage(
                 str(item.getDimensionAttributes()), tag="Geest", level=Qgis.Info
             )
         elif item.role == "layer":
             QgsMessageLog.logMessage(
-                "Indicator attributes", tag="Geest", level=Qgis.Info
+                "Indicator attributes that get passed to workflow",
+                tag="Geest",
+                level=Qgis.Info,
             )
             QgsMessageLog.logMessage(
                 str(item.getIndicatorAttributes()), tag="Geest", level=Qgis.Info
             )
+        QgsMessageLog.logMessage(
+            "Attributes stored in tree:", tag="Geest", level=Qgis.Info
+        )
+        QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            "----------------------------", tag="Geest", level=Qgis.Info
+        )
 
     def add_to_map(self, item):
         """Add the item to the map."""
-        layer_uri = item.data(3).get("Result File")
+        # TODO refactor use of the term Layer everywhere to Indicator
+        # for now, some spaghetti code to get the layer_uri
+        if item.role == "layer":
+            layer_uri = item.data(3).get(f"Indicator Result File")
+        else:
+            layer_uri = item.data(3).get(
+                f"{item.role.title()} Result File"
+            )  # title = title case string
         layer_name = item.data(0)
         QgsMessageLog.logMessage(
             f"Adding {layer_uri} to the map.", tag="Geest", level=Qgis.Info
@@ -475,43 +507,46 @@ class TreePanel(QWidget):
         """
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
-
-            # If the child is a layer, queue a workflow task
-            if child_item.role == role:
-                # Create the workflow task
-                task = None
-                if role == "layer":
-                    task = self.queue_manager.add_task(child_item.data(3))
-
-                elif role == "factor":
-                    task = self.queue_manager.add_task(child_item.getFactorAttributes())
-
-                elif role == "dimension":
-                    task = self.queue_manager.add_task(
-                        child_item.getDimensionAttributes()
-                    )
-
-                elif role == "analysis":
-                    task = self.queue_manager.add_task(
-                        child_item.getAnalysisAttributes()
-                    )
-
-                if task is None:
-                    continue
-                # Connect workflow signals to TreePanel slots
-                task.job_queued.connect(partial(self.on_workflow_created, child_item))
-                task.job_started.connect(partial(self.on_workflow_started, child_item))
-                # task.job_completed.connect(partial(self.on_workflow_completed, child_item))
-                task.job_canceled.connect(
-                    partial(self.on_workflow_completed, child_item, False)
-                )
-                task.job_finished.connect(
-                    lambda success, attrs: self.on_workflow_completed(
-                        child_item, success
-                    )
-                )
+            self.queue_workflow_task(child_item, role)
             # Recursively process children (dimensions, factors)
             self._start_workflows(child_item, role)
+
+    def queue_workflow_task(self, item, role):
+        """Queue a workflow task based on the role of the item.
+
+        ⭐️ These calls all pass a reference of the item to the workflow task.
+            The task directly modifies the item's properties to update the tree.
+        """
+        task = None
+        if role == item.role and role == "layer":
+            task = self.queue_manager.add_task(item)
+        if role == item.role and role == "factor":
+            item.data(3)["Analysis Mode"] = "Factor Aggregation"
+            task = self.queue_manager.add_task(item)
+        if role == item.role and role == "dimension":
+            item.data(3)["Analysis Mode"] = "Dimension Aggregation"
+            task = self.queue_manager.add_task(item)
+        if role == item.role and role == "analysis":
+            item.data(3)["Analysis Mode"] = "Analysis Aggregation"
+            task = self.queue_manager.add_task(item)
+        if task is None:
+            return
+
+        # Connect workflow signals to TreePanel slots
+        task.job_queued.connect(partial(self.on_workflow_created, item))
+        task.job_started.connect(partial(self.on_workflow_started, item))
+        task.job_canceled.connect(partial(self.on_workflow_completed, item, False))
+        task.job_finished.connect(
+            lambda success: self.on_workflow_completed(item, success)
+        )
+
+    def run_item(self, item, role):
+        self.queue_workflow_task(item, role)
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
     @pyqtSlot()
     def on_workflow_created(self, item):
@@ -559,7 +594,11 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.start_workflows(type="indicators")
-        self.queue_manager.start_processing()
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
     def prepare_factors_pressed(self):
         """
@@ -569,7 +608,11 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.start_workflows(type="factors")
-        self.queue_manager.start_processing()
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
     def prepare_dimensions_pressed(self):
         """
@@ -579,7 +622,11 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.start_workflows(type="dimensions")
-        self.queue_manager.start_processing()
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
     def prepare_analysis_pressed(self):
         """

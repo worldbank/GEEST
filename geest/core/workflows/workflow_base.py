@@ -1,7 +1,9 @@
+import datetime
 import os
 from abc import ABC, abstractmethod
 from qgis.core import QgsFeedback, QgsVectorLayer, QgsMessageLog, Qgis
 from qgis.PyQt.QtCore import QSettings
+from geest.gui.treeview import JsonTreeItem
 
 
 class WorkflowBase(ABC):
@@ -10,13 +12,13 @@ class WorkflowBase(ABC):
     Every workflow must accept an attributes dictionary and a QgsFeedback object.
     """
 
-    def __init__(self, attributes: dict, feedback: QgsFeedback):
+    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
         """
         Initialize the workflow with attributes and feedback.
         :param attributes: Dictionary containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
-        self.attributes = attributes
+        self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.feedback = feedback
         # This is set in the setup panel
         self.settings = QSettings()
@@ -41,12 +43,26 @@ class WorkflowBase(ABC):
         )
         self.output_crs = self.bboxes_layer.crs()
         # Will be populated by the workflow
-        self.attributes["Result"] = "Not Run"
+        attributes = self.item.data(3)
+        attributes["Result"] = "Not Run"
 
-    @abstractmethod
     def execute(self) -> bool:
         """
         Executes the workflow logic.
+        :return: True if the workflow completes successfully, False if canceled or failed.
+        """
+        # call the execute method of the concrete class and then add a time stamp to the attributes
+        attributes = self.item.data(3)
+        attributes["Execution Start Time"] = datetime.datetime.now().isoformat()
+        result = self.do_execute()
+        attributes["Execution End Time"] = datetime.datetime.now().isoformat()
+        return result
+
+    @abstractmethod
+    def do_execute(self) -> bool:
+        """
+        Executes the actual workflow logic.
+        Must be implemented by subclasses.
         :return: True if the workflow completes successfully, False if canceled or failed.
         """
         pass
