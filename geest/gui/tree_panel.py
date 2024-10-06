@@ -37,6 +37,7 @@ class TreePanel(QWidget):
         self.queue_manager = WorkflowQueueManager(pool_size=1)
         self.json_file = json_file
         self.tree_view_visible = True
+        edit_mode = int(setting(key="edit_mode", default=0))
 
         layout = QVBoxLayout()
 
@@ -59,8 +60,9 @@ class TreePanel(QWidget):
         self.model.rowsInserted.connect(self.save_json_to_working_directory)
         self.model.rowsRemoved.connect(self.save_json_to_working_directory)
 
-        # Only allow editing on double-click (initially enabled)
-        self.treeView.setEditTriggers(QTreeView.DoubleClicked)
+        self.treeView.setRootIsDecorated(True)  # Ensures tree branches are visible
+        self.treeView.setItemsExpandable(True)
+        self.treeView.setUniformRowHeights(True)
 
         # Enable custom context menu
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -114,7 +116,6 @@ class TreePanel(QWidget):
         self.edit_toggle = QCheckBox("Edit")
         self.edit_toggle.setChecked(False)
         self.edit_toggle.stateChanged.connect(self.toggle_edit_mode)
-        edit_mode = int(setting(key="edit_mode", default=0))
         if edit_mode:
             self.edit_toggle.setVisible(True)
         else:
@@ -133,6 +134,12 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.load_json_button)
         button_bar.addWidget(self.export_json_button)
         button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
+
+        # Only allow editing on double-click (initially enabled)
+        editing = self.edit_toggle.isChecked()
+        if editing:
+            self.treeView.setEditTriggers(QTreeView.DoubleClicked)
+
         layout.addLayout(button_bar)
         self.setLayout(layout)
 

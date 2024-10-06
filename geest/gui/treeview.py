@@ -20,8 +20,9 @@ from PyQt5.QtCore import (
 
 # Change to this when implementing in QGIS
 # from qgis.PyQt.QtGui import (
-from PyQt5.QtGui import QColor, QColor, QMovie
+from PyQt5.QtGui import QColor, QFont, QIcon
 from qgis.core import QgsMessageLog, Qgis
+from geest.utilities import resources_path
 
 
 class JsonTreeItem:
@@ -33,6 +34,22 @@ class JsonTreeItem:
         self.childItems = []
         self.role = role  # Stores whether an item is a dimension, factor, or layer
         self.font_color = QColor(Qt.black)  # Default font color
+
+        # Define icons for each role
+        self.dimension_icon = QIcon(
+            resources_path("resources", "icons", "dimension.svg")
+        )
+        self.factor_icon = QIcon(resources_path("resources", "icons", "factor.svg"))
+        self.indicator_icon = QIcon(
+            resources_path("resources", "icons", "indicator.svg")
+        )
+
+        # Define fonts for each role
+        self.dimension_font = QFont()
+        self.dimension_font.setBold(True)
+
+        self.factor_font = QFont()
+        self.factor_font.setItalic(True)
 
     def appendChild(self, item):
         self.childItems.append(item)
@@ -80,12 +97,26 @@ class JsonTreeItem:
     def isDimension(self):
         return self.role == "dimension"
 
+    def get_icon(self):
+        """Retrieve the appropriate icon for the item based on its role."""
+        if self.isDimension():
+            return self.dimension_icon
+        elif self.isFactor():
+            return self.factor_icon
+        elif self.isIndicator():
+            return self.indicator_icon
+        return None
+
+    def get_font(self):
+        """Retrieve the appropriate font for the item based on its role."""
+        if self.isDimension():
+            return self.dimension_font
+        elif self.isFactor():
+            return self.factor_font
+        return QFont()
+
     def getIndicatorAttributes(self):
-        """Return the dict of indicators (or layers) under this factor.
-
-        TODO - do we need this? Doens make sense listing indicators under indicators
-
-        """
+        """Return the dict of indicators (or layers) under this factor."""
         attributes = {}
         if self.isIndicator():
             attributes["Dimension ID"] = self.parentItem.itemData[3].get("id", "")
@@ -224,9 +255,6 @@ class JsonTreeModel(QAbstractItemModel):
             dimension_attributes["Execution End Time"] = dimension.get(
                 "Execution End Time", ""
             )
-            # We store the whole dimension object in the last column (excluding factors)
-            # so that we can pull out any of the additional properties
-            # from it later
             status = "🔴"
             result = dimension.get("Result", "")
             if "Workflow Completed" in result:
@@ -239,9 +267,6 @@ class JsonTreeModel(QAbstractItemModel):
             self.rootItem.appendChild(dimension_item)
 
             for factor in dimension.get("factors", []):
-                # We store the whole factor object in the last column (excluding layers)
-                # so that we can pull out any of the additional properties
-                # from it later
                 factor_attributes = {}
                 factor_attributes["id"] = factor.get("id", "")
                 factor_attributes["name"] = factor.get("name", "")
@@ -276,27 +301,24 @@ class JsonTreeModel(QAbstractItemModel):
 
                 factor_weighting_sum = 0.0
 
-                for layer in factor.get("layers", []):
+                for indicator in factor.get("layers", []):
 
                     status = "🔴"
-                    result = layer.get("Indicator Result", "")
+                    result = indicator.get("Indicator Result", "")
                     if "Workflow Completed" in result:
                         status = "✔️"
-                    layer_item = JsonTreeItem(
-                        # We store the whole json layer object in the last column
-                        # so that we can pull out any of the additional properties
-                        # from it later
-                        # layer name, status, weighting, attributes
+                    indicator_item = JsonTreeItem(
                         [
-                            layer["Layer"],
+                            indicator["Layer"],
                             status,
-                            layer.get("Factor Weighting", 0),
-                            layer,
+                            indicator.get("Factor Weighting", 0),
+                            indicator,
                         ],
                         "layer",
                         factor_item,
                     )
-                    factor_item.appendChild(layer_item)
+
+                    factor_item.appendChild(indicator_item)
 
                 # Set the factor's total weighting
                 factor_item.setData(2, f"{factor_weighting_sum:.2f}")
@@ -306,6 +328,30 @@ class JsonTreeModel(QAbstractItemModel):
                 )
 
         self.endResetModel()
+
+    def data(self, index, role):
+        if not index.isValid():
+            return None
+
+        item = index.internalPointer()
+
+        # Set the display text
+        if role == Qt.DisplayRole:
+            return item.data(index.column())
+
+        # Set the font color for weightings
+        elif role == Qt.ForegroundRole and index.column() == 2:
+            return item.font_color
+
+        # Set the icon
+        elif role == Qt.DecorationRole and index.column() == 0:
+            return item.get_icon()
+
+        # Set the font
+        elif role == Qt.FontRole:
+            return item.get_font()
+
+        return None
 
     def setData(self, index, value, role=Qt.EditRole):
         """Handle editing of values in the tree."""
@@ -469,42 +515,6 @@ class JsonTreeModel(QAbstractItemModel):
 
     def columnCount(self, parent=QModelIndex()):
         return self.rootItem.columnCount()
-
-    def data(self, index, role):
-        if not index.isValid():
-            return None
-
-        item = index.internalPointer()
-
-        if role == Qt.DisplayRole:
-            return item.data(index.column())
-        elif role == Qt.ForegroundRole and index.column() == 2:
-            return item.font_color  # Return the custom font color
-
-        return None
-
-    def setData(self, index, value, role=Qt.EditRole):
-        if role == Qt.EditRole:
-            item = index.internalPointer()
-            return item.setData(index.column(), value)
-        return False
-
-    def flags(self, index):
-        """Allow editing and drag/drop reordering of dimensions."""
-        item = index.internalPointer()
-
-        if index.column() == 0:
-            if item.parentItem is None:  # Top-level dimensions
-                return (
-                    Qt.ItemIsSelectable
-                    | Qt.ItemIsEditable
-                    | Qt.ItemIsEnabled
-                    | Qt.ItemIsDragEnabled
-                    | Qt.ItemIsDropEnabled
-                )
-            else:  # Factors and layers
-                return Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled
-        return Qt.ItemIsSelectable | Qt.ItemIsEnabled
 
     def index(self, row, column, parent=QModelIndex()):
         """Create a QModelIndex for the specified row and column."""
