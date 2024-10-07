@@ -3,6 +3,7 @@ import re
 import glob
 from typing import List, Optional
 from qgis.core import (
+    QgsTask,
     QgsRectangle,
     QgsFeature,
     QgsGeometry,
@@ -19,13 +20,22 @@ from qgis.core import (
     QgsMessageLog,
     Qgis,
 )
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant, pyqtSignal
 import processing  # QGIS processing toolbox
 
 
-class StudyAreaProcessor:
+class StudyAreaProcessingTask(QgsTask):
+    # Signals for task lifecycle
+    job_queued = pyqtSignal()
+    job_started = pyqtSignal()
+    job_canceled = pyqtSignal()
+    # Custom signal to emit when the job is finished
+    job_finished = pyqtSignal(bool)
+    job_failed = pyqtSignal(str)  # Signal for task failure
+
     def __init__(
         self,
+        name: str,
         layer: QgsVectorLayer,
         field_name: str,
         working_dir: str,
@@ -33,8 +43,9 @@ class StudyAreaProcessor:
         epsg_code: Optional[int] = None,
     ):
         """
-        Initializes the StudyAreaProcessor class.
+        Initializes the StudyAreaProcessingTask.
 
+        :param name: The name of the task.
         :param layer: The vector layer containing study area features.
         :param field_name: The name of the field containing area names.
         :param working_dir: Directory path where outputs will be saved.
@@ -42,6 +53,7 @@ class StudyAreaProcessor:
         :param epsg_code: Optional EPSG code for the output CRS. If None, a UTM zone
                           is calculated based on layer extent or extent of selected features.
         """
+        super().__init__(name)
         self.layer: QgsVectorLayer = layer
         self.field_name: str = field_name
         self.working_dir: str = working_dir
@@ -70,6 +82,7 @@ class StudyAreaProcessor:
 
         # Determine the correct CRS and layer bounding box based on selected features
         selected_features = self.layer.selectedFeatures()
+        self.layer_bbox = QgsRectangle()
 
         if selected_features:
             # Calculate bounding box based on selected features only
@@ -95,6 +108,40 @@ class StudyAreaProcessor:
 
         # Reproject and align the transformed layer_bbox to a 100m grid and output crs
         self.layer_bbox = self.grid_aligned_bbox(self.layer_bbox)
+
+    def run(self) -> bool:
+        """
+        Runs the task in the background.
+        """
+        try:
+            self.process_study_area()
+            return True
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Task failed: {e}", tag="Geest", level=Qgis.Critical
+            )
+            self.job_failed.emit(str(e))
+            return False
+
+    def finished(self, result: bool) -> None:
+        """
+        Called when the task completes successfully.
+        """
+        if result:
+            QgsMessageLog.logMessage(
+                "Study Area Processing completed successfully.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            self.job_finished.emit(True)
+
+    def cancel(self) -> None:
+        """
+        Called when the task is canceled.
+        """
+        QgsMessageLog.logMessage(
+            "Study Area Processing was canceled.", tag="Geest", level=Qgis.Warning
+        )
 
     def process_study_area(self) -> None:
         """
@@ -162,7 +209,6 @@ class StudyAreaProcessor:
                     self.process_multipart_geometry(geom, normalized_name, area_name)
                 else:
                     self.process_singlepart_geometry(geom, normalized_name, area_name)
-
             except Exception as e:
                 # Log any unexpected errors during processing
                 invalid_feature_count += 1
@@ -171,6 +217,10 @@ class StudyAreaProcessor:
                     tag="Geest",
                     level=Qgis.Critical,
                 )
+
+            # Update progress (for example, as percentage)
+            progress = (valid_feature_count / self.layer.featureCount()) * 100
+            self.setProgress(progress)
 
         # Log the count of valid, fixed, and invalid features processed
         QgsMessageLog.logMessage(
@@ -541,7 +591,6 @@ class StudyAreaProcessor:
             "EXTRA": "-co NBITS=1",
             "OUTPUT": mask_filepath,
         }
-        # Run the rasterize algorithm
         processing.run("gdal:rasterize", params)
         QgsMessageLog.logMessage(
             f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info

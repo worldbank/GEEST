@@ -23,7 +23,8 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import resources_path
-from geest.core.study_area import StudyAreaProcessor
+from geest.core.study_area import StudyAreaProcessingTask
+from geest.core.workflow_queue_manager import WorkflowQueueManager
 
 
 class SetupPanel(QWidget):
@@ -32,6 +33,9 @@ class SetupPanel(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("GEEST")
+        # For running study area processing in a separate thread
+        self.queue_manager = WorkflowQueueManager(pool_size=1)
+
         self.working_dir = ""
         self.settings = (
             QSettings()
@@ -249,10 +253,19 @@ class SetupPanel(QWidget):
 
             # Create the processor instance and process the features
             try:
-                processor = StudyAreaProcessor(
-                    layer=layer, field_name=field_name, working_dir=self.working_dir
+                processor = StudyAreaProcessingTask(
+                    name="Study Area Processing",
+                    layer=layer,
+                    field_name=field_name,
+                    working_dir=self.working_dir,
                 )
-                processor.process_study_area()
+
+                debug_env = int(os.getenv("GEEST_DEBUG", 0))
+                if debug_env:
+                    processor.process_study_area()
+                else:
+                    self.queue_manager.add_task(processor)
+                    self.queue_manager.start_processing()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
                 return
