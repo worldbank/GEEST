@@ -67,8 +67,9 @@ class SetupPanel(QWidget):
         self.dir_button = QToolButton()
         self.dir_button.setText("📂")
         self.dir_button.clicked.connect(self.select_directory)
-        dir_layout.addWidget(self.dir_display)
         dir_layout.addWidget(self.dir_button)
+        dir_layout.addWidget(self.dir_display)
+
         layout.addLayout(dir_layout)
 
         # Existing project label
