@@ -541,7 +541,6 @@ class StudyAreaProcessor:
             "EXTRA": "-co NBITS=1",
             "OUTPUT": mask_filepath,
         }
-        # Run the rasterize algorithm
         processing.run("gdal:rasterize", params)
         QgsMessageLog.logMessage(
             f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info
