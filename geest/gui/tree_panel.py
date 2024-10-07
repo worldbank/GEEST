@@ -526,16 +526,16 @@ class TreePanel(QWidget):
         """
         task = None
         if role == item.role and role == "layer":
-            task = self.queue_manager.add_task(item)
+            task = self.queue_manager.add_workflow(item)
         if role == item.role and role == "factor":
             item.data(3)["Analysis Mode"] = "Factor Aggregation"
-            task = self.queue_manager.add_task(item)
+            task = self.queue_manager.add_workflow(item)
         if role == item.role and role == "dimension":
             item.data(3)["Analysis Mode"] = "Dimension Aggregation"
-            task = self.queue_manager.add_task(item)
+            task = self.queue_manager.add_workflow(item)
         if role == item.role and role == "analysis":
             item.data(3)["Analysis Mode"] = "Analysis Aggregation"
-            task = self.queue_manager.add_task(item)
+            task = self.queue_manager.add_workflow(item)
         if task is None:
             return
 

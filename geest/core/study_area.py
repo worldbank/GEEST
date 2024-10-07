@@ -25,8 +25,13 @@ import processing  # QGIS processing toolbox
 
 
 class StudyAreaProcessingTask(QgsTask):
-    taskCompleted = pyqtSignal()  # Signal for task completion
-    taskFailed = pyqtSignal(str)  # Signal for task failure
+    # Signals for task lifecycle
+    job_queued = pyqtSignal()
+    job_started = pyqtSignal()
+    job_canceled = pyqtSignal()
+    # Custom signal to emit when the job is finished
+    job_finished = pyqtSignal(bool)
+    job_failed = pyqtSignal(str)  # Signal for task failure
 
     def __init__(
         self,
@@ -115,7 +120,7 @@ class StudyAreaProcessingTask(QgsTask):
             QgsMessageLog.logMessage(
                 f"Task failed: {e}", tag="Geest", level=Qgis.Critical
             )
-            self.taskFailed.emit(str(e))
+            self.job_failed.emit(str(e))
             return False
 
     def finished(self, result: bool) -> None:
@@ -128,7 +133,7 @@ class StudyAreaProcessingTask(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.taskCompleted.emit()
+            self.job_finished.emit(True)
 
     def cancel(self) -> None:
         """

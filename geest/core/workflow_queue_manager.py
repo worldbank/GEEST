@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QObject
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsTask
 from .workflow_queue import WorkflowQueue
 from .workflow_job import WorkflowJob
 from geest.gui.treeview import JsonTreeItem
@@ -25,10 +25,33 @@ class WorkflowQueueManager(QObject):
         self.workflow_queue.processing_completed.connect(self.on_processing_completed)
         self.workflow_queue.status_message.connect(self.log_status_message)
 
-    def add_task(self, item: JsonTreeItem) -> None:
+    def add_task(self, task: QgsTask) -> None:
+        """
+        Add a QgsTask to the queue.
+
+        Use this when you just want to run any QgsTask subclass in tbe queue.
+
+        Make sure your class emites the appropriate signals to update the UI:
+            job_finished = pyqtSignal(bool)
+            job_failed = pyqtSignal(str)
+
+        See Also add_workflow method below
+        .
+        :param task: A QgsTask object representing the task
+        """
+        # ⭐️ Now we are passing the item reference to the WorkflowJob
+        #    any changes made to the item will be reflected in the tree directly
+
+        self.workflow_queue.add_job(task)
+        QgsMessageLog.logMessage(f"Task added", tag="Geest", level=Qgis.Info)
+        return task
+
+    def add_workflow(self, item: JsonTreeItem) -> None:
         """
         Add a task to the WorkflowQueue for processing using the item provided.
+
         Internally uses the WorkflowFactory to create the appropriate workflow.
+
         :param item: A reference to a JsonTreeItem object representing the task
         """
         # ⭐️ Now we are passing the item reference to the WorkflowJob
