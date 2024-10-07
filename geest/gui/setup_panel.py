@@ -23,7 +23,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import resources_path
-from geest.core.study_area import StudyAreaProcessor
+from geest.core.study_area import StudyAreaProcessingTask
 
 
 class SetupPanel(QWidget):
@@ -249,8 +249,11 @@ class SetupPanel(QWidget):
 
             # Create the processor instance and process the features
             try:
-                processor = StudyAreaProcessor(
-                    layer=layer, field_name=field_name, working_dir=self.working_dir
+                processor = StudyAreaProcessingTask(
+                    name="Study Area Processing",
+                    layer=layer,
+                    field_name=field_name,
+                    working_dir=self.working_dir,
                 )
                 processor.process_study_area()
             except Exception as e:
