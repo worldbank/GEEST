@@ -74,20 +74,10 @@ class WorkflowBase(ABC):
 
         :return: The path to the workflow directory
         """
-        workflow_dir = os.path.join(
-            self.working_directory,
-            *subdirs,
-        )
-        if not os.path.exists(workflow_dir):
-            try:
-                os.makedirs(workflow_dir)
-                QgsMessageLog.logMessage(
-                    f"Created study area directory: {workflow_dir}",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
-            except Exception as e:
-                QgsMessageLog.logMessage(
-                    f"Error creating directory: {e}", tag="Geest", level=Qgis.Critical
-                )
-        return workflow_dir
+        paths = self.item.getPaths()
+        directory = os.path.join(self.workflow_directory, *paths)
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        return directory

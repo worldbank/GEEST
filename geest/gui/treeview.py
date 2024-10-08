@@ -115,6 +115,32 @@ class JsonTreeItem:
             return self.factor_font
         return QFont()
 
+    def getPaths(self) -> []:
+        """Return the path of the item in the tree in the form dimension/factor/indicator.
+
+        :return: A list of strings representing the path of the item in the tree.
+        """
+        path = []
+        if self.isIndicator():
+            path.append(
+                self.parentItem.parentItem.itemData[3]
+                .get("id", "")
+                .lower()
+                .replace(" ", "_")
+            )
+            path.append(
+                self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
+            )
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+        elif self.isFactor():
+            path.append(
+                self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
+            )
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+        if self.idDimension():
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+        return path
+
     def getIndicatorAttributes(self):
         """Return the dict of indicators (or layers) under this factor."""
         attributes = {}

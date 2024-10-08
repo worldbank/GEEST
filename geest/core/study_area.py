@@ -25,6 +25,24 @@ import processing  # QGIS processing toolbox
 
 
 class StudyAreaProcessingTask(QgsTask):
+    """
+    A QgsTask subclass for processing study area features.
+
+    It works through the (multi)part geometries in the input layer, creating bounding boxes and masks.
+    The masks are stored as individual tif files and then a vrt file is created to combine them.
+    The grids are in two forms - the entire bounding box and the individual parts.
+    The grids are aligned to 100m intervals and saved as vector features in a GeoPackage.
+    Any invalid geometries are discarded, and fixed geometries are processed.
+
+
+
+    Args:
+        QgsTask (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     # Signals for task lifecycle
     job_queued = pyqtSignal()
     job_started = pyqtSignal()
