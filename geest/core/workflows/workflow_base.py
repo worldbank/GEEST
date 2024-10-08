@@ -75,7 +75,7 @@ class WorkflowBase(ABC):
         :return: The path to the workflow directory
         """
         paths = self.item.getPaths()
-        directory = os.path.join(self.workflow_directory, *paths)
+        directory = os.path.join(self.working_directory, *paths)
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):
             os.makedirs(directory)

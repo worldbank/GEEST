@@ -137,7 +137,7 @@ class JsonTreeItem:
                 self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
             )
             path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
-        if self.idDimension():
+        if self.isDimension():
             path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
         return path
 
