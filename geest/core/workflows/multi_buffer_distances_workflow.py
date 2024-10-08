@@ -76,7 +76,19 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         self.workflow_directory = self._create_workflow_directory()
 
         # loop through self.bboxes_layer and the self.areas_layer  and create a raster mask for each feature
-        index_score = self.attributes["Default Index Score"]
+        distances = self.attributes[
+            "Multi Buffer Distances"
+        ]  # in the units specified below
+        distance_units = self.attributes[
+            "Multi Buffer Distances Distance Units"
+        ]  # distance or time
+        travel_mode = self.attributes[
+            "Multi Buffer Distances Travel Mode"
+        ]  # walking, driving
+        points_layer = self.attributes[
+            "Multi Buffer Distances Points of Interest Layer"
+        ]
+
         for feature in self.areas_layer.getFeatures():
             if (
                 self.feedback.isCanceled()
@@ -93,11 +105,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             area_name = feature.attribute("area_name")
 
             mask_name = f"{self.layer_id}_{area_name}"
-            self.create_raster(
+            self.create_multibuffer(
                 geom=geom,
                 aligned_box=aligned_box,
                 mask_name=mask_name,
-                index_score=index_score,
+                distances=distances,
+                distance_units=distance_units,
+                travel_mode=travel_mode,
+                points_layer=points_layer,
             )
         # TODO Jeff copy create_raster_vrt from study_area.py
         # Create and add the VRT of all generated raster masks if in raster mode
@@ -107,28 +122,28 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
         )
         self.attributes["Indicator Result File"] = vrt_filepath
-        self.attributes["Indicator Result"] = (
-            "Use Default Index Score Workflow Completed"
-        )
-        self.attributes["XXXXXXXXXXXXXXXXXXXXXXXX"] = "XXXXXXXX"
+        self.attributes["Indicator Result"] = f"{self.workflow_name} Workflow Completed"
         QgsMessageLog.logMessage(
-            f"self.attributes after Use Default Index Score workflow\n\n {self.attributes}",
+            f"self.attributes after {self.workflow_name} workflow\n\n {self.attributes}",
             tag="Geest",
             level=Qgis.Info,
         )
         QgsMessageLog.logMessage(
-            "Use Default Index Score workflow workflow completed",
+            f"{self.workflow_name} workflow completed",
             tag="Geest",
             level=Qgis.Info,
         )
         return True
 
-    def create_raster(
+    def create_multibuffer(
         self,
         geom: QgsGeometry,
         aligned_box: QgsGeometry,
         mask_name: str,
-        index_score: float,
+        distances: [],
+        distance_units: str,
+        travel_mode: str,
+        points_layer: str,
     ) -> None:
         """
         Creates a byte raster mask for a single geometry.
@@ -136,6 +151,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         :param geom: Geometry to be rasterized.
         :param aligned_box: Aligned bounding box geometry for the geometry.
         :param mask_name: Name for the output raster file.
+        :param distances --------j
         """
         if self.feedback.isCanceled():  # Check for cancellation before starting
             QgsMessageLog.logMessage(
