@@ -270,13 +270,17 @@ class SetupPanel(QWidget):
                 QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
                 return
             try:
+                # This checks we can access Open Route Service
+                # and that access works in the background in another thread
                 checker = OrsCheckerTask(
                     description="ORS Checker Task",
-                    url="https://api.openrouteservice.org/health",
+                    url="https://api.openrouteservice.org/",
                 )
                 if debug_env:
+                    # Non threaded version
                     checker.make_synchronous_request()
                 else:
+                    # Threaded version
                     self.queue_manager.add_task(checker)
                     self.queue_manager.start_processing()
             except Exception as e:

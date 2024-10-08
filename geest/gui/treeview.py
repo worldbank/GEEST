@@ -26,7 +26,15 @@ from geest.utilities import resources_path
 
 
 class JsonTreeItem:
-    """A class representing a node in the tree."""
+    """A class representing a node in the tree.
+
+    🚩  TAKE NOTE: 🚩
+
+    This class may NOT inherit from QObject, as it has to remain
+    thread safe and not be tied to the main thread. Items are passed to
+    workflow threads and must be able to be manipulated in the background.
+
+    """
 
     def __init__(self, data, role, parent=None):
         self.parentItem = parent
