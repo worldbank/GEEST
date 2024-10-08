@@ -11,7 +11,7 @@ from qgis.core import (
     QgsFeature,
     QgsPointXY,
 )
-from qgis.PyQt.QtCore import QVariant, QEventLoop
+from qgis.PyQt.QtCore import QVariant, QEventLoop, QTimer
 import processing
 from geest.core.ors_client import ORSClient
 
@@ -30,6 +30,10 @@ class MultiBufferCreator:
         self.subset_size = subset_size
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = os.getenv("ORS_API_KEY")
+        # Create the masked API key before using it in the f-string
+        self.masked_api_key = (
+            self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
+        )
         self.temp_layers = []  # Store intermediate layers
 
         # Create an event loop to handle asynchronous responses
@@ -53,13 +57,23 @@ class MultiBufferCreator:
         :param crs: Coordinate reference system (default is WGS84)
         :return: QgsVectorLayer containing the buffers as polygons
         """
+        QgsMessageLog.logMessage(
+            f"Using ORS API key: {self.masked_api_key}",
+            "Geest",
+            Qgis.Info,
+        )
         output_dir = os.path.dirname(output_path)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         # Prepare to collect intermediate layers
         features = list(point_layer.getFeatures())
+        QgsMessageLog.logMessage(
+            f"Creating buffers for {len(features)} points", "Geest", Qgis.Info
+        )
         total_features = len(features)
+
+        self.ors_client.request_finished.connect(self._handle_ors_response)
 
         # Process features in subsets to handle large datasets
         for i in range(0, total_features, self.subset_size):
@@ -67,26 +81,35 @@ class MultiBufferCreator:
             subset_layer = self._create_subset_layer(subset_features, point_layer, crs)
 
             # Connect to the ORSClient's request_finished signal to handle responses
-            self.ors_client.request_finished.connect(self._handle_ors_response)
 
             # Make API calls using ORSClient for the subset
             try:
                 self._fetch_isochrones(subset_layer, mode, measurement)
+                QgsMessageLog.logMessage(
+                    f"Waiting for response for subset {i + 1} to {min(i + self.subset_size, total_features)}",
+                    "Geest",
+                    Qgis.Info,
+                )
 
                 # Start the event loop to wait for the asynchronous response
-                self.loop.exec_()
-
+                if not self.loop.isRunning():
+                    self.loop.exec_()
+                QgsMessageLog.logMessage(
+                    f"Response received for subset {i + 1} to {min(i + self.subset_size, total_features)}",
+                    "Geest",
+                    Qgis.Info,
+                )
                 # Log progress using QgsMessageLog
                 QgsMessageLog.logMessage(
                     f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
-                    "MultiBufferCreator",
+                    "Geest",
                     Qgis.Info,
                 )
 
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error processing subset {i + 1} to {min(i + self.subset_size, total_features)}: {e}",
-                    "MultiBufferCreator",
+                    "Geest",
                     Qgis.Critical,
                 )
                 continue
@@ -97,7 +120,7 @@ class MultiBufferCreator:
             self._create_bands(merged_layer, output_path, crs)
         else:
             QgsMessageLog.logMessage(
-                "No isochrones were created.", "MultiBufferCreator", Qgis.Warning
+                "No isochrones were created.", "Geest", Qgis.Warning
             )
 
     def _create_subset_layer(self, subset_features, point_layer, crs):
@@ -138,6 +161,7 @@ class MultiBufferCreator:
 
         # Make the request to ORS API using ORSClient
         self.ors_client.make_request(mode, params)
+        QTimer.singleShot(10000, self.loop.quit)
 
     def _handle_ors_response(self, response):
         """
@@ -146,21 +170,27 @@ class MultiBufferCreator:
         :param response: JSON response from the ORS API
         :return: None
         """
+        QgsMessageLog.logMessage(
+            f"Received response from ORS API: {response}", "Geest", Qgis.Info
+        )
         if response:
             try:
                 # Create isochrone layer from the ORS response
                 isochrone_layer = self._create_isochrone_layer(response)
+                QgsMessageLog.logMessage(
+                    f"Isochrone layer created: {isochrone_layer}", "Geest", Qgis.Info
+                )
                 self.temp_layers.append(isochrone_layer)
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error creating isochrone layer: {e}",
-                    "MultiBufferCreator",
+                    "Geest",
                     Qgis.Critical,
                 )
         else:
             QgsMessageLog.logMessage(
                 "No response or invalid response from ORS API.",
-                "MultiBufferCreator",
+                "Geest",
                 Qgis.Critical,
             )
 
@@ -332,6 +362,6 @@ class MultiBufferCreator:
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
         QgsMessageLog.logMessage(
             f"Multi-buffer layer created at {output_path}",
-            "MultiBufferCreator",
+            "Geest",
             Qgis.Info,
         )
