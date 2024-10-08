@@ -23,7 +23,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import resources_path
-from geest.core.study_area import StudyAreaProcessingTask
+from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
 from geest.core.workflow_queue_manager import WorkflowQueueManager
 
 
@@ -252,6 +252,7 @@ class SetupPanel(QWidget):
                 return
 
             # Create the processor instance and process the features
+            debug_env = int(os.getenv("GEEST_DEBUG", 0))
             try:
                 processor = StudyAreaProcessingTask(
                     name="Study Area Processing",
@@ -260,7 +261,6 @@ class SetupPanel(QWidget):
                     working_dir=self.working_dir,
                 )
 
-                debug_env = int(os.getenv("GEEST_DEBUG", 0))
                 if debug_env:
                     processor.process_study_area()
                 else:
@@ -268,4 +268,17 @@ class SetupPanel(QWidget):
                     self.queue_manager.start_processing()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
+                return
+            try:
+                checker = OrsCheckerTask(
+                    description="ORS Checker Task",
+                    url="https://api.openrouteservice.org/health",
+                )
+                if debug_env:
+                    checker.make_synchronous_request()
+                else:
+                    self.queue_manager.add_task(checker)
+                    self.queue_manager.start_processing()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Error checking ORS service: {e}")
                 return
