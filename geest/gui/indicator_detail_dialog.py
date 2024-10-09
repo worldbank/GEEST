@@ -30,7 +30,7 @@ from geest.utilities import resources_path
 from .indicator_config_widget import IndicatorConfigWidget
 
 
-class LayerDetailDialog(QDialog):
+class IndicatorDetailDialog(QDialog):
     """Dialog to show layer properties, with a Markdown editor and preview for the 'indicator' field."""
 
     # Signal to emit the updated data as a dictionary
@@ -271,7 +271,7 @@ class LayerDetailDialog(QDialog):
             # In editing mode, the edit table is canonical
             updated_data = self.get_updated_data_from_table()
         else:
-            # Otherwise, the Markdown editor is canonical
+            # Otherwise, the custom widget is canonical
             updated_data = self.config_widget.attributes_dict
 
         # Set 'Analysis Mode' based on the selected radio button

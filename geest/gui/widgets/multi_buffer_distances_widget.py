@@ -65,7 +65,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.increments_input = QLineEdit("")
             self.travel_increments_layout.addWidget(self.increments_label)
             self.travel_increments_layout.addWidget(self.increments_input)
-            if self.attributes.get("Multi Buffer Travel Increments", False):
+            if self.attributes.get("Multi Buffer Travel Distances", False):
                 self.increments_input.setText(
                     self.attributes["Multi Buffer Travel Distances"]
                 )
@@ -79,6 +79,14 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.main_layout.addWidget(self.measurement_group)
             self.main_layout.addLayout(self.travel_increments_layout)
             self.layout.addLayout(self.main_layout)
+            # Emit the data_changed signal when any widget is changed
+            self.layer_combo.currentIndexChanged.connect(self.update_data)
+            self.time_radio.toggled.connect(self.update_data)
+            self.distance_radio.toggled.connect(self.update_data)
+            self.walking_radio.toggled.connect(self.update_data)
+            self.driving_radio.toggled.connect(self.update_data)
+            self.increments_input.textChanged.connect(self.update_data)
+
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
@@ -101,11 +109,11 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.attributes["Multi Buffer Travel Mode"] = "Walking"
         else:
             self.attributes["Multi Buffer Travel Mode"] = "Driving"
-        # if self.distance_radio.isChecked():
-        #    self.attributes["Multi Buffer Travel Units"] = "Distance"
-        # else:
-        #    self.attributes["Multi Buffer Travel Units"] = "Time"
-        # self.attributes["Multi Buffer Travel Distances"] = self.increments_input.text()
+        if self.distance_radio.isChecked():
+            self.attributes["Multi Buffer Travel Units"] = "Distance"
+        else:
+            self.attributes["Multi Buffer Travel Units"] = "Time"
+        self.attributes["Multi Buffer Travel Distances"] = self.increments_input.text()
         return self.attributes
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:

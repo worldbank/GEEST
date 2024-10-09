@@ -21,7 +21,7 @@ from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject
 from functools import partial
 from .treeview import CustomTreeView, JsonTreeModel
 from .setup_panel import SetupPanel
-from .layer_detail_dialog import LayerDetailDialog
+from .indicator_detail_dialog import IndicatorDetailDialog
 from geest.utilities import resources_path
 from geest.core import setting
 from geest.core.workflow_queue_manager import WorkflowQueueManager
@@ -455,7 +455,7 @@ class TreePanel(QWidget):
         layer_data = item.data(3)  # Column 3: layer data (stored as a dict)
 
         # Create and show the LayerDetailDialog
-        dialog = LayerDetailDialog(
+        dialog = IndicatorDetailDialog(
             layer_name, layer_data, item, editing=editing, parent=self
         )
 
