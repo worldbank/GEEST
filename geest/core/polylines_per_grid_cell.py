@@ -155,8 +155,6 @@ class RasterPolylineGridScore:
             aligned_bbox.yMaximum(),
         )  # Extent of the aligned bbox
 
-        print(f"Extent: {xmin}, {xmax}, {ymin}, {ymax}")
-
         # Rasterize the clipped grid layer to generate the raster
         # output_file = os.path.join(output_dir, "rasterized_grid.tif")
         rasterize_params = {
