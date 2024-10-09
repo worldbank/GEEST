@@ -149,8 +149,8 @@
    <item row="5" column="0">
     <widget class="QComboBox" name="previous_project_combo"/>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QRadioButton" name="radioButton_2">
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_10">
      <property name="text">
       <string>Start a new project</string>
      </property>
@@ -173,13 +173,6 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QRadioButton" name="radioButton">
-     <property name="text">
-      <string>Use a previously created  project folder</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0" colspan="2">
     <widget class="QLabel" name="label_2">
      <property name="text">
@@ -193,6 +186,13 @@
      </property>
      <property name="wordWrap">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Use a previously created  project folder</string>
      </property>
     </widget>
    </item>

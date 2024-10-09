@@ -65,22 +65,54 @@ class SetupPanel(FORM_CLASS, QWidget):
         self.continue_button.clicked.connect(self.on_continue)
 
         # Set the last used working directory from QSettings
-        last_used_dir = self.settings.value("last_working_directory", "")
-        if last_used_dir and os.path.exists(last_used_dir):
-            self.working_dir = last_used_dir
-            # self.dir_display.setText(self.working_dir)
-            self.update_for_working_directory()
+        recent_projects = self.settings.value("recent_projects", [])
+        self.previous_project_combo.addItems(
+            reversed(recent_projects)
+        )  # Add recent projects to the combo
+        self.working_dir = self.previous_project_combo.currentText()
+        # self.dir_display.setText(self.working_dir)
+        self.update_for_working_directory()
+
+    def update_recent_projects(self, directory):
+        """Updates the recent projects list with the new directory."""
+        recent_projects = self.settings.value("recent_projects", [])
+
+        if directory in recent_projects:
+            recent_projects.remove(
+                directory
+            )  # Remove if already in the list (to reorder)
+
+        recent_projects.insert(0, directory)  # Add to the top of the list
+
+        # Limit the list to a certain number of recent projects (e.g., 5)
+        if len(recent_projects) > 5:
+            recent_projects = recent_projects[:5]
+
+        # Save back to QSettings
+        self.settings.setValue("recent_projects", recent_projects)
+
+        # Update the combo box
+        self.previous_project_combo.clear()
+        self.previous_project_combo.addItems(reversed(recent_projects))
 
     def select_directory(self):
-        """Opens a file dialog to select the working directory and updates the UI based on its contents."""
         directory = QFileDialog.getExistingDirectory(
             self, "Select Working Directory", self.working_dir
         )
         if directory:
             self.working_dir = directory
-            self.previous_project_combo.addItem(directory)
+            self.update_recent_projects(directory)  # Update recent projects
             self.settings.setValue("last_working_directory", directory)
             self.update_for_working_directory()
+
+    def create_new_project_folder(self):
+        directory = QFileDialog.getExistingDirectory(
+            self, "Create New Project Folder", self.working_dir
+        )
+        if directory:
+            self.working_dir = directory
+            self.update_recent_projects(directory)  # Update recent projects
+            self.settings.setValue("last_working_directory", directory)
 
     def update_for_working_directory(self):
         """
@@ -146,7 +178,8 @@ class SetupPanel(FORM_CLASS, QWidget):
 
     def on_continue(self):
         """Triggered when the Continue button is pressed."""
-        model_path = os.path.join(self.working_dir, "model.json")
+        directory = self.previous_project_combo.currentText()
+        model_path = os.path.join(directory, "model.json")
         if os.path.exists(model_path):
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
