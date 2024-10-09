@@ -2,15 +2,8 @@ import os
 import shutil
 from PyQt5.QtWidgets import (
     QWidget,
-    QLabel,
-    QVBoxLayout,
-    QPushButton,
-    QToolButton,
-    QHBoxLayout,
     QFileDialog,
     QMessageBox,
-    QSpacerItem,
-    QSizePolicy,
 )
 from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
@@ -19,15 +12,23 @@ from qgis.core import (
     QgsVectorLayer,
     QgsProject,
     QgsApplication,
+    QgsMessageLog,
+    Qgis,
+    QgsProject,
 )
+from qgis.PyQt import uic
+
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import resources_path
 from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
 from geest.core.workflow_queue_manager import WorkflowQueueManager
+from geest.utilities import get_ui_class, resources_path
+
+FORM_CLASS = get_ui_class("setup_panel_base.ui")
 
 
-class SetupPanel(QWidget):
+class SetupPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
     def __init__(self):
@@ -40,111 +41,34 @@ class SetupPanel(QWidget):
         self.settings = (
             QSettings()
         )  # Initialize QSettings to store and retrieve settings
+        # Dynamically load the .ui file
+        self.setupUi(self)
+        QgsMessageLog.logMessage(f"Loading setup panel", tag="Geest", level=Qgis.Info)
         self.initUI()
 
     def initUI(self):
-        layout = QVBoxLayout()
-
-        # Title
-        self.banner_label = QLabel()
-        self.banner_label.setScaledContents(True)  # Allow image scaling
-        self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.banner_label.setPixmap(
             QPixmap(resources_path("resources", "geest-banner.png"))
         )
-        layout.addWidget(self.banner_label)
-        self.title_label = QLabel(
-            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
-            self,
-        )
-        self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
-
-        # Directory Selector for Working Directory
-        self.dir_label = QLabel(
-            "Working Directory: This folder will store all the outputs for your analysis."
-        )
-        layout.addWidget(self.dir_label)
-
-        dir_layout = QHBoxLayout()
-        self.dir_display = QLabel("Choose a working directory")
-        self.dir_button = QToolButton()
-        self.dir_button.setText("📂")
         self.dir_button.clicked.connect(self.select_directory)
-        dir_layout.addWidget(self.dir_button)
-        dir_layout.addWidget(self.dir_display)
-
-        layout.addLayout(dir_layout)
-
-        # Existing project label
-        self.existing_project_label = QLabel(
-            "This directory contains an existing project."
-        )
-        self.existing_project_label.setVisible(False)
-        layout.addWidget(self.existing_project_label)
-
-        # Study Area Combobox - Filtered to polygon/multipolygon layers
-        self.study_area_label = QLabel("Study Area Layer:")
-        layout.addWidget(self.study_area_label)
-
         self.layer_combo = QgsMapLayerComboBox()
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        layout.addWidget(self.layer_combo)
-
-        # Area Name Field ComboBox
-        self.area_name_label = QLabel("Area Name Field:")
-        layout.addWidget(self.area_name_label)
 
         self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         self.field_combo.setFilters(QgsFieldProxyModel.String)
-        layout.addWidget(self.field_combo)
 
         # Link the map layer combo box with the field combo box
         self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
 
-        # Easter egg label and button for adding the QGIS world map
-        self.world_map_label = QLabel(
-            "No boundaries layer? Add the default QGIS world map to your canvas! Be sure to select just the country or areas of interest before pressing continue."
-        )
-        self.world_map_label.setWordWrap(True)
-        self.world_map_button = QPushButton("Add World Map")
         self.world_map_button.clicked.connect(self.add_world_map)
-        self.world_map_label.setVisible(False)
-        self.world_map_button.setVisible(False)
-        layout.addWidget(self.world_map_label)
-        layout.addWidget(self.world_map_button)
 
-        # Text for analysis preparation
-        self.preparation_label = QLabel(
-            "After selecting your study area layer, we will prepare the analysis region."
-        )
-        layout.addWidget(self.preparation_label)
-
-        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        layout.addItem(spacer)
-
-        # Description
-        self.description_label = QLabel(
-            "This plugin is built with support from the Canada Clean Energy and Forest Climate Facility (CCEFCFy), "
-            "the Geospatial Operational Support Team (GOST, DECSC) for the project "
-            "'Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector'.",
-            self,
-        )
-        self.description_label.setWordWrap(True)
-        layout.addWidget(self.description_label)
-
-        # Continue Button
-        self.continue_button = QPushButton("Continue")
         self.continue_button.clicked.connect(self.on_continue)
-        layout.addWidget(self.continue_button)
-
-        self.setLayout(layout)
 
         # Set the last used working directory from QSettings
         last_used_dir = self.settings.value("last_working_directory", "")
         if last_used_dir and os.path.exists(last_used_dir):
             self.working_dir = last_used_dir
-            self.dir_display.setText(self.working_dir)
+            # self.dir_display.setText(self.working_dir)
             self.update_for_working_directory()
 
     def select_directory(self):
@@ -154,7 +78,7 @@ class SetupPanel(QWidget):
         )
         if directory:
             self.working_dir = directory
-            self.dir_display.setText(directory)
+            self.previous_project_combo.addItem(directory)
             self.settings.setValue("last_working_directory", directory)
             self.update_for_working_directory()
 
@@ -167,32 +91,35 @@ class SetupPanel(QWidget):
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
             # Existing project
-            self.existing_project_label.setVisible(True)
-            self.study_area_label.setVisible(False)
-            self.layer_combo.setVisible(False)
-            self.area_name_label.setVisible(False)
-            self.field_combo.setVisible(False)
-            self.preparation_label.setVisible(False)
-            self.world_map_label.setVisible(False)
-            self.world_map_button.setVisible(False)
+            # self.existing_project_label.setVisible(True)
+            # self.study_area_label.setVisible(False)
+            # self.layer_combo.setVisible(False)
+            # self.area_name_label.setVisible(False)
+            # self.field_combo.setVisible(False)
+            # self.preparation_label.setVisible(False)
+            # self.world_map_label.setVisible(False)
+            # self.world_map_button.setVisible(False)
+            pass
         else:
             # New project
-            self.existing_project_label.setVisible(False)
-            self.study_area_label.setVisible(True)
-            self.layer_combo.setVisible(True)
-            self.area_name_label.setVisible(True)
-            self.field_combo.setVisible(True)
-            self.preparation_label.setVisible(True)
+            # self.existing_project_label.setVisible(False)
+            # self.study_area_label.setVisible(True)
+            # self.layer_combo.setVisible(True)
+            # self.area_name_label.setVisible(True)
+            # self.field_combo.setVisible(True)
+            # self.preparation_label.setVisible(True)
 
             # Check if there are any polygon layers in the project
             if not self.layer_combo.count():
                 # No available polygon layers, show world map option
-                self.world_map_label.setVisible(True)
-                self.world_map_button.setVisible(True)
+                # self.world_map_label.setVisible(True)
+                # self.world_map_button.setVisible(True)
+                pass
             else:
                 # Layers available, hide world map option
-                self.world_map_label.setVisible(False)
-                self.world_map_button.setVisible(False)
+                # self.world_map_label.setVisible(False)
+                # self.world_map_button.setVisible(False)
+                pass
 
     def add_world_map(self):
         """Adds the built-in QGIS world map to the canvas."""
