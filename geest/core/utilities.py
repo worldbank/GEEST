@@ -21,6 +21,12 @@ __revision__ = "$Format:%H$"
 from math import floor
 import os
 import sys
+from qgis.core import (
+    QgsRectangle,
+    QgsCoordinateTransform,
+    QgsCoordinateReferenceSystem,
+    QgsProject,
+)
 
 
 class CoreUtils:
@@ -112,3 +118,67 @@ def calculate_cardinality(angle):
     index = int(floor(bearing / direction_interval))
     index %= direction_count
     return direction_list[index]
+
+
+class GridAligner:
+    def __init__(self, grid_size: int = 100):
+        """
+        Initializes the GridAligner class with grid size.
+
+        :param grid_size: The size of the grid for alignment (default is 100m).
+        """
+        self.grid_size = grid_size  # The size of the grid (default is 100m)
+
+    def align_bbox(
+        self, bbox: QgsRectangle, study_area_bbox: QgsRectangle = None
+    ) -> QgsRectangle:
+        """
+        Aligns the bounding box to a grid, assuming the bounding box is already in the correct CRS.
+
+        :param bbox: The bounding box to be aligned.
+        :param study_area_bbox: The bounding box of the study area to define the grid origin. If None, it defaults to the bounding box itself.
+        :return: A new bounding box aligned to the grid.
+        """
+
+        # If no study area bbox is provided, use the bbox itself
+        if study_area_bbox is None:
+            study_area_bbox = bbox
+
+        # Calculate the study area origin (lower-left corner) based on the provided bounding box or default to bbox
+        study_area_origin_x = (
+            int(study_area_bbox.xMinimum() // self.grid_size) * self.grid_size
+        )
+        study_area_origin_y = (
+            int(study_area_bbox.yMinimum() // self.grid_size) * self.grid_size
+        )
+
+        # Align bbox to the grid based on the study area origin
+        x_min = (
+            study_area_origin_x
+            + int((bbox.xMinimum() - study_area_origin_x) // self.grid_size)
+            * self.grid_size
+        )
+        y_min = (
+            study_area_origin_y
+            + int((bbox.yMinimum() - study_area_origin_y) // self.grid_size)
+            * self.grid_size
+        )
+        x_max = (
+            study_area_origin_x
+            + (int((bbox.xMaximum() - study_area_origin_x) // self.grid_size) + 1)
+            * self.grid_size
+        )
+        y_max = (
+            study_area_origin_y
+            + (int((bbox.yMaximum() - study_area_origin_y) // self.grid_size) + 1)
+            * self.grid_size
+        )
+
+        # Offset by grid size to ensure the grid covers the entire geometry
+        y_min -= self.grid_size
+        y_max += self.grid_size
+        x_min -= self.grid_size
+        x_max += self.grid_size
+
+        # Return the aligned bbox
+        return QgsRectangle(x_min, y_min, x_max, y_max)

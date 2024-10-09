@@ -12,11 +12,13 @@ from qgis.core import (
     QgsRectangle,
     QgsRasterLayer,
     QgsProject,
+    QgsCoordinateReferenceSystem,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.gui.treeview import JsonTreeItem
+from geest.core.utilities import GridAligner
 
 
 class DefaultIndexScoreWorkflow(WorkflowBase):
@@ -38,6 +40,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         self.project_base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../..")
         )
+
+        # Initialize GridAligner with grid size
+        self.grid_aligner = GridAligner(grid_size=100)
 
     def do_execute(self):
         """
@@ -133,7 +138,11 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             )
             return
 
-        aligned_box = QgsRectangle(aligned_box.boundingBox())
+        # Align the bounding box using GridAligner before proceeding
+        aligned_bbox = self.grid_aligner.align_bbox(
+            geom.boundingBox(), self.areas_layer.extent()
+        )
+
         mask_filepath = os.path.join(self.workflow_directory, f"{mask_name}.tif")
         index_score = (self.attributes["Default Index Score"] / 100) * 5
 
@@ -166,8 +175,8 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "UNITS": 1,
             "WIDTH": x_res,
             "HEIGHT": y_res,
-            "EXTENT": f"{aligned_box.xMinimum()},{aligned_box.xMaximum()},"
-            f"{aligned_box.yMinimum()},{aligned_box.yMaximum()}",  # Extent of the aligned bbox
+            "EXTENT": f"{aligned_bbox.xMinimum()},{aligned_bbox.xMaximum()},"
+            f"{aligned_bbox.yMinimum()},{aligned_bbox.yMaximum()}",  # Extent of the aligned bbox
             "NODATA": 0,
             "OPTIONS": "",
             "DATA_TYPE": 0,  # byte
