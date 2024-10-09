@@ -64,6 +64,11 @@ class TreePanel(QWidget):
         self.treeView.setItemsExpandable(True)
         self.treeView.setUniformRowHeights(True)
 
+        # Hide the third column (index 2)
+        # Hide the weights column for now - I think later we will remove it completely
+        # see https://github.com/kartoza/GEEST2/issues/370
+        self.treeView.header().hideSection(2)
+
         # Enable custom context menu
         self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.treeView.customContextMenuRequested.connect(self.open_context_menu)
