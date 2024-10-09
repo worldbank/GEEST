@@ -273,16 +273,16 @@ class SetupPanel(QWidget):
                 # This checks we can access Open Route Service
                 # and that access works in the background in another thread
                 checker = OrsCheckerTask(
-                    description="ORS Checker Task",
                     url="https://api.openrouteservice.org/",
                 )
                 if debug_env:
                     # Non threaded version
-                    checker.make_synchronous_request()
+                    checker.run()
                 else:
-                    # Threaded version
-                    self.queue_manager.add_task(checker)
-                    self.queue_manager.start_processing()
+                    checker.run()
+                    # Threaded version (crashes QGIS)
+                    # self.queue_manager.add_task(checker)
+                    # self.queue_manager.start_processing()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error checking ORS service: {e}")
                 return

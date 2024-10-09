@@ -31,10 +31,6 @@ class WorkflowQueueManager(QObject):
 
         Use this when you just want to run any QgsTask subclass in tbe queue.
 
-        Make sure your class emites the appropriate signals to update the UI:
-            job_finished = pyqtSignal(bool)
-            job_failed = pyqtSignal(str)
-
         See Also add_workflow method below
         .
         :param task: A QgsTask object representing the task

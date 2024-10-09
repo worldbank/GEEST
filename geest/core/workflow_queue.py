@@ -97,7 +97,7 @@ class WorkflowQueue(QObject):
 
             self.active_tasks[job.description()] = job
 
-            job.job_finished.connect(
+            job.taskCompleted.connect(
                 partial(self.task_completed, job_name=job.description())
             )
             job.taskTerminated.connect(

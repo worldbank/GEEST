@@ -1,103 +1,66 @@
-from functools import partial
-import typing
+from typing import Optional
+
 from qgis.core import (
     QgsTask,
     QgsMessageLog,
     Qgis,
-    QgsNetworkContentFetcherTask,
-    QgsApplication,
+    QgsNetworkAccessManager,
+    QgsNetworkReplyContent,
 )
-from qgis.PyQt.QtCore import pyqtSignal, QEventLoop, QUrl
+from qgis.PyQt.QtCore import QUrl
+from qgis.PyQt.QtNetwork import QNetworkRequest
 
 
 class OrsCheckerTask(QgsTask):
-    """
-    Utility to demonstrate that we have a valid ORS key set up and we can call ORS
-    from a thread.
-    """
+    # Crashes QGIS
+    # job_finished = pyqtSignal(bool)
+    # job_failed = pyqtSignal(str)
 
-    # Signals for task lifecycle
-    job_queued = pyqtSignal()
-    job_started = pyqtSignal()
-    job_canceled = pyqtSignal()
-    # Custom signal to emit when the job is finished
-    job_finished = pyqtSignal(bool)
-    job_failed = pyqtSignal(str)  # Signal for task failure
-
-    def __init__(self, description, url):
-        super().__init__(description)
+    def __init__(self, url: str):
+        super().__init__("ORS download task", QgsTask.CanCancel)
+        self.output_dir = "/tmp/"
+        self.content = None
         self.url = url
-        self.result_path = "/tmp/test.txt"
-        self.response_content = None  # To store the response
-        self.response_handler: typing.Callable
-        self.error_handler: typing.Callable
-        self.event_loop = (
-            QEventLoop()
-        )  # Local event loop to simulate synchronous behavior
+        self.exception: Optional[Exception] = None
 
     def run(self):
-        """This code will be executed in the background thread."""
+        """Do the work."""
         try:
-            # Move the network request to the main thread
-            self.make_synchronous_request()
+            nam = QgsNetworkAccessManager()
+
+            # get the new tile if it didn't exist
+            url = QUrl(f"{self.url}")
+            request = QNetworkRequest(url)
+            reply: QgsNetworkReplyContent = nam.blockingGet(request)
+            self.content = reply.content()
+            # write the content to "/tmp/ors_response.json"
+            with open("/tmp/ors_response.json", "wb") as f:
+                f.write(self.content)
+            self.setProgress(100)
+
             return True
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error: {str(e)}", "Geest", Qgis.Critical)
+            # Dont raise the exception in a thread, you will crash QGIS
+            self.exception = e
             return False
 
     def finished(self, result):
-        """Called when the task is complete."""
-        if result:
+        """Postprocessing after the run() method."""
+        if self.isCanceled():
+            # if it was canceled by the user
             QgsMessageLog.logMessage(
-                "Task completed successfully", "Geest", Qgis.Success
+                message=f"Canceled download task.",
+                level=Qgis.Warning,
             )
-            self.job_finished.emit(True)
-        else:
-            QgsMessageLog.logMessage("Task failed", "Geest", Qgis.Critical)
-            self.job_failed.emit("ORS Check Task failed")
-
-    def make_synchronous_request(self):
-        """Perform synchronous network request using QgsNetworkContentFetcherTask."""
-        # Create the QgsNetworkContentFetcherTask
-        task = QgsNetworkContentFetcherTask(QUrl(self.url))
-
-        # Connect response handler
-        task.fetched.connect(partial(self.response_handler, task))
-
-        # Connect error handler
-        task.errorOccurred.connect(self.error_handler)
-
-        # Run the task (this runs in the background thread)
-        QgsApplication.taskManager().addTask(task)
-
-        # Start the event loop and wait for the request to complete
-        # enable this to CRASH QGIS!
-        # self.event_loop.exec_()
-
-    def response_handler(self, task, content=None):
-        """Handle the fetched response content."""
-        if task.errorOccurred():
-            QgsMessageLog.logMessage(
-                f"Error: {task.errorMessage()}", "Geest", Qgis.Critical
-            )
-            self.event_loop.quit()  # Exit the event loop on error
             return
-
-        # Process the response
-        self.response_content = content.decode("utf-8") if content else None
-
-        if self.response_content:
+        elif not result:
+            # if there was an error
             QgsMessageLog.logMessage(
-                f"Response received: {self.response_content}", "Geest", Qgis.Info
+                message=f"Canceled download task.",
+                level=Qgis.Warning,
             )
-        else:
-            QgsMessageLog.logMessage("No content received", "Geest", Qgis.Warning)
-
-        # Quit the event loop after processing the response
-        self.event_loop.quit()
-
-    def error_handler(self, error_msg):
-        """Handle any errors that occur during the network request."""
-        QgsMessageLog.logMessage(f"Network error: {error_msg}", "Geest", Qgis.Critical)
-        # Exit the event loop in case of error
-        self.event_loop.quit()
+            return
+        QgsMessageLog.logMessage(
+            message=f"ORS Check Succeeded.",
+            level=Qgis.Warning,
+        )
