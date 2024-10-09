@@ -74,3 +74,4 @@ app.py
 /.idea/vcs.xml
 
 .shell.nix.swp
+geest.tar.gz

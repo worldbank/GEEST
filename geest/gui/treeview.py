@@ -26,7 +26,15 @@ from geest.utilities import resources_path
 
 
 class JsonTreeItem:
-    """A class representing a node in the tree."""
+    """A class representing a node in the tree.
+
+    🚩  TAKE NOTE: 🚩
+
+    This class may NOT inherit from QObject, as it has to remain
+    thread safe and not be tied to the main thread. Items are passed to
+    workflow threads and must be able to be manipulated in the background.
+
+    """
 
     def __init__(self, data, role, parent=None):
         self.parentItem = parent
@@ -114,6 +122,32 @@ class JsonTreeItem:
         elif self.isFactor():
             return self.factor_font
         return QFont()
+
+    def getPaths(self) -> []:
+        """Return the path of the item in the tree in the form dimension/factor/indicator.
+
+        :return: A list of strings representing the path of the item in the tree.
+        """
+        path = []
+        if self.isIndicator():
+            path.append(
+                self.parentItem.parentItem.itemData[3]
+                .get("id", "")
+                .lower()
+                .replace(" ", "_")
+            )
+            path.append(
+                self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
+            )
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+        elif self.isFactor():
+            path.append(
+                self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
+            )
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+        if self.isDimension():
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+        return path
 
     def getIndicatorAttributes(self):
         """Return the dict of indicators (or layers) under this factor."""

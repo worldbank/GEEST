@@ -2,6 +2,7 @@ from qgis.core import QgsMessageLog, Qgis
 from .widgets.base_indicator_widget import BaseIndicatorWidget
 from .widgets import IndexScoreRadioButton
 from .widgets import DontUseRadioButton
+from .widgets import MultiBufferDistancesWidget
 
 
 class RadioButtonFactory:
@@ -33,6 +34,8 @@ class RadioButtonFactory:
                 return DontUseRadioButton(label_text="Don't Use", attributes=attributes)
             if key == "Use Default Index Score" and value == 1:
                 return IndexScoreRadioButton(label_text=key, attributes=attributes)
+            if key == "Use Multi Buffer Point" and value == 1:
+                return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
             else:
                 QgsMessageLog.logMessage(
                     f"Factory did not match any widgets",

@@ -4,3 +4,4 @@ from .default_index_score_workflow import DefaultIndexScoreWorkflow
 from .factor_aggregation_workflow import FactorAggregationWorkflow
 from .dimension_aggregation_workflow import DimensionAggregationWorkflow
 from .analysis_aggregation_workflow import AnalysisAggregationWorkflow
+from .multi_buffer_distances_workflow import MultiBufferDistancesWorkflow

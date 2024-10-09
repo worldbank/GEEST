@@ -69,6 +69,7 @@ class GeestPlugin:
             parent=self.iface.mainWindow(),
             json_file=resources_path("resources", "model.json"),
         )
+        self.dock_widget.setObjectName("GeestDockWidget")  # Set a unique object name
         self.dock_widget.setFeatures(
             QDockWidget.DockWidgetClosable
             | QDockWidget.DockWidgetMovable

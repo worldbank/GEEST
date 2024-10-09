@@ -8,6 +8,7 @@ from qgis.core import (
     QgsFeature,
     QgsGeometry,
     QgsField,
+    QgsPointXY,
     QgsProject,
     QgsCoordinateTransform,
     QgsCoordinateReferenceSystem,
@@ -42,14 +43,6 @@ class StudyAreaProcessingTask(QgsTask):
     Returns:
         _type_: _description_
     """
-
-    # Signals for task lifecycle
-    job_queued = pyqtSignal()
-    job_started = pyqtSignal()
-    job_canceled = pyqtSignal()
-    # Custom signal to emit when the job is finished
-    job_finished = pyqtSignal(bool)
-    job_failed = pyqtSignal(str)  # Signal for task failure
 
     def __init__(
         self,
@@ -138,7 +131,7 @@ class StudyAreaProcessingTask(QgsTask):
             QgsMessageLog.logMessage(
                 f"Task failed: {e}", tag="Geest", level=Qgis.Critical
             )
-            self.job_failed.emit(str(e))
+            self.taskTerminated.emit(str(e))
             return False
 
     def finished(self, result: bool) -> None:
@@ -151,7 +144,7 @@ class StudyAreaProcessingTask(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.job_finished.emit(True)
+            self.taskCompleted.emit(True)
 
     def cancel(self) -> None:
         """

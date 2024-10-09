@@ -7,6 +7,7 @@ from .workflows import (
     FactorAggregationWorkflow,
     DimensionAggregationWorkflow,
     AnalysisAggregationWorkflow,
+    MultiBufferDistancesWorkflow,
 )
 from geest.gui.treeview import JsonTreeItem
 
@@ -39,8 +40,8 @@ class WorkflowFactory:
             return DefaultIndexScoreWorkflow(item, feedback)
         elif analysis_mode == "Don’t Use":
             return DontUseWorkflow(item, feedback)
-        elif analysis_mode == "Temporal Analysis":
-            return RasterLayerWorkflow(item, feedback)
+        elif analysis_mode == "Use Multi Buffer Point":
+            return MultiBufferDistancesWorkflow(item, feedback)
         elif analysis_mode == "Factor Aggregation":
             return FactorAggregationWorkflow(item, feedback)
         elif analysis_mode == "Dimension Aggregation":
