@@ -144,7 +144,7 @@ class StudyAreaProcessingTask(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.taskCompleted.emit(True)
+            self.taskCompleted.emit()
 
     def cancel(self) -> None:
         """
@@ -321,6 +321,13 @@ class StudyAreaProcessingTask(QgsTask):
                 level=Qgis.Info,
             )
             self.create_raster_mask(geom, bbox, normalized_name)
+            QgsMessageLog.logMessage(
+                f"Creating vector grid for {normalized_name}.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            self.create_and_save_grid(geom, bbox)
+
         self.counter += 1
 
     def process_multipart_geometry(
@@ -506,20 +513,30 @@ class StudyAreaProcessingTask(QgsTask):
         grid_layer_name = "study_area_grid"
         grid_fields = [QgsField("id", QVariant.Int)]
 
-        self.create_layer_if_not_exists(
-            grid_layer_name, grid_fields, QgsWkbTypes.Polygon
-        )
+        self.create_layer_if_not_exists(grid_layer_name)
+        # Access the GeoPackage layer to append features
+        gpkg_layer_path = f"{self.gpkg_path}|layername={grid_layer_name}"
+        gpkg_layer = QgsVectorLayer(gpkg_layer_path, grid_layer_name, "ogr")
+
+        # get the highest fid from the vector layer
+        if gpkg_layer.isValid():
+            provider = gpkg_layer.dataProvider()
+            feature_id = provider.featureCount()
+        else:
+            QgsMessageLog.logMessage(
+                f"Failed to access layer '{grid_layer_name}' in the GeoPackage.",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            return
 
         step = 100  # 100m grid cells
-        feature_id = 0
+        feature_id += 1
         feature_batch = []
 
         x_min, x_max = bbox.xMinimum(), bbox.xMaximum()
         y_min, y_max = bbox.yMinimum(), bbox.yMaximum()
 
-        # Access the GeoPackage layer to append features
-        gpkg_layer_path = f"{self.gpkg_path}|layername={grid_layer_name}"
-        gpkg_layer = QgsVectorLayer(gpkg_layer_path, grid_layer_name, "ogr")
         if not gpkg_layer.isValid():
             QgsMessageLog.logMessage(
                 f"Failed to access layer '{grid_layer_name}' in the GeoPackage.",
