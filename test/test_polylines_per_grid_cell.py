@@ -7,7 +7,7 @@ from qgis.core import (
 )
 from geest.core.polylines_per_grid_cell import (
     RasterPolylineGridScore,
-)  # Adjust the path to your class
+)
 
 
 class TestRasterPolylineGridScore(unittest.TestCase):
@@ -23,11 +23,11 @@ class TestRasterPolylineGridScore(unittest.TestCase):
 
         # Load the input data (polylines and country boundary layers)
         self.polyline_layer = QgsVectorLayer(
-            os.path.join(self.test_data_dir, "polylines/polylines.shp"),
+            os.path.join(self.test_data_dir, "polylines", "polylines.shp"),
             "test_polylines",
             "ogr",
         )
-        self.country_boundary = os.path.join(self.test_data_dir, "admin/Admin0.shp")
+        self.country_boundary = os.path.join(self.test_data_dir, "admin", "Admin0.shp")
 
         self.assertTrue(
             self.polyline_layer.isValid(), "The polyline layer is not valid."
@@ -35,7 +35,7 @@ class TestRasterPolylineGridScore(unittest.TestCase):
 
         # Define output path for the generated raster
         self.output_path = os.path.join(
-            self.working_dir, "output", "test_polylines_per_grid_cell.tif"
+            self.working_dir, "output", "rasterized_grid.tif"
         )
         os.makedirs(os.path.join(self.working_dir, "output"), exist_ok=True)
 
@@ -47,19 +47,22 @@ class TestRasterPolylineGridScore(unittest.TestCase):
         rasterizer = RasterPolylineGridScore(
             country_boundary=self.country_boundary,
             pixel_size=self.pixel_size,
-            output_path=self.output_path,
+            working_dir=self.test_data_dir,
             crs=self.crs,
             input_polylines=self.polyline_layer,
+            output_path=self.output_path,
         )
 
         # Run the raster_polyline_grid_score method
         rasterizer.raster_polyline_grid_score()
 
         # Load the generated raster layer to verify its validity
-        # Verify that the raster file was created
         self.assertTrue(
             os.path.exists(self.output_path), "The raster output file was not created."
         )
+        # self.clipped_output_path = os.path.join(
+        #    self.working_dir, "output", "clipped_rasterized_grid.tif"
+        # )
         raster_layer = QgsRasterLayer(self.output_path, "test_raster", "gdal")
         self.assertTrue(
             raster_layer.isValid(), "The generated raster layer is not valid."
