@@ -12,7 +12,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.gui import QgsMapLayerComboBox
 
 from .base_indicator_widget import BaseIndicatorWidget
-from qgis.core import QgsMessageLog, Qgis, QgsMapLayerProxyModel
+from qgis.core import QgsMessageLog, QgsMapLayerProxyModel, QgsProject, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings
 
 
@@ -37,6 +37,18 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setFilters(QgsMapLayerProxyModel.PointLayer)
             self.main_layout.addWidget(self.layer_combo)
+
+            # Set the selected QgsVectorLayer in QgsMapLayerComboBox
+            layer_id = self.attributes.get("Multi Buffer Point Layer ID", None)
+            if layer_id:
+                layer = QgsProject.instance().mapLayer(layer_id)
+                if layer:
+                    self.layer_combo.setLayer(layer)
+            layer_id = self.attributes.get("Multi Buffer Point Layer ID")
+            layer = QgsProject.instance().mapLayer(layer_id)
+
+            if layer and isinstance(layer, QgsVectorLayer):
+                self.layer_combo.setLayer(layer)
 
             # Add shapefile selection (QLineEdit and QToolButton)
             self.shapefile_layout = QHBoxLayout()
@@ -148,7 +160,20 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
         if not layer:
             self.attributes["Multi Buffer Point Layer"] = None
         else:
-            self.attributes["Multi Buffer Point Layer"] = layer
+            self.attributes["Multi Buffer Point Layer Name"] = layer.name()
+            self.attributes["Multi Buffer Point Layer Source"] = layer.source()
+            self.attributes["Multi Buffer Point Layer Provider Type"] = (
+                layer.providerType()
+            )
+            self.attributes["Multi Buffer Point Layer CRS"] = (
+                layer.crs().authid()
+            )  # Coordinate Reference System
+            self.attributes["Multi Buffer Point Layer Wkb Type"] = (
+                layer.wkbType()
+            )  # Geometry type (e.g., Point, Polygon)
+            self.attributes["Multi Buffer Point Layer ID"] = (
+                layer.id()
+            )  # Unique ID of the layer
 
         if self.walking_radio.isChecked():
             self.attributes["Multi Buffer Travel Mode"] = "Walking"
