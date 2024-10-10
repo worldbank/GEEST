@@ -22,6 +22,7 @@ from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
 from geest.utilities import get_ui_class, resources_path
+from geest.core import WorkflowQueueManager
 
 FORM_CLASS = get_ui_class("setup_panel_base.ui")
 
@@ -33,9 +34,6 @@ class SetupPanel(FORM_CLASS, QWidget):
         super().__init__()
         self.setWindowTitle("GEEST")
         # For running study area processing in a separate thread
-        # Lazy import to prevent circular imports
-        from geest.core import WorkflowQueueManager
-
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
         self.working_dir = ""
