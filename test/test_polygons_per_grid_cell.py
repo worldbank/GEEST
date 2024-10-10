@@ -23,11 +23,11 @@ class TestRasterPolygonGridScore(unittest.TestCase):
 
         # Load the input data (polygons and country boundary layers)
         self.polygon_layer = QgsVectorLayer(
-            os.path.join(self.test_data_dir, "polygons/blocks.shp"),
+            os.path.join(self.test_data_dir, "polygons", "blocks.shp"),
             "test_polygons",
             "ogr",
         )
-        self.country_boundary = os.path.join(self.test_data_dir, "admin/Admin0.shp")
+        self.country_boundary = os.path.join(self.test_data_dir, "admin", "Admin0.shp")
 
         self.assertTrue(self.polygon_layer.isValid(), "The polygon layer is not valid.")
 
@@ -45,9 +45,10 @@ class TestRasterPolygonGridScore(unittest.TestCase):
         rasterizer = RasterPolygonGridScore(
             country_boundary=self.country_boundary,
             pixel_size=self.pixel_size,
-            output_path=self.output_path,
+            working_dir=self.test_data_dir,
             crs=self.crs,
             input_polygons=self.polygon_layer,
+            output_path=self.output_path,
         )
 
         # Run the raster_polygon_grid_score method
