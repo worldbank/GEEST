@@ -51,19 +51,22 @@ class SetupPanel(FORM_CLASS, QWidget):
         self.banner_label.setPixmap(
             QPixmap(resources_path("resources", "geest-banner.png"))
         )
+        self.open_project_group.setVisible(False)
         self.dir_button.clicked.connect(self.select_directory)
-        self.layer_combo = QgsMapLayerComboBox()
+        # self.layer_combo = QgsMapLayerComboBox()
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
 
-        self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
+        # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         self.field_combo.setFilters(QgsFieldProxyModel.String)
 
         # Link the map layer combo box with the field combo box
         self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
-
+        self.field_combo.setLayer(self.layer_combo.currentLayer())
         self.world_map_button.clicked.connect(self.add_world_map)
-
-        self.continue_button.clicked.connect(self.on_continue)
+        self.create_project_directory_button.clicked.connect(
+            self.create_new_project_folder
+        )
+        self.prepare_project_button.clicked.connect(self.create_project)
         self.new_project_group.setVisible(False)
         # Set the last used working directory from QSettings
         recent_projects = self.settings.value("recent_projects", [])
@@ -72,7 +75,7 @@ class SetupPanel(FORM_CLASS, QWidget):
         )  # Add recent projects to the combo
         self.working_dir = self.previous_project_combo.currentText()
         # self.dir_display.setText(self.working_dir)
-        self.update_for_working_directory()
+        self.set_project_directory()
 
     def update_recent_projects(self, directory):
         """Updates the recent projects list with the new directory."""
@@ -104,7 +107,7 @@ class SetupPanel(FORM_CLASS, QWidget):
             self.working_dir = directory
             self.update_recent_projects(directory)  # Update recent projects
             self.settings.setValue("last_working_directory", directory)
-            self.update_for_working_directory()
+            self.set_project_directory()
 
     def create_new_project_folder(self):
         directory = QFileDialog.getExistingDirectory(
@@ -114,8 +117,9 @@ class SetupPanel(FORM_CLASS, QWidget):
             self.working_dir = directory
             self.update_recent_projects(directory)  # Update recent projects
             self.settings.setValue("last_working_directory", directory)
+        self.working_dir = directory
 
-    def update_for_working_directory(self):
+    def set_project_directory(self):
         """
         Updates the UI based on the selected working directory.
         If the directory contains 'model.json', shows a message and hides layer/field selectors.
@@ -177,10 +181,13 @@ class SetupPanel(FORM_CLASS, QWidget):
 
         QgsProject.instance().addMapLayer(world_map_layer)
 
-    def on_continue(self):
-        """Triggered when the Continue button is pressed."""
+    def load_project(self):
         directory = self.previous_project_combo.currentText()
-        model_path = os.path.join(directory, "model.json")
+
+    def create_project(self):
+        """Triggered when the Continue button is pressed."""
+
+        model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
@@ -247,3 +254,4 @@ class SetupPanel(FORM_CLASS, QWidget):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error checking ORS service: {e}")
                 return
+            self.switch_to_next_tab.emit()
