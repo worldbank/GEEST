@@ -157,6 +157,7 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Point and Polyline per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
