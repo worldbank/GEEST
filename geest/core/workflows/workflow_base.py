@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from qgis.core import QgsFeedback, QgsVectorLayer, QgsMessageLog, Qgis
 from qgis.PyQt.QtCore import QSettings
-from geest.gui.treeview import JsonTreeItem
+from geest.gui.views import JsonTreeItem
 
 
 class WorkflowBase(ABC):

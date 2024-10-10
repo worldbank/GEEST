@@ -9,7 +9,7 @@ from .workflows import (
     AnalysisAggregationWorkflow,
     MultiBufferDistancesWorkflow,
 )
-from geest.gui.treeview import JsonTreeItem
+from geest.gui.views.treeview import JsonTreeItem
 
 
 class WorkflowFactory:

@@ -25,9 +25,9 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.core import QgsMessageLog, Qgis
-from .toggle_switch import ToggleSwitch
+from ..toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
-from .indicator_config_widget import IndicatorConfigWidget
+from ..indicator_config_widget import IndicatorConfigWidget
 
 
 class IndicatorDetailDialog(QDialog):

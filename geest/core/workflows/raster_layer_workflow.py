@@ -1,6 +1,6 @@
 from qgis.core import QgsMessageLog, Qgis, QgsFeedback
 from .workflow_base import WorkflowBase
-from geest.gui.treeview import JsonTreeItem
+from geest.gui.views import JsonTreeItem
 
 
 class RasterLayerWorkflow(WorkflowBase):

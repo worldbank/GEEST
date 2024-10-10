@@ -20,9 +20,7 @@ from qgis.PyQt import uic
 
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
-from geest.utilities import resources_path
 from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
-from geest.core.workflow_queue_manager import WorkflowQueueManager
 from geest.utilities import get_ui_class, resources_path
 
 FORM_CLASS = get_ui_class("setup_panel_base.ui")
@@ -35,6 +33,9 @@ class SetupPanel(FORM_CLASS, QWidget):
         super().__init__()
         self.setWindowTitle("GEEST")
         # For running study area processing in a separate thread
+        # Lazy import to prevent circular imports
+        from geest.core import WorkflowQueueManager
+
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
         self.working_dir = ""
@@ -63,7 +64,7 @@ class SetupPanel(FORM_CLASS, QWidget):
         self.world_map_button.clicked.connect(self.add_world_map)
 
         self.continue_button.clicked.connect(self.on_continue)
-
+        self.new_project_group.setVisible(False)
         # Set the last used working directory from QSettings
         recent_projects = self.settings.value("recent_projects", [])
         self.previous_project_combo.addItems(

@@ -19,13 +19,12 @@ from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject
 from functools import partial
-from .treeview import CustomTreeView, JsonTreeModel
-from .setup_panel import SetupPanel
-from .indicator_detail_dialog import IndicatorDetailDialog
+from geest.gui.views import JsonTreeView, JsonTreeModel
+from geest.gui.dialogs import IndicatorDetailDialog
 from geest.utilities import resources_path
 from geest.core import setting
-from geest.core.workflow_queue_manager import WorkflowQueueManager
-from .factor_aggregation_dialog import FactorAggregationDialog
+from geest.core import WorkflowQueueManager
+from geest.gui.dialogs import FactorAggregationDialog
 
 
 class TreePanel(QWidget):
@@ -48,7 +47,7 @@ class TreePanel(QWidget):
             self.json_data = {"dimensions": []}
 
         # Create a CustomTreeView widget to handle editing and reverts
-        self.treeView = CustomTreeView()
+        self.treeView = JsonTreeView()
         self.treeView.setDragDropMode(QTreeView.InternalMove)
         self.treeView.setDefaultDropAction(Qt.MoveAction)
 

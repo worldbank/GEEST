@@ -9,15 +9,13 @@ from qgis.core import (
     QgsVectorLayer,
     QgsField,
     QgsGeometry,
-    QgsRectangle,
     QgsRasterLayer,
     QgsProject,
-    QgsCoordinateReferenceSystem,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
-from geest.gui.treeview import JsonTreeItem
+from geest.gui.views import JsonTreeItem
 from geest.core.utilities import GridAligner
 
 

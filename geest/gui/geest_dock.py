@@ -7,8 +7,8 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsMessageLog, Qgis
 from typing import Optional
-from .setup_panel import SetupPanel
-from .tree_panel import TreePanel
+from geest.gui.panels import SetupPanel
+from geest.gui.panels import TreePanel
 
 
 class GeestDock(QDockWidget):

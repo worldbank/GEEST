@@ -1,3 +1,54 @@
+a79144c | 2024-10-09 14:40:49 | Tim Sutton | Fix Delete Weights Column #370
+ab2ae2f | 2024-10-09 14:37:18 | Tim Sutton | WIP progress for Pop-up box on Plugin Initiation (start fresh or continue project) #377
+dc37840 | 2024-10-09 14:21:18 | Tim Sutton | Pop-up box on Plugin Initiation (start fresh or continue project) Fixes #377
+c370889 | 2024-10-09 12:39:03 | Tim Sutton | We still need vector grids Fixes #395
+edba9e2 | 2024-10-09 12:02:43 | Tim Sutton | Threadsafe (de)serialise for vector layers
+ebcbea6 | 2024-10-09 08:41:25 | Tim Sutton | Added shapefile chooser to multibuffer widget
+0e46660 | 2024-10-09 08:24:01 | Tim Sutton | fix state handling for travel distances
+c2fdbc1 | 2024-10-09 07:46:54 | Tim Sutton | Fix rendering of multi buffer point widget
+1515d80 | 2024-10-09 06:36:24 | Tim Sutton | Fix geometry restore of geest window
+4ec12a0 | 2024-10-09 06:12:15 | Tim Sutton | Imported update sheet from Clara. More tests for ors checker trying to resolve crash in threads. Review signal use in thread classes
+a507f8a | 2024-10-08 22:01:24 | Tim Sutton | About to try another approach for threaded networking requests
+06280f5 | 2024-10-08 17:48:46 | Tim Sutton | Added ORS Checker
+115ad40 | 2024-10-08 15:30:27 | Tim Sutton | Implementation for widget for #385
+1bbfeb0 | 2024-10-08 17:19:28 | Jeff Osundwa | updates on multibuffer distances
+e89281c | 2024-10-08 10:10:10 | Tim Sutton | WIP Multi Buffer Implementation
+72be238 | 2024-10-08 09:41:41 | Tim Sutton | Workflow for multibuffer ORS analysis WIP #385
+76bea91 | 2024-10-08 08:52:30 | Jeff Osundwa | added grid aligner to utilities
+4c1688f | 2024-10-07 22:53:59 | Tim Sutton | Run study area creation in a background thread
+1b2e76c | 2024-10-07 22:17:48 | Tim Sutton | Add "Processing.." or Progress Bar on 1st step WIP for  #378
+9bea9b7 | 2024-10-07 22:17:09 | Tim Sutton | Add "Processing.." or Progress Bar on 1st step WIP for  #378
+1850e31 | 2024-10-07 08:30:43 | Tim Sutton | Move folder icon on Setup Page Fixes #376
+45a059f | 2024-10-06 22:51:19 | Tim Sutton | Format the Inputs List as a tree Fixes #372
+c869beb | 2024-10-06 20:57:35 | Tim Sutton | Fixes for factor weighting dialog
+acf2955 | 2024-10-06 20:43:45 | Tim Sutton | Fix weighting dialog
+d0fd7a7 | 2024-10-06 20:28:06 | Tim Sutton | Fixes for deseriialising dimensions and showing status on load
+6a02772 | 2024-10-06 19:40:35 | Tim Sutton | Fix dimension aggregate running
+69bdd5f | 2024-10-06 17:14:22 | Tim Sutton | Fixes for restoring json with extended attributes added for start and end times etc.
+16d15dc | 2024-10-06 15:52:23 | Tim Sutton | Fix factor aggregation after refactoring away references to vrt
+328c3f5 | 2024-10-06 01:05:56 | Tim Sutton | Updates to workflows to support item paradigm
+08a4596 | 2024-10-06 00:36:39 | Tim Sutton | Fixes for aggregation workflow
+450cacf | 2024-10-05 23:35:37 | Tim Sutton | Refactor workflows to pass item instead of dict as payload. Still need to do aggregators.
+84844e1 | 2024-10-05 11:47:05 | Tim Sutton | Implement concrete classes for analysis and dimension workflows
+cdc87e3 | 2024-10-05 01:02:54 | Tim Sutton | WIP fixes for aggregation base class
+d2164e2 | 2024-10-04 23:14:21 | Tim Sutton | Clean up messaging
+7169fd6 | 2024-10-04 22:57:53 | Tim Sutton | Updates for index score function and in progress fixes for aggregrates
+d163ddb | 2024-10-04 16:37:10 | Tim Sutton | Fix return for aggregator when it ran ok
+a200a2c | 2024-10-04 12:57:21 | Tim Sutton | Wired in logic so we can run a single nodes workflow. Fixes #363
+8260d32 | 2024-10-04 10:47:56 | Tim Sutton | Comment out qml stuff for now
+cd0555c | 2024-10-04 10:29:36 | Tim Sutton | Very nearly working for aggregation
+c5ba5f1 | 2024-10-04 09:24:44 | Tim Sutton | Fix merge issues
+d48c5a7 | 2024-10-04 09:14:20 | Tim Sutton | Black format all files
+44fc4ee | 2024-10-04 03:24:46 | Jeff Osundwa | updates on aggregation workflow
+4e190fa | 2024-10-03 15:56:54 | Tim Sutton | WIP support for aggregation at factor and dimensions
+63c063d | 2024-10-03 14:52:16 | Tim Sutton | Complete Integration of Dimensions and factors Fixes #347
+76cad6c | 2024-10-03 12:03:12 | Jeff Osundwa | rm 32bit files
+279cd3c | 2024-10-03 11:55:29 | Jeff Osundwa | added 8bit conversion to factor aggregation workflow
+eab50d7 | 2024-10-03 11:36:13 | Jeff Osundwa | add 32bit assertion
+95ac9fc | 2024-10-03 11:32:02 | Jeff Osundwa | added convert to 8bit function and test
+315b4cc | 2024-10-02 22:07:15 | Tim Sutton | Show attributes should show workflow attributes too Fixes #361
+750af7b | 2024-10-02 16:29:33 | Jeff Osundwa | improved factor aggregation to use vrts from "Result File"
+83df587 | 2024-10-02 14:15:45 | Tim Sutton | Dont show popup when creating a new project Fixes #358
 bc301a1 | 2024-10-02 12:15:41 | Tim Sutton | Added context menu action to be able to view any layer in the map to help with debugging Fixes #356
 4eed5fe | 2024-10-02 11:44:11 | Tim Sutton | We need to write the json doc after running analysis Fixes #354
 1653612 | 2024-10-02 10:30:22 | Tim Sutton | Resolve race condition where factor aggregates try to acess attributes of indicators that were not yet written Fixes #350

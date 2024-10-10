@@ -2,7 +2,7 @@ from PyQt5.QtCore import QObject
 from qgis.core import QgsMessageLog, Qgis, QgsTask
 from .workflow_queue import WorkflowQueue
 from .workflow_job import WorkflowJob
-from geest.gui.treeview import JsonTreeItem
+from .json_tree_item import JsonTreeItem
 
 
 class WorkflowQueueManager(QObject):
