@@ -19,7 +19,6 @@ from qgis.PyQt.QtCore import (
 # Change to this when implementing in QGIS
 # from qgis.PyQt.QtGui import (
 from PyQt5.QtGui import QColor
-from qgis.core import QgsMessageLog, Qgis
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
 

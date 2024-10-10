@@ -1,7 +1,7 @@
 import time
 from qgis.core import QgsMessageLog, Qgis, QgsFeedback
 from .workflow_base import WorkflowBase
-from geest.gui.views import JsonTreeItem
+from geest.core import JsonTreeItem
 
 
 class DontUseWorkflow(WorkflowBase):

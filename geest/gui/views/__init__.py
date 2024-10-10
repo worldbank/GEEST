@@ -1,1 +1,1 @@
-from .treeview import JsonTreeItem, JsonTreeModel, JsonTreeView
+from .treeview import JsonTreeModel, JsonTreeView

@@ -4,7 +4,7 @@ from qgis.core import (
 )
 from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.utilities import resources_path
-from geest.gui.views import JsonTreeItem
+from geest.core import JsonTreeItem
 
 
 class FactorAggregationWorkflow(AggregationWorkflowBase):

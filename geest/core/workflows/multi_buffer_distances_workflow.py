@@ -17,7 +17,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
-from geest.gui.views import JsonTreeItem
+from geest.core import JsonTreeItem
 from geest.core.multibuffer_point import MultiBufferCreator
 
 
