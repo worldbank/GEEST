@@ -53,6 +53,7 @@ class SetupPanel(FORM_CLASS, QWidget):
         )
         self.open_project_group.setVisible(False)
         self.dir_button.clicked.connect(self.select_directory)
+        self.open_project_button.clicked.connect(self.load_project)
         # self.layer_combo = QgsMapLayerComboBox()
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
 
@@ -126,37 +127,6 @@ class SetupPanel(FORM_CLASS, QWidget):
         Otherwise, shows the layer/field selectors.
         """
         model_path = os.path.join(self.working_dir, "model.json")
-        if os.path.exists(model_path):
-            # Existing project
-            # self.existing_project_label.setVisible(True)
-            # self.study_area_label.setVisible(False)
-            # self.layer_combo.setVisible(False)
-            # self.area_name_label.setVisible(False)
-            # self.field_combo.setVisible(False)
-            # self.preparation_label.setVisible(False)
-            # self.world_map_label.setVisible(False)
-            # self.world_map_button.setVisible(False)
-            pass
-        else:
-            # New project
-            # self.existing_project_label.setVisible(False)
-            # self.study_area_label.setVisible(True)
-            # self.layer_combo.setVisible(True)
-            # self.area_name_label.setVisible(True)
-            # self.field_combo.setVisible(True)
-            # self.preparation_label.setVisible(True)
-
-            # Check if there are any polygon layers in the project
-            if not self.layer_combo.count():
-                # No available polygon layers, show world map option
-                # self.world_map_label.setVisible(True)
-                # self.world_map_button.setVisible(True)
-                pass
-            else:
-                # Layers available, hide world map option
-                # self.world_map_label.setVisible(False)
-                # self.world_map_button.setVisible(False)
-                pass
 
     def add_world_map(self):
         """Adds the built-in QGIS world map to the canvas."""
@@ -182,7 +152,11 @@ class SetupPanel(FORM_CLASS, QWidget):
         QgsProject.instance().addMapLayer(world_map_layer)
 
     def load_project(self):
-        directory = self.previous_project_combo.currentText()
+        self.working_dir = self.previous_project_combo.currentText()
+        model_path = os.path.join(self.working_dir, "model.json")
+        if os.path.exists(model_path):
+            # Switch to the next tab if an existing project is found
+            self.switch_to_next_tab.emit()
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
