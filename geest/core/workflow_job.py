@@ -1,6 +1,6 @@
 from qgis.core import QgsTask, QgsMessageLog, QgsFeedback, Qgis
-from qgis.PyQt.QtCore import QObject, pyqtSignal
-from geest.gui.treeview import JsonTreeItem
+from qgis.PyQt.QtCore import pyqtSignal
+from .json_tree_item import JsonTreeItem
 from .workflow_factory import WorkflowFactory
 
 

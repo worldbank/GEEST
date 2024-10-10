@@ -7,8 +7,8 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsMessageLog, Qgis
 from typing import Optional
-from .setup_panel import SetupPanel
-from .tree_panel import TreePanel
+from geest.gui.panels import SetupPanel
+from geest.gui.panels import TreePanel
 
 
 class GeestDock(QDockWidget):
@@ -47,6 +47,10 @@ class GeestDock(QDockWidget):
             project_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
             project_layout.addWidget(self.setup_widget)
             self.tab_widget.addTab(project_tab, "Project")
+            self.setup_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.tab_widget.setCurrentIndex(1)
+            )
 
             # Create and add the "Inputs" tab (TreePanel)
             self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)

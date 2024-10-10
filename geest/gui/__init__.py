@@ -4,7 +4,6 @@ Gui classes
 
 from .geest_settings import GeestOptionsFactory
 from .geest_dock import GeestDock
-from .treeview import JsonTreeItem, JsonTreeModel, CustomTreeView
-from .setup_panel import SetupPanel
-from .tree_panel import TreePanel
-from .indicator_detail_dialog import IndicatorDetailDialog
+from .indicator_config_widget import IndicatorConfigWidget
+from .toggle_switch import ToggleSwitch
+from .indicator_widget_factory import RadioButtonFactory

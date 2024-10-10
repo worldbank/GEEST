@@ -5,7 +5,7 @@ from qgis.core import (
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.utilities import resources_path
-from geest.gui.treeview import JsonTreeItem
+from geest.core import JsonTreeItem
 
 
 class AnalysisAggregationWorkflow(AggregationWorkflowBase):

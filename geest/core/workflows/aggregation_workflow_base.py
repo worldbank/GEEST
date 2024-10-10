@@ -12,7 +12,7 @@ from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
 from geest.core.convert_to_8bit import RasterConverter
 from geest.utilities import resources_path
-from geest.gui.treeview import JsonTreeItem
+from geest.core import JsonTreeItem
 
 
 class AggregationWorkflowBase(WorkflowBase):
