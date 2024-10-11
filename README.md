@@ -384,3 +384,28 @@ To install the plugin into the QGIS application, activate virtual environment an
 ```
  python admin.py install
 ```
+
+## Creating a release
+
+Edit [config.json](config.json) and set the version number there then push that to main. This
+will automatically update the metadata.txt during the release process.
+
+Go to https://github.com/kartoza/GEEST2/releases/new
+
+Create a tag following semver e.g. v0.1.4
+
+![Create a tag](docs/images/tagging.png)
+
+Fill in the release (use the autogenerate release notes button)
+
+![Create a tag](docs/images/release.png)
+
+Now we have a new release:
+
+![New Release](docs/images/new-release.png)
+
+In https://github.com/kartoza/GEEST2/actions we will see the release building:
+
+![Release Buildng](docs/images/new-release.png)
+
+
