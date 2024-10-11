@@ -25,7 +25,7 @@ from qgis.PyQt import uic
 
 
 def resources_path(*args):
-    """Get the path to our resources folder.
+    """Get the path to our resources foresources_pathlder.
 
     .. versionadded:: 2.0
 

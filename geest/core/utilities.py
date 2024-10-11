@@ -23,9 +23,6 @@ import os
 import sys
 from qgis.core import (
     QgsRectangle,
-    QgsCoordinateTransform,
-    QgsCoordinateReferenceSystem,
-    QgsProject,
 )
 
 

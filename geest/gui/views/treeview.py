@@ -80,7 +80,9 @@ class JsonTreeModel(QAbstractItemModel):
 
         # Create the "Analysis" item
         analysis_item = JsonTreeItem(
-            [analysis_name, "", "", analysis_attributes], "analysis", self.rootItem
+            [analysis_name, "analysis", "", analysis_attributes],
+            "analysis",
+            self.rootItem,
         )
         self.rootItem.appendChild(analysis_item)
 
@@ -221,9 +223,9 @@ class JsonTreeModel(QAbstractItemModel):
         elif role == Qt.ForegroundRole and index.column() == 2:
             return item.font_color
         elif role == Qt.DecorationRole and index.column() == 0:
-            return item.get_icon()
+            return item.getIcon()
         elif role == Qt.FontRole:
-            return item.get_font()
+            return item.getFont()
 
         return None
 

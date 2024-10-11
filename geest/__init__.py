@@ -29,7 +29,6 @@ from qgis.PyQt.QtWidgets import (
     QPushButton,
     QAction,
     QDockWidget,
-    QSizePolicy,
 )
 from qgis.core import Qgis
 

@@ -89,7 +89,10 @@ class JsonTreeItem:
     def isDimension(self):
         return self.role == "dimension"
 
-    def get_icon(self):
+    def isAnalysis(self):
+        return self.role == "analysis"
+
+    def getIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
         if self.isDimension():
             return self.dimension_icon
@@ -99,7 +102,7 @@ class JsonTreeItem:
             return self.indicator_icon
         return None
 
-    def get_font(self):
+    def getFont(self):
         """Retrieve the appropriate font for the item based on its role."""
         if self.isDimension():
             return self.dimension_font
@@ -192,9 +195,13 @@ class JsonTreeItem:
     def getAnalysisAttributes(self):
         """Return the dict of dimensions under this analysis."""
         attributes = {}
-        if self.isFactor():
-            attributes["Analysis Mode"] = "Top Level Aggregation"
-            attributes["Analysis ID"] = self.data(0)
+        if self.isAnalysis():
+            attributes["Analysis Name"] = self.data(3).get("Analysis Name", "Not Set")
+            attributes["Description"] = self.data(3).get(
+                "Analysis Description", "Not Set"
+            )
+            attributes["Working Folder"] = self.data(3).get("Working Folder", "Not Set")
+
             attributes["Dimensions"] = [
                 {
                     "Dimension ID": i,

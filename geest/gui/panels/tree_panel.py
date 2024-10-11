@@ -279,6 +279,12 @@ class TreePanel(QWidget):
 
         run_item_action = QAction("Run Item Workflow", self)
         run_item_action.triggered.connect(lambda: self.run_item(item, role=item.role))
+
+        if item.role == "analysis":
+            menu = QMenu(self)
+            menu.addAction(show_json_attributes_action)
+            menu.addAction(run_item_action)
+
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
             # Context menu for dimensions
@@ -377,6 +383,15 @@ class TreePanel(QWidget):
         QgsMessageLog.logMessage(
             "----------------------------", tag="Geest", level=Qgis.Info
         )
+        if item.role == "analysis":
+            QgsMessageLog.logMessage(
+                "Analysis attributes:",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            QgsMessageLog.logMessage(
+                str(item.getAnalysisAttributes()), tag="Geest", level=Qgis.Info
+            )
         if item.role == "factor":
             QgsMessageLog.logMessage(
                 "Factor attributes that get passed to workflow:",
