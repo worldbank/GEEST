@@ -1,5 +1,7 @@
 # Widgets package initialization file
+from .base_indicator_widget import BaseIndicatorWidget
 from .indicator_index_score_widget import IndexScoreRadioButton
 from .dont_use_widget import DontUseRadioButton
 from .multi_buffer_distances_widget import MultiBufferDistancesWidget
 from .polyline_widget import PolylineWidget
+from .point_layer_widget import PointLayerWidget
