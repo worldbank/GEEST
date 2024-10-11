@@ -1,6 +1,6 @@
 from qgis.core import QgsMessageLog, Qgis
 from qgis.core import QgsFeedback
-from .workflows import (
+from geest.core.workflows import (
     RasterLayerWorkflow,
     DontUseWorkflow,
     DefaultIndexScoreWorkflow,
@@ -8,6 +8,7 @@ from .workflows import (
     DimensionAggregationWorkflow,
     AnalysisAggregationWorkflow,
     MultiBufferDistancesWorkflow,
+    PointPerCellWorkflow,
 )
 from .json_tree_item import JsonTreeItem
 
@@ -42,6 +43,8 @@ class WorkflowFactory:
             return DontUseWorkflow(item, feedback)
         elif analysis_mode == "Use Multi Buffer Point":
             return MultiBufferDistancesWorkflow(item, feedback)
+        elif analysis_mode == "Use Point per Cell":
+            return PointPerCellWorkflow(item, feedback)
         elif analysis_mode == "Factor Aggregation":
             return FactorAggregationWorkflow(item, feedback)
         elif analysis_mode == "Dimension Aggregation":

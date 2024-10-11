@@ -1,9 +1,12 @@
 from qgis.core import QgsMessageLog, Qgis
-from .widgets.base_indicator_widget import BaseIndicatorWidget
-from .widgets import IndexScoreRadioButton
-from .widgets import DontUseRadioButton
-from .widgets import MultiBufferDistancesWidget
-from .widgets import PolylineWidget
+from geest.gui.widgets import (
+    BaseIndicatorWidget,
+    IndexScoreRadioButton,
+    DontUseRadioButton,
+    MultiBufferDistancesWidget,
+    PolylineWidget,
+    PointLayerWidget,
+)
 
 
 class RadioButtonFactory:
@@ -39,6 +42,10 @@ class RadioButtonFactory:
                 return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
             if key == "Use Polyline per Cell" and value == 1:
                 return PolylineWidget(label_text=key, attributes=attributes)
+            if key == "Use Polyline per Cell" and value == 1:
+                return PolylineWidget(label_text=key, attributes=attributes)
+            if key == "Use Point per Cell" and value == 1:
+                return PointLayerWidget(label_text=key, attributes=attributes)
             else:
                 QgsMessageLog.logMessage(
                     f"Factory did not match any widgets",
