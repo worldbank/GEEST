@@ -65,10 +65,15 @@ class PointPerCellProcessor:
             workflow_directory (str): Directory where temporary and final output files will be stored.
             gpkg_path (str): Path to the GeoPackage file containing the study areas, bounding boxes, and grid layer.
         """
-        self.points_layer = points_layer
-        self.workflow_directory = (
-            workflow_directory  # low level folder where we write the workflow outputs
+        QgsMessageLog.logMessage(
+            "Point per Cell Processor Initialising", tag="Geest", level=Qgis.Info
         )
+        self.points_layer = QgsVectorLayer(
+            f"/home/timlinux/dev/python/GEEST2/data/Mauritius/random_points.gpkg|layername=random_points",
+            "random_points",
+            "ogr",
+        )
+
         self.gpkg_path = gpkg_path  # top level folder where gpkg is etc
 
         # Load the grid layer from the GeoPackage
@@ -76,11 +81,16 @@ class PointPerCellProcessor:
             f"{self.gpkg_path}|layername=study_area_grid", "study_area_grid", "ogr"
         )
         if not self.grid_layer.isValid():
-
             raise QgsProcessingException(
                 f"Failed to load 'study_area_grid' layer from the GeoPackage. at {self.gpkg_path}"
             )
-        QgsMessageLog.logMessage("Point per Cell Processor Initialised")
+        if not self.points_layer.isValid():
+            raise QgsProcessingException(
+                f"Failed to load points layer for Point per Cell Processor at {self.layer.source()}"
+            )
+        QgsMessageLog.logMessage(
+            "Point per Cell Processor Initialised", tag="Geest", level=Qgis.Info
+        )
 
     def process_areas(self) -> None:
         """
@@ -94,6 +104,10 @@ class PointPerCellProcessor:
         Raises:
             QgsProcessingException: If any processing step fails during the execution.
         """
+        QgsMessageLog.logMessage(
+            "Point per Cell Process Areas Started", tag="Geest", level=Qgis.Info
+        )
+
         feedback = QgsProcessingFeedback()
         area_iterator = AreaIterator(
             self.gpkg_path
@@ -139,14 +153,21 @@ class PointPerCellProcessor:
         Returns:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
+        QgsMessageLog.logMessage(
+            "Point per Cell Select Features Started", tag="Geest", level=Qgis.Info
+        )
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
         params = {
-            "INPUT": layer,
+            "INPUT": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Mauritius/study_area/study_area.gpkg|layername=study_area_grid",
+            "INTERSECT": "/home/timlinux/dev/python/GEEST2/data/Mauritius/random_points.gpkg",
             "PREDICATE": [0],  # Intersects predicate
-            "GEOMETRY": area_geom,
             "OUTPUT": output_path,
         }
         result = processing.run("native:extractbyextent", params)
+        QgsMessageLog.logMessage(
+            "Point per Cell Select Features Ending", tag="Geest", level=Qgis.Info
+        )
+
         return QgsVectorLayer(result["OUTPUT"], output_name, "ogr")
 
     def _select_grid_cells(

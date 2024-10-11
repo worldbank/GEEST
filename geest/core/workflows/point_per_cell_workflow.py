@@ -63,6 +63,10 @@ class PointPerCellWorkflow(WorkflowBase):
             gpkg_path=self.gpkg_path,
             workflow_directory=self.workflow_directory,
         )
+        QgsMessageLog.logMessage(
+            "Point per Cell Processor Created", tag="Geest", level=Qgis.Info
+        )
+
         processor.process_areas()
         # loop through self.bboxes_layer and the self.areas_layer  and create a raster mask for each feature
         # index_score = self.attributes["Point per Cell"]
