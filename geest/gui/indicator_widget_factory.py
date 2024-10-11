@@ -6,7 +6,7 @@ from geest.gui.widgets import (
     MultiBufferDistancesWidget,
     PolylineWidget,
     PointLayerWidget,
-	PolygonWidget,
+    PolygonWidget,
 )
 
 
