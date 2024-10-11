@@ -22,11 +22,9 @@ from PyQt5.QtGui import QColor
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
 
-
 from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QTreeView, QMessageBox
 from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt
 from PyQt5.QtGui import QColor
-from geest.core import JsonTreeItem
 
 
 class JsonTreeModel(QAbstractItemModel):

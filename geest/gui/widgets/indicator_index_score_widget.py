@@ -15,6 +15,7 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
         try:
             self.info_label: QLabel = QLabel(self.label_text)
             self.index_input: QDoubleSpinBox = QDoubleSpinBox()
+            self.index_input.setRange(0, 100)
             self.layout.addWidget(self.info_label)
             self.layout.addWidget(self.index_input)
             self.index_input.setValue(self.attributes["Default Index Score"])
