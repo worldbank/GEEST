@@ -4,6 +4,7 @@ from .widgets import IndexScoreRadioButton
 from .widgets import DontUseRadioButton
 from .widgets import MultiBufferDistancesWidget
 from .widgets import PolygonWidget
+from .widgets import PolylineWidget
 
 
 class RadioButtonFactory:
@@ -39,6 +40,8 @@ class RadioButtonFactory:
                 return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
             if key == "Use Poly per Cell" and value == 1:
                 return PolygonWidget(label_text=key, attributes=attributes)
+            if key == "Use Polyline per Cell" and value == 1:
+                return PolylineWidget(label_text=key, attributes=attributes)
             else:
                 QgsMessageLog.logMessage(
                     f"Factory did not match any widgets",
