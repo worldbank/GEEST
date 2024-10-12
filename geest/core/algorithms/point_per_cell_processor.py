@@ -15,6 +15,7 @@ from qgis.core import (
     QgsProject,
     QgsVectorFileWriter,
     QgsVectorLayer,
+    QgsRasterLayer,
 )
 import processing
 from qgis.PyQt.QtCore import QVariant
@@ -509,7 +510,7 @@ class PointPerCellProcessor:
             "HEIGHT": y_res,
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},"
             f"{bbox.yMinimum()},{bbox.yMaximum()}",  # Extent of the aligned bbox
-            "NODATA": 0,
+            "NODATA": -9999,
             "OPTIONS": "",
             "DATA_TYPE": 0,  # byte
             "INIT": None,
@@ -555,10 +556,57 @@ class PointPerCellProcessor:
         Args:
             num_rasters (int): The number of rasters to combine into a VRT.
         """
-        raster_paths = [
-            os.path.join(self.workflow_directory, f"byte_raster_{i}.tif")
+        raster_files = [
+            os.path.join(self.workflow_directory, f"point_per_cell_byte_raster_{i}.tif")
             for i in range(num_rasters)
         ]
-        vrt_path = os.path.join(self.workflow_directory, "combined_rasters.vrt")
-        params = {"INPUT": raster_paths, "OUTPUT": vrt_path}
-        processing.run("gdal:buildvrt", params)
+        vrt_filepath = os.path.join(
+            self.workflow_directory, "point_per_cell_byte_raster_combined.vrt"
+        )
+
+        QgsMessageLog.logMessage(
+            f"Creating VRT of masks '{vrt_filepath}' layer to the map.",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        if not raster_files:
+            QgsMessageLog.logMessage(
+                "No raster masks found to combine into VRT.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
+        # Define the VRT parameters
+        params = {
+            "INPUT": raster_files,
+            "RESOLUTION": 0,  # Use highest resolution among input files
+            "SEPARATE": False,  # Combine all input rasters as a single band
+            "OUTPUT": vrt_filepath,
+            "PROJ_DIFFERENCE": False,
+            "ADD_ALPHA": False,
+            "ASSIGN_CRS": None,
+            "RESAMPLING": 0,
+            "SRC_NODATA": "0",
+            "EXTRA": "",
+        }
+
+        # Run the gdal:buildvrt processing algorithm to create the VRT
+        processing.run("gdal:buildvirtualraster", params)
+        QgsMessageLog.logMessage(
+            f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
+        )
+
+        # Add the VRT to the QGIS map
+        vrt_layer = QgsRasterLayer(vrt_filepath, "Combined VRT")
+
+        if vrt_layer.isValid():
+            QgsProject.instance().addMapLayer(vrt_layer)
+            QgsMessageLog.logMessage(
+                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+            )
+        else:
+            QgsMessageLog.logMessage(
+                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
+            )
