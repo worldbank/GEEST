@@ -16,5 +16,5 @@ Discover Opportunities. Drive Change.
 Join us in advancing women's empowerment and shaping a more equitable future in the renewable energy sector.
 
 <p align="center">
-  <img src="framework.png" height=400 alt="GEEST Framework" style="border-radius:10px;">
+  <img src="https://github.com/elbeejay/draft-docs/blob/main/framework.png?raw=true" height=600 alt="GEEST Framework" style="border-radius:10px;">
 </p>
