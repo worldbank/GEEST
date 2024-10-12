@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt
 from qgis.PyQt.QtGui import QMovie
-from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject
+from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
 from geest.gui.dialogs import IndicatorDetailDialog
@@ -284,6 +284,7 @@ class TreePanel(QWidget):
             menu = QMenu(self)
             menu.addAction(show_json_attributes_action)
             menu.addAction(run_item_action)
+            menu.addAction(add_to_map_action)
 
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
@@ -431,6 +432,35 @@ class TreePanel(QWidget):
         """Add the item to the map."""
         # TODO refactor use of the term Layer everywhere to Indicator
         # for now, some spaghetti code to get the layer_uri
+        gpkg_path = os.path.join(
+            self.working_directory, "study_area", "study_area.gpkg"
+        )
+
+        if item.role == "analysis":
+            layers = [
+                "study_area_bbox",
+                "study_area_bboxes",
+                "study_area_polygons",
+                "study_area_grid",
+            ]
+            for layer_name in layers:
+                gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
+                layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
+
+                if layer.isValid():
+                    QgsProject.instance().addMapLayer(layer)
+                    QgsMessageLog.logMessage(
+                        f"Added '{layer_name}' layer to the map.",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                else:
+                    QgsMessageLog.logMessage(
+                        f"Failed to add '{layer_name}' layer to the map.",
+                        tag="Geest",
+                        level=Qgis.Critical,
+                    )
+
         if item.role == "layer":
             layer_uri = item.data(3).get(f"Indicator Result File")
         else:
