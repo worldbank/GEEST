@@ -370,6 +370,8 @@ class PointPerCellProcessor:
         fields = QgsFields()
         fields.append(QgsField("id", QVariant.Int))
         fields.append(QgsField("intersecting_features", QVariant.Int))
+        # Will be used to hold the scaled value from 0-5
+        fields.append(QgsField("value", QVariant.Int))
 
         writer = QgsVectorFileWriter.create(
             fileName=output_path,
@@ -386,8 +388,15 @@ class PointPerCellProcessor:
 
         # Select only grid cells based on the keys (grid IDs) in the grid_point_counts dictionary
         request = QgsFeatureRequest().setFilterFids(list(grid_point_counts.keys()))
-
+        QgsMessageLog.logMessage(
+            f"Looping over {len(grid_point_counts.keys())} grid polygons",
+            "Geest",
+            Qgis.Info,
+        )
+        counter = 0
         for grid_feature in grid_layer.getFeatures(request):
+            QgsMessageLog.logMessage(f"Feature #{counter}", "Geest", Qgis.Info)
+            counter += 1
             new_feature = QgsFeature()
             new_feature.setGeometry(
                 grid_feature.geometry()
@@ -399,6 +408,7 @@ class PointPerCellProcessor:
             new_feature.setAttribute(
                 "intersecting_features", grid_point_counts[grid_feature.id()]
             )
+            new_feature.setAttribute("value", None)
 
             # Write the feature to the new layer
             writer.addFeature(new_feature)
@@ -440,42 +450,13 @@ class PointPerCellProcessor:
                 grid_layer.updateFeature(feature)
         return grid_layer
 
-    def _create_temp_layer(
-        self, features: List[QgsFeature], output_path: str
-    ) -> QgsVectorLayer:
-        """
-        Create a temporary vector layer with the provided features.
-
-        Args:
-            features (List[QgsFeature]): A list of selected QgsFeatures to add to the temporary layer.
-            output_path (str): The file path for storing the temporary output layer.
-
-        Returns:
-            QgsVectorLayer: A new temporary vector layer containing the selected features.
-        """
-        crs = features[0].geometry().crs() if features else None
-        temp_layer = QgsVectorLayer(
-            "Polygon?crs={}".format(crs.authid()), "temporary_layer", "memory"
-        )
-        temp_layer_data = temp_layer.dataProvider()
-
-        # Add fields and features to the new layer
-        temp_layer_data.addAttributes([f.fieldName() for f in features[0].fields()])
-        temp_layer.updateFields()
-
-        temp_layer_data.addFeatures(features)
-
-        # Save the memory layer to a file for persistence
-        QgsVectorFileWriter.writeAsVectorFormat(
-            temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
-        )
-
-        return QgsVectorLayer(output_path, os.path.basename(output_path), "ogr")
-
     def _rasterize_grid(
         self, grid_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
     ) -> str:
         """
+
+        ⭐️🚩⭐️ Warning this is not DRY - almost same function exists in study_area.py
+
         Rasterize the grid layer based on the 'value' attribute.
 
         Args:
