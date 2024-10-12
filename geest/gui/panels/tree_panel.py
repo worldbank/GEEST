@@ -162,6 +162,25 @@ class TreePanel(QWidget):
                 QgsMessageLog.logMessage(
                     f"Loaded model.json from {model_path}", "Geest", level=Qgis.Info
                 )
+
+                # If this is a first time use of the analysis project lets set some things up
+                analysis_item = self.model.rootItem.child(0)
+                analysis_data = analysis_item.data(3)
+                QgsMessageLog.logMessage(
+                    str(analysis_data), tag="Geest", level=Qgis.Info
+                )
+                if analysis_data.get("Working Folder", "Not Set"):
+                    analysis_data["Working Folder"] = self.working_directory
+                else:
+                    if not os.path.exists(analysis_data["Working Folder"]):
+                        analysis_data["Working Folder"] = self.working_directory
+                # Use the last dir in the working directory path as the analysis name
+                if analysis_data.get("Analysis Name", "Not Set"):
+                    analysis_data["Analysis Name"] = os.path.basename(
+                        self.working_directory
+                    )
+                analysis_item.setData(0, analysis_data.get("Analysis Name", "Analysis"))
+
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical

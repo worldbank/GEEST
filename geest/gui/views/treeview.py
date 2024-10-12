@@ -79,10 +79,13 @@ class JsonTreeModel(QAbstractItemModel):
         }
 
         # Create the "Analysis" item
+        status = ""
+        weighting = ""
+        role = "analysis"
         analysis_item = JsonTreeItem(
-            [analysis_name, "analysis", "", analysis_attributes],
-            "analysis",
-            self.rootItem,
+            [analysis_name, status, weighting, analysis_attributes],
+            role=role,
+            parent=self.rootItem,
         )
         self.rootItem.appendChild(analysis_item)
 
