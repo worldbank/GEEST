@@ -16,9 +16,10 @@ from qgis.core import (
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
+import processing
 from qgis.PyQt.QtCore import QVariant
 from .area_iterator import AreaIterator
-from typing import List, Tuple
+from typing import List
 import os
 
 
@@ -149,16 +150,16 @@ class PointPerCellProcessor:
             area_grid = self._select_grid_cells(self.grid_layer, area_points)
 
             # Step 4: Assign values to grid cells
-            area_grid = self._assign_values_to_grid(area_grid)
+            grid = self._assign_values_to_grid(area_grid)
 
             # Step 5: Rasterize the grid layer using the assigned values
-            # raster_output = self._rasterize_grid(area_grid, current_bbox, index)
+            raster_output = self._rasterize_grid(grid, current_bbox, index)
 
             # Step 6: Convert the raster to byte format
-            # byte_raster = self._convert_to_byte_raster(raster_output, index)
+            byte_raster = self._convert_to_byte_raster(raster_output, index)
 
         # Step 7: Combine the resulting byte rasters into a single VRT
-        # self._combine_rasters_to_vrt(index + 1)
+        self._combine_rasters_to_vrt(index + 1)
 
     def _reproject_layer(
         self, layer: QgsVectorLayer, target_crs: QgsCoordinateReferenceSystem
@@ -489,15 +490,39 @@ class PointPerCellProcessor:
         QgsMessageLog.logMessage(f"--- index {index}", tag="Geest", level=Qgis.Info)
 
         output_path = os.path.join(
-            self.workflow_directory, f"raster_output_{index}.tif"
+            self.workflow_directory, f"point_per_cell_output_{index}.tif"
         )
+
+        # Ensure resolution parameters are properly formatted as float values
+        x_res = 100.0  # 100m pixel size in X direction
+        y_res = 100.0  # 100m pixel size in Y direction
+        bbox = bbox.boundingBox()
+
+        # Define rasterization parameters for the temporary layer
         params = {
             "INPUT": grid_layer,
-            "FIELD": "value",
-            "EXTENT": bbox.boundingBox(),
+            "FIELD": None,
+            "BURN": 1,
+            "USE_Z": False,
+            "UNITS": 1,
+            "WIDTH": x_res,
+            "HEIGHT": y_res,
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},"
+            f"{bbox.yMinimum()},{bbox.yMaximum()}",  # Extent of the aligned bbox
+            "NODATA": 0,
+            "OPTIONS": "",
+            "DATA_TYPE": 0,  # byte
+            "INIT": None,
+            "INVERT": False,
+            "EXTRA": "-co NBITS=1",
             "OUTPUT": output_path,
         }
         processing.run("gdal:rasterize", params)
+        QgsMessageLog.logMessage(
+            f"Created grid for Point Per Cell: {output_path}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         return output_path
 
     def _convert_to_byte_raster(self, raster_path: str, index: int) -> str:
@@ -512,7 +537,7 @@ class PointPerCellProcessor:
             str: The file path to the byte raster output.
         """
         byte_raster_path = os.path.join(
-            self.workflow_directory, f"byte_raster_{index}.tif"
+            self.workflow_directory, f"point_per_cell_byte_raster_{index}.tif"
         )
         params = {
             "INPUT": raster_path,
