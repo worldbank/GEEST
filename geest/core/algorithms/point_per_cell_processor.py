@@ -334,9 +334,29 @@ class PointPerCellProcessor:
             QgsVectorLayer: A temporary layer containing grid cells that intersect with points.
         """
         QgsMessageLog.logMessage(
-            "Point per Cell Process Areas Started", tag="Geest", level=Qgis.Info
+            "Point per Cell Process Select Grid Cells Started",
+            tag="Geest",
+            level=Qgis.Info,
         )
-
+        if not self.grid_layer.isValid():
+            raise QgsProcessingException(
+                f"Failed to load 'study_area_grid' layer from the GeoPackage at {self.gpkg_path}"
+            )
+        if not self.points_layer.isValid():
+            raise QgsProcessingException(
+                f"Failed to load 'points layer' layer from the GeoPackage at {self.gpkg_path}"
+            )
+        if points_layer.featureCount() == 0:
+            QgsMessageLog.logMessage(
+                "No features found in points layer. Skipping grid cell selection.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return QgsVectorLayer(
+                "Polygon?crs={}".format(grid_layer.crs().authid()),
+                "empty_layer",
+                "memory",
+            )
         output_path = os.path.join(self.workflow_directory, "area_grid_selected.shp")
 
         # Create a memory layer to store the selected grid cells
@@ -357,10 +377,23 @@ class PointPerCellProcessor:
         combined_points_geom = QgsGeometry.unaryUnion(
             [point_feature.geometry() for point_feature in points_layer.getFeatures()]
         )
-
+        QgsMessageLog.logMessage(
+            f"Number of points in combined geometry: {combined_points_geom.asMultiPoint().__len__()}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        QgsMessageLog.logMessage(
+            "Point per Cell Process Select Grid Cells creating request",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         # Use QgsFeatureRequest to filter grid cells that intersect with the combined points geometry
         request = QgsFeatureRequest().setFilterRect(combined_points_geom.boundingBox())
-
+        QgsMessageLog.logMessage(
+            "Point per Cell Process Select Grid Cells Iterating over dataset",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         # Iterate over the grid cells and select only those that intersect with the combined points geometry
         selected_features = []
         for grid_feature in grid_layer.getFeatures(request):
