@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>3.4. Troubleshooting</title>
+    <title>3.7. Troubleshooting</title>
   
   
   
@@ -67,8 +67,8 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="3.5. FAQ" href="faq.html" />
-    <link rel="prev" title="3.3. Data Collection" href="datacollection.html" />
+    <link rel="next" title="3.8. FAQ" href="faq.html" />
+    <link rel="prev" title="3.6. Data Collection" href="datacollection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
     <meta name="docbuild:last-update" content="Oct 12, 2024"/>
@@ -187,16 +187,22 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="../download.html">2. Download GEEST</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../user_guide.html">3. User Guide</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="install.html">3.1. Install the tool</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="navigation.html">3.2. Navigation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="contextual.html">3.2.1. Contextual</a></li>
-<li class="toctree-l3"><a class="reference internal" href="accessibility.html">3.2.2. Accessibility</a></li>
-<li class="toctree-l3"><a class="reference internal" href="placecharacterization.html">3.2.3. Place Characterization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="insights.html">3.2.4. Insights</a></li>
+
+
+
+<li class="toctree-l2 has-children"><a class="reference internal" href="navigation.html">3.5. Navigation</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="contextual.html">3.5.1. Contextual</a></li>
+<li class="toctree-l3"><a class="reference internal" href="accessibility.html">3.5.2. Accessibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="placecharacterization.html">3.5.3. Place Characterization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="insights.html">3.5.4. Insights</a></li>
+
+
+
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="datacollection.html">3.3. Data Collection</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">3.4. Troubleshooting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html">3.5. FAQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datacollection.html">3.6. Data Collection</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">3.7. Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html">3.8. FAQ</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../background.html">4. Project Background</a></li>
@@ -403,7 +409,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
 </div></div>
       
     </div>
@@ -419,6 +427,20 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessibilty-tabs-permissions-error">3.7.1. ACCESSIBILTY TABS PERMISSIONS ERROR</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#qgis-plugin-interface-widgets-and-text-are-distorted-and-scaled-incorrectly">3.7.2. QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#raster-outputs-not-being-loaded-and-displaying-correctly">3.7.3. RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-output-directory-not-set">3.7.4. ERROR: OUTPUT DIRECTORY NOT SET</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-country-boundary-polygon-not-set">3.7.5. ERROR: COUNTRY BOUNDARY POLYGON NOT SET</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-co-ordinate-reference-system-crs-not-set">3.7.6. ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative-way-to-refresh-the-plugin-if-it-freezes-or-does-not-run-as-expected">3.7.7. ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -429,8 +451,68 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="troubleshooting">
-<h1><span class="section-number">3.4. </span>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">#</a></h1>
-<p>troubleshooting GEEST</p>
+<h1><span class="section-number">3.7. </span>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">#</a></h1>
+<section id="accessibilty-tabs-permissions-error">
+<h2><span class="section-number">3.7.1. </span>ACCESSIBILTY TABS PERMISSIONS ERROR<a class="headerlink" href="#accessibilty-tabs-permissions-error" title="Permalink to this heading">#</a></h2>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/63edfc18-8294-478c-bcc5-1a4f28c07711" /></p>
+<p>This error occurs when some of the shapefiles produced in the temp folder of the working directory are trying to be overwritten or deleted but can’t because it’s still being stored in QGIS’s memory. This can occurs even when the layer is removed from the QGIS table of contents.</p>
+<p><strong>This error may also occur when the tool runs correctly so first check if the desired output file was produced in the working directory.</strong></p>
+<p>If the file is not produced you can try the following:</p>
+<ul class="simple">
+<li><p>Delete the <em>temp</em> folder in the working directory</p></li>
+<li><p>If you cannot delete the <em>temp</em> folder you will have to close QGIS and open it again, complete the setup tab, go back to the tab where the error occurred and re-run the tab again.</p></li>
+</ul>
+</section>
+<section id="qgis-plugin-interface-widgets-and-text-are-distorted-and-scaled-incorrectly">
+<h2><span class="section-number">3.7.2. </span>QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY<a class="headerlink" href="#qgis-plugin-interface-widgets-and-text-are-distorted-and-scaled-incorrectly" title="Permalink to this heading">#</a></h2>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/e195416b-ee86-4998-9ca5-a4784f7c724e" /></p>
+<p>This is a problem linked to display settings caused by the connection of multiple monitors and/or varying display scales and resolutions, rather than a QGIS or plugin-related issue. This is backed by a Microsoft support post, linked <a class="reference external" href="https://support.microsoft.com/en-gb/topic/windows-scaling-issues-for-high-dpi-devices-508483cd-7c59-0d08-12b0-960b99aa347d">here</a>, highlighting the issues that may be experienced when using a high-DPI device, such as a 4k monitor. Additionally, in the scaling display setting, Microsoft indicates that entering a custom scaling size between 100% - 500% is not recommended as “…it can cause text and apps to become unreadable.”</p>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/248fde5c-dd1a-41d0-94ad-2ace20a74f95" /></p>
+<p>Possible solutions to this are:</p>
+<ul class="simple">
+<li><p>Adjust the scale for all monitors to 100%.</p></li>
+<li><p>Ensure that the display resolution is the same for both monitors. i.e. If the smallest monitor is set to 1920 x 1080 set the 4k monitor to this display resolution as well.</p></li>
+</ul>
+</section>
+<section id="raster-outputs-not-being-loaded-and-displaying-correctly">
+<h2><span class="section-number">3.7.3. </span>RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY<a class="headerlink" href="#raster-outputs-not-being-loaded-and-displaying-correctly" title="Permalink to this heading">#</a></h2>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/10de6c72-f8f6-47b8-adb3-930f5c625f66" /></p>
+<p>Occasionally, some of the outputs automatically loaded to the QGIS table of contents do not display correctly. To correct this, try removing the layer that is displayed incorrectly and add it again to QGIS.</p>
+</section>
+<section id="error-output-directory-not-set">
+<h2><span class="section-number">3.7.4. </span>ERROR: OUTPUT DIRECTORY NOT SET<a class="headerlink" href="#error-output-directory-not-set" title="Permalink to this heading">#</a></h2>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/b2f2959e-85c4-4e89-8493-dac2b9a20f07" /></p>
+<p>If you see the following error message, please check if your output directory has been set in the “Setup” tab.</p>
+</section>
+<section id="error-country-boundary-polygon-not-set">
+<h2><span class="section-number">3.7.5. </span>ERROR: COUNTRY BOUNDARY POLYGON NOT SET<a class="headerlink" href="#error-country-boundary-polygon-not-set" title="Permalink to this heading">#</a></h2>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/75882e9d-a9af-43fc-9f68-0293c75b49b3" /></p>
+<p>If you see the following error message, please check if you’re country boundary polygon layer has been set in the “Setup” tab.</p>
+</section>
+<section id="error-co-ordinate-reference-system-crs-not-set">
+<h2><span class="section-number">3.7.6. </span>ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET<a class="headerlink" href="#error-co-ordinate-reference-system-crs-not-set" title="Permalink to this heading">#</a></h2>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/120c0cf9-e526-4d8b-adff-de3a9d2f7fb8" /></p>
+<p>If you see the following error message, please check if you’re CRS has been set in the “Setup” tab.</p>
+</section>
+<section id="alternative-way-to-refresh-the-plugin-if-it-freezes-or-does-not-run-as-expected">
+<h2><span class="section-number">3.7.7. </span>ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED<a class="headerlink" href="#alternative-way-to-refresh-the-plugin-if-it-freezes-or-does-not-run-as-expected" title="Permalink to this heading">#</a></h2>
+<ol class="arabic">
+<li><p>Install the “Plugin Reloader” plugin.</p>
+<p>1.1 Navigate to and open “Manage and Install Plugins…” under the plugins tab in QGIS.</p>
+<p>1.2 In the search bar type “plugin reloader”.</p>
+<p>1.3 Select the “Plugin Reloader” plugin and click on the install button.</p>
+</li>
+</ol>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/801db189-92ca-4755-a79f-8898b2e43a2f" /></p>
+<p>1.4 Navigate to the “Plugin Reloader” configuration window under the Plugins tab.</p>
+<p><em>Plugins</em> → <em>Plugin Reloader</em> → <em>Configure</em></p>
+<p>1.5 From the drop-down list select the “gender_indicator_tool” plugin and press “OK”.</p>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/3dc21c04-2ebe-4b33-92bc-1020746ee9e3" /></p>
+<p>1.6 If you encounter an unexpected error in the tool that has not been mentioned in any of the previous troubleshooting sections you can try runing the “plugin reload” tool</p>
+<p><img alt="image" src="https://github.com/worldbank/GEEST/assets/120469484/80e1ae57-8608-4392-8df2-46e5b5d4789e" /></p>
+<p><strong>OR</strong></p>
+<p><strong>If the “Plugin Reloader” does not resolve the error close QGIS, restart it again, and re-run the process you were trying to execute.</strong></p>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -469,7 +551,7 @@ document.write(`
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">3.3. </span>Data Collection</p>
+        <p class="prev-next-title"><span class="section-number">3.6. </span>Data Collection</p>
       </div>
     </a>
     <a class="right-next"
@@ -477,7 +559,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">3.5. </span>FAQ</p>
+        <p class="prev-next-title"><span class="section-number">3.8. </span>FAQ</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -487,6 +569,26 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessibilty-tabs-permissions-error">3.7.1. ACCESSIBILTY TABS PERMISSIONS ERROR</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#qgis-plugin-interface-widgets-and-text-are-distorted-and-scaled-incorrectly">3.7.2. QGIS PLUGIN/INTERFACE WIDGETS AND TEXT ARE DISTORTED AND SCALED INCORRECTLY</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#raster-outputs-not-being-loaded-and-displaying-correctly">3.7.3. RASTER OUTPUTS NOT BEING LOADED AND DISPLAYING CORRECTLY</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-output-directory-not-set">3.7.4. ERROR: OUTPUT DIRECTORY NOT SET</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-country-boundary-polygon-not-set">3.7.5. ERROR: COUNTRY BOUNDARY POLYGON NOT SET</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#error-co-ordinate-reference-system-crs-not-set">3.7.6. ERROR: CO-ORDINATE REFERENCE SYSTEM (CRS) NOT SET</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative-way-to-refresh-the-plugin-if-it-freezes-or-does-not-run-as-expected">3.7.7. ALTERNATIVE WAY TO REFRESH THE PLUGIN IF IT FREEZES OR DOES NOT RUN AS EXPECTED</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

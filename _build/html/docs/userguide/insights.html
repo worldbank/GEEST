@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>3.2.4. Insights</title>
+    <title>3.5.4. Insights</title>
   
   
   
@@ -67,8 +67,8 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="3.3. Data Collection" href="datacollection.html" />
-    <link rel="prev" title="3.2.3. Place Characterization" href="placecharacterization.html" />
+    <link rel="next" title="3.6. Data Collection" href="datacollection.html" />
+    <link rel="prev" title="3.5.3. Place Characterization" href="placecharacterization.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
     <meta name="docbuild:last-update" content="Oct 12, 2024"/>
@@ -187,16 +187,22 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="../download.html">2. Download GEEST</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../user_guide.html">3. User Guide</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="install.html">3.1. Install the tool</a></li>
-<li class="toctree-l2 current active has-children"><a class="reference internal" href="navigation.html">3.2. Navigation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="contextual.html">3.2.1. Contextual</a></li>
-<li class="toctree-l3"><a class="reference internal" href="accessibility.html">3.2.2. Accessibility</a></li>
-<li class="toctree-l3"><a class="reference internal" href="placecharacterization.html">3.2.3. Place Characterization</a></li>
-<li class="toctree-l3 current active"><a class="current reference internal" href="#">3.2.4. Insights</a></li>
+
+
+
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="navigation.html">3.5. Navigation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="contextual.html">3.5.1. Contextual</a></li>
+<li class="toctree-l3"><a class="reference internal" href="accessibility.html">3.5.2. Accessibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="placecharacterization.html">3.5.3. Place Characterization</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">3.5.4. Insights</a></li>
+
+
+
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="datacollection.html">3.3. Data Collection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">3.4. Troubleshooting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html">3.5. FAQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datacollection.html">3.6. Data Collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">3.7. Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html">3.8. FAQ</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../background.html">4. Project Background</a></li>
@@ -403,7 +409,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
 </div></div>
       
     </div>
@@ -419,6 +427,25 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">3.5.4. Insights</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">3.5.4.1. Enablement</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">3.5.5. Step 1: Classify into discrete classes</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">3.5.6. Step 2: Combine score and population classifications</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">3.5.7. Step 3: Aggregation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">3.5.7.1. RE Zone Raster Locations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">3.5.7.2. RE Point Locations</a></li>
+</ul>
+</li>
+</ul>
+
+            </nav>
         </div>
     </div>
 </div>
@@ -429,8 +456,74 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="insights">
-<h1><span class="section-number">3.2.4. </span>Insights<a class="headerlink" href="#insights" title="Permalink to this heading">#</a></h1>
-<p>novel insights…</p>
+<h1><span class="section-number">3.5.4. </span>Insights<a class="headerlink" href="#insights" title="Permalink to this heading">#</a></h1>
+<section id="enablement">
+<h2><span class="section-number">3.5.4.1. </span>Enablement<a class="headerlink" href="#enablement" title="Permalink to this heading">#</a></h2>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ENA.jpg" alt="picture">
+</p>
+</section>
+</section>
+<section id="step-1-classify-into-discrete-classes">
+<h1><span class="section-number">3.5.5. </span>Step 1: Classify into discrete classes<a class="headerlink" href="#step-1-classify-into-discrete-classes" title="Permalink to this heading">#</a></h1>
+<p>1.1 Navigate to and select the enablement score input raster file. This can be the final aggregate score (WEE.tif), a dimension aggregate score, or even a single factor output layer.</p>
+<p>1.2 Click the “Classify” button under the “Enablement Score Input layer” field to run the algorithm.</p>
+<p>1.3 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/1) Level of Enablement Classification” folder. (Project_Folder/Insights/1) Level of Enablement Classification/WEE_score.tif). The user can rename the output file to the preferred filename.</p>
+<p>1.4 Navigate to and select the population input raster file.</p>
+<ul class="simple">
+<li><p>E.g., Input File: Population/Female_population_35_39.tif (Any of the age ranges can be used as input).</p></li>
+</ul>
+<p>1.5 Click the “Classify” button under the “Population Input layer” field to run the algorithm.</p>
+<p>1.6 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/2) Relative Population Count Classification” folder. (Project_Folder/Insights/2) Relative Population Count Classification/Population.tif). The user can rename the output file to the preferred filename.</p>
+</section>
+<section id="step-2-combine-score-and-population-classifications">
+<h1><span class="section-number">3.5.6. </span>Step 2: Combine score and population classifications<a class="headerlink" href="#step-2-combine-score-and-population-classifications" title="Permalink to this heading">#</a></h1>
+<p>2.1 Navigate to and select the “Level of Enablement” output raster file produced in step 1.2 (WEE_score.tif). This file path will be automatically populated if step 1.2 was executed in the same work session.</p>
+<p>2.2 Navigate to and select the “Relative Population Count” output raster file produced in step 1.5 (Population.tif). This file path will be automatically populated if step 1.5 was executed in the same work session.</p>
+<p>2.3 Click the “Combine Classification” button to run the algorithm combining the “Level of Enablement” and “Relative Population Count” raster layers.</p>
+<p>2.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification” folder. (Project_Folder/Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification/WEE_pop_score.tif). The user can rename the output file to the preferred filename.</p>
+</section>
+<section id="step-3-aggregation">
+<h1><span class="section-number">3.5.7. </span>Step 3: Aggregation<a class="headerlink" href="#step-3-aggregation" title="Permalink to this heading">#</a></h1>
+<p>3.1 Navigate to and select the “Combine Classification” output raster file produced in step 2.3. This file path will be automatically populated if step 2.3 was executed in the same work session.</p>
+<p>3.2 Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g., municipal boundary layer).</p>
+<ul class="simple">
+<li><p>E.G., Input File: AdminBoundaries/Admin2.shp (Any admin level can be used as input)</p></li>
+</ul>
+<p>3.3 Click the “Execute” button to run the algorithm.</p>
+<p>3.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/4) Aggregation” folder. (Project_Folder/Insights/4) Aggregation/WEE_pop_adm_score.shp). The user can rename the output file to the preferred filename.</p>
+<section id="re-zone-raster-locations">
+<h2><span class="section-number">3.5.7.1. </span>RE Zone Raster Locations<a class="headerlink" href="#re-zone-raster-locations" title="Permalink to this heading">#</a></h2>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/REzone.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select the combined classification input file produced in step 2.3 of the “Enablement” tab (WEE_pop_score.tif). This file path will be automatically populated if step 2.3 of the “Enablement” tab was executed in the same work session.</p></li>
+<li><p>Navigate to and select the aggregated combined classification input file produced in step 3.3 of the “Enablement” tab (WEE_pop_adm_score.shp). This file path will be automatically populated if step 3.3 of the “Enablement” tab was executed in the same work session.</p></li>
+<li><p>Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with “no data” or “inf” values in the raster file).</p>
+<ul class="simple">
+<li><p>E.G. Input File: RE/WBG_REZoning_DOM_score_wind.tif</p></li>
+<li><p>E.G. Input File: RE/WBG_REZoning_DOM_score_solar.tif</p></li>
+</ul>
+</li>
+<li><p>Click the “Execute” button to run the algorithm.</p></li>
+<li><p>The 2 output files will be stored in the project folder specified in the “Setup” tab, under Raster Locations/AOI_WEE_score.tif &amp; Project_Folder/Insights/5) RE Zone Raster Locations/AOI_WEE_score.shp). The user can rename the output file to the preferred filename.</p></li>
+</ol>
+</section>
+<section id="re-point-locations">
+<h2><span class="section-number">3.5.7.2. </span>RE Point Locations<a class="headerlink" href="#re-point-locations" title="Permalink to this heading">#</a></h2>
+<p align="center">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/REpoint.jpg" alt="picture">
+</p>
+<ol class="arabic simple">
+<li><p>Navigate to and select the combined classification input file produced in step 2.3 of the “Enablement” tab (WEE_pop_score.tif). This file path will be automatically populated if step 2.3 of the “Enablement” tab was executed in the same work session.</p></li>
+<li><p>Navigate to and select the aggregated combined classification input file produced in step 3.3 of the “Enablement” tab (WEE_pop_adm_score.shp). This file path will be automatically populated if step 3.3 of the “Enablement” tab was executed in the same work session.</p></li>
+<li><p>Navigate to and select the RE point locations input shapefile of interest. (These could be existing RE job locations or other points of interest)</p></li>
+<li><p>Set radial buffer distance in meters.</p></li>
+<li><p>Click the “Execute” button to run the algorithm.</p></li>
+<li><p>The 2 output shapefiles will be stored in the project folder specified in the “Setup” tab, Locations/POI_WEE_score.shp &amp; Project_Folder/Insights/6) RE Point Locations/POI_WEE_score.shp). The user can rename the output file to preferred filename.</p></li>
+</ol>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -469,7 +562,7 @@ document.write(`
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">3.2.3. </span>Place Characterization</p>
+        <p class="prev-next-title"><span class="section-number">3.5.3. </span>Place Characterization</p>
       </div>
     </a>
     <a class="right-next"
@@ -477,7 +570,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">3.3. </span>Data Collection</p>
+        <p class="prev-next-title"><span class="section-number">3.6. </span>Data Collection</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -487,6 +580,31 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">3.5.4. Insights</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">3.5.4.1. Enablement</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">3.5.5. Step 1: Classify into discrete classes</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">3.5.6. Step 2: Combine score and population classifications</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">3.5.7. Step 3: Aggregation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">3.5.7.1. RE Zone Raster Locations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">3.5.7.2. RE Point Locations</a></li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+</div></div>
               
             
           </div>

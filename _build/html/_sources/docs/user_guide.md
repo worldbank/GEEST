@@ -2,5 +2,3 @@
 
 ```{tableofcontents}
 ```
-
-using GEEST

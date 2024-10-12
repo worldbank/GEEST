@@ -2,5 +2,3 @@
 
 ```{tableofcontents}
 ```
-
-navigating GEEST...
