@@ -1,18 +1,20 @@
 from qgis.core import (
-    QgsVectorLayer,
-    QgsProcessingFeedback,
-    QgsProcessingException,
-    QgsFeature,
-    QgsCoordinateTransformContext,
-    QgsGeometry,
-    QgsVectorFileWriter,
     edit,
-    QgsMessageLog,
     Qgis,
-    QgsFeatureRequest,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
+    QgsCoordinateTransformContext,
+    QgsFeature,
+    QgsFeatureRequest,
+    QgsFields,
+    QgsField,
+    QgsGeometry,
+    QgsMessageLog,
+    QgsProcessingException,
+    QgsProcessingFeedback,
     QgsProject,
+    QgsVectorFileWriter,
+    QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
 from .area_iterator import AreaIterator
@@ -324,91 +326,117 @@ class PointPerCellProcessor:
         points_layer: QgsVectorLayer,
     ) -> QgsVectorLayer:
         """
-        Select grid cells that intersect with points by using spatial filtering (reprojecting points to match grid CRS).
+        Select grid cells that intersect with points, count the number of intersecting points for each cell,
+        and create a new grid layer with the count information. Only the grid cell ID and the count of intersecting
+        points will be retained in the new layer.
 
         Args:
             grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
             points_layer (QgsVectorLayer): The input layer containing points (e.g., pedestrian crossings).
 
         Returns:
-            QgsVectorLayer: A temporary layer containing grid cells that intersect with points.
+            QgsVectorLayer: A new layer with grid cells containing a count of intersecting points.
         """
         QgsMessageLog.logMessage(
-            "Point per Cell Process Select Grid Cells Started",
+            "Selecting grid cells that intersect with points and counting intersections.",
             tag="Geest",
             level=Qgis.Info,
         )
-        if not self.grid_layer.isValid():
-            raise QgsProcessingException(
-                f"Failed to load 'study_area_grid' layer from the GeoPackage at {self.gpkg_path}"
-            )
-        if not self.points_layer.isValid():
-            raise QgsProcessingException(
-                f"Failed to load 'points layer' layer from the GeoPackage at {self.gpkg_path}"
-            )
-        if points_layer.featureCount() == 0:
-            QgsMessageLog.logMessage(
-                "No features found in points layer. Skipping grid cell selection.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            return QgsVectorLayer(
-                "Polygon?crs={}".format(grid_layer.crs().authid()),
-                "empty_layer",
-                "memory",
-            )
-        output_path = os.path.join(self.workflow_directory, "area_grid_selected.shp")
 
-        # Create a memory layer to store the selected grid cells
-        temp_layer = QgsVectorLayer(
-            f"Polygon?crs={grid_layer.crs().authid()}", "area_grid_selected", "memory"
-        )
-        temp_layer_data = temp_layer.dataProvider()
+        # Create a dictionary to hold the count of intersecting points for each grid cell ID
+        grid_point_counts = {}
 
-        # Add fields to the temporary layer
-        temp_layer_data.addAttributes(grid_layer.fields())
-        temp_layer.updateFields()
-        QgsMessageLog.logMessage(
-            "Point per Cell Process Select Grid Cells combining geoms",
-            tag="Geest",
-            level=Qgis.Info,
+        # Iterate over each point and determine which grid cells it intersects
+        for point_feature in points_layer.getFeatures():
+            point_geom = point_feature.geometry()
+            for grid_feature in grid_layer.getFeatures():
+                if grid_feature.geometry().intersects(point_geom):
+                    grid_id = grid_feature.id()
+                    if grid_id in grid_point_counts:
+                        grid_point_counts[grid_id] += 1
+                    else:
+                        grid_point_counts[grid_id] = 1
+
+        # Create a new layer to store the grid cells with point counts
+        output_path = os.path.join(self.workflow_directory, "grid_with_counts.gpkg")
+        options = QgsVectorFileWriter.SaveVectorOptions()
+        options.driverName = "GPKG"
+        options.fileEncoding = "UTF-8"
+        options.layerName = "grid_with_point_counts"
+
+        # Define fields for the new layer: only 'id' and 'intersecting_features'
+        fields = QgsFields()
+        fields.append(QgsField("id", QVariant.Int))
+        fields.append(QgsField("intersecting_features", QVariant.Int))
+
+        writer = QgsVectorFileWriter.create(
+            fileName=output_path,
+            fields=fields,
+            geometryType=grid_layer.wkbType(),
+            srs=grid_layer.crs(),
+            transformContext=QgsCoordinateTransformContext(),
+            options=options,
         )
-        # Combine geometries of all point features into a single geometry
-        combined_points_geom = QgsGeometry.unaryUnion(
-            [point_feature.geometry() for point_feature in points_layer.getFeatures()]
-        )
-        QgsMessageLog.logMessage(
-            f"Number of points in combined geometry: {combined_points_geom.asMultiPoint().__len__()}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        QgsMessageLog.logMessage(
-            "Point per Cell Process Select Grid Cells creating request",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        # Use QgsFeatureRequest to filter grid cells that intersect with the combined points geometry
-        request = QgsFeatureRequest().setFilterRect(combined_points_geom.boundingBox())
-        QgsMessageLog.logMessage(
-            "Point per Cell Process Select Grid Cells Iterating over dataset",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        # Iterate over the grid cells and select only those that intersect with the combined points geometry
-        selected_features = []
+        if writer.hasError() != QgsVectorFileWriter.NoError:
+            raise QgsProcessingException(
+                f"Failed to create output layer: {writer.errorMessage()}"
+            )
+
+        # Select only grid cells based on the keys (grid IDs) in the grid_point_counts dictionary
+        request = QgsFeatureRequest().setFilterFids(list(grid_point_counts.keys()))
+
         for grid_feature in grid_layer.getFeatures(request):
-            if grid_feature.geometry().intersects(combined_points_geom):
-                selected_features.append(grid_feature)
+            new_feature = QgsFeature()
+            new_feature.setGeometry(
+                grid_feature.geometry()
+            )  # Use the original geometry
 
-        # Add the selected grid cells to the temporary layer
-        temp_layer_data.addFeatures(selected_features)
+            # Set the 'id' and 'intersecting_features' attributes
+            new_feature.setFields(fields)
+            new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
+            new_feature.setAttribute(
+                "intersecting_features", grid_point_counts[grid_feature.id()]
+            )
 
-        # Save the temporary layer to a file for persistence
-        QgsVectorFileWriter.writeAsVectorFormat(
-            temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
+            # Write the feature to the new layer
+            writer.addFeature(new_feature)
+
+        del writer  # Finalize the writer and close the file
+
+        QgsMessageLog.logMessage(
+            f"Grid cells with point counts saved to {output_path}",
+            tag="Geest",
+            level=Qgis.Info,
         )
 
-        return QgsVectorLayer(output_path, "area_grid_selected", "ogr")
+        return QgsVectorLayer(
+            f"{output_path}|layername=grid_with_point_counts",
+            "grid_with_point_counts",
+            "ogr",
+        )
+
+    def _assign_values_to_grid(self, grid_layer: QgsVectorLayer) -> QgsVectorLayer:
+        """
+        Assign values to grid cells based on the number of intersecting features.
+
+        A value of 3 is assigned to cells that intersect with one feature, and a value of 5 is assigned to
+        cells that intersect with more than one feature.
+
+        Args:
+            grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
+
+        Returns:
+            QgsVectorLayer: The grid layer with values assigned to the 'value' field.
+        """
+        with edit(grid_layer):
+            for feature in grid_layer.getFeatures():
+                intersecting_features = feature["intersecting_features"]
+                if intersecting_features == 1:
+                    feature["value"] = 3
+                elif intersecting_features > 1:
+                    feature["value"] = 5
+                grid_layer.updateFeature(feature)
+        return grid_layer
 
     def _create_temp_layer(
         self, features: List[QgsFeature], output_path: str
@@ -441,29 +469,6 @@ class PointPerCellProcessor:
         )
 
         return QgsVectorLayer(output_path, os.path.basename(output_path), "ogr")
-
-    def _assign_values_to_grid(self, grid_layer: QgsVectorLayer) -> QgsVectorLayer:
-        """
-        Assign values to grid cells based on the number of intersecting features.
-
-        A value of 3 is assigned to cells that intersect with one feature, and a value of 5 is assigned to
-        cells that intersect with more than one feature.
-
-        Args:
-            grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
-
-        Returns:
-            QgsVectorLayer: The grid layer with values assigned to the 'value' field.
-        """
-        with edit(grid_layer):
-            for feature in grid_layer.getFeatures():
-                intersecting_features = feature["intersecting_features"]
-                if intersecting_features == 1:
-                    feature["value"] = 3
-                elif intersecting_features > 1:
-                    feature["value"] = 5
-                grid_layer.updateFeature(feature)
-        return grid_layer
 
     def _rasterize_grid(
         self, grid_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
