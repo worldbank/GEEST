@@ -1,0 +1,3 @@
+### Place Characterization
+
+characterizing a place...

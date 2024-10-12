@@ -2,9 +2,26 @@ format: jb-book
 root: README
 
 parts:
-  - caption: GEEST
+  - caption:
+    numbered: true
     chapters:
+      - file: docs/about
+      - file: docs/download
       - file: docs/user_guide
+        sections:
+        - file: docs/userguide/install
+        - file: docs/userguide/navigation
+          sections:
+          - file: docs/userguide/contextual
+          - file: docs/userguide/accessibility
+          - file: docs/userguide/placecharacterization
+          - file: docs/userguide/insights
+        - file: docs/userguide/datacollection
+        - file: docs/userguide/troubleshooting
+        - file: docs/userguide/faq
+      - file: docs/background
+      - file: docs/acknowledgements
+      - file: docs/training
   - caption: Additional Resources
     chapters:
       - url: https://datacatalog.worldbank.org/search/collections/genderspatial
