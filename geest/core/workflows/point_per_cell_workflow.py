@@ -57,7 +57,9 @@ class PointPerCellWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             "----------------------------------", tag="Geest", level=Qgis.Info
         )
-        points_layer = QgsVectorLayer()
+        points_layer = QgsVectorLayer(
+            self.attributes.get("Point per Cell Layer Source", "")
+        )
         processor = PointPerCellProcessor(
             points_layer=points_layer,
             gpkg_path=self.gpkg_path,
