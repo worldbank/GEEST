@@ -365,7 +365,11 @@ class PointPerCellProcessor:
                         grid_point_counts[grid_id] += 1
                     else:
                         grid_point_counts[grid_id] = 1
-
+        QgsMessageLog.logMessage(
+            f"{len(grid_point_counts)} intersections found.",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         # Create a new layer to store the grid cells with point counts
         output_path = os.path.join(self.workflow_directory, "grid_with_counts.gpkg")
         options = QgsVectorFileWriter.SaveVectorOptions()
@@ -402,7 +406,7 @@ class PointPerCellProcessor:
         )
         counter = 0
         for grid_feature in grid_layer.getFeatures(request):
-            QgsMessageLog.logMessage(f"Feature #{counter}", "Geest", Qgis.Info)
+            QgsMessageLog.logMessage(f"Writing Feature #{counter}", "Geest", Qgis.Info)
             counter += 1
             new_feature = QgsFeature()
             new_feature.setGeometry(
@@ -486,12 +490,11 @@ class PointPerCellProcessor:
         x_res = 100.0  # 100m pixel size in X direction
         y_res = 100.0  # 100m pixel size in Y direction
         bbox = bbox.boundingBox()
-
         # Define rasterization parameters for the temporary layer
         params = {
             "INPUT": grid_layer,
-            "FIELD": None,
-            "BURN": 1,
+            "FIELD": "value",
+            "BURN": -9999,
             "USE_Z": False,
             "UNITS": 1,
             "WIDTH": x_res,
@@ -500,12 +503,14 @@ class PointPerCellProcessor:
             f"{bbox.yMinimum()},{bbox.yMaximum()}",  # Extent of the aligned bbox
             "NODATA": -9999,
             "OPTIONS": "",
+            #'OPTIONS':'COMPRESS=DEFLATE|PREDICTOR=2|ZLEVEL=9',
             "DATA_TYPE": 0,  # byte
             "INIT": None,
             "INVERT": False,
-            "EXTRA": "-co NBITS=1",
+            "EXTRA": "",
             "OUTPUT": output_path,
         }
+
         processing.run("gdal:rasterize", params)
         QgsMessageLog.logMessage(
             f"Created grid for Point Per Cell: {output_path}",
