@@ -16,6 +16,7 @@ from .base_indicator_widget import BaseIndicatorWidget
 
 class PolygonWidget(BaseIndicatorWidget):
     """
+
     A widget for selecting a polygon (area) layer with options for shapefile inputs.
 
     This widget provides one `QgsMapLayerComboBox` components for selecting polygon layers,
@@ -61,8 +62,7 @@ class PolygonWidget(BaseIndicatorWidget):
             "Polygon Layer - shapefile will have preference"
         )
         self.main_layout.addWidget(self.polygon_layer_label)
-
-        # Polygon Layer ComboBox (Filtered to line layers)
+        # Polygon Layer ComboBox (Filtered to polygon layers)
         self.polygon_layer_combo = QgsMapLayerComboBox()
         self.polygon_layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
         self.main_layout.addWidget(self.polygon_layer_combo)
@@ -121,19 +121,23 @@ class PolygonWidget(BaseIndicatorWidget):
         # Collect data for the polygon layer
         polygon_layer = self.polygon_layer_combo.currentLayer()
         if polygon_layer:
-            self.attributes[f"{self.widget_key} Layer Name"] = polygon_layer.name()
-            self.attributes[f"{self.widget_key} Layer Source"] = polygon_layer.source()
-            self.attributes[f"{self.widget_key} Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key} Polygon Layer Name"] = (
+                polygon_layer.name()
+            )
+            self.attributes[f"{self.widget_key} Polygon Layer Source"] = (
+                polygon_layer.source()
+            )
+            self.attributes[f"{self.widget_key} Polygon Layer Provider Type"] = (
                 polygon_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Layer CRS"] = (
+            self.attributes[f"{self.widget_key} Polygon Layer CRS"] = (
                 polygon_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Layer Wkb Type"] = (
+            self.attributes[f"{self.widget_key} Polygon Layer Wkb Type"] = (
                 polygon_layer.wkbType()
             )
-            self.attributes[f"{self.widget_key} Layer ID"] = polygon_layer.id()
-        self.attributes[f"{self.widget_key} Shapefile"] = (
+            self.attributes[f"{self.widget_key} Polygon Layer ID"] = polygon_layer.id()
+        self.attributes[f"{self.widget_key} Polygon Shapefile"] = (
             self.polygon_shapefile_line_edit.text()
         )
 
