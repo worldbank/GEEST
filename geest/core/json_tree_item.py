@@ -126,7 +126,7 @@ class JsonTreeItem:
             path.append(
                 self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
             )
-            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+            path.append(self.itemData[3].get("ID", "").lower().replace(" ", "_"))
         elif self.isFactor():
             path.append(
                 self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
@@ -137,22 +137,24 @@ class JsonTreeItem:
         return path
 
     def getIndicatorAttributes(self):
-        """Return the dict of indicators (or layers) under this factor."""
+        """Return the dict of indicators (or layers) under this indicator."""
         attributes = {}
         if self.isIndicator():
-            attributes["Dimension ID"] = self.parentItem.itemData[3].get("id", "")
-            attributes["Factor ID"] = self.data(0)
-            attributes["Indicators"] = [
-                {
-                    "Indicator ID": i,
-                    "Indicator Name": child.data(0),
-                    "Indicator Weighting": child.data(2),
-                    "Indicator Result File": child.data(3).get(
-                        "Indicator Result File", ""
-                    ),
-                }
-                for i, child in enumerate(self.childItems)
-            ]
+            attributes["Dimension ID"] = self.parentItem.parentItem.itemData[3].get(
+                "id", ""
+            )
+            attributes["Factor ID"] = self.parentItem.itemData[3].get("id", "")
+            attributes["Indicator ID"] = self.itemData[3].get("ID", "")
+            attributes["Indicator Name"] = self.itemData[3].get("Layer", "")
+            attributes["Indicator Weighting"] = self.itemData[3].get(
+                "Factor Weighting", ""
+            )
+            attributes["Indicator Result File"] = self.itemData[3].get(
+                "Indicator Result File", ""
+            )
+            attributes["Indicator Result"] = self.itemData[3].get(
+                "Indicator Result", ""
+            )
         return attributes
 
     def getFactorAttributes(self):

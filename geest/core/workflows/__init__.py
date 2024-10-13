@@ -6,3 +6,4 @@ from .dimension_aggregation_workflow import DimensionAggregationWorkflow
 from .analysis_aggregation_workflow import AnalysisAggregationWorkflow
 from .multi_buffer_distances_workflow import MultiBufferDistancesWorkflow
 from .point_per_cell_workflow import PointPerCellWorkflow
+from .polyline_per_cell_workflow import PolylinePerCellWorkflow

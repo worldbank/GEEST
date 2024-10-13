@@ -13,10 +13,11 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingFeedback,
     QgsProject,
+    QgsRasterLayer,
     QgsSpatialIndex,
     QgsVectorFileWriter,
     QgsVectorLayer,
-    QgsRasterLayer,
+    QgsWkbTypes,
 )
 import processing
 from qgis.PyQt.QtCore import QVariant
@@ -46,6 +47,7 @@ class FeaturesPerCellProcessor:
     7. After processing all areas, combine the resulting byte rasters into a single VRT file.
 
     Attributes:
+        output_prefix (str): Prefix to be used for naming output files. Based on the layer ID.
         gpkg_path (str): Path to the GeoPackage containing the study areas, bounding boxes, and grid.
         features_layer (QgsVectorLayer): A layer representing pedestrian crossings or other feature-based data.
         workflow_directory (str): Directory where temporary and output files will be stored.
@@ -60,6 +62,7 @@ class FeaturesPerCellProcessor:
 
     def __init__(
         self,
+        output_prefix: str,
         features_layer: QgsVectorLayer,
         workflow_directory: str,
         gpkg_path: str,
@@ -75,6 +78,7 @@ class FeaturesPerCellProcessor:
         QgsMessageLog.logMessage(
             "Features per Cell Processor Initialising", tag="Geest", level=Qgis.Info
         )
+        self.output_prefix = output_prefix
         self.features_layer = features_layer
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path  # top-level folder where the GeoPackage is stored
@@ -144,7 +148,9 @@ class FeaturesPerCellProcessor:
 
             # Step 2: Select features that intersect with the current area and store in a temporary layer
             area_features = self._select_features(
-                reprojected_features_layer, current_area, f"area_features_{index+1}"
+                reprojected_features_layer,
+                current_area,
+                f"{self.output_prefix}_area_features_{index+1}",
             )
             area_features_count = area_features.featureCount()
             QgsMessageLog.logMessage(
@@ -186,9 +192,9 @@ class FeaturesPerCellProcessor:
         )
 
         # Define the output GPKG path
-        output_layer_name = f"{layer.name()}_reprojected"
+        output_layer_name = f"{self.output_prefix}_{layer.name()}_reprojected"
         output_gpkg_path = os.path.join(
-            self.workflow_directory, "reprojected_layers.gpkg"
+            self.workflow_directory, f"{self.output_prefix}_reprojected_layers.gpkg"
         )
 
         # Remove the GeoPackage if it already exists
@@ -329,12 +335,11 @@ class FeaturesPerCellProcessor:
     ) -> QgsVectorLayer:
         """
         Select grid cells that intersect with features, count the number of intersecting features for each cell,
-        and create a new grid layer with the count information. Only the grid cell ID and the count of intersecting
-        features will be retained in the new layer.
+        and create a new grid layer with the count information. This supports features of any geometry type (points, lines, polygons).
 
         Args:
             grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
-            features_layer (QgsVectorLayer): The input layer containing features (e.g., pedestrian crossings).
+            features_layer (QgsVectorLayer): The input layer containing features (e.g., points, lines, polygons).
 
         Returns:
             QgsVectorLayer: A new layer with grid cells containing a count of intersecting features.
@@ -354,23 +359,44 @@ class FeaturesPerCellProcessor:
         # Iterate over each feature and use the spatial index to find the intersecting grid cells
         for feature in features_layer.getFeatures():
             feature_geom = feature.geometry()
-            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
+
+            # Use bounding box only for point geometries; otherwise, use the actual geometry for intersection checks
+            if feature_geom.isEmpty():
+                continue
+
+            if feature_geom.type() == QgsWkbTypes.PointGeometry:
+                # For point geometries, use bounding box to find intersecting grid cells
+                intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
+            else:
+                # For line and polygon geometries, check actual geometry against grid cells
+                intersecting_ids = grid_index.intersects(
+                    feature_geom.boundingBox()
+                )  # Initial rough filter
+                intersecting_ids = [
+                    grid_id
+                    for grid_id in intersecting_ids
+                    if grid_layer.getFeature(grid_id)
+                    .geometry()
+                    .intersects(feature_geom)
+                ]
 
             # Iterate over the intersecting grid cell IDs and count intersections
             for grid_id in intersecting_ids:
-                grid_feature = grid_layer.getFeature(grid_id)
-                if grid_feature.geometry().intersects(feature_geom):
-                    if grid_id in grid_feature_counts:
-                        grid_feature_counts[grid_id] += 1
-                    else:
-                        grid_feature_counts[grid_id] = 1
+                if grid_id in grid_feature_counts:
+                    grid_feature_counts[grid_id] += 1
+                else:
+                    grid_feature_counts[grid_id] = 1
+
         QgsMessageLog.logMessage(
             f"{len(grid_feature_counts)} intersections found.",
             tag="Geest",
             level=Qgis.Info,
         )
+
         # Create a new layer to store the grid cells with feature counts
-        output_path = os.path.join(self.workflow_directory, "grid_with_counts.gpkg")
+        output_path = os.path.join(
+            self.workflow_directory, f"{self.output_prefix}_grid_with_counts.gpkg"
+        )
         options = QgsVectorFileWriter.SaveVectorOptions()
         options.driverName = "GPKG"
         options.fileEncoding = "UTF-8"
@@ -482,7 +508,8 @@ class FeaturesPerCellProcessor:
         QgsMessageLog.logMessage(f"--- index {index}", tag="Geest", level=Qgis.Info)
 
         output_path = os.path.join(
-            self.workflow_directory, f"features_per_cell_output_{index}.tif"
+            self.workflow_directory,
+            f"{self.output_prefix}_features_per_cell_output_{index}.tif",
         )
 
         # Ensure resolution parameters are properly formatted as float values
@@ -531,7 +558,8 @@ class FeaturesPerCellProcessor:
         raster_files = []
         for i in range(num_rasters):
             raster_path = os.path.join(
-                self.workflow_directory, f"features_per_cell_output_{i}.tif"
+                self.workflow_directory,
+                f"{self.output_prefix}_features_per_cell_output_{i}.tif",
             )
             if os.path.exists(raster_path) and QgsRasterLayer(raster_path).isValid():
                 raster_files.append(raster_path)
@@ -550,7 +578,8 @@ class FeaturesPerCellProcessor:
             )
             return
         vrt_filepath = os.path.join(
-            self.workflow_directory, "features_per_cell_output_combined.vrt"
+            self.workflow_directory,
+            f"{self.output_prefix}_features_per_cell_output_combined.vrt",
         )
 
         QgsMessageLog.logMessage(
@@ -588,7 +617,7 @@ class FeaturesPerCellProcessor:
         )
 
         # Add the VRT to the QGIS map
-        vrt_layer = QgsRasterLayer(vrt_filepath, "Combined VRT")
+        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.output_prefix}_combined VRT")
 
         if vrt_layer.isValid():
             QgsProject.instance().addMapLayer(vrt_layer)
