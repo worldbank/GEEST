@@ -101,7 +101,7 @@ class PointPerCellProcessor:
 
         This function processes areas (defined by polygons and bounding boxes) from the GeoPackage using
         the provided input layers (points, grid). It applies the steps of selecting intersecting
-        features, assigning values to grid cells, rasterizing the grid, converting to byte format, and finally
+        features, assigning values to grid cells, rasterizing the grid, in byte format, and finally
         combining the rasters into a VRT.
 
         Raises:
@@ -156,9 +156,6 @@ class PointPerCellProcessor:
 
             # Step 5: Rasterize the grid layer using the assigned values
             raster_output = self._rasterize_grid(grid, current_bbox, index)
-
-            # Step 6: Convert the raster to byte format
-            byte_raster = self._convert_to_byte_raster(raster_output, index)
 
         # Step 7: Combine the resulting byte rasters into a single VRT
         self._combine_rasters_to_vrt(index + 1)
@@ -519,42 +516,36 @@ class PointPerCellProcessor:
         )
         return output_path
 
-    def _convert_to_byte_raster(self, raster_path: str, index: int) -> str:
-        """
-        Convert the raster to byte format to reduce the file size.
-
-        Args:
-            raster_path (str): The path to the input raster to be converted.
-            index (int): The current index for naming the output byte raster.
-
-        Returns:
-            str: The file path to the byte raster output.
-        """
-        byte_raster_path = os.path.join(
-            self.workflow_directory, f"point_per_cell_byte_raster_{index}.tif"
-        )
-        params = {
-            "INPUT": raster_path,
-            "BAND": 1,
-            "OUTPUT": byte_raster_path,
-            "TYPE": 1,  # Byte format
-        }
-        processing.run("gdal:translate", params)
-        return byte_raster_path
-
     def _combine_rasters_to_vrt(self, num_rasters: int) -> None:
         """
-        Combine all the byte rasters into a single VRT file.
+        Combine all the rasters into a single VRT file.
 
         Args:
             num_rasters (int): The number of rasters to combine into a VRT.
         """
-        raster_files = [
-            os.path.join(self.workflow_directory, f"point_per_cell_byte_raster_{i}.tif")
-            for i in range(num_rasters)
-        ]
+        raster_files = []
+        for i in range(num_rasters):
+            raster_path = os.path.join(
+                self.workflow_directory, f"point_per_cell_output_{i}.tif"
+            )
+            if os.path.exists(raster_path) and QgsRasterLayer(raster_path).isValid():
+                raster_files.append(raster_path)
+            else:
+                QgsMessageLog.logMessage(
+                    f"Skipping invalid or non-existent raster: {raster_path}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        if not raster_files:
+            QgsMessageLog.logMessage(
+                "No valid raster masks found to combine into VRT.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
         vrt_filepath = os.path.join(
-            self.workflow_directory, "point_per_cell_byte_raster_combined.vrt"
+            self.workflow_directory, "point_per_cell_output_combined.vrt"
         )
 
         QgsMessageLog.logMessage(
