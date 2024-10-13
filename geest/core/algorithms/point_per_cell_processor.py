@@ -13,6 +13,7 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingFeedback,
     QgsProject,
+    QgsSpatialIndex,
     QgsVectorFileWriter,
     QgsVectorLayer,
     QgsRasterLayer,
@@ -345,15 +346,21 @@ class PointPerCellProcessor:
             level=Qgis.Info,
         )
 
+        # Create a spatial index for the grid layer to optimize intersection queries
+        grid_index = QgsSpatialIndex(grid_layer.getFeatures())
+
         # Create a dictionary to hold the count of intersecting points for each grid cell ID
         grid_point_counts = {}
 
-        # Iterate over each point and determine which grid cells it intersects
+        # Iterate over each point and use the spatial index to find the intersecting grid cells
         for point_feature in points_layer.getFeatures():
             point_geom = point_feature.geometry()
-            for grid_feature in grid_layer.getFeatures():
+            intersecting_ids = grid_index.intersects(point_geom.boundingBox())
+
+            # Iterate over the intersecting grid cell IDs and count intersections
+            for grid_id in intersecting_ids:
+                grid_feature = grid_layer.getFeature(grid_id)
                 if grid_feature.geometry().intersects(point_geom):
-                    grid_id = grid_feature.id()
                     if grid_id in grid_point_counts:
                         grid_point_counts[grid_id] += 1
                     else:
