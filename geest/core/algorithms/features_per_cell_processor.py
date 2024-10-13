@@ -285,7 +285,7 @@ class FeaturesPerCellProcessor:
         using the QGIS API. The selected features are stored in a temporary layer.
 
         Args:
-            layer (QgsVectorLayer): The input layer (e.g., features for crossings) to select features from.
+            layer (QgsVectorLayer): The input layer to select features from (e.g., points, lines, polygons).
             area_geom (QgsGeometry): The current area geometry for which intersections are evaluated.
             output_name (str): A name for the output temporary layer to store selected features.
 
@@ -297,9 +297,22 @@ class FeaturesPerCellProcessor:
         )
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
-        # Create a memory layer to store the selected features
+        # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
+        geometry_type = layer.wkbType()
+
+        # Determine geometry type name based on input layer's geometry
+        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
+            geometry_name = "Point"
+        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
+            geometry_name = "LineString"
+        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PolygonGeometry:
+            geometry_name = "Polygon"
+        else:
+            raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
+
+        # Create a memory layer to store the selected features with the correct geometry type
         crs = layer.crs().authid()
-        temp_layer = QgsVectorLayer(f"Point?crs={crs}", output_name, "memory")
+        temp_layer = QgsVectorLayer(f"{geometry_name}?crs={crs}", output_name, "memory")
         temp_layer_data = temp_layer.dataProvider()
 
         # Add fields to the temporary layer
@@ -316,6 +329,12 @@ class FeaturesPerCellProcessor:
             if feat.geometry().intersects(area_geom)
         ]
         temp_layer_data.addFeatures(selected_features)
+
+        QgsMessageLog.logMessage(
+            f"Features per Cell writing {len(selected_features)} features",
+            tag="Geest",
+            level=Qgis.Info,
+        )
 
         # Save the memory layer to a file for persistence
         QgsVectorFileWriter.writeAsVectorFormat(
@@ -372,6 +391,11 @@ class FeaturesPerCellProcessor:
                 intersecting_ids = grid_index.intersects(
                     feature_geom.boundingBox()
                 )  # Initial rough filter
+                QgsMessageLog.logMessage(
+                    f"{len(intersecting_ids)} rough intersections found.",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
                 intersecting_ids = [
                     grid_id
                     for grid_id in intersecting_ids
@@ -379,6 +403,11 @@ class FeaturesPerCellProcessor:
                     .geometry()
                     .intersects(feature_geom)
                 ]
+                QgsMessageLog.logMessage(
+                    f"{len(intersecting_ids)} refined intersections found.",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
 
             # Iterate over the intersecting grid cell IDs and count intersections
             for grid_id in intersecting_ids:
