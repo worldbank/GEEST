@@ -25,19 +25,19 @@ from typing import List
 import os
 
 
-class PointPerCellProcessor:
+class FeaturesPerCellProcessor:
     """
     A class to process spatial areas and perform spatial analysis using QGIS API.
 
     This class iterates over areas (polygons) and corresponding bounding boxes within a GeoPackage.
-    For each area, it performs spatial operations on the input layer representing pedestrian or other point features,
+    For each area, it performs spatial operations on the input layer representing pedestrian or other feature-based data,
     and a grid layer from the same GeoPackage. The results are processed and rasterized.
 
     The following steps are performed for each area:
 
-    1. Reproject the points layer to match the CRS of the grid layer.
-    2. Select points (from a reprojected points layer) that intersect with the current area.
-    3. Select grid cells (from the `study_area_grid` layer in the GeoPackage) that intersect with the points, ensuring no duplicates.
+    1. Reproject the features layer to match the CRS of the grid layer.
+    2. Select features (from a reprojected features layer) that intersect with the current area.
+    3. Select grid cells (from the `study_area_grid` layer in the GeoPackage) that intersect with the features, ensuring no duplicates.
     4. Assign values to the grid cells based on the number of intersecting features:
         - A value of 3 if the grid cell intersects only one feature.
         - A value of 5 if the grid cell intersects more than one feature.
@@ -47,35 +47,35 @@ class PointPerCellProcessor:
 
     Attributes:
         gpkg_path (str): Path to the GeoPackage containing the study areas, bounding boxes, and grid.
-        points_layer (QgsVectorLayer): A point layer representing pedestrian crossings or other point features.
+        features_layer (QgsVectorLayer): A layer representing pedestrian crossings or other feature-based data.
         workflow_directory (str): Directory where temporary and output files will be stored.
         grid_layer (QgsVectorLayer): A grid layer (study_area_grid) loaded from the GeoPackage.
 
     Example:
         ```python
-        processor = PointPerCellProcessor(points_layer, '/path/to/workflow_directory', '/path/to/your/geopackage.gpkg')
+        processor = FeaturesPerCellProcessor(features_layer, '/path/to/workflow_directory', '/path/to/your/geopackage.gpkg')
         processor.process_areas()
         ```
     """
 
     def __init__(
         self,
-        points_layer: QgsVectorLayer,
+        features_layer: QgsVectorLayer,
         workflow_directory: str,
         gpkg_path: str,
     ) -> None:
         """
-        Initialize the PointPerCellProcessor with the points layer, working directory, and the GeoPackage path.
+        Initialize the FeaturesPerCellProcessor with the features layer, working directory, and the GeoPackage path.
 
         Args:
-            points_layer (QgsVectorLayer): The input point layer representing features like pedestrian crossings.
+            features_layer (QgsVectorLayer): The input feature layer representing features like pedestrian crossings.
             workflow_directory (str): Directory where temporary and final output files will be stored.
             gpkg_path (str): Path to the GeoPackage file containing the study areas, bounding boxes, and grid layer.
         """
         QgsMessageLog.logMessage(
-            "Point per Cell Processor Initialising", tag="Geest", level=Qgis.Info
+            "Features per Cell Processor Initialising", tag="Geest", level=Qgis.Info
         )
-        self.points_layer = points_layer
+        self.features_layer = features_layer
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path  # top-level folder where the GeoPackage is stored
 
@@ -87,12 +87,12 @@ class PointPerCellProcessor:
             raise QgsProcessingException(
                 f"Failed to load 'study_area_grid' layer from the GeoPackage at {self.gpkg_path}"
             )
-        if not self.points_layer.isValid():
+        if not self.features_layer.isValid():
             raise QgsProcessingException(
-                f"Failed to load points layer for Point per Cell Processor at {self.points_layer.source()}"
+                f"Failed to load features layer for Features per Cell Processor at {self.features_layer.source()}"
             )
         QgsMessageLog.logMessage(
-            "Point per Cell Processor Initialised", tag="Geest", level=Qgis.Info
+            "Features per Cell Processor Initialised", tag="Geest", level=Qgis.Info
         )
 
     def process_areas(self) -> None:
@@ -100,29 +100,33 @@ class PointPerCellProcessor:
         Main function to iterate over areas from the GeoPackage and perform the analysis for each area.
 
         This function processes areas (defined by polygons and bounding boxes) from the GeoPackage using
-        the provided input layers (points, grid). It applies the steps of selecting intersecting
+        the provided input layers (features, grid). It applies the steps of selecting intersecting
         features, assigning values to grid cells, rasterizing the grid, in byte format, and finally
         combining the rasters into a VRT.
 
         Raises:
             QgsProcessingException: If any processing step fails during the execution.
+
+        Returns:
+            str: The file path to the VRT file containing the combined rasters
+
         """
         QgsMessageLog.logMessage(
-            "Point per Cell Process Areas Started", tag="Geest", level=Qgis.Info
+            "Features per Cell Process Areas Started", tag="Geest", level=Qgis.Info
         )
-        total_points = self.points_layer.featureCount()
+        total_features = self.features_layer.featureCount()
         QgsMessageLog.logMessage(
-            f"Points layer loaded with {total_points} features.",
+            f"Features layer loaded with {total_features} features.",
             tag="Geest",
             level=Qgis.Info,
         )
-        # Step 1: Reproject the points layer to match the CRS of the grid layer
-        reprojected_points_layer = self._reproject_layer(
-            self.points_layer, self.grid_layer.crs()
+        # Step 1: Reproject the features layer to match the CRS of the grid layer
+        reprojected_features_layer = self._reproject_layer(
+            self.features_layer, self.grid_layer.crs()
         )
-        total_points = reprojected_points_layer.featureCount()
+        total_features = reprojected_features_layer.featureCount()
         QgsMessageLog.logMessage(
-            f"Reprojected Points layer loaded with {total_points} features.",
+            f"Reprojected features layer loaded with {total_features} features.",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -138,18 +142,18 @@ class PointPerCellProcessor:
                 f"Processing area {index + 1} with progress {progress:.2f}%"
             )
 
-            # Step 2: Select points that intersect with the current area and store in a temporary layer
-            area_points = self._select_features(
-                reprojected_points_layer, current_area, f"area_points_{index+1}"
+            # Step 2: Select features that intersect with the current area and store in a temporary layer
+            area_features = self._select_features(
+                reprojected_features_layer, current_area, f"area_features_{index+1}"
             )
-            area_points_count = area_points.featureCount()
+            area_features_count = area_features.featureCount()
             QgsMessageLog.logMessage(
-                f"Points layer for area {index+1} loaded with {area_points_count} features.",
+                f"Features layer for area {index+1} loaded with {area_features_count} features.",
                 tag="Geest",
                 level=Qgis.Info,
             )
-            # Step 3: Select grid cells that intersect with points
-            area_grid = self._select_grid_cells(self.grid_layer, area_points)
+            # Step 3: Select grid cells that intersect with features
+            area_grid = self._select_grid_cells(self.grid_layer, area_features)
 
             # Step 4: Assign values to grid cells
             grid = self._assign_values_to_grid(area_grid)
@@ -158,7 +162,8 @@ class PointPerCellProcessor:
             raster_output = self._rasterize_grid(grid, current_bbox, index)
 
         # Step 7: Combine the resulting byte rasters into a single VRT
-        self._combine_rasters_to_vrt(index + 1)
+        vrt_filepath = self._combine_rasters_to_vrt(index + 1)
+        return vrt_filepath
 
     def _reproject_layer(
         self, layer: QgsVectorLayer, target_crs: QgsCoordinateReferenceSystem
@@ -198,9 +203,6 @@ class PointPerCellProcessor:
         options.driverName = "GPKG"
         options.fileEncoding = "UTF-8"
         options.layerName = output_layer_name
-        # options.actionOnExistingFile = (
-        #    QgsVectorFileWriter.CreateOrOverwriteLayer
-        # )
 
         writer = QgsVectorFileWriter.create(
             fileName=output_gpkg_path,
@@ -277,7 +279,7 @@ class PointPerCellProcessor:
         using the QGIS API. The selected features are stored in a temporary layer.
 
         Args:
-            layer (QgsVectorLayer): The input layer (e.g., points for crossings) to select features from.
+            layer (QgsVectorLayer): The input layer (e.g., features for crossings) to select features from.
             area_geom (QgsGeometry): The current area geometry for which intersections are evaluated.
             output_name (str): A name for the output temporary layer to store selected features.
 
@@ -285,7 +287,7 @@ class PointPerCellProcessor:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
         QgsMessageLog.logMessage(
-            "Point per Cell Select Features Started", tag="Geest", level=Qgis.Info
+            "Features per Cell Select Features Started", tag="Geest", level=Qgis.Info
         )
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
@@ -315,7 +317,7 @@ class PointPerCellProcessor:
         )
 
         QgsMessageLog.logMessage(
-            "Point per Cell Select Features Ending", tag="Geest", level=Qgis.Info
+            "Features per Cell Select Features Ending", tag="Geest", level=Qgis.Info
         )
 
         return QgsVectorLayer(output_path, output_name, "ogr")
@@ -323,22 +325,22 @@ class PointPerCellProcessor:
     def _select_grid_cells(
         self,
         grid_layer: QgsVectorLayer,
-        points_layer: QgsVectorLayer,
+        features_layer: QgsVectorLayer,
     ) -> QgsVectorLayer:
         """
-        Select grid cells that intersect with points, count the number of intersecting points for each cell,
+        Select grid cells that intersect with features, count the number of intersecting features for each cell,
         and create a new grid layer with the count information. Only the grid cell ID and the count of intersecting
-        points will be retained in the new layer.
+        features will be retained in the new layer.
 
         Args:
             grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
-            points_layer (QgsVectorLayer): The input layer containing points (e.g., pedestrian crossings).
+            features_layer (QgsVectorLayer): The input layer containing features (e.g., pedestrian crossings).
 
         Returns:
-            QgsVectorLayer: A new layer with grid cells containing a count of intersecting points.
+            QgsVectorLayer: A new layer with grid cells containing a count of intersecting features.
         """
         QgsMessageLog.logMessage(
-            "Selecting grid cells that intersect with points and counting intersections.",
+            "Selecting grid cells that intersect with features and counting intersections.",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -346,33 +348,33 @@ class PointPerCellProcessor:
         # Create a spatial index for the grid layer to optimize intersection queries
         grid_index = QgsSpatialIndex(grid_layer.getFeatures())
 
-        # Create a dictionary to hold the count of intersecting points for each grid cell ID
-        grid_point_counts = {}
+        # Create a dictionary to hold the count of intersecting features for each grid cell ID
+        grid_feature_counts = {}
 
-        # Iterate over each point and use the spatial index to find the intersecting grid cells
-        for point_feature in points_layer.getFeatures():
-            point_geom = point_feature.geometry()
-            intersecting_ids = grid_index.intersects(point_geom.boundingBox())
+        # Iterate over each feature and use the spatial index to find the intersecting grid cells
+        for feature in features_layer.getFeatures():
+            feature_geom = feature.geometry()
+            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
 
             # Iterate over the intersecting grid cell IDs and count intersections
             for grid_id in intersecting_ids:
                 grid_feature = grid_layer.getFeature(grid_id)
-                if grid_feature.geometry().intersects(point_geom):
-                    if grid_id in grid_point_counts:
-                        grid_point_counts[grid_id] += 1
+                if grid_feature.geometry().intersects(feature_geom):
+                    if grid_id in grid_feature_counts:
+                        grid_feature_counts[grid_id] += 1
                     else:
-                        grid_point_counts[grid_id] = 1
+                        grid_feature_counts[grid_id] = 1
         QgsMessageLog.logMessage(
-            f"{len(grid_point_counts)} intersections found.",
+            f"{len(grid_feature_counts)} intersections found.",
             tag="Geest",
             level=Qgis.Info,
         )
-        # Create a new layer to store the grid cells with point counts
+        # Create a new layer to store the grid cells with feature counts
         output_path = os.path.join(self.workflow_directory, "grid_with_counts.gpkg")
         options = QgsVectorFileWriter.SaveVectorOptions()
         options.driverName = "GPKG"
         options.fileEncoding = "UTF-8"
-        options.layerName = "grid_with_point_counts"
+        options.layerName = "grid_with_feature_counts"
 
         # Define fields for the new layer: only 'id' and 'intersecting_features'
         fields = QgsFields()
@@ -394,10 +396,10 @@ class PointPerCellProcessor:
                 f"Failed to create output layer: {writer.errorMessage()}"
             )
 
-        # Select only grid cells based on the keys (grid IDs) in the grid_point_counts dictionary
-        request = QgsFeatureRequest().setFilterFids(list(grid_point_counts.keys()))
+        # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
+        request = QgsFeatureRequest().setFilterFids(list(grid_feature_counts.keys()))
         QgsMessageLog.logMessage(
-            f"Looping over {len(grid_point_counts.keys())} grid polygons",
+            f"Looping over {len(grid_feature_counts.keys())} grid polygons",
             "Geest",
             Qgis.Info,
         )
@@ -414,7 +416,7 @@ class PointPerCellProcessor:
             new_feature.setFields(fields)
             new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
             new_feature.setAttribute(
-                "intersecting_features", grid_point_counts[grid_feature.id()]
+                "intersecting_features", grid_feature_counts[grid_feature.id()]
             )
             new_feature.setAttribute("value", None)
 
@@ -424,14 +426,14 @@ class PointPerCellProcessor:
         del writer  # Finalize the writer and close the file
 
         QgsMessageLog.logMessage(
-            f"Grid cells with point counts saved to {output_path}",
+            f"Grid cells with feature counts saved to {output_path}",
             tag="Geest",
             level=Qgis.Info,
         )
 
         return QgsVectorLayer(
-            f"{output_path}|layername=grid_with_point_counts",
-            "grid_with_point_counts",
+            f"{output_path}|layername=grid_with_feature_counts",
+            "grid_with_feature_counts",
             "ogr",
         )
 
@@ -480,7 +482,7 @@ class PointPerCellProcessor:
         QgsMessageLog.logMessage(f"--- index {index}", tag="Geest", level=Qgis.Info)
 
         output_path = os.path.join(
-            self.workflow_directory, f"point_per_cell_output_{index}.tif"
+            self.workflow_directory, f"features_per_cell_output_{index}.tif"
         )
 
         # Ensure resolution parameters are properly formatted as float values
@@ -510,7 +512,7 @@ class PointPerCellProcessor:
 
         processing.run("gdal:rasterize", params)
         QgsMessageLog.logMessage(
-            f"Created grid for Point Per Cell: {output_path}",
+            f"Created grid for Features Per Cell: {output_path}",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -522,11 +524,14 @@ class PointPerCellProcessor:
 
         Args:
             num_rasters (int): The number of rasters to combine into a VRT.
+
+        Returns:
+            vrtpath (str): The file path to the VRT file.
         """
         raster_files = []
         for i in range(num_rasters):
             raster_path = os.path.join(
-                self.workflow_directory, f"point_per_cell_output_{i}.tif"
+                self.workflow_directory, f"features_per_cell_output_{i}.tif"
             )
             if os.path.exists(raster_path) and QgsRasterLayer(raster_path).isValid():
                 raster_files.append(raster_path)
@@ -545,7 +550,7 @@ class PointPerCellProcessor:
             )
             return
         vrt_filepath = os.path.join(
-            self.workflow_directory, "point_per_cell_output_combined.vrt"
+            self.workflow_directory, "features_per_cell_output_combined.vrt"
         )
 
         QgsMessageLog.logMessage(
@@ -594,3 +599,4 @@ class PointPerCellProcessor:
             QgsMessageLog.logMessage(
                 "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
             )
+        return vrt_filepath

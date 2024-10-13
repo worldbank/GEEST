@@ -1,3 +1,3 @@
 from .area_iterator import AreaIterator
 from .point_and_paths_processor import PointAndPathsProcessor
-from .point_per_cell_processor import PointPerCellProcessor
+from .features_per_cell_processor import FeaturesPerCellProcessor
