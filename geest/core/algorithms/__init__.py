@@ -2,3 +2,4 @@ from .area_iterator import AreaIterator
 from .point_and_paths_processor import PointAndPathsProcessor
 from .features_per_cell_processor import FeaturesPerCellProcessor
 from .polygon_per_cell_processor import PolygonPerCellProcessor
+from .acled_impact_raster_processor import AcledImpactRasterProcessor
