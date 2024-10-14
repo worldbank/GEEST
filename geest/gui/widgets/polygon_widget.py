@@ -121,23 +121,19 @@ class PolygonWidget(BaseIndicatorWidget):
         # Collect data for the polygon layer
         polygon_layer = self.polygon_layer_combo.currentLayer()
         if polygon_layer:
-            self.attributes[f"{self.widget_key} Polygon Layer Name"] = (
-                polygon_layer.name()
-            )
-            self.attributes[f"{self.widget_key} Polygon Layer Source"] = (
-                polygon_layer.source()
-            )
-            self.attributes[f"{self.widget_key} Polygon Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key} Layer Name"] = polygon_layer.name()
+            self.attributes[f"{self.widget_key} Layer Source"] = polygon_layer.source()
+            self.attributes[f"{self.widget_key} Layer Provider Type"] = (
                 polygon_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Polygon Layer CRS"] = (
+            self.attributes[f"{self.widget_key} Layer CRS"] = (
                 polygon_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Polygon Layer Wkb Type"] = (
+            self.attributes[f"{self.widget_key} Layer Wkb Type"] = (
                 polygon_layer.wkbType()
             )
-            self.attributes[f"{self.widget_key} Polygon Layer ID"] = polygon_layer.id()
-        self.attributes[f"{self.widget_key} Polygon Shapefile"] = (
+            self.attributes[f"{self.widget_key} Layer ID"] = polygon_layer.id()
+        self.attributes[f"{self.widget_key} Shapefile"] = (
             self.polygon_shapefile_line_edit.text()
         )
 
