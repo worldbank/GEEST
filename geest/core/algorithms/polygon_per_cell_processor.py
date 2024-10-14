@@ -26,7 +26,7 @@ from typing import List
 import os
 
 
-class FeaturesPerCellProcessor:
+class PolygonPerCellProcessor:
     """
     A class to process spatial areas and perform spatial analysis using QGIS API.
 
@@ -55,7 +55,7 @@ class FeaturesPerCellProcessor:
 
     Example:
         ```python
-        processor = FeaturesPerCellProcessor(features_layer, '/path/to/workflow_directory', '/path/to/your/geopackage.gpkg')
+        processor = PolygonsPerCellProcessor(features_layer, '/path/to/workflow_directory', '/path/to/your/geopackage.gpkg')
         processor.process_areas()
         ```
     """
@@ -68,7 +68,7 @@ class FeaturesPerCellProcessor:
         gpkg_path: str,
     ) -> None:
         """
-        Initialize the FeaturesPerCellProcessor with the features layer, working directory, and the GeoPackage path.
+        Initialize the PolygonsPerCellProcessor with the features layer, working directory, and the GeoPackage path.
 
         Args:
             features_layer (QgsVectorLayer): The input feature layer representing features like pedestrian crossings.
@@ -76,7 +76,7 @@ class FeaturesPerCellProcessor:
             gpkg_path (str): Path to the GeoPackage file containing the study areas, bounding boxes, and grid layer.
         """
         QgsMessageLog.logMessage(
-            "Features per Cell Processor Initialising", tag="Geest", level=Qgis.Info
+            "Polygons per Cell Processor Initialising", tag="Geest", level=Qgis.Info
         )
         self.output_prefix = output_prefix
         self.features_layer = features_layer
@@ -93,10 +93,10 @@ class FeaturesPerCellProcessor:
             )
         if not self.features_layer.isValid():
             raise QgsProcessingException(
-                f"Failed to load features layer for Features per Cell Processor at {self.features_layer.source()}"
+                f"Failed to load features layer for Polygons per Cell Processor at {self.features_layer.source()}"
             )
         QgsMessageLog.logMessage(
-            "Features per Cell Processor Initialised", tag="Geest", level=Qgis.Info
+            "Polygons per Cell Processor Initialised", tag="Geest", level=Qgis.Info
         )
 
     def process_areas(self) -> None:
@@ -116,11 +116,11 @@ class FeaturesPerCellProcessor:
 
         """
         QgsMessageLog.logMessage(
-            "Features per Cell Process Areas Started", tag="Geest", level=Qgis.Info
+            "Polygons per Cell Process Areas Started", tag="Geest", level=Qgis.Info
         )
         total_features = self.features_layer.featureCount()
         QgsMessageLog.logMessage(
-            f"Features layer loaded with {total_features} features.",
+            f"Polygons layer loaded with {total_features} features.",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -154,20 +154,21 @@ class FeaturesPerCellProcessor:
             )
             area_features_count = area_features.featureCount()
             QgsMessageLog.logMessage(
-                f"Features layer for area {index+1} loaded with {area_features_count} features.",
+                f"Polygons layer for area {index+1} loaded with {area_features_count} features.",
                 tag="Geest",
                 level=Qgis.Info,
             )
-            # Step 3: Select grid cells that intersect with features
-            area_grid = self._select_grid_cells(self.grid_layer, area_features)
+            # Step 2: Assign reclassification values to polygons based on their perimeter
+            reclassified_layer = self._assign_reclassification_to_polygons(
+                reprojected_features_layer
+            )
 
-            # Step 4: Assign values to grid cells
-            grid = self._assign_values_to_grid(area_grid)
+            # Step 3: Rasterize the polygons using the reclassification values
+            raster_output = self._rasterize_polygons(
+                reclassified_layer, current_bbox, index
+            )
 
-            # Step 5: Rasterize the grid layer using the assigned values
-            raster_output = self._rasterize_grid(grid, current_bbox, index)
-
-        # Step 7: Combine the resulting byte rasters into a single VRT
+        # Step 4: Combine the resulting byte rasters into a single VRT
         vrt_filepath = self._combine_rasters_to_vrt(index + 1)
         return vrt_filepath
 
@@ -293,7 +294,7 @@ class FeaturesPerCellProcessor:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
         QgsMessageLog.logMessage(
-            "Features per Cell Select Features Started", tag="Geest", level=Qgis.Info
+            "Polygons per Cell Select Polygons Started", tag="Geest", level=Qgis.Info
         )
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
@@ -301,10 +302,8 @@ class FeaturesPerCellProcessor:
         geometry_type = layer.wkbType()
 
         # Determine geometry type name based on input layer's geometry
-        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
-            geometry_name = "Point"
-        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
-            geometry_name = "LineString"
+        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PolygonGeometry:
+            geometry_name = "Polygon"
         else:
             raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
 
@@ -329,7 +328,7 @@ class FeaturesPerCellProcessor:
         temp_layer_data.addFeatures(selected_features)
 
         QgsMessageLog.logMessage(
-            f"Features per Cell writing {len(selected_features)} features",
+            f"Polygons per Cell writing {len(selected_features)} features",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -340,181 +339,71 @@ class FeaturesPerCellProcessor:
         )
 
         QgsMessageLog.logMessage(
-            "Features per Cell Select Features Ending", tag="Geest", level=Qgis.Info
+            "Polygons per Cell Select Polygons Ending", tag="Geest", level=Qgis.Info
         )
 
         return QgsVectorLayer(output_path, output_name, "ogr")
 
-    def _select_grid_cells(
-        self,
-        grid_layer: QgsVectorLayer,
-        features_layer: QgsVectorLayer,
+    def _assign_reclassification_to_polygons(
+        self, layer: QgsVectorLayer
     ) -> QgsVectorLayer:
         """
-        Select grid cells that intersect with features, count the number of intersecting features for each cell,
-        and create a new grid layer with the count information. This supports features of any geometry type (points, lines, polygons).
+        Assign reclassification values to polygons based on their perimeter length.
+
+        A value is assigned according to the perimeter thresholds:
+        - Very large blocks: value = 1 (perimeter > 1000)
+        - Large blocks: value = 2 (751 <= perimeter <= 1000)
+        - Moderate blocks: value = 3 (501 <= perimeter <= 750)
+        - Small blocks: value = 4 (251 <= perimeter <= 500)
+        - Very small blocks: value = 5 (0 < perimeter <= 250)
+        - No intersection or invalid: value = 0
 
         Args:
-            grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
-            features_layer (QgsVectorLayer): The input layer containing features (e.g., points, lines, polygons).
+            layer (QgsVectorLayer): The input polygon layer.
 
         Returns:
-            QgsVectorLayer: A new layer with grid cells containing a count of intersecting features.
+            QgsVectorLayer: The updated polygon layer with reclassification values assigned.
         """
-        QgsMessageLog.logMessage(
-            "Selecting grid cells that intersect with features and counting intersections.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
 
-        # Create a spatial index for the grid layer to optimize intersection queries
-        grid_index = QgsSpatialIndex(grid_layer.getFeatures())
+        with edit(layer):  # Allow editing of the layer
+            # Check if the 'value' field exists, if not, create it
+            if layer.fields().indexFromName("value") == -1:
+                layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+                layer.updateFields()
+            for feature in layer.getFeatures():
+                perimeter = (
+                    feature.geometry().length()
+                )  # Calculate the perimeter of the polygon
 
-        # Create a dictionary to hold the count of intersecting features for each grid cell ID
-        grid_feature_counts = {}
-
-        # Iterate over each feature and use the spatial index to find the intersecting grid cells
-        for feature in features_layer.getFeatures():
-            feature_geom = feature.geometry()
-
-            # Use bounding box only for point geometries; otherwise, use the actual geometry for intersection checks
-            if feature_geom.isEmpty():
-                continue
-
-            if feature_geom.type() == QgsWkbTypes.PointGeometry:
-                # For point geometries, use bounding box to find intersecting grid cells
-                intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
-            else:
-                # For line and polygon geometries, check actual geometry against grid cells
-                intersecting_ids = grid_index.intersects(
-                    feature_geom.boundingBox()
-                )  # Initial rough filter
                 QgsMessageLog.logMessage(
-                    f"{len(intersecting_ids)} rough intersections found.",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
-                intersecting_ids = [
-                    grid_id
-                    for grid_id in intersecting_ids
-                    if grid_layer.getFeature(grid_id)
-                    .geometry()
-                    .intersects(feature_geom)
-                ]
-                QgsMessageLog.logMessage(
-                    f"{len(intersecting_ids)} refined intersections found.",
+                    f"Perimeter of polygon {feature.id()}: {perimeter}",
                     tag="Geest",
                     level=Qgis.Info,
                 )
 
-            # Iterate over the intersecting grid cell IDs and count intersections
-            for grid_id in intersecting_ids:
-                if grid_id in grid_feature_counts:
-                    grid_feature_counts[grid_id] += 1
+                # Assign reclassification value based on the perimeter
+                if perimeter > 1000:  # Very large blocks
+                    reclass_val = 1
+                elif 751 <= perimeter <= 1000:  # Large blocks
+                    reclass_val = 2
+                elif 501 <= perimeter <= 750:  # Moderate blocks
+                    reclass_val = 3
+                elif 251 <= perimeter <= 500:  # Small blocks
+                    reclass_val = 4
+                elif 0 < perimeter <= 250:  # Very small blocks
+                    reclass_val = 5
                 else:
-                    grid_feature_counts[grid_id] = 1
+                    reclass_val = 0  # No valid perimeter or no intersection
 
-        QgsMessageLog.logMessage(
-            f"{len(grid_feature_counts)} intersections found.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+                feature.setAttribute("value", reclass_val)  # Set the 'value' field
+                layer.updateFeature(
+                    feature
+                )  # Update the feature with the new attribute
 
-        # Create a new layer to store the grid cells with feature counts
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.output_prefix}_grid_with_counts.gpkg"
-        )
-        options = QgsVectorFileWriter.SaveVectorOptions()
-        options.driverName = "GPKG"
-        options.fileEncoding = "UTF-8"
-        options.layerName = "grid_with_feature_counts"
+        return layer
 
-        # Define fields for the new layer: only 'id' and 'intersecting_features'
-        fields = QgsFields()
-        fields.append(QgsField("id", QVariant.Int))
-        fields.append(QgsField("intersecting_features", QVariant.Int))
-        # Will be used to hold the scaled value from 0-5
-        fields.append(QgsField("value", QVariant.Int))
-
-        writer = QgsVectorFileWriter.create(
-            fileName=output_path,
-            fields=fields,
-            geometryType=grid_layer.wkbType(),
-            srs=grid_layer.crs(),
-            transformContext=QgsCoordinateTransformContext(),
-            options=options,
-        )
-        if writer.hasError() != QgsVectorFileWriter.NoError:
-            raise QgsProcessingException(
-                f"Failed to create output layer: {writer.errorMessage()}"
-            )
-
-        # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
-        request = QgsFeatureRequest().setFilterFids(list(grid_feature_counts.keys()))
-        QgsMessageLog.logMessage(
-            f"Looping over {len(grid_feature_counts.keys())} grid polygons",
-            "Geest",
-            Qgis.Info,
-        )
-        counter = 0
-        for grid_feature in grid_layer.getFeatures(request):
-            QgsMessageLog.logMessage(f"Writing Feature #{counter}", "Geest", Qgis.Info)
-            counter += 1
-            new_feature = QgsFeature()
-            new_feature.setGeometry(
-                grid_feature.geometry()
-            )  # Use the original geometry
-
-            # Set the 'id' and 'intersecting_features' attributes
-            new_feature.setFields(fields)
-            new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
-            new_feature.setAttribute(
-                "intersecting_features", grid_feature_counts[grid_feature.id()]
-            )
-            new_feature.setAttribute("value", None)
-
-            # Write the feature to the new layer
-            writer.addFeature(new_feature)
-
-        del writer  # Finalize the writer and close the file
-
-        QgsMessageLog.logMessage(
-            f"Grid cells with feature counts saved to {output_path}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-
-        return QgsVectorLayer(
-            f"{output_path}|layername=grid_with_feature_counts",
-            "grid_with_feature_counts",
-            "ogr",
-        )
-
-    def _assign_values_to_grid(self, grid_layer: QgsVectorLayer) -> QgsVectorLayer:
-        """
-        Assign values to grid cells based on the number of intersecting features.
-
-        A value of 3 is assigned to cells that intersect with one feature, and a value of 5 is assigned to
-        cells that intersect with more than one feature.
-
-        Args:
-            grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
-
-        Returns:
-            QgsVectorLayer: The grid layer with values assigned to the 'value' field.
-        """
-        with edit(grid_layer):
-            for feature in grid_layer.getFeatures():
-                intersecting_features = feature["intersecting_features"]
-                if intersecting_features == 1:
-                    feature["value"] = 3
-                elif intersecting_features > 1:
-                    feature["value"] = 5
-                grid_layer.updateFeature(feature)
-        return grid_layer
-
-    def _rasterize_grid(
-        self, grid_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
+    def _rasterize_polygons(
+        self, polygon_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
     ) -> str:
         """
 
@@ -545,7 +434,7 @@ class FeaturesPerCellProcessor:
         bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
-            "INPUT": grid_layer,
+            "INPUT": polygon_layer,
             "FIELD": "value",
             "BURN": -9999,
             "USE_Z": False,
@@ -566,7 +455,7 @@ class FeaturesPerCellProcessor:
 
         processing.run("gdal:rasterize", params)
         QgsMessageLog.logMessage(
-            f"Created grid for Features Per Cell: {output_path}",
+            f"Created grid for Polygons Per Cell: {output_path}",
             tag="Geest",
             level=Qgis.Info,
         )

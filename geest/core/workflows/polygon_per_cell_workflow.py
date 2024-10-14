@@ -17,7 +17,7 @@ import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.core.utilities import GridAligner
-from geest.core.algorithms import FeaturesPerCellProcessor
+from geest.core.algorithms import PolygonPerCellProcessor
 
 
 class PolygonPerCellWorkflow(WorkflowBase):
@@ -61,7 +61,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
         features_layer = QgsVectorLayer(
             self.attributes.get("Polygon per Cell Layer Source", "")
         )
-        processor = FeaturesPerCellProcessor(
+        processor = PolygonPerCellProcessor(
             output_prefix=self.layer_id,
             features_layer=features_layer,
             gpkg_path=self.gpkg_path,
