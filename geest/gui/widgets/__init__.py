@@ -6,3 +6,4 @@ from .multi_buffer_distances_widget import MultiBufferDistancesWidget
 from .polygon_widget import PolygonWidget
 from .polyline_widget import PolylineWidget
 from .point_layer_widget import PointLayerWidget
+from .acled_csv_layer_widget import AcledCsvLayerWidget
