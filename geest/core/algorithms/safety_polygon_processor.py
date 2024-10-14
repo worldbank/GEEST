@@ -17,7 +17,7 @@ from qgis.PyQt.QtCore import QVariant
 import processing
 import os
 from typing import List
-from .area_iterator import AreaIterator  # Import AreaIterator from the other file
+from .area_iterator import AreaIterator
 
 
 class SafetyPerCellProcessor:

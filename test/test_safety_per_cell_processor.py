@@ -3,7 +3,7 @@ import os
 from qgis.core import QgsVectorLayer, QgsProcessingException
 from geest.core.algorithms.safety_polygon_processor import (
     SafetyPerCellProcessor,
-)  # Assuming the class is in safety_processor.py
+)
 
 
 class TestSafetyPerCellProcessor(unittest.TestCase):
