@@ -174,16 +174,35 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "HEIGHT": y_res,
             "EXTENT": f"{aligned_bbox.xMinimum()},{aligned_bbox.xMaximum()},"
             f"{aligned_bbox.yMinimum()},{aligned_bbox.yMaximum()}",  # Extent of the aligned bbox
-            "NODATA": 0,
+            "NODATA": None,
             "OPTIONS": "",
             "DATA_TYPE": 0,  # byte
             "INIT": None,
             "INVERT": False,
             "EXTRA": "",
-            "OUTPUT": mask_filepath,
+            "OUTPUT": "TEMPORARY_OUTPUT",
         }
         # Run the rasterize algorithm
-        processing.run("gdal:rasterize", params)
+        mask = processing.run("gdal:rasterize", params)["OUTPUT"]
+        QgsMessageLog.logMessage(
+            f"Created raster mask: {mask}", tag="Geest", level=Qgis.Info
+        )
+
+        # Clip the raster mask to the study area boundary
+        clipped_mask_filepath = os.path.join(
+            self.workflow_directory, f"{mask_filepath}"
+        )
+
+        processing.run(
+            "gdal:cliprasterbymasklayer",
+            {
+                "INPUT": mask,
+                "MASK": self.areas_layer,
+                "NODATA": 255,
+                "CROP_TO_CUTLINE": True,
+                "OUTPUT": mask_filepath,
+            },
+        )
         QgsMessageLog.logMessage(
             f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info
         )
@@ -236,7 +255,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "ADD_ALPHA": False,
             "ASSIGN_CRS": None,
             "RESAMPLING": 0,
-            "SRC_NODATA": "0",
+            "SRC_NODATA": "255",
             "EXTRA": "",
         }
 
