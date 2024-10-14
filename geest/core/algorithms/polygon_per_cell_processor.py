@@ -28,34 +28,35 @@ import os
 
 class PolygonPerCellProcessor:
     """
-    A class to process spatial areas and perform spatial analysis using QGIS API.
+    A class to process spatial areas and perform spatial analysis using the QGIS API.
 
     This class iterates over areas (polygons) and corresponding bounding boxes within a GeoPackage.
-    For each area, it performs spatial operations on the input layer representing pedestrian or other feature-based data,
-    and a grid layer from the same GeoPackage. The results are processed and rasterized.
+    For each area, it performs spatial operations on the input layer representing pedestrian or other feature-based data.
+    It assigns values to the polygons based on their perimeter, rasterizes the polygons, and combines the resulting rasters into a single VRT file.
 
     The following steps are performed for each area:
 
-    1. Reproject the features layer to match the CRS of the grid layer.
-    2. Select features (from a reprojected features layer) that intersect with the current area.
-    3. Select grid cells (from the `study_area_grid` layer in the GeoPackage) that intersect with the features, ensuring no duplicates.
-    4. Assign values to the grid cells based on the number of intersecting features:
-        - A value of 3 if the grid cell intersects only one feature.
-        - A value of 5 if the grid cell intersects more than one feature.
-    5. Rasterize the grid cells, using their assigned values to create a raster for each area.
-    6. Convert the resulting raster to byte format to minimize space usage.
-    7. After processing all areas, combine the resulting byte rasters into a single VRT file.
+    1. Reproject the features layer to match the CRS of the input polygons if necessary.
+    2. Select features (from the reprojected features layer) that intersect with the current area.
+    3. Assign values to polygons based on their perimeter:
+        - A value of 1 if the perimeter is greater than 1000 meters (Very large blocks).
+        - A value of 2 if the perimeter is between 751 and 1000 meters (Large blocks).
+        - A value of 3 if the perimeter is between 501 and 750 meters (Moderate blocks).
+        - A value of 4 if the perimeter is between 251 and 500 meters (Small blocks).
+        - A value of 5 if the perimeter is less than 250 meters (Very small blocks).
+    4. Rasterize the polygons using the assigned values to create a raster for each area.
+    5. Convert the resulting raster to byte format to minimize space usage.
+    6. After processing all areas, combine the resulting byte rasters into a single VRT file.
 
     Attributes:
         output_prefix (str): Prefix to be used for naming output files. Based on the layer ID.
-        gpkg_path (str): Path to the GeoPackage containing the study areas, bounding boxes, and grid.
+        gpkg_path (str): Path to the GeoPackage containing the study areas and bounding boxes.
         features_layer (QgsVectorLayer): A layer representing pedestrian crossings or other feature-based data.
         workflow_directory (str): Directory where temporary and output files will be stored.
-        grid_layer (QgsVectorLayer): A grid layer (study_area_grid) loaded from the GeoPackage.
 
     Example:
         ```python
-        processor = PolygonsPerCellProcessor(features_layer, '/path/to/workflow_directory', '/path/to/your/geopackage.gpkg')
+        processor = PolygonPerCellProcessor(features_layer, '/path/to/workflow_directory', '/path/to/your/geopackage.gpkg')
         processor.process_areas()
         ```
     """
