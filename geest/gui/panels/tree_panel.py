@@ -15,7 +15,7 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QCheckBox,
 )
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
 from functools import partial
@@ -180,7 +180,9 @@ class TreePanel(QWidget):
                         self.working_directory
                     )
                 analysis_item.setData(0, analysis_data.get("Analysis Name", "Analysis"))
-
+                settings = QSettings()
+                # This is the top level folder for work files
+                settings.setValue("last_working_directory", self.working_directory)
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical
