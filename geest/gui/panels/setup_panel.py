@@ -67,14 +67,19 @@ class SetupPanel(FORM_CLASS, QWidget):
         )
         self.prepare_project_button.clicked.connect(self.create_project)
         self.new_project_group.setVisible(False)
-        # Set the last used working directory from QSettings
+
+        # Load the last used working directory from QSettings
         recent_projects = self.settings.value("recent_projects", [])
+        last_working_directory = self.settings.value("last_working_directory", "")
         self.previous_project_combo.addItems(
             reversed(recent_projects)
         )  # Add recent projects to the combo
-        self.working_dir = self.previous_project_combo.currentText()
-        # self.dir_display.setText(self.working_dir)
-        self.set_project_directory()
+        if last_working_directory and last_working_directory in recent_projects:
+            self.previous_project_combo.setCurrentText(last_working_directory)
+            self.load_project()  # Automatically load the last used project
+        else:
+            self.working_dir = self.previous_project_combo.currentText()
+            self.set_project_directory()
 
     def update_recent_projects(self, directory):
         """Updates the recent projects list with the new directory."""
@@ -87,9 +92,9 @@ class SetupPanel(FORM_CLASS, QWidget):
 
         recent_projects.insert(0, directory)  # Add to the top of the list
 
-        # Limit the list to a certain number of recent projects (e.g., 5)
-        if len(recent_projects) > 5:
-            recent_projects = recent_projects[:5]
+        # Limit the list to a certain number of recent projects (e.g., 15)
+        if len(recent_projects) > 15:
+            recent_projects = recent_projects[:15]
 
         # Save back to QSettings
         self.settings.setValue("recent_projects", recent_projects)
@@ -105,7 +110,9 @@ class SetupPanel(FORM_CLASS, QWidget):
         if directory:
             self.working_dir = directory
             self.update_recent_projects(directory)  # Update recent projects
-            self.settings.setValue("last_working_directory", directory)
+            self.settings.setValue(
+                "last_working_directory", directory
+            )  # Update last used project
             self.set_project_directory()
 
     def create_new_project_folder(self):
@@ -115,8 +122,10 @@ class SetupPanel(FORM_CLASS, QWidget):
         if directory:
             self.working_dir = directory
             self.update_recent_projects(directory)  # Update recent projects
-            self.settings.setValue("last_working_directory", directory)
-        self.working_dir = directory
+            self.settings.setValue(
+                "last_working_directory", directory
+            )  # Update last used project
+        self.set_project_directory()
 
     def set_project_directory(self):
         """
@@ -150,17 +159,28 @@ class SetupPanel(FORM_CLASS, QWidget):
         QgsProject.instance().addMapLayer(world_map_layer)
 
     def load_project(self):
+        """Load the project from the working directory."""
         self.working_dir = self.previous_project_combo.currentText()
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
+            self.settings.setValue(
+                "last_working_directory", self.working_dir
+            )  # Update last used project
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
+        else:
+            QMessageBox.critical(
+                self, "Error", "Selected project does not contain a model.json file."
+            )
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
 
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
+            self.settings.setValue(
+                "last_working_directory", self.working_dir
+            )  # Update last used project
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
         else:
@@ -209,21 +229,29 @@ class SetupPanel(FORM_CLASS, QWidget):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
                 return
-            try:
-                # This checks we can access Open Route Service
-                # and that access works in the background in another thread
-                checker = OrsCheckerTask(
-                    url="https://api.openrouteservice.org/",
-                )
-                if debug_env:
-                    # Non threaded version
-                    checker.run()
-                else:
-                    checker.run()
-                    # Threaded version (crashes QGIS)
-                    # self.queue_manager.add_task(checker)
-                    # self.queue_manager.start_processing()
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Error checking ORS service: {e}")
-                return
+
+            # Update the last used project after processing
+            self.settings.setValue("last_working_directory", self.working_dir)
             self.switch_to_next_tab.emit()
+
+    def update_recent_projects(self, directory):
+        """Updates the recent projects list with the new directory."""
+        recent_projects = self.settings.value("recent_projects", [])
+
+        if directory in recent_projects:
+            recent_projects.remove(
+                directory
+            )  # Remove if already in the list (to reorder)
+
+        recent_projects.insert(0, directory)  # Add to the top of the list
+
+        # Limit the list to a certain number of recent projects (e.g., 15)
+        if len(recent_projects) > 15:
+            recent_projects = recent_projects[:15]
+
+        # Save back to QSettings
+        self.settings.setValue("recent_projects", recent_projects)
+
+        # Update the combo box
+        self.previous_project_combo.clear()
+        self.previous_project_combo.addItems(reversed(recent_projects))
