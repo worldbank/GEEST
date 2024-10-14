@@ -9,6 +9,8 @@ from geest.core.workflows import (
     AnalysisAggregationWorkflow,
     MultiBufferDistancesWorkflow,
     PointPerCellWorkflow,
+    PolylinePerCellWorkflow,
+    PolygonPerCellWorkflow,
 )
 from .json_tree_item import JsonTreeItem
 
@@ -45,6 +47,11 @@ class WorkflowFactory:
             return MultiBufferDistancesWorkflow(item, feedback)
         elif analysis_mode == "Use Point per Cell":
             return PointPerCellWorkflow(item, feedback)
+        elif analysis_mode == "Use Polyline per Cell":
+            return PolylinePerCellWorkflow(item, feedback)
+        # TODO fix inconsistent abbreviation below for Poly
+        elif analysis_mode == "Use Poly per Cell":
+            return PolygonPerCellWorkflow(item, feedback)
         elif analysis_mode == "Factor Aggregation":
             return FactorAggregationWorkflow(item, feedback)
         elif analysis_mode == "Dimension Aggregation":

@@ -43,8 +43,9 @@ class WorkflowBase(ABC):
         )
         self.output_crs = self.bboxes_layer.crs()
         # Will be populated by the workflow
-        attributes = self.item.data(3)
-        attributes["Result"] = "Not Run"
+        self.attributes = self.item.data(3)
+        self.layer_id = self.attributes.get("ID", "").lower().replace(" ", "_")
+        self.attributes["Result"] = "Not Run"
 
     def execute(self) -> bool:
         """

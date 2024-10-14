@@ -123,25 +123,19 @@ class PolylineWidget(BaseIndicatorWidget):
         # Collect data for the polyline layer
         polyline_layer = self.polyline_layer_combo.currentLayer()
         if polyline_layer:
-            self.attributes[f"{self.widget_key} Polyline Layer Name"] = (
-                polyline_layer.name()
-            )
-            self.attributes[f"{self.widget_key} Polyline Layer Source"] = (
-                polyline_layer.source()
-            )
-            self.attributes[f"{self.widget_key} Polyline Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key} Layer Name"] = polyline_layer.name()
+            self.attributes[f"{self.widget_key} Layer Source"] = polyline_layer.source()
+            self.attributes[f"{self.widget_key} Layer Provider Type"] = (
                 polyline_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer CRS"] = (
+            self.attributes[f"{self.widget_key} Layer CRS"] = (
                 polyline_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer Wkb Type"] = (
+            self.attributes[f"{self.widget_key} Layer Wkb Type"] = (
                 polyline_layer.wkbType()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer ID"] = (
-                polyline_layer.id()
-            )
-        self.attributes[f"{self.widget_key} Polyline Shapefile"] = (
+            self.attributes[f"{self.widget_key} Layer ID"] = polyline_layer.id()
+        self.attributes[f"{self.widget_key} Shapefile"] = (
             self.polyline_shapefile_line_edit.text()
         )
 

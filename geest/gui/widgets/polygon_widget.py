@@ -16,9 +16,10 @@ from .base_indicator_widget import BaseIndicatorWidget
 
 class PolygonWidget(BaseIndicatorWidget):
     """
-    A widget for selecting a polygon (block) layer with options for shapefile inputs.
 
-    This widget provides two `QgsMapLayerComboBox` components for selecting the polygon layers,
+    A widget for selecting a polygon (area) layer with options for shapefile inputs.
+
+    This widget provides one `QgsMapLayerComboBox` components for selecting polygon layers,
     as well as `QLineEdit` and `QToolButton` components to allow the user to specify shapefile paths for
     each layer. The user can choose layers either from the QGIS project or provide external shapefiles.
 
@@ -61,7 +62,6 @@ class PolygonWidget(BaseIndicatorWidget):
             "Polygon Layer - shapefile will have preference"
         )
         self.main_layout.addWidget(self.polygon_layer_label)
-
         # Polygon Layer ComboBox (Filtered to polygon layers)
         self.polygon_layer_combo = QgsMapLayerComboBox()
         self.polygon_layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)

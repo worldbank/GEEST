@@ -15,9 +15,9 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QCheckBox,
 )
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings
 from qgis.PyQt.QtGui import QMovie
-from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject
+from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
 from geest.gui.dialogs import IndicatorDetailDialog
@@ -162,6 +162,27 @@ class TreePanel(QWidget):
                 QgsMessageLog.logMessage(
                     f"Loaded model.json from {model_path}", "Geest", level=Qgis.Info
                 )
+
+                # If this is a first time use of the analysis project lets set some things up
+                analysis_item = self.model.rootItem.child(0)
+                analysis_data = analysis_item.data(3)
+                QgsMessageLog.logMessage(
+                    str(analysis_data), tag="Geest", level=Qgis.Info
+                )
+                if analysis_data.get("Working Folder", "Not Set"):
+                    analysis_data["Working Folder"] = self.working_directory
+                else:
+                    if not os.path.exists(analysis_data["Working Folder"]):
+                        analysis_data["Working Folder"] = self.working_directory
+                # Use the last dir in the working directory path as the analysis name
+                if analysis_data.get("Analysis Name", "Not Set"):
+                    analysis_data["Analysis Name"] = os.path.basename(
+                        self.working_directory
+                    )
+                analysis_item.setData(0, analysis_data.get("Analysis Name", "Analysis"))
+                settings = QSettings()
+                # This is the top level folder for work files
+                settings.setValue("last_working_directory", self.working_directory)
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical
@@ -279,6 +300,13 @@ class TreePanel(QWidget):
 
         run_item_action = QAction("Run Item Workflow", self)
         run_item_action.triggered.connect(lambda: self.run_item(item, role=item.role))
+
+        if item.role == "analysis":
+            menu = QMenu(self)
+            menu.addAction(show_json_attributes_action)
+            menu.addAction(run_item_action)
+            menu.addAction(add_to_map_action)
+
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
             # Context menu for dimensions
@@ -377,6 +405,15 @@ class TreePanel(QWidget):
         QgsMessageLog.logMessage(
             "----------------------------", tag="Geest", level=Qgis.Info
         )
+        if item.role == "analysis":
+            QgsMessageLog.logMessage(
+                "Analysis attributes:",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            QgsMessageLog.logMessage(
+                str(item.getAnalysisAttributes()), tag="Geest", level=Qgis.Info
+            )
         if item.role == "factor":
             QgsMessageLog.logMessage(
                 "Factor attributes that get passed to workflow:",
@@ -416,6 +453,35 @@ class TreePanel(QWidget):
         """Add the item to the map."""
         # TODO refactor use of the term Layer everywhere to Indicator
         # for now, some spaghetti code to get the layer_uri
+        gpkg_path = os.path.join(
+            self.working_directory, "study_area", "study_area.gpkg"
+        )
+
+        if item.role == "analysis":
+            layers = [
+                "study_area_bbox",
+                "study_area_bboxes",
+                "study_area_polygons",
+                "study_area_grid",
+            ]
+            for layer_name in layers:
+                gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
+                layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
+
+                if layer.isValid():
+                    QgsProject.instance().addMapLayer(layer)
+                    QgsMessageLog.logMessage(
+                        f"Added '{layer_name}' layer to the map.",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                else:
+                    QgsMessageLog.logMessage(
+                        f"Failed to add '{layer_name}' layer to the map.",
+                        tag="Geest",
+                        level=Qgis.Critical,
+                    )
+
         if item.role == "layer":
             layer_uri = item.data(3).get(f"Indicator Result File")
         else:

@@ -45,8 +45,6 @@ class RadioButtonFactory:
                 return PolygonWidget(label_text=key, attributes=attributes)
             if key == "Use Polyline per Cell" and value == 1:
                 return PolylineWidget(label_text=key, attributes=attributes)
-            if key == "Use Polyline per Cell" and value == 1:
-                return PolylineWidget(label_text=key, attributes=attributes)
             if key == "Use Point per Cell" and value == 1:
                 return PointLayerWidget(label_text=key, attributes=attributes)
             else:
