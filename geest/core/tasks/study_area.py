@@ -8,11 +8,11 @@ from qgis.core import (
     QgsFeature,
     QgsGeometry,
     QgsField,
-    QgsPointXY,
     QgsProject,
     QgsCoordinateTransform,
     QgsCoordinateReferenceSystem,
     QgsRasterLayer,
+    QgsSpatialIndex,
     QgsWkbTypes,
     QgsVectorLayer,
     QgsVectorFileWriter,
@@ -34,8 +34,6 @@ class StudyAreaProcessingTask(QgsTask):
     The grids are in two forms - the entire bounding box and the individual parts.
     The grids are aligned to 100m intervals and saved as vector features in a GeoPackage.
     Any invalid geometries are discarded, and fixed geometries are processed.
-
-
 
     Args:
         QgsTask (_type_): _description_
@@ -131,7 +129,6 @@ class StudyAreaProcessingTask(QgsTask):
             QgsMessageLog.logMessage(
                 f"Task failed: {e}", tag="Geest", level=Qgis.Critical
             )
-            self.taskTerminated.emit(str(e))
             return False
 
     def finished(self, result: bool) -> None:
@@ -144,7 +141,6 @@ class StudyAreaProcessingTask(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.taskCompleted.emit()
 
     def cancel(self) -> None:
         """
@@ -537,6 +533,9 @@ class StudyAreaProcessingTask(QgsTask):
         x_min, x_max = bbox.xMinimum(), bbox.xMaximum()
         y_min, y_max = bbox.yMinimum(), bbox.yMaximum()
 
+        # Access the GeoPackage layer to append features
+        gpkg_layer_path = f"{self.gpkg_path}|layername={grid_layer_name}"
+        gpkg_layer = QgsVectorLayer(gpkg_layer_path, grid_layer_name, "ogr")
         if not gpkg_layer.isValid():
             QgsMessageLog.logMessage(
                 f"Failed to access layer '{grid_layer_name}' in the GeoPackage.",
@@ -547,14 +546,27 @@ class StudyAreaProcessingTask(QgsTask):
 
         provider = gpkg_layer.dataProvider()
 
+        # Create a spatial index for efficient intersection checks
+        spatial_index = QgsSpatialIndex()
+        feature = QgsFeature()
+        feature.setGeometry(geom)
+        spatial_index.addFeature(feature)  # Add the main geometry to the spatial index
+
         # Loop through the grid cells
+        total_cells = ((x_max - x_min) // step) * ((y_max - y_min) // step)
+        cell_count = 0
+        features_per_batch = 10000  # Commit features every 10,000 records
+        progress_log_interval = 1000  # Log progress every 1,000 features
+
         for x in range(int(x_min), int(x_max), step):
             for y in range(int(y_min), int(y_max), step):
                 rect = QgsRectangle(x, y, x + step, y + step)
                 grid_geom = QgsGeometry.fromRect(rect)
 
-                # Check if grid_geom intersects with the geometry
-                if grid_geom.intersects(geom):
+                # Check if grid_geom intersects with the geometry using spatial index
+                if spatial_index.intersects(
+                    grid_geom.boundingBox()
+                ) and grid_geom.intersects(geom):
                     # Create the grid feature
                     feature = QgsFeature()
                     feature.setGeometry(grid_geom)
@@ -562,9 +574,46 @@ class StudyAreaProcessingTask(QgsTask):
                     feature_batch.append(feature)
                     feature_id += 1
 
-        # Commit the features to the layer
-        provider.addFeatures(feature_batch)
-        gpkg_layer.updateExtents()
+                    # Commit features in batches
+                    if len(feature_batch) >= features_per_batch:
+                        provider.addFeatures(feature_batch)
+                        gpkg_layer.updateExtents()
+                        feature_batch = []
+                        QgsMessageLog.logMessage(
+                            f"Committed {feature_id} features to {grid_layer_name}.",
+                            tag="Geest",
+                            level=Qgis.Info,
+                        )
+                        # Close and reopen the dataset every 10,000 records
+                        del provider
+                        gpkg_layer = QgsVectorLayer(
+                            gpkg_layer_path, grid_layer_name, "ogr"
+                        )
+                        provider = gpkg_layer.dataProvider()
+
+                cell_count += 1
+                if cell_count % progress_log_interval == 0:
+                    QgsMessageLog.logMessage(
+                        f"Processed {cell_count}/{total_cells} grid cells ({(cell_count / total_cells) * 100:.2f}% complete).",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+
+        # Commit any remaining features in the batch
+        if feature_batch:
+            provider.addFeatures(feature_batch)
+            gpkg_layer.updateExtents()
+            QgsMessageLog.logMessage(
+                f"Final commit: {feature_id} features written to {grid_layer_name}.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
+        QgsMessageLog.logMessage(
+            f"Grid creation completed. Total features written: {feature_id}.",
+            tag="Geest",
+            level=Qgis.Info,
+        )
 
     def create_raster_mask(
         self, geom: QgsGeometry, aligned_box: QgsRectangle, mask_name: str
