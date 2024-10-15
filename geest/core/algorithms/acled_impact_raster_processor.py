@@ -3,6 +3,7 @@ from qgis.core import (
     QgsCoordinateTransform,
     QgsCoordinateTransformContext,
     QgsFeature,
+    QgsFeatureRequest,
     QgsField,
     QgsGeometry,
     QgsProcessingFeedback,
@@ -13,6 +14,8 @@ from qgis.core import (
     QgsProject,
     QgsMessageLog,
     QgsVectorFileWriter,
+    QgsWkbTypes,
+    QgsRasterLayer,
     Qgis,
 )
 from qgis.PyQt.QtCore import QVariant
@@ -133,8 +136,10 @@ class AcledImpactRasterProcessor:
             point_layer, shapefile_path, "utf-8", target_crs, "ESRI Shapefile"
         )
 
-        if error != QgsVectorFileWriter.NoError:
-            raise QgsProcessingException(f"Error saving point layer to disk: {error}")
+        if error[0] != 0:
+            raise QgsProcessingException(
+                f"Error saving point layer to disk: {error[1]}"
+            )
 
         QgsMessageLog.logMessage(
             f"Point layer created from CSV saved to {shapefile_path}",
@@ -178,13 +183,20 @@ class AcledImpactRasterProcessor:
             )
 
             # Step 1: Select features that intersect with the current area
-            area_features = self._select_features(self.features_layer, current_area)
+            area_features = self._select_features(
+                self.features_layer,
+                current_area,
+                f"{self.output_prefix}_area_features_{index+1}",
+            )
 
             if area_features.featureCount() == 0:
                 continue
 
             # Step 2: Buffer the selected features by 5 km
-            buffered_layer = self._buffer_features(area_features)
+            buffered_layer = self._buffer_features(
+                area_features,
+                f"{self.output_prefix}_buffers_{index+1}",
+            )
 
             # Step 3: Assign values based on event_type
             scored_layer = self._assign_scores(buffered_layer)
@@ -203,41 +215,87 @@ class AcledImpactRasterProcessor:
         return vrt_filepath
 
     def _select_features(
-        self, layer: QgsVectorLayer, area_geom: QgsGeometry
+        self, layer: QgsVectorLayer, area_geom: QgsGeometry, output_name: str
     ) -> QgsVectorLayer:
         """
-        Select features from the input layer that intersect with the provided area geometry.
+        Select features from the input layer that intersect with the given area geometry
+        using the QGIS API. The selected features are stored in a temporary layer.
 
         Args:
-            layer (QgsVectorLayer): The input feature layer.
-            area_geom (QgsGeometry): The area geometry to intersect with.
+            layer (QgsVectorLayer): The input layer to select features from (e.g., points, lines, polygons).
+            area_geom (QgsGeometry): The current area geometry for which intersections are evaluated.
+            output_name (str): A name for the output temporary layer to store selected features.
 
         Returns:
-            QgsVectorLayer: A new layer containing the intersecting features.
+            QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
-        # Clip features based on the area geometry
-        clipped_layer = processing.run(
-            "native:extractbylocation",
-            {
-                "INPUT": layer,
-                "PREDICATE": [0],  # Intersects
-                "INTERSECT": area_geom,
-                "OUTPUT": "memory:",
-            },
-        )["OUTPUT"]
+        QgsMessageLog.logMessage(
+            "Features per Cell Select Features Started", tag="Geest", level=Qgis.Info
+        )
+        output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
-        return clipped_layer
+        # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
+        geometry_type = layer.wkbType()
 
-    def _buffer_features(self, layer: QgsVectorLayer) -> QgsVectorLayer:
+        # Determine geometry type name based on input layer's geometry
+        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
+            geometry_name = "Point"
+        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
+            geometry_name = "LineString"
+        else:
+            raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
+
+        # Create a memory layer to store the selected features with the correct geometry type
+        crs = layer.crs().authid()
+        temp_layer = QgsVectorLayer(f"{geometry_name}?crs={crs}", output_name, "memory")
+        temp_layer_data = temp_layer.dataProvider()
+
+        # Add fields to the temporary layer
+        temp_layer_data.addAttributes(layer.fields())
+        temp_layer.updateFields()
+
+        # Iterate through features and select those that intersect with the area
+        request = QgsFeatureRequest(area_geom.boundingBox()).setFilterRect(
+            area_geom.boundingBox()
+        )
+        selected_features = [
+            feat
+            for feat in layer.getFeatures(request)
+            if feat.geometry().intersects(area_geom)
+        ]
+        temp_layer_data.addFeatures(selected_features)
+
+        QgsMessageLog.logMessage(
+            f"Features per Cell writing {len(selected_features)} features",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        # Save the memory layer to a file for persistence
+        QgsVectorFileWriter.writeAsVectorFormat(
+            temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
+        )
+
+        QgsMessageLog.logMessage(
+            "Features per Cell Select Features Ending", tag="Geest", level=Qgis.Info
+        )
+
+        return QgsVectorLayer(output_path, output_name, "ogr")
+
+    def _buffer_features(
+        self, layer: QgsVectorLayer, output_name: str
+    ) -> QgsVectorLayer:
         """
         Buffer the input features by 5 km.
 
         Args:
             layer (QgsVectorLayer): The input feature layer.
+            output_name (str): A name for the output buffered layer.
 
         Returns:
             QgsVectorLayer: The buffered features layer.
         """
+        output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
         buffered_layer = processing.run(
             "native:buffer",
             {
@@ -245,7 +303,7 @@ class AcledImpactRasterProcessor:
                 "DISTANCE": 5000,  # 5 km buffer
                 "SEGMENTS": 5,
                 "DISSOLVE": False,
-                "OUTPUT": "memory:",
+                "OUTPUT": output_path,
             },
         )["OUTPUT"]
 
