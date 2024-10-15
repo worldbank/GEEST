@@ -66,7 +66,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             self.layer_id,
         )
 
-        # loop through self.bboxes_layer and the self.areas_layer  and create a raster mask for each feature
+        # loop through self.bboxes_layer and the self.areas_layer  and create a raster for each feature
         index_score = self.attributes["Default Index Score"]
         for feature in self.areas_layer.getFeatures():
             if (
@@ -83,15 +83,15 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             # Set the 'area_name' from layer
             area_name = feature.attribute("area_name")
 
-            mask_name = f"{self.layer_id}_{area_name}"
+            raster_name = f"{self.layer_id}_{area_name}"
             self.create_raster(
                 geom=geom,
                 aligned_box=aligned_box,
-                mask_name=mask_name,
+                raster_name=raster_name,
                 index_score=index_score,
             )
         # TODO Jeff copy create_raster_vrt from study_area.py
-        # Create and add the VRT of all generated raster masks if in raster mode
+        # Create and add the VRT of all generated raster if in raster mode
         vrt_filepath = self.create_raster_vrt(
             output_vrt_name=os.path.join(
                 self.workflow_directory, f"{self.layer_id}.vrt"
@@ -117,15 +117,15 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         self,
         geom: QgsGeometry,
         aligned_box: QgsGeometry,
-        mask_name: str,
+        raster_name: str,
         index_score: float,
     ) -> None:
         """
-        Creates a byte raster mask for a single geometry.
+        Creates a byte raster for a single geometry.
 
         :param geom: Geometry to be rasterized.
         :param aligned_box: Aligned bounding box geometry for the geometry.
-        :param mask_name: Name for the output raster file.
+        :param raster_name: Name for the output raster file.
         """
         if self.feedback.isCanceled():  # Check for cancellation before starting
             QgsMessageLog.logMessage(
@@ -140,23 +140,23 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             geom.boundingBox(), self.areas_layer.extent()
         )
 
-        mask_filepath = os.path.join(self.workflow_directory, f"{mask_name}.tif")
+        raster_filepath = os.path.join(self.workflow_directory, f"{raster_name}.tif")
         index_score = (self.attributes["Default Index Score"] / 100) * 5
 
         # Create a memory layer to hold the geometry
         temp_layer = QgsVectorLayer(
-            f"Polygon?crs={self.output_crs.authid()}", "temp_mask_layer", "memory"
+            f"Polygon?crs={self.output_crs.authid()}", "temp_raster_layer", "memory"
         )
         temp_layer_data_provider = temp_layer.dataProvider()
 
-        # Define a field to store the mask value
+        # Define a field to store the raster value
         temp_layer_data_provider.addAttributes([QgsField("area_name", QVariant.String)])
         temp_layer.updateFields()
 
         # Add the geometry to the memory layer
         temp_feature = QgsFeature()
         temp_feature.setGeometry(geom)
-        temp_feature.setAttributes(["1"])  # Setting an arbitrary value for the mask
+        temp_feature.setAttributes(["1"])  # Setting an arbitrary value for the raster
         temp_layer_data_provider.addFeature(temp_feature)
 
         # Ensure resolution parameters are properly formatted as float values
@@ -183,33 +183,33 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "OUTPUT": "TEMPORARY_OUTPUT",
         }
         # Run the rasterize algorithm
-        mask = processing.run("gdal:rasterize", params)["OUTPUT"]
+        raster = processing.run("gdal:rasterize", params)["OUTPUT"]
         QgsMessageLog.logMessage(
-            f"Created raster mask: {mask}", tag="Geest", level=Qgis.Info
+            f"Created raster: {raster}", tag="Geest", level=Qgis.Info
         )
 
-        # Clip the raster mask to the study area boundary
-        clipped_mask_filepath = os.path.join(
-            self.workflow_directory, f"{mask_filepath}"
+        # Clip the raster to the study area boundary
+        clipped_raster_filepath = os.path.join(
+            self.workflow_directory, f"{raster_filepath}"
         )
 
         processing.run(
             "gdal:cliprasterbymasklayer",
             {
-                "INPUT": mask,
+                "INPUT": raster,
                 "MASK": self.areas_layer,
                 "NODATA": 255,
                 "CROP_TO_CUTLINE": True,
-                "OUTPUT": mask_filepath,
+                "OUTPUT": raster_filepath,
             },
         )
         QgsMessageLog.logMessage(
-            f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info
+            f"Created raster: {raster_filepath}", tag="Geest", level=Qgis.Info
         )
 
     def create_raster_vrt(self, output_vrt_name: str = None) -> None:
         """
-        Creates a VRT file from all generated raster masks and adds it to the QGIS map.
+        Creates a VRT file from all generated rasters and adds it to the QGIS map.
 
         :param output_vrt_name: The name of the VRT file to create.
 
@@ -227,17 +227,17 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             output_vrt_name = f"{self.layer_id}.vrt"
 
         QgsMessageLog.logMessage(
-            f"Creating VRT of masks '{output_vrt_name}' layer to the map.",
+            f"Creating VRT of rasters '{output_vrt_name}' layer to the map.",
             tag="Geest",
             level=Qgis.Info,
         )
-        # Directory containing raster masks
+        # Directory containing rasters
         raster_dir = os.path.dirname(output_vrt_name)
         raster_files = glob.glob(os.path.join(raster_dir, "*.tif"))
 
         if not raster_files:
             QgsMessageLog.logMessage(
-                "No raster masks found to combine into VRT.",
+                "No rasters found to combine into VRT.",
                 tag="Geest",
                 level=Qgis.Warning,
             )

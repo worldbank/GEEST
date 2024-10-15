@@ -46,6 +46,15 @@ class AcledImpactRasterProcessor:
         self.csv_path = csv_path
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path
+        # Retrieve CRS from a layer in the GeoPackage to match the points with that CRS
+        gpkg_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_polygons", "areas", "ogr"
+        )
+        if not gpkg_layer.isValid():
+            raise QgsProcessingException(
+                f"Failed to load GeoPackage layer for CRS retrieval."
+            )
+        self.target_crs = gpkg_layer.crs()  # Get the CRS of the GeoPackage layer
 
         # Load the CSV and create a point layer
         self.features_layer = self._load_csv_as_point_layer()
@@ -68,16 +77,6 @@ class AcledImpactRasterProcessor:
         Returns:
             QgsVectorLayer: The reprojected point layer created from the CSV.
         """
-        # Retrieve CRS from a layer in the GeoPackage to match the points with that CRS
-        gpkg_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_polygons", "areas", "ogr"
-        )
-        if not gpkg_layer.isValid():
-            raise QgsProcessingException(
-                f"Failed to load GeoPackage layer for CRS retrieval."
-            )
-
-        target_crs = gpkg_layer.crs()  # Get the CRS of the GeoPackage layer
         source_crs = QgsCoordinateReferenceSystem(
             "EPSG:4326"
         )  # Assuming the CSV uses WGS84
@@ -85,7 +84,7 @@ class AcledImpactRasterProcessor:
         # Set up a coordinate transform from WGS84 to the target CRS
         transform_context = QgsProject.instance().transformContext()
         coordinate_transform = QgsCoordinateTransform(
-            source_crs, target_crs, transform_context
+            source_crs, self.target_crs, transform_context
         )
 
         # Define fields for the point layer
@@ -94,7 +93,7 @@ class AcledImpactRasterProcessor:
 
         # Create an in-memory point layer in the target CRS
         point_layer = QgsVectorLayer(
-            f"Point?crs={target_crs.authid()}", "acled_points", "memory"
+            f"Point?crs={self.target_crs.authid()}", "acled_points", "memory"
         )
         point_provider = point_layer.dataProvider()
         point_provider.addAttributes(fields)
@@ -133,7 +132,7 @@ class AcledImpactRasterProcessor:
             f"Writing points to {shapefile_path}", tag="Geest", level=Qgis.Info
         )
         error = QgsVectorFileWriter.writeAsVectorFormat(
-            point_layer, shapefile_path, "utf-8", target_crs, "ESRI Shapefile"
+            point_layer, shapefile_path, "utf-8", self.target_crs, "ESRI Shapefile"
         )
 
         if error[0] != 0:
@@ -204,9 +203,16 @@ class AcledImpactRasterProcessor:
                 scored_layer, f"{self.output_prefix}_dissolved_{index}.shp"
             )
 
-            # Step 4: Rasterize the scored buffer layer
+            # Step 5: Rasterize the scored buffer layer
             raster_output = self._rasterize(dissolved_layer, current_bbox, index)
 
+            # Step 6: Multiply the area by it matching mask layer in study_area folder
+            masked_layer = self._mask_raster(
+                raster_path=raster_output,
+                area_geometry=current_area,
+                output_name=f"{self.output_prefix}_masked_{index}.shp",
+                index=index,
+            )
         # Combine all area rasters into a VRT
         vrt_filepath = self._combine_rasters_to_vrt(index + 1)
 
@@ -541,6 +547,8 @@ class AcledImpactRasterProcessor:
             "INVERT": False,
             "EXTRA": "",
             "OUTPUT": output_path,
+            # TODO this doesnt work, layer is written in correct CRS but advertises 4326
+            "ASSIGN_CRS": self.target_crs.toWkt(),
         }
 
         processing.run("gdal:rasterize", params)
@@ -549,7 +557,52 @@ class AcledImpactRasterProcessor:
             tag="Geest",
             level=Qgis.Info,
         )
+
+        QgsMessageLog.logMessage(
+            f"Created raster: {output_path}", tag="Geest", level=Qgis.Info
+        )
         return output_path
+
+    def _mask_raster(
+        self, raster_path: str, area_geometry: QgsGeometry, index: int, output_name: str
+    ) -> QgsVectorLayer:
+        """
+        Mask the raster with the study area mask layer.
+
+        Args:
+            raster_path (str): The path to the raster to mask.
+            output_name (str): A name for the output masked layer.
+
+        """
+        # Clip the raster to the study area boundary
+        masked_raster_filepath = os.path.join(
+            self.workflow_directory,
+            f"{self.output_prefix}_final_{index}.tif",
+        )
+        # Convert the area geometry to a temporary layer
+        epsg_code = self.target_crs.authid()
+        area_layer = QgsVectorLayer(f"Polygon?crs=EPSG:{epsg_code}", "area", "memory")
+        area_provider = area_layer.dataProvider()
+        area_feature = QgsFeature()
+        area_feature.setGeometry(area_geometry)
+        area_provider.addFeatures([area_feature])
+        params = {
+            "INPUT": f"{raster_path}",
+            "MASK": area_layer,
+            "NODATA": 255,
+            "CROP_TO_CUTLINE": False,
+            "OUTPUT": masked_raster_filepath,
+            # TODO this doesnt work, layer is written in correct CRS but advertises 4326
+            "ASSIGN_CRS": self.target_crs.toWkt(),
+        }
+        processing.run("gdal:cliprasterbymasklayer", params)
+        QgsMessageLog.logMessage(f"Parameter: {params}", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            f"Masked raster saved to {masked_raster_filepath}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        return masked_raster_filepath
 
     def _combine_rasters_to_vrt(self, num_rasters: int) -> None:
         """
@@ -565,7 +618,7 @@ class AcledImpactRasterProcessor:
         for i in range(num_rasters):
             raster_path = os.path.join(
                 self.workflow_directory,
-                f"{self.output_prefix}_dissolved_{i}.tif",
+                f"{self.output_prefix}_final_{i}.tif",
             )
             if os.path.exists(raster_path) and QgsRasterLayer(raster_path).isValid():
                 raster_files.append(raster_path)
@@ -610,9 +663,9 @@ class AcledImpactRasterProcessor:
             "OUTPUT": vrt_filepath,
             "PROJ_DIFFERENCE": False,
             "ADD_ALPHA": False,
-            "ASSIGN_CRS": None,
+            "ASSIGN_CRS": self.target_crs.toWkt(),
             "RESAMPLING": 0,
-            "SRC_NODATA": "0",
+            "SRC_NODATA": "255",
             "EXTRA": "",
         }
 
