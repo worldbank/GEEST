@@ -309,16 +309,22 @@ class AcledImpactRasterProcessor:
 
         return buffered_layer
 
-    def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
+    def _assign_scores(self, layer_path: str) -> QgsVectorLayer:
         """
         Assign values to buffered polygons based on their event_type.
 
         Args:
-            layer (QgsVectorLayer): The buffered features layer.
+            layer_path (str): The buffered features layer.
 
         Returns:
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
+        layer = QgsVectorLayer(
+            layer_path, "buffered_features", "ogr"
+        )  # Load the buffered layer
+        QgsMessageLog.logMessage(
+            f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info
+        )
         # Define scoring categories based on event_type
         event_scores = {
             "Battles": 0,
