@@ -3,6 +3,9 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsCoordinateReferenceSystem,
     QgsRectangle,
+    QgsGeometry,
+    QgsMessageLog,
+    Qgis,
 )
 from qgis.analysis import QgsRasterCalculatorEntry
 import os
@@ -20,7 +23,7 @@ class RasterReclassificationProcessor:
         self,
         input_raster,
         output_vrt,
-        reclassification_rules,
+        reclassification_table,
         pixel_size,
         gpkg_path,
         grid_layer,
@@ -32,7 +35,7 @@ class RasterReclassificationProcessor:
         Args:
             input_raster (str): Path to the input raster file.
             output_vrt (str): Path to save the final VRT file.
-            reclassification_rules (dict): Dictionary of reclassification rules.
+            reclassification_table (list): List of reclassification rules.
             pixel_size (float): The pixel size for the output raster.
             gpkg_path (str): Path to the GeoPackage with study areas.
             grid_layer (QgsVectorLayer): The grid layer defining the extent and CRS.
@@ -40,7 +43,7 @@ class RasterReclassificationProcessor:
         """
         self.input_raster = input_raster
         self.output_vrt = output_vrt
-        self.reclassification_rules = reclassification_rules
+        self.reclassification_table = reclassification_table
         self.pixel_size = pixel_size
         self.gpkg_path = gpkg_path
         self.grid_layer = grid_layer
@@ -70,16 +73,25 @@ class RasterReclassificationProcessor:
 
             # Apply the reclassification rules
             reclassified_raster = self._apply_reclassification(
-                reprojected_raster, index
+                reprojected_raster,
+                index,
+                reclass_table=self.reclassification_table,
+                bbox=current_bbox,
             )
             temp_rasters.append(reclassified_raster)
 
         # Combine the reclassified rasters into a VRT
         self._combine_rasters_to_vrt(temp_rasters)
 
-        print(f"Reclassified VRT saved to: {self.output_vrt}")
+        QgsMessageLog.logMessage(
+            f"Reclassification complete. VRT file saved to {self.output_vrt}",
+            "RasterReclassificationProcessor",
+            Qgis.Info,
+        )
 
-    def _reproject_and_clip_raster(self, raster_path, bbox, index):
+    def _reproject_and_clip_raster(
+        self, raster_path: str, bbox: QgsGeometry, index: int
+    ):
         """
         Reproject and clip the raster to the bounding box of the current area.
         """
@@ -104,67 +116,54 @@ class RasterReclassificationProcessor:
 
         return reprojected_raster
 
-    def _build_reclassification_expression(self, input_raster):
-        """
-        Build the raster calculator expression based on the reclassification rules.
-        """
-        # Get the file name without extension
-        file_name = os.path.splitext(os.path.basename(input_raster))[0]
-
-        expression_parts = []
-
-        for (
-            lower_bound,
-            upper_bound,
-        ), new_value in self.reclassification_rules.items():
-            expression_parts.append(
-                f"({file_name}@1 >= {lower_bound} AND {file_name}@1 <= {upper_bound}) * {new_value}"
-            )
-
-        reclass_expression = " + ".join(expression_parts)
-        return reclass_expression
-
-    def _apply_reclassification(self, input_raster, index):
+    def _apply_reclassification(
+        self,
+        input_raster: QgsRasterLayer,
+        index: int,
+        reclass_table,
+        bbox: QgsGeometry,
+    ):
         """
         Apply the reclassification using the raster calculator and save the output.
         """
-
-        # Build the reclassification expression
-        expression = self._build_reclassification_expression(input_raster)
+        bbox = bbox.boundingBox()
 
         reclassified_raster = os.path.join(
             self.workflow_directory, f"reclassified_{index}.tif"
         )
 
-        # Define the input raster layer
-        raster_layer = QgsRasterLayer(input_raster, f"Reprojected Raster {index}")
-
-        if not raster_layer.isValid():
-            raise Exception(f"Failed to load raster: {input_raster}")
-
-        # Define the raster calculator entries
-        raster_entry = QgsRasterCalculatorEntry()
-        raster_entry.ref = f"{os.path.splitext(os.path.basename(input_raster))[0]}@1"
-        raster_entry.raster = raster_layer
-        raster_entry.bandNumber = 1
-
-        # Set up the raster calculator
+        # Set up the reclassification using reclassifybytable
         params = {
-            "EXPRESSION": expression,
-            "LAYERS": [raster_entry.raster],
-            "CELLSIZE": self.pixel_size,
-            "EXTENT": raster_layer.extent(),
-            "CRS": self.crs.toWkt(),
-            "OUTPUT": reclassified_raster,
+            "INPUT_RASTER": input_raster,
+            "RASTER_BAND": 1,  # Band number to apply the reclassification
+            "TABLE": reclass_table,  # Reclassification table
+            "NO_DATA": 255,  # NoData value
+            "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
+            "OUTPUT": "TEMPORARY_OUTPUT",
         }
-        extent = raster_layer.extent()
-        # Print extent and expression for debugging
-        print(f"Extent: {extent}")
-        print(f"Expression: {expression}")
 
         # Perform the reclassification using the raster calculator
+        reclass = processing.run(
+            "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+
+        clip_params = {
+            "INPUT": reclass,
+            "MASK": self.grid_layer,
+            "NODATA": 255,
+            "CROP_TO_CUTLINE": True,
+            "KEEP_RESOLUTION": True,
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
+            "OUTPUT": reclassified_raster,
+        }
+
         processing.run(
-            "gdal:rastercalculator", params, feedback=QgsProcessingFeedback()
+            "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
+        )
+        QgsMessageLog.logMessage(
+            f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
+            "RasterReclassificationProcessor",
+            Qgis.Info,
         )
 
         return reclassified_raster
@@ -183,5 +182,3 @@ class RasterReclassificationProcessor:
         processing.run(
             "gdal:buildvirtualraster", params, feedback=QgsProcessingFeedback()
         )
-
-        print(f"VRT created at {self.output_vrt}")

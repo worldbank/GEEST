@@ -39,14 +39,26 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         self.assertTrue(self.grid_layer.isValid(), "Failed to load grid layer.")
 
         # Define the reclassification rules for fire hazards
-        self.reclassification_rules = {
-            (0, 0): 5,  # No hazard (value = 0)
-            (0.01, 1): 4,  # Very low hazard (0 < value <= 1)
-            (1.01, 2): 3,  # Low hazard (1 < value <= 2)
-            (2.01, 5): 2,  # Moderate hazard (2 < value <= 5)
-            (5.01, 8): 1,  # High hazard (5 < value <= 8)
-            (8.01, 1e10): 0,  # Very high hazard (value > 8)
-        }
+        self.reclassification_rules = [
+            0,
+            0,
+            5,
+            0.00,
+            1,
+            4,
+            1.00,
+            2,
+            3,
+            2.00,
+            5,
+            2,
+            5.00,
+            8,
+            1,
+            8.00,
+            float("inf"),
+            0,
+        ]
 
         # Set the output VRT path
         self.output_vrt = os.path.join(self.output_directory, "reclassified_output.vrt")
@@ -58,7 +70,7 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         self.processor = RasterReclassificationProcessor(
             input_raster=self.input_raster_path,
             output_vrt=self.output_vrt,
-            reclassification_rules=self.reclassification_rules,
+            reclassification_table=self.reclassification_rules,
             pixel_size=self.pixel_size,
             gpkg_path=self.gpkg_path,
             grid_layer=self.grid_layer,
