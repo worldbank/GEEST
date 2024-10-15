@@ -36,6 +36,7 @@ class SafetyPerCellProcessor:
         self,
         output_prefix: str,
         safety_layer: QgsVectorLayer,
+        safety_field: str,
         workflow_directory: str,
         gpkg_path: str,
     ) -> None:
@@ -52,6 +53,7 @@ class SafetyPerCellProcessor:
         self.safety_layer = safety_layer
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path
+        self.safety_field = safety_field
 
         # Load the grid layer from the GeoPackage
         self.grid_layer = QgsVectorLayer(
@@ -148,7 +150,7 @@ class SafetyPerCellProcessor:
                 layer.updateFields()
 
             for feature in layer.getFeatures():
-                perceived_safety = feature["safety"]
+                perceived_safety = feature[self.safety_field]
                 # Scale perceived safety values between 0 and 5
                 reclass_val = self._scale_value(perceived_safety, 0, 100, 0, 5)
                 feature.setAttribute("value", reclass_val)

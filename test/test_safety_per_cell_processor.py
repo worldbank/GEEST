@@ -1,6 +1,11 @@
 import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsProcessingException
+from qgis.core import (
+    QgsVectorLayer,
+    QgsProcessingException,
+    QgsRasterLayer,
+    QgsRasterBandStats,
+)
 from geest.core.algorithms.safety_polygon_processor import (
     SafetyPerCellProcessor,
 )
@@ -41,6 +46,7 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
         self.processor = SafetyPerCellProcessor(
             output_prefix="test",
             safety_layer=self.safety_layer,
+            safety_field="safety",
             workflow_directory=self.workflow_directory,
             gpkg_path=self.gpkg_path,
         )
@@ -65,6 +71,23 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
                 os.path.exists(output_raster), "Output raster was not created."
             )
             self.assertTrue(os.path.exists(output_vrt), "Output VRT was not created.")
+
+            # Load the VRT file as a raster layer
+            vrt_layer = QgsRasterLayer(output_vrt, "VRT Layer")
+
+            if not vrt_layer.isValid():
+                self.fail(f"Failed to load the VRT file from {output_vrt}")
+
+            # Compute statistics from the raster layer
+            stats = vrt_layer.dataProvider().bandStatistics(1, QgsRasterBandStats.All)
+
+            # Check if the statistics are valid and contain expected values
+            self.assertIsNotNone(stats, "Failed to compute statistics.")
+            self.assertEqual(stats.minimumValue, 0, "Minimum value should be >= 0.")
+            self.assertEqual(stats.maximumValue, 5, "Maximum value should be <= 5.")
+            self.assertEqual(
+                stats.mean, 2.4326080111367063, "Mean value should be > 0."
+            )
 
         except QgsProcessingException as e:
             self.fail(f"Processing failed with exception: {str(e)}")
