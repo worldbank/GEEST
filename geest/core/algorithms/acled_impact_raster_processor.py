@@ -470,6 +470,7 @@ class AcledImpactRasterProcessor:
 
             # Add the new feature to the result layer
             provider.addFeature(new_feature)
+
         full_output_filepath = os.path.join(self.workflow_directory, output_filepath)
         # Step 7: Save the result layer to the specified output shapefile
         error = QgsVectorFileWriter.writeAsVectorFormat(
@@ -598,8 +599,6 @@ class AcledImpactRasterProcessor:
             "NODATA": 255,
             "CROP_TO_CUTLINE": False,
             "OUTPUT": masked_raster_filepath,
-            # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "TARGET_CRS": self.target_crs.toWkt(),
         }
         processing.run("gdal:cliprasterbymasklayer", params)
         QgsMessageLog.logMessage(
@@ -671,7 +670,7 @@ class AcledImpactRasterProcessor:
             "OUTPUT": vrt_filepath,
             "PROJ_DIFFERENCE": False,
             "ADD_ALPHA": False,
-            "ASSIGN_CRS": self.target_crs.toWkt(),
+            "ASSIGN_CRS": self.target_crs,
             "RESAMPLING": 0,
             "SRC_NODATA": "255",
             "EXTRA": "",
