@@ -416,7 +416,9 @@ class AcledImpactRasterProcessor:
             return
 
         # Step 2: Create a memory layer to store the result
-        result_layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "result_layer", "memory")
+        result_layer = QgsVectorLayer(
+            f"Polygon?crs=EPSG:{self.target_crs.authid()}", "result_layer", "memory"
+        )
         provider = result_layer.dataProvider()
 
         # Step 3: Add a field to store the minimum value (lower number = higher rank)
