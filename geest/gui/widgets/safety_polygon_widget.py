@@ -133,7 +133,6 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         Opens a file dialog to select a shapefile for the polygon (paths) layer and updates the QLineEdit with the file path.
         """
         try:
-            # settings = QSettings()
             last_dir = self.settings.value("Geest/lastShapefileDir", "")
 
             file_path, _ = QFileDialog.getOpenFileName(
@@ -159,7 +158,6 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
             shapefile_path (str): The path to the shapefile.
         """
         try:
-            # settings = QSettings()
             # Store the currently selected field
             previous_field = self.settings.value(
                 f"{self.widget_key} Selected Field", None
@@ -190,7 +188,6 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         """
         Updates the field combo box when the polygon layer or shapefile is changed.
         """
-        # settings = QSettings()
         # Store the currently selected field
         previous_field = self.settings.value(f"{self.widget_key} Selected Field", None)
 
@@ -248,7 +245,6 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         """
         Updates the selected field in the attributes dictionary when the field selection changes.
         """
-        # settings = QSettings()
         if self.field_selection_combo.isEnabled():
             selected_field = self.field_selection_combo.currentText()
             self.attributes[f"{self.widget_key} Selected Field"] = selected_field
