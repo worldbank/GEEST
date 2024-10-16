@@ -1,7 +1,4 @@
 from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsCoordinateTransformContext,
     QgsFeature,
     QgsFeatureRequest,
     QgsField,
@@ -9,8 +6,6 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsProcessingException,
     QgsVectorLayer,
-    QgsPointXY,
-    QgsFields,
     QgsProject,
     QgsMessageLog,
     QgsVectorFileWriter,
@@ -58,7 +53,9 @@ class SinglePointBufferProcessor:
                 f"Failed to load GeoPackage layer for CRS retrieval."
             )
         self.target_crs = gpkg_layer.crs()  # Get the CRS of the GeoPackage layer
-
+        QgsMessageLog.logMessage(
+            f"Target CRS: {self.target_crs.authid()}", tag="Geest", level=Qgis.Info
+        )
         if not self.features_layer.isValid():
             raise QgsProcessingException(
                 f"Failed to load features layer from {self.features_layer.source()}"
@@ -308,7 +305,7 @@ class SinglePointBufferProcessor:
             "DATA_TYPE": 0,
             "INIT": 1,
             "INVERT": False,
-            "EXTRA": "-a_srs EPSG:32620",
+            "EXTRA": f"-a_srs {self.target_crs.authid()}",
             "OUTPUT": output_path,
         }
 
@@ -361,13 +358,27 @@ class SinglePointBufferProcessor:
         area_feature = QgsFeature()
         area_feature.setGeometry(area_geometry)
         area_provider.addFeatures([area_feature])
+        # Save the area layer to a file for persistence
+        QgsMessageLog.logMessage(
+            f"Saving area layer to {output_name} with crs {self.target_crs.authid()}",
+            tag="Geest",
+        )
+        QgsVectorFileWriter.writeAsVectorFormat(
+            area_layer,
+            os.path.join(
+                self.workflow_directory, f"{self.output_prefix}_area_{index}.shp"
+            ),
+            "UTF-8",
+            area_layer.crs(),
+            "ESRI Shapefile",
+        )
 
         bbox = bbox.boundingBox()
         params = {
             "INPUT": f"{raster_path}",
             "MASK": area_layer,
-            "SOURCE_CRS": f"{self.target_crs.authid()}",
-            "TARGET_CRS": f"{self.target_crs.authid()}",
+            "SOURCE_CRS": self.target_crs,
+            "TARGET_CRS": self.target_crs,
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
             "NODATA": None,
             "ALPHA_BAND": False,

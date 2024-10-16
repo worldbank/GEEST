@@ -6,6 +6,7 @@ from qgis.core import (
     Qgis,
     QgsFeedback,
     QgsVectorLayer,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
@@ -20,15 +21,17 @@ class SinglePointBufferWorkflow(WorkflowBase):
     Concrete implementation of a 'Use Single Buffer Point' workflow.
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
         Initialize the workflow with attributes and feedback.
-        :param item: Item containing workflow parameters.
         :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback
+            item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Single Buffer Point"
         # Initialize GridAligner with grid size

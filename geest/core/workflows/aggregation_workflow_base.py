@@ -7,6 +7,7 @@ from qgis.core import (
     QgsFeedback,
     QgsRasterLayer,
     QgsProject,
+    QgsProcessingContext,
 )
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
@@ -20,15 +21,18 @@ class AggregationWorkflowBase(WorkflowBase):
     Base class for all aggregation workflows (factor, dimension, analysis)
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
-        Initialize the Factor Aggregation with attributes and feedback.
-        :param item: A reference to a JsonTreeItem object.
+        Initialize the workflow with attributes and feedback.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
-        # ⭐️ Note that the item is a reference to the JsonTreeItem object so any changes
-        # made to the item will be reflected directly in the tree view.
-        super().__init__(item, feedback)
+        super().__init__(
+            item, feedback, context
+        )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.attributes = item.data(3)
         self.aggregation_attributes = None  # This should be set by the child class e.g. item.getIndicatorAttributes()
         self.analysis_mode = self.attributes.get("Analysis Mode", "")
@@ -228,7 +232,7 @@ class AggregationWorkflowBase(WorkflowBase):
                     )
                     break
 
-        QgsProject.instance().addMapLayer(aggregated_layer)
+        self.context.project().addMapLayer(aggregated_layer)
         QgsMessageLog.logMessage(
             "Added raster layer to the map.", tag="Geest", level=Qgis.Info
         )

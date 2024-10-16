@@ -11,6 +11,7 @@ from qgis.core import (
     QgsGeometry,
     QgsRasterLayer,
     QgsProject,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
@@ -25,14 +26,17 @@ class PointPerCellWorkflow(WorkflowBase):
     Concrete implementation of a 'Use Point per Cell' workflow.
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
         Initialize the workflow with attributes and feedback.
         :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback
+            item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Point per Cell"
         # Initialize GridAligner with grid size

@@ -1,7 +1,6 @@
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
-    QgsCoordinateTransformContext,
     QgsFeature,
     QgsFeatureRequest,
     QgsField,
@@ -11,18 +10,19 @@ from qgis.core import (
     QgsVectorLayer,
     QgsPointXY,
     QgsFields,
-    QgsProject,
     QgsMessageLog,
     QgsVectorFileWriter,
     QgsWkbTypes,
     QgsRasterLayer,
     Qgis,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import os
 import csv
 import processing
 from .area_iterator import AreaIterator
+from .utilities import assign_crs_to_raster_layer
 
 
 class AcledImpactRasterProcessor:
@@ -32,6 +32,7 @@ class AcledImpactRasterProcessor:
         csv_path: str,
         workflow_directory: str,
         gpkg_path: str,
+        context: QgsProcessingContext,
     ):
         """
         Initializes the AcledImpactRasterProcessor.
@@ -46,6 +47,9 @@ class AcledImpactRasterProcessor:
         self.csv_path = csv_path
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path
+        self.context = (
+            context  # Used to pass objects to the thread. e.g. the QgsProject Instance
+        )
         # Retrieve CRS from a layer in the GeoPackage to match the points with that CRS
         gpkg_layer = QgsVectorLayer(
             f"{self.gpkg_path}|layername=study_area_polygons", "areas", "ogr"
@@ -82,7 +86,7 @@ class AcledImpactRasterProcessor:
         )  # Assuming the CSV uses WGS84
 
         # Set up a coordinate transform from WGS84 to the target CRS
-        transform_context = QgsProject.instance().transformContext()
+        transform_context = self.context.project().transformContext()
         coordinate_transform = QgsCoordinateTransform(
             source_crs, self.target_crs, transform_context
         )
@@ -533,7 +537,7 @@ class AcledImpactRasterProcessor:
         bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
-            "INPUT": f"{input_layer}",
+            "INPUT": input_layer,
             "FIELD": "min_value",
             "BURN": 0,
             "INIT": 5,  # use 5 as the initial value where there is no data. Sea will be masked out later.
@@ -541,8 +545,7 @@ class AcledImpactRasterProcessor:
             "UNITS": 1,
             "WIDTH": x_res,
             "HEIGHT": y_res,
-            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},"
-            f"{bbox.yMinimum()},{bbox.yMaximum()}",  # Extent of the aligned bbox
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
             "NODATA": -9999,
             "OPTIONS": "",
             #'OPTIONS':'COMPRESS=DEFLATE|PREDICTOR=2|ZLEVEL=9',
@@ -553,8 +556,10 @@ class AcledImpactRasterProcessor:
             # TODO this doesnt work, layer is written in correct CRS but advertises 4326
             "TARGET_CRS": self.target_crs.toWkt(),
         }
-
-        processing.run("gdal:rasterize", params)
+        result = processing.run("gdal:rasterize", params)["OUTPUT"]
+        QgsMessageLog.logMessage(
+            f"Result from rasterization: {result}", tag="Geest", level=Qgis.Info
+        )
         QgsMessageLog.logMessage(
             f"Rasterize Parameter: {params}", tag="Geest", level=Qgis.Info
         )
@@ -686,7 +691,7 @@ class AcledImpactRasterProcessor:
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.output_prefix}_combined VRT")
 
         if vrt_layer.isValid():
-            QgsProject.instance().addMapLayer(vrt_layer)
+            self.context.project().addMapLayer(vrt_layer)
             QgsMessageLog.logMessage(
                 "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
             )

@@ -1,7 +1,13 @@
 import datetime
 import os
 from abc import ABC, abstractmethod
-from qgis.core import QgsFeedback, QgsVectorLayer, QgsMessageLog, Qgis
+from qgis.core import (
+    QgsFeedback,
+    QgsVectorLayer,
+    QgsMessageLog,
+    Qgis,
+    QgsProcessingContext,
+)
 from qgis.PyQt.QtCore import QSettings
 from geest.core import JsonTreeItem
 
@@ -12,14 +18,18 @@ class WorkflowBase(ABC):
     Every workflow must accept an attributes dictionary and a QgsFeedback object.
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Dictionary containing workflow parameters.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.feedback = feedback
+        self.context = context
         # This is set in the setup panel
         self.settings = QSettings()
         # This is the top level folder for work files
