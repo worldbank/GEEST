@@ -117,6 +117,7 @@ class SinglePointBufferProcessor:
             masked_layer = self._mask_raster(
                 raster_path=raster_output,
                 area_geometry=current_area,
+                bbox=current_bbox,
                 output_name=f"{self.output_prefix}_masked_{index}.shp",
                 index=index,
             )
@@ -330,13 +331,21 @@ class SinglePointBufferProcessor:
         return output_path
 
     def _mask_raster(
-        self, raster_path: str, area_geometry: QgsGeometry, index: int, output_name: str
+        self,
+        raster_path: str,
+        area_geometry: QgsGeometry,
+        bbox: QgsGeometry,
+        index: int,
+        output_name: str,
     ) -> QgsVectorLayer:
         """
         Mask the raster with the study area mask layer.
 
         Args:
             raster_path (str): The path to the raster to mask.
+            area_geometry (QgsGeometry): The geometry of the study area.
+            bbox (QgsGeometry): The bounding box for the raster extents.
+            index (int): The current index used for naming the output raster.
             output_name (str): A name for the output masked layer.
 
         """
@@ -352,15 +361,28 @@ class SinglePointBufferProcessor:
         area_feature = QgsFeature()
         area_feature.setGeometry(area_geometry)
         area_provider.addFeatures([area_feature])
+
+        bbox = bbox.boundingBox()
         params = {
             "INPUT": f"{raster_path}",
             "MASK": area_layer,
-            "NODATA": 255,
+            "SOURCE_CRS": f"{self.target_crs.authid()}",
+            "TARGET_CRS": f"{self.target_crs.authid()}",
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "NODATA": None,
+            "ALPHA_BAND": False,
             "CROP_TO_CUTLINE": False,
+            "KEEP_RESOLUTION": True,
+            "SET_RESOLUTION": False,
+            "X_RESOLUTION": None,
+            "Y_RESOLUTION": None,
+            "MULTITHREADING": True,
+            "OPTIONS": "",
+            "DATA_TYPE": 0,  # byte
+            "EXTRA": "",
             "OUTPUT": masked_raster_filepath,
-            # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "ASSIGN_CRS": self.target_crs,
         }
+
         processing.run("gdal:cliprasterbymasklayer", params)
         QgsMessageLog.logMessage(
             f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info
