@@ -59,9 +59,6 @@ class SinglePointBufferProcessor:
             )
         self.target_crs = gpkg_layer.crs()  # Get the CRS of the GeoPackage layer
 
-        # Load the CSV and create a point layer
-        self.features_layer = self._load_csv_as_point_layer()
-
         if not self.features_layer.isValid():
             raise QgsProcessingException(
                 f"Failed to load features layer from {self.features_layer.source()}"
@@ -105,24 +102,18 @@ class SinglePointBufferProcessor:
             if area_features.featureCount() == 0:
                 continue
 
-            # Step 2: Buffer the selected features by 5 km
+            # Step 3: Buffer the selected features
             buffered_layer = self._buffer_features(
-                area_features,
-                f"{self.output_prefix}_buffers_{index}",
+                area_features, f"{self.output_prefix}_buffered_{index}"
             )
 
             # Step 3: Assign values based on event_type
             scored_layer = self._assign_scores(buffered_layer)
 
-            # Step 4: Dissolve and remove overlapping areas, keeping areas withe the lowest value
-            dissolved_layer = self._overlay_analysis(
-                scored_layer, f"{self.output_prefix}_dissolved_{index}.shp"
-            )
+            # Step 4: Rasterize the scored buffer layer
+            raster_output = self._rasterize(scored_layer, current_bbox, index)
 
-            # Step 5: Rasterize the scored buffer layer
-            raster_output = self._rasterize(dissolved_layer, current_bbox, index)
-
-            # Step 6: Multiply the area by it matching mask layer in study_area folder
+            # Step 5: Multiply the area by it matching mask layer in study_area folder
             masked_layer = self._mask_raster(
                 raster_path=raster_output,
                 area_geometry=current_area,
@@ -155,7 +146,7 @@ class SinglePointBufferProcessor:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
         QgsMessageLog.logMessage(
-            "ACLED Select Features Started", tag="Geest", level=Qgis.Info
+            "Single Point Buffer Select Features Started", tag="Geest", level=Qgis.Info
         )
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
@@ -191,7 +182,7 @@ class SinglePointBufferProcessor:
         temp_layer_data.addFeatures(selected_features)
 
         QgsMessageLog.logMessage(
-            f"Acled writing {len(selected_features)} features",
+            f"Single Point Buffer writing {len(selected_features)} features",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -202,7 +193,7 @@ class SinglePointBufferProcessor:
         )
 
         QgsMessageLog.logMessage(
-            "ACLED Select Features Ending", tag="Geest", level=Qgis.Info
+            "Single Point Buffer Select Features Ending", tag="Geest", level=Qgis.Info
         )
 
         return QgsVectorLayer(output_path, output_name, "ogr")
@@ -226,27 +217,26 @@ class SinglePointBufferProcessor:
             {
                 "INPUT": layer,
                 "DISTANCE": self.buffer_distance,  # 5 km buffer
-                "SEGMENTS": 5,
-                "DISSOLVE": False,
+                "SEGMENTS": 15,
+                "DISSOLVE": True,
                 "OUTPUT": output_path,
             },
         )["OUTPUT"]
 
+        buffered_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return buffered_layer
 
-    def _assign_scores(self, layer_path: str) -> QgsVectorLayer:
+    def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
         """
-        Assign values to buffered polygons based on their event_type.
+        Assign values to buffered polygons based 5 for presence of a polygon.
 
         Args:
-            layer_path (str): The buffered features layer.
+            layer QgsVectorLayer: The buffered features layer.
 
         Returns:
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
-        layer = QgsVectorLayer(
-            layer_path, "buffered_features", "ogr"
-        )  # Load the buffered layer
+
         QgsMessageLog.logMessage(
             f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info
         )
@@ -264,137 +254,6 @@ class SinglePointBufferProcessor:
         layer.commitChanges()
 
         return layer
-
-    def _overlay_analysis(self, input_layer, output_filepath):
-        """
-        Perform an overlay analysis on a set of circular polygons, prioritizing areas with the lowest value in overlapping regions,
-        and save the result as a shapefile.
-
-        This function processes an input shapefile containing circular polygons, each with a value between 1 and 4, representing
-        different priority levels. The function performs an overlay analysis where the polygons overlap and ensures that for any
-        overlapping areas, the polygon with the lowest value (i.e., highest priority) is retained, while polygons with higher values
-        are removed from those regions.
-
-        The analysis is performed as follows:
-        1. The input layer is loaded from the provided shapefile path.
-        2. A dissolve operation is performed on the input layer to combine any adjacent polygons with the same value.
-        3. A union operation is performed on the input layer to break the polygons into distinct, non-overlapping areas.
-        4. For each distinct area, the value from the overlapping polygons is compared, and the minimum value (representing the highest priority) is assigned to that area.
-        5. The resulting dataset, which consists of non-overlapping polygons with the highest priority (smallest value), is saved to a new shapefile at the specified output path.
-
-        Parameters:
-        -----------
-        input_layer : QgsVectorLayer
-            The input shapefile containing the circular polygons with values between 1 and 4.
-
-        output_filepath : str
-            The file path where the output shapefile with the results of the overlay analysis will be saved. The
-            output will be saved in self.workflow_directory.
-
-        Returns:
-        --------
-        None
-            The function does not return a value but writes the result to the specified output shapefile.
-
-        Logging:
-        --------
-        Messages related to the status of the operation (success or failure) are logged using QgsMessageLog with the tag 'Geest'
-        and the log level set to Qgis.Info.
-
-        Raises:
-        -------
-        IOError:
-            If the input layer cannot be loaded or if an error occurs during the file writing process.
-
-        Example:
-        --------
-        To perform an overlay analysis on a shapefile located at "path/to/input.shp" and save the result to "path/to/output.shp",
-        use the following:
-
-        overlay_analysis(qgis_vector_layer, "path/to/output.shp")
-        """
-        QgsMessageLog.logMessage("Overlay analysis started", "Geest", Qgis.Info)
-        # Step 1: Load the input layer from the provided shapefile path
-        # layer = QgsVectorLayer(input_filepath, "circles_layer", "ogr")
-
-        if not input_layer.isValid():
-            QgsMessageLog.logMessage("Layer failed to load!", "Geest", Qgis.Info)
-            return
-
-        # Step 2: Create a memory layer to store the result
-        result_layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "result_layer", "memory")
-        provider = result_layer.dataProvider()
-
-        # Step 3: Add a field to store the minimum value (lower number = higher rank)
-        provider.addAttributes([QgsField("min_value", QVariant.Int)])
-        result_layer.updateFields()
-        # Step 4: Perform the dissolve operation to separate disjoint polygons
-        dissolve = processing.run(
-            "native:dissolve",
-            {
-                "INPUT": input_layer,
-                "FIELD": ["value"],
-                "SEPARATE_DISJOINT": True,
-                "OUTPUT": "TEMPORARY_OUTPUT",
-            },
-        )["OUTPUT"]
-        QgsMessageLog.logMessage(
-            f"Dissolved areas have {len(dissolve)} features",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        # Step 5: Perform the union to get all overlapping areas
-        union = processing.run(
-            "qgis:union",
-            {
-                "INPUT": dissolve,
-                #'OVERLAY': '', #input_layer, # Do we need this?
-                "OUTPUT": "memory:",
-            },
-        )["OUTPUT"]
-        QgsMessageLog.logMessage(
-            f"Unioned areas have {len(dissolve)} features", tag="Geest", level=Qgis.Info
-        )
-        # Step 6: Iterate through the unioned features to assign the minimum value in overlapping areas
-        for feature in union.getFeatures():
-            geom = feature.geometry()
-            attrs = feature.attributes()
-            value_1 = attrs[input_layer.fields().indexFromName("value")]
-            value_2 = attrs[
-                input_layer.fields().indexFromName("value_2")
-            ]  # This comes from the unioned layer
-
-            # Assign the minimum value to the overlapping area (lower number = higher rank)
-            min_value = min(value_1, value_2)
-
-            # Create a new feature with this geometry and the min value
-            new_feature = QgsFeature()
-            new_feature.setGeometry(geom)
-            new_feature.setAttributes([min_value])
-
-            # Add the new feature to the result layer
-            provider.addFeature(new_feature)
-        full_output_filepath = os.path.join(self.workflow_directory, output_filepath)
-        # Step 7: Save the result layer to the specified output shapefile
-        error = QgsVectorFileWriter.writeAsVectorFormat(
-            result_layer,
-            full_output_filepath,
-            "UTF-8",
-            result_layer.crs(),
-            "ESRI Shapefile",
-        )
-
-        if error[0] == 0:
-            QgsMessageLog.logMessage(
-                f"Overlay analysis complete, output saved to {full_output_filepath}",
-                "Geest",
-                Qgis.Info,
-            )
-        else:
-            raise QgsProcessingException(
-                f"Error saving dissolved layer to disk: {error[1]}"
-            )
-        return full_output_filepath
 
     def _rasterize(
         self, input_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
@@ -419,10 +278,9 @@ class SinglePointBufferProcessor:
 
         output_path = os.path.join(
             self.workflow_directory,
-            f"{self.output_prefix}_dissolved_{index}.tif",
+            f"{self.output_prefix}_buffered_{index}.tif",
         )
-        layer = QgsVectorLayer(input_layer, "acled_areas", "ogr")
-        if not layer.isValid():
+        if not input_layer.isValid():
             QgsMessageLog.logMessage(
                 f"Layer failed to load! {input_layer}", "Geest", Qgis.Info
             )
@@ -436,10 +294,10 @@ class SinglePointBufferProcessor:
         bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
-            "INPUT": f"{input_layer}",
-            "FIELD": "min_value",
+            "INPUT": input_layer,
+            "FIELD": "value",
             "BURN": 0,
-            "INIT": 5,  # use 5 as the initial value where there is no data. Sea will be masked out later.
+            "INIT": 0,  # use 0 as the initial value where there is no data. Sea will be masked out later.
             "USE_Z": False,
             "UNITS": 1,
             "WIDTH": x_res,
@@ -550,7 +408,7 @@ class SinglePointBufferProcessor:
             return
         vrt_filepath = os.path.join(
             self.workflow_directory,
-            f"{self.output_prefix}_dissolved_combined.vrt",
+            f"{self.output_prefix}_buffered_combined.vrt",
         )
 
         QgsMessageLog.logMessage(

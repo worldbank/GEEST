@@ -55,9 +55,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         layer_source = self.attributes.get("Single Buffer Point Layer Shapefile", None)
         provider_type = "ogr"
         if not layer_source:
-            layer_source = self.attributes.get(
-                "Single Buffer Point Layer SourceD", None
-            )
+            layer_source = self.attributes.get("Single Buffer Point Layer Source", None)
             provider_type = self.attributes.get(
                 "Single Buffer Point Layer Provider Type", "ogr"
             )
@@ -73,6 +71,9 @@ class SinglePointBufferWorkflow(WorkflowBase):
         if not input_layer.isValid():
             QgsMessageLog.logMessage(
                 "Single Buffer Point Layer not valid", tag="Geest", level=Qgis.Critical
+            )
+            QgsMessageLog.logMessage(
+                f"Layer Source: {layer_source}", tag="Geest", level=Qgis.Critical
             )
             return False
 
