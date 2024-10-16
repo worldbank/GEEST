@@ -65,7 +65,6 @@ class SinglePointBufferWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-
             return False
         input_layer = QgsVectorLayer(layer_source, "points", provider_type)
         if not input_layer.isValid():

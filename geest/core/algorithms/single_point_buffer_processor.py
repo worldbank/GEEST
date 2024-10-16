@@ -297,23 +297,21 @@ class SinglePointBufferProcessor:
             "INPUT": input_layer,
             "FIELD": "value",
             "BURN": 0,
-            "INIT": 0,  # use 0 as the initial value where there is no data. Sea will be masked out later.
             "USE_Z": False,
             "UNITS": 1,
             "WIDTH": x_res,
             "HEIGHT": y_res,
-            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},"
-            f"{bbox.yMinimum()},{bbox.yMaximum()}",  # Extent of the aligned bbox
-            "NODATA": -9999,
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "NODATA": 0,
             "OPTIONS": "",
-            #'OPTIONS':'COMPRESS=DEFLATE|PREDICTOR=2|ZLEVEL=9',
-            "DATA_TYPE": 0,  # byte
+            "DATA_TYPE": 0,
+            "INIT": 1,
             "INVERT": False,
-            "EXTRA": "",
+            "EXTRA": "-a_srs EPSG:32620",
             "OUTPUT": output_path,
-            # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "TARGET_CRS": self.target_crs.toWkt(),
         }
+
+        #'OUTPUT':'TEMPORARY_OUTPUT'})
 
         processing.run("gdal:rasterize", params)
         QgsMessageLog.logMessage(
@@ -361,7 +359,7 @@ class SinglePointBufferProcessor:
             "CROP_TO_CUTLINE": False,
             "OUTPUT": masked_raster_filepath,
             # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "TARGET_CRS": self.target_crs.toWkt(),
+            "ASSIGN_CRS": self.target_crs,
         }
         processing.run("gdal:cliprasterbymasklayer", params)
         QgsMessageLog.logMessage(
@@ -433,7 +431,7 @@ class SinglePointBufferProcessor:
             "OUTPUT": vrt_filepath,
             "PROJ_DIFFERENCE": False,
             "ADD_ALPHA": False,
-            "ASSIGN_CRS": self.target_crs.toWkt(),
+            "ASSIGN_CRS": self.target_crs,
             "RESAMPLING": 0,
             "SRC_NODATA": "255",
             "EXTRA": "",
