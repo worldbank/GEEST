@@ -548,10 +548,14 @@ class AcledImpactRasterProcessor:
             "EXTRA": "",
             "OUTPUT": output_path,
             # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "ASSIGN_CRS": self.target_crs.toWkt(),
+            "TARGET_CRS": self.target_crs.toWkt(),
         }
 
         processing.run("gdal:rasterize", params)
+        QgsMessageLog.logMessage(
+            f"Rasterize Parameter: {params}", tag="Geest", level=Qgis.Info
+        )
+
         QgsMessageLog.logMessage(
             f"Rasterize complete for: {output_path}",
             tag="Geest",
@@ -593,10 +597,12 @@ class AcledImpactRasterProcessor:
             "CROP_TO_CUTLINE": False,
             "OUTPUT": masked_raster_filepath,
             # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "ASSIGN_CRS": self.target_crs.toWkt(),
+            "TARGET_CRS": self.target_crs.toWkt(),
         }
         processing.run("gdal:cliprasterbymasklayer", params)
-        QgsMessageLog.logMessage(f"Parameter: {params}", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(
+            f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info
+        )
         QgsMessageLog.logMessage(
             f"Masked raster saved to {masked_raster_filepath}",
             tag="Geest",

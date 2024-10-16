@@ -4,6 +4,7 @@ from geest.gui.widgets import (
     IndexScoreRadioButton,
     DontUseRadioButton,
     MultiBufferDistancesWidget,
+    SingleBufferDistanceWidget,
     PolylineWidget,
     PointLayerWidget,
     PolygonWidget,
@@ -42,6 +43,8 @@ class RadioButtonFactory:
                 return IndexScoreRadioButton(label_text=key, attributes=attributes)
             if key == "Use Multi Buffer Point" and value == 1:
                 return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
+            if key == "Use Single Buffer Point" and value == 1:
+                return SingleBufferDistanceWidget(label_text=key, attributes=attributes)
             if key == "Use Poly per Cell" and value == 1:
                 return PolygonWidget(label_text=key, attributes=attributes)
             if key == "Use Polyline per Cell" and value == 1:
