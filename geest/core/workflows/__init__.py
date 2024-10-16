@@ -8,3 +8,4 @@ from .multi_buffer_distances_workflow import MultiBufferDistancesWorkflow
 from .point_per_cell_workflow import PointPerCellWorkflow
 from .polyline_per_cell_workflow import PolylinePerCellWorkflow
 from .polygon_per_cell_workflow import PolygonPerCellWorkflow
+from .acled_impact_workflow import AcledImpactWorkflow

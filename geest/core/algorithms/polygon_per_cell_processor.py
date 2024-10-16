@@ -489,7 +489,7 @@ class PolygonPerCellProcessor:
 
         if not raster_files:
             QgsMessageLog.logMessage(
-                "No valid raster masks found to combine into VRT.",
+                "No valid rasters found to combine into VRT.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
@@ -500,14 +500,14 @@ class PolygonPerCellProcessor:
         )
 
         QgsMessageLog.logMessage(
-            f"Creating VRT of masks '{vrt_filepath}' layer to the map.",
+            f"Creating VRT of rasters '{vrt_filepath}' layer to the map.",
             tag="Geest",
             level=Qgis.Info,
         )
 
         if not raster_files:
             QgsMessageLog.logMessage(
-                "No raster masks found to combine into VRT.",
+                "No rasters found to combine into VRT.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
