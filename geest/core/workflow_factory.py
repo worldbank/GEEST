@@ -12,6 +12,7 @@ from geest.core.workflows import (
     PolylinePerCellWorkflow,
     PolygonPerCellWorkflow,
     AcledImpactWorkflow,
+    SinglePointBufferWorkflow,
 )
 from .json_tree_item import JsonTreeItem
 
@@ -46,6 +47,8 @@ class WorkflowFactory:
             return DontUseWorkflow(item, feedback)
         elif analysis_mode == "Use Multi Buffer Point":
             return MultiBufferDistancesWorkflow(item, feedback)
+        elif analysis_mode == "Use Single Buffer Point":
+            return SinglePointBufferWorkflow(item, feedback)
         elif analysis_mode == "Use Point per Cell":
             return PointPerCellWorkflow(item, feedback)
         elif analysis_mode == "Use Polyline per Cell":

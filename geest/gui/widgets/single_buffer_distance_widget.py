@@ -55,9 +55,9 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.shapefile_button = QToolButton()
             self.shapefile_button.setText("...")
             self.shapefile_button.clicked.connect(self.select_shapefile)
-            if self.attributes.get("Single Buffer Shapefile", False):
+            if self.attributes.get("Single Buffer Point Layer Shapefile", False):
                 self.shapefile_line_edit.setText(
-                    self.attributes["Single Buffer Shapefile"]
+                    self.attributes["Single Buffer Point Layer Shapefile"]
                 )
             self.shapefile_layout.addWidget(self.shapefile_line_edit)
             self.shapefile_layout.addWidget(self.shapefile_button)
@@ -74,7 +74,7 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
                 "Default Single Buffer Travel Distance", 0
             )
             buffer_distance = self.attributes.get(
-                "Single Buffer Distance", default_distance
+                "Single Buffer Point Layer Distance", default_distance
             )
             try:
                 self.buffer_distance_input.setValue(int(buffer_distance))
@@ -144,8 +144,12 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
                 layer.id()
             )  # Unique ID of the layer
 
-        self.attributes["Single Buffer Distance"] = self.buffer_distance_input.text()
-        self.attributes["Single Buffer Shapefile"] = self.shapefile_line_edit.text()
+        self.attributes["Single Buffer Point Layer Distance"] = (
+            self.buffer_distance_input.text()
+        )
+        self.attributes["Single Buffer Point Layer Shapefile"] = (
+            self.shapefile_line_edit.text()
+        )
 
         return self.attributes
 
