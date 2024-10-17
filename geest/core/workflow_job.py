@@ -1,4 +1,4 @@
-from qgis.core import QgsTask, QgsMessageLog, QgsFeedback, Qgis
+from qgis.core import QgsTask, QgsMessageLog, QgsFeedback, Qgis, QgsProcessingContext
 from qgis.PyQt.QtCore import pyqtSignal
 from .json_tree_item import JsonTreeItem
 from .workflow_factory import WorkflowFactory
@@ -17,19 +17,26 @@ class WorkflowJob(QgsTask):
     # Custom signal to emit when the job is finished
     job_finished = pyqtSignal(bool)
 
-    def __init__(self, description: str, item: JsonTreeItem):
+    def __init__(
+        self, description: str, context: QgsProcessingContext, item: JsonTreeItem
+    ):
         """
         Initialize the workflow job.
         :param description: Task description
+        :param context: QgsProcessingContext object - we will use this to pass any QObjects in to the thread
+                to keep things thread safe
         :param item: JsonTreeItem object representing the task - this is a reference
               so it will update the tree directly when modified
         """
         super().__init__(description)
+        self.context = (
+            context  # QgsProcessingContext object used to pass objects to the thread
+        )
         self._item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self._feedback = QgsFeedback()  # Feedback object for progress and cancellation
         workflow_factory = WorkflowFactory()
         self._workflow = workflow_factory.create_workflow(
-            item, self._feedback
+            item, self._feedback, self.context
         )  # Create the workflow
 
         # Emit the 'queued' signal upon initialization
@@ -41,6 +48,7 @@ class WorkflowJob(QgsTask):
         object for progress reporting and cancellation.
         :return: True if the task was successful, False otherwise
         """
+
         if not self._workflow:
             QgsMessageLog.logMessage(
                 f"Error: No workflow assigned to {self.description()}",

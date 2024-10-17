@@ -13,6 +13,7 @@ from qgis.core import (
     QgsRasterLayer,
     QgsProject,
     QgsMapLayer,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
@@ -39,15 +40,17 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
-        Initialize the Multi Buffer Distance with attributes and feedback.
-
-        :param attributes: Dictionary containing workflow parameters.
+        Initialize the workflow with attributes and feedback.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback
+            item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Multi Buffer Distances"
         self.attributes = item.data(3)
@@ -70,7 +73,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             distance_list=self.dummy_distances,
         )
         layer_name = "points"
-        self.dummy_layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+        self.dummy_layer = self.context.project().mapLayersByName(layer_name)[0]
 
     def do_execute(self):
         """

@@ -1,7 +1,5 @@
 import os
-from qgis.core import (
-    QgsFeedback,
-)
+from qgis.core import QgsFeedback, QgsProcessingContext
 from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
@@ -14,16 +12,18 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
     It will aggregate the indicators within a factor to create a single raster output.
     """
 
-    def __init__(self, item: dict, feedback: QgsFeedback):
+    def __init__(
+        self, item: dict, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
-        Initialize the Factor Aggregation with attributes and feedback.
-
-        ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-
-        :param item: JsonTreeItem containing workflow parameters.
+        Initialize the workflow with attributes and feedback.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
-        super().__init__(item, feedback)
+        super().__init__(
+            item, feedback, context
+        )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
 
         self.aggregation_attributes = self.item.getFactorAttributes()
         self.id = self.aggregation_attributes[f"Factor ID"].lower().replace(" ", "_")

@@ -1,4 +1,5 @@
 import os
+import platform
 import shutil
 from PyQt5.QtWidgets import (
     QWidget,
@@ -139,9 +140,18 @@ class SetupPanel(FORM_CLASS, QWidget):
         """Adds the built-in QGIS world map to the canvas."""
         # Use QgsApplication.prefixPath() to get the correct path
         qgis_prefix = QgsApplication.prefixPath()
-        layer_path = os.path.join(
-            qgis_prefix, "share", "qgis", "resources", "data", "world_map.gpkg"
-        )
+
+        # Check the platform to get the correct path
+        if platform.system() == "Windows":
+            # For Windows
+            layer_path = os.path.join(
+                qgis_prefix, "resources", "data", "world_map.gpkg"
+            )
+        else:
+            # For macOS and Linux
+            layer_path = os.path.join(
+                qgis_prefix, "share", "qgis", "resources", "data", "world_map.gpkg"
+            )
 
         if not os.path.exists(layer_path):
             QMessageBox.critical(

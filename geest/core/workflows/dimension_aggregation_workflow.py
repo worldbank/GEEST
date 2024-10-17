@@ -1,7 +1,5 @@
 import os
-from qgis.core import (
-    QgsFeedback,
-)
+from qgis.core import QgsFeedback, QgsProcessingContext
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.utilities import resources_path
@@ -16,16 +14,18 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
 
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
-        Initialize the Dimension Aggregation with attributes and feedback.
-
-        ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-
-        :param item: JsonTreeItem containing workflow parameters.
+        Initialize the workflow with attributes and feedback.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
-        super().__init__(item, feedback)
+        super().__init__(
+            item, feedback, context
+        )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.aggregation_attributes = self.item.getDimensionAttributes()
         self.id = self.attributes["id"].lower().replace(" ", "_")
         self.layers = self.aggregation_attributes.get(f"Factors", [])
