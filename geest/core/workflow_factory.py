@@ -1,4 +1,4 @@
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsProcessingContext
 from qgis.core import QgsFeedback
 from geest.core.workflows import (
     RasterLayerWorkflow,
@@ -12,6 +12,7 @@ from geest.core.workflows import (
     PolylinePerCellWorkflow,
     PolygonPerCellWorkflow,
     AcledImpactWorkflow,
+    SinglePointBufferWorkflow,
 )
 from .json_tree_item import JsonTreeItem
 
@@ -22,10 +23,19 @@ class WorkflowFactory:
     The workflows accept a QgsFeedback object to report progress and handle cancellation.
     """
 
-    def create_workflow(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def create_workflow(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
         Determines the workflow to return based on 'Analysis Mode' in the attributes.
         Passes the feedback object to the workflow for progress reporting.
+
+        :param item: The JsonTreeItem object representing the task.
+        :param feedback: The QgsFeedback object for progress reporting.
+        :param context: The QgsProcessingContext object for processing. This can be used to
+            pass objects to the thread. e.g. the QgsProject Instance
+
+        :return: The workflow object to execute.
         """
         if not item:
             return DontUseWorkflow({}, feedback)
@@ -39,27 +49,29 @@ class WorkflowFactory:
         analysis_mode = attributes.get("Analysis Mode", "")
 
         if analysis_mode == "Spatial Analysis":
-            return RasterLayerWorkflow(item, feedback)
+            return RasterLayerWorkflow(item, feedback, context)
         elif analysis_mode == "Use Default Index Score":
-            return DefaultIndexScoreWorkflow(item, feedback)
+            return DefaultIndexScoreWorkflow(item, feedback, context)
         elif analysis_mode == "Don’t Use":
-            return DontUseWorkflow(item, feedback)
+            return DontUseWorkflow(item, feedback, context)
         elif analysis_mode == "Use Multi Buffer Point":
-            return MultiBufferDistancesWorkflow(item, feedback)
+            return MultiBufferDistancesWorkflow(item, feedback, context)
+        elif analysis_mode == "Use Single Buffer Point":
+            return SinglePointBufferWorkflow(item, feedback, context)
         elif analysis_mode == "Use Point per Cell":
-            return PointPerCellWorkflow(item, feedback)
+            return PointPerCellWorkflow(item, feedback, context)
         elif analysis_mode == "Use Polyline per Cell":
-            return PolylinePerCellWorkflow(item, feedback)
+            return PolylinePerCellWorkflow(item, feedback, context)
         # TODO fix inconsistent abbreviation below for Poly
         elif analysis_mode == "Use Poly per Cell":
-            return PolygonPerCellWorkflow(item, feedback)
+            return PolygonPerCellWorkflow(item, feedback, context)
         elif analysis_mode == "Factor Aggregation":
-            return FactorAggregationWorkflow(item, feedback)
+            return FactorAggregationWorkflow(item, feedback, context)
         elif analysis_mode == "Dimension Aggregation":
-            return DimensionAggregationWorkflow(item, feedback)
+            return DimensionAggregationWorkflow(item, feedback, context)
         elif analysis_mode == "Analysis Aggregation":
-            return AnalysisAggregationWorkflow(item, feedback)
+            return AnalysisAggregationWorkflow(item, feedback, context)
         elif analysis_mode == "Use CSV to Point Layer":
-            return AcledImpactWorkflow(item, feedback)
+            return AcledImpactWorkflow(item, feedback, context)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")

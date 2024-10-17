@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QObject
-from qgis.core import QgsMessageLog, Qgis, QgsTask
+from qgis.core import QgsMessageLog, Qgis, QgsTask, QgsProcessingContext, QgsProject
 from .workflow_queue import WorkflowQueue
 from .workflow_job import WorkflowJob
 from .json_tree_item import JsonTreeItem
@@ -50,9 +50,13 @@ class WorkflowQueueManager(QObject):
 
         :param item: A reference to a JsonTreeItem object representing the task
         """
-        # ⭐️ Now we are passing the item reference to the WorkflowJob
+        # Create a new QgsProcessingContext so we can pass the QgsProject instance
+        # to the threads in a thread safe manner
+        context = QgsProcessingContext()
+        context.setProject(QgsProject.instance())
+        # ⭐️ Note we are passing the item reference to the WorkflowJob
         #    any changes made to the item will be reflected in the tree directly
-        task = WorkflowJob(description="Geest Task", item=item)
+        task = WorkflowJob(description="Geest Task", item=item, context=context)
         self.workflow_queue.add_job(task)
         QgsMessageLog.logMessage(
             f"Task added: {task.description()}", tag="Geest", level=Qgis.Info

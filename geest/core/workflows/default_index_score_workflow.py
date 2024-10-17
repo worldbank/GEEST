@@ -11,6 +11,7 @@ from qgis.core import (
     QgsGeometry,
     QgsRasterLayer,
     QgsProject,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
@@ -24,14 +25,17 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
     Concrete implementation of a 'Use Default Index Score' workflow.
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+    ):
         """
-        Initialize the TemporalAnalysisWorkflow with attributes and feedback.
-        :param attributes: Dictionary containing workflow parameters.
+        Initialize the workflow with attributes and feedback.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback
+            item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.attributes = item.data(3)
         self.layer_id = self.attributes["Layer"].lower().replace(" ", "_")
@@ -312,7 +316,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
                     level=Qgis.Warning,
                 )
 
-        QgsProject.instance().addMapLayer(vrt_layer)
+        self.context.project().addMapLayer(vrt_layer)
         QgsMessageLog.logMessage(
             "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
         )
