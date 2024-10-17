@@ -226,7 +226,7 @@ class AcledImpactRasterProcessor:
             tag="Geest",
             level=Qgis.Info,
         )
-        return ""  # vrt_filepath
+        return vrt_filepath
 
     def _select_features(
         self, layer: QgsVectorLayer, area_geom: QgsGeometry, output_name: str
