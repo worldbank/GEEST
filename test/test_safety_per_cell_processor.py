@@ -5,6 +5,8 @@ from qgis.core import (
     QgsProcessingException,
     QgsRasterLayer,
     QgsRasterBandStats,
+    QgsProcessingContext,
+    QgsProject,
 )
 from geest.core.algorithms.safety_polygon_processor import (
     SafetyPerCellProcessor,
@@ -16,6 +18,11 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
         """
         Set up the environment for the test, loading the test data layers.
         """
+        self.context = QgsProcessingContext()
+
+        # Manually create a QgsProject instance and set it in the context
+        self.project = QgsProject.instance()
+        self.context.setProject(self.project)
         self.test_data_directory = os.path.join(os.path.dirname(__file__), "test_data")
 
         # Define paths to test layers
@@ -49,6 +56,7 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
             safety_field="safety",
             workflow_directory=self.workflow_directory,
             gpkg_path=self.gpkg_path,
+            context=self.context,
         )
 
     def test_process_areas(self):

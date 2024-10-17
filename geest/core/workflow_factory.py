@@ -13,6 +13,7 @@ from geest.core.workflows import (
     PolygonPerCellWorkflow,
     AcledImpactWorkflow,
     SinglePointBufferWorkflow,
+    SafetyPolygonWorkflow,
 )
 from .json_tree_item import JsonTreeItem
 
@@ -73,5 +74,7 @@ class WorkflowFactory:
             return AnalysisAggregationWorkflow(item, feedback, context)
         elif analysis_mode == "Use CSV to Point Layer":
             return AcledImpactWorkflow(item, feedback, context)
+        elif analysis_mode == "Use Classify Poly into Classes":
+            return SafetyPolygonWorkflow(item, feedback, context)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")

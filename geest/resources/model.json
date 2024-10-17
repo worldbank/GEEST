@@ -588,7 +588,7 @@
                             "Use Add Layers Manually": 0,
                             "Use Classify Poly into Classes": 1,
                             "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 1,
+                            "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 1,
                             "Use Point per Cell": 1,
                             "Analysis Mode": "Don\u2019t Use",
