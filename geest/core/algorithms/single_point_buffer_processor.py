@@ -104,7 +104,7 @@ class SinglePointBufferProcessor:
                 area_features, f"{self.output_prefix}_buffered_{index}"
             )
 
-            # Step 3: Assign values based on event_type
+            # Step 3: Assign values to the buffered polygons
             scored_layer = self._assign_scores(buffered_layer)
 
             # Step 4: Rasterize the scored buffer layer
@@ -243,7 +243,7 @@ class SinglePointBufferProcessor:
         layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
         layer.updateFields()
 
-        # Assign scores based on event_type
+        # Assign scores to the buffered polygons
         score = 5
         for feature in layer.getFeatures():
             feature.setAttribute("value", score)
@@ -353,7 +353,7 @@ class SinglePointBufferProcessor:
         )
         # Convert the area geometry to a temporary layer
         epsg_code = self.target_crs.authid()
-        area_layer = QgsVectorLayer(f"Polygon?crs=EPSG:{epsg_code}", "area", "memory")
+        area_layer = QgsVectorLayer(f"Polygon?crs={epsg_code}", "area", "memory")
         area_provider = area_layer.dataProvider()
         area_feature = QgsFeature()
         area_feature.setGeometry(area_geometry)
@@ -369,7 +369,7 @@ class SinglePointBufferProcessor:
                 self.workflow_directory, f"{self.output_prefix}_area_{index}.shp"
             ),
             "UTF-8",
-            area_layer.crs(),
+            self.target_crs,
             "ESRI Shapefile",
         )
 
@@ -380,15 +380,15 @@ class SinglePointBufferProcessor:
             "SOURCE_CRS": self.target_crs,
             "TARGET_CRS": self.target_crs,
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
-            "NODATA": None,
+            "NODATA": 255,
             "ALPHA_BAND": False,
-            "CROP_TO_CUTLINE": False,
-            "KEEP_RESOLUTION": True,
-            "SET_RESOLUTION": False,
-            "X_RESOLUTION": None,
-            "Y_RESOLUTION": None,
+            "CROP_TO_CUTLINE": True,
+            "KEEP_RESOLUTION": False,
+            "SET_RESOLUTION": True,
+            "X_RESOLUTION": 100,
+            "Y_RESOLUTION": 100,
             "MULTITHREADING": True,
-            "OPTIONS": "",
+            "OPTIONS": "-a_srs EPSG:62320",
             "DATA_TYPE": 0,  # byte
             "EXTRA": "",
             "OUTPUT": masked_raster_filepath,
