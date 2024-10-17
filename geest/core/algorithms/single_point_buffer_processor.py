@@ -379,7 +379,8 @@ class SinglePointBufferProcessor:
             "MASK": area_layer,
             "SOURCE_CRS": self.target_crs,
             "TARGET_CRS": self.target_crs,
-            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            # This fails!
+            # "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
             "NODATA": 255,
             "ALPHA_BAND": False,
             "CROP_TO_CUTLINE": True,
@@ -388,7 +389,6 @@ class SinglePointBufferProcessor:
             "X_RESOLUTION": 100,
             "Y_RESOLUTION": 100,
             "MULTITHREADING": True,
-            "OPTIONS": "-a_srs EPSG:62320",
             "DATA_TYPE": 0,  # byte
             "EXTRA": "",
             "OUTPUT": masked_raster_filepath,
