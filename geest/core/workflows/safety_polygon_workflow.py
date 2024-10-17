@@ -6,6 +6,7 @@ from qgis.core import (
     Qgis,
     QgsFeedback,
     QgsVectorLayer,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
@@ -20,14 +21,19 @@ class SafetyPolygonWorkflow(WorkflowBase):
     Concrete implementation of a 'Use Classify Poly into Classes' workflow.
     """
 
-    def __init__(self, item: JsonTreeItem, feedback: QgsFeedback):
+    def __init__(
+        self,
+        item: JsonTreeItem,
+        feedback: QgsFeedback,
+        context: QgsProcessingContext,
+    ):
         """
         Initialize the workflow with attributes and feedback.
         :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
         super().__init__(
-            item, feedback
+            item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Classify Poly into Classes"
         # Initialize GridAligner with grid size
@@ -63,6 +69,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
             safety_field=selected_field,
             workflow_directory=self.workflow_directory,
             gpkg_path=self.gpkg_path,
+            context=self.context,
         )
         QgsMessageLog.logMessage(
             "Safety Per Cell Processor Created", tag="Geest", level=Qgis.Info

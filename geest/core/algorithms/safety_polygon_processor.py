@@ -14,6 +14,7 @@ from qgis.core import (
     edit,
     QgsRasterLayer,
     QgsProject,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing
@@ -41,6 +42,7 @@ class SafetyPerCellProcessor:
         safety_field: str,
         workflow_directory: str,
         gpkg_path: str,
+        context: QgsProcessingContext,
     ) -> None:
         """
         Initialize the SafetyPerCellProcessor.
@@ -56,6 +58,9 @@ class SafetyPerCellProcessor:
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path
         self.safety_field = safety_field
+        self.context = (
+            context  # Used to pass objects to the thread. e.g. the QgsProject Instance
+        )
 
         # Load the grid layer from the GeoPackage
         self.grid_layer = QgsVectorLayer(
@@ -215,7 +220,7 @@ class SafetyPerCellProcessor:
         vrt_layer = QgsRasterLayer(vrt_path, f"{self.output_prefix}_combined VRT")
 
         if vrt_layer.isValid():
-            QgsProject.instance().addMapLayer(vrt_layer)
+            self.context.project().addMapLayer(vrt_layer)
             QgsMessageLog.logMessage(
                 "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
             )
