@@ -130,7 +130,7 @@ class JsonTreeModel(QAbstractItemModel):
             "Execution End Time": dimension.get("Execution End Time", ""),
         }
         status = (
-            "🔴" if "Workflow Completed" not in dimension_attributes["Result"] else "✔️"
+            "x" if "Workflow Completed" not in dimension_attributes["Result"] else "✔️"
         )
 
         dimension_item = JsonTreeItem(
@@ -165,9 +165,7 @@ class JsonTreeModel(QAbstractItemModel):
             "Factor Result File": factor.get("Factor Result File", ""),
             "Execution End Time": factor.get("Execution End Time", ""),
         }
-        status = (
-            "🔴" if "Workflow Completed" not in factor_attributes["Result"] else "✔️"
-        )
+        status = "x" if "Workflow Completed" not in factor_attributes["Result"] else "✔️"
 
         factor_item = JsonTreeItem(
             [factor["name"], status, "", factor_attributes], "factor", parent_item
@@ -188,7 +186,7 @@ class JsonTreeModel(QAbstractItemModel):
             None
         """
         status = (
-            "🔴"
+            "x"
             if "Workflow Completed" not in indicator.get("Indicator Result", "")
             else "✔️"
         )
@@ -420,7 +418,7 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        new_factor = JsonTreeItem(["New Factor", "🔴", ""], "factor", dimension_item)
+        new_factor = JsonTreeItem(["New Factor", "x", ""], "factor", dimension_item)
         dimension_item.appendChild(new_factor)
         self.layoutChanged.emit()
 
@@ -434,7 +432,7 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        new_layer = JsonTreeItem(["New Layer", "🔴", "1.00"], "layer", factor_item)
+        new_layer = JsonTreeItem(["New Layer", "x", "1.00"], "layer", factor_item)
         factor_item.appendChild(new_layer)
         self.layoutChanged.emit()
 
@@ -553,7 +551,7 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        new_dimension = JsonTreeItem([name, "🔴", ""], "dimension", self.rootItem)
+        new_dimension = JsonTreeItem([name, "x", ""], "dimension", self.rootItem)
         self.rootItem.appendChild(new_dimension)
         self.layoutChanged.emit()
 
