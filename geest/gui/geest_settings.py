@@ -59,6 +59,12 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             self.verbose_mode_checkbox.setChecked(True)
         else:
             self.verbose_mode_checkbox.setChecked(False)
+        # ORS API key
+        ors_key = setting(key="ors_key", default="")
+        if ors_key:
+            self.ors_key_line_edit.setText(ors_key)
+        else:
+            self.ors_key_line_edit.setPlaceholderText("Enter your ORS API key here")
 
     def apply(self):
         """Process the animation sequence.
@@ -84,6 +90,8 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             set_setting(key="verbose_mode", value=1)
         else:
             set_setting(key="verbose_mode", value=0)
+
+        set_setting(key="ors_key", value=self.ors_key_line_edit.text())
 
 
 class GeestOptionsFactory(QgsOptionsWidgetFactory):

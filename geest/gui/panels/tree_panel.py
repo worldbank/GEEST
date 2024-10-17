@@ -647,11 +647,15 @@ class TreePanel(QWidget):
         Slot for handling when a workflow is completed.
         Update the tree item to indicate success or failure.
         """
+        output_file = item.data(3).get("Indicator Result File", None)
+        if output_file:
+            layer = QgsRasterLayer(output_file, item.data(0))
+            QgsProject.instance().addMapLayer(layer)
         if success:
-            self.update_tree_item_status(item, "✅")
+            self.update_tree_item_status(item, "✔️")
 
         else:
-            self.update_tree_item_status(item, "❌")
+            self.update_tree_item_status(item, "x")
         self.save_json_to_working_directory()
 
     def update_tree_item_status(self, item, status):

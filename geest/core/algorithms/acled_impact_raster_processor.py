@@ -8,6 +8,7 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsProcessingException,
     QgsVectorLayer,
+    QgsProject,
     QgsPointXY,
     QgsFields,
     QgsMessageLog,
@@ -682,16 +683,28 @@ class AcledImpactRasterProcessor:
         }
 
         # Run the gdal:buildvrt processing algorithm to create the VRT
-        processing.run("gdal:buildvirtualraster", params)
+        results = processing.run("gdal:buildvirtualraster", params)
         QgsMessageLog.logMessage(
             f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
         )
-
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.output_prefix}_combined VRT")
 
         if vrt_layer.isValid():
-            self.context.project().addMapLayer(vrt_layer)
+
+            # output_layer = context.getMapLayer(results['OUTPUT'])
+
+            # because getMapLayer doesn't transfer ownership, the layer will
+            # be deleted when context goes out of scope and you'll get a
+            # crash.
+            # takeMapLayer transfers ownership so it's then safe to add it
+            # to the project and give the project ownership.
+            # See https://docs.qgis.org/3.34/en/docs/pyqgis_developer_cookbook/tasks.html
+
+            # QgsProject.instance().addMapLayer(
+            #    self.context.takeResultLayer(vrt_layer.id()))
+
+            # self.context.project().addMapLayer(vrt_layer)
             QgsMessageLog.logMessage(
                 "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
             )
