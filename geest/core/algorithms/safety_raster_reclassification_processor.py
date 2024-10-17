@@ -72,7 +72,6 @@ class SafetyRasterReclassificationProcessor:
 
             # Dynamically build the reclassification table using the max value
             reclass_table = self._build_reclassification_table(max_val)
-            print(reclass_table)
 
             # Apply the reclassification rules
             reclassified_raster = self._apply_reclassification(
@@ -103,7 +102,6 @@ class SafetyRasterReclassificationProcessor:
                 "BAND": 1,
             },
         )
-        print(stats.keys())
 
         max_val = stats["MAX"]
         QgsMessageLog.logMessage(
@@ -115,25 +113,27 @@ class SafetyRasterReclassificationProcessor:
         """
         Build a reclassification table dynamically using the max value from the raster.
         """
+        # TODO: handle Standard Classification Scheme
+        # Currently, only the Low NTL Classification Scheme is implemented
         return [
             0,
             0,
-            0,  # No hazard (value = 0)
-            0.00,
+            0,  # No Light
+            0.01,
             max_val * 0.2,
-            1,  # Very low hazard (0 < value <= 20% of max)
+            1,  # Very Low
             max_val * 0.2 + 0.01,
             max_val * 0.4,
-            2,  # Low hazard
+            2,  # Low
             max_val * 0.4 + 0.01,
             max_val * 0.6,
-            3,  # Moderate hazard
+            3,  # Moderate
             max_val * 0.6 + 0.01,
             max_val * 0.8,
-            4,  # High hazard
+            4,  # High
             max_val * 0.8 + 0.01,
             max_val,
-            5,  # Very high hazard
+            5,  # Highest
         ]
 
     def _reproject_and_clip_raster(
