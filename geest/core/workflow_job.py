@@ -64,9 +64,7 @@ class WorkflowJob(QgsTask):
 
             # Emit the 'started' signal before running the workflow
             self.job_started.emit()
-
             result = self._workflow.execute()
-
             QgsMessageLog.logMessage(
                 f"WorkflowJob {self.description()} attributes.",
                 tag="Geest",
@@ -84,7 +82,6 @@ class WorkflowJob(QgsTask):
                     tag="Geest",
                     level=Qgis.Info,
                 )
-
                 return True
             else:
                 QgsMessageLog.logMessage(

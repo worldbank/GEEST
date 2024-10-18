@@ -239,7 +239,13 @@ class SetupPanel(FORM_CLASS, QWidget):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
                 return
-
+            try:
+                checker = OrsCheckerTask(url="https://api.openrouteservice.org")
+                self.queue_manager.add_task(checker)
+                self.queue_manager.start_processing()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Error checking ORS: {e}")
+                return
             # Update the last used project after processing
             self.settings.setValue("last_working_directory", self.working_dir)
             self.switch_to_next_tab.emit()

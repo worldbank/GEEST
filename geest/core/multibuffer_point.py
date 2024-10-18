@@ -10,10 +10,12 @@ from qgis.core import (
     QgsGeometry,
     QgsFeature,
     QgsPointXY,
+    QgsVectorFileWriter,
 )
 from qgis.PyQt.QtCore import QVariant, QEventLoop, QTimer
 import processing
 from geest.core.ors_client import ORSClient
+from geest.core import setting
 
 
 class MultiBufferCreator:
@@ -29,7 +31,14 @@ class MultiBufferCreator:
         self.distance_list = distance_list
         self.subset_size = subset_size
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
-        self.api_key = os.getenv("ORS_API_KEY")
+
+        self.api_key = setting(key="ors_key", default="")
+        if not self.api_key:
+            self.api_key = os.getenv("ORS_API_KEY")
+        if not self.api_key:
+            raise EnvironmentError(
+                "ORS API key is missing. Set it in the environment variable 'ORS_API_KEY"
+            )
         # Create the masked API key before using it in the f-string
         self.masked_api_key = (
             self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
@@ -215,6 +224,11 @@ class MultiBufferCreator:
         isochrone_layer.commitChanges()
 
         # Parse the features from ORS response
+        QgsMessageLog.logMessage(
+            f"Creating isochrone layer with {len(isochrone_data['features'])} features",
+            "Geest",
+            Qgis.Info,
+        )
         features = []
         for feature_data in isochrone_data["features"]:
             geometry = feature_data["geometry"]
@@ -244,6 +258,16 @@ class MultiBufferCreator:
             features.append(feat)
 
         provider.addFeatures(features)
+        # Write the layer to the working directory
+        # writer = QgsVectorFileWriter.writeAsVectorFormat(
+        #    isochrone_layer,
+        #    os.path.join('/tmp', "isochrones.shp"),
+        #    "utf-8",
+        #    QgsCoordinateReferenceSystem("EPSG:4326"),
+        #    "ESRI Shapefile"
+        # )
+        # if writer[0] != 0:
+        #    raise IOError(f"Error saving isochrone layer: {writer[1]}")
         return isochrone_layer
 
     def _merge_layers(self, temp_layers, crs, output_dir):
@@ -365,3 +389,4 @@ class MultiBufferCreator:
             "Geest",
             Qgis.Info,
         )
+        QgsMessageLog.logMessage(f"Layer written to {output_path}", "Geest", Qgis.Info)
