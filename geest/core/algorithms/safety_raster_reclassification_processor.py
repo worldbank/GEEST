@@ -1,8 +1,6 @@
 from qgis.core import (
     QgsRasterLayer,
     QgsProcessingFeedback,
-    QgsCoordinateReferenceSystem,
-    QgsRectangle,
     QgsGeometry,
     QgsMessageLog,
     Qgis,
@@ -236,7 +234,7 @@ class SafetyRasterReclassificationProcessor:
             "RASTER_BAND": 1,  # Band number to apply the reclassification
             "TABLE": reclass_table,  # Reclassification table
             "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
-            "OUTPUT": "TEMPORARY_OUTPUT",
+            "OUTPUT": reclassified_raster,
         }
 
         # Perform the reclassification using the raster calculator
@@ -244,20 +242,6 @@ class SafetyRasterReclassificationProcessor:
             "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
         )["OUTPUT"]
 
-        clip_params = {
-            "INPUT": reclass,
-            "MASK": self.grid_layer,
-            "NODATA": 255,
-            "CROP_TO_CUTLINE": True,
-            "KEEP_RESOLUTION": True,
-            "DATA_TYPE": 0,  # Float32
-            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
-            "OUTPUT": reclassified_raster,
-        }
-
-        processing.run(
-            "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
-        )
         QgsMessageLog.logMessage(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
             "SafetyRasterReclassificationProcessor",
