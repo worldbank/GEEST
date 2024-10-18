@@ -8,6 +8,7 @@ from qgis.core import (
     Qgis,
 )
 import os
+import numpy as np
 import processing
 from .area_iterator import AreaIterator
 
@@ -54,9 +55,6 @@ class SafetyRasterReclassificationProcessor:
         feedback = QgsProcessingFeedback()
         temp_rasters = []
 
-        # First, calculate the max value of the input raster
-        max_val = self._get_max_value()
-
         # Iterate over each area from the AreaIterator
         for index, (current_area, current_bbox, progress) in enumerate(
             self.area_iterator
@@ -70,8 +68,14 @@ class SafetyRasterReclassificationProcessor:
                 self.input_raster, current_bbox, index
             )
 
+            max_val, median, percentile_75 = self.calculate_raster_stats(
+                reprojected_raster
+            )
+
             # Dynamically build the reclassification table using the max value
-            reclass_table = self._build_reclassification_table(max_val)
+            reclass_table = self._build_reclassification_table(
+                max_val, median, percentile_75
+            )
 
             # Apply the reclassification rules
             reclassified_raster = self._apply_reclassification(
@@ -91,50 +95,97 @@ class SafetyRasterReclassificationProcessor:
             Qgis.Info,
         )
 
-    def _get_max_value(self):
+    def calculate_raster_stats(self, raster_path):
         """
-        Calculate the maximum value of the input raster.
+        Calculate statistics (max, median, 75th percentile) from a QGIS raster layer using as_numpy.
         """
-        stats = processing.run(
-            "qgis:rasterlayerstatistics",
-            {
-                "INPUT": self.input_raster,
-                "BAND": 1,
-            },
+        raster_layer = QgsRasterLayer(raster_path, "Input Raster")
+        provider = raster_layer.dataProvider()
+        extent = raster_layer.extent()
+        width = raster_layer.width()
+        height = raster_layer.height()
+
+        # Create an empty list to store raster data
+        raster_data = []
+
+        # Loop through the raster layer block by block
+        # Fetch the raster data for band 1
+        block = provider.block(
+            1, raster_layer.extent(), raster_layer.width(), raster_layer.height()
         )
 
-        max_val = stats["MAX"]
-        QgsMessageLog.logMessage(
-            f"Max value of the raster: {max_val}", "Processor", Qgis.Info
-        )
-        return max_val
+        byte_array = block.data()  # This returns a QByteArray
 
-    def _build_reclassification_table(self, max_val):
+        # Convert list to a numpy array
+        raster_array = np.frombuffer(byte_array, dtype=np.float32).reshape(
+            (height, width)
+        )
+
+        # Filter out NoData values (assumes NoData is represented by some large value like 3.4e+38 or negative values)
+        no_data_value = provider.sourceNoDataValue(1)
+        valid_data = raster_array[raster_array != no_data_value]
+
+        if valid_data.size > 0:
+            # Compute statistics
+            max_value = np.max(valid_data)
+            median = np.median(valid_data)
+            percentile_75 = np.percentile(valid_data, 75)
+
+            return max_value, median, percentile_75
+
+        else:
+            return None, None, None
+
+    def _build_reclassification_table(self, max_val, median, percentile_75):
         """
         Build a reclassification table dynamically using the max value from the raster.
         """
         # TODO: handle Standard Classification Scheme
         # Currently, only the Low NTL Classification Scheme is implemented
-        return [
-            0,
-            0,
-            0,  # No Light
-            0.01,
-            max_val * 0.2,
-            1,  # Very Low
-            max_val * 0.2 + 0.01,
-            max_val * 0.4,
-            2,  # Low
-            max_val * 0.4 + 0.01,
-            max_val * 0.6,
-            3,  # Moderate
-            max_val * 0.6 + 0.01,
-            max_val * 0.8,
-            4,  # High
-            max_val * 0.8 + 0.01,
-            max_val,
-            5,  # Highest
-        ]
+        if max_val < 0.05:
+            reclass_table = [
+                0,
+                0,
+                0,  # No Light
+                0.01,
+                max_val * 0.2,
+                1,  # Very Low
+                max_val * 0.2 + 0.01,
+                max_val * 0.4,
+                2,  # Low
+                max_val * 0.4 + 0.01,
+                max_val * 0.6,
+                3,  # Moderate
+                max_val * 0.6 + 0.01,
+                max_val * 0.8,
+                4,  # High
+                max_val * 0.8 + 0.01,
+                max_val,
+                5,  # Highest
+            ]
+            return reclass_table
+        else:
+            reclass_table = [
+                0,
+                0.05,
+                0,  # No Access
+                0.05,
+                0.25 * median,
+                1,  # Very Low
+                0.25 * median,
+                0.5 * median,
+                2,  # Low
+                0.5 * median,
+                median,
+                3,  # Moderate
+                median,
+                percentile_75,
+                4,  # High
+                percentile_75,
+                max_val,
+                5,  # Very High
+            ]
+            return reclass_table
 
     def _reproject_and_clip_raster(
         self, raster_path: str, bbox: QgsGeometry, index: int
@@ -184,7 +235,6 @@ class SafetyRasterReclassificationProcessor:
             "INPUT_RASTER": input_raster,
             "RASTER_BAND": 1,  # Band number to apply the reclassification
             "TABLE": reclass_table,  # Reclassification table
-            "NO_DATA": 255,  # NoData value
             "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
             "OUTPUT": "TEMPORARY_OUTPUT",
         }
@@ -200,6 +250,7 @@ class SafetyRasterReclassificationProcessor:
             "NODATA": 255,
             "CROP_TO_CUTLINE": True,
             "KEEP_RESOLUTION": True,
+            "DATA_TYPE": 0,  # Float32
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
             "OUTPUT": reclassified_raster,
         }
