@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import uuid
 
 # Change to this when implementing in QGIS
 from qgis.PyQt.QtWidgets import (
@@ -49,14 +50,17 @@ class JsonTreeModel(QAbstractItemModel):
             parent (QObject): Optional parent object for the model.
         """
         super().__init__(parent)
-        self.rootItem = JsonTreeItem(["GEEST2", "Status", "Weight"], "root")
+        guid = str(uuid.uuid4())
+        self.rootItem = JsonTreeItem(
+            ["GEEST2", "Status", "Weight"], role="root", guid=guid
+        )
         self.original_value = None  # To store the original value before editing
         self.loadJsonData(json_data)
 
     def loadJsonData(self, json_data):
         """
         Loads the JSON data into the tree model, creating a hierarchical structure with the "Analysis" node
-        as the parent. Dimensions, Factors, and Indicators are nested accordingly.
+        as the parent. Dimensions, Factors, and Indicators are nested accordingly, including deserializing UUIDs.
 
         The "Analysis" node contains custom attributes for the analysis name, description, and working folder.
 
@@ -70,6 +74,7 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_name = json_data.get("analysis_name", "Analysis")
         analysis_description = json_data.get("description", "No Description")
         working_folder = json_data.get("working_folder", "Not Set")
+        guid = json_data.get("guid", str(uuid.uuid4()))  # Deserialize UUID
 
         # Store special properties in the data(3) dictionary
         analysis_attributes = {
@@ -85,6 +90,7 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_item = JsonTreeItem(
             [analysis_name, status, weighting, analysis_attributes],
             role=role,
+            guid=guid,
             parent=self.rootItem,
         )
         self.rootItem.appendChild(analysis_item)
@@ -129,12 +135,17 @@ class JsonTreeModel(QAbstractItemModel):
             "Dimension Result File": dimension.get("Dimension Result File", ""),
             "Execution End Time": dimension.get("Execution End Time", ""),
         }
+        guid = dimension.get("guid", str(uuid.uuid4()))  # Deserialize UUID
+
         status = (
             "x" if "Workflow Completed" not in dimension_attributes["Result"] else "✔️"
         )
 
         dimension_item = JsonTreeItem(
-            [dimension_name, status, "", dimension_attributes], "dimension", parent_item
+            [dimension_name, status, "", dimension_attributes],
+            role="dimension",
+            guid=guid,
+            parent=parent_item,
         )
         parent_item.appendChild(dimension_item)
 
@@ -166,9 +177,13 @@ class JsonTreeModel(QAbstractItemModel):
             "Execution End Time": factor.get("Execution End Time", ""),
         }
         status = "x" if "Workflow Completed" not in factor_attributes["Result"] else "✔️"
+        guid = factor.get("guid", str(uuid.uuid4()))  # Deserialize UUID
 
         factor_item = JsonTreeItem(
-            [factor["name"], status, "", factor_attributes], "factor", parent_item
+            [factor["name"], status, "", factor_attributes],
+            role="factor",
+            guid=guid,
+            parent=parent_item,
         )
         parent_item.appendChild(factor_item)
 
@@ -190,6 +205,7 @@ class JsonTreeModel(QAbstractItemModel):
             if "Workflow Completed" not in indicator.get("Indicator Result", "")
             else "✔️"
         )
+        guid = indicator.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         indicator_item = JsonTreeItem(
             [
                 indicator["Layer"],
@@ -197,8 +213,9 @@ class JsonTreeModel(QAbstractItemModel):
                 indicator.get("Factor Weighting", 0),
                 indicator,
             ],
-            "layer",
-            parent_item,
+            role="layer",
+            guid=guid,
+            parent=parent_item,
         )
         parent_item.appendChild(indicator_item)
 
@@ -283,46 +300,48 @@ class JsonTreeModel(QAbstractItemModel):
     def to_json(self):
         """
         Converts the tree structure back into a JSON document, recursively traversing the tree and including
-        the custom attributes stored in `data(3)` for each item.
+        the custom attributes stored in `data(3)` for each item. UUIDs are serialized for all items.
 
         Returns:
             dict: The JSON representation of the tree structure.
         """
 
         def recurse_tree(item):
+            # Serialize each item, including UUID
             if item.role == "analysis":
-                json = {
+                json_data = {
                     "analysis_name": item.data(3)["Analysis Name"],
                     "description": item.data(3)["Description"],
                     "working_folder": item.data(3)["Working Folder"],
+                    "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }
-                return json
+                return json_data
             elif item.role == "dimension":
-                json = {
+                json_data = {
                     "name": item.data(0).lower(),
+                    "guid": item.guid,  # Serialize UUID
                     "factors": [recurse_tree(child) for child in item.childItems],
                     "Analysis Weighting": item.data(2),
                 }
-                json.update(item.data(3))
-                return json
+                json_data.update(item.data(3))
+                return json_data
             elif item.role == "factor":
-                json = {
+                json_data = {
                     "name": item.data(0),
+                    "guid": item.guid,  # Serialize UUID
                     "layers": [recurse_tree(child) for child in item.childItems],
                     "Dimension Weighting": item.data(2),
                 }
-                json.update(item.data(3))
-                return json
+                json_data.update(item.data(3))
+                return json_data
             elif item.role == "layer":
-                json = item.data(3)
-                json["Factor Weighting"] = item.data(2)
-                return json
+                json_data = item.data(3)
+                json_data["Factor Weighting"] = item.data(2)
+                json_data["guid"] = item.guid  # Serialize UUID
+                return json_data
 
-        json_data = recurse_tree(
-            self.rootItem.child(0)
-        )  # Start with the "Analysis" item
-        return json_data
+        return recurse_tree(self.rootItem.child(0))  # Start from the root item
 
     def clear_factor_weightings(self, dimension_item):
         """
@@ -478,6 +497,58 @@ class JsonTreeModel(QAbstractItemModel):
             int: The number of columns in the model.
         """
         return self.rootItem.columnCount()
+
+    def itemIndex(self, item: JsonTreeItem):
+        """
+        Searches for the item and returns its QModelIndex.
+
+        Args:
+            item (JsonTreeItem): The JsonTreeItem to search for.
+
+        Returns:
+            QModelIndex: The QModelIndex of the item with the given UUID, or an invalid QModelIndex if not found.
+        """
+        return self._findIndexByGuid(self.rootItem, item.guid)
+
+    def guidIndex(self, guid):
+        """
+        Searches for the item with the given guid and returns its QModelIndex.
+
+        Args:
+            guid (str): The guid of the item to search for.
+
+        Returns:
+            QModelIndex: The QModelIndex of the item with the given guid, or an invalid QModelIndex if not found.
+        """
+        return self._findIndexByGuid(self.rootItem, guid)
+
+    def _findIndexByGuid(self, parent_item, target_guid, parent_index=QModelIndex()):
+        """
+        Recursively searches for the target guid within the children of the given parent item.
+
+        Args:
+            parent_item (JsonTreeItem): The parent item to start searching from.
+            target_guid (str): The GUID of the item to search for.
+            parent_index (QModelIndex): The QModelIndex of the parent item.
+
+        Returns:
+            QModelIndex: The QModelIndex of the target item, or an invalid QModelIndex if not found.
+        """
+        for row in range(parent_item.childCount()):
+            child_item = parent_item.child(row)
+
+            # If the item's UUID matches, return its QModelIndex
+            if child_item.guid == target_guid:
+                return self.createIndex(row, 0, child_item)
+
+            # Recursively search children
+            child_index = self._findIndexByGuid(
+                child_item, target_guid, self.createIndex(row, 0, parent_item)
+            )
+            if child_index.isValid():
+                return child_index
+
+        return QModelIndex()  # Return invalid QModelIndex if not found
 
     def index(self, row, column, parent=QModelIndex()):
         """

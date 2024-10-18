@@ -634,47 +634,6 @@ class TreePanel(QWidget):
         """
         self.update_tree_item_status(item, "Q")
 
-    def find_index_for_item(self, item, parent_index=QModelIndex()):
-        """
-        Recursively find the QModelIndex for a given item in a custom model.
-
-        Parameters:
-        -----------
-        item : object
-            The item you are searching for in the model.
-        parent_index : QModelIndex, optional
-            The parent index to start the search from (default is the root index).
-
-        Returns:
-        --------
-        QModelIndex
-            The index corresponding to the given item, or an invalid QModelIndex if not found.
-        """
-
-        for row in range(self.model.rowCount(parent_index)):
-            # Get the current index at (row, 0) in the parent_index context
-            current_index = self.model.index(row, 0, parent_index)
-
-            # Get the actual item from the model at this index
-            current_item = self.model.data(
-                current_index, Qt.UserRole
-            )  # Adjust this based on how you store items in the model
-
-            # If this is the item we are looking for, return the current index
-            try:
-                if current_item.data(0) == item.data(0):  # Assumes names are unique
-                    return current_index
-            except AttributeError:
-                pass
-            # Otherwise, search recursively in the child indexes
-            if self.model.hasChildren(current_index):
-                child_index = self.find_index_for_item(item, current_index)
-                if child_index.isValid():
-                    return child_index
-
-        # Return an invalid index if the item is not found
-        return QModelIndex()
-
     @pyqtSlot()
     def on_workflow_started(self, item):
         """
@@ -684,7 +643,7 @@ class TreePanel(QWidget):
         # This is just a fall back in case our animation fails...
         self.update_tree_item_status(item, "R")
         # Now set up an animated icon
-        node_index = self.find_index_for_item(item)
+        node_index = self.model.itemIndex(item)
 
         if not node_index.isValid():
             QgsMessageLog.logMessage(
