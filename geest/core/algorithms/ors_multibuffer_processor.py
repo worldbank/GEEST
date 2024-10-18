@@ -24,13 +24,33 @@ from geest.core import setting
 
 
 class ORSMultiBufferProcessor:
-    """Creates multiple buffers around point features using the OpenRouteService API."""
+    """
+    A processor that creates multiple buffers (isochrones) around point features using the OpenRouteService (ORS) API.
+
+    This class allows you to process point features in batches, query the ORS API for buffers (isochrones)
+    based on distance or time, and merge the resulting polygons into a final output layer. It supports
+    travel modes such as walking or driving, and the final buffer results are always projected in EPSG:4326.
+
+    The buffer results (polygons) are retrieved as isochrones from ORS and merged into a final polygon layer
+    stored in the specified output path.
+
+    Note: The final polygon results are always in EPSG:4326.
+
+    Attributes:
+        distance_list (list): A list of buffer distances (in meters or seconds if using time-based buffers).
+        subset_size (int): The number of features to process in each subset.
+        context (QgsProcessingContext): The processing context, needed for thread safety.
+        ors_client (ORSClient): The OpenRouteService client to interact with the ORS API.
+        api_key (str): The API key for OpenRouteService.
+        masked_api_key (str): A masked version of the API key (for logging purposes).
+        temp_layers (list): Stores intermediate layers created during processing.
+    """
 
     def __init__(
         self, distance_list, subset_size=5, context: QgsProcessingContext = None
     ):
         """
-        Initialize the MultiBufferCreator class.
+        Initialize the ORSMultiBufferProcessor.
 
         :param distance_list: List of buffer distances (in meters or seconds if using time-based buffers)
         :param subset_size: Number of features to process in each subset
@@ -41,7 +61,7 @@ class ORSMultiBufferProcessor:
         self.context = context
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
-        # Create the masked API key before using it in the f-string
+        # Create the masked API key for logging
         self.masked_api_key = (
             self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
         )
@@ -55,15 +75,18 @@ class ORSMultiBufferProcessor:
         measurement="distance",
     ):
         """
-        Creates multibuffers for each point in the input point layer using ORSClient.
+        Create multiple buffers (isochrones) for each point in the input point layer using ORSClient.
 
-        :param point_layer: QgsVectorLayer containing point features
-        :param output_path: Path to save the merged output layer
-        :param mode: Mode of travel for ORS API (e.g., 'walking', 'driving-car')
-        :param measurement: 'distance' or 'time'
-        :return: QgsVectorLayer containing the buffers as polygons
+        This method processes the point features in subsets (to handle large datasets), makes API calls
+        to the OpenRouteService to fetch the isochrones (buffers) for each subset, and merges the results
+        into a final output layer.
+
+        :param point_layer: QgsVectorLayer containing point features to process.
+        :param output_path: Path to save the merged output layer.
+        :param mode: Mode of travel for ORS API (e.g., 'walking', 'driving-car').
+        :param measurement: Either 'distance' or 'time' for the ORS isochrones.
+        :return: QgsVectorLayer containing the buffers as polygons.
         """
-        # Create a coordinate reference system from EPSG:4326
         QgsMessageLog.logMessage(
             f"Using ORS API key: {self.masked_api_key}",
             "Geest",
@@ -73,7 +96,7 @@ class ORSMultiBufferProcessor:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        # Prepare to collect intermediate layers
+        # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
         QgsMessageLog.logMessage(
             f"Creating buffers for {len(features)} points", "Geest", Qgis.Info
@@ -84,8 +107,6 @@ class ORSMultiBufferProcessor:
         for i in range(0, total_features, self.subset_size):
             subset_features = features[i : i + self.subset_size]
             subset_layer = self._create_subset_layer(subset_features, point_layer)
-
-            # Connect to the ORSClient's request_finished signal to handle responses
 
             # Make API calls using ORSClient for the subset
             try:
@@ -106,7 +127,7 @@ class ORSMultiBufferProcessor:
                 )
                 continue
 
-        # Merge all isochrone layers into one
+        # Merge all isochrone layers into one final output
         if self.temp_layers:
             crs = point_layer.crs()
             merged_layer = self._merge_layers(self.temp_layers, crs, output_dir)
@@ -119,18 +140,15 @@ class ORSMultiBufferProcessor:
     def _create_subset_layer(self, subset_features, point_layer):
         """
         Create a subset layer for processing, with reprojection of points
-        from the point_layer CRS to the provided target CRS.
+        from the point_layer CRS to EPSG:4326 (WGS 84).
 
-        Args:
-            subset_features (list[QgsFeature]): Features to add to the subset layer.
-            point_layer (QgsVectorLayer): The original point layer.
-
-        Returns:
-            QgsVectorLayer: The newly created subset layer with reprojected features.
+        :param subset_features: List of QgsFeature objects to add to the subset layer.
+        :param point_layer: The original point layer (QgsVectorLayer) to reproject from.
+        :return: A QgsVectorLayer (subset layer) with reprojected features.
         """
         target_crs = QgsCoordinateReferenceSystem("EPSG:4326")
 
-        # Create a new memory layer with the target CRS
+        # Create a new memory layer with the target CRS (EPSG:4326)
         subset_layer = QgsVectorLayer(
             f"Point?crs={target_crs.authid()}", "subset", "memory"
         )
@@ -140,10 +158,9 @@ class ORSMultiBufferProcessor:
         subset_layer_data.addAttributes(point_layer.fields())
         subset_layer.updateFields()
 
-        # Create coordinate transformation from point_layer CRS to the target CRS
+        # Create coordinate transformation from point_layer CRS to the target CRS (EPSG:4326)
         source_crs = point_layer.crs()
         transform_context = self.context.project().transformContext()
-
         transform = QgsCoordinateTransform(source_crs, target_crs, transform_context)
 
         # Reproject and add features to the subset layer
@@ -165,11 +182,12 @@ class ORSMultiBufferProcessor:
 
     def _fetch_isochrones(self, subset_layer, mode, measurement):
         """
-        Fetches isochrones for the given subset of features using ORSClient.
+        Fetch isochrones for the given subset of features using ORSClient.
 
-        :param subset_layer: QgsVectorLayer containing the subset of features
-        :param mode: Travel mode for ORS API (e.g., 'driving-car')
-        :return: dict: JSON response from the ORS API
+        :param subset_layer: A QgsVectorLayer containing the subset of features.
+        :param mode: Travel mode for ORS API (e.g., 'driving-car').
+        :param measurement: Either 'distance' or 'time' for ORS isochrones.
+        :return: A dict representing the JSON response from the ORS API.
         """
         # Prepare the coordinates for the API request
         coordinates = []
@@ -195,10 +213,10 @@ class ORSMultiBufferProcessor:
 
     def _create_isochrone_layer(self, isochrone_data):
         """
-        Creates a QgsVectorLayer from ORS isochrone data.
+        Create a QgsVectorLayer from the ORS isochrone data.
 
-        :param isochrone_data: JSON data returned from ORS
-        :return: QgsVectorLayer containing the isochrones
+        :param isochrone_data: JSON data returned from ORS.
+        :return: A QgsVectorLayer containing the isochrones as polygons.
         """
         isochrone_layer = QgsVectorLayer(
             "Polygon?crs=EPSG:4326", "isochrones", "memory"
@@ -248,7 +266,14 @@ class ORSMultiBufferProcessor:
         return isochrone_layer
 
     def _merge_layers(self, temp_layers, crs, output_dir):
-        """Merges all temporary isochrone layers."""
+        """
+        Merge all temporary isochrone layers into a single layer.
+
+        :param temp_layers: List of temporary QgsVectorLayers to merge.
+        :param crs: The CRS to use for the merged layer.
+        :param output_dir: Directory to save the merged output layer.
+        :return: A QgsVectorLayer representing the merged isochrone layers.
+        """
         merge_output = os.path.join(output_dir, "merged_isochrones.shp")
         merge_params = {
             "LAYERS": temp_layers,
@@ -256,21 +281,18 @@ class ORSMultiBufferProcessor:
             "OUTPUT": merge_output,
         }
         merged_result = processing.run("native:mergevectorlayers", merge_params)
-        # return merged_result["OUTPUT"]
         merge = QgsVectorLayer(merged_result["OUTPUT"], "merge", "ogr")
         return merge
 
     def _create_bands(self, merged_layer, output_path, crs):
         """
-        Creates bands by differencing isochrone ranges.
+        Create bands by computing differences between isochrone ranges.
 
-        :param merged_layer: The merged isochrone layer
-        :param output_path: Path to save the final output layer
-        :param crs: Coordinate reference system
+        :param merged_layer: The merged isochrone layer.
+        :param output_path: Path to save the final output layer.
+        :param crs: Coordinate reference system for the output.
         """
-        # Extract unique ranges from the 'value' field added by ORS
         ranges_field = "value"
-        # Verify that the field exists in the merged_layer
         field_index = merged_layer.fields().indexFromName(ranges_field)
         if field_index == -1:
             raise KeyError(
@@ -281,15 +303,12 @@ class ORSMultiBufferProcessor:
             {feat[ranges_field] for feat in merged_layer.getFeatures()}
         )
 
-        # Create dissolved layers for each range
         range_layers = {}
         for r in unique_ranges:
-            # Select features matching the current range
             expr = f'"{ranges_field}" = {r}'
             request = QgsFeatureRequest().setFilterExpression(expr)
             features = [feat for feat in merged_layer.getFeatures(request)]
             if features:
-                # Create a memory layer for this range
                 range_layer = QgsVectorLayer(
                     f"Polygon?crs={crs.authid()}", f"range_{r}", "memory"
                 )
@@ -298,7 +317,6 @@ class ORSMultiBufferProcessor:
                 range_layer.updateFields()
                 dp.addFeatures(features)
 
-                # Dissolve the range layer to create a single feature
                 dissolve_params = {
                     "INPUT": range_layer,
                     "FIELD": [],
@@ -308,7 +326,6 @@ class ORSMultiBufferProcessor:
                 dissolved_layer = dissolve_result["OUTPUT"]
                 range_layers[r] = dissolved_layer
 
-        # Create bands by computing differences between the ranges
         band_layers = []
         sorted_ranges = sorted(range_layers.keys(), reverse=True)
         for i in range(len(sorted_ranges) - 1):
@@ -317,7 +334,6 @@ class ORSMultiBufferProcessor:
             current_layer = range_layers[current_range]
             next_layer = range_layers[next_range]
 
-            # Difference between current and next range
             difference_params = {
                 "INPUT": current_layer,
                 "OVERLAY": next_layer,
@@ -326,7 +342,6 @@ class ORSMultiBufferProcessor:
             diff_result = processing.run("native:difference", difference_params)
             diff_layer = diff_result["OUTPUT"]
 
-            # Add 'rasField' attribute to store the range value
             diff_layer.dataProvider().addAttributes(
                 [QgsField("rasField", QVariant.Int)]
             )
@@ -338,7 +353,6 @@ class ORSMultiBufferProcessor:
 
             band_layers.append(diff_layer)
 
-        # Handle the smallest range separately
         smallest_range = sorted_ranges[-1]
         smallest_layer = range_layers[smallest_range]
         smallest_layer.dataProvider().addAttributes(
@@ -351,7 +365,6 @@ class ORSMultiBufferProcessor:
                 smallest_layer.updateFeature(feat)
         band_layers.append(smallest_layer)
 
-        # Merge all band layers into the final output
         merge_bands_params = {
             "LAYERS": band_layers,
             "CRS": crs,
