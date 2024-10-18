@@ -85,5 +85,5 @@ class TestORSClientRealRequest(unittest.TestCase):
         self.loop.exec_()
 
 
-if __name__ == "__main__":
-    unittest.main()
+# if __name__ == "__main__":
+#    unittest.main()
