@@ -1,3 +1,4 @@
+import uuid
 from qgis.PyQt.QtCore import (
     Qt,
 )
@@ -26,6 +27,8 @@ class JsonTreeItem:
         self.childItems = []
         self.role = role  # Stores whether an item is a dimension, factor, or layer
         self.font_color = QColor(Qt.black)  # Default font color
+        # Add a unique UUID for each item
+        self.uuid = str(uuid.uuid4())  # Generate a unique identifier for this item
 
         # Define icons for each role
         self.dimension_icon = QIcon(
