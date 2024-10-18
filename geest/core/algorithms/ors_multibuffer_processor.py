@@ -108,6 +108,7 @@ class ORSMultiBufferProcessor:
 
         # Merge all isochrone layers into one
         if self.temp_layers:
+            crs = point_layer.crs()
             merged_layer = self._merge_layers(self.temp_layers, crs, output_dir)
             self._create_bands(merged_layer, output_path, crs)
         else:
@@ -251,7 +252,7 @@ class ORSMultiBufferProcessor:
         merge_output = os.path.join(output_dir, "merged_isochrones.shp")
         merge_params = {
             "LAYERS": temp_layers,
-            "CRS": QgsCoordinateReferenceSystem(crs),
+            "CRS": crs,
             "OUTPUT": merge_output,
         }
         merged_result = processing.run("native:mergevectorlayers", merge_params)
@@ -290,7 +291,7 @@ class ORSMultiBufferProcessor:
             if features:
                 # Create a memory layer for this range
                 range_layer = QgsVectorLayer(
-                    f"Polygon?crs={crs}", f"range_{r}", "memory"
+                    f"Polygon?crs={crs.authid()}", f"range_{r}", "memory"
                 )
                 dp = range_layer.dataProvider()
                 dp.addAttributes(merged_layer.fields())
@@ -353,7 +354,7 @@ class ORSMultiBufferProcessor:
         # Merge all band layers into the final output
         merge_bands_params = {
             "LAYERS": band_layers,
-            "CRS": QgsCoordinateReferenceSystem(crs),
+            "CRS": crs,
             "OUTPUT": output_path,
         }
         final_merge_result = processing.run(
