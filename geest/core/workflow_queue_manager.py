@@ -44,7 +44,7 @@ class WorkflowQueueManager(QObject):
 
     def add_workflow(self, item: JsonTreeItem) -> None:
         """
-        Add a task to the WorkflowQueue for processing using the item provided.
+        Add a task to the WorkflowQueue for QgsProcessingContext using the item provided.
 
         Internally uses the WorkflowFactory to create the appropriate workflow.
 
@@ -54,6 +54,7 @@ class WorkflowQueueManager(QObject):
         # to the threads in a thread safe manner
         context = QgsProcessingContext()
         context.setProject(QgsProject.instance())
+
         # ⭐️ Note we are passing the item reference to the WorkflowJob
         #    any changes made to the item will be reflected in the tree directly
         task = WorkflowJob(description="Geest Task", item=item, context=context)
