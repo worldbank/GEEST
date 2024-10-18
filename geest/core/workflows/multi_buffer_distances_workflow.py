@@ -5,21 +5,13 @@ from qgis.core import (
     QgsMessageLog,
     Qgis,
     QgsFeedback,
-    QgsFeature,
-    QgsVectorLayer,
-    QgsField,
-    QgsGeometry,
-    QgsRectangle,
-    QgsRasterLayer,
-    QgsProject,
-    QgsMapLayer,
     QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.multibuffer_point import MultiBufferCreator
+from geest.core.algorithms import ORSMultiBufferProcessor
 
 
 class MultiBufferDistancesWorkflow(WorkflowBase):
@@ -65,8 +57,10 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         self.distances = item.data(3).get("Multi Buffer Travel Distances", None)
         # split the distances string into a list of floats
         self.distances = [float(x) for x in self.distances.split(",")]
-        self.buffer_creator = MultiBufferCreator(
+        self.buffer_creator = ORSMultiBufferProcessor(
             distance_list=self.distances,
+            subset_size=5,
+            context=self.context,  # set in base class
         )
         layer_name = item.data(3).get("Multi Buffer Point Layer Name", None)
         if not layer_name:
@@ -137,12 +131,12 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
 
             # Call the create_multibuffers function from MultiBufferCreator
+
             self.buffer_creator.create_multibuffers(
                 point_layer=self.points_layer,
                 output_path=os.path.join(self.workflow_directory, f"{mask_name}.shp"),
                 mode="foot-walking",
                 measurement="distance",  # TODO this should be distances
-                crs="EPSG:4326",
             )
             QgsMessageLog.logMessage(
                 f"Buffers created for {mask_name}", tag="Geest", level=Qgis.Info

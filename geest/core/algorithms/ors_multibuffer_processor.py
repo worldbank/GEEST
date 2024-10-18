@@ -10,26 +10,35 @@ from qgis.core import (
     QgsGeometry,
     QgsFeature,
     QgsPointXY,
-    QgsVectorFileWriter,
+    QgsCoordinateTransform,
+    QgsProcessingContext,
+    QgsProject,
+    QgsVectorLayer,
+    QgsFeature,
 )
+
 from qgis.PyQt.QtCore import QVariant
 import processing
 from geest.core.ors_client import ORSClient
 from geest.core import setting
 
 
-class MultiBufferCreator:
+class ORSMultiBufferProcessor:
     """Creates multiple buffers around point features using the OpenRouteService API."""
 
-    def __init__(self, distance_list, subset_size=5):
+    def __init__(
+        self, distance_list, subset_size=5, context: QgsProcessingContext = None
+    ):
         """
         Initialize the MultiBufferCreator class.
 
         :param distance_list: List of buffer distances (in meters or seconds if using time-based buffers)
         :param subset_size: Number of features to process in each subset
+        :param context: QgsProcessingContext object for processing - needed for thread safety
         """
         self.distance_list = distance_list
         self.subset_size = subset_size
+        self.context = context
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
         # Create the masked API key before using it in the f-string
@@ -44,7 +53,6 @@ class MultiBufferCreator:
         output_path,
         mode="foot-walking",
         measurement="distance",
-        crs="EPSG:4326",
     ):
         """
         Creates multibuffers for each point in the input point layer using ORSClient.
@@ -53,9 +61,9 @@ class MultiBufferCreator:
         :param output_path: Path to save the merged output layer
         :param mode: Mode of travel for ORS API (e.g., 'walking', 'driving-car')
         :param measurement: 'distance' or 'time'
-        :param crs: Coordinate reference system (default is WGS84)
         :return: QgsVectorLayer containing the buffers as polygons
         """
+        # Create a coordinate reference system from EPSG:4326
         QgsMessageLog.logMessage(
             f"Using ORS API key: {self.masked_api_key}",
             "Geest",
@@ -75,7 +83,7 @@ class MultiBufferCreator:
         # Process features in subsets to handle large datasets
         for i in range(0, total_features, self.subset_size):
             subset_features = features[i : i + self.subset_size]
-            subset_layer = self._create_subset_layer(subset_features, point_layer, crs)
+            subset_layer = self._create_subset_layer(subset_features, point_layer)
 
             # Connect to the ORSClient's request_finished signal to handle responses
 
@@ -107,13 +115,51 @@ class MultiBufferCreator:
                 "No isochrones were created.", "Geest", Qgis.Warning
             )
 
-    def _create_subset_layer(self, subset_features, point_layer, crs):
-        """Create a subset layer for processing."""
-        subset_layer = QgsVectorLayer(f"Point?crs={crs}", "subset", "memory")
+    def _create_subset_layer(self, subset_features, point_layer):
+        """
+        Create a subset layer for processing, with reprojection of points
+        from the point_layer CRS to the provided target CRS.
+
+        Args:
+            subset_features (list[QgsFeature]): Features to add to the subset layer.
+            point_layer (QgsVectorLayer): The original point layer.
+
+        Returns:
+            QgsVectorLayer: The newly created subset layer with reprojected features.
+        """
+        target_crs = QgsCoordinateReferenceSystem("EPSG:4326")
+
+        # Create a new memory layer with the target CRS
+        subset_layer = QgsVectorLayer(
+            f"Point?crs={target_crs.authid()}", "subset", "memory"
+        )
         subset_layer_data = subset_layer.dataProvider()
+
+        # Add attributes (fields) from the point_layer
         subset_layer_data.addAttributes(point_layer.fields())
         subset_layer.updateFields()
-        subset_layer_data.addFeatures(subset_features)
+
+        # Create coordinate transformation from point_layer CRS to the target CRS
+        source_crs = point_layer.crs()
+        transform_context = self.context.project().transformContext()
+
+        transform = QgsCoordinateTransform(source_crs, target_crs, transform_context)
+
+        # Reproject and add features to the subset layer
+        reprojected_features = []
+        for feature in subset_features:
+            reprojected_feature = QgsFeature(feature)
+            geom = reprojected_feature.geometry()
+
+            # Transform the geometry to the target CRS
+            geom.transform(transform)
+            reprojected_feature.setGeometry(geom)
+
+            reprojected_features.append(reprojected_feature)
+
+        # Add reprojected features to the new subset layer
+        subset_layer_data.addFeatures(reprojected_features)
+
         return subset_layer
 
     def _fetch_isochrones(self, subset_layer, mode, measurement):
@@ -198,16 +244,6 @@ class MultiBufferCreator:
             features.append(feat)
 
         provider.addFeatures(features)
-        # Write the layer to the working directory
-        # writer = QgsVectorFileWriter.writeAsVectorFormat(
-        #    isochrone_layer,
-        #    os.path.join('/tmp', "isochrones.shp"),
-        #    "utf-8",
-        #    QgsCoordinateReferenceSystem("EPSG:4326"),
-        #    "ESRI Shapefile"
-        # )
-        # if writer[0] != 0:
-        #    raise IOError(f"Error saving isochrone layer: {writer[1]}")
         return isochrone_layer
 
     def _merge_layers(self, temp_layers, crs, output_dir):
