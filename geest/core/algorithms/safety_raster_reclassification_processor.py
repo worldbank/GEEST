@@ -79,7 +79,11 @@ class SafetyRasterReclassificationProcessor:
             reclass_table = self._build_reclassification_table(
                 max_val, median, percentile_75
             )
-            print(reclass_table)
+            QgsMessageLog.logMessage(
+                f"Reclassification table for area {index}: {reclass_table}",
+                "Geest",
+                Qgis.Info,
+            )
 
             # Apply the reclassification rules
             reclassified_raster = self._apply_reclassification(
