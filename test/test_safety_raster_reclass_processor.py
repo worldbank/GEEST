@@ -1,6 +1,6 @@
 import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsRasterLayer
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsProcessingContext, QgsProject
 from geest.core.algorithms import SafetyRasterReclassificationProcessor
 
 
@@ -9,6 +9,11 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         """
         Set up the environment for the test, loading the test data layers.
         """
+        self.context = QgsProcessingContext()
+        # Manually create a QgsProject instance and set it in the context
+        self.project = QgsProject.instance()
+        self.context.setProject(self.project)
+
         # Define working directories
         self.working_directory = os.path.dirname(__file__)
         self.test_data_directory = os.path.join(self.working_directory, "test_data")
@@ -46,12 +51,13 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
 
         # Initialize the processor with test data
         self.processor = SafetyRasterReclassificationProcessor(
-            prefix="safety",
+            output_prefix="safety",
             input_raster=self.input_raster_path,
             pixel_size=self.pixel_size,
             gpkg_path=self.gpkg_path,
             grid_layer=self.grid_layer,
             workflow_directory=self.output_directory,
+            context=self.context,
         )
 
     def test_reclassify(self):
@@ -60,7 +66,7 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         and the VRT output is generated correctly.
         """
         # Run the processor
-        self.processor.reclassify()
+        self.processor.process_areas()
 
         # Check if the VRT output file was created
         self.assertTrue(

@@ -4,6 +4,7 @@ from qgis.core import (
     QgsGeometry,
     QgsMessageLog,
     Qgis,
+    QgsProcessingContext,
 )
 import os
 import numpy as np
@@ -19,12 +20,13 @@ class SafetyRasterReclassificationProcessor:
 
     def __init__(
         self,
-        prefix,
+        output_prefix,
         input_raster,
         pixel_size,
         gpkg_path,
         grid_layer,
         workflow_directory,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the SafetyRasterReclassificationProcessor.
@@ -37,7 +39,7 @@ class SafetyRasterReclassificationProcessor:
             grid_layer (QgsVectorLayer): The grid layer defining the extent and CRS.
             workflow_directory (str): Directory where intermediate files and the final VRT will be saved.
         """
-        self.prefix = prefix
+        self.output_prefix = output_prefix
         self.input_raster = input_raster
         self.pixel_size = pixel_size
         self.gpkg_path = gpkg_path
@@ -45,8 +47,11 @@ class SafetyRasterReclassificationProcessor:
         self.workflow_directory = workflow_directory
         self.crs = grid_layer.crs()  # CRS is derived from the grid layer
         self.area_iterator = AreaIterator(gpkg_path)  # Initialize the area iterator
+        self.context = (
+            context  # Used to pass objects to the thread. e.g. the QgsProject Instance
+        )
 
-    def reclassify(self):
+    def process_areas(self):
         """
         Reclassify the input raster for each area and combine the results into a VRT.
         """
@@ -74,6 +79,7 @@ class SafetyRasterReclassificationProcessor:
             reclass_table = self._build_reclassification_table(
                 max_val, median, percentile_75
             )
+            print(reclass_table)
 
             # Apply the reclassification rules
             reclassified_raster = self._apply_reclassification(
@@ -89,7 +95,7 @@ class SafetyRasterReclassificationProcessor:
 
         QgsMessageLog.logMessage(
             f"Reclassification complete. VRT file saved to {vrt_path}",
-            "SafetyRasterReclassificationProcessor",
+            "Geest",
             Qgis.Info,
         )
 
@@ -225,7 +231,7 @@ class SafetyRasterReclassificationProcessor:
         bbox = bbox.boundingBox()
 
         reclassified_raster = os.path.join(
-            self.workflow_directory, f"{self.prefix}_reclassified_{index}.tif"
+            self.workflow_directory, f"{self.output_prefix}_reclassified_{index}.tif"
         )
 
         # Set up the reclassification using reclassifybytable
@@ -244,7 +250,7 @@ class SafetyRasterReclassificationProcessor:
 
         QgsMessageLog.logMessage(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
-            "SafetyRasterReclassificationProcessor",
+            "Geest",
             Qgis.Info,
         )
 
@@ -255,7 +261,7 @@ class SafetyRasterReclassificationProcessor:
         Combine the list of rasters into a single VRT file.
         """
         output_vrt = os.path.join(
-            self.workflow_directory, f"{self.prefix}_reclass_output.vrt"
+            self.workflow_directory, f"{self.output_prefix}_reclass_output.vrt"
         )
         params = {
             "INPUT": rasters,
@@ -267,4 +273,14 @@ class SafetyRasterReclassificationProcessor:
         processing.run(
             "gdal:buildvirtualraster", params, feedback=QgsProcessingFeedback()
         )
+        vrt_layer = QgsRasterLayer(output_vrt, f"{self.output_prefix}_reclass_output")
+        if vrt_layer.isValid():
+            self.context.project().addMapLayer(vrt_layer)
+            QgsMessageLog.logMessage(
+                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+            )
+        else:
+            QgsMessageLog.logMessage(
+                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
+            )
         return output_vrt

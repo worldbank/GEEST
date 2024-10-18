@@ -9,3 +9,4 @@ from .polyline_widget import PolylineWidget
 from .point_layer_widget import PointLayerWidget
 from .acled_csv_layer_widget import AcledCsvLayerWidget
 from .safety_polygon_widget import SafetyPolygonWidget
+from .safety_raster_widget import SafetyRasterWidget

@@ -14,6 +14,7 @@ from geest.core.workflows import (
     AcledImpactWorkflow,
     SinglePointBufferWorkflow,
     SafetyPolygonWorkflow,
+    SafetyRasterWorkflow,
 )
 from .json_tree_item import JsonTreeItem
 
@@ -76,5 +77,7 @@ class WorkflowFactory:
             return AcledImpactWorkflow(item, feedback, context)
         elif analysis_mode == "Use Classify Poly into Classes":
             return SafetyPolygonWorkflow(item, feedback, context)
+        elif analysis_mode == "Use Nighttime Lights":
+            return SafetyRasterWorkflow(item, feedback, context)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")

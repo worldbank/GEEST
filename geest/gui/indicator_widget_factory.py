@@ -10,6 +10,7 @@ from geest.gui.widgets import (
     PolygonWidget,
     AcledCsvLayerWidget,
     SafetyPolygonWidget,
+    SafetyRasterWidget,
 )
 
 
@@ -56,6 +57,8 @@ class RadioButtonFactory:
                 return AcledCsvLayerWidget(label_text=key, attributes=attributes)
             if key == "Use Classify Poly into Classes" and value == 1:
                 return SafetyPolygonWidget(label_text=key, attributes=attributes)
+            if key == "Use Nighttime Lights" and value == 1:
+                return SafetyRasterWidget(label_text=key, attributes=attributes)
             else:
                 QgsMessageLog.logMessage(
                     f"Factory did not match any widgets",
