@@ -57,6 +57,8 @@ class SpreadsheetToJsonParser:
                 "Use Poly per Cell",
                 "Use Polyline per Cell",
                 "Use Point per Cell",
+                "Use Nighttime Lights",
+                "Use Environmental Hazards",
                 "Analysis Mode",  # New column
                 "Layer Required",  # New column
             ]
@@ -241,6 +243,16 @@ class SpreadsheetToJsonParser:
                 "Use Point per Cell": (
                     row["Use Point per Cell"]
                     if not pd.isna(row["Use Point per Cell"])
+                    else ""
+                ),
+                "Use Nighttime Lights": (
+                    row["Use Nighttime Lights"]
+                    if not pd.isna(row["Use Nighttime Lights"])
+                    else ""
+                ),
+                "Use Environmental Hazards": (
+                    row["Use Environmental Hazards"]
+                    if not pd.isna(row["Use Environmental Hazards"])
                     else ""
                 ),
                 "Analysis Mode": (

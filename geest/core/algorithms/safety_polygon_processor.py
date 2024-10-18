@@ -12,6 +12,9 @@ from qgis.core import (
     QgsVectorFileWriter,
     QgsFeatureRequest,
     edit,
+    QgsRasterLayer,
+    QgsProject,
+    QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing
@@ -39,6 +42,7 @@ class SafetyPerCellProcessor:
         safety_field: str,
         workflow_directory: str,
         gpkg_path: str,
+        context: QgsProcessingContext,
     ) -> None:
         """
         Initialize the SafetyPerCellProcessor.
@@ -54,6 +58,9 @@ class SafetyPerCellProcessor:
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path
         self.safety_field = safety_field
+        self.context = (
+            context  # Used to pass objects to the thread. e.g. the QgsProject Instance
+        )
 
         # Load the grid layer from the GeoPackage
         self.grid_layer = QgsVectorLayer(
@@ -103,7 +110,8 @@ class SafetyPerCellProcessor:
             self._rasterize_safety(reclassified_layer, current_bbox, index)
 
         # Step 5: Combine the resulting rasters into a single VRT
-        self._combine_rasters_to_vrt(index + 1)
+        vrt_filepath = self._combine_rasters_to_vrt(index + 1)
+        return vrt_filepath
 
     def _reproject_layer(
         self, layer: QgsVectorLayer, target_crs: QgsCoordinateReferenceSystem
@@ -208,6 +216,19 @@ class SafetyPerCellProcessor:
             "gdal:buildvirtualraster", {"INPUT": raster_files, "OUTPUT": vrt_path}
         )
         QgsMessageLog.logMessage(f"Created combined VRT: {vrt_path}", level=Qgis.Info)
+        # Add the VRT to the QGIS map
+        vrt_layer = QgsRasterLayer(vrt_path, f"{self.output_prefix}_combined VRT")
+
+        if vrt_layer.isValid():
+            self.context.project().addMapLayer(vrt_layer)
+            QgsMessageLog.logMessage(
+                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+            )
+        else:
+            QgsMessageLog.logMessage(
+                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
+            )
+        return vrt_path
 
     def _write_features_to_layer(
         self,

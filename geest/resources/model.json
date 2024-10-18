@@ -27,7 +27,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 1,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -38,6 +38,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -64,7 +66,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 1,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -75,6 +77,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -101,7 +105,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 1,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -112,6 +116,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -146,7 +152,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 1,
                             "Use Mapillary Downloader": 0,
@@ -157,7 +163,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
-                            "Use Point and Polyline per Cell": 1,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -176,7 +183,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 1,
                             "Use Mapillary Downloader": 0,
@@ -187,6 +194,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -205,7 +214,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -216,6 +225,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -234,7 +245,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -245,6 +256,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -263,7 +276,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -274,6 +287,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -300,7 +315,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -311,6 +326,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -337,7 +354,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -348,6 +365,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -374,7 +393,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 1,
                             "Use Mapillary Downloader": 0,
@@ -385,6 +404,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -411,7 +432,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -422,6 +443,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -456,7 +479,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 1,
@@ -467,6 +490,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 1,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -485,7 +510,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -496,6 +521,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 1,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -514,7 +541,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -525,6 +552,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 1,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -543,7 +572,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -554,6 +583,8 @@
                             "Use Poly per Cell": 1,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -566,7 +597,7 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "Street lights/Nigthttime ligths",
+                            "Layer": "Street lights/Nigthttime lights",
                             "ID": "Street_Lights",
                             "Text": "Safety addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women\u2019s ability to move freely, seek employment, and access essential services.",
                             "Default Index Score": 0,
@@ -580,7 +611,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 1,
@@ -591,6 +622,8 @@
                             "Use Poly per Cell": 1,
                             "Use Polyline per Cell": 1,
                             "Use Point per Cell": 1,
+                            "Use Nighttime Lights": 1,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -617,7 +650,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -628,6 +661,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -654,7 +689,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 1,
                             "Use Mapillary Downloader": 0,
@@ -665,6 +700,8 @@
                             "Use Poly per Cell": 1,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -691,7 +728,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -702,6 +739,8 @@
                             "Use Poly per Cell": 1,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -728,7 +767,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -739,6 +778,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -757,7 +798,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -768,6 +809,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -786,7 +829,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -797,6 +840,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -815,7 +860,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -826,6 +871,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         },
@@ -844,7 +891,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 0,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 0,
@@ -855,6 +902,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
@@ -881,7 +930,7 @@
                             "Use Create Grid": 0,
                             "Use OSM Downloader": 1,
                             "Use Bbox for AOI": 0,
-                            "Use Rasterize Layer": true,
+                            "Use Rasterize Layer": 1,
                             "Use WBL Downloader": 0,
                             "Use Humdata Downloader": 0,
                             "Use Mapillary Downloader": 1,
@@ -892,6 +941,8 @@
                             "Use Poly per Cell": 0,
                             "Use Polyline per Cell": 0,
                             "Use Point per Cell": 0,
+                            "Use Nighttime Lights": 0,
+                            "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
                             "Layer Required": 1
                         }
