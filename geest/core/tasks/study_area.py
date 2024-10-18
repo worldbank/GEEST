@@ -9,6 +9,7 @@ from qgis.core import (
     QgsGeometry,
     QgsField,
     QgsProject,
+    QgsProcessingContext,
     QgsCoordinateTransform,
     QgsCoordinateReferenceSystem,
     QgsRasterLayer,
@@ -50,6 +51,7 @@ class StudyAreaProcessingTask(QgsTask):
         working_dir: str,
         mode: str = "raster",
         epsg_code: Optional[int] = None,
+        context: QgsProcessingContext = None,
     ):
         """
         Initializes the StudyAreaProcessingTask.
@@ -67,6 +69,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.field_name: str = field_name
         self.working_dir: str = working_dir
         self.mode: str = mode
+        self.context: QgsProcessingContext = context
         self.gpkg_path: str = os.path.join(
             self.working_dir, "study_area", "study_area.gpkg"
         )
@@ -254,7 +257,8 @@ class StudyAreaProcessingTask(QgsTask):
         layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
 
         if layer.isValid():
-            QgsProject.instance().addMapLayer(layer)
+            # Not thread safe, use signal instead
+            # QgsProject.instance().addMapLayer(layer)
             QgsMessageLog.logMessage(
                 f"Added '{layer_name}' layer to the map.",
                 tag="Geest",
@@ -293,7 +297,7 @@ class StudyAreaProcessingTask(QgsTask):
         # Transform the geometry to the output CRS
         crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
         transform: QgsCoordinateTransform = QgsCoordinateTransform(
-            crs_src, self.output_crs, QgsProject.instance()
+            crs_src, self.output_crs, self.context.project()
         )
         geom.transform(transform)
 
@@ -358,7 +362,7 @@ class StudyAreaProcessingTask(QgsTask):
         # Transform the bounding box to the output CRS
         crs_src: QgsCoordinateReferenceSystem = self.layer.crs()
         transform: QgsCoordinateTransform = QgsCoordinateTransform(
-            crs_src, self.output_crs, QgsProject.instance()
+            crs_src, self.output_crs, self.context.project()
         )
         bbox_transformed = transform.transformBoundingBox(bbox)
 
@@ -689,7 +693,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         # Create the transform object
         transform: QgsCoordinateTransform = QgsCoordinateTransform(
-            crs_src, crs_wgs84, QgsProject.instance()
+            crs_src, crs_wgs84, self.context.project()
         )
 
         # Transform the centroid to WGS84
@@ -779,7 +783,8 @@ class StudyAreaProcessingTask(QgsTask):
         vrt_layer = QgsRasterLayer(vrt_filepath, "Combined Mask VRT")
 
         if vrt_layer.isValid():
-            QgsProject.instance().addMapLayer(vrt_layer)
+            # Not thread safe, use signal instead
+            # QgsProject.instance().addMapLayer(vrt_layer)
             QgsMessageLog.logMessage(
                 "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
             )

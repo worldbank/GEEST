@@ -62,18 +62,19 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         #    distance_list=self.attributes["Default Multi Buffer Distances"],
         #    subset_size=5
         # )  # Initialize the MultiBufferCreator
-        self.dummy_distances = [
-            250,
-            500,
-            1000,
-            1250,
-            2000,
-        ]  # Dummy distances for testing
+        self.distances = item.data(3).get("Multi Buffer Travel Distances", None)
+        # split the distances string into a list of floats
+        self.distances = [float(x) for x in self.distances.split(",")]
         self.buffer_creator = MultiBufferCreator(
-            distance_list=self.dummy_distances,
+            distance_list=self.distances,
         )
-        layer_name = "points"
-        self.dummy_layer = self.context.project().mapLayersByName(layer_name)[0]
+        layer_name = item.data(3).get("Multi Buffer Point Layer Name", None)
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid points layer.", tag="Geest", level=Qgis.Warning
+            )
+            return False
+        self.points_layer = self.context.project().mapLayersByName(layer_name)[0]
 
     def do_execute(self):
         """
@@ -129,16 +130,6 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             # Set the 'area_name' from layer
             area_name = feature.attribute("area_name")
 
-            # Call the internal create_multibuffer function
-            # self.create_multibuffer(
-            #    geom=geom,
-            #    aligned_box=aligned_box,
-            #    mask_name=f"{self.layer_id}_{area_name}",
-            #    distance_units="distance",
-            #    travel_mode="foot-walking",
-            #    points_layer=self.dummy_layer,
-            # )
-
             mask_name = f"{self.layer_id}_{area_name}"
 
             QgsMessageLog.logMessage(
@@ -147,7 +138,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
             # Call the create_multibuffers function from MultiBufferCreator
             self.buffer_creator.create_multibuffers(
-                point_layer=self.dummy_layer,
+                point_layer=self.points_layer,
                 output_path=os.path.join(self.workflow_directory, f"{mask_name}.shp"),
                 mode="foot-walking",
                 measurement="distance",  # TODO this should be distances

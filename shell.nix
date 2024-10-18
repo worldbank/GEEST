@@ -47,6 +47,7 @@ in pkgs.mkShell rec {
     gum # UX for TUIs
     skate # Distributed key/value store
     glow # terminal markdown viewer
+    gdb
   ];
   # Run this command, only after creating the virtual environment
   PROJECT_ROOT = builtins.getEnv "PWD";
