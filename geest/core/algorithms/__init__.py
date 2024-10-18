@@ -6,3 +6,6 @@ from .acled_impact_raster_processor import AcledImpactRasterProcessor
 from .single_point_buffer_processor import SinglePointBufferProcessor
 from .safety_polygon_processor import SafetyPerCellProcessor
 from .raster_reclassification_processor import RasterReclassificationProcessor
+from .safety_raster_reclassification_processor import (
+    SafetyRasterReclassificationProcessor,
+)
