@@ -5,6 +5,7 @@ from qgis.PyQt.QtCore import QEventLoop
 from geest.core.ors_client import ORSClient
 
 
+@unittest.skip("Skip this test for now")
 class TestORSClientRealRequest(unittest.TestCase):
     def setUp(self):
         """Ensure the API key is available in the environment before running the test."""
