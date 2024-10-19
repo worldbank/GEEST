@@ -56,14 +56,16 @@ class ORSClient(QObject):
         # Convert parameters (Python dict) to JSON
         # data = QByteArray(json.dumps(params).encode("utf-8"))
         data = json.dumps(params).encode("utf-8")
-        QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if verbose_mode:
+            QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
         # Send the request and connect the finished signal
         reply: QgsNetworkReplyContent = self.network_manager.blockingPost(request, data)
         response_data = reply.content()
-        QgsMessageLog.logMessage(str(response_data), tag="Geest", level=Qgis.Info)
         response_string = str(response_data)
         # remove b' at the beginning and ' at the end
         response_string = response_string[2:-1]
         response_json = json.loads(response_string)
-        QgsMessageLog.logMessage(str(response_json), tag="Geest", level=Qgis.Info)
+        if verbose_mode:
+            QgsMessageLog.logMessage(str(response_json), tag="Geest", level=Qgis.Info)
         return response_json

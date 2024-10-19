@@ -12,7 +12,6 @@ from qgis.core import (
     QgsPointXY,
     QgsCoordinateTransform,
     QgsProcessingContext,
-    QgsProject,
     QgsVectorLayer,
     QgsFeature,
 )
@@ -231,11 +230,13 @@ class ORSMultiBufferProcessor:
         isochrone_layer.commitChanges()
 
         # Parse the features from ORS response
-        QgsMessageLog.logMessage(
-            f"Creating isochrone layer with {len(isochrone_data['features'])} features",
-            "Geest",
-            Qgis.Info,
-        )
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if verbose_mode:
+            QgsMessageLog.logMessage(
+                f"Creating isochrone layer with {len(isochrone_data['features'])} features",
+                "Geest",
+                Qgis.Info,
+            )
         features = []
         for feature_data in isochrone_data["features"]:
             geometry = feature_data["geometry"]
@@ -345,12 +346,14 @@ class ORSMultiBufferProcessor:
             diff_layer = diff_result["OUTPUT"]
 
             diff_layer.dataProvider().addAttributes(
-                [QgsField("rasField", QVariant.Int)]
+                [
+                    QgsField("distance", QVariant.Int),
+                ]
             )
             diff_layer.updateFields()
             with edit(diff_layer):
                 for feat in diff_layer.getFeatures():
-                    feat["rasField"] = current_range
+                    feat["distance"] = current_range
                     diff_layer.updateFeature(feat)
 
             band_layers.append(diff_layer)
@@ -358,12 +361,12 @@ class ORSMultiBufferProcessor:
         smallest_range = sorted_ranges[-1]
         smallest_layer = range_layers[smallest_range]
         smallest_layer.dataProvider().addAttributes(
-            [QgsField("rasField", QVariant.Int)]
+            [QgsField("distance", QVariant.Int)]
         )
         smallest_layer.updateFields()
         with edit(smallest_layer):
             for feat in smallest_layer.getFeatures():
-                feat["rasField"] = smallest_range
+                feat["distance"] = smallest_range
                 smallest_layer.updateFeature(feat)
         band_layers.append(smallest_layer)
 
@@ -388,81 +391,102 @@ class ORSMultiBufferProcessor:
         input_path: str = None,
         output_path: str = None,
         distance_values: list = None,
-        distance_field: str = "rasField",
+        distance_field: str = "distance",
         cell_size=100,
     ):
         """
         Rasterize the input vector layer based on the burn field and values.
 
         Args:
-            input_path (str, optional): _description_. Defaults to None.
-            output_path (str, optional): _description_. Defaults to None.
-            distance_field (str, optional): _description_. Defaults to "rasField".
-            distance_values (list, optional): _description_. Defaults to None.
-            cell_size (int, optional): _description_. Defaults to 100.
+            input_path (str, optional): Path to the input vector layer. Defaults to None.
+            output_path (str, optional): Path to save the rasterized output. Defaults to None.
+            distance_field (str, optional): Field to be used for the burn values. Defaults to "distance".
+            distance_values (list, optional): List of distance values for rasterization. Defaults to None.
+            cell_size (int, optional): Cell size for rasterization. Defaults to 100.
         """
         QgsMessageLog.logMessage(
             f"Rasterizing {input_path} to {output_path}",
             "Geest",
             Qgis.Info,
         )
+
         if not input_path:
             raise ValueError("Input path is required")
         if not output_path:
             raise ValueError("Output path is required")
         if not distance_values:
             raise ValueError("Burn values are required")
-        # Add a column to the input layer to store the burn values
-        # The burn field should be calculated based on the item number in the distance list
 
         # Load the input vector layer
         input_layer = QgsVectorLayer(input_path, "input_layer", "ogr")
         if not input_layer.isValid():
             raise ValueError(f"Failed to load input layer from {input_path}")
 
-        # Add the burn field to the input layer
-        input_layer.dataProvider().addAttributes(
-            [QgsField(distance_field, QVariant.Int)]
-        )
-        input_layer.updateFields()
+        # Check if the "value" field already exists
+        field_names = [field.name() for field in input_layer.fields()]
+        QgsMessageLog.logMessage(f"Field names: {field_names}", "Geest", Qgis.Info)
+        if "value" not in field_names:
+            QgsMessageLog.logMessage(
+                "Adding 'value' field to input layer", "Geest", Qgis.Info
+            )
+            # Add the burn field to the input layer if it doesn't exist
+            input_layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+            input_layer.updateFields()
+
+            # Log message when the field is added
+            QgsMessageLog.logMessage(
+                'Added "value" field to input layer',
+                "Geest",
+                Qgis.Info,
+            )
 
         # Calculate the burn field value based on the item number in the distance list
-
-        input_layer.addAttribute(QgsField("value", QVariant.Int))
-        input_layer.commitChanges()
         input_layer.startEditing()
         for i, feature in enumerate(input_layer.getFeatures()):
             # Get the value of the burn field from the feature
             distance_field_value = feature.attribute(distance_field)
-            # get the index of the burn field value from the distances list
-            QgsMessageLog.logMessage(
-                f"Searching for {distance_field_value} in {distance_values}",
-                "Geest",
-                Qgis.Info,
-            )
-            distance_field_index = distance_values.index(distance_field_value)
-            # The list should have max 5 values in it. If the index is greater than 5, set it to 5
-            distance_field_index = min(distance_field_index, 5)
-            # Invert the value so that closer distances have higher values
-            distance_field_index = 5 - distance_field_index
-            feature.setAttribute("value", distance_field_index)
-            input_layer.updateFeature(feature)
+            # Get the index of the burn field value from the distances list
+            if distance_field_value in distance_values:
+                distance_field_index = distance_values.index(distance_field_value)
+                QgsMessageLog.logMessage(
+                    f"Found {distance_field_value} at index {distance_field_index}",
+                    "Geest",
+                    Qgis.Info,
+                )
+                # The list should have max 5 values in it. If the index is greater than 5, set it to 5
+                distance_field_index = min(distance_field_index, 5)
+                # Invert the value so that closer distances have higher values
+                distance_field_index = 5 - distance_field_index
+                feature.setAttribute("value", distance_field_index)
+                input_layer.updateFeature(feature)
         input_layer.commitChanges()
 
-        # use the processing algorithm to rasterize the vector layer
-
-        rasterize_params = {
-            "INPUT": input_path,
+        # Ensure resolution parameters are properly formatted as float values
+        x_res = 100.0  # 100m pixel size in X direction
+        y_res = 100.0  # 100m pixel size in Y direction
+        # bbox = bbox.boundingBox()
+        # Define rasterization parameters for the temporary layer
+        params = {
+            "INPUT": f"{input_path}",
             "FIELD": "value",
             "BURN": 0,
+            "INIT": 255,  # use 5 as the initial value where there is no data. Sea will be masked out later.
+            "USE_Z": False,
             "UNITS": 1,
-            "WIDTH": cell_size,
-            "HEIGHT": cell_size,
-            "EXTENT": None,
-            "NODATA": 0,
+            "WIDTH": x_res,
+            "HEIGHT": y_res,
+            # "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            # "EXTENT": input_layer.extent(),  # Set the extent to the layer's extent
+            "NODATA": 255,
             "OPTIONS": "",
-            "DATA_TYPE": 5,
+            #'OPTIONS':'COMPRESS=DEFLATE|PREDICTOR=2|ZLEVEL=9',
+            "DATA_TYPE": 0,  # byte
+            "INVERT": False,
+            "EXTRA": "",
             "OUTPUT": output_path,
+            # TODO this doesnt work, layer is written in correct CRS but advertises 4326
+            "TARGET_CRS": input_layer.crs().toWkt(),
         }
-        result = processing.run("gdal:rasterize", rasterize_params)
+        result = processing.run("gdal:rasterize", params)["OUTPUT"]
+
         return result["OUTPUT"]

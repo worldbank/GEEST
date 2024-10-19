@@ -1,17 +1,14 @@
 import os
-import glob
-import shutil
 from qgis.core import (
     QgsMessageLog,
     Qgis,
     QgsFeedback,
     QgsProcessingContext,
 )
-from qgis.PyQt.QtCore import QVariant
-import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.core.algorithms import ORSMultiBufferProcessor
+from geest.core import setting
 
 
 class MultiBufferDistancesWorkflow(WorkflowBase):
@@ -74,20 +71,22 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
+        verbose_mode = int(setting(key="verbose_mode", default=0))
 
         QgsMessageLog.logMessage(
             f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
         )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
-        for item in self.attributes.items():
+        if verbose_mode:
             QgsMessageLog.logMessage(
-                f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
+                "----------------------------------", tag="Geest", level=Qgis.Info
             )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
+            for item in self.attributes.items():
+                QgsMessageLog.logMessage(
+                    f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
+                )
+            QgsMessageLog.logMessage(
+                "----------------------------------", tag="Geest", level=Qgis.Info
+            )
 
         self.workflow_directory = self._create_workflow_directory()
 
@@ -160,7 +159,8 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = "Use Acled Impact Workflow Completed"
-        return True
+        self.attributes["Indicator Result File"] = result
+        self.attributes["Indicator Result"] = (
+            "Use Multi Buffer Point Workflow Completed"
+        )
         return True
