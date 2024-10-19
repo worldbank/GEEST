@@ -44,7 +44,6 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
             self.output_file,
             mode="foot-walking",
             measurement="distance",
-            crs="EPSG:4326",
         )
 
         # Now all requests are done, check the final output layer
