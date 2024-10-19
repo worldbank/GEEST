@@ -95,19 +95,6 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         distances = self.attributes[
             "Default Multi Buffer Distances"
         ]  # in the units specified below
-        # distance_units = self.attributes[
-        #    "Multi Buffer Distances Units"
-        # ]  # distance or time
-        # travel_mode = self.attributes[
-        #    "Multi Buffer Distances Travel Mode"
-        # ]  # walking, driving
-        # points_layer = self.attributes[
-        # "Multi Buffer Distances Points of Interest Layer"
-        # ]
-
-        # if not points_layer or not isinstance(points_layer, QgsVectorLayer):
-        #    QgsMessageLog.logMessage("Invalid points layer.", tag="Geest", level=Qgis.Warning)
-        #    return False
 
         for feature in self.areas_layer.getFeatures():
             if (
@@ -131,15 +118,34 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
 
             # Call the create_multibuffers function from MultiBufferCreator
+            output_path = os.path.join(self.workflow_directory, f"{mask_name}.shp")
 
-            self.buffer_creator.create_multibuffers(
+            result = self.buffer_creator.create_multibuffers(
                 point_layer=self.points_layer,
-                output_path=os.path.join(self.workflow_directory, f"{mask_name}.shp"),
+                output_path=output_path,
                 mode="foot-walking",
                 measurement="distance",  # TODO this should be distances
             )
+            if not result:
+                QgsMessageLog.logMessage(
+                    f"Error creating buffers for {mask_name}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                return False
             QgsMessageLog.logMessage(
                 f"Buffers created for {mask_name}", tag="Geest", level=Qgis.Info
+            )
+            raster_output_path = os.path.join(
+                self.workflow_directory, f"{mask_name}.tif"
+            )
+            # Call the rasterize function from MultiBufferCreator
+            result = self.buffer_creator.rasterize(
+                input_path=output_path,
+                output_path=raster_output_path,
+                burn_field="distance",
+                burn_values=self.distances,
+                cell_size=100,
             )
 
         QgsMessageLog.logMessage(
@@ -147,50 +153,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
+        self.attributes["Indicator Result File"] = vrt_path
+        self.attributes["Indicator Result"] = "Use Acled Impact Workflow Completed"
         return True
-
-    """def create_multibuffer(
-        self,
-        geom: QgsGeometry,
-        aligned_box: QgsRectangle,
-        mask_name: str,
-        distance_units: str,
-        travel_mode: str,
-        points_layer: QgsMapLayer,
-    ):
-        """
-    """Creates buffers for a single geometry using the MultiBufferCreator.
-
-        :param geom: Geometry to be buffered.
-        :param aligned_box: Bounding box for raster mask alignment.
-        :param mask_name: Name for the output raster file.
-        :param distances: List of buffer distances (or times).
-        :param distance_units: Units for the buffers ('distance' for meters or 'time' for seconds).
-        :param travel_mode: Mode of travel for ORS API (e.g., 'walking', 'driving').
-        :param points_layer: Points of interest layer for distance calculation.
-        """
-
-    """if self.feedback.isCanceled():  # Check for cancellation before starting
-            QgsMessageLog.logMessage(
-                "Workflow canceled before creating raster.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            return
-
-        QgsMessageLog.logMessage(
-            f"Creating buffers for {mask_name}", tag="Geest", level=Qgis.Info
-        )
-
-        # Call the create_multibuffers function from MultiBufferCreator
-        self.buffer_creator.create_multibuffers(
-            point_layer=points_layer,
-            output_path=os.path.join(self.workflow_directory, f"{mask_name}.shp"),
-            mode=travel_mode,
-            measurement=distance_units, # TODO this should be distances
-            crs="EPSG:4326",
-        )
-        QgsMessageLog.logMessage(
-            f"Buffers created for {mask_name}", tag="Geest", level=Qgis.Info
-        )
-        return True"""
+        return True

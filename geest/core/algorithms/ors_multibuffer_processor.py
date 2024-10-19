@@ -132,10 +132,12 @@ class ORSMultiBufferProcessor:
             crs = point_layer.crs()
             merged_layer = self._merge_layers(self.temp_layers, crs, output_dir)
             self._create_bands(merged_layer, output_path, crs)
+            return True
         else:
             QgsMessageLog.logMessage(
                 "No isochrones were created.", "Geest", Qgis.Warning
             )
+            return False
 
     def _create_subset_layer(self, subset_features, point_layer):
         """
@@ -380,3 +382,79 @@ class ORSMultiBufferProcessor:
             Qgis.Info,
         )
         QgsMessageLog.logMessage(f"Layer written to {output_path}", "Geest", Qgis.Info)
+
+    def rasterize(
+        input_path: str = None,
+        output_path: str = None,
+        burn_values: list = None,
+        burn_field: str = "rasField",
+        cell_size=100,
+    ):
+        """
+        Rasterize the input vector layer based on the burn field and values.
+
+        Args:
+            input_path (str, optional): _description_. Defaults to None.
+            output_path (str, optional): _description_. Defaults to None.
+            burn_field (str, optional): _description_. Defaults to "rasField".
+            burn_values (list, optional): _description_. Defaults to None.
+            cell_size (int, optional): _description_. Defaults to 100.
+        """
+        QgsMessageLog.logMessage(
+            f"Rasterizing {input_path} to {output_path}",
+            "Geest",
+            Qgis.Info,
+        )
+        if not input_path:
+            raise ValueError("Input path is required")
+        if not output_path:
+            raise ValueError("Output path is required")
+        if not burn_values:
+            raise ValueError("Burn values are required")
+        # Add a column to the input layer to store the burn values
+        # The burn field should be calculated based on the item number in the distance list
+
+        # Load the input vector layer
+        input_layer = QgsVectorLayer(input_path, "input_layer", "ogr")
+        if not input_layer.isValid():
+            raise ValueError(f"Failed to load input layer from {input_path}")
+
+        # Add the burn field to the input layer
+        input_layer.dataProvider().addAttributes([QgsField(burn_field, QVariant.Int)])
+        input_layer.updateFields()
+
+        # Calculate the burn field value based on the item number in the distance list
+
+        input_layer.addAttribute(QgsField("value", QVariant.Int))
+        input_layer.commitChanges()
+        input_layer.startEditing()
+        for i, feature in enumerate(input_layer.getFeatures()):
+            # Get the value of the burn field from the feature
+            burn_field_value = feature.attribute(burn_field)
+            # get the index of the burn field value from the distances list
+            burn_values_index = burn_values.index(burn_field_value)
+            # The list should have max 5 values in it. If the index is greater than 5, set it to 5
+            burn_values_index = min(burn_values_index, 5)
+            # Invert the value so that closer distances have higher values
+            burn_values_index = 5 - burn_values_index
+            feature.setAttribute("value", burn_values_index)
+            input_layer.updateFeature(feature)
+        input_layer.commitChanges()
+
+        # use the processing algorithm to rasterize the vector layer
+
+        rasterize_params = {
+            "INPUT": input_path,
+            "FIELD": "value",
+            "BURN": 0,
+            "UNITS": 1,
+            "WIDTH": cell_size,
+            "HEIGHT": cell_size,
+            "EXTENT": None,
+            "NODATA": 0,
+            "OPTIONS": "",
+            "DATA_TYPE": 5,
+            "OUTPUT": output_path,
+        }
+        result = processing.run("gdal:rasterize", rasterize_params)
+        return result["OUTPUT"]

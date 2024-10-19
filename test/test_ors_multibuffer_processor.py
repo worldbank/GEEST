@@ -1,11 +1,10 @@
 import os
 import unittest
-from qgis.core import QgsVectorLayer
-from qgis.PyQt.QtCore import QEventLoop
-from geest.core.multibuffer_point import MultiBufferCreator
+from qgis.core import QgsVectorLayer, QgsProcessingContext, QgsProject
+from geest.core.algorithms import ORSMultiBufferProcessor
 
 
-class TestMultiBufferCreator(unittest.TestCase):
+class TestORSMultiBufferProcessor(unittest.TestCase):
 
     def setUp(self):
         """
@@ -26,7 +25,9 @@ class TestMultiBufferCreator(unittest.TestCase):
 
         # Initialize MultiBufferCreator with test distances
         self.distances = [500, 1000, 1500, 2000, 2500]
-        self.creator = MultiBufferCreator(self.distances)
+        self.context = QgsProcessingContext()
+        self.context.setProject(QgsProject.instance())
+        self.creator = ORSMultiBufferProcessor(self.distances, context=self.context)
 
     def test_create_multibuffers(self):
         """
