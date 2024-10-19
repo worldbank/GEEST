@@ -150,7 +150,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             result = self.buffer_creator.rasterize(
                 input_path=vector_output_path,
                 output_path=raster_output_path,
-                burn_field="distance",
+                distance_field="distance",
                 distance_values=self.distances,
                 cell_size=100,
             )

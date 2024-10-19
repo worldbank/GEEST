@@ -433,14 +433,19 @@ class ORSMultiBufferProcessor:
         input_layer.startEditing()
         for i, feature in enumerate(input_layer.getFeatures()):
             # Get the value of the burn field from the feature
-            burn_field_value = feature.attribute(distance_field)
+            distance_field_value = feature.attribute(distance_field)
             # get the index of the burn field value from the distances list
-            burn_values_index = distance_values.index(burn_field_value)
+            QgsMessageLog.logMessage(
+                f"Searching for {distance_field_value} in {distance_values}",
+                "Geest",
+                Qgis.Info,
+            )
+            distance_field_index = distance_values.index(distance_field_value)
             # The list should have max 5 values in it. If the index is greater than 5, set it to 5
-            burn_values_index = min(burn_values_index, 5)
+            distance_field_index = min(distance_field_index, 5)
             # Invert the value so that closer distances have higher values
-            burn_values_index = 5 - burn_values_index
-            feature.setAttribute("value", burn_values_index)
+            distance_field_index = 5 - distance_field_index
+            feature.setAttribute("value", distance_field_index)
             input_layer.updateFeature(feature)
         input_layer.commitChanges()
 
