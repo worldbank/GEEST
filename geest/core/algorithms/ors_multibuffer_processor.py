@@ -384,10 +384,11 @@ class ORSMultiBufferProcessor:
         QgsMessageLog.logMessage(f"Layer written to {output_path}", "Geest", Qgis.Info)
 
     def rasterize(
+        self,
         input_path: str = None,
         output_path: str = None,
-        burn_values: list = None,
-        burn_field: str = "rasField",
+        distance_values: list = None,
+        distance_field: str = "rasField",
         cell_size=100,
     ):
         """
@@ -396,8 +397,8 @@ class ORSMultiBufferProcessor:
         Args:
             input_path (str, optional): _description_. Defaults to None.
             output_path (str, optional): _description_. Defaults to None.
-            burn_field (str, optional): _description_. Defaults to "rasField".
-            burn_values (list, optional): _description_. Defaults to None.
+            distance_field (str, optional): _description_. Defaults to "rasField".
+            distance_values (list, optional): _description_. Defaults to None.
             cell_size (int, optional): _description_. Defaults to 100.
         """
         QgsMessageLog.logMessage(
@@ -409,7 +410,7 @@ class ORSMultiBufferProcessor:
             raise ValueError("Input path is required")
         if not output_path:
             raise ValueError("Output path is required")
-        if not burn_values:
+        if not distance_values:
             raise ValueError("Burn values are required")
         # Add a column to the input layer to store the burn values
         # The burn field should be calculated based on the item number in the distance list
@@ -420,7 +421,9 @@ class ORSMultiBufferProcessor:
             raise ValueError(f"Failed to load input layer from {input_path}")
 
         # Add the burn field to the input layer
-        input_layer.dataProvider().addAttributes([QgsField(burn_field, QVariant.Int)])
+        input_layer.dataProvider().addAttributes(
+            [QgsField(distance_field, QVariant.Int)]
+        )
         input_layer.updateFields()
 
         # Calculate the burn field value based on the item number in the distance list
@@ -430,9 +433,9 @@ class ORSMultiBufferProcessor:
         input_layer.startEditing()
         for i, feature in enumerate(input_layer.getFeatures()):
             # Get the value of the burn field from the feature
-            burn_field_value = feature.attribute(burn_field)
+            burn_field_value = feature.attribute(distance_field)
             # get the index of the burn field value from the distances list
-            burn_values_index = burn_values.index(burn_field_value)
+            burn_values_index = distance_values.index(burn_field_value)
             # The list should have max 5 values in it. If the index is greater than 5, set it to 5
             burn_values_index = min(burn_values_index, 5)
             # Invert the value so that closer distances have higher values

@@ -46,7 +46,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Multi Buffer Distances"
         self.attributes = item.data(3)
-        self.layer_id = self.attributes["Layer"].lower().replace(" ", "_")
+        self.layer_id = self.attributes["ID"].lower().replace(" ", "_")
         self.project_base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../..")
         )
@@ -118,11 +118,13 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
 
             # Call the create_multibuffers function from MultiBufferCreator
-            output_path = os.path.join(self.workflow_directory, f"{mask_name}.shp")
+            vector_output_path = os.path.join(
+                self.workflow_directory, f"{mask_name}.shp"
+            )
 
             result = self.buffer_creator.create_multibuffers(
                 point_layer=self.points_layer,
-                output_path=output_path,
+                output_path=vector_output_path,
                 mode="foot-walking",
                 measurement="distance",  # TODO this should be distances
             )
@@ -140,11 +142,16 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 self.workflow_directory, f"{mask_name}.tif"
             )
             # Call the rasterize function from MultiBufferCreator
+            QgsMessageLog.logMessage(
+                f"Rasterizing buffers for {mask_name} with input_path {vector_output_path}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             result = self.buffer_creator.rasterize(
-                input_path=output_path,
+                input_path=vector_output_path,
                 output_path=raster_output_path,
                 burn_field="distance",
-                burn_values=self.distances,
+                distance_values=self.distances,
                 cell_size=100,
             )
 
