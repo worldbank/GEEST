@@ -153,6 +153,7 @@ class ORSMultiBufferProcessor:
                 output_path=vector_output_path,
                 mode="foot-walking",  # TODO should be a parameter
                 measurement="distance",  # TODO this should be distances, should be a parameter
+                index=index,
             )
             if not result:
                 QgsMessageLog.logMessage(
@@ -185,7 +186,6 @@ class ORSMultiBufferProcessor:
                 input_path=vector_output_path,
                 output_path=raster_output_path,
                 distance_field="distance",
-                distance_values=self.distances,
                 cell_size=100,
             )
             # raster_output = self._rasterize(dissolved_layer, current_bbox, index)
@@ -281,10 +281,11 @@ class ORSMultiBufferProcessor:
 
     def create_multibuffers(
         self,
-        point_layer,
-        output_path,
-        mode="foot-walking",
-        measurement="distance",
+        point_layer: str,
+        output_path: str,
+        mode: str = "foot-walking",
+        measurement: str = "distance",
+        index: int = 0,
     ):
         """
         Create multiple buffers (isochrones) for each point in the input point layer using ORSClient.
@@ -297,6 +298,7 @@ class ORSMultiBufferProcessor:
         :param output_path: Path to save the merged output layer.
         :param mode: Mode of travel for ORS API (e.g., 'walking', 'driving-car').
         :param measurement: Either 'distance' or 'time' for the ORS isochrones.
+        :param index: Index of the current area being processed.
         :return: QgsVectorLayer containing the buffers as polygons.
         """
         QgsMessageLog.logMessage(
@@ -304,9 +306,11 @@ class ORSMultiBufferProcessor:
             "Geest",
             Qgis.Info,
         )
-        output_dir = os.path.dirname(output_path)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        QgsMessageLog.logMessage(
+            f"Creating buffers for {point_layer.name()} in {output_path}",
+            "Geest",
+            Qgis.Info,
+        )
 
         # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
@@ -341,9 +345,24 @@ class ORSMultiBufferProcessor:
 
         # Merge all isochrone layers into one final output
         if self.temp_layers:
+            QgsMessageLog.logMessage(
+                f"Merging {len(self.temp_layers)} isochrone layers",
+                "Geest",
+                Qgis.Info,
+            )
             crs = point_layer.crs()
-            merged_layer = self._merge_layers(self.temp_layers, crs, output_dir)
-            self._create_bands(merged_layer, output_path, crs)
+            merged_layer = self._merge_layers(self.temp_layers, crs, index)
+            QgsMessageLog.logMessage(
+                f"Merged isochrone layer created at {output_path}",
+                "Geest",
+                Qgis.Info,
+            )
+            QgsMessageLog.logMessage(
+                f"Removing overlaps between isochrones for {merged_layer}",
+                "Geest",
+                Qgis.Info,
+            )
+            self._create_bands(merged_layer, crs, index)
             return True
         else:
             QgsMessageLog.logMessage(
@@ -481,16 +500,18 @@ class ORSMultiBufferProcessor:
         provider.addFeatures(features)
         return isochrone_layer
 
-    def _merge_layers(self, temp_layers, crs, output_dir):
+    def _merge_layers(self, temp_layers=None, crs=None, index=None):
         """
         Merge all temporary isochrone layers into a single layer.
 
         :param temp_layers: List of temporary QgsVectorLayers to merge.
         :param crs: The CRS to use for the merged layer.
-        :param output_dir: Directory to save the merged output layer.
+        :param index: The index of the current area being processed.
         :return: A QgsVectorLayer representing the merged isochrone layers.
         """
-        merge_output = os.path.join(output_dir, "merged_isochrones.shp")
+        merge_output = os.path.join(
+            self.workflow_directory, f"merged_isochrones_{index}.shp"
+        )
         merge_params = {
             "LAYERS": temp_layers,
             "CRS": crs,
@@ -500,14 +521,21 @@ class ORSMultiBufferProcessor:
         merge = QgsVectorLayer(merged_result["OUTPUT"], "merge", "ogr")
         return merge
 
-    def _create_bands(self, merged_layer, output_path, crs):
+    def _create_bands(self, merged_layer, crs, index):
         """
         Create bands by computing differences between isochrone ranges.
 
+        This method computes the differences between isochrone ranges to create bands
+        of non overlapping polygons. The bands are then merged into a final output layer.
+
         :param merged_layer: The merged isochrone layer.
-        :param output_path: Path to save the final output layer.
         :param crs: Coordinate reference system for the output.
+        :param index: The index of the current area being processed.
         """
+        output_path = os.path.join(
+            self.workflow_directory, f"final_isochrones_{index}.shp"
+        )
+
         ranges_field = "value"
         field_index = merged_layer.fields().indexFromName(ranges_field)
         if field_index == -1:
@@ -603,7 +631,6 @@ class ORSMultiBufferProcessor:
         self,
         input_path: str = None,
         output_path: str = None,
-        distance_values: list = None,
         distance_field: str = "distance",
         cell_size=100,
     ):
@@ -614,7 +641,6 @@ class ORSMultiBufferProcessor:
             input_path (str, optional): Path to the input vector layer. Defaults to None.
             output_path (str, optional): Path to save the rasterized output. Defaults to None.
             distance_field (str, optional): Field to be used for the burn values. Defaults to "distance".
-            distance_values (list, optional): List of distance values for rasterization. Defaults to None.
             cell_size (int, optional): Cell size for rasterization. Defaults to 100.
         """
         QgsMessageLog.logMessage(
@@ -627,7 +653,7 @@ class ORSMultiBufferProcessor:
             raise ValueError("Input path is required")
         if not output_path:
             raise ValueError("Output path is required")
-        if not distance_values:
+        if not self.distance_list:
             raise ValueError("Burn values are required")
 
         # Load the input vector layer
@@ -659,8 +685,8 @@ class ORSMultiBufferProcessor:
             # Get the value of the burn field from the feature
             distance_field_value = feature.attribute(distance_field)
             # Get the index of the burn field value from the distances list
-            if distance_field_value in distance_values:
-                distance_field_index = distance_values.index(distance_field_value)
+            if distance_field_value in self.distance_list:
+                distance_field_index = self.distance_list.index(distance_field_value)
                 QgsMessageLog.logMessage(
                     f"Found {distance_field_value} at index {distance_field_index}",
                     "Geest",

@@ -98,20 +98,43 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
             return False
         points_layer = self.context.project().mapLayersByName(layer_name)[0]
+        try:
 
-        processor = ORSMultiBufferProcessor(
-            output_prefix=self.layer_id,
-            distance_list=self.distances,
-            points_layer=points_layer,
-            gpkg_path=self.gpkg_path,
-            workflow_directory=self.workflow_directory,
-            context=self.context,
-        )
+            processor = ORSMultiBufferProcessor(
+                output_prefix=self.layer_id,
+                distance_list=self.distances,
+                points_layer=points_layer,
+                gpkg_path=self.gpkg_path,
+                workflow_directory=self.workflow_directory,
+                context=self.context,
+            )
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Failed to initialize {self.workflow_name} processor: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            return False
         QgsMessageLog.logMessage(
-            "{self.workflow_name} Created", tag="Geest", level=Qgis.Info
+            f"{self.workflow_name} created", tag="Geest", level=Qgis.Info
         )
+        try:
+            vrt_path = processor.process_areas()
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Failed to process {self.workflow_name}: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            # print the stack trace
+            import traceback
 
-        vrt_path = processor.process_areas()
+            QgsMessageLog.logMessage(
+                traceback.format_exc(),
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            return False
         QgsMessageLog.logMessage(
             f"{self.workflow_name} completed successfully.",
             tag="Geest",
