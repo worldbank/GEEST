@@ -183,10 +183,10 @@ class ORSMultiBufferProcessor:
                 level=Qgis.Info,
             )
             raster_output = self.rasterize(
-                input_path=vector_output_path,
+                input_path=result,
                 output_path=raster_output_path,
                 distance_field="distance",
-                cell_size=100,
+                bbox=current_bbox,
             )
             # raster_output = self._rasterize(dissolved_layer, current_bbox, index)
 
@@ -362,8 +362,8 @@ class ORSMultiBufferProcessor:
                 "Geest",
                 Qgis.Info,
             )
-            self._create_bands(merged_layer, crs, index)
-            return True
+            result = self._create_bands(merged_layer, crs, index)
+            return result
         else:
             QgsMessageLog.logMessage(
                 "No isochrones were created.", "Geest", Qgis.Warning
@@ -531,6 +531,9 @@ class ORSMultiBufferProcessor:
         :param merged_layer: The merged isochrone layer.
         :param crs: Coordinate reference system for the output.
         :param index: The index of the current area being processed.
+
+        Returns:
+            str: The final output layer path containing the bands.
         """
         output_path = os.path.join(
             self.workflow_directory, f"final_isochrones_{index}.shp"
@@ -626,13 +629,14 @@ class ORSMultiBufferProcessor:
             Qgis.Info,
         )
         QgsMessageLog.logMessage(f"Layer written to {output_path}", "Geest", Qgis.Info)
+        return output_path
 
     def rasterize(
         self,
         input_path: str = None,
         output_path: str = None,
         distance_field: str = "distance",
-        cell_size=100,
+        bbox: QgsGeometry = None,
     ):
         """
         Rasterize the input vector layer based on the burn field and values.
@@ -700,31 +704,54 @@ class ORSMultiBufferProcessor:
                 input_layer.updateFeature(feature)
         input_layer.commitChanges()
 
+        # reproject the later to self.target_crs
+        reprojected_layer_path = input_path.replace(
+            ".shp", f"_epsg{self.target_crs.postgisSrid()}.shp"
+        )
+        transform_params = {
+            "INPUT": input_layer,
+            "TARGET_CRS": self.target_crs,
+            "OUTPUT": reprojected_layer_path,
+        }
+        QgsMessageLog.logMessage(
+            f"Reprojecting input layer to {self.target_crs.authid()}",
+            "Geest",
+            Qgis.Info,
+        )
+        reprojected_layer_result = processing.run(
+            "native:reprojectlayer", transform_params
+        )
+        reprojected_layer = QgsVectorLayer(
+            reprojected_layer_result["OUTPUT"], "reprojected_layer", "ogr"
+        )
+
+        if not reprojected_layer.isValid():
+            raise ValueError(
+                f"Failed to reproject input layer to {target_crs.authid()}"
+            )
+
         # Ensure resolution parameters are properly formatted as float values
         x_res = 100.0  # 100m pixel size in X direction
         y_res = 100.0  # 100m pixel size in Y direction
         # bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
-            "INPUT": f"{input_path}",
+            "INPUT": reprojected_layer,
             "FIELD": "value",
             "BURN": 0,
-            "INIT": 255,  # use 5 as the initial value where there is no data. Sea will be masked out later.
             "USE_Z": False,
             "UNITS": 1,
             "WIDTH": x_res,
             "HEIGHT": y_res,
-            # "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
-            # "EXTENT": input_layer.extent(),  # Set the extent to the layer's extent
-            "NODATA": 255,
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            #'EXTENT':'280518.114000000,296308.326900000,3998456.316800000,4003763.812500000 [EPSG:32630]',
+            "NODATA": 0,
             "OPTIONS": "",
-            #'OPTIONS':'COMPRESS=DEFLATE|PREDICTOR=2|ZLEVEL=9',
-            "DATA_TYPE": 0,  # byte
+            "DATA_TYPE": 0,
+            "INIT": 5,
             "INVERT": False,
             "EXTRA": "",
             "OUTPUT": output_path,
-            # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "TARGET_CRS": input_layer.crs().authid(),
         }
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if not verbose_mode:
