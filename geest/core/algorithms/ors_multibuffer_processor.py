@@ -195,6 +195,7 @@ class ORSMultiBufferProcessor:
             masked_layer = self._mask_raster(
                 raster_path=raster_output,
                 area_geometry=current_area,
+                bbox=current_bbox,
                 index=index,
             )
         # Combine all area rasters into a VRT
@@ -767,13 +768,20 @@ class ORSMultiBufferProcessor:
         return output_path
 
     def _mask_raster(
-        self, raster_path: str, area_geometry: QgsGeometry, index: int
+        self,
+        raster_path: str,
+        area_geometry: QgsGeometry,
+        bbox: QgsGeometry,
+        index: int,
     ) -> QgsVectorLayer:
         """
         Mask the raster with the study area mask layer.
 
         Args:
             raster_path (str): The path to the raster to mask.
+            area_geometry (QgsGeometry): The geometry of the study area.
+            bbox (QgsGeometry): The bounding box of the study area.
+            index (int): The index of the current area being processed.
         Returns:
             masked_raster_filepath (str): The file path to the masked raster.
         """
@@ -784,18 +792,37 @@ class ORSMultiBufferProcessor:
         )
         # Convert the area geometry to a temporary layer
         epsg_code = self.target_crs.authid()
-        area_layer = QgsVectorLayer(f"Polygon?crs=EPSG:{epsg_code}", "area", "memory")
+        area_layer = QgsVectorLayer(f"Polygon?crs={epsg_code}", "area", "memory")
         area_provider = area_layer.dataProvider()
         area_feature = QgsFeature()
         area_feature.setGeometry(area_geometry)
         area_provider.addFeatures([area_feature])
+        # save the area layer to a file
+        area_layer_path = os.path.join(self.workflow_directory, f"area_{index}.shp")
+        QgsVectorFileWriter.writeAsVectorFormat(
+            area_layer, area_layer_path, "UTF-8", self.target_crs, "ESRI Shapefile"
+        )
+        bbox = bbox.boundingBox()
         params = {
             "INPUT": f"{raster_path}",
             "MASK": area_layer,
+            "SOURCE_CRS": None,
+            "TARGET_CRS": None,
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
             "NODATA": 255,
-            "CROP_TO_CUTLINE": False,
+            "ALPHA_BAND": False,
+            "CROP_TO_CUTLINE": True,
+            "KEEP_RESOLUTION": True,
+            "SET_RESOLUTION": False,
+            "X_RESOLUTION": None,
+            "Y_RESOLUTION": None,
+            "MULTITHREADING": False,
+            "OPTIONS": "",
+            "DATA_TYPE": 0,
+            "EXTRA": "",
             "OUTPUT": masked_raster_filepath,
         }
+
         processing.run("gdal:cliprasterbymasklayer", params)
         QgsMessageLog.logMessage(
             f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info
