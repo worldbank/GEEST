@@ -592,6 +592,12 @@ class AcledImpactRasterProcessor:
             self.workflow_directory,
             f"{self.output_prefix}_final_{index}.tif",
         )
+        # Check if the raster file exists
+        if not os.path.exists(raster_path):
+            QgsMessageLog.logMessage(
+                f"Raster file not found: {raster_path}", tag="Geest", level=Qgis.Warning
+            )
+            return None
         # Convert the area geometry to a temporary layer
         epsg_code = self.target_crs.authid()
         area_layer = QgsVectorLayer(f"Polygon?crs={epsg_code}", "area", "memory")

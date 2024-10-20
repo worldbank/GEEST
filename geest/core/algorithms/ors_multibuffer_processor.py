@@ -797,11 +797,13 @@ class ORSMultiBufferProcessor:
         area_feature = QgsFeature()
         area_feature.setGeometry(area_geometry)
         area_provider.addFeatures([area_feature])
-        # save the area layer to a file
-        area_layer_path = os.path.join(self.workflow_directory, f"area_{index}.shp")
-        QgsVectorFileWriter.writeAsVectorFormat(
-            area_layer, area_layer_path, "UTF-8", self.target_crs, "ESRI Shapefile"
-        )
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if verbose_mode:
+            # save the area layer to a file
+            area_layer_path = os.path.join(self.workflow_directory, f"area_{index}.shp")
+            QgsVectorFileWriter.writeAsVectorFormat(
+                area_layer, area_layer_path, "UTF-8", self.target_crs, "ESRI Shapefile"
+            )
         bbox = bbox.boundingBox()
         params = {
             "INPUT": f"{raster_path}",
