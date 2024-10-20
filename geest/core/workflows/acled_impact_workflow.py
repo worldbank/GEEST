@@ -8,6 +8,7 @@ from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.core.utilities import GridAligner
 from geest.core.algorithms import AcledImpactRasterProcessor
+from geest.core import setting
 
 
 class AcledImpactWorkflow(WorkflowBase):
@@ -42,13 +43,15 @@ class AcledImpactWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             "----------------------------------", tag="Geest", level=Qgis.Info
         )
-        for item in self.attributes.items():
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if verbose_mode:
+            for item in self.attributes.items():
+                QgsMessageLog.logMessage(
+                    f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
+                )
             QgsMessageLog.logMessage(
-                f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
+                "----------------------------------", tag="Geest", level=Qgis.Info
             )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
         csv_file = self.attributes.get("Use CSV to Point Layer CSV File", "")
         processor = AcledImpactRasterProcessor(
             output_prefix=self.layer_id,

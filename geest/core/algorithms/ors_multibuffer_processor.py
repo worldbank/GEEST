@@ -14,12 +14,18 @@ from qgis.core import (
     QgsProcessingContext,
     QgsVectorLayer,
     QgsFeature,
+    QgsProcessingException,
+    QgsProcessingFeedback,
+    QgsVectorFileWriter,
+    QgsWkbTypes,
+    QgsVectorLayer,
 )
 
 from qgis.PyQt.QtCore import QVariant
 import processing
 from geest.core.ors_client import ORSClient
 from geest.core import setting
+from geest.core.algorithms import AreaIterator
 
 
 class ORSMultiBufferProcessor:
@@ -37,27 +43,50 @@ class ORSMultiBufferProcessor:
 
     Attributes:
         distance_list (list): A list of buffer distances (in meters or seconds if using time-based buffers).
-        subset_size (int): The number of features to process in each subset.
-        context (QgsProcessingContext): The processing context, needed for thread safety.
-        ors_client (ORSClient): The OpenRouteService client to interact with the ORS API.
-        api_key (str): The API key for OpenRouteService.
-        masked_api_key (str): A masked version of the API key (for logging purposes).
-        temp_layers (list): Stores intermediate layers created during processing.
+        points_layer (QgsVectorLayer): A point layer containing features to generate isochrones for.
+        output_prefix (str): Prefix for naming output files.
+        workflow_directory (str): Directory where temporary and output files will be stored.
+        gpkg_path (str): Path to the GeoPackage containing study areas and bounding boxes.
+        context (QgsProcessingContext): QgsProcessingContext object for processing - needed for thread safety.
+        subset_size (int): Number of features to process in each subset (default: 5).
+        ors_client (ORSClient): An instance of the ORSClient for making API requests.
+        api_key (str): The API key used for ORS API requests.
+        masked_api_key (str): The masked API key for logging purposes.
+        temp_layers (list): List of intermediate layers created during processing.
+        target_crs (QgsCoordinateReferenceSystem): The target CRS for the final output layer (EPSG:4326).
     """
 
     def __init__(
-        self, distance_list, subset_size=5, context: QgsProcessingContext = None
+        self,
+        distance_list: list,
+        points_layer: QgsVectorLayer,
+        output_prefix: str,
+        workflow_directory: str,
+        gpkg_path: str,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the ORSMultiBufferProcessor.
 
-        :param distance_list: List of buffer distances (in meters or seconds if using time-based buffers)
-        :param subset_size: Number of features to process in each subset
+        :param distance_list (list): List of buffer distances (in meters or seconds if using time-based buffers)
+        :param output_prefix (str): Prefix for naming output files.
+        :param points_layer (QgsVectorLayer): A point layer containing features to generate isochrones for.
+        :param csv_path (str): The input ORS event CSV file path.
+        :param workflow_directory (str): Directory where temporary and output files will be stored.
+        :param gpkg_path (str): Path to the GeoPackage containing study areas and bounding boxes.
         :param context: QgsProcessingContext object for processing - needed for thread safety
         """
+
         self.distance_list = distance_list
-        self.subset_size = subset_size
-        self.context = context
+        self.subset_size = 5  # Process 5 features at a time - hardcoded for now
+        self.output_prefix = output_prefix
+        self.points_layer = points_layer
+        self.workflow_directory = workflow_directory
+        self.gpkg_path = gpkg_path
+        self.context = (
+            context  # Used to pass objects to the thread. e.g. the QgsProject Instance
+        )
+
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
         # Create the masked API key for logging
@@ -65,6 +94,190 @@ class ORSMultiBufferProcessor:
             self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
         )
         self.temp_layers = []  # Store intermediate layers
+
+        # Retrieve CRS from a layer in the GeoPackage to match the outputs with that CRS
+        gpkg_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_polygons", "areas", "ogr"
+        )
+        if not gpkg_layer.isValid():
+            raise QgsProcessingException(
+                f"Failed to load GeoPackage layer for CRS retrieval."
+            )
+        self.target_crs = gpkg_layer.crs()  # Get the CRS of the GeoPackage layer
+
+        if not self.points_layer.isValid():
+            raise QgsProcessingException(f"Failed to load points layer")
+
+        QgsMessageLog.logMessage(
+            "ORS Multibuffer Processor Initialized", tag="Geest", level=Qgis.Info
+        )
+
+    def process_areas(self) -> str:
+        """
+        Main function to iterate over areas from the GeoPackage and perform the analysis for each area.
+
+        This function processes areas (defined by polygons and bounding boxes) from the GeoPackage using
+        the provided input layers (features, grid). It applies the steps of selecting intersecting
+        features, buffering them by 5 km, assigning values, and rasterizing the grid.
+
+        Raises:
+            QgsProcessingException: If any processing step fails during the execution.
+
+        Returns:
+            str: The file path to the VRT file containing the combined rasters
+        """
+        QgsMessageLog.logMessage(
+            "ORS  Mulitbuffer Processing Started", tag="Geest", level=Qgis.Info
+        )
+
+        feedback = QgsProcessingFeedback()
+        area_iterator = AreaIterator(self.gpkg_path)
+
+        for index, (current_area, current_bbox, progress) in enumerate(area_iterator):
+            feedback.pushInfo(f"Processing area {index} with progress {progress:.2f}%")
+
+            # Step 1: Select features that intersect with the current area
+            area_features = self._select_features(
+                self.points_layer,
+                current_area,
+                f"{self.output_prefix}_area_features_{index}",
+            )
+
+            if area_features.featureCount() == 0:
+                continue
+
+            # Step 2: Process these areas in batches and create buffers
+            vector_output_path = f"{self.output_prefix}_area_features_{index}"
+            result = self.create_multibuffers(
+                point_layer=area_features,
+                output_path=vector_output_path,
+                mode="foot-walking",  # TODO should be a parameter
+                measurement="distance",  # TODO this should be distances, should be a parameter
+            )
+            if not result:
+                QgsMessageLog.logMessage(
+                    f"Error creating buffers for {vector_output_path}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                return False
+            QgsMessageLog.logMessage(
+                f"Buffers created for {vector_output_path}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
+            # Step 3: Assign values based on distance
+
+            # Step 4: Dissolve and remove overlapping areas, keeping areas withe the lowest value
+
+            # Step 5: Rasterize the scored buffer layer
+            raster_output_path = os.path.join(
+                self.workflow_directory, f"{self.output_prefix}_multibuffer_{index}.tif"
+            )
+            # Call the rasterize function from MultiBufferCreator
+            QgsMessageLog.logMessage(
+                f"Rasterizing buffers for area {index} with input_path {vector_output_path}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            raster_output = self.rasterize(
+                input_path=vector_output_path,
+                output_path=raster_output_path,
+                distance_field="distance",
+                distance_values=self.distances,
+                cell_size=100,
+            )
+            # raster_output = self._rasterize(dissolved_layer, current_bbox, index)
+
+            # Step 6: Multiply the area by it matching area in the study_area
+            masked_layer = self._mask_raster(
+                raster_path=raster_output,
+                area_geometry=current_area,
+                index=index,
+            )
+        # Combine all area rasters into a VRT
+        vrt_filepath = self._combine_rasters_to_vrt(index + 1)
+
+        QgsMessageLog.logMessage(
+            f"ORS Impact Raster Processing Completed. Output VRT: {vrt_filepath}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        return vrt_filepath
+
+    def _select_features(
+        self, layer: QgsVectorLayer, area_geom: QgsGeometry, output_name: str
+    ) -> QgsVectorLayer:
+        """
+        Select features from the input layer that intersect with the given area geometry
+        using the QGIS API. The selected features are stored in a temporary layer.
+
+        Args:
+            layer (QgsVectorLayer): The input layer to select features from (should be a point layer)
+            area_geom (QgsGeometry): The current area geometry for which intersections are evaluated.
+            output_name (str): A name for the output temporary layer to store selected features.
+
+        Returns:
+            QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
+        """
+        QgsMessageLog.logMessage(
+            "ORS Select Features Started", tag="Geest", level=Qgis.Info
+        )
+        output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
+
+        # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
+        geometry_type = layer.wkbType()
+
+        # Determine geometry type name based on input layer's geometry
+        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
+            geometry_name = "Point"
+        else:
+            raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
+
+        # Create a memory layer to store the selected features with the correct geometry type
+        crs = layer.crs().authid()
+        temp_layer = QgsVectorLayer(f"{geometry_name}?crs={crs}", output_name, "memory")
+        temp_layer_data = temp_layer.dataProvider()
+
+        # Add fields to the temporary layer
+        temp_layer_data.addAttributes(layer.fields())
+        temp_layer.updateFields()
+
+        # Transform the area geometry to match the point layer CRS
+        transform = QgsCoordinateTransform(
+            self.target_crs, layer.crs(), self.context.project()
+        )
+        reprojected_area_geom = QgsGeometry(area_geom)
+        reprojected_area_geom.transform(transform)
+        # Iterate through features and select those that intersect with the area
+        request = QgsFeatureRequest(area_geom.boundingBox()).setFilterRect(
+            reprojected_area_geom.boundingBox()
+        )
+
+        selected_features = [
+            feat
+            for feat in layer.getFeatures(request)
+            if feat.geometry().intersects(reprojected_area_geom)
+        ]
+        temp_layer_data.addFeatures(selected_features)
+
+        QgsMessageLog.logMessage(
+            f"ORS writing {len(selected_features)} features",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        # Save the memory layer to a file for persistence
+        QgsVectorFileWriter.writeAsVectorFormat(
+            temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
+        )
+
+        QgsMessageLog.logMessage(
+            "ORS Select Features Ending", tag="Geest", level=Qgis.Info
+        )
+
+        return QgsVectorLayer(output_path, output_name, "ogr")
 
     def create_multibuffers(
         self,
@@ -485,8 +698,11 @@ class ORSMultiBufferProcessor:
             "EXTRA": "",
             "OUTPUT": output_path,
             # TODO this doesnt work, layer is written in correct CRS but advertises 4326
-            "TARGET_CRS": input_layer.crs().toWkt(),
+            "TARGET_CRS": input_layer.crs().authid(),
         }
-        result = processing.run("gdal:rasterize", params)["OUTPUT"]
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if not verbose_mode:
+            QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
+        result = processing.run("gdal:rasterize", params)
 
         return result["OUTPUT"]

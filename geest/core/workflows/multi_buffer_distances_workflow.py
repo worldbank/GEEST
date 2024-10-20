@@ -41,31 +41,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Multi Buffer Distances"
-        self.attributes = item.data(3)
-        self.layer_id = self.attributes["ID"].lower().replace(" ", "_")
-        self.project_base_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../..")
-        )
-        # self.buffer_creator = MultiBufferCreator(
-        #    distance_list=self.attributes["Default Multi Buffer Distances"],
-        #    subset_size=5
-        # )  # Initialize the MultiBufferCreator
-        self.distances = item.data(3).get("Multi Buffer Travel Distances", None)
-        # split the distances string into a list of floats
-        self.distances = [float(x) for x in self.distances.split(",")]
-        self.buffer_creator = ORSMultiBufferProcessor(
-            distance_list=self.distances,
-            subset_size=5,
-            context=self.context,  # set in base class
-        )
-        layer_name = item.data(3).get("Multi Buffer Point Layer Name", None)
-        if not layer_name:
-            QgsMessageLog.logMessage(
-                "Invalid points layer.", tag="Geest", level=Qgis.Warning
-            )
-            return False
-        self.points_layer = self.context.project().mapLayersByName(layer_name)[0]
+        self.workflow_name = "Use Multi Buffer Point"
 
     def do_execute(self):
         """
@@ -88,78 +64,60 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 "----------------------------------", tag="Geest", level=Qgis.Info
             )
 
-        self.workflow_directory = self._create_workflow_directory()
-
-        # loop through self.bboxes_layer and the self.areas_layer  and create a raster mask for each feature
-        distances = self.attributes[
-            "Default Multi Buffer Distances"
-        ]  # in the units specified below
-
-        for feature in self.areas_layer.getFeatures():
-            if (
-                self.feedback.isCanceled()
-            ):  # Check for cancellation before each major step
-                QgsMessageLog.logMessage(
-                    "Workflow canceled before processing feature.",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-                return False
-            geom = feature.geometry()  # todo this shoudl come from the areas layer
-            aligned_box = geom
-            # Set the 'area_name' from layer
-            area_name = feature.attribute("area_name")
-
-            mask_name = f"{self.layer_id}_{area_name}"
-
+        self.distances = self.attributes.get("Multi Buffer Travel Distances", None)
+        if not self.distances:
             QgsMessageLog.logMessage(
-                f"Creating buffers for {mask_name}", tag="Geest", level=Qgis.Info
-            )
-
-            # Call the create_multibuffers function from MultiBufferCreator
-            vector_output_path = os.path.join(
-                self.workflow_directory, f"{mask_name}.shp"
-            )
-
-            result = self.buffer_creator.create_multibuffers(
-                point_layer=self.points_layer,
-                output_path=vector_output_path,
-                mode="foot-walking",
-                measurement="distance",  # TODO this should be distances
-            )
-            if not result:
-                QgsMessageLog.logMessage(
-                    f"Error creating buffers for {mask_name}",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-                return False
-            QgsMessageLog.logMessage(
-                f"Buffers created for {mask_name}", tag="Geest", level=Qgis.Info
-            )
-            raster_output_path = os.path.join(
-                self.workflow_directory, f"{mask_name}.tif"
-            )
-            # Call the rasterize function from MultiBufferCreator
-            QgsMessageLog.logMessage(
-                f"Rasterizing buffers for {mask_name} with input_path {vector_output_path}",
+                "Invalid travel distances, using default.",
                 tag="Geest",
-                level=Qgis.Info,
+                level=Qgis.Warning,
             )
-            result = self.buffer_creator.rasterize(
-                input_path=vector_output_path,
-                output_path=raster_output_path,
-                distance_field="distance",
-                distance_values=self.distances,
-                cell_size=100,
+            distances = self.attributes.get("Default Multi Buffer Distances", None)
+            if not distances:
+                QgsMessageLog.logMessage(
+                    "Invalid default travel distances and no default specified.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                return False
+        try:
+            self.distances = [float(x) for x in self.distances.split(",")]
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                "Invalid travel distances provided. Distances should be a comma separated list of up to 5 numbers.",
+                tag="Geest",
+                level=Qgis.Warning,
             )
+            return False
 
+        layer_name = self.attributes.get("Multi Buffer Point Layer Name", None)
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid points layer found in Multi Buffer Point Layer Name.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return False
+        points_layer = self.context.project().mapLayersByName(layer_name)[0]
+
+        processor = ORSMultiBufferProcessor(
+            output_prefix=self.layer_id,
+            distance_list=self.distances,
+            points_layer=points_layer,
+            gpkg_path=self.gpkg_path,
+            workflow_directory=self.workflow_directory,
+            context=self.context,
+        )
+        QgsMessageLog.logMessage(
+            "{self.workflow_name} Created", tag="Geest", level=Qgis.Info
+        )
+
+        vrt_path = processor.process_areas()
         QgsMessageLog.logMessage(
             f"{self.workflow_name} completed successfully.",
             tag="Geest",
             level=Qgis.Info,
         )
-        self.attributes["Indicator Result File"] = result
+        self.attributes["Indicator Result File"] = vrt_path
         self.attributes["Indicator Result"] = (
             "Use Multi Buffer Point Workflow Completed"
         )

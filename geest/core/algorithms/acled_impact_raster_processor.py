@@ -584,8 +584,8 @@ class AcledImpactRasterProcessor:
 
         Args:
             raster_path (str): The path to the raster to mask.
-            output_name (str): A name for the output masked layer.
-
+        Returns:
+            masked_raster_filepath (str): The file path to the masked raster.
         """
         # Clip the raster to the study area boundary
         masked_raster_filepath = os.path.join(
