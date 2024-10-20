@@ -170,8 +170,9 @@ class SafetyRasterReclassificationProcessor:
             return reclass_table
         else:
             # Standard Classification Scheme
-            quarter_median = round(0.25 * median, 2)
-            half_median = round(0.5 * median, 2)
+            quarter_median = 0.25 * median
+            half_median = 0.5 * median
+
             reclass_table = [
                 0.00,
                 0.05,
