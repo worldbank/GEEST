@@ -19,6 +19,7 @@ from qgis.core import (
     QgsVectorFileWriter,
     QgsWkbTypes,
     QgsVectorLayer,
+    QgsRasterLayer,
 )
 
 from qgis.PyQt.QtCore import QVariant
@@ -646,6 +647,9 @@ class ORSMultiBufferProcessor:
             output_path (str, optional): Path to save the rasterized output. Defaults to None.
             distance_field (str, optional): Field to be used for the burn values. Defaults to "distance".
             cell_size (int, optional): Cell size for rasterization. Defaults to 100.
+
+        Returns:
+            str: The path to the rasterized output.
         """
         QgsMessageLog.logMessage(
             f"Rasterizing {input_path} to {output_path}",
@@ -757,5 +761,145 @@ class ORSMultiBufferProcessor:
         if not verbose_mode:
             QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
         result = processing.run("gdal:rasterize", params)
+        QgsMessageLog.logMessage(
+            f"Rasterized output saved to {output_path}", "Geest", Qgis.Info
+        )
+        return output_path
 
-        return result["OUTPUT"]
+    def _mask_raster(
+        self, raster_path: str, area_geometry: QgsGeometry, index: int
+    ) -> QgsVectorLayer:
+        """
+        Mask the raster with the study area mask layer.
+
+        Args:
+            raster_path (str): The path to the raster to mask.
+        Returns:
+            masked_raster_filepath (str): The file path to the masked raster.
+        """
+        # Clip the raster to the study area boundary
+        masked_raster_filepath = os.path.join(
+            self.workflow_directory,
+            f"{self.output_prefix}_final_{index}.tif",
+        )
+        # Convert the area geometry to a temporary layer
+        epsg_code = self.target_crs.authid()
+        area_layer = QgsVectorLayer(f"Polygon?crs=EPSG:{epsg_code}", "area", "memory")
+        area_provider = area_layer.dataProvider()
+        area_feature = QgsFeature()
+        area_feature.setGeometry(area_geometry)
+        area_provider.addFeatures([area_feature])
+        params = {
+            "INPUT": f"{raster_path}",
+            "MASK": area_layer,
+            "NODATA": 255,
+            "CROP_TO_CUTLINE": False,
+            "OUTPUT": masked_raster_filepath,
+        }
+        processing.run("gdal:cliprasterbymasklayer", params)
+        QgsMessageLog.logMessage(
+            f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info
+        )
+        QgsMessageLog.logMessage(
+            f"Masked raster saved to {masked_raster_filepath}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        return masked_raster_filepath
+
+    def _combine_rasters_to_vrt(self, num_rasters: int) -> None:
+        """
+        Combine all the rasters into a single VRT file.
+
+        Args:
+            num_rasters (int): The number of rasters to combine into a VRT.
+
+        Returns:
+            vrtpath (str): The file path to the VRT file.
+        """
+        raster_files = []
+        for i in range(num_rasters):
+            raster_path = os.path.join(
+                self.workflow_directory,
+                f"{self.output_prefix}_final_{i}.tif",
+            )
+            if os.path.exists(raster_path) and QgsRasterLayer(raster_path).isValid():
+                raster_files.append(raster_path)
+            else:
+                QgsMessageLog.logMessage(
+                    f"Skipping invalid or non-existent raster: {raster_path}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        if not raster_files:
+            QgsMessageLog.logMessage(
+                "No valid raster layers found to combine into VRT.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+        vrt_filepath = os.path.join(
+            self.workflow_directory,
+            f"{self.output_prefix}_dissolved_combined.vrt",
+        )
+
+        QgsMessageLog.logMessage(
+            f"Creating VRT of layers '{vrt_filepath}' layer to the map.",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        if not raster_files:
+            QgsMessageLog.logMessage(
+                "No raster layers found to combine into VRT.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
+        # Define the VRT parameters
+        params = {
+            "INPUT": raster_files,
+            "RESOLUTION": 0,  # Use highest resolution among input files
+            "SEPARATE": False,  # Combine all input rasters as a single band
+            "OUTPUT": vrt_filepath,
+            "PROJ_DIFFERENCE": False,
+            "ADD_ALPHA": False,
+            "ASSIGN_CRS": self.target_crs,
+            "RESAMPLING": 0,
+            "SRC_NODATA": "255",
+            "EXTRA": "",
+        }
+
+        # Run the gdal:buildvrt processing algorithm to create the VRT
+        results = processing.run("gdal:buildvirtualraster", params)
+        QgsMessageLog.logMessage(
+            f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
+        )
+        # Add the VRT to the QGIS map
+        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.output_prefix}_combined VRT")
+
+        if vrt_layer.isValid():
+
+            # output_layer = context.getMapLayer(results['OUTPUT'])
+
+            # because getMapLayer doesn't transfer ownership, the layer will
+            # be deleted when context goes out of scope and you'll get a
+            # crash.
+            # takeMapLayer transfers ownership so it's then safe to add it
+            # to the project and give the project ownership.
+            # See https://docs.qgis.org/3.34/en/docs/pyqgis_developer_cookbook/tasks.html
+
+            # QgsProject.instance().addMapLayer(
+            #    self.context.takeResultLayer(vrt_layer.id()))
+
+            # self.context.project().addMapLayer(vrt_layer)
+            QgsMessageLog.logMessage(
+                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+            )
+        else:
+            QgsMessageLog.logMessage(
+                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
+            )
+        return vrt_filepath
