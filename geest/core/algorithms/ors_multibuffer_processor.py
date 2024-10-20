@@ -727,13 +727,13 @@ class ORSMultiBufferProcessor:
 
         if not reprojected_layer.isValid():
             raise ValueError(
-                f"Failed to reproject input layer to {target_crs.authid()}"
+                f"Failed to reproject input layer to {self.target_crs.authid()}"
             )
 
         # Ensure resolution parameters are properly formatted as float values
         x_res = 100.0  # 100m pixel size in X direction
         y_res = 100.0  # 100m pixel size in Y direction
-        # bbox = bbox.boundingBox()
+        bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
             "INPUT": reprojected_layer,
