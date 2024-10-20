@@ -113,14 +113,8 @@ class SafetyRasterReclassificationProcessor:
         width = raster_layer.width()
         height = raster_layer.height()
 
-        # Create an empty list to store raster data
-        raster_data = []
-
-        # Loop through the raster layer block by block
         # Fetch the raster data for band 1
-        block = provider.block(
-            1, raster_layer.extent(), raster_layer.width(), raster_layer.height()
-        )
+        block = provider.block(1, extent, width, height)
 
         byte_array = block.data()  # This returns a QByteArray
 
@@ -135,21 +129,22 @@ class SafetyRasterReclassificationProcessor:
 
         if valid_data.size > 0:
             # Compute statistics
-            max_value = np.max(valid_data)
-            median = np.median(valid_data)
-            percentile_75 = np.percentile(valid_data, 75)
+            max_value = np.max(valid_data).astype(np.float32)
+            median = np.median(valid_data).astype(np.float32)
+            percentile_75 = np.percentile(valid_data, 75).astype(np.float32)
 
             return max_value, median, percentile_75
 
         else:
             return None, None, None
 
-    def _build_reclassification_table(self, max_val, median, percentile_75):
+    def _build_reclassification_table(
+        self, max_val: float, median: float, percentile_75: float
+    ):
         """
         Build a reclassification table dynamically using the max value from the raster.
         """
-        # TODO: handle Standard Classification Scheme
-        # Currently, only the Low NTL Classification Scheme is implemented
+        # Low NTL Classification Scheme
         if max_val < 0.05:
             reclass_table = [
                 0,
@@ -171,28 +166,33 @@ class SafetyRasterReclassificationProcessor:
                 max_val,
                 5,  # Highest
             ]
+            reclass_table = list(map(str, reclass_table))
             return reclass_table
         else:
+            # Standard Classification Scheme
+            quarter_median = round(0.25 * median, 2)
+            half_median = round(0.5 * median, 2)
             reclass_table = [
-                0,
+                0.00,
                 0.05,
                 0,  # No Access
                 0.05,
-                0.25 * median,
+                quarter_median,
                 1,  # Very Low
-                0.25 * median,
-                0.5 * median,
+                quarter_median,
+                half_median,
                 2,  # Low
-                0.5 * median,
+                half_median,
                 median,
                 3,  # Moderate
                 median,
                 percentile_75,
                 4,  # High
                 percentile_75,
-                max_val,
+                "inf",
                 5,  # Very High
             ]
+            reclass_table = list(map(str, reclass_table))
             return reclass_table
 
     def _reproject_and_clip_raster(
@@ -214,6 +214,7 @@ class SafetyRasterReclassificationProcessor:
             "RESAMPLING": 0,
             "NODATA": 255,
             "TARGET_RESOLUTION": self.pixel_size,
+            "DATA_TYPE": 0,  # Byte
             "OUTPUT": reprojected_raster,
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
         }
@@ -226,7 +227,7 @@ class SafetyRasterReclassificationProcessor:
         self,
         input_raster: QgsRasterLayer,
         index: int,
-        reclass_table,
+        reclass_table: list,
         bbox: QgsGeometry,
     ):
         """
@@ -244,6 +245,8 @@ class SafetyRasterReclassificationProcessor:
             "RASTER_BAND": 1,  # Band number to apply the reclassification
             "TABLE": reclass_table,  # Reclassification table
             "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
+            "NODATA_FOR_MISSING": False,
+            "NO_DATA": 255,  # No data value
             "OUTPUT": reclassified_raster,
         }
 
