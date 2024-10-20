@@ -594,7 +594,7 @@ class AcledImpactRasterProcessor:
         )
         # Convert the area geometry to a temporary layer
         epsg_code = self.target_crs.authid()
-        area_layer = QgsVectorLayer(f"Polygon?crs=EPSG:{epsg_code}", "area", "memory")
+        area_layer = QgsVectorLayer(f"Polygon?crs={epsg_code}", "area", "memory")
         area_provider = area_layer.dataProvider()
         area_feature = QgsFeature()
         area_feature.setGeometry(area_geometry)
