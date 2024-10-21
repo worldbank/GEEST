@@ -1,5 +1,6 @@
 import datetime
 import os
+import traceback
 from abc import ABC, abstractmethod
 from qgis.core import (
     QgsFeedback,
@@ -29,7 +30,8 @@ class WorkflowBase(ABC):
         """
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.feedback = feedback
-        self.context = context
+        self.context = context  # QgsProcessingContext
+        self.workflow_name = None  # This is set in the concrete class
         # This is set in the setup panel
         self.settings = QSettings()
         # This is the top level folder for work files
@@ -63,11 +65,34 @@ class WorkflowBase(ABC):
         :return: True if the workflow completes successfully, False if canceled or failed.
         """
         # call the execute method of the concrete class and then add a time stamp to the attributes
-        attributes = self.item.data(3)
-        attributes["Execution Start Time"] = datetime.datetime.now().isoformat()
-        result = self.do_execute()
-        attributes["Execution End Time"] = datetime.datetime.now().isoformat()
-        return result
+        try:
+            self.attributes["Execution Start Time"] = (
+                datetime.datetime.now().isoformat()
+            )
+            result = self.do_execute()
+            self.attributes["Execution End Time"] = datetime.datetime.now().isoformat()
+            # remove error.txt if it exists
+            error_file = os.path.join(self.workflow_directory, "error.txt")
+            if os.path.exists(error_file):
+                os.remove(error_file)
+            return result
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Failed to process {self.workflow_name}: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            QgsMessageLog.logMessage(
+                traceback.format_exc(),
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            self.attributes["Indicator Result"] = f"{self.workflow_name} Workflow Error"
+            # Write the traceback to error.txt in the workflow_directory
+            with open(os.path.join(self.workflow_directory, "error.txt"), "w") as f:
+                f.write(f"Failed to process {self.workflow_name}: {e}\n")
+                f.write(traceback.format_exc())
+            return False
 
     @abstractmethod
     def do_execute(self) -> bool:

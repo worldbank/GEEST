@@ -113,13 +113,17 @@ class ORSMultiBufferProcessor:
             "ORS Multibuffer Processor Initialized", tag="Geest", level=Qgis.Info
         )
 
-    def process_areas(self) -> str:
+    def process_areas(self, mode="foot-walking", measurement="distance") -> str:
         """
         Main function to iterate over areas from the GeoPackage and perform the analysis for each area.
 
         This function processes areas (defined by polygons and bounding boxes) from the GeoPackage using
         the provided input layers (features, grid). It applies the steps of selecting intersecting
         features, buffering them by 5 km, assigning values, and rasterizing the grid.
+
+        Param:
+            mode (str): The mode of travel for the ORS API (e.g., 'walking', 'driving-car')
+            measurement (str): The measurement type for the ORS isochrones ('distance' or 'time')
 
         Raises:
             QgsProcessingException: If any processing step fails during the execution.
@@ -152,8 +156,8 @@ class ORSMultiBufferProcessor:
             result = self.create_multibuffers(
                 point_layer=area_features,
                 output_path=vector_output_path,
-                mode="foot-walking",  # TODO should be a parameter
-                measurement="distance",  # TODO this should be distances, should be a parameter
+                mode=mode,
+                measurement=measurement,
                 index=index,
             )
             if not result:
@@ -415,7 +419,9 @@ class ORSMultiBufferProcessor:
 
         return subset_layer
 
-    def _fetch_isochrones(self, subset_layer, mode, measurement):
+    def _fetch_isochrones(
+        self, subset_layer, mode="foot-walking", measurement="distance"
+    ):
         """
         Fetch isochrones for the given subset of features using ORSClient.
 

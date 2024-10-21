@@ -54,7 +54,10 @@ class AggregationWorkflowBase(WorkflowBase):
         weights = []
 
         for layer in self.layers:
-            weights.append(float(layer.get(self.weight_key, 1.0)))
+            weight = layer.get(self.weight_key, 1.0)
+            if weight == "" and len(self.layers) == 1:
+                weight = 1.0
+            weights.append(weight)
         return weights
 
     def output_path(self, extension: str) -> str:
