@@ -31,14 +31,6 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
         self.gpkg_path = os.path.join(
             self.working_dir, "test_data", "study_area", "study_area.gpkg"
         )
-        self.creator = ORSMultiBufferProcessor(
-            output_prefix="ors-test",
-            distance_list=self.distances,
-            points_layer=self.point_layer,
-            gpkg_path=self.gpkg_path,
-            workflow_directory=self.workflow_directory,
-            context=self.context,
-        )
 
     def test_create_multibuffers(self):
         """
@@ -49,12 +41,13 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
         total_features = self.point_layer.featureCount()
         self.remaining_requests = (total_features + subset_size - 1) // subset_size
 
-        # Run the buffer creation process
-        self.creator.create_multibuffers(
-            self.point_layer,
-            self.output_file,
-            mode="foot-walking",
-            measurement="distance",
+        self.creator = ORSMultiBufferProcessor(
+            output_prefix="ors-test",
+            distance_list=self.distances,
+            points_layer=self.point_layer,
+            gpkg_path=self.gpkg_path,
+            workflow_directory=self.workflow_directory,
+            context=self.context,
         )
 
         # Now all requests are done, check the final output layer
