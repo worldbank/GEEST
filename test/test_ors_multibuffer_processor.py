@@ -39,9 +39,9 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
         # Determine the number of expected requests based on subsets of points
         subset_size = self.creator.subset_size
         total_features = self.point_layer.featureCount()
-        self.remaining_requests = (total_features + subset_size - 1) // subset_size
+        remaining_requests = (total_features + subset_size - 1) // subset_size
 
-        self.creator = ORSMultiBufferProcessor(
+        creator = ORSMultiBufferProcessor(
             output_prefix="ors-test",
             distance_list=self.distances,
             points_layer=self.point_layer,
