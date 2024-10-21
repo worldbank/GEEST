@@ -8,7 +8,7 @@ from qgis.core import (
     QgsFeature,
     QgsGeometry,
     QgsField,
-    QgsProject,
+    QgsPointXY,
     QgsProcessingContext,
     QgsCoordinateTransform,
     QgsCoordinateReferenceSystem,
@@ -50,7 +50,7 @@ class StudyAreaProcessingTask(QgsTask):
         field_name: str,
         working_dir: str,
         mode: str = "raster",
-        epsg_code: Optional[int] = None,
+        crs: Optional[QgsCoordinateReferenceSystem] = None,
         context: QgsProcessingContext = None,
     ):
         """
@@ -61,7 +61,7 @@ class StudyAreaProcessingTask(QgsTask):
         :param field_name: The name of the field containing area names.
         :param working_dir: Directory path where outputs will be saved.
         :param mode: Processing mode, either 'vector' or 'raster'. Default is raster.
-        :param epsg_code: Optional EPSG code for the output CRS. If None, a UTM zone
+        :param crs: Optional CRS for the output CRS. If None, a UTM zone
                           is calculated based on layer extent or extent of selected features.
         """
         super().__init__(name)
@@ -106,16 +106,18 @@ class StudyAreaProcessingTask(QgsTask):
             self.layer_bbox: QgsRectangle = self.layer.extent()
 
         # Determine EPSG code based on provided input or calculated UTM zone
-        if epsg_code is None:
+        if crs is None:
             self.epsg_code: int = self.calculate_utm_zone(self.layer_bbox)
+            self.output_crs: QgsCoordinateReferenceSystem = (
+                QgsCoordinateReferenceSystem(f"EPSG:{self.epsg_code}")
+            )
         else:
-            self.epsg_code: int = epsg_code
+            self.output_crs = crs
 
-        self.output_crs: QgsCoordinateReferenceSystem = QgsCoordinateReferenceSystem(
-            f"EPSG:{self.epsg_code}"
-        )
         QgsMessageLog.logMessage(
-            f"Project CRS Set to: EPSG:{self.epsg_code}", tag="Geest", level=Qgis.Info
+            f"Project CRS Set to: {self.output_crs.authid()}",
+            tag="Geest",
+            level=Qgis.Info,
         )
 
         # Reproject and align the transformed layer_bbox to a 100m grid and output crs
@@ -483,7 +485,6 @@ class StudyAreaProcessingTask(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            crs = QgsCoordinateReferenceSystem(f"EPSG:{self.epsg_code}")
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "GPKG"
             options.fileEncoding = "UTF-8"
@@ -498,7 +499,7 @@ class StudyAreaProcessingTask(QgsTask):
                 fileName=self.gpkg_path,
                 fields=fields,
                 geometryType=geometry_type,
-                srs=crs,
+                srs=self.output_crs,
                 transformContext=QgsCoordinateTransformContext(),
                 options=options,
             )

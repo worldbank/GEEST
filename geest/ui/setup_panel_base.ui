@@ -175,6 +175,13 @@
        <widget class="QgsFieldComboBox" name="field_combo"/>
       </item>
       <item>
+       <widget class="QCheckBox" name="use_boundary_crs">
+        <property name="text">
+         <string>Use Coordinate Reference System of your boundary layer</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="label_8">
         <property name="text">
          <string>If you do not have a boundary layer you can quickly add one using the button below:</string>
@@ -216,6 +223,12 @@
    </item>
    <item row="4" column="0">
     <widget class="QPushButton" name="open_existing_project_button">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>📂 Open an existing project</string>
      </property>
@@ -298,6 +311,70 @@
     <hint type="destinationlabel">
      <x>288</x>
      <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>open_existing_project_button</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>open_existing_project_button</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>379</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>create_new_project_button</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>create_new_project_button</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>438</x>
+     <y>221</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>228</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>create_new_project_button</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>open_existing_project_button</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>228</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>open_existing_project_button</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>create_new_project_button</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>196</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>228</y>
     </hint>
    </hints>
   </connection>

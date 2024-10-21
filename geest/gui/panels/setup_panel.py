@@ -186,7 +186,10 @@ class SetupPanel(FORM_CLASS, QWidget):
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
-
+        if self.use_boundary_crs.isChecked():
+            crs = self.layer_combo.currentLayer().crs()
+        else:
+            crs = None
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
             self.settings.setValue(
@@ -232,6 +235,7 @@ class SetupPanel(FORM_CLASS, QWidget):
                     name="Study Area Processing",
                     layer=layer,
                     field_name=field_name,
+                    crs=crs,
                     working_dir=self.working_dir,
                     context=context,
                 )
