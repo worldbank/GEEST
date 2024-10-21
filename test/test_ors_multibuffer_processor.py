@@ -41,7 +41,7 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
         total_features = self.point_layer.featureCount()
         remaining_requests = (total_features + subset_size - 1) // subset_size
 
-        creator = ORSMultiBufferProcessor(
+        processor = ORSMultiBufferProcessor(
             output_prefix="ors-test",
             distance_list=self.distances,
             points_layer=self.point_layer,
@@ -49,7 +49,7 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
             workflow_directory=self.workflow_directory,
             context=self.context,
         )
-
+        processor.process_areas()
         # Now all requests are done, check the final output layer
         output_layer = QgsVectorLayer(self.output_file, "Output Buffers", "ogr")
         self.assertTrue(output_layer.isValid(), "Failed to load the output layer")
