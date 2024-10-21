@@ -119,7 +119,22 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             f"{self.workflow_name} created", tag="Geest", level=Qgis.Info
         )
         try:
-            vrt_path = processor.process_areas()
+            mode = self.attributes.get("Multi Buffer Travel Mode", "Walking")
+            if mode == "Walking":
+                mode = "foot-walking"
+            else:
+                mode = "driving-car"
+            measurement = self.attributes.get("Multi Buffer Travel Units", "Distance")
+            if measurement == "Distance":
+                measurement = "distance"
+            else:
+                measurement = "time"
+            QgsMessageLog.logMessage(
+                f"Processing areas for {self.workflow_name} with mode {mode} and measurement {measurement}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            vrt_path = processor.process_areas(mode=mode, measurement=measurement)
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Failed to process {self.workflow_name}: {e}",
