@@ -584,17 +584,23 @@ class AcledImpactRasterProcessor:
 
         Args:
             raster_path (str): The path to the raster to mask.
-            output_name (str): A name for the output masked layer.
-
+        Returns:
+            masked_raster_filepath (str): The file path to the masked raster.
         """
         # Clip the raster to the study area boundary
         masked_raster_filepath = os.path.join(
             self.workflow_directory,
             f"{self.output_prefix}_final_{index}.tif",
         )
+        # Check if the raster file exists
+        if not os.path.exists(raster_path):
+            QgsMessageLog.logMessage(
+                f"Raster file not found: {raster_path}", tag="Geest", level=Qgis.Warning
+            )
+            return None
         # Convert the area geometry to a temporary layer
         epsg_code = self.target_crs.authid()
-        area_layer = QgsVectorLayer(f"Polygon?crs=EPSG:{epsg_code}", "area", "memory")
+        area_layer = QgsVectorLayer(f"Polygon?crs={epsg_code}", "area", "memory")
         area_provider = area_layer.dataProvider()
         area_feature = QgsFeature()
         area_feature.setGeometry(area_geometry)

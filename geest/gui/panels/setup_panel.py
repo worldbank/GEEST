@@ -16,6 +16,7 @@ from qgis.core import (
     QgsMessageLog,
     Qgis,
     QgsProject,
+    QgsProcessingContext,
 )
 from qgis.PyQt import uic
 
@@ -223,12 +224,16 @@ class SetupPanel(FORM_CLASS, QWidget):
 
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
+            context = QgsProcessingContext()
+            context.setProject(QgsProject.instance())
             try:
+
                 processor = StudyAreaProcessingTask(
                     name="Study Area Processing",
                     layer=layer,
                     field_name=field_name,
                     working_dir=self.working_dir,
+                    context=context,
                 )
 
                 if debug_env:

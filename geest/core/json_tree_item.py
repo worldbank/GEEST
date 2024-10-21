@@ -1,7 +1,5 @@
 import uuid
-from qgis.PyQt.QtCore import (
-    Qt,
-)
+from qgis.PyQt.QtCore import Qt
 
 # Change to this when implementing in QGIS
 # from qgis.PyQt.QtGui import (

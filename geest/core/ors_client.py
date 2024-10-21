@@ -19,22 +19,33 @@ class ORSClient(QObject):
         super().__init__()
         self.base_url = base_url
         self.network_manager = QgsNetworkAccessManager.instance()
+        self.check_api_key()
+
+    def check_api_key(self):
         self.api_key = setting(key="ors_key", default="")
         if not self.api_key:
             self.api_key = os.getenv("ORS_API_KEY")
         if not self.api_key:
             raise EnvironmentError(
-                "ORS API key is missing. Set it in the environment variable 'ORS_API_KEY"
+                "ORS API key is missing. Set it in settings panel or the environment variable 'ORS_API_KEY"
             )
-
-        # Ensure the API key is available
-        if not self.api_key:
-            raise EnvironmentError(
-                "ORS API key is missing. Set it in the environment variable 'ORS_API_KEY'."
-            )
+        return self.api_key
 
     def make_request(self, endpoint, params):
-        """Make a request to the ORS API."""
+        """Make a request to the ORS API.
+
+        This will make a blocking post request to the ORS API and return the response as a JSON object.
+        It is intended to be used in a thread so that the UI does not freeze.
+
+
+        Args:
+            endpoint (str): The endpoint to send the request to.
+            params (dict): The parameters to send with the request.
+
+        Returns:
+            dict: The response from the ORS API as a JSON object.
+
+        """
         url = QUrl(f"{self.base_url}/{endpoint}")
         request = QNetworkRequest(QUrl(url))
 
@@ -45,15 +56,16 @@ class ORSClient(QObject):
         # Convert parameters (Python dict) to JSON
         # data = QByteArray(json.dumps(params).encode("utf-8"))
         data = json.dumps(params).encode("utf-8")
-        QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if verbose_mode:
+            QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
         # Send the request and connect the finished signal
         reply: QgsNetworkReplyContent = self.network_manager.blockingPost(request, data)
         response_data = reply.content()
-        QgsMessageLog.logMessage(str(response_data), tag="Geest", level=Qgis.Info)
         response_string = str(response_data)
         # remove b' at the beginning and ' at the end
         response_string = response_string[2:-1]
         response_json = json.loads(response_string)
-        QgsMessageLog.logMessage(str(response_json), tag="Geest", level=Qgis.Info)
-
-        self.request_finished.emit(response_json)
+        if verbose_mode:
+            QgsMessageLog.logMessage(str(response_json), tag="Geest", level=Qgis.Info)
+        return response_json

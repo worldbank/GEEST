@@ -12,6 +12,7 @@ from geest.gui.widgets import (
     SafetyPolygonWidget,
     SafetyRasterWidget,
 )
+from geest.core import setting
 
 
 class RadioButtonFactory:
@@ -26,17 +27,19 @@ class RadioButtonFactory:
         """
         Factory method to create a radio button based on key-value pairs.
         """
-        QgsMessageLog.logMessage(
-            "Dialog widget factory called", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(
-            "----------------------------", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(f"Key: {key}", tag="Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(f"Value: {value}", tag="Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(
-            "----------------------------", tag="Geest", level=Qgis.Info
-        )
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if verbose_mode:
+            QgsMessageLog.logMessage(
+                "Dialog widget factory called", tag="Geest", level=Qgis.Info
+            )
+            QgsMessageLog.logMessage(
+                "----------------------------", tag="Geest", level=Qgis.Info
+            )
+            QgsMessageLog.logMessage(f"Key: {key}", tag="Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(f"Value: {value}", tag="Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                "----------------------------", tag="Geest", level=Qgis.Info
+            )
 
         try:
             if key == "Layer Required" and value == 0:
