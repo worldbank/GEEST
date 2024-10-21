@@ -200,11 +200,11 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        status = (
-            "x"
-            if "Workflow Completed" not in indicator.get("Indicator Result", "")
-            else "✔️"
-        )
+        status = "✔️"
+        if "Error" in indicator.get("Indicator Result", ""):
+            status = "!"
+        elif "Workflow Completed" not in indicator.get("Indicator Result", ""):
+            status = "x"
         guid = indicator.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         indicator_item = JsonTreeItem(
             [
