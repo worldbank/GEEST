@@ -27,7 +27,18 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
         self.distances = [500, 1000, 1500, 2000, 2500]
         self.context = QgsProcessingContext()
         self.context.setProject(QgsProject.instance())
-        self.creator = ORSMultiBufferProcessor(self.distances, context=self.context)
+        self.workflow_directory = (os.path.join(self.working_dir, "tmp"),)
+        self.gpkg_path = os.path.join(
+            self.working_dir, "test_data", "study_area", "study_area.gpkg"
+        )
+        self.creator = ORSMultiBufferProcessor(
+            output_prefix="ors-test",
+            distance_list=self.distances,
+            points_layer=self.point_layer,
+            gpkg_path=self.gpkg_path,
+            workflow_directory=self.workflow_directory,
+            context=self.context,
+        )
 
     def test_create_multibuffers(self):
         """
