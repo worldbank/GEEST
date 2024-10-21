@@ -37,9 +37,7 @@ class TestORSMultiBufferProcessor(unittest.TestCase):
         Test the create_multibuffers function with real input data.
         """
         # Determine the number of expected requests based on subsets of points
-        subset_size = self.creator.subset_size
         total_features = self.point_layer.featureCount()
-        remaining_requests = (total_features + subset_size - 1) // subset_size
 
         processor = ORSMultiBufferProcessor(
             output_prefix="ors-test",
