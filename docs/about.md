@@ -23,51 +23,51 @@ The interpretation of these scores is thoroughly detailed in the <a href="https:
 Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
 
 
-<table>
+<table style="width: 100%; border-collapse: collapse;">
   <thead>
     <tr>
-      <th>Score range</th>
-      <th>Class</th>
-      <th>Interpretation</th>
-      <th>Color</th>
+      <th style="padding: 10px;">Score range</th>
+      <th style="padding: 10px;">Class</th>
+      <th style="padding: 10px;">Interpretation</th>
+      <th style="padding: 10px;">Color</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>0.00 - 0.50</td>
-      <td>0</td>
-      <td>Not enabling</td>
-      <td style="background-color: #d73027;">#d73027</td>
+      <td style="padding: 10px;">0.00 - 0.50</td>
+      <td style="padding: 10px;">0</td>
+      <td style="padding: 10px;">Not enabling</td>
+      <td style="background-color: #d73027; padding: 10px;">#d73027</td>
     </tr>
     <tr>
-      <td>0.51 - 1.50</td>
-      <td>1</td>
-      <td>Very low enabling</td>
-      <td style="background-color: #fc8d59;">#fc8d59</td>
+      <td style="padding: 10px;">0.51 - 1.50</td>
+      <td style="padding: 10px;">1</td>
+      <td style="padding: 10px;">Very low enabling</td>
+      <td style="background-color: #fc8d59; padding: 10px;">#fc8d59</td>
     </tr>
     <tr>
-      <td>1.51 - 2.50</td>
-      <td>2</td>
-      <td>Low enabling</td>
-      <td style="background-color: #fee090;">#fee090</td>
+      <td style="padding: 10px;">1.51 - 2.50</td>
+      <td style="padding: 10px;">2</td>
+      <td style="padding: 10px;">Low enabling</td>
+      <td style="background-color: #fee090; padding: 10px;">#fee090</td>
     </tr>
     <tr>
-      <td>2.51 - 3.50</td>
-      <td>3</td>
-      <td>Moderately enabling</td>
-      <td style="background-color: #e0f3f8;">#e0f3f8</td>
+      <td style="padding: 10px;">2.51 - 3.50</td>
+      <td style="padding: 10px;">3</td>
+      <td style="padding: 10px;">Moderately enabling</td>
+      <td style="background-color: #e0f3f8; padding: 10px;">#e0f3f8</td>
     </tr>
     <tr>
-      <td>3.51 - 4.50</td>
-      <td>4</td>
-      <td>Enabling</td>
-      <td style="background-color: #91bfdb;">#91bfdb</td>
+      <td style="padding: 10px;">3.51 - 4.50</td>
+      <td style="padding: 10px;">4</td>
+      <td style="padding: 10px;">Enabling</td>
+      <td style="background-color: #91bfdb; padding: 10px;">#91bfdb</td>
     </tr>
     <tr>
-      <td>4.51 - 5.00</td>
-      <td>5</td>
-      <td>Highly enabling</td>
-      <td style="background-color: #4575b4;">#4575b4</td>
+      <td style="padding: 10px;">4.51 - 5.00</td>
+      <td style="padding: 10px;">5</td>
+      <td style="padding: 10px;">Highly enabling</td>
+      <td style="background-color: #4575b4; padding: 10px;">#4575b4</td>
     </tr>
   </tbody>
 </table>
