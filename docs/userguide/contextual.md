@@ -59,7 +59,7 @@ This indicator is composed by aggregating the Parenthood and Pay Index scores of
                <span>🔍 Right-Click on Regulatory Frameworks.</span><br>
                <span>⚙️ Select Show Properties.</span>
         </ul>
-        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+        <img src="your_image_path_here" alt="IMAGE for RF" style="width:100%;"/>
     </li>
 </ul>
 
@@ -72,7 +72,7 @@ This indicator is composed by aggregating the Parenthood and Pay Index scores of
             <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
         </ul>
     </li>
-           <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+           <img src="your_image_path_here" alt="IMAGE for RF" style="width:100%;"/>
     </li>
 </ul>
 
@@ -80,7 +80,7 @@ This indicator is composed by aggregating the Parenthood and Pay Index scores of
 
 
 <p align="center">
- **IMAGE for WD**
+ **IMAGE for RF**
 </p>
 
 <h3>Financial Inclusion</h3>
@@ -98,7 +98,7 @@ This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and i
                <span>🔍 Right-Click on Financial Inclusion.</span><br>
                <span>⚙️ Select Show Properties.</span>
         </ul>
-        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+        <img src="your_image_path_here" alt="IMAGE for FI" style="width:100%;"/>
     </li>
 </ul>
 
@@ -111,14 +111,14 @@ This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and i
             <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
         </ul>
     </li>
-           <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+           <img src="your_image_path_here" alt="IMAGE for FI" style="width:100%;"/>
     </li>
 </ul>
 
 <p>📂 <strong>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder.</strong></p>
 
 <p align="center">
- **IMAGE for WD**
+ **IMAGE for FI**
 </p>
 
 
@@ -133,7 +133,7 @@ This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and i
                <span>🔍 Right-Click on Contextual Dimension.</span><br>
                <span>⚙️ Select Edit Attributes.</span>
         </ul>
-        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+        <img src="your_image_path_here" alt="IMAGE for Weights" style="width:100%;"/>
     </li>
 </ul>
 
@@ -146,31 +146,16 @@ This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and i
             <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
             <p>
 </ul>
-<p>
+        
+<p align="justify"> 
     <span style="color: orange; font-size: 50px;">⚠️</span>
     <strong>If equal weights are not suitable for the specific context of the analysis, the user can adjust the weights as necessary, ensuring that all weights still sum to 100!</strong> The default weights are <strong>34%</strong> for <strong>Workplace Discrimination</strong>, <strong>33%</strong> for <strong>Regulatory Frameworks</strong>, and <strong>33%</strong> for <strong>Financial Inclusion</strong>. If a factor was not calculated—perhaps due to missing data or because it was deemed unimportant—that factor should be assigned a weight of <strong>0%</strong>. Subsequently, the remaining factor weights must be adjusted to ensure they collectively add up to <strong>100%</strong>.
 </p>
 
 
 
-<img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+<img src="your_image_path_here" alt="IMAGE for Weights" style="width:100%;"/>
 
+<h3>Step 3: Aggegate</h3>
 
-
-
-1.	Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
-If a factor was executed in the same work session, its file path will automatically be populated after execution.
-
-2.	If factors are missing adjust the weighting percentage accordingly and ensure it totals to 100%.
-
-3.	If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weights.
-
-4.	Enter an alternate aggregated raster output file name if desired. The standard output file name is Contextual_score.tif
-
-5.	Click the “Execute” button to run the algorithm.
-
-6.	Status text next to the “Execute” button will appear and let you know once processing is complete.
-
-7.	The aggregated layer will be loaded to the QGIS and appear in the table of contents.
-
-8.	The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (Project_Folder/Contextual/ Contextual_score.tif). The user can rename the output file to preferred filename.
+it will be amended after UIX is finished...
