@@ -145,8 +145,9 @@ This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and i
             <span>  🖊️ Ensure that all Weight fields are filled with valid numerical entries.</span><br>
             <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
             <p>
+</ul>
 <p>
-    <span style="color: orange; font-size: 30px;">⚠️</span>
+    <span style="color: orange; font-size: 50px;">⚠️</span>
     <strong>If equal weights are not suitable for the specific context of the analysis, the user can adjust the weights as necessary, ensuring that all weights still sum to 100!</strong> The default weights are <strong>34%</strong> for <strong>Workplace Discrimination</strong>, <strong>33%</strong> for <strong>Regulatory Frameworks</strong>, and <strong>33%</strong> for <strong>Financial Inclusion</strong>. If a factor was not calculated—perhaps due to missing data or because it was deemed unimportant—that factor should be assigned a weight of <strong>0%</strong>. Subsequently, the remaining factor weights must be adjusted to ensure they collectively add up to <strong>100%</strong>.
 </p>
 
@@ -154,7 +155,7 @@ This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and i
 
 <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
 
-</ul>
+
 
 
 1.	Load the raster outputs generated in each of the previous factor tabs for the Contextual Dimension.
