@@ -29,48 +29,49 @@ Higher scores signify a more conducive environment for women to access job oppor
       <th>Score range</th>
       <th>Class</th>
       <th>Interpretation</th>
-      <th>Color</th>
+      <th style="background-color: #d73027;">Color</th>
     </tr>
   </thead>
   <tbody>
-    <tr style="background-color: #d73027;">
+    <tr>
       <td>0.00 - 0.50</td>
       <td>0</td>
       <td>Not enabling</td>
-      <td>#d73027</td>
+      <td style="background-color: #d73027;">#d73027</td>
     </tr>
-    <tr style="background-color: #fc8d59;">
+    <tr>
       <td>0.51 - 1.50</td>
       <td>1</td>
       <td>Very low enabling</td>
-      <td>#fc8d59</td>
+      <td style="background-color: #fc8d59;">#fc8d59</td>
     </tr>
-    <tr style="background-color: #fee090;">
+    <tr>
       <td>1.51 - 2.50</td>
       <td>2</td>
       <td>Low enabling</td>
-      <td>#fee090</td>
+      <td style="background-color: #fee090;">#fee090</td>
     </tr>
-    <tr style="background-color: #e0f3f8;">
+    <tr>
       <td>2.51 - 3.50</td>
       <td>3</td>
       <td>Moderately enabling</td>
-      <td>#e0f3f8</td>
+      <td style="background-color: #e0f3f8;">#e0f3f8</td>
     </tr>
-    <tr style="background-color: #91bfdb;">
+    <tr>
       <td>3.51 - 4.50</td>
       <td>4</td>
       <td>Enabling</td>
-      <td>#91bfdb</td>
+      <td style="background-color: #91bfdb;">#91bfdb</td>
     </tr>
-    <tr style="background-color: #4575b4;">
+    <tr>
       <td>4.51 - 5.00</td>
       <td>5</td>
       <td>Highly enabling</td>
-      <td>#4575b4</td>
+      <td style="background-color: #4575b4;">#4575b4</td>
     </tr>
   </tbody>
 </table>
+
 
 ```{list-table} Proposed discrete score classes to enable simpler visual interpretation of raw score outputs and enable intersection with other layers of information (reproduced from the Methodology Report).
 :header-rows: 1
