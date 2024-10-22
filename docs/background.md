@@ -19,7 +19,7 @@ The project is divided into six main components:
 
 
 <h2 id="project-scope">Project Scope</h2>
-
+(novel-analytical-framework)=
 <h3 id="novel-analytical-framework">1. Novel Analytical Framework</h3>
 <hr style="height: 3px; background-color: grey; border: none;">
 
