@@ -246,7 +246,11 @@ This undertaking involved the identification and compilation of essential open-s
   <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/data%20availability%20per%20country.JPG" alt="Data Availability per Country" width="600" style="display: block; margin-left: auto; margin-right: auto;">
 </a>
 
-
+5. [Geospatial Databases](#geospatial-databases)
+   <details>
+   <summary>Details</summary>
+   This section describes the geospatial databases used to support the analysis, data storage, and management for the project.
+   </details>
 
 <h3 id="geospatial-databases">5.	Geospatial Databases</h3>
 <hr style="height: 3px; background-color: black; border: none;">
