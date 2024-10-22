@@ -1,10 +1,14 @@
 import os
 import re
 import glob
+import traceback
+import datetime
+
 from typing import List, Optional
 from qgis.core import (
     QgsTask,
     QgsRectangle,
+    QgsFeedback,
     QgsFeature,
     QgsGeometry,
     QgsField,
@@ -22,7 +26,7 @@ from qgis.core import (
     QgsMessageLog,
     Qgis,
 )
-from qgis.PyQt.QtCore import QVariant, pyqtSignal
+from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 
 
@@ -52,6 +56,7 @@ class StudyAreaProcessingTask(QgsTask):
         mode: str = "raster",
         crs: Optional[QgsCoordinateReferenceSystem] = None,
         context: QgsProcessingContext = None,
+        feedback: QgsFeedback = None,
     ):
         """
         Initializes the StudyAreaProcessingTask.
@@ -63,8 +68,11 @@ class StudyAreaProcessingTask(QgsTask):
         :param mode: Processing mode, either 'vector' or 'raster'. Default is raster.
         :param crs: Optional CRS for the output CRS. If None, a UTM zone
                           is calculated based on layer extent or extent of selected features.
+        :param context: QgsProcessingContext for the task. Default is None.
+        :param feedback: QgsFeedback object for task cancelling. Default is None.
         """
-        super().__init__(name)
+        super().__init__(name, QgsTask.CanCancel)
+        self.feedback = feedback
         self.layer: QgsVectorLayer = layer
         self.field_name: str = field_name
         self.working_dir: str = working_dir
@@ -119,7 +127,6 @@ class StudyAreaProcessingTask(QgsTask):
             tag="Geest",
             level=Qgis.Info,
         )
-
         # Reproject and align the transformed layer_bbox to a 100m grid and output crs
         self.layer_bbox = self.grid_aligned_bbox(self.layer_bbox)
 
@@ -128,12 +135,24 @@ class StudyAreaProcessingTask(QgsTask):
         Runs the task in the background.
         """
         try:
-            self.process_study_area()
-            return True
+            result = self.process_study_area()
+            return result  # false if the task was canceled
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Task failed: {e}", tag="Geest", level=Qgis.Critical
             )
+            # Print the traceback to the QgsMessageLog
+            QgsMessageLog.logMessage(
+                traceback.format_exc(), tag="Geest", level=Qgis.Critical
+            )
+            # And write it to a text file called error.txt in the working directory
+            with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
+                # first the date and time
+                f.write(f"{datetime.datetime.now()}\n")
+                # then the name of the task
+                f.write(f"{self.name}\n")
+                # then the traceback
+                f.write(traceback.format_exc())
             return False
 
     def finished(self, result: bool) -> None:
@@ -146,11 +165,26 @@ class StudyAreaProcessingTask(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
+        else:
+            if self.feedback.isCanceled():
+                QgsMessageLog.logMessage(
+                    "Study Area Processing was canceled by the user.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+            else:
+                QgsMessageLog.logMessage(
+                    "Study Area Processing encountered an error.",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
 
     def cancel(self) -> None:
         """
         Called when the task is canceled.
         """
+        super().cancel()
+        self.feedback.cancel()
         QgsMessageLog.logMessage(
             "Study Area Processing was canceled.", tag="Geest", level=Qgis.Warning
         )
@@ -177,9 +211,14 @@ class StudyAreaProcessingTask(QgsTask):
 
         # Process individual features
         selected_features = self.layer.selectedFeatures()
+        # count how many features are selected
+        total_features = len(selected_features)
+
         features = selected_features if selected_features else self.layer.getFeatures()
 
         for feature in features:
+            if self.feedback.isCanceled():
+                return False
             geom: QgsGeometry = feature.geometry()
             area_name: str = feature[self.field_name]
             normalized_name: str = re.sub(r"\s+", "_", area_name.lower())
@@ -231,7 +270,7 @@ class StudyAreaProcessingTask(QgsTask):
                 )
 
             # Update progress (for example, as percentage)
-            progress = (valid_feature_count / self.layer.featureCount()) * 100
+            progress = int((valid_feature_count / self.layer.featureCount()) * 100)
             self.setProgress(progress)
 
         # Log the count of valid, fixed, and invalid features processed
@@ -242,12 +281,14 @@ class StudyAreaProcessingTask(QgsTask):
         )
 
         # Add the 'study_area_bboxes' layer to the QGIS map after processing is complete
-        self.add_layer_to_map("study_area_bboxes")
-        self.add_layer_to_map("study_area_polygons")
+        # Not thread safe, use signal instead!
+        # self.add_layer_to_map("study_area_bboxes")
+        # self.add_layer_to_map("study_area_polygons")
 
         # Create and add the VRT of all generated raster masks if in raster mode
         if self.mode == "raster":
             self.create_raster_vrt()
+        return True
 
     def add_layer_to_map(self, layer_name: str) -> None:
         """
@@ -565,6 +606,8 @@ class StudyAreaProcessingTask(QgsTask):
 
         for x in range(int(x_min), int(x_max), step):
             for y in range(int(y_min), int(y_max), step):
+                if self.feedback.isCanceled():
+                    return False
                 rect = QgsRectangle(x, y, x + step, y + step)
                 grid_geom = QgsGeometry.fromRect(rect)
 
@@ -598,11 +641,13 @@ class StudyAreaProcessingTask(QgsTask):
 
                 cell_count += 1
                 if cell_count % progress_log_interval == 0:
+                    progress = (cell_count / total_cells) * 100
                     QgsMessageLog.logMessage(
-                        f"Processed {cell_count}/{total_cells} grid cells ({(cell_count / total_cells) * 100:.2f}% complete).",
+                        f"Processed {cell_count}/{total_cells} grid cells ({progress:.2f}% complete).",
                         tag="Geest",
                         level=Qgis.Info,
                     )
+                    self.setProgress(int(progress))
 
         # Commit any remaining features in the batch
         if feature_batch:
