@@ -12,41 +12,46 @@ Workplace Discrimination involves laws that address gender biases and stereotype
 This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
 </p>
 
-<p align="justify"> 
-<strong>Step 1</strong>: Accessing the <strong>Contextual Dimension</strong>
+<h2>Workplace Discrimination</h2>
+<p>
+    Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields. This indicator is composed of the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+</p>
+
+<h2>Workplace Discrimination</h2>
+<p>
+    Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields. This indicator is composed of the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+</p>
+
+<h3>Step 1: Accessing the Contextual Dimension</h3>
 <ul>
-    <li><strong>Locate the Contextual Section:</strong>
+    <li>
+        <strong>Locate the Workplace Discrimination Section:</strong>
         <ul>
-            <li>Open the GEEST tool interface.</li>
-            <li>In the left panel, find the section labeled "Contextual".</li>
+            <li>🔍 <strong>Right-Click</strong> on <strong>Workplace Discrimination</strong>.</li>
+            <li>⚙️ Select <strong>Show Properties</strong>.</li>
         </ul>
-    </li>
-    <li><strong>Find the Workplace Discrimination Category:</strong>
-        <ul>
-            <li>Under the "Contextual" section, you will see "Workplace Discrimination". This category contains various inputs.</li>
-        </ul>
+        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
     </li>
 </ul>
 
-<strong>Step 2</strong>: Opening the Properties
+<h3>Step 2: Opening the Show Properties Dialog</h3>
 <ul>
-    <li><strong>Right-Click on Workplace Discrimination:</strong>
+    <li>
+        <strong>Input the Value for <em>Value</em>:</strong>
         <ul>
-            <li>Right-click on "WBL 2024 Workplace Index Score" within the Workplace Discrimination section.</li>
+            <li>🖊️ Enter your desired value.</li>
         </ul>
     </li>
-    <li><strong>Select Show Properties:</strong>
+    <li>
+        <strong>Click the OK button:</strong>
         <ul>
-            <li>A context menu will appear. Click on "Show Properties" to access the details of the input.</li>
+            <li>✔️ Press <strong>OK</strong> to confirm your input.</li>
         </ul>
-    </li>
-    <li><strong>Pop-Up Window:</strong>
-        <ul>
-            <li>A new pop-up window will appear, displaying various properties and options related to the Workplace Index Score.</li>
-        </ul>
+        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
     </li>
 </ul>
-</p>
+
+<p>📂 <strong>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder.</strong></p>
 
 
 <p align="center">
