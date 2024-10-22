@@ -157,5 +157,8 @@ This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and i
 <img src="your_image_path_here" alt="IMAGE for Weights" style="width:100%;"/>
 
 <h3>Step 3: Aggegate</h3>
-
-it will be amended after UIX is finished...
+<ul>
+     <li>
+            it will be amended after UIX is finished...
+    </li>
+</ul>
