@@ -1,22 +1,76 @@
 # About GEEST
+<p align="justify">  
+The Gender Enabling Environments Spatial Tool (GEEST), developed by the World Bank, evaluates locations based on how supportive they are of women’s employment and business opportunities. By incorporating 15 spatial factors across three dimensions—Contextual, Accessibility, and Place Characterization—GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all. 
+</p>
 
-Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GEEST characterizes communities based on women's prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women's participation in the RE sector in SIDS.
+
+**Brief summary of the framework** 
+<p align="justify">  
+The framework identifies 15 factors that are considered key to women’s ability to access employment opportunities. These factors are evaluated individually to create a single raster output layer for each factor with scores ranging from 0 to 5. 
+Factor layers are aggregated into 3 dimensions (Contextual, Accessibility and Place Characterization) using a multicriteria evaluation as described in the methodology document. Dimensions are also represented by a single raster layer with scores ranging from 0 to 5. Finally, dimensions can be further combined to produce a final aggregate output of scores ranging from 0 to 5. 
+</p>
 
 The table below outlines the dimensions, factors, and recommended indicators for computing the GEEST, derived from the Methodological Framework:
-
 
 <p align="center">
   <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ReadMe/factors.jpg" alt="picture">
 </p>
 
-Dimensions, Factors and indicators included in the Analytical Framework
-:::
-
-The GEEST generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
-
-The interpretation of these scores is thoroughly detailed in the Methodology Report: <https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42>.
+<p align="justify"> 
+The interpretation of these scores is thoroughly detailed in the <a href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42">Methodology Report</a>.
+</p>
 
 Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Score range</th>
+      <th>Class</th>
+      <th>Interpretation</th>
+      <th>Color</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background-color: #d73027;">
+      <td>0.00 - 0.50</td>
+      <td>0</td>
+      <td>Not enabling</td>
+      <td>#d73027</td>
+    </tr>
+    <tr style="background-color: #fc8d59;">
+      <td>0.51 - 1.50</td>
+      <td>1</td>
+      <td>Very low enabling</td>
+      <td>#fc8d59</td>
+    </tr>
+    <tr style="background-color: #fee090;">
+      <td>1.51 - 2.50</td>
+      <td>2</td>
+      <td>Low enabling</td>
+      <td>#fee090</td>
+    </tr>
+    <tr style="background-color: #e0f3f8;">
+      <td>2.51 - 3.50</td>
+      <td>3</td>
+      <td>Moderately enabling</td>
+      <td>#e0f3f8</td>
+    </tr>
+    <tr style="background-color: #91bfdb;">
+      <td>3.51 - 4.50</td>
+      <td>4</td>
+      <td>Enabling</td>
+      <td>#91bfdb</td>
+    </tr>
+    <tr style="background-color: #4575b4;">
+      <td>4.51 - 5.00</td>
+      <td>5</td>
+      <td>Highly enabling</td>
+      <td>#4575b4</td>
+    </tr>
+  </tbody>
+</table>
 
 ```{list-table} Proposed discrete score classes to enable simpler visual interpretation of raw score outputs and enable intersection with other layers of information (reproduced from the Methodology Report).
 :header-rows: 1
@@ -44,3 +98,4 @@ Higher scores signify a more conducive environment for women to access job oppor
    - 5
    - Highly enabling
 ```
+
