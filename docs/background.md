@@ -235,19 +235,24 @@ This undertaking involved the identification and compilation of essential open-s
     <td style="border: 1px solid black; padding: 8px;">Water points, catch basins, water valves and fire hydrants</td>
   </tr>
 </table>
-
-
+<br><br>
+<p align="justify"> 
 This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS included in the project. The report for each country provides a comprehensive overview of the findings derived from an extensive data gap analysis, specifically centered on women in SIDS and their access (or lack thereof) to employment opportunities within the RE sector. This endeavor entailed thorough desk-based research, necessitating a detailed exploration of both spatial and non-spatial data sources that are publicly available. The focus was on identifying critical open sources, evaluating the resolution and quality of the data, and specifying any pertinent gaps or missing information in each country. The reports are available here: [Data Catalog](https://datacatalog.worldbank.org/search/collections/genderspatial). 
 The following figure summarizes the data availability concerning the datasets examined for each country:
+</p>
 
-<img src="https://github.com/worldbank/GEEST/blob/main/docs/New%20Pictures/data%20availability%20per%20country.JPG" alt="Data Availability per Country" width="600"/>
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/data%20availability%20per%20country.JPG" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/data%20availability%20per%20country.JPG" alt="Data Availability per Country" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
 
 
-## 5.	Geospatial Databases
 
+<h3>5.	Geospatial Databases</h3>
+<hr style="height: 3px; background-color: black; border: none;">
+<p align="justify"> 
 In parallel with the Gender Data Gap Assessment, a comprehensive geospatial database was compiled for each of the 31 Small Island Developing States (SIDS) Targeted in the project. The repository containing the geospatial databases can be found in the following link: [Data Catalog](https://datacatalog.worldbank.org/search/collections/genderspatial). 
-
 <p>
+    
   <small><a href="#ref1" id="footnote1"><sup>1</sup> **Eligible SIDS:**
 Antigua and Barbuda, Belize, Cabo Verde, Comoros, Dominica, Dominican Republic, Federated States of Micronesia, Fiji, Grenada, Guinea-Bissau, Guyana, Haiti, Jamaica, Kiribati, Maldives, Marshall Islands, Mauritius, Nauru, Niue, Palau, Papua New Guinea, Samoa, São Tomé and Príncipe, Solomon Islands, St. Lucia, St. Vincent and Grenadines, Suriname, Timor-Leste, Tonga, Tuvalu, Vanuatu.</a></small>
 </p>
