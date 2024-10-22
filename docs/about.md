@@ -72,8 +72,46 @@ Higher scores signify a more conducive environment for women to access job oppor
   </tbody>
 </table>
 <p style="text-align: center; font-weight: normal;">
-  Proposed discrete score classes to enable simpler visual interpretation of raw score outputs
+  <em>Proposed discrete score classes to enable simpler visual interpretation of raw score outputs</em>
 </p>
+
+
+**Confidence Level** 
+<p align="justify">  
+An overall confidence level is assigned to the final aggregate output based on the percentage of factors included in the aggregation. The level of confidence in the overall result can be interpreted as follows: 
+</p>
+<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+  <thead>
+    <tr>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Confidence Range</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd;">0-24%</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Very low confidence</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd;">25-49%</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Low confidence</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd;">50-74%</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Medium confidence</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd;">75-89%</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">High confidence</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd;">90-100%</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Very high confidence</td>
+    </tr>
+  </tbody>
+</table>
+
+
 
 ```{list-table} Proposed discrete score classes to enable simpler visual interpretation of raw score outputs and enable intersection with other layers of information (reproduced from the Methodology Report).
 :header-rows: 1
