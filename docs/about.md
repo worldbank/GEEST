@@ -5,6 +5,7 @@ The Gender Enabling Environments Spatial Tool (GEEST), developed by the World Ba
 
 
 **Brief summary of the framework** 
+<hr style="height: 3px; background-color: black; border: none;">
 <p align="justify">  
 The framework identifies 15 factors that are considered key to women’s ability to access employment opportunities. These factors are evaluated individually to create a single raster output layer for each factor with scores ranging from 0 to 5. 
 Factor layers are aggregated into 3 dimensions (Contextual, Accessibility and Place Characterization) using a multicriteria evaluation as described in the methodology document. Dimensions are also represented by a single raster layer with scores ranging from 0 to 5. Finally, dimensions can be further combined to produce a final aggregate output of scores ranging from 0 to 5. 
@@ -77,6 +78,7 @@ Higher scores signify a more conducive environment for women to access job oppor
 
 
 **Confidence Level** 
+<hr style="height: 3px; background-color: black; border: none;">
 <p align="justify">  
 An overall confidence level is assigned to the final aggregate output based on the percentage of factors included in the aggregation. The level of confidence in the overall result can be interpreted as follows: 
 </p>
@@ -112,31 +114,80 @@ An overall confidence level is assigned to the final aggregate output based on t
 </table>
 
 
+**Insights**
+<hr style="height: 3px; background-color: black; border: none;">
+<p align="justify"> 
+The raw aggregate scores can be used in combination with information regarding the distribution of women and renewable energy sites to derive further insights. The insights tab categorizes population counts into three groups based on the lower, median, and upper quartile ranges of the data to identify areas with low, medium, and high numbers of women. These groupings are then combined with score classes to create 15 score-population classes, as listed below:
+</p>
 
-```{list-table} Proposed discrete score classes to enable simpler visual interpretation of raw score outputs and enable intersection with other layers of information (reproduced from the Methodology Report).
-:header-rows: 1
-:name: Class Scores Table
-
-* - Score range
-  - Class
-  - Interpretation
-* - 0.00-0.50
-  - 0
-  - Not enabling
-* - 0.51-1.50
-  - 1
-  - Very low enabling
-* - 1.51-2.50
-  - 2
-  - Low enabling
-* - 2.51-3.50
-   - 3
-   - Moderately enabling
-* - 3.51-4.50
-   - 4
-   - Enabling
-* - 4.51-5.00
-   - 5
-   - Highly enabling
-```
+<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+  <thead>
+    <tr>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Class</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">1</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Very low enablement, low population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">2</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Very low enablement, medium population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">3</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Very low enablement, high population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">4</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Low enablement, low population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">5</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Low enablement, medium population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">6</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Low enablement, high population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">7</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, low population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">8</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, medium population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">9</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, high population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">10</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Enabling, low population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">11</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Enabling, medium population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">12</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Enabling, high population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">13</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling, low population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">14</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling, medium population</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">15</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling, high population</td>
+    </tr>
+  </tbody>
+</table>
 
