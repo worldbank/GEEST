@@ -376,7 +376,7 @@ class TreePanel(QWidget):
             edit_aggregation_action.triggered.connect(
                 lambda: self.edit_factor_aggregation(item)
             )  # Connect to method
-            add_layer_action.triggered.connect(lambda: self.model.add_layer(item))
+            add_layer_action.triggered.connect(lambda: self.model.add_indicator(item))
             remove_factor_action.triggered.connect(lambda: self.model.remove_item(item))
             clear_action.triggered.connect(
                 lambda: self.model.clear_layer_weightings(item)

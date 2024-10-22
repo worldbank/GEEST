@@ -138,10 +138,7 @@ class JsonTreeModel(QAbstractItemModel):
         }
         guid = dimension.get("guid", str(uuid.uuid4()))  # Deserialize UUID
 
-        status = (
-            "x" if "Workflow Completed" not in dimension_attributes["Result"] else "✔️"
-        )
-
+        status = ""  # Will be set in the item ctor
         dimension_item = JsonTreeItem(
             [dimension_name, status, "", dimension_attributes],
             role="dimension",
@@ -177,9 +174,8 @@ class JsonTreeModel(QAbstractItemModel):
             "Factor Result File": factor.get("Factor Result File", ""),
             "Execution End Time": factor.get("Execution End Time", ""),
         }
-        status = "x" if "Workflow Completed" not in factor_attributes["Result"] else "✔️"
+        status = ""  # Use item.getStatus to get after constructing the item
         guid = factor.get("guid", str(uuid.uuid4()))  # Deserialize UUID
-
         factor_item = JsonTreeItem(
             [factor["name"], status, "", factor_attributes],
             role="factor",
@@ -201,11 +197,7 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        status = "✔️"
-        if "Error" in indicator.get("Result", ""):
-            status = "!"
-        elif "Workflow Completed" not in indicator.get("Result", ""):
-            status = "x"
+        status = ""  # Use item.getStatus to get after constructing the item
         guid = indicator.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         indicator_item = JsonTreeItem(
             [
@@ -443,9 +435,9 @@ class JsonTreeModel(QAbstractItemModel):
         dimension_item.appendChild(new_factor)
         self.layoutChanged.emit()
 
-    def add_layer(self, factor_item):
+    def add_indicator(self, factor_item):
         """
-        Adds a new Layer (Indicator) item under the given Factor item, allowing the user to define a new layer.
+        Adds a new Indicator item under the given Factor item, allowing the user to define a new item.
 
         Args:
             factor_item (JsonTreeItem): The factor item to which the new layer will be added.
@@ -453,8 +445,8 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        new_layer = JsonTreeItem(["New Layer", "x", "1.00"], "layer", factor_item)
-        factor_item.appendChild(new_layer)
+        indicator = JsonTreeItem(["New Layer", "x", "1.00"], "layer", factor_item)
+        factor_item.appendChild(indicator)
         self.layoutChanged.emit()
 
     def remove_item(self, item):
