@@ -37,6 +37,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             int(setting(key="render_thread_pool_size", default=1))
         )
         # This is for ESMAP staff to edit the tree directly in QGIS
+        # Still considered experimental....
         edit_mode = int(setting(key="edit_mode", default=0))
         if edit_mode:
             self.edit_mode_checkbox.setChecked(True)

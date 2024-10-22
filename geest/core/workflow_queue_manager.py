@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import QgsMessageLog, Qgis, QgsTask, QgsProcessingContext, QgsProject
 from .workflow_queue import WorkflowQueue
 from .workflow_job import WorkflowJob
@@ -10,6 +10,9 @@ class WorkflowQueueManager(QObject):
     Manages the overall workflow queue system. Delegates task management
     to the WorkflowQueue, which handles concurrent task execution.
     """
+
+    # Qt signal for when the queue is completed
+    processing_completed = pyqtSignal()
 
     def __init__(self, pool_size: int, parent=None):
         """
@@ -112,6 +115,7 @@ class WorkflowQueueManager(QObject):
             QgsMessageLog.logMessage(
                 "Workflow processing was canceled.", tag="Geest", level=Qgis.Info
             )
+        self.processing_completed.emit()
 
     def log_status_message(self, message: str) -> None:
         """

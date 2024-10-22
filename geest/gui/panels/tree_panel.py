@@ -82,6 +82,8 @@ class TreePanel(QWidget):
         # Expand the first column to use the remaining space and resize with the dialog
         self.treeView.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.treeView.header().setStretchLastSection(False)
+        # Now hide the header
+        self.treeView.header().hide()
 
         # Set layout
         layout.addWidget(self.treeView)
@@ -89,8 +91,11 @@ class TreePanel(QWidget):
         button_bar = QHBoxLayout()
 
         # "Add Dimension" button (initially enabled)
-        self.add_dimension_button = QPushButton("⭐️ Add Dimension")
-        self.add_dimension_button.clicked.connect(self.add_dimension)
+        if setting(key="edit_mode", default=0):
+            self.add_dimension_button = QPushButton("⭐️ Add Dimension")
+            self.add_dimension_button.clicked.connect(self.add_dimension)
+            button_bar.addWidget(self.add_dimension_button)
+            button_bar.addStretch()
 
         # Load and Save buttons
         self.load_json_button = QPushButton("📂 Load")
@@ -106,13 +111,7 @@ class TreePanel(QWidget):
         self.prepare_throbber.setVisible(False)  # Hide initially
         button_bar.addWidget(self.prepare_throbber)
 
-        self.prepare_indicators_button = QPushButton("▶️ 1")
-        self.prepare_indicators_button.clicked.connect(self.prepare_indicators_pressed)
-        self.prepare_factors_button = QPushButton("▶️ 2")
-        self.prepare_factors_button.clicked.connect(self.prepare_factors_pressed)
-        self.prepare_dimensions_button = QPushButton("▶️ 3")
-        self.prepare_dimensions_button.clicked.connect(self.prepare_dimensions_pressed)
-        self.prepare_analysis_button = QPushButton("▶️ 4")
+        self.prepare_analysis_button = QPushButton("▶️")
         self.prepare_analysis_button.clicked.connect(self.prepare_analysis_pressed)
 
         # Add Edit Toggle checkbox
@@ -124,12 +123,6 @@ class TreePanel(QWidget):
         else:
             self.edit_toggle.setVisible(False)
 
-        button_bar.addWidget(self.add_dimension_button)
-        button_bar.addStretch()
-
-        button_bar.addWidget(self.prepare_indicators_button)
-        button_bar.addWidget(self.prepare_factors_button)
-        button_bar.addWidget(self.prepare_dimensions_button)
         button_bar.addWidget(self.prepare_analysis_button)
 
         button_bar.addStretch()
@@ -145,6 +138,12 @@ class TreePanel(QWidget):
 
         layout.addLayout(button_bar)
         self.setLayout(layout)
+
+        # Connect the working directory changed signal to the slot
+        # Workflows need to be run in batches: first indicators, then factors, then dimensions
+        # to prevent race conditions
+        self.workflow_queue = []
+        self.queue_manager.processing_completed.connect(self.run_next_worflow_queue)
 
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
@@ -714,48 +713,6 @@ class TreePanel(QWidget):
         # Assuming column 1 is where status updates are shown
         item.setData(1, status)
 
-    def prepare_indicators_pressed(self):
-        """
-        This function processes all nodes in the QTreeView that have the 'layer' role.
-        It iterates over the entire tree, collecting nodes with the 'layer' role, and
-        processes each one by showing an animated icon, waiting for 2 seconds, and
-        then removing the animation.
-        """
-        self.start_workflows(type="indicators")
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        if debug_env:
-            self.queue_manager.start_processing_in_foreground()
-        else:
-            self.queue_manager.start_processing()
-
-    def prepare_factors_pressed(self):
-        """
-        This function processes all nodes in the QTreeView that have the 'factor' role.
-        It iterates over the entire tree, collecting nodes with the 'layer' role, and
-        processes each one by showing an animated icon, waiting for 2 seconds, and
-        then removing the animation.
-        """
-        self.start_workflows(type="factors")
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        if debug_env:
-            self.queue_manager.start_processing_in_foreground()
-        else:
-            self.queue_manager.start_processing()
-
-    def prepare_dimensions_pressed(self):
-        """
-        This function processes all nodes in the QTreeView that have the 'dimension' role.
-        It iterates over the entire tree, collecting nodes with the 'layer' role, and
-        processes each one by showing an animated icon, waiting for 2 seconds, and
-        then removing the animation.
-        """
-        self.start_workflows(type="dimensions")
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        if debug_env:
-            self.queue_manager.start_processing_in_foreground()
-        else:
-            self.queue_manager.start_processing()
-
     def prepare_analysis_pressed(self):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
@@ -763,5 +720,23 @@ class TreePanel(QWidget):
         processes each one by showing an animated icon, waiting for 2 seconds, and
         then removing the animation.
         """
-        self.start_workflows(type="analysis")
-        self.queue_manager.start_processing()
+        self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
+        self.run_next_worflow_queue()
+        # rest will be called iteratively when the workflow queue managed completed slot is called
+        # this is set up in the ctor of the tree panel
+
+    def run_next_worflow_queue(self):
+        """
+        Run the next group of workflows in the queue.
+        If self.workflow_queue is empty, the function will return.
+        """
+        if len(self.workflow_queue) == 0:
+            return
+        # pop the first item from the queue
+        next_workflow = self.workflow_queue.pop(0)
+        self.start_workflows(type=next_workflow)
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
