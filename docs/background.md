@@ -9,6 +9,7 @@
 <h2>Project Scope</h2>
 
 <h3>1. Novel Analytical Framework</h3>
+<hr>
 <p align="justify">  
 An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>. The latter two dimensions concentrate on geographical factors.
 
