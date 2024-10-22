@@ -11,6 +11,7 @@ from geest.gui.widgets import (
     AcledCsvLayerWidget,
     SafetyPolygonWidget,
     SafetyRasterWidget,
+    RasterReclassificationWidget,
 )
 from geest.core import setting
 
@@ -62,6 +63,10 @@ class RadioButtonFactory:
                 return SafetyPolygonWidget(label_text=key, attributes=attributes)
             if key == "Use Nighttime Lights" and value == 1:
                 return SafetyRasterWidget(label_text=key, attributes=attributes)
+            if key == "Use Environmental Hazards" and value == 1:
+                return RasterReclassificationWidget(
+                    label_text=key, attributes=attributes
+                )
             else:
                 QgsMessageLog.logMessage(
                     f"Factory did not match any widgets",
