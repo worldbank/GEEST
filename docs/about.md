@@ -122,7 +122,7 @@ An overall confidence level is assigned to the final aggregate output based on t
 The raw aggregate scores can be used in combination with information regarding the distribution of women and renewable energy sites to derive further insights. The insights tab categorizes population counts into three groups based on the lower, median, and upper quartile ranges of the data to identify areas with low, medium, and high numbers of women. These groupings are then combined with score classes to create 15 score-population classes, as listed below:
 </p>
 
-<h3 style="text-align: center; font-weight: normal;">Classes and Descriptions</h3>
+
 
 <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
   <thead>
@@ -171,12 +171,12 @@ The raw aggregate scores can be used in combination with information regarding t
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">8</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, medium population</td>
-      <td style="background-color: #ffffff; padding: 10px; border: 1px solid #ddd;">#ffffff</td>
+      <td style="background-color: #ffffb4; padding: 10px; border: 1px solid #ddd;">#ffffb4</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">9</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, high population</td>
-      <td style="background-color: #ffffff; padding: 10px; border: 1px solid #ddd;">#ffffff</td>
+      <td style="background-color: #ffffee; padding: 10px; border: 1px solid #ddd;">#ffffee</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">10</td>
@@ -201,7 +201,7 @@ The raw aggregate scores can be used in combination with information regarding t
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">14</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling, medium population</td>
-      <td style="background-color: #2c7b6e; padding: 10px; border: 1px solid #ddd;">#2c7b6e</td>
+      <td style="background-color: #2c7bb6; padding: 10px; border: 1px solid #ddd;">#2c7bb6</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">15</td>
@@ -210,4 +210,5 @@ The raw aggregate scores can be used in combination with information regarding t
     </tr>
   </tbody>
 </table>
+
 
