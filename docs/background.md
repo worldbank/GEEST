@@ -1,18 +1,34 @@
 ## Project Background
 
-  <!-- Table of Contents -->
-  <h2>Table of Contents</h2>
-  <ul>
-    <li><a href="#introduction">Introduction</a></li>
-    <li><a href="#project-scope">Project Scope</a></li>
-    <ul>
-      <li><a href="#analytical-framework">1. Novel Analytical Framework</a></li>
-      <li><a href="#geest-tool">2. Gender Enabling Environments Tool (GEEST)</a></li>
-      <li><a href="#saint-lucia-case">3. Study Case: Saint Lucia</a></li>
-      <li><a href="#data-gap-assessment">4. Gender Spatial Data Gap Assessment</a></li>
-      <li><a href="#geospatial-databases">5. Geospatial Databases</a></li>
-    </ul>
-  </ul>
+/* Style the TOC container */
+    .toc {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background-color: #f9f9f9;
+      padding: 15px;
+      border: 1px solid #ddd;
+      width: 250px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .toc ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .toc ul li {
+      margin: 10px 0;
+    }
+    .toc a {
+      text-decoration: none;
+      color: #007bff;
+    }
+    .toc a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  
 <h2>Introduction</h2>
     
 <p align="justify">  
