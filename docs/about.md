@@ -4,7 +4,7 @@ The Gender Enabling Environments Spatial Tool (GEEST), developed by the World Ba
 </p>
 
 
-**Brief summary of the framework** 
+<h3>Brief summary of the framework</h3>
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify">  
 The framework identifies 15 factors that are considered key to women’s ability to access employment opportunities. These factors are evaluated individually to create a single raster output layer for each factor with scores ranging from 0 to 5. 
@@ -24,15 +24,13 @@ The interpretation of these scores is thoroughly detailed in the <a href="https:
 Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
 
 
-<h3 style="text-align: center; font-weight: normal;">Proposed discrete score classes to enable simpler visual interpretation of raw score outputs</h3>
-
 <table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd;">
   <thead>
     <tr>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Score range</th>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Class</th>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Interpretation</th>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Color</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Score range</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Class</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Interpretation</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Color</th>
     </tr>
   </thead>
   <tbody>
@@ -80,7 +78,7 @@ Higher scores signify a more conducive environment for women to access job oppor
 </p>
 
 
-**Confidence Level** 
+<h3>Confidence Level</h3>
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify">  
 An overall confidence level is assigned to the final aggregate output based on the percentage of factors included in the aggregation. The level of confidence in the overall result can be interpreted as follows: 
@@ -117,7 +115,7 @@ An overall confidence level is assigned to the final aggregate output based on t
 </table>
 
 <br><br>
-**Insights**
+<h3>Insights</h3>
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify"> 
 The raw aggregate scores can be used in combination with information regarding the distribution of women and renewable energy sites to derive further insights. The insights tab categorizes population counts into three groups based on the lower, median, and upper quartile ranges of the data to identify areas with low, medium, and high numbers of women. These groupings are then combined with score classes to create 15 score-population classes, as listed below:
@@ -126,8 +124,8 @@ The raw aggregate scores can be used in combination with information regarding t
 <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
   <thead>
     <tr>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Class</th>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Description</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Class</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Description</th>
     </tr>
   </thead>
   <tbody>
