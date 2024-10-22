@@ -1,44 +1,27 @@
 ## Project Background
-
-/* Style the TOC container */
-    .toc {
-      position: fixed;
-      top: 100px;
-      right: 20px;
-      background-color: #f9f9f9;
-      padding: 15px;
-      border: 1px solid #ddd;
-      width: 250px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    }
-    .toc ul {
-      list-style-type: none;
-      padding-left: 0;
-    }
-    .toc ul li {
-      margin: 10px 0;
-    }
-    .toc a {
-      text-decoration: none;
-      color: #007bff;
-    }
-    .toc a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
+<!-- Floating Table of Contents -->
+  <div class="toc">
+    <h3>Contents</h3>
+    <ul>
+      <li><a href="#introduction">Introduction</a></li>
+      <li><a href="#novel-analytical-framework">1. Novel Analytical Framework</a></li>
+      <li><a href="#geest-tool">2. Gender Enabling Environments Tool (GEEST)</a></li>
+      <li><a href="#saint-lucia-case">3. Study Case: Saint Lucia</a></li>
+      <li><a href="#data-gap-assessment">4. Gender Spatial Data Gap Assessment</a></li>
+      <li><a href="#geospatial-databases">5. Geospatial Databases</a></li>
+    </ul>
+  </div>
   
-<h2>Introduction</h2>
+<h2 id="introduction">Introduction</h2>
     
 <p align="justify">  
   With support from the <a href="https://www.worldbank.org/en/topic/climatechange/brief/canada-world-bank-clean-energy-and-forests-climate-facility">Canada Clean Energy and Forest Climate Facility (CCEFCFy)</a>, the <a href="https://worldbank.github.io/GOST">Geospatial Operational Support Team (GOST, DECSC)</a> launched the project "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector" in <a href="#footnote1" id="ref1">SIDS<sup>1</sup></a>. The project aims to propose a novel methodology and generate a geospatial open-source tool for mapping the enabling environments for women in a country that can inform new energy projects to support the advancement of women's economic empowerment in <a href="#footnote1" id="ref1">SIDS<sup>1</sup></a> while contributing to closing gender gaps in employment in the RE sector.
 </p>
 
 
-<h2>Project Scope</h2>
+<h2 id="project-scope">Project Scope</h2>
 
-<h3>1. Novel Analytical Framework</h3>
+<h3 id="novel-analytical-framework">1. Novel Analytical Framework</h3>
 <hr style="height: 3px; background-color: grey; border: none;">
 
 <p align="justify">  
@@ -53,7 +36,7 @@ For a comprehensive understanding of the Analytical Framework and the associated
 
 
 
-<h3>2. Gender Enabling Environments Tool (GEEST)</h3>
+<h3 id="geest-tool">2. Gender Enabling Environments Tool (GEEST)</h3>
 <hr style="height: 3px; background-color: grey; border: none;">
 <p align="justify"> 
 Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GEEST characterizes communities based on women’s prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women’s participation in the RE sector in SIDS.
@@ -67,7 +50,7 @@ The GEEST generates raw score outputs for 15 factors outlined in the Analytical 
 
 
 
-<h3>3. Study Case: Saint Lucia</h3>
+<h3 id="saint-lucia-case">3. Study Case: Saint Lucia</h3>
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify"> 
   The GEEST was tested in Saint Lucia to assess its functionality. The selection of this country was strategic, considering its varied geographic region, size, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: 
@@ -127,7 +110,7 @@ When the enablement scores are combined with data on the distribution of women o
 </a>
 
 
-<h3>4. Gender Spatial Data Gap Assessment</h3>
+<h3 id="data-gap-assessment">4. Gender Spatial Data Gap Assessment</h3>
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify"> 
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women’s development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 38 data layers within each country, organized into 11 thematic categories. The table below presents the 38 layers identified during the desk research, grouped into 11 categories, as outlined below:
@@ -278,7 +261,7 @@ This undertaking involved the identification and compilation of essential open-s
 
 
 
-<h3>5.	Geospatial Databases</h3>
+<h3 id="geospatial-databases">5.	Geospatial Databases</h3>
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify"> 
   In parallel with the Gender Data Gap Assessment, a comprehensive geospatial database was compiled for each of the 31 Small Island Developing States (SIDS) targeted in the project. The repository containing the geospatial databases can be found in the following link: 
