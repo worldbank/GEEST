@@ -1,4 +1,4 @@
-<h1>Project Background</h1>
+## Project Background
 
 <h2>Introduction</h2>
     
@@ -9,7 +9,8 @@
 <h2>Project Scope</h2>
 
 <h3>1. Novel Analytical Framework</h3>
-<hr>
+<hr style="height: 3px; background-color: black; border: none;">
+
 <p align="justify">  
 An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>. The latter two dimensions concentrate on geographical factors.
 
@@ -19,19 +20,23 @@ For a comprehensive understanding of the Analytical Framework and the associated
 <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/framework.jpg" alt="Analytical Framework" width="700" style="display: block; margin-left: auto; margin-right: auto;">
 
 
-## 2. Gender Enabling Environments Tool (GEEST)
-
+<h3>2. Gender Enabling Environments Tool (GEEST)</h3>
+<hr style="height: 3px; background-color: black; border: none;">
+<p align="justify"> 
 Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GEEST characterizes communities based on women’s prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women’s participation in the RE sector in SIDS.
 
 The GEEST generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
+</p>
 
-<img src="https://github.com/worldbank/GEEST/blob/main/docs/New%20Pictures/3%20countries%20maps.png" alt="Examples" width="700"/>
+<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3%20countries%20maps.png" alt="Examples" width="700" style="display: block; margin-left: auto; margin-right: auto;">
 
 
-
-## 3. Study Case: Saint Lucia
-
-The GEEST was tested Saint Lucia to assess its functionality. The selection of this country was strategic, considering its varied geographic region, size, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: [Implementation Report St. Lucia](https://worldbankgroup-my.sharepoint.com/:w:/r/personal/civanescu_worldbank_org/Documents/Desktop/Work/Gender/TORs/Task%203/St%20Lucia%20-%20GEEST/Implementation%20Report/Implementation%20Report%20Saint%20Lucia.docx?d=wd12a9d054d5747f49788597e3fdc4ff8&csf=1&web=1&e=q6UcU0)
+<h3>3. Study Case: Saint Lucia</h3>
+<hr style="height: 3px; background-color: black; border: none;">
+<p align="justify"> 
+  The GEEST was tested in Saint Lucia to assess its functionality. The selection of this country was strategic, considering its varied geographic region, size, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: 
+  <a href="https://worldbankgroup-my.sharepoint.com/:w:/r/personal/civanescu_worldbank_org/Documents/Desktop/Work/Gender/TORs/Task%203/St%20Lucia%20-%20GEEST/Implementation%20Report/Implementation%20Report%20Saint%20Lucia.docx?d=wd12a9d054d5747f49788597e3fdc4ff8&csf=1&web=1&e=q6UcU0" target="_blank">Implementation Report St. Lucia</a>
+</p>
 
 
 **GEEST Results in Saint Lucia**
