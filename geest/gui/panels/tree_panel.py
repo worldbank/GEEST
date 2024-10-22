@@ -82,6 +82,8 @@ class TreePanel(QWidget):
         # Expand the first column to use the remaining space and resize with the dialog
         self.treeView.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.treeView.header().setStretchLastSection(False)
+        # Now hide the header
+        self.treeView.header().hide()
 
         # Set layout
         layout.addWidget(self.treeView)
