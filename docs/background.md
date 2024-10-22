@@ -69,7 +69,7 @@ When the enablement scores are combined with data on the distribution of women o
 
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women’s development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 38 data layers within each country, organized into 11 thematic categories. The table below presents the 38 layers identified during the desk research, grouped into 11 categories, as outlined below:
 
-<table>
+<table style="width: 100%;">
   <tr>
     <th>🌍 Category</th>
     <th>📊 Data Layers</th>
