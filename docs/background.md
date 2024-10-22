@@ -9,7 +9,7 @@
 <h2>Project Scope</h2>
 
 <h3>1. Novel Analytical Framework</h3>
-<hr style="height: 3px; background-color: black; border: none;">
+<hr style="height: 3px; background-color: grey; border: none;">
 
 <p align="justify">  
 An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>. The latter two dimensions concentrate on geographical factors.
@@ -21,7 +21,7 @@ For a comprehensive understanding of the Analytical Framework and the associated
 
 
 <h3>2. Gender Enabling Environments Tool (GEEST)</h3>
-<hr style="height: 3px; background-color: black; border: none;">
+<hr style="height: 3px; background-color: grey; border: none;">
 <p align="justify"> 
 Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GEEST characterizes communities based on women’s prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women’s participation in the RE sector in SIDS.
 
