@@ -629,6 +629,8 @@ class TreePanel(QWidget):
         task.job_finished.connect(
             lambda success: self.on_workflow_completed(item, success)
         )
+        # Hook up the QTask feedback signal to the progress bar
+        task.progressChanged.connect(self.task_progress_updated)
 
     def run_item(self, item, role):
         self.queue_workflow_task(item, role)
@@ -687,6 +689,10 @@ class TreePanel(QWidget):
         # Set the animated icon in the second column of the node
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, label)
+
+    def task_progress_updated(self, progress):
+        """Slot to be called when the task progress is updated."""
+        self.workflow_progress_bar.setValue(int(progress))
 
     @pyqtSlot(bool)
     def on_workflow_completed(self, item, success):
