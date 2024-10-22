@@ -15,6 +15,7 @@ from geest.core.workflows import (
     SinglePointBufferWorkflow,
     SafetyPolygonWorkflow,
     SafetyRasterWorkflow,
+    RasterReclassificationWorkflow,
 )
 from .json_tree_item import JsonTreeItem
 
@@ -79,5 +80,7 @@ class WorkflowFactory:
             return SafetyPolygonWorkflow(item, feedback, context)
         elif analysis_mode == "Use Nighttime Lights":
             return SafetyRasterWorkflow(item, feedback, context)
+        elif analysis_mode == "Use Environmental Hazards":
+            return RasterReclassificationWorkflow(item, feedback, context)
         else:
             raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
