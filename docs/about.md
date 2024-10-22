@@ -29,7 +29,7 @@ Higher scores signify a more conducive environment for women to access job oppor
       <th>Score range</th>
       <th>Class</th>
       <th>Interpretation</th>
-      <th style="background-color: #d73027;">Color</th>
+      <th>Color</th>
     </tr>
   </thead>
   <tbody>
