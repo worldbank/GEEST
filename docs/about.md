@@ -24,54 +24,57 @@ The interpretation of these scores is thoroughly detailed in the <a href="https:
 Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
 
 
-<table style="width: 100%; border-collapse: collapse;">
+<h3 style="text-align: center; font-weight: normal;">Proposed discrete score classes to enable simpler visual interpretation of raw score outputs</h3>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd;">
   <thead>
     <tr>
-      <th style="padding: 10px;">Score range</th>
-      <th style="padding: 10px;">Class</th>
-      <th style="padding: 10px;">Interpretation</th>
-      <th style="padding: 10px;">Color</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Score range</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Class</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Interpretation</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Color</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="padding: 10px;">0.00 - 0.50</td>
-      <td style="padding: 10px;">0</td>
-      <td style="padding: 10px;">Not enabling</td>
-      <td style="background-color: #d73027; padding: 10px;">#d73027</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">0.00 - 0.50</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">0</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Not enabling</td>
+      <td style="background-color: #d73027; padding: 10px; border: 1px solid #ddd;">#d73027</td>
     </tr>
     <tr>
-      <td style="padding: 10px;">0.51 - 1.50</td>
-      <td style="padding: 10px;">1</td>
-      <td style="padding: 10px;">Very low enabling</td>
-      <td style="background-color: #fc8d59; padding: 10px;">#fc8d59</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">0.51 - 1.50</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">1</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Very low enabling</td>
+      <td style="background-color: #fc8d59; padding: 10px; border: 1px solid #ddd;">#fc8d59</td>
     </tr>
     <tr>
-      <td style="padding: 10px;">1.51 - 2.50</td>
-      <td style="padding: 10px;">2</td>
-      <td style="padding: 10px;">Low enabling</td>
-      <td style="background-color: #fee090; padding: 10px;">#fee090</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">1.51 - 2.50</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">2</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Low enabling</td>
+      <td style="background-color: #fee090; padding: 10px; border: 1px solid #ddd;">#fee090</td>
     </tr>
     <tr>
-      <td style="padding: 10px;">2.51 - 3.50</td>
-      <td style="padding: 10px;">3</td>
-      <td style="padding: 10px;">Moderately enabling</td>
-      <td style="background-color: #e0f3f8; padding: 10px;">#e0f3f8</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">2.51 - 3.50</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">3</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling</td>
+      <td style="background-color: #e0f3f8; padding: 10px; border: 1px solid #ddd;">#e0f3f8</td>
     </tr>
     <tr>
-      <td style="padding: 10px;">3.51 - 4.50</td>
-      <td style="padding: 10px;">4</td>
-      <td style="padding: 10px;">Enabling</td>
-      <td style="background-color: #91bfdb; padding: 10px;">#91bfdb</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">3.51 - 4.50</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">4</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Enabling</td>
+      <td style="background-color: #91bfdb; padding: 10px; border: 1px solid #ddd;">#91bfdb</td>
     </tr>
     <tr>
-      <td style="padding: 10px;">4.51 - 5.00</td>
-      <td style="padding: 10px;">5</td>
-      <td style="padding: 10px;">Highly enabling</td>
-      <td style="background-color: #4575b4; padding: 10px;">#4575b4</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">4.51 - 5.00</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">5</td>
+      <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling</td>
+      <td style="background-color: #4575b4; padding: 10px; border: 1px solid #ddd;">#4575b4</td>
     </tr>
   </tbody>
 </table>
+
 <p style="text-align: center; font-weight: normal;">
   <em>Proposed discrete score classes to enable simpler visual interpretation of raw score outputs</em>
 </p>
@@ -113,7 +116,7 @@ An overall confidence level is assigned to the final aggregate output based on t
   </tbody>
 </table>
 
-
+<br><br>
 **Insights**
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify"> 
