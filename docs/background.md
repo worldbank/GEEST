@@ -7,10 +7,6 @@
 </p>
 
 
-
-
-
-
 <h2>Project Scope</h2>
 
 <h3>1. Novel Analytical Framework</h3>
@@ -36,7 +32,10 @@ Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS,
 The GEEST generates raw score outputs for 15 factors outlined in the Analytical Framework. Each of the 15 factors, dimensions, and overall aggregate scores are assessed on a scale ranging from 0 to 5.
 </p>
 
-<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3%20countries%20maps.png" alt="Examples" width="700" style="display: block; margin-left: auto; margin-right: auto;">
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3%20countries%20maps.png" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3%20countries%20maps.png" alt="Examples" width="700" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
+
 
 
 <h3>3. Study Case: Saint Lucia</h3>
@@ -53,14 +52,20 @@ The GEEST generates raw score outputs for 15 factors outlined in the Analytical 
 <p align="justify"> 
 The Contextual Dimension (CD) factors were evaluated using the World Bank's Women, Business, and the Law study, a reputable non-governmental resource that assigns country-level scores ranging from 0 to 100 based on the presence of relevant laws and regulations. Scores for factors in this dimension were standardized on a scale of 0 to 5, with 5 representing the most favorable environment for that specific factor.  
 </p>
-<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Contextual_new.png" alt="Contextual Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Contextual_new.png" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Contextual_new.png" alt="Contextual Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
+
 
 
             b. Accessibility Dimension
 <p align="justify"> 
 The factors in the Accessibility Dimension were assessed using service areas through network analyses around key facilities, which defined varying levels of access. As anticipated, the highest levels of access to each factor are concentrated in urban centers. Women's Travel Patterns, which relate to essential services needed by women to fulfill their caregiving and household responsibilities, is the factor in this dimension with the fewest highly enabling areas. The latter underscores the need for environments that are better planned with the unique needs and responsibilities of women in mind. This includes ensuring that essential services, such as childcare, pharmacies, and grocery stores, are easily accessible to support women in their roles as caregivers and members of the workforce.
 </p>
-<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Acc.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Acc.jpg" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Acc.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
+
 
 
 
@@ -68,13 +73,19 @@ The factors in the Accessibility Dimension were assessed using service areas thr
 <p align="justify"> 
 The Place-Characterization Dimension encompasses seven factors, each evaluated through distinct analytical methods. Notably, the analyses of factors such as Active Transport, Education, and Water and Sanitation reveal some areas where these elements fail to be even moderately supportive of women's access to employment.
 </p>
-<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/PD.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/PD.jpg" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/PD.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
+
 
 
 <p align="justify"> 
 The overall enablement scores for Saint Lucia reveal that, although some areas in the northwest and south exhibit a somewhat supportive environment, the country largely lacks regions that are highly conducive to facilitating women’s access to employment opportunities. Notably, the area around the solar plant in Vieux Fort provides a moderately enabling environment for women's job access, but it still falls short of achieving the highest level of enablement.
 </p>
-<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/WEE%20score%20solar.png" alt="WEE Score Solar" width="600" style="display: block; margin-left: auto;
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/WEE%20score%20solar.png" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/WEE%20score%20solar.png" alt="WEE Score Solar" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
+
 
 
 
@@ -82,7 +93,10 @@ The overall enablement scores for Saint Lucia reveal that, although some areas i
 When the enablement scores are combined with data on the distribution of women of working age, specifically those aged 35 to 39, across low, medium, and high population densities, it was observed that the most enabling areas on the island corresponded with regions of high female population. However, a few areas with very high population density were identified as having significantly low enablement scores. For example, the area surrounding the solar plant in Vieux Fort is characterized by a high female population density but is classified as only moderately enabling. 
 </p>
 
-<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3D%20Score%20map.png" alt="3D Score Map" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3D%20Score%20map.png" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3D%20Score%20map.png" alt="3D Score Map" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
+
 
 <h3>4. Gender Spatial Data Gap Assessment</h3>
 <hr style="height: 3px; background-color: black; border: none;">
