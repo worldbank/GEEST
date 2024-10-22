@@ -21,7 +21,7 @@ class JsonTreeItem:
 
     def __init__(self, data, role, guid=None, parent=None):
         self.parentItem = parent
-        self.itemData = data
+        self.itemData = data  # name, status, weighting, attributes(dict)
         self.childItems = []
         self.role = role  # Stores whether an item is a dimension, factor, or layer
         self.font_color = QColor(Qt.black)  # Default font color
@@ -46,6 +46,7 @@ class JsonTreeItem:
 
         self.factor_font = QFont()
         self.factor_font.setItalic(True)
+        self.updateStatus()
 
     def appendChild(self, item):
         self.childItems.append(item)
@@ -105,6 +106,58 @@ class JsonTreeItem:
         elif self.isIndicator():
             return self.indicator_icon
         return None
+
+    def getStatus(self):
+        """Return the status of the item as single character."""
+        try:
+            data = self.itemData[3]
+            # QgsMessageLog.logMessage(f"Data: {data}", tag="Geest", level=Qgis.Info)
+            status = "✔️"
+            if "Error" in data.get("Result", ""):
+                status = "!"
+            # Item not required and not configured
+            elif "Don’t Use" in data.get("Analysis Mode", "") and data.get(
+                "Layer Required", False
+            ):
+                status = "-"
+            # Item required but not configured
+            elif "Don’t Use" in data.get("Analysis Mode", "") and not data.get(
+                "Layer Required", False
+            ):
+                status = "!"
+            elif "Workflow Completed" not in data.get("Result", ""):
+                status = "x"
+            return status
+        except Exception as e:
+            import traceback
+
+            QgsMessageLog.logMessage(
+                f"Error getting status: {e}", tag="Geest", level=Qgis.Warning
+            )
+            QgsMessageLog.logMessage(
+                traceback.format_exc(), tag="Geest", level=Qgis.Warning
+            )
+            return "e"  # e for error
+
+    def updateStatus(self, status=None):
+        """Update the status of the item.
+
+        If no status is provided we will compute the best status based on the item's attributes.
+
+        :param status: The status to set the item to.
+
+        :return: None
+
+        Note: The status is stored in the second column of the itemData
+        """
+        try:
+            if status is None:
+                status = self.getStatus()
+            self.itemData[1] = status
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Error updating status: {e}", tag="Geest", level=Qgis.Warning
+            )
 
     def getFont(self):
         """Retrieve the appropriate font for the item based on its role."""

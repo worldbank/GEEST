@@ -242,7 +242,7 @@ class SetupPanel(FORM_CLASS, QWidget):
                     context=context,
                     feedback=feedback,
                 )
-                # Hook up the feedback signal to the progress bar
+                # Hook up the QTask feedback signal to the progress bar
                 processor.progressChanged.connect(self.progress_updated)
                 processor.taskCompleted.connect(self.on_task_completed)
 
