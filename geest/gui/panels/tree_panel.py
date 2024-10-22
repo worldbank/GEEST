@@ -15,8 +15,9 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QCheckBox,
 )
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, QModelIndex
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings
 from qgis.PyQt.QtGui import QMovie
+from qgis.PyQt.QtWidgets import QProgressBar
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
@@ -36,7 +37,7 @@ class TreePanel(QWidget):
         self.queue_manager = WorkflowQueueManager(pool_size=1)
         self.json_file = json_file
         self.tree_view_visible = True
-        edit_mode = int(setting(key="edit_mode", default=0))
+        self.edit_mode = int(setting(key="edit_mode", default=0))
 
         layout = QVBoxLayout()
 
@@ -91,48 +92,61 @@ class TreePanel(QWidget):
         button_bar = QHBoxLayout()
 
         # "Add Dimension" button (initially enabled)
-        if setting(key="edit_mode", default=0):
-            self.add_dimension_button = QPushButton("⭐️ Add Dimension")
+        if self.edit_mode:
+            self.add_dimension_button = QPushButton("⭐️")
+            self.add_dimension_button.setToolTip("Add Dimension")
             self.add_dimension_button.clicked.connect(self.add_dimension)
             button_bar.addWidget(self.add_dimension_button)
             button_bar.addStretch()
 
-        # Load and Save buttons
-        self.load_json_button = QPushButton("📂 Load")
-        self.load_json_button.clicked.connect(self.load_json_from_file)
+            # Load and Save buttons
+            self.load_json_button = QPushButton("📂")
+            self.load_json_button.setToolTip("Load JSON Model File")
+            self.load_json_button.clicked.connect(self.load_json_from_file)
 
-        self.export_json_button = QPushButton("💾 Save")
-        self.export_json_button.clicked.connect(self.export_json_to_file)
-
-        # Prepare the throbber for the button (hidden initially)
-        self.prepare_throbber = QLabel(self)
-        self.movie = QMovie(resources_path("resources", "throbber-small.gif"))
-        self.prepare_throbber.setMovie(self.movie)
-        self.prepare_throbber.setVisible(False)  # Hide initially
-        button_bar.addWidget(self.prepare_throbber)
+            self.export_json_button = QPushButton("💾")
+            self.export_json_button.setToolTip("Export JSON Model File")
+            self.export_json_button.clicked.connect(self.export_json_to_file)
 
         self.prepare_analysis_button = QPushButton("▶️")
         self.prepare_analysis_button.clicked.connect(self.prepare_analysis_pressed)
-
-        # Add Edit Toggle checkbox
-        self.edit_toggle = QCheckBox("Edit")
-        self.edit_toggle.setChecked(False)
-        self.edit_toggle.stateChanged.connect(self.toggle_edit_mode)
-        if edit_mode:
-            self.edit_toggle.setVisible(True)
-        else:
-            self.edit_toggle.setVisible(False)
-
         button_bar.addWidget(self.prepare_analysis_button)
 
-        button_bar.addStretch()
+        # Add two progress bars to monitor all workflow progress and individual progress
+        self.overall_progress_bar = QProgressBar()
+        self.overall_progress_bar.setRange(0, 100)
+        self.overall_progress_bar.setValue(0)
+        self.overall_progress_bar.setFormat("Overall Progress: %p%")
+        self.overall_progress_bar.setAlignment(Qt.AlignCenter)
+        self.overall_progress_bar.setVisible(False)
+        self.overall_progress_bar.setFixedHeight(20)
+        self.overall_progress_bar.setFixedWidth(200)
+        button_bar.addWidget(self.overall_progress_bar)
+        self.workflow_progress_bar = QProgressBar()
+        self.workflow_progress_bar.setRange(0, 100)
+        self.workflow_progress_bar.setValue(0)
+        self.workflow_progress_bar.setFormat("Task Progress: %p%")
+        self.workflow_progress_bar.setAlignment(Qt.AlignCenter)
+        self.workflow_progress_bar.setVisible(False)
+        self.workflow_progress_bar.setFixedHeight(20)
+        self.workflow_progress_bar.setFixedWidth(200)
+        button_bar.addWidget(self.workflow_progress_bar)
 
-        button_bar.addWidget(self.load_json_button)
-        button_bar.addWidget(self.export_json_button)
-        button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
+        # Add Edit Toggle checkbox
+        if self.edit_mode:
+            self.edit_toggle = QCheckBox("Edit")
+            self.edit_toggle.setChecked(False)
+            self.edit_toggle.stateChanged.connect(self.toggle_edit_mode)
+            button_bar.addStretch()
+
+        if self.edit_mode:
+            # Load and Save buttons
+            button_bar.addWidget(self.load_json_button)
+            button_bar.addWidget(self.export_json_button)
+            button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
 
         # Only allow editing on double-click (initially enabled)
-        editing = self.edit_toggle.isChecked()
+        editing = self.edit_mode and self.edit_toggle.isChecked()
         if editing:
             self.treeView.setEditTriggers(QTreeView.DoubleClicked)
 
@@ -282,7 +296,8 @@ class TreePanel(QWidget):
 
     def open_context_menu(self, position: QPoint):
         """Handle right-click context menu."""
-        editing = self.edit_toggle.isChecked()
+
+        editing = self.edit_mode and self.edit_toggle.isChecked()
 
         index = self.treeView.indexAt(position)
         if not index.isValid():
@@ -517,7 +532,7 @@ class TreePanel(QWidget):
 
     def show_layer_properties(self, item):
         """Open a dialog showing layer properties and update the tree upon changes."""
-        editing = self.edit_toggle.isChecked()
+        editing = self.edit_mode and self.edit_toggle.isChecked()
         # Get the current layer name and layer data from the item
         layer_name = item.data(0)  # Column 0: layer name
         layer_data = item.data(3)  # Column 3: layer data (stored as a dict)
@@ -614,6 +629,8 @@ class TreePanel(QWidget):
         task.job_finished.connect(
             lambda success: self.on_workflow_completed(item, success)
         )
+        # Hook up the QTask feedback signal to the progress bar
+        task.progressChanged.connect(self.task_progress_updated)
 
     def run_item(self, item, role):
         self.queue_workflow_task(item, role)
@@ -673,12 +690,19 @@ class TreePanel(QWidget):
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, label)
 
+    def task_progress_updated(self, progress):
+        """Slot to be called when the task progress is updated."""
+        self.workflow_progress_bar.setValue(int(progress))
+
     @pyqtSlot(bool)
     def on_workflow_completed(self, item, success):
         """
         Slot for handling when a workflow is completed.
         Update the tree item to indicate success or failure.
         """
+        self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
+        self.workflow_progress_bar.setValue(100)
+
         output_file = item.data(3).get("Indicator Result File", None)
         if output_file:
             layer = QgsRasterLayer(output_file, item.data(0))
@@ -690,7 +714,7 @@ class TreePanel(QWidget):
             self.update_tree_item_status(item, "x")
         self.save_json_to_working_directory()
 
-        # Now cancelt the animated icon
+        # Now cancel the animated icon
         node_index = self.model.itemIndex(item)
 
         if not node_index.isValid():
@@ -721,6 +745,13 @@ class TreePanel(QWidget):
         then removing the animation.
         """
         self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
+        self.overall_progress_bar.setVisible(True)
+        self.workflow_progress_bar.setVisible(True)
+        self.overall_progress_bar.setValue(0)
+        total_items = self.model.rowCount()
+        self.overall_progress_bar.setMaximum(total_items)
+        self.workflow_progress_bar.setValue(0)
+        self.overall_progress_bar.setMaximum(100)
         self.run_next_worflow_queue()
         # rest will be called iteratively when the workflow queue managed completed slot is called
         # this is set up in the ctor of the tree panel
@@ -731,6 +762,8 @@ class TreePanel(QWidget):
         If self.workflow_queue is empty, the function will return.
         """
         if len(self.workflow_queue) == 0:
+            self.overall_progress_bar.setVisible(False)
+            self.workflow_progress_bar.setVisible(False)
             return
         # pop the first item from the queue
         next_workflow = self.workflow_queue.pop(0)

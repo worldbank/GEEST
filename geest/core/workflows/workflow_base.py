@@ -9,7 +9,7 @@ from qgis.core import (
     Qgis,
     QgsProcessingContext,
 )
-from qgis.PyQt.QtCore import QSettings
+from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from geest.core import JsonTreeItem
 
 
@@ -18,6 +18,9 @@ class WorkflowBase(ABC):
     Abstract base class for all workflows.
     Every workflow must accept an attributes dictionary and a QgsFeedback object.
     """
+
+    # Signal for progress changes - will be propagated to the task that owns this workflow
+    progressChanged = pyqtSignal(int)
 
     def __init__(
         self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
