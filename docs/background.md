@@ -1,14 +1,14 @@
-# Project Background
+<h1>Project Background</h1>
 
-# Introduction
+<h2>Introduction</h2>
     
 <p align="justify">  
   With support from the <a href="https://www.worldbank.org/en/topic/climatechange/brief/canada-world-bank-clean-energy-and-forests-climate-facility">Canada Clean Energy and Forest Climate Facility (CCEFCFy)</a>, the <a href="https://worldbank.github.io/GOST">Geospatial Operational Support Team (GOST, DECSC)</a> launched the project "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector" in SIDS. The project aims to propose a novel methodology and generate a geospatial open-source tool for mapping the enabling environments for women in a country that can inform new energy projects to support the advancement of women's economic empowerment in SIDS while contributing to closing gender gaps in employment in the RE sector.
 </p>
 
-# Project Scope
+<h2>Project Scope</h2>
 
-## 1. Novel Analytical Framework
+<h3>1. Novel Analytical Framework</h3>
 
 An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: **Contextual**, **Accessibility**, and **Place Characterization**. The latter two dimensions concentrate on geographical factors.
 
