@@ -42,37 +42,45 @@ The GEEST generates raw score outputs for 15 factors outlined in the Analytical 
 **GEEST Results in Saint Lucia**
 
             a. Contextual Dimension
-
+<p align="justify"> 
 The Contextual Dimension (CD) factors were evaluated using the World Bank's Women, Business, and the Law study, a reputable non-governmental resource that assigns country-level scores ranging from 0 to 100 based on the presence of relevant laws and regulations. Scores for factors in this dimension were standardized on a scale of 0 to 5, with 5 representing the most favorable environment for that specific factor.  
-
-<img src="https://github.com/worldbank/GEEST/blob/main/docs/New%20Pictures/Contextual_new.png" alt="Contextual Image" width="600"/>
+</p>
+<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Contextual_new.png" alt="Contextual Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
 
 
             b. Accessibility Dimension
-
+<p align="justify"> 
 The factors in the Accessibility Dimension were assessed using service areas through network analyses around key facilities, which defined varying levels of access. As anticipated, the highest levels of access to each factor are concentrated in urban centers. Women's Travel Patterns, which relate to essential services needed by women to fulfill their caregiving and household responsibilities, is the factor in this dimension with the fewest highly enabling areas. The latter underscores the need for environments that are better planned with the unique needs and responsibilities of women in mind. This includes ensuring that essential services, such as childcare, pharmacies, and grocery stores, are easily accessible to support women in their roles as caregivers and members of the workforce.
+</p>
+<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Acc.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
 
-<img src="https://github.com/worldbank/GEEST/blob/main/docs/New%20Pictures/Acc.jpg" alt="Accessibility Image" width="600"/>
 
 
             c. Place Characterization Dimension
-
+<p align="justify"> 
 The Place-Characterization Dimension encompasses seven factors, each evaluated through distinct analytical methods. Notably, the analyses of factors such as Active Transport, Education, and Water and Sanitation reveal some areas where these elements fail to be even moderately supportive of women's access to employment.
+</p>
+<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/PD.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
 
-<img src="https://github.com/worldbank/GEEST/blob/main/docs/New%20Pictures/PD.jpg" alt="Accessibility Image" width="600"/>
 
-
+<p align="justify"> 
 The overall enablement scores for Saint Lucia reveal that, although some areas in the northwest and south exhibit a somewhat supportive environment, the country largely lacks regions that are highly conducive to facilitating women’s access to employment opportunities. Notably, the area around the solar plant in Vieux Fort provides a moderately enabling environment for women's job access, but it still falls short of achieving the highest level of enablement.
+</p>
+<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/WEE%20score%20solar.png" alt="WEE Score Solar" width="600" style="display: block; margin-left: auto;
 
-<img src="https://github.com/worldbank/GEEST/blob/main/docs/New%20Pictures/WEE%20score%20solar.png" alt="WEE Score Solar" width="600">
 
 
-
+<p align="justify"> 
 When the enablement scores are combined with data on the distribution of women of working age, specifically those aged 35 to 39, across low, medium, and high population densities, it was observed that the most enabling areas on the island corresponded with regions of high female population. However, a few areas with very high population density were identified as having significantly low enablement scores. For example, the area surrounding the solar plant in Vieux Fort is characterized by a high female population density but is classified as only moderately enabling. 
+</p>
 
-## 4. Gender Spatial Data Gap Assessment
+<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3D%20Score%20map.png" alt="3D Score Map" width="600" style="display: block; margin-left: auto; margin-right: auto;">
 
+<h3>4. Gender Spatial Data Gap Assessment</h3>
+<hr style="height: 3px; background-color: black; border: none;">
+<p align="justify"> 
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women’s development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 38 data layers within each country, organized into 11 thematic categories. The table below presents the 38 layers identified during the desk research, grouped into 11 categories, as outlined below:
+</p>
 
 <table style="border-collapse: collapse; width: 100%;">
   <tr>
