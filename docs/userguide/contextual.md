@@ -1,9 +1,56 @@
-### Contextual
+## Contextual
 
-#### Workplace Discrimination
+<p align="justify"> 
+The Contextual Dimension refers to the laws and policies that shape workplace gender discrimination, financial autonomy, and overall gender empowerment. Although this dimension may vary between countries due to differences in legal frameworks, it remains consistent within a single country, as national policies and regulations are typically applied uniformly across countries. 
+</p>
+
+<h3>Workplace Discrimination</h3>
+<hr style="height: 3px; background-color: grey; border: none;">
+
+<p align="justify"> 
+Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.
+This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+</p>
+
+<p align="justify"> 
+<strong>Step 1</strong>: Accessing the <strong>Contextual Dimension</strong>
+<ul>
+    <li><strong>Locate the Contextual Section:</strong>
+        <ul>
+            <li>Open the GEEST tool interface.</li>
+            <li>In the left panel, find the section labeled "Contextual".</li>
+        </ul>
+    </li>
+    <li><strong>Find the Workplace Discrimination Category:</strong>
+        <ul>
+            <li>Under the "Contextual" section, you will see "Workplace Discrimination". This category contains various inputs.</li>
+        </ul>
+    </li>
+</ul>
+
+<strong>Step 2</strong>: Opening the Properties
+<ul>
+    <li><strong>Right-Click on Workplace Discrimination:</strong>
+        <ul>
+            <li>Right-click on "WBL 2024 Workplace Index Score" within the Workplace Discrimination section.</li>
+        </ul>
+    </li>
+    <li><strong>Select Show Properties:</strong>
+        <ul>
+            <li>A context menu will appear. Click on "Show Properties" to access the details of the input.</li>
+        </ul>
+    </li>
+    <li><strong>Pop-Up Window:</strong>
+        <ul>
+            <li>A new pop-up window will appear, displaying various properties and options related to the Workplace Index Score.</li>
+        </ul>
+    </li>
+</ul>
+</p>
+
 
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WD.jpg" alt="picture">
+ **IMAGE for WD**
 </p>
 
 1.	Navigate to the WBL (Women, Business and the Law) report and input the WBL index score representing the value from 0 to 100. This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL. The data is already formatted on a scale from 1 to 100.
