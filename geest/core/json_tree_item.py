@@ -68,7 +68,7 @@ class JsonTreeItem:
         if column == 3:
             QgsMessageLog.logMessage(
                 f"JsonTreeItem setData: {value} for column {column} ",
-                tag="Geest JsonTreeItem",
+                tag="Geest",
                 level=Qgis.Info,
             )
         if column < len(self.itemData):

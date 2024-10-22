@@ -21,11 +21,14 @@ from qgis.PyQt.QtWidgets import QProgressBar
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
-from geest.gui.dialogs import IndicatorDetailDialog
 from geest.utilities import resources_path
 from geest.core import setting
 from geest.core import WorkflowQueueManager
-from geest.gui.dialogs import FactorAggregationDialog
+from geest.gui.dialogs import (
+    IndicatorDetailDialog,
+    FactorAggregationDialog,
+    DimensionAggregationDialog,
+)
 
 
 class TreePanel(QWidget):
@@ -149,6 +152,8 @@ class TreePanel(QWidget):
         editing = self.edit_mode and self.edit_toggle.isChecked()
         if editing:
             self.treeView.setEditTriggers(QTreeView.DoubleClicked)
+        else:
+            self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
         layout.addLayout(button_bar)
         self.setLayout(layout)
@@ -323,6 +328,10 @@ class TreePanel(QWidget):
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
             # Context menu for dimensions
+            edit_aggregation_action = QAction("Edit Aggregation", self)
+            edit_aggregation_action.triggered.connect(
+                lambda: self.edit_dimension_aggregation(item)
+            )  # Connect to method
             add_factor_action = QAction("Add Factor", self)
             remove_dimension_action = QAction("Remove Dimension", self)
 
@@ -342,6 +351,7 @@ class TreePanel(QWidget):
 
             # Add actions to menu
             menu = QMenu(self)
+            menu.addAction(edit_aggregation_action)
             menu.addAction(clear_action)
             menu.addAction(auto_assign_action)
             menu.addAction(show_json_attributes_action)
@@ -364,7 +374,7 @@ class TreePanel(QWidget):
 
             # Connect actions
             edit_aggregation_action.triggered.connect(
-                lambda: self.edit_aggregation(item)
+                lambda: self.edit_factor_aggregation(item)
             )  # Connect to method
             add_layer_action.triggered.connect(lambda: self.model.add_layer(item))
             remove_factor_action.triggered.connect(lambda: self.model.remove_item(item))
@@ -516,9 +526,23 @@ class TreePanel(QWidget):
                 level=Qgis.Critical,
             )
 
-    def edit_aggregation(self, factor_item):
+    def edit_dimension_aggregation(self, dimension_item):
+        """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension."""
+        editing = self.edit_mode and self.edit_toggle.isChecked()
+        dimension_name = dimension_item.data(0)
+        dimension_data = dimension_item.data(3)
+        if not dimension_data:
+            dimension_data = {}
+        dialog = DimensionAggregationDialog(
+            dimension_name, dimension_data, dimension_item, editing=editing, parent=self
+        )
+        if dialog.exec_():  # If OK was clicked
+            dialog.assignWeightings()
+            self.save_json_to_working_directory()  # Save changes to the JSON if necessary
+
+    def edit_factor_aggregation(self, factor_item):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
-        editing = self.edit_toggle.isChecked()
+        editing = self.edit_mode and self.edit_toggle.isChecked()
         factor_name = factor_item.data(0)
         factor_data = factor_item.data(3)
         if not factor_data:

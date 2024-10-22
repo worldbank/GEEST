@@ -5,6 +5,7 @@
             "name": "Contextual",
             "required": 0.0,
             "default_analysis_weighting": 0.333333,
+            "description": "The Contextual Dimension refers to the laws and policies that shape workplace gender discrimination, financial autonomy, and overall gender empowerment. Although this dimension may vary between countries due to differences in legal frameworks, it remains consistent within a single country, as national policies and regulations are typically applied uniformly across countries.",
             "factors": [
                 {
                     "id": "workplace_discrimination",
@@ -130,6 +131,7 @@
             "name": "Accessibility",
             "required": 0.0,
             "default_analysis_weighting": 0.33333,
+            "description": "The Accessibility Dimension evaluates women\u2019s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce.",
             "factors": [
                 {
                     "id": "women's_travel_patterns",
@@ -457,6 +459,7 @@
             "name": "Place Characterization",
             "required": 0.0,
             "default_analysis_weighting": 0.333333,
+            "description": "The Place-Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women\u2019s ability to participate in the workforce.",
             "factors": [
                 {
                     "id": "active_transport",
@@ -619,8 +622,8 @@
                             "Use Add Layers Manually": 0,
                             "Use Classify Poly into Classes": 1,
                             "Use CSV to Point Layer": 0,
-                            "Use Poly per Cell": 0,
-                            "Use Polyline per Cell": 0,
+                            "Use Poly per Cell": 1,
+                            "Use Polyline per Cell": 1,
                             "Use Point per Cell": 1,
                             "Use Nighttime Lights": 1,
                             "Use Environmental Hazards": 0,

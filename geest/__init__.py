@@ -59,7 +59,7 @@ class GeestPlugin:
         Initialize the GUI elements of the plugin.
         """
         icon = QIcon(resources_path("resources", "geest-main.svg"))
-        self.run_action = QAction(icon, "GEEST", self.iface.mainWindow())
+        self.run_action = QAction(icon, "GEEST Settings", self.iface.mainWindow())
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
 
@@ -68,6 +68,7 @@ class GeestPlugin:
             parent=self.iface.mainWindow(),
             json_file=resources_path("resources", "model.json"),
         )
+        # Dont remove this, needed for geometry restore....
         self.dock_widget.setObjectName("GeestDockWidget")  # Set a unique object name
         self.dock_widget.setFeatures(
             QDockWidget.DockWidgetClosable
