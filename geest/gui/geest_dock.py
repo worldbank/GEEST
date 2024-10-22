@@ -1,8 +1,9 @@
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
-    QTabWidget,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
+    QPushButton,
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsMessageLog, Qgis
@@ -17,7 +18,7 @@ class GeestDock(QDockWidget):
     ) -> None:
         """
         Initializes the GeestDock with a parent and an optional JSON file.
-        Sets up the main widget and tabs.
+        Sets up the main widget and stacked panels.
 
         :param parent: The parent widget for the dock.
         :param json_file: Path to a JSON file used for the TreePanel.
@@ -33,41 +34,39 @@ class GeestDock(QDockWidget):
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for a cleaner look
         layout.setSpacing(0)  # Remove spacing between elements
 
-        # Create a tab widget
-        self.tab_widget: QTabWidget = QTabWidget()
-        self.tab_widget.setTabPosition(QTabWidget.North)  # Tabs at the top
-        self.tab_widget.setDocumentMode(True)  # Cleaner look for the tabs
-        self.tab_widget.setMovable(False)  # Prevent tabs from being moved
+        # Create a stacked widget
+        self.stacked_widget: QStackedWidget = QStackedWidget()
 
         try:
-            # Create and add the "Project" tab (SetupPanel)
+            # Create and add the "Project" panel (SetupPanel)
             self.setup_widget: SetupPanel = SetupPanel()
-            project_tab: QWidget = QWidget()
-            project_layout: QVBoxLayout = QVBoxLayout(project_tab)
+            project_panel: QWidget = QWidget()
+            project_layout: QVBoxLayout = QVBoxLayout(project_panel)
             project_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
             project_layout.addWidget(self.setup_widget)
-            self.tab_widget.addTab(project_tab, "Project")
+            self.stacked_widget.addWidget(project_panel)
+
             self.setup_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.tab_widget.setCurrentIndex(1)
+                lambda: self.stacked_widget.setCurrentIndex(1)
             )
 
-            # Create and add the "Inputs" tab (TreePanel)
+            # Create and add the "Inputs" panel (TreePanel)
             self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
-            inputs_tab: QWidget = QWidget()
-            inputs_layout: QVBoxLayout = QVBoxLayout(inputs_tab)
+            inputs_panel: QWidget = QWidget()
+            inputs_layout: QVBoxLayout = QVBoxLayout(inputs_panel)
             inputs_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
             inputs_layout.addWidget(self.tree_widget)
-            self.tab_widget.addTab(inputs_tab, "Inputs")
+            self.stacked_widget.addWidget(inputs_panel)
 
-            # Add the tab widget to the main layout
-            layout.addWidget(self.tab_widget)
+            # Add the stacked widget to the main layout
+            layout.addWidget(self.stacked_widget)
 
             # Set the main widget as the widget for the dock
             self.setWidget(main_widget)
 
-            # Start with the first tab selected
-            self.tab_widget.setCurrentIndex(0)
+            # Start with the first panel selected
+            self.stacked_widget.setCurrentIndex(0)
 
             # Customize allowed areas for docking
             self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -75,8 +74,8 @@ class GeestDock(QDockWidget):
                 QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable
             )
 
-            # Connect tab change event if custom logic is needed when switching tabs
-            self.tab_widget.currentChanged.connect(self.on_tab_changed)
+            # Connect panel change event if custom logic is needed when switching panels
+            self.stacked_widget.currentChanged.connect(self.on_panel_changed)
 
             QgsMessageLog.logMessage("GeestDock initialized successfully.", "Geest")
 
@@ -87,16 +86,16 @@ class GeestDock(QDockWidget):
                 level=Qgis.Critical,
             )
 
-    def on_tab_changed(self, index: int) -> None:
+    def on_panel_changed(self, index: int) -> None:
         """
-        Handle tab change events and log the tab switch.
+        Handle panel change events and log the panel switch.
 
-        :param index: The index of the newly selected tab.
+        :param index: The index of the newly selected panel.
         """
         if index == 0:
-            QgsMessageLog.logMessage("Switched to Project tab", "Geest", Qgis.Info)
+            QgsMessageLog.logMessage("Switched to Project panel", "Geest", Qgis.Info)
         elif index == 1:
-            QgsMessageLog.logMessage("Switched to Tree tab", "Geest", Qgis.Info)
+            QgsMessageLog.logMessage("Switched to Tree panel", "Geest", Qgis.Info)
             self.tree_widget.set_working_directory(self.setup_widget.working_dir)
 
     def load_json_file(self, json_file: str) -> None:
