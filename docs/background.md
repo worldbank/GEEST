@@ -1,7 +1,6 @@
 # Project Background
 
 # Introduction
-<p style="text-align: justify;">
     
   
 With support from the [Canada Clean Energy and Forest Climate Facility (CCEFCFy)](https://www.worldbank.org/en/topic/climatechange/brief/canada-world-bank-clean-energy-and-forests-climate-facility), the [Geospatial Operational Support Team (GOST, DECSC)](https://worldbank.github.io/GOST) launched the project "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector" in SIDS[^1]. The project aims to propose a novel methodology and generate a geospatial open-source tool for mapping the enabling environments for women in a country that can inform new energy projects to support the advancement of women's economic empowerment in SIDS while contributing to closing gender gaps in employment in the RE sector.
@@ -13,7 +12,6 @@ With support from the [Canada Clean Energy and Forest Climate Facility (CCEFCFy)
 An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: **Contextual**, **Accessibility**, and **Place Characterization**. The latter two dimensions concentrate on geographical factors.
 
 For a comprehensive understanding of the Analytical Framework and the associated methodology employed to evaluate women’s spatial access to employment opportunities, please refer to the Methodology Report available at the following link: [Methodology Report](https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42)
-
 
 <img src="https://github.com/elbeejay/draft-docs/blob/main/docs/images/new%20images/framework.jpg" alt="Analytical Framework" width="700"/>
 
@@ -67,137 +65,138 @@ When the enablement scores are combined with data on the distribution of women o
 
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women’s development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 38 data layers within each country, organized into 11 thematic categories. The table below presents the 38 layers identified during the desk research, grouped into 11 categories, as outlined below:
 
-<table>
+<table style="border-collapse: collapse; width: 100%;">
   <tr>
-    <th>🌍 Category</th>
-    <th>📊 Data Layers</th>
+    <th style="border: 1px solid black; padding: 8px;">🌍 Category</th>
+    <th style="border: 1px solid black; padding: 8px;">📊 Data Layers</th>
   </tr>
   <tr>
-    <td rowspan="3">📌 Reference Data</td>
-    <td>Administrative boundaries</td>
+    <td rowspan="3" style="border: 1px solid black; padding: 8px;">📌 Reference Data</td>
+    <td style="border: 1px solid black; padding: 8px;">Administrative boundaries</td>
   </tr>
   <tr>
-    <td>Location and outline of cities/villages</td>
+    <td style="border: 1px solid black; padding: 8px;">Location and outline of cities/villages</td>
   </tr>
   <tr>
-    <td>Location and outline of cities/villages</td>
+    <td style="border: 1px solid black; padding: 8px;">Location and outline of cities/villages</td>
   </tr>
   <tr>
-    <td rowspan="2">👥 Demographics and Population</td>
-    <td>Population Density</td>
+    <td rowspan="2" style="border: 1px solid black; padding: 8px;">👥 Demographics and Population</td>
+    <td style="border: 1px solid black; padding: 8px;">Population Density</td>
   </tr>
   <tr>
-    <td>Age</td>
+    <td style="border: 1px solid black; padding: 8px;">Age</td>
   </tr>
   <tr>
-    <td rowspan="5">⚡ Renewable Energy</td>
-    <td>Existing RE: Solar Plants, Wind Onshore and Offshore</td>
+    <td rowspan="5" style="border: 1px solid black; padding: 8px;">⚡ Renewable Energy</td>
+    <td style="border: 1px solid black; padding: 8px;">Existing RE: Solar Plants, Wind Onshore and Offshore</td>
   </tr>
   <tr>
-    <td>Potential RE Project Sites: Solar</td>
+    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Solar</td>
   </tr>
   <tr>
-    <td>Potential RE Project Sites: Wind Onshore</td>
+    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Wind Onshore</td>
   </tr>
   <tr>
-    <td>Potential RE Project Sites: Wind Offshore</td>
+    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Wind Offshore</td>
   </tr>
   <tr>
-    <td>Potential RE Project Sites: Geothermal</td>
+    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Geothermal</td>
   </tr>
   <tr>
-    <td rowspan="3">⚖️ Law/Policy</td>
-    <td>Workplace Discrimination</td>
+    <td rowspan="3" style="border: 1px solid black; padding: 8px;">⚖️ Law/Policy</td>
+    <td style="border: 1px solid black; padding: 8px;">Workplace Discrimination</td>
   </tr>
   <tr>
-    <td>Regulatory Frameworks</td>
+    <td style="border: 1px solid black; padding: 8px;">Regulatory Frameworks</td>
   </tr>
   <tr>
-    <td>Financial Inclusion</td>
+    <td style="border: 1px solid black; padding: 8px;">Financial Inclusion</td>
   </tr>
   <tr>
-    <td rowspan="8">🏥 Amenities</td>
-    <td>Location of Hospitals and Clinics</td>
+    <td rowspan="8" style="border: 1px solid black; padding: 8px;">🏥 Amenities</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Hospitals and Clinics</td>
   </tr>
   <tr>
-    <td>Location of Grocery Stores</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Grocery Stores</td>
   </tr>
   <tr>
-    <td>Location of Green Spaces</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Green Spaces</td>
   </tr>
   <tr>
-    <td>Location of Kindergartens/Childcare</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Kindergartens/Childcare</td>
   </tr>
   <tr>
-    <td>Location of Pharmacies</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Pharmacies</td>
   </tr>
   <tr>
-    <td>Location of Schools</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Schools</td>
   </tr>
   <tr>
-    <td>Location of Universities</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Universities</td>
   </tr>
   <tr>
-    <td>Location of Banks and other financial facilities</td>
+    <td style="border: 1px solid black; padding: 8px;">Location of Banks and other financial facilities</td>
   </tr>
   <tr>
-    <td rowspan="6">🚶‍♂️ Transportation and Active Transport</td>
-    <td>Public Transportation Stops</td>
+    <td rowspan="6" style="border: 1px solid black; padding: 8px;">🚶‍♂️ Transportation and Active Transport</td>
+    <td style="border: 1px solid black; padding: 8px;">Public Transportation Stops</td>
   </tr>
   <tr>
-    <td>Ports</td>
+    <td style="border: 1px solid black; padding: 8px;">Ports</td>
   </tr>
   <tr>
-    <td>Street crossings</td>
+    <td style="border: 1px solid black; padding: 8px;">Street crossings</td>
   </tr>
   <tr>
-    <td>Cyclepaths</td>
+    <td style="border: 1px solid black; padding: 8px;">Cyclepaths</td>
   </tr>
   <tr>
-    <td>Blocklayout</td>
+    <td style="border: 1px solid black; padding: 8px;">Blocklayout</td>
   </tr>
   <tr>
-    <td>Footpaths</td>
+    <td style="border: 1px solid black; padding: 8px;">Footpaths</td>
   </tr>
   <tr>
-    <td rowspan="3">🔦 Safety</td>
-    <td>Measure of Visible Light at Nighttime</td>
+    <td rowspan="3" style="border: 1px solid black; padding: 8px;">🔦 Safety</td>
+    <td style="border: 1px solid black; padding: 8px;">Measure of Visible Light at Nighttime</td>
   </tr>
   <tr>
-    <td>Street lights for safe areas at night</td>
+    <td style="border: 1px solid black; padding: 8px;">Street lights for safe areas at night</td>
   </tr>
   <tr>
-    <td>FCV data</td>
+    <td style="border: 1px solid black; padding: 8px;">FCV data</td>
   </tr>
   <tr>
-    <td>🌐 Digital Inclusion</td>
-    <td>Access to internet</td>
+    <td style="border: 1px solid black; padding: 8px;">🌐 Digital Inclusion</td>
+    <td style="border: 1px solid black; padding: 8px;">Access to internet</td>
   </tr>
   <tr>
-    <td>🎓 Education</td>
-    <td>Percentage of women with post-secondary education</td>
+    <td style="border: 1px solid black; padding: 8px;">🎓 Education</td>
+    <td style="border: 1px solid black; padding: 8px;">Percentage of women with post-secondary education</td>
   </tr>
   <tr>
-    <td rowspan="5">🌪️ Climate Hazards</td>
-    <td>Fires</td>
+    <td rowspan="5" style="border: 1px solid black; padding: 8px;">🌪️ Climate Hazards</td>
+    <td style="border: 1px solid black; padding: 8px;">Fires</td>
   </tr>
   <tr>
-    <td>Coastal or Inland Flood Risk</td>
+    <td style="border: 1px solid black; padding: 8px;">Coastal or Inland Flood Risk</td>
   </tr>
   <tr>
-    <td>Cyclones</td>
+    <td style="border: 1px solid black; padding: 8px;">Cyclones</td>
   </tr>
   <tr>
-    <td>Landslides</td>
+    <td style="border: 1px solid black; padding: 8px;">Landslides</td>
   </tr>
   <tr>
-    <td>Drought</td>
+    <td style="border: 1px solid black; padding: 8px;">Drought</td>
   </tr>
   <tr>
-    <td>🚰 Water Sanitation</td>
-    <td>Water points, catch basins, water valves and fire hydrants</td>
+    <td style="border: 1px solid black; padding: 8px;">🚰 Water Sanitation</td>
+    <td style="border: 1px solid black; padding: 8px;">Water points, catch basins, water valves and fire hydrants</td>
   </tr>
 </table>
+
 
 This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS included in the project. The report for each country provides a comprehensive overview of the findings derived from an extensive data gap analysis, specifically centered on women in SIDS and their access (or lack thereof) to employment opportunities within the RE sector. This endeavor entailed thorough desk-based research, necessitating a detailed exploration of both spatial and non-spatial data sources that are publicly available. The focus was on identifying critical open sources, evaluating the resolution and quality of the data, and specifying any pertinent gaps or missing information in each country. The reports are available here: [Data Catalog](https://datacatalog.worldbank.org/search/collections/genderspatial). 
 The following figure summarizes the data availability concerning the datasets examined for each country:
@@ -212,5 +211,5 @@ In parallel with the Gender Data Gap Assessment, a comprehensive geospatial data
 [^1]: Eligible SIDS:
 Antigua and Barbuda, Belize, Cabo Verde, Comoros, Dominica, Dominican Republic, Federated States of Micronesia, Fiji, Grenada, Guinea-Bissau, Guyana, Haiti, Jamaica, Kiribati, Maldives, Marshall Islands, Mauritius, Nauru, Niue, Palau, Papua New Guinea, Samoa, São Tomé and Príncipe, Solomon Islands, St. Lucia, St. Vincent and Grenadines, Suriname, Timor-Leste, Tonga, Tuvalu, Vanuatu
 
-</p>
+
 
