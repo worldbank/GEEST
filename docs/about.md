@@ -114,80 +114,99 @@ An overall confidence level is assigned to the final aggregate output based on t
   </tbody>
 </table>
 
-<br><br>
+
+
 <h3>Insights</h3>
 <hr style="height: 3px; background-color: black; border: none;">
 <p align="justify"> 
 The raw aggregate scores can be used in combination with information regarding the distribution of women and renewable energy sites to derive further insights. The insights tab categorizes population counts into three groups based on the lower, median, and upper quartile ranges of the data to identify areas with low, medium, and high numbers of women. These groupings are then combined with score classes to create 15 score-population classes, as listed below:
 </p>
 
+<h3 style="text-align: center; font-weight: normal;">Classes and Descriptions</h3>
+
 <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
   <thead>
     <tr>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Class</th>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Description</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Class</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Description</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Color</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">1</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Very low enablement, low population</td>
+      <td style="background-color: #b11419; padding: 10px; border: 1px solid #ddd;">#b11419</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">2</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Very low enablement, medium population</td>
+      <td style="background-color: #d7191c; padding: 10px; border: 1px solid #ddd;">#d7191c</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">3</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Very low enablement, high population</td>
+      <td style="background-color: #f14247; padding: 10px; border: 1px solid #ddd;">#f14247</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">4</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Low enablement, low population</td>
+      <td style="background-color: #d68f47; padding: 10px; border: 1px solid #ddd;">#d68f47</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">5</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Low enablement, medium population</td>
+      <td style="background-color: #fdae61; padding: 10px; border: 1px solid #ddd;">#fdae61</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">6</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Low enablement, high population</td>
+      <td style="background-color: #ffc688; padding: 10px; border: 1px solid #ddd;">#ffc688</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">7</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, low population</td>
+      <td style="background-color: #e0e09f; padding: 10px; border: 1px solid #ddd;">#e0e09f</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">8</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, medium population</td>
+      <td style="background-color: #ffffff; padding: 10px; border: 1px solid #ddd;">#ffffff</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">9</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Moderately enabling, high population</td>
+      <td style="background-color: #ffffff; padding: 10px; border: 1px solid #ddd;">#ffffff</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">10</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Enabling, low population</td>
+      <td style="background-color: #93bd9b; padding: 10px; border: 1px solid #ddd;">#93bd9b</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">11</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Enabling, medium population</td>
+      <td style="background-color: #bce1b8; padding: 10px; border: 1px solid #ddd;">#bce1b8</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">12</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Enabling, high population</td>
+      <td style="background-color: #dbfbd5; padding: 10px; border: 1px solid #ddd;">#dbfbd5</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">13</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling, low population</td>
+      <td style="background-color: #1d5c8d; padding: 10px; border: 1px solid #ddd;">#1d5c8d</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">14</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling, medium population</td>
+      <td style="background-color: #2c7b6e; padding: 10px; border: 1px solid #ddd;">#2c7b6e</td>
     </tr>
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">15</td>
       <td style="padding: 10px; border: 1px solid #ddd;">Highly enabling, high population</td>
+      <td style="background-color: #4ab8e0; padding: 10px; border: 1px solid #ddd;">#4ab8e0</td>
     </tr>
   </tbody>
 </table>
