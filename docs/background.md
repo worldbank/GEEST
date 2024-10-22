@@ -22,7 +22,10 @@ An extensive literature review, focusing on the barriers women face in securing 
 For a comprehensive understanding of the Analytical Framework and the associated methodology employed to evaluate women’s spatial access to employment opportunities, please refer to the Methodology Report available at the following link: <a href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42" target="_blank">Methodology Report</a>
 </p>
 
-<img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/framework.jpg" alt="Analytical Framework" width="700" style="display: block; margin-left: auto; margin-right: auto;">
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/framework.jpg" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/framework.jpg" alt="Analytical Framework" width="700" style="display: block; margin-left: auto; margin-right: auto;">
+</a>
+
 
 
 <h3>2. Gender Enabling Environments Tool (GEEST)</h3>
