@@ -61,9 +61,6 @@ The overall enablement scores for Saint Lucia reveal that, although some areas i
 
 
 When the enablement scores are combined with data on the distribution of women of working age, specifically those aged 35 to 39, across low, medium, and high population densities, it was observed that the most enabling areas on the island corresponded with regions of high female population. However, a few areas with very high population density were identified as having significantly low enablement scores. For example, the area surrounding the solar plant in Vieux Fort is characterized by a high female population density but is classified as only moderately enabling. 
-</div>
-
-
 
 ## 4. Gender Spatial Data Gap Assessment
 
