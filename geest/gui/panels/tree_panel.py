@@ -731,11 +731,7 @@ class TreePanel(QWidget):
         if output_file:
             layer = QgsRasterLayer(output_file, item.data(0))
             QgsProject.instance().addMapLayer(layer)
-        if success:
-            self.update_tree_item_status(item, "✔️")
-
-        else:
-            self.update_tree_item_status(item, "x")
+        item.updateStatus()
         self.save_json_to_working_directory()
 
         # Now cancel the animated icon
