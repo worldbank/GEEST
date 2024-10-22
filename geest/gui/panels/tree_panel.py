@@ -152,6 +152,8 @@ class TreePanel(QWidget):
         editing = self.edit_mode and self.edit_toggle.isChecked()
         if editing:
             self.treeView.setEditTriggers(QTreeView.DoubleClicked)
+        else:
+            self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
         layout.addLayout(button_bar)
         self.setLayout(layout)

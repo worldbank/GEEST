@@ -125,6 +125,7 @@ class JsonTreeModel(QAbstractItemModel):
             "id": dimension.get("id", ""),
             "name": dimension.get("name", ""),
             "text": dimension.get("text", ""),
+            "description": dimension.get("description", ""),
             "required": dimension.get("required", False),
             "default_analysis_weighting": dimension.get(
                 "default_analysis_weighting", 0.0
@@ -201,9 +202,9 @@ class JsonTreeModel(QAbstractItemModel):
             None
         """
         status = "✔️"
-        if "Error" in indicator.get("Indicator Result", ""):
+        if "Error" in indicator.get("Result", ""):
             status = "!"
-        elif "Workflow Completed" not in indicator.get("Indicator Result", ""):
+        elif "Workflow Completed" not in indicator.get("Result", ""):
             status = "x"
         guid = indicator.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         indicator_item = JsonTreeItem(
@@ -323,6 +324,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "guid": item.guid,  # Serialize UUID
                     "factors": [recurse_tree(child) for child in item.childItems],
                     "Analysis Weighting": item.data(2),
+                    "description": item.data(3)["description"],
                 }
                 json_data.update(item.data(3))
                 return json_data

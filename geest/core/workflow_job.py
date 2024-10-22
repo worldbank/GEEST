@@ -38,9 +38,16 @@ class WorkflowJob(QgsTask):
         self._workflow = workflow_factory.create_workflow(
             item, self._feedback, self.context
         )  # Create the workflow
-
+        self._workflow.progressChanged.connect(self.setProgress)
         # Emit the 'queued' signal upon initialization
         self.job_queued.emit()
+
+    def setProgress(self, progress: int):
+        """
+        Set the progress of the task.
+        :param progress: The progress value
+        """
+        self.setProgress(progress)
 
     def run(self) -> bool:
         """
