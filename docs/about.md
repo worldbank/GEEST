@@ -21,8 +21,7 @@ The interpretation of these scores is thoroughly detailed in the <a href="https:
 </p>
 
 Higher scores signify a more conducive environment for women to access job opportunities. Conversely, scores of 0 indicate a lack of supportive conditions for women to access employment opportunities. To enhance comprehension, the methodology further categorizes these scores into distinct 'classes,' offering a simplified approach to their interpretation, as shown in the following table:
-
-
+<h4 style="text-align: center;">Proposed discrete score classes to enable simpler visual interpretation of raw score outputs</h4>
 <table style="width: 100%; border-collapse: collapse;">
   <thead>
     <tr>
