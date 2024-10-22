@@ -17,8 +17,8 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
     <li>
         <strong>Locate the Workplace Discrimination Section:</strong>
         <ul>
-            <li>🔍 <strong>Right-Click</strong> on <strong>Workplace Discrimination</strong>.</li>
-            <li>⚙️ Select <strong>Show Properties</strong>.</li>
+               <span>🔍 Right-Click on Workplace Discrimination.</span><br>
+               <span>⚙️ Select Show Properties.</span>
         </ul>
         <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
     </li>
@@ -29,15 +29,11 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
     <li>
         <strong>Input the Value for <em>Value</em>:</strong>
         <ul>
-            <li>🖊️ Enter your desired value.</li>
+            <span>  🖊️ Enter the <strong>WBL Workplace Index Score</strong> value.</span><br>
+            <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
         </ul>
     </li>
-    <li>
-        <strong>Click the OK button:</strong>
-        <ul>
-            <li>✔️ Press <strong>OK</strong> to confirm your input.</li>
-        </ul>
-        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+           <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
     </li>
 </ul>
 
@@ -48,42 +44,7 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
  **IMAGE for WD**
 </p>
 
-1.	Navigate to the WBL (Women, Business and the Law) report and input the WBL index score representing the value from 0 to 100. This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by the Workplace Index score of the WBL. The data is already formatted on a scale from 1 to 100.
 
-2.	Click the “Execute” button to run the algorithm.
-
-3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
-
-4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder. (Project_Folder/Contextual/WD.tif). The user can rename the output file to preferred filename.
-
-
-#### Regulatory Frameworks
-
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/RF.jpg" alt="picture">
-</p>
-
-1.	Navigate to the WBL (Women, Business and the Law) report and input the WBL Pay and Parenthood index scores, values ranging from 0 to 100. This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. This indicator is composed by aggregating the Parenthood and Pay Index scores of the WBL. The data is already formatted on a scale from 1 to 100.
-
-2.	Click the “Execute” button to run the algorithm.
-
-3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
-
-4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (Project_Folder/Contextual/RF.tif). The user can rename the output file to preferred filename.
-
-#### Financial Inclusion
-
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/FI.jpg" alt="picture">
-</p>
-
-1.	Navigate to the WBL (Women, Business and the Law) report and input the WBL Entrepreneurship index score, value ranging from 0 to 100. This value represents data at the national level and must be standardized on a scale ranging from 0 to 5. The data is already formatted on a scale from 1 to 100. It comes from the Entrepreneurship rating of the WBL Index.
-
-2.	Click the “Execute” button to run the algorithm.
-
-3.	Status text next to the “Execute” button will appear and let you know once processing is complete.
-
-4.	The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder (Project_Folder/Contextual/FIN.tif). The user can rename the output file to preferred filename.
 
 #### Aggregate
 
