@@ -12,16 +12,6 @@ Workplace Discrimination involves laws that address gender biases and stereotype
 This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
 </p>
 
-<h2>Workplace Discrimination</h2>
-<p>
-    Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields. This indicator is composed of the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
-</p>
-
-<h2>Workplace Discrimination</h2>
-<p>
-    Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields. This indicator is composed of the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
-</p>
-
 <h3>Step 1: Accessing the Contextual Dimension</h3>
 <ul>
     <li>
