@@ -63,13 +63,143 @@ The overall enablement scores for Saint Lucia reveal that, although some areas i
 When the enablement scores are combined with data on the distribution of women of working age, specifically those aged 35 to 39, across low, medium, and high population densities, it was observed that the most enabling areas on the island corresponded with regions of high female population. However, a few areas with very high population density were identified as having significantly low enablement scores. For example, the area surrounding the solar plant in Vieux Fort is characterized by a high female population density but is classified as only moderately enabling. 
 </div>
 
-<img src="https://github.com/worldbank/GEEST/blob/main/docs/New%20Pictures/3D%20Score%20map.png" alt="3D Score Map" width="600">
+
 
 ## 4. Gender Spatial Data Gap Assessment
 
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women’s development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 38 data layers within each country, organized into 11 thematic categories. The table below presents the 38 layers identified during the desk research, grouped into 11 categories, as outlined below:
 
-
+<table>
+  <tr>
+    <th>🌍 Category</th>
+    <th>📊 Data Layers</th>
+  </tr>
+  <tr>
+    <td rowspan="3">📌 Reference Data</td>
+    <td>Administrative boundaries</td>
+  </tr>
+  <tr>
+    <td>Location and outline of cities/villages</td>
+  </tr>
+  <tr>
+    <td>Location and outline of cities/villages</td>
+  </tr>
+  <tr>
+    <td rowspan="2">👥 Demographics and Population</td>
+    <td>Population Density</td>
+  </tr>
+  <tr>
+    <td>Age</td>
+  </tr>
+  <tr>
+    <td rowspan="5">⚡ Renewable Energy</td>
+    <td>Existing RE: Solar Plants, Wind Onshore and Offshore</td>
+  </tr>
+  <tr>
+    <td>Potential RE Project Sites: Solar</td>
+  </tr>
+  <tr>
+    <td>Potential RE Project Sites: Wind Onshore</td>
+  </tr>
+  <tr>
+    <td>Potential RE Project Sites: Wind Offshore</td>
+  </tr>
+  <tr>
+    <td>Potential RE Project Sites: Geothermal</td>
+  </tr>
+  <tr>
+    <td rowspan="3">⚖️ Law/Policy</td>
+    <td>Workplace Discrimination</td>
+  </tr>
+  <tr>
+    <td>Regulatory Frameworks</td>
+  </tr>
+  <tr>
+    <td>Financial Inclusion</td>
+  </tr>
+  <tr>
+    <td rowspan="8">🏥 Amenities</td>
+    <td>Location of Hospitals and Clinics</td>
+  </tr>
+  <tr>
+    <td>Location of Grocery Stores</td>
+  </tr>
+  <tr>
+    <td>Location of Green Spaces</td>
+  </tr>
+  <tr>
+    <td>Location of Kindergartens/Childcare</td>
+  </tr>
+  <tr>
+    <td>Location of Pharmacies</td>
+  </tr>
+  <tr>
+    <td>Location of Schools</td>
+  </tr>
+  <tr>
+    <td>Location of Universities</td>
+  </tr>
+  <tr>
+    <td>Location of Banks and other financial facilities</td>
+  </tr>
+  <tr>
+    <td rowspan="6">🚶‍♂️ Transportation and Active Transport</td>
+    <td>Public Transportation Stops</td>
+  </tr>
+  <tr>
+    <td>Ports</td>
+  </tr>
+  <tr>
+    <td>Street crossings</td>
+  </tr>
+  <tr>
+    <td>Cyclepaths</td>
+  </tr>
+  <tr>
+    <td>Blocklayout</td>
+  </tr>
+  <tr>
+    <td>Footpaths</td>
+  </tr>
+  <tr>
+    <td rowspan="3">🔦 Safety</td>
+    <td>Measure of Visible Light at Nighttime</td>
+  </tr>
+  <tr>
+    <td>Street lights for safe areas at night</td>
+  </tr>
+  <tr>
+    <td>FCV data</td>
+  </tr>
+  <tr>
+    <td>🌐 Digital Inclusion</td>
+    <td>Access to internet</td>
+  </tr>
+  <tr>
+    <td>🎓 Education</td>
+    <td>Percentage of women with post-secondary education</td>
+  </tr>
+  <tr>
+    <td rowspan="5">🌪️ Climate Hazards</td>
+    <td>Fires</td>
+  </tr>
+  <tr>
+    <td>Coastal or Inland Flood Risk</td>
+  </tr>
+  <tr>
+    <td>Cyclones</td>
+  </tr>
+  <tr>
+    <td>Landslides</td>
+  </tr>
+  <tr>
+    <td>Drought</td>
+  </tr>
+  <tr>
+    <td>🚰 Water Sanitation</td>
+    <td>Water points, catch basins, water valves and fire hydrants</td>
+  </tr>
+</table>
 
 This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS included in the project. The report for each country provides a comprehensive overview of the findings derived from an extensive data gap analysis, specifically centered on women in SIDS and their access (or lack thereof) to employment opportunities within the RE sector. This endeavor entailed thorough desk-based research, necessitating a detailed exploration of both spatial and non-spatial data sources that are publicly available. The focus was on identifying critical open sources, evaluating the resolution and quality of the data, and specifying any pertinent gaps or missing information in each country. The reports are available here: [Data Catalog](https://datacatalog.worldbank.org/search/collections/genderspatial). 
 The following figure summarizes the data availability concerning the datasets examined for each country:
