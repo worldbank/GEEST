@@ -1,9 +1,49 @@
 ## Project Background
-<!-- Floating Table of Contents -->
+/* Style the TOC container */
+    .toc {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background-color: #f9f9f9;
+      padding: 15px;
+      border: 1px solid #ddd;
+      width: 250px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      font-family: Arial, sans-serif;
+    }
+    .toc ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .toc ul li {
+      margin: 10px 0;
+    }
+    .toc a {
+      text-decoration: none;
+      color: #007bff;
+    }
+    .toc a:hover {
+      text-decoration: underline;
+    }
+    .toc h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .toc ul li::before {
+      content: "►";
+      color: #007bff;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Table of Contents -->
   <div class="toc">
     <h3>Contents</h3>
     <ul>
       <li><a href="#introduction">Introduction</a></li>
+      <li><a href="#project-scope">Project Scope</a></li>
       <li><a href="#novel-analytical-framework">1. Novel Analytical Framework</a></li>
       <li><a href="#geest-tool">2. Gender Enabling Environments Tool (GEEST)</a></li>
       <li><a href="#saint-lucia-case">3. Study Case: Saint Lucia</a></li>
@@ -11,6 +51,22 @@
       <li><a href="#geospatial-databases">5. Geospatial Databases</a></li>
     </ul>
   </div>
+
+  <!-- Main Content -->
+  <h2 id="introduction">Introduction</h2>
+  <p>This is the introduction section...</p>
+
+  <h2 id="project-scope">Project Scope</h2>
+  <ul>
+    <li><h3 id="novel-analytical-framework">1. Novel Analytical Framework</h3></li>
+    <li><h3 id="geest-tool">2. Gender Enabling Environments Tool (GEEST)</h3></li>
+    <li><h3 id="saint-lucia-case">3. Study Case: Saint Lucia</h3></li>
+    <li><h3 id="data-gap-assessment">4. Gender Spatial Data Gap Assessment</h3></li>
+    <li><h3 id="geospatial-databases">5. Geospatial Databases</h3></li>
+  </ul>
+
+</body>
+</html>
   
 <h2 id="introduction">Introduction</h2>
     
