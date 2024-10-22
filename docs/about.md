@@ -127,9 +127,9 @@ The raw aggregate scores can be used in combination with information regarding t
 <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
   <thead>
     <tr>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Class</th>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Description</th>
-      <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Color</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Class</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Description</th>
+      <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Color</th>
     </tr>
   </thead>
   <tbody>
