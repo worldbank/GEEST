@@ -118,45 +118,28 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             f"{self.workflow_name} created", tag="Geest", level=Qgis.Info
         )
-        try:
-            mode = self.attributes.get("Multi Buffer Travel Mode", "Walking")
-            if mode == "Walking":
-                mode = "foot-walking"
-            else:
-                mode = "driving-car"
-            measurement = self.attributes.get("Multi Buffer Travel Units", "Distance")
-            if measurement == "Distance":
-                measurement = "distance"
-            else:
-                measurement = "time"
-            QgsMessageLog.logMessage(
-                f"Processing areas for {self.workflow_name} with mode {mode} and measurement {measurement}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            vrt_path = processor.process_areas(mode=mode, measurement=measurement)
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Failed to process {self.workflow_name}: {e}",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            # print the stack trace
-            import traceback
 
-            QgsMessageLog.logMessage(
-                traceback.format_exc(),
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            return False
+        mode = self.attributes.get("Multi Buffer Travel Mode", "Walking")
+        if mode == "Walking":
+            mode = "foot-walking"
+        else:
+            mode = "driving-car"
+        measurement = self.attributes.get("Multi Buffer Travel Units", "Distance")
+        if measurement == "Distance":
+            measurement = "distance"
+        else:
+            measurement = "time"
+        QgsMessageLog.logMessage(
+            f"Processing areas for {self.workflow_name} with mode {mode} and measurement {measurement}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        vrt_path = processor.process_areas(mode=mode, measurement=measurement)
+
         QgsMessageLog.logMessage(
             f"{self.workflow_name} completed successfully.",
             tag="Geest",
             level=Qgis.Info,
         )
         self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = (
-            "Use Multi Buffer Point Workflow Completed"
-        )
         return True

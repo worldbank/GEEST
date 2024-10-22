@@ -17,6 +17,7 @@ from qgis.core import (
     Qgis,
     QgsProject,
     QgsProcessingContext,
+    QgsFeedback,
 )
 from qgis.PyQt import uic
 
@@ -186,7 +187,10 @@ class SetupPanel(FORM_CLASS, QWidget):
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
-
+        if self.use_boundary_crs.isChecked():
+            crs = self.layer_combo.currentLayer().crs()
+        else:
+            crs = None
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
             self.settings.setValue(
@@ -226,15 +230,21 @@ class SetupPanel(FORM_CLASS, QWidget):
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
             context = QgsProcessingContext()
             context.setProject(QgsProject.instance())
+            feedback = QgsFeedback()
             try:
 
                 processor = StudyAreaProcessingTask(
                     name="Study Area Processing",
                     layer=layer,
                     field_name=field_name,
+                    crs=crs,
                     working_dir=self.working_dir,
                     context=context,
+                    feedback=feedback,
                 )
+                # Hook up the feedback signal to the progress bar
+                processor.progressChanged.connect(self.progress_updated)
+                processor.taskCompleted.connect(self.on_task_completed)
 
                 if debug_env:
                     processor.process_study_area()
@@ -244,16 +254,30 @@ class SetupPanel(FORM_CLASS, QWidget):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
                 return
-            try:
-                checker = OrsCheckerTask(url="https://api.openrouteservice.org")
-                self.queue_manager.add_task(checker)
-                self.queue_manager.start_processing()
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Error checking ORS: {e}")
-                return
+
+            # Move this to its own button
+            # try:
+            #    checker = OrsCheckerTask(url="https://api.openrouteservice.org")
+            #    self.queue_manager.add_task(checker)
+            #    self.queue_manager.start_processing()
+            # except Exception as e:
+            #    QMessageBox.critical(self, "Error", f"Error checking ORS: {e}")
+            #    return
             # Update the last used project after processing
             self.settings.setValue("last_working_directory", self.working_dir)
-            self.switch_to_next_tab.emit()
+
+    def progress_updated(self, progress):
+        """Slot to be called when the task progress is updated."""
+        self.progress_bar.setValue(int(progress))
+
+    def on_task_completed(self):
+        """Slot to be called when the task completes successfully."""
+        QgsMessageLog.logMessage(
+            "*** Study area processing completed successfully. ***",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        self.switch_to_next_tab.emit()
 
     def update_recent_projects(self, directory):
         """Updates the recent projects list with the new directory."""
