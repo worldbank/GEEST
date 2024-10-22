@@ -1,7 +1,6 @@
 # Project Background
 
 # Introduction
-<div align="justify">
   
 With support from the [Canada Clean Energy and Forest Climate Facility (CCEFCFy)](https://www.worldbank.org/en/topic/climatechange/brief/canada-world-bank-clean-energy-and-forests-climate-facility), the [Geospatial Operational Support Team (GOST, DECSC)](https://worldbank.github.io/GOST) launched the project "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector" in SIDS[^1]. The project aims to propose a novel methodology and generate a geospatial open-source tool for mapping the enabling environments for women in a country that can inform new energy projects to support the advancement of women's economic empowerment in SIDS while contributing to closing gender gaps in employment in the RE sector.
 
@@ -207,7 +206,7 @@ The following figure summarizes the data availability concerning the datasets ex
 ## 5.	Geospatial Databases
 
 In parallel with the Gender Data Gap Assessment, a comprehensive geospatial database was compiled for each of the 31 Small Island Developing States (SIDS) Targeted in the project. The repository containing the geospatial databases can be found in the following link: [Data Catalog](https://datacatalog.worldbank.org/search/collections/genderspatial). 
-</div>
+
 [^1]: Eligible SIDS:
 Antigua and Barbuda, Belize, Cabo Verde, Comoros, Dominica, Dominican Republic, Federated States of Micronesia, Fiji, Grenada, Guinea-Bissau, Guyana, Haiti, Jamaica, Kiribati, Maldives, Marshall Islands, Mauritius, Nauru, Niue, Palau, Papua New Guinea, Samoa, São Tomé and Príncipe, Solomon Islands, St. Lucia, St. Vincent and Grenadines, Suriname, Timor-Leste, Tonga, Tuvalu, Vanuatu
 
