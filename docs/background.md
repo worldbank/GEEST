@@ -207,9 +207,9 @@ The following figure summarizes the data availability concerning the datasets ex
 ## 5.	Geospatial Databases
 
 In parallel with the Gender Data Gap Assessment, a comprehensive geospatial database was compiled for each of the 31 Small Island Developing States (SIDS) Targeted in the project. The repository containing the geospatial databases can be found in the following link: [Data Catalog](https://datacatalog.worldbank.org/search/collections/genderspatial). 
-
+</div>
 [^1]: Eligible SIDS:
 Antigua and Barbuda, Belize, Cabo Verde, Comoros, Dominica, Dominican Republic, Federated States of Micronesia, Fiji, Grenada, Guinea-Bissau, Guyana, Haiti, Jamaica, Kiribati, Maldives, Marshall Islands, Mauritius, Nauru, Niue, Palau, Papua New Guinea, Samoa, São Tomé and Príncipe, Solomon Islands, St. Lucia, St. Vincent and Grenadines, Suriname, Timor-Leste, Tonga, Tuvalu, Vanuatu
-</div>
+
 
 
