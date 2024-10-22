@@ -1,15 +1,4 @@
 ## Project Background
-
-**Project Components**
-
-The project is divided into six main components:
-
-  1. [Introduction](introduction)
-  2. [Project Scope](project-scope)
-  3. [Novel Analytical Framework](novel-analytical-framework)
-  4. [Gender Enabling Environments Tool (GEEST)](gender-enabling-environments-tool-geest)
-  5. [Implementation](implementation)
-  6. [GEEST Main Limitations](geest-main-limitations)
   
 <h2 id="introduction">Introduction</h2>
     
@@ -19,7 +8,6 @@ The project is divided into six main components:
 
 
 <h2 id="project-scope">Project Scope</h2>
-(novel-analytical-framework)=
 <h3 id="novel-analytical-framework">1. Novel Analytical Framework</h3>
 <hr style="height: 3px; background-color: grey; border: none;">
 
