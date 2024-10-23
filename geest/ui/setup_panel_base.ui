@@ -13,60 +13,8 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="15" column="0" colspan="2">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>This plugin is built with support from the Canada Clean Energy and Forest Climate Facility (CCEFCFy), the Geospatial Operational Support Team (GOST, DECSC) for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector.   </string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignJustify|Qt::AlignVCenter</set>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>To get started, we need to select a project folder. The contents of this folder will be managed by Geest. It will store the project file and the working analysis results.</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignJustify|Qt::AlignTop</set>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QToolButton" name="create_new_project_button">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>⭐️ Create a new project</string>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="0" colspan="2">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>113</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="0" column="0" colspan="2">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
     <widget class="QLabel" name="banner_label">
      <property name="text">
       <string/>
@@ -79,7 +27,69 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>**Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector**</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::MarkdownText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>To get started, we need to select a project folder. The contents of this folder will be managed by Geest. It will store the project file and the working analysis results.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignJustify|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="open_existing_project_button">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>📂 Open an existing project</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="create_new_project_button">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>⭐️ Create a new project</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="open_project_group">
      <property name="title">
       <string>Open an existing project folder</string>
@@ -105,30 +115,7 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>**Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector**</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::MarkdownText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="0" colspan="2">
+   <item>
     <widget class="QGroupBox" name="new_project_group">
      <property name="title">
       <string>Start a new project</string>
@@ -144,14 +131,31 @@
       <item>
        <widget class="QPushButton" name="create_project_directory_button">
         <property name="text">
-         <string>📂 Create a project directory</string>
+         <string>📂 Create or select a project directory</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>If you do not have a boundary layer you can quickly add one using the button below:</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="world_map_button">
+        <property name="text">
+         <string>Add World Layer</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>For new projects you also need to select a boundary layer ...</string>
+         <string>For new projects you need to select a boundary layer ...</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
@@ -182,21 +186,28 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>If you do not have a boundary layer you can quickly add one using the button below:</string>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="world_map_button">
-        <property name="text">
-         <string>Add World Layer</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QSpinBox" name="cell_size_spinbox">
+          <property name="minimum">
+           <number>10</number>
+          </property>
+          <property name="maximum">
+           <number>100000</number>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Analysis cell size (m)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QLabel" name="label_9">
@@ -221,23 +232,36 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QPushButton" name="open_existing_project_button">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
-     <property name="text">
-      <string>📂 Open an existing project</string>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>113</height>
+      </size>
      </property>
-    </widget>
+    </spacer>
    </item>
-   <item row="13" column="0" colspan="2">
+   <item>
     <widget class="QProgressBar" name="progress_bar">
      <property name="value">
       <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>This plugin is built with support from the Canada Clean Energy and Forest Climate Facility (CCEFCFy), the Geospatial Operational Support Team (GOST, DECSC) for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector.   </string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

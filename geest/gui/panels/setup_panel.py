@@ -84,27 +84,7 @@ class SetupPanel(FORM_CLASS, QWidget):
             self.working_dir = self.previous_project_combo.currentText()
             self.set_project_directory()
 
-    def update_recent_projects(self, directory):
-        """Updates the recent projects list with the new directory."""
-        recent_projects = self.settings.value("recent_projects", [])
-
-        if directory in recent_projects:
-            recent_projects.remove(
-                directory
-            )  # Remove if already in the list (to reorder)
-
-        recent_projects.insert(0, directory)  # Add to the top of the list
-
-        # Limit the list to a certain number of recent projects (e.g., 15)
-        if len(recent_projects) > 15:
-            recent_projects = recent_projects[:15]
-
-        # Save back to QSettings
-        self.settings.setValue("recent_projects", recent_projects)
-
-        # Update the combo box
-        self.previous_project_combo.clear()
-        self.previous_project_combo.addItems(reversed(recent_projects))
+        self.progress_bar.setVisible(False)
 
     def select_directory(self):
         directory = QFileDialog.getExistingDirectory(
@@ -268,6 +248,7 @@ class SetupPanel(FORM_CLASS, QWidget):
 
     def progress_updated(self, progress):
         """Slot to be called when the task progress is updated."""
+        self.progress_bar.setVisible(True)
         self.progress_bar.setValue(int(progress))
 
     def on_task_completed(self):
@@ -277,6 +258,7 @@ class SetupPanel(FORM_CLASS, QWidget):
             tag="Geest",
             level=Qgis.Info,
         )
+        self.progress_bar.setVisible(False)
         self.switch_to_next_tab.emit()
 
     def update_recent_projects(self, directory):
