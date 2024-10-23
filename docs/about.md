@@ -40,4 +40,3 @@ Women continue to face significant challenges in accessing employment and busine
 ### 🤝 **How to Get Involved**
 
 Whether you are a policymaker, researcher, business leader, or advocate for gender equality, GEEST provides the tools and insights you need to make a difference. **Join us** in exploring the tool, contributing to our mission, and driving meaningful change for women around the world.
-
