@@ -15,7 +15,7 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QCheckBox,
 )
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QMovie
 from qgis.PyQt.QtWidgets import QProgressBar
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
@@ -32,6 +32,9 @@ from geest.gui.dialogs import (
 
 
 class TreePanel(QWidget):
+    switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)
 
@@ -114,7 +117,12 @@ class TreePanel(QWidget):
         self.prepare_analysis_button = QPushButton("▶️")
         self.prepare_analysis_button.clicked.connect(self.prepare_analysis_pressed)
         button_bar.addWidget(self.prepare_analysis_button)
-
+        self.project_button = QPushButton("Project")
+        self.project_button.clicked.connect(self.switch_to_previous_tab)
+        button_bar.addWidget(self.project_button)
+        self.help_button = QPushButton("Help")
+        self.help_button.clicked.connect(self.switch_to_next_tab)
+        button_bar.addWidget(self.help_button)
         # Add two progress bars to monitor all workflow progress and individual progress
         self.overall_progress_bar = QProgressBar()
         self.overall_progress_bar.setRange(0, 100)
@@ -163,6 +171,12 @@ class TreePanel(QWidget):
         # to prevent race conditions
         self.workflow_queue = []
         self.queue_manager.processing_completed.connect(self.run_next_worflow_queue)
+
+    def on_previous_button_clicked(self):
+        self.switch_to_previous_tab.emit()
+
+    def on_next_button_clicked(self):
+        self.switch_to_next_tab.emit()
 
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
@@ -767,6 +781,8 @@ class TreePanel(QWidget):
         self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
+        self.help_button.setVisible(False)
+        self.project_button.setVisible(False)
         self.overall_progress_bar.setValue(0)
         total_items = self.model.rowCount()
         self.overall_progress_bar.setMaximum(total_items)
@@ -784,6 +800,8 @@ class TreePanel(QWidget):
         if len(self.workflow_queue) == 0:
             self.overall_progress_bar.setVisible(False)
             self.workflow_progress_bar.setVisible(False)
+            self.help_button.setVisible(True)
+            self.project_button.setVisible(True)
             return
         # pop the first item from the queue
         next_workflow = self.workflow_queue.pop(0)
