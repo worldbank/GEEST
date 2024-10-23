@@ -103,7 +103,7 @@ When the enablement scores are combined with data on the distribution of women o
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women’s development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 38 data layers within each country, organized into 11 thematic categories. The table below presents the 38 layers identified during the desk research, grouped into 11 categories, as outlined below:
 </p>
 
-<table style="border-collapse: collapse; width: 100%;">
+<table style="border-collapse: collapse; width: 100%; font-size: small;">
   <tr>
     <th style="border: 1px solid black; padding: 2px;">🌍 Category</th>
     <th style="border: 1px solid black; padding: 2px;">📊 Data Layers</th>
@@ -234,8 +234,6 @@ This undertaking involved the identification and compilation of essential open-s
     <td style="border: 1px solid black; padding: 2px;">Water points, catch basins, water valves and fire hydrants</td>
   </tr>
 </table>
-
-
 <br><br>
 <p align="justify"> 
   This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS included in the project. The report for each country provides a comprehensive overview of the findings derived from an extensive data gap analysis, specifically centered on women in SIDS and their access (or lack thereof) to employment opportunities within the RE sector. This endeavor entailed thorough desk-based research, necessitating a detailed exploration of both spatial and non-spatial data sources that are publicly available. The focus was on identifying critical open sources, evaluating the resolution and quality of the data, and specifying any pertinent gaps or missing information in each country. The reports are available here: 
