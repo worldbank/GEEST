@@ -30,6 +30,7 @@ in pkgs.mkShell rec {
     pythonPackages.debugpy
     pythonPackages.numpy
     pythonPackages.pip
+    pythonPackages.pyqtwebengine
     pinnedPkgs.vim
     pre-commit
     git

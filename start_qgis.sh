@@ -8,5 +8,5 @@ case $choice in
 	"🐞 No") DEBUG_MODE=0 ;;
 esac
 nix-shell -p \
-  'qgis.override { extraPythonPackages = (ps: [ ps.jsonschema ps.debugpy ]);}' \
+  'qgis.override { extraPythonPackages = (ps: [ ps.pyqtwebengine ps.jsonschema ps.debugpy ]);}' \
   --command "GEEST_DEBUG=${DEBUG_MODE} qgis --profile GEEST2"
