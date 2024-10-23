@@ -6,6 +6,8 @@ from qgis.core import (
     QgsGeometry,
     QgsMessageLog,
     Qgis,
+    QgsProcessingContext,
+    QgsVectorLayer,
 )
 from qgis.analysis import QgsRasterCalculatorEntry
 import os
@@ -22,12 +24,12 @@ class RasterReclassificationProcessor:
     def __init__(
         self,
         input_raster,
-        output_vrt,
+        output_prefix,
         reclassification_table,
         pixel_size,
         gpkg_path,
-        grid_layer,
         workflow_directory,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the RasterReclassificationProcessor.
@@ -42,14 +44,19 @@ class RasterReclassificationProcessor:
             workflow_directory (str): Directory where intermediate files and the final VRT will be saved.
         """
         self.input_raster = input_raster
-        self.output_vrt = output_vrt
+        self.output_prefix = output_prefix
         self.reclassification_table = reclassification_table
         self.pixel_size = pixel_size
         self.gpkg_path = gpkg_path
-        self.grid_layer = grid_layer
+        self.grid_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr"
+        )
         self.workflow_directory = workflow_directory
-        self.crs = grid_layer.crs()  # CRS is derived from the grid layer
+        self.crs = self.grid_layer.crs()  # CRS is derived from the grid layer
         self.area_iterator = AreaIterator(gpkg_path)  # Initialize the area iterator
+        self.context = (
+            context  # Used to pass objects to the thread. e.g. the QgsProject Instance
+        )
 
     def reclassify(self):
         """
@@ -81,13 +88,14 @@ class RasterReclassificationProcessor:
             temp_rasters.append(reclassified_raster)
 
         # Combine the reclassified rasters into a VRT
-        self._combine_rasters_to_vrt(temp_rasters)
+        output_vrt = self._combine_rasters_to_vrt(temp_rasters)
 
         QgsMessageLog.logMessage(
-            f"Reclassification complete. VRT file saved to {self.output_vrt}",
+            f"Reclassification complete. VRT file saved to {output_vrt}",
             "RasterReclassificationProcessor",
             Qgis.Info,
         )
+        return output_vrt
 
     def _reproject_and_clip_raster(
         self, raster_path: str, bbox: QgsGeometry, index: int
@@ -99,20 +107,32 @@ class RasterReclassificationProcessor:
         bbox = bbox.boundingBox()
 
         reprojected_raster = os.path.join(
-            self.workflow_directory, f"temp_reprojected_{index}.tif"
+            self.workflow_directory,
+            f"temp_{self.output_prefix}_reprojected_{index}.tif",
         )
 
         params = {
             "INPUT": raster_path,
             "TARGET_CRS": self.crs,
             "RESAMPLING": 0,
-            "NODATA": 255,
             "TARGET_RESOLUTION": self.pixel_size,
-            "OUTPUT": reprojected_raster,
+            "NODATA": -9999,
+            "OUTPUT": "TEMPORARY_OUTPUT",
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
         }
 
-        processing.run("gdal:warpreproject", params, feedback=QgsProcessingFeedback())
+        aoi = processing.run(
+            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+
+        params = {
+            "INPUT": aoi,
+            "BAND": 1,
+            "FILL_VALUE": 0,
+            "OUTPUT": reprojected_raster,
+        }
+
+        processing.run("native:fillnodata", params)
 
         return reprojected_raster
 
@@ -129,7 +149,7 @@ class RasterReclassificationProcessor:
         bbox = bbox.boundingBox()
 
         reclassified_raster = os.path.join(
-            self.workflow_directory, f"reclassified_{index}.tif"
+            self.workflow_directory, f"{self.output_prefix}_reclassified_{index}.tif"
         )
 
         # Set up the reclassification using reclassifybytable
@@ -137,7 +157,6 @@ class RasterReclassificationProcessor:
             "INPUT_RASTER": input_raster,
             "RASTER_BAND": 1,  # Band number to apply the reclassification
             "TABLE": reclass_table,  # Reclassification table
-            "NO_DATA": 255,  # NoData value
             "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
             "OUTPUT": "TEMPORARY_OUTPUT",
         }
@@ -150,9 +169,8 @@ class RasterReclassificationProcessor:
         clip_params = {
             "INPUT": reclass,
             "MASK": self.grid_layer,
-            "NODATA": 255,
             "CROP_TO_CUTLINE": True,
-            "KEEP_RESOLUTION": True,
+            "KEEP_RESOLUTION": False,
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
             "OUTPUT": reclassified_raster,
         }
@@ -162,7 +180,7 @@ class RasterReclassificationProcessor:
         )
         QgsMessageLog.logMessage(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
-            "RasterReclassificationProcessor",
+            "Geest",
             Qgis.Info,
         )
 
@@ -172,13 +190,28 @@ class RasterReclassificationProcessor:
         """
         Combine the list of rasters into a single VRT file.
         """
+        output_vrt = os.path.join(
+            self.workflow_directory, f"{self.output_prefix}_reclassified_output.vrt"
+        )
         params = {
             "INPUT": rasters,
             "RESOLUTION": 0,  # Use the highest resolution of input rasters
             "SEPARATE": False,
-            "OUTPUT": self.output_vrt,
+            "OUTPUT": output_vrt,
         }
 
         processing.run(
             "gdal:buildvirtualraster", params, feedback=QgsProcessingFeedback()
         )
+
+        vrt_layer = QgsRasterLayer(output_vrt, f"{self.output_prefix}_reclass_output")
+        if vrt_layer.isValid():
+            # self.context.project().addMapLayer(vrt_layer)
+            QgsMessageLog.logMessage(
+                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
+            )
+        else:
+            QgsMessageLog.logMessage(
+                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
+            )
+        return output_vrt

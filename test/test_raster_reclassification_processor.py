@@ -1,6 +1,6 @@
 import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsRasterLayer
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsProcessingContext, QgsProject
 from geest.core.algorithms.raster_reclassification_processor import (
     RasterReclassificationProcessor,
 )
@@ -11,6 +11,11 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         """
         Set up the environment for the test, loading the test data layers.
         """
+        self.context = QgsProcessingContext()
+        # Manually create a QgsProject instance and set it in the context
+        self.project = QgsProject.instance()
+        self.context.setProject(self.project)
+
         # Define working directories
         self.working_directory = os.path.dirname(__file__)
         self.test_data_directory = os.path.join(self.working_directory, "test_data")
@@ -30,13 +35,12 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
 
         # Load the input raster and grid layer
         self.input_raster = QgsRasterLayer(self.input_raster_path, "Input Raster")
-        self.grid_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr"
-        )
+        # self.grid_layer = QgsVectorLayer(
+        #    f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr"
+        # )
 
         # Ensure the input layers are valid
         self.assertTrue(self.input_raster.isValid(), "Failed to load input raster.")
-        self.assertTrue(self.grid_layer.isValid(), "Failed to load grid layer.")
 
         # Define the reclassification rules for fire hazards
         self.reclassification_rules = [
@@ -61,7 +65,9 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         ]
 
         # Set the output VRT path
-        self.output_vrt = os.path.join(self.output_directory, "reclassified_output.vrt")
+        self.output_vrt = os.path.join(
+            self.output_directory, "test_reclassified_output.vrt"
+        )
 
         # Set the pixel size (example: 100 meters)
         self.pixel_size = 100.0
@@ -69,12 +75,12 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         # Initialize the processor with test data
         self.processor = RasterReclassificationProcessor(
             input_raster=self.input_raster_path,
-            output_vrt=self.output_vrt,
+            output_prefix="test",
             reclassification_table=self.reclassification_rules,
             pixel_size=self.pixel_size,
             gpkg_path=self.gpkg_path,
-            grid_layer=self.grid_layer,
             workflow_directory=self.output_directory,
+            context=self.context,
         )
 
     def test_reclassify(self):
