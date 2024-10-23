@@ -105,135 +105,136 @@ This undertaking involved the identification and compilation of essential open-s
 
 <table style="border-collapse: collapse; width: 100%;">
   <tr>
-    <th style="border: 1px solid black; padding: 8px;">🌍 Category</th>
-    <th style="border: 1px solid black; padding: 8px;">📊 Data Layers</th>
+    <th style="border: 1px solid black; padding: 4px;">🌍 Category</th>
+    <th style="border: 1px solid black; padding: 4px;">📊 Data Layers</th>
   </tr>
   <tr>
-    <td rowspan="3" style="border: 1px solid black; padding: 8px;">📌 Reference Data</td>
-    <td style="border: 1px solid black; padding: 8px;">Administrative boundaries</td>
+    <td rowspan="3" style="border: 1px solid black; padding: 4px;">📌 Reference Data</td>
+    <td style="border: 1px solid black; padding: 4px;">Administrative boundaries</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location and outline of cities/villages</td>
+    <td style="border: 1px solid black; padding: 4px;">Location and outline of cities/villages</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location and outline of cities/villages</td>
+    <td style="border: 1px solid black; padding: 4px;">Location and outline of cities/villages</td>
   </tr>
   <tr>
-    <td rowspan="2" style="border: 1px solid black; padding: 8px;">👥 Demographics and Population</td>
-    <td style="border: 1px solid black; padding: 8px;">Population Density</td>
+    <td rowspan="2" style="border: 1px solid black; padding: 4px;">👥 Demographics and Population</td>
+    <td style="border: 1px solid black; padding: 4px;">Population Density</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Age</td>
+    <td style="border: 1px solid black; padding: 4px;">Age</td>
   </tr>
   <tr>
-    <td rowspan="5" style="border: 1px solid black; padding: 8px;">⚡ Renewable Energy</td>
-    <td style="border: 1px solid black; padding: 8px;">Existing RE: Solar Plants, Wind Onshore and Offshore</td>
+    <td rowspan="5" style="border: 1px solid black; padding: 4px;">⚡ Renewable Energy</td>
+    <td style="border: 1px solid black; padding: 4px;">Existing RE: Solar Plants, Wind Onshore and Offshore</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Solar</td>
+    <td style="border: 1px solid black; padding: 4px;">Potential RE Project Sites: Solar</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Wind Onshore</td>
+    <td style="border: 1px solid black; padding: 4px;">Potential RE Project Sites: Wind Onshore</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Wind Offshore</td>
+    <td style="border: 1px solid black; padding: 4px;">Potential RE Project Sites: Wind Offshore</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Potential RE Project Sites: Geothermal</td>
+    <td style="border: 1px solid black; padding: 4px;">Potential RE Project Sites: Geothermal</td>
   </tr>
   <tr>
-    <td rowspan="3" style="border: 1px solid black; padding: 8px;">⚖️ Law/Policy</td>
-    <td style="border: 1px solid black; padding: 8px;">Workplace Discrimination</td>
+    <td rowspan="3" style="border: 1px solid black; padding: 4px;">⚖️ Law/Policy</td>
+    <td style="border: 1px solid black; padding: 4px;">Workplace Discrimination</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Regulatory Frameworks</td>
+    <td style="border: 1px solid black; padding: 4px;">Regulatory Frameworks</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Financial Inclusion</td>
+    <td style="border: 1px solid black; padding: 4px;">Financial Inclusion</td>
   </tr>
   <tr>
-    <td rowspan="8" style="border: 1px solid black; padding: 8px;">🏥 Amenities</td>
-    <td style="border: 1px solid black; padding: 8px;">Location of Hospitals and Clinics</td>
+    <td rowspan="8" style="border: 1px solid black; padding: 4px;">🏥 Amenities</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Hospitals and Clinics</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location of Grocery Stores</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Grocery Stores</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location of Green Spaces</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Green Spaces</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location of Kindergartens/Childcare</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Kindergartens/Childcare</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location of Pharmacies</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Pharmacies</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location of Schools</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Schools</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location of Universities</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Universities</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Location of Banks and other financial facilities</td>
+    <td style="border: 1px solid black; padding: 4px;">Location of Banks and other financial facilities</td>
   </tr>
   <tr>
-    <td rowspan="6" style="border: 1px solid black; padding: 8px;">🚶‍♂️ Transportation and Active Transport</td>
-    <td style="border: 1px solid black; padding: 8px;">Public Transportation Stops</td>
+    <td rowspan="6" style="border: 1px solid black; padding: 4px;">🚶‍♂️ Transportation and Active Transport</td>
+    <td style="border: 1px solid black; padding: 4px;">Public Transportation Stops</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Ports</td>
+    <td style="border: 1px solid black; padding: 4px;">Ports</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Street crossings</td>
+    <td style="border: 1px solid black; padding: 4px;">Street crossings</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Cyclepaths</td>
+    <td style="border: 1px solid black; padding: 4px;">Cyclepaths</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Blocklayout</td>
+    <td style="border: 1px solid black; padding: 4px;">Blocklayout</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Footpaths</td>
+    <td style="border: 1px solid black; padding: 4px;">Footpaths</td>
   </tr>
   <tr>
-    <td rowspan="3" style="border: 1px solid black; padding: 8px;">🔦 Safety</td>
-    <td style="border: 1px solid black; padding: 8px;">Measure of Visible Light at Nighttime</td>
+    <td rowspan="3" style="border: 1px solid black; padding: 4px;">🔦 Safety</td>
+    <td style="border: 1px solid black; padding: 4px;">Measure of Visible Light at Nighttime</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Street lights for safe areas at night</td>
+    <td style="border: 1px solid black; padding: 4px;">Street lights for safe areas at night</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">FCV data</td>
+    <td style="border: 1px solid black; padding: 4px;">FCV data</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">🌐 Digital Inclusion</td>
-    <td style="border: 1px solid black; padding: 8px;">Access to internet</td>
+    <td style="border: 1px solid black; padding: 4px;">🌐 Digital Inclusion</td>
+    <td style="border: 1px solid black; padding: 4px;">Access to internet</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">🎓 Education</td>
-    <td style="border: 1px solid black; padding: 8px;">Percentage of women with post-secondary education</td>
+    <td style="border: 1px solid black; padding: 4px;">🎓 Education</td>
+    <td style="border: 1px solid black; padding: 4px;">Percentage of women with post-secondary education</td>
   </tr>
   <tr>
-    <td rowspan="5" style="border: 1px solid black; padding: 8px;">🌪️ Climate Hazards</td>
-    <td style="border: 1px solid black; padding: 8px;">Fires</td>
+    <td rowspan="5" style="border: 1px solid black; padding: 4px;">🌪️ Climate Hazards</td>
+    <td style="border: 1px solid black; padding: 4px;">Fires</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Coastal or Inland Flood Risk</td>
+    <td style="border: 1px solid black; padding: 4px;">Coastal or Inland Flood Risk</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Cyclones</td>
+    <td style="border: 1px solid black; padding: 4px;">Cyclones</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Landslides</td>
+    <td style="border: 1px solid black; padding: 4px;">Landslides</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">Drought</td>
+    <td style="border: 1px solid black; padding: 4px;">Drought</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 8px;">🚰 Water Sanitation</td>
-    <td style="border: 1px solid black; padding: 8px;">Water points, catch basins, water valves and fire hydrants</td>
+    <td style="border: 1px solid black; padding: 4px;">🚰 Water Sanitation</td>
+    <td style="border: 1px solid black; padding: 4px;">Water points, catch basins, water valves and fire hydrants</td>
   </tr>
 </table>
+
 <br><br>
 <p align="justify"> 
   This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS included in the project. The report for each country provides a comprehensive overview of the findings derived from an extensive data gap analysis, specifically centered on women in SIDS and their access (or lack thereof) to employment opportunities within the RE sector. This endeavor entailed thorough desk-based research, necessitating a detailed exploration of both spatial and non-spatial data sources that are publicly available. The focus was on identifying critical open sources, evaluating the resolution and quality of the data, and specifying any pertinent gaps or missing information in each country. The reports are available here: 
