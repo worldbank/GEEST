@@ -234,7 +234,7 @@ This undertaking involved the identification and compilation of essential open-s
     <td style="border: 1px solid black; padding: 2px;">Water points, catch basins, water valves and fire hydrants</td>
   </tr>
 </table>
-<br><br>
+
 <p align="justify"> 
   This effort resulted in a Data Gap Analysis Report for each of the 31 SIDS included in the project. The report for each country provides a comprehensive overview of the findings derived from an extensive data gap analysis, specifically centered on women in SIDS and their access (or lack thereof) to employment opportunities within the RE sector. This endeavor entailed thorough desk-based research, necessitating a detailed exploration of both spatial and non-spatial data sources that are publicly available. The focus was on identifying critical open sources, evaluating the resolution and quality of the data, and specifying any pertinent gaps or missing information in each country. The reports are available here: 
   <a href="https://datacatalog.worldbank.org/search/collections/genderspatial" target="_blank">Data Catalog</a>.
