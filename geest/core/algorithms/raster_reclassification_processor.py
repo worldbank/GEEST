@@ -7,6 +7,7 @@ from qgis.core import (
     QgsMessageLog,
     Qgis,
     QgsProcessingContext,
+    QgsVectorLayer,
 )
 from qgis.analysis import QgsRasterCalculatorEntry
 import os
@@ -27,7 +28,6 @@ class RasterReclassificationProcessor:
         reclassification_table,
         pixel_size,
         gpkg_path,
-        grid_layer,
         workflow_directory,
         context: QgsProcessingContext,
     ):
@@ -48,9 +48,11 @@ class RasterReclassificationProcessor:
         self.reclassification_table = reclassification_table
         self.pixel_size = pixel_size
         self.gpkg_path = gpkg_path
-        self.grid_layer = grid_layer
+        self.grid_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr"
+        )
         self.workflow_directory = workflow_directory
-        self.crs = grid_layer.crs()  # CRS is derived from the grid layer
+        self.crs = self.grid_layer.crs()  # CRS is derived from the grid layer
         self.area_iterator = AreaIterator(gpkg_path)  # Initialize the area iterator
         self.context = (
             context  # Used to pass objects to the thread. e.g. the QgsProject Instance
@@ -114,11 +116,23 @@ class RasterReclassificationProcessor:
             "TARGET_CRS": self.crs,
             "RESAMPLING": 0,
             "TARGET_RESOLUTION": self.pixel_size,
-            "OUTPUT": reprojected_raster,
+            "NODATA": -9999,
+            "OUTPUT": "TEMPORARY_OUTPUT",
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
         }
 
-        processing.run("gdal:warpreproject", params, feedback=QgsProcessingFeedback())
+        aoi = processing.run(
+            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+
+        params = {
+            "INPUT": aoi,
+            "BAND": 1,
+            "FILL_VALUE": 0,
+            "OUTPUT": reprojected_raster,
+        }
+
+        processing.run("native:fillnodata", params)
 
         return reprojected_raster
 
@@ -156,7 +170,7 @@ class RasterReclassificationProcessor:
             "INPUT": reclass,
             "MASK": self.grid_layer,
             "CROP_TO_CUTLINE": True,
-            "KEEP_RESOLUTION": True,
+            "KEEP_RESOLUTION": False,
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
             "OUTPUT": reclassified_raster,
         }
@@ -166,7 +180,7 @@ class RasterReclassificationProcessor:
         )
         QgsMessageLog.logMessage(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
-            "RasterReclassificationProcessor",
+            "Geest",
             Qgis.Info,
         )
 
@@ -192,7 +206,7 @@ class RasterReclassificationProcessor:
 
         vrt_layer = QgsRasterLayer(output_vrt, f"{self.output_prefix}_reclass_output")
         if vrt_layer.isValid():
-            self.context.project().addMapLayer(vrt_layer)
+            # self.context.project().addMapLayer(vrt_layer)
             QgsMessageLog.logMessage(
                 "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
             )

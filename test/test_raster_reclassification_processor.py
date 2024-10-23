@@ -35,13 +35,12 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
 
         # Load the input raster and grid layer
         self.input_raster = QgsRasterLayer(self.input_raster_path, "Input Raster")
-        self.grid_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr"
-        )
+        # self.grid_layer = QgsVectorLayer(
+        #    f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr"
+        # )
 
         # Ensure the input layers are valid
         self.assertTrue(self.input_raster.isValid(), "Failed to load input raster.")
-        self.assertTrue(self.grid_layer.isValid(), "Failed to load grid layer.")
 
         # Define the reclassification rules for fire hazards
         self.reclassification_rules = [
@@ -80,7 +79,6 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
             reclassification_table=self.reclassification_rules,
             pixel_size=self.pixel_size,
             gpkg_path=self.gpkg_path,
-            grid_layer=self.grid_layer,
             workflow_directory=self.output_directory,
             context=self.context,
         )

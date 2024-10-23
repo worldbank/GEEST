@@ -81,7 +81,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
             ]
         elif self.layer_id == "flood":
             reclassification_rules = [
-                0,
+                -1,
                 0,
                 5.00,  # new value = 5
                 0,
@@ -175,7 +175,6 @@ class RasterReclassificationWorkflow(WorkflowBase):
             reclassification_table=reclassification_rules,
             pixel_size=100,
             gpkg_path=self.gpkg_path,
-            grid_layer=self.bboxes_layer,
             workflow_directory=self.workflow_directory,
             context=self.context,
         )
