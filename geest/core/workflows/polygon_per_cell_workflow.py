@@ -58,9 +58,25 @@ class PolygonPerCellWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             "----------------------------------", tag="Geest", level=Qgis.Info
         )
-        features_layer = QgsVectorLayer(
-            self.attributes.get("Polygon per Cell Layer Source", "")
-        )
+
+        layer_name = self.attributes.get("Polygon per Cell Shapefile", None)
+
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid raster found in Polygon per Cell Shapefile, trying Polygon per Cell Layer Source.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            layer_name = self.attributes.get("Polygon per Cell Layer Source", None)
+            if not layer_name:
+                QgsMessageLog.logMessage(
+                    "No points layer found in Polygon per Cell Layer Source.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+            return False
+
+        features_layer = QgsVectorLayer(layer_name, "Polygon per Cell Layer", "ogr")
         processor = PolygonPerCellProcessor(
             output_prefix=self.layer_id,
             features_layer=features_layer,
