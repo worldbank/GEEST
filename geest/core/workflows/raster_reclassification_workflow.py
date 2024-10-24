@@ -54,8 +54,27 @@ class RasterReclassificationWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             "----------------------------------", tag="Geest", level=Qgis.Info
         )
+        layer_name = self.attributes.get("Use Environmental Hazards Raster", None)
+
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid points layer found in Use Environmental Hazards Raster, trying Use Environmental Hazards Layer Source.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            layer_name = self.attributes.get(
+                "Use Environmental Hazards Layer Source", None
+            )
+            if not layer_name:
+                QgsMessageLog.logMessage(
+                    "No points layer found in Use Environmental Hazards Layer Source.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+            return False
+
         features_layer = QgsRasterLayer(
-            self.attributes.get("Use Environmental Hazards Layer Source", "")
+            layer_name, "Environmental Hazards Raster", "gdal"
         )
 
         if self.layer_id == "fire":

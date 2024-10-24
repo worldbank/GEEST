@@ -4,6 +4,7 @@ from qgis.core import (
     Qgis,
     QgsFeedback,
     QgsProcessingContext,
+    QgsVectorLayer,
 )
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
@@ -89,15 +90,23 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
             return False
 
-        layer_name = self.attributes.get("Multi Buffer Point Layer Name", None)
+        layer_name = self.attributes.get("Multi Buffer Shapefile", None)
+
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid points layer found in Multi Buffer Point Layer Name.",
+                "Invalid points layer found in Multi Buffer Shapefile, trying Multi Buffer Point Layer Name.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
+            layer_name = self.attributes.get("Multi Buffer Point Layer Source", None)
+            if not layer_name:
+                QgsMessageLog.logMessage(
+                    "No points layer found in Multi Buffer Point Layer Name.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
             return False
-        points_layer = self.context.project().mapLayersByName(layer_name)[0]
+        points_layer = QgsVectorLayer(layer_name, "points", "ogr")
         try:
 
             processor = ORSMultiBufferProcessor(
