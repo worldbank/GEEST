@@ -33,9 +33,25 @@ class PointPerCellWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
-        points_layer = QgsVectorLayer(
-            self.attributes.get("Point per Cell Layer Source", "")
-        )
+        layer_name = self.attributes.get("Point per Cell Shapefile", None)
+
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid raster found in Point per Cell Shapefile, trying Point per Cell Layer Source.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            layer_name = self.attributes.get("Point per Cell Layer Source", None)
+            if not layer_name:
+                QgsMessageLog.logMessage(
+                    "No points layer found in Point per Cell Layer Source.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+            return False
+
+        points_layer = QgsVectorLayer(layer_name, "Point per Cell Layer", "ogr")
+
         processor = FeaturesPerCellProcessor(
             output_prefix=self.layer_id,
             features_layer=points_layer,

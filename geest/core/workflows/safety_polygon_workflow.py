@@ -35,9 +35,28 @@ class SafetyPolygonWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
-        features_layer = QgsVectorLayer(
-            self.attributes.get("Classify Poly into Classes Layer Source", "")
-        )
+
+        layer_name = self.attributes.get("Classify Poly into Classes Shapefile", None)
+
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid raster found in Classify Poly into Classes Shapefile, trying Classify Poly into Classes Layer Source.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            layer_name = self.attributes.get(
+                "Classify Poly into Classes Layer Source", None
+            )
+            if not layer_name:
+                QgsMessageLog.logMessage(
+                    "No points layer found in Classify Poly into Classes Layer Source.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+            return False
+
+        features_layer = QgsVectorLayer(layer_name, "features_layer", "ogr")
+
         selected_field = self.attributes.get(
             "Classify Poly into Classes Selected Field", ""
         )

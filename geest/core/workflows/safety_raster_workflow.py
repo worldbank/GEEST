@@ -36,9 +36,24 @@ class SafetyRasterWorkflow(WorkflowBase):
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
 
-        features_layer = QgsRasterLayer(
-            self.attributes.get("Use Nighttime Lights Layer Source", "")
-        )
+        layer_name = self.attributes.get("Use Nighttime Lights Raster", None)
+
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid raster found in Use Nighttime Lights Raster, trying Use Nighttime Lights Layer Source.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            layer_name = self.attributes.get("Use Nighttime Lights Layer Source", None)
+            if not layer_name:
+                QgsMessageLog.logMessage(
+                    "No points layer found in Use Nighttime Lights Layer Source.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+            return False
+
+        features_layer = QgsRasterLayer(layer_name, "Nighttime Lights Raster", "gdal")
 
         processor = SafetyRasterReclassificationProcessor(
             output_prefix=self.layer_id,
