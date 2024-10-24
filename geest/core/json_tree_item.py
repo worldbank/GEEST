@@ -6,6 +6,7 @@ from qgis.PyQt.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont, QIcon
 from qgis.core import QgsMessageLog, Qgis
 from geest.utilities import resources_path
+from geest.core import setting
 
 
 class JsonTreeItem:
@@ -129,15 +130,17 @@ class JsonTreeItem:
                 status = "x"
             return status
         except Exception as e:
-            import traceback
+            verbose_mode = setting.value("verbose_mode", False)
+            if verbose_mode:
+                import traceback
 
-            QgsMessageLog.logMessage(
-                f"Error getting status: {e}", tag="Geest", level=Qgis.Warning
-            )
-            QgsMessageLog.logMessage(
-                traceback.format_exc(), tag="Geest", level=Qgis.Warning
-            )
-            return "e"  # e for error
+                QgsMessageLog.logMessage(
+                    f"Error getting status: {e}", tag="Geest", level=Qgis.Warning
+                )
+                QgsMessageLog.logMessage(
+                    traceback.format_exc(), tag="Geest", level=Qgis.Warning
+                )
+                return "e"  # e for error
 
     def updateStatus(self, status=None):
         """Update the status of the item.

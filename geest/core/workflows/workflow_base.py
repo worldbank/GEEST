@@ -8,9 +8,21 @@ from qgis.core import (
     QgsMessageLog,
     Qgis,
     QgsProcessingContext,
+    QgsProcessingFeedback,
+    QgsFeatureRequest,
+    QgsGeometry,
+    QgsProcessingFeedback,
+    QgsProcessingException,
+    QgsVectorLayer,
+    QgsMessageLog,
+    QgsVectorFileWriter,
+    QgsWkbTypes,
+    Qgis,
 )
+import processing
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from geest.core import JsonTreeItem, setting
+from geest.core.algorithms import AreaIterator
 
 
 class WorkflowBase(ABC):
@@ -56,6 +68,8 @@ class WorkflowBase(ABC):
             "study_area_polygons",
             "ogr",
         )
+        self.features_layer = None  # set in concrete class if needed
+        self.raster_layer = None  # set in concrete class if needed
         self.output_crs = self.bboxes_layer.crs()
         # Will be populated by the workflow
         self.attributes = self.item.data(3)
@@ -64,8 +78,17 @@ class WorkflowBase(ABC):
 
     def execute(self) -> bool:
         """
-        Executes the workflow logic.
-        :return: True if the workflow completes successfully, False if canceled or failed.
+        Main function to iterate over areas from the GeoPackage and perform the analysis for each area.
+
+        This function processes areas (defined by polygons and bounding boxes) from the GeoPackage using
+        the provided input layers (features, grid). It applies the steps of selecting intersecting
+        features, then passes them to process area for further processing.
+
+        Raises:
+            QgsProcessingException: If any processing step fails during the execution.
+
+        Returns:
+            True if the workflow completes successfully, False if canceled or failed.
         """
         QgsMessageLog.logMessage(
             f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
@@ -82,19 +105,83 @@ class WorkflowBase(ABC):
             QgsMessageLog.logMessage(
                 "----------------------------------", tag="Geest", level=Qgis.Info
             )
-        # call the execute method of the concrete class and then add a time stamp to the attributes
+
+        self.attributes["Execution Start Time"] = datetime.datetime.now().isoformat()
+
+        QgsMessageLog.logMessage("Processing Started", tag="Geest", level=Qgis.Info)
+
+        feedback = QgsProcessingFeedback()
+        output_rasters = []
+        area_iterator = AreaIterator(self.gpkg_path)
         try:
-            self.attributes["Execution Start Time"] = (
-                datetime.datetime.now().isoformat()
+            for index, (current_area, current_bbox, progress) in enumerate(
+                area_iterator
+            ):
+                feedback.pushInfo(
+                    f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"
+                )
+                if self.feedback.isCanceled():
+                    QgsMessageLog.logMessage(
+                        f"{self.class_name} Processing was canceled by the user.",
+                        tag="Geest",
+                        level=Qgis.Warning,
+                    )
+                raster_output = None
+                # Step 1: Select features that intersect with the current area
+                if self.features_layer:
+                    area_features = self._select_features(
+                        self.features_layer,
+                        current_area,
+                        output_prefix=f"{self.layer_id}_area_features_{index}",
+                    )
+                    if area_features.featureCount() == 0:
+                        continue
+
+                    # Step 2: Process the area features
+                    raster_output = self._process_area(
+                        current_area=current_area,
+                        current_bbox=current_bbox,
+                        area_features=area_features,
+                        index=index,
+                    )
+
+                else:  # assumes we are processing a raster input
+                    raster_output = self._subset_raster(
+                        self.raster_layer,
+                        current_area,
+                        output_prefix=f"{self.output_prefix}_area_features_{index}",
+                    )
+
+                # Multiply the area by its matching mask layer in study_area folder
+                masked_layer = self._mask_raster(
+                    raster_path=raster_output,
+                    area_geometry=current_area,
+                    output_name=f"{self.output_prefix}_masked_{index}.shp",
+                    index=index,
+                )
+                output_rasters.append(masked_layer)
+            # Combine all area rasters into a VRT
+            vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
+            self.attributes["Indicator Result File"] = vrt_filepath
+            self.attributes["Indicator Result"] = (
+                f"{self.workflow_name} Workflow Completed"
             )
-            result = self.do_execute()
+
+            QgsMessageLog.logMessage(
+                f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             self.attributes["Execution End Time"] = datetime.datetime.now().isoformat()
+            self.attributes["Error File"] = None
+            return True
+
+        except Exception as e:
             # remove error.txt if it exists
             error_file = os.path.join(self.workflow_directory, "error.txt")
             if os.path.exists(error_file):
                 os.remove(error_file)
-            return result
-        except Exception as e:
+
             QgsMessageLog.logMessage(
                 f"Failed to process {self.workflow_name}: {e}",
                 tag="Geest",
@@ -106,18 +193,34 @@ class WorkflowBase(ABC):
                 level=Qgis.Critical,
             )
             self.attributes["Indicator Result"] = f"{self.workflow_name} Workflow Error"
+            self.attributes["Indicator Result File"] = ""
+
             # Write the traceback to error.txt in the workflow_directory
-            with open(os.path.join(self.workflow_directory, "error.txt"), "w") as f:
+            error_path = os.path.join(self.workflow_directory, "error.txt")
+            with open(error_path, "w") as f:
                 f.write(f"Failed to process {self.workflow_name}: {e}\n")
                 f.write(traceback.format_exc())
+            self.attributes["Error File"] = error_path
             return False
 
     @abstractmethod
-    def do_execute(self) -> bool:
+    def _process_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
         """
-        Executes the actual workflow logic.
+        Executes the actual workflow logic for a single area
         Must be implemented by subclasses.
-        :return: True if the workflow completes successfully, False if canceled or failed.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: A raster layer if processing completes successfully, False if canceled or failed.
         """
         pass
 
@@ -135,3 +238,149 @@ class WorkflowBase(ABC):
             os.makedirs(directory)
 
         return directory
+
+    def _select_features(
+        self, layer: QgsVectorLayer, area_geom: QgsGeometry, output_prefix: str
+    ) -> QgsVectorLayer:
+        """
+        Select features from the input layer that intersect with the given area geometry
+        using the QGIS API. The selected features are stored in the working directory layer.
+
+        Args:
+            layer (QgsVectorLayer): The input layer to select features from (e.g., points, lines, polygons).
+            area_geom (QgsGeometry): The current area geometry for which intersections are evaluated.
+            output_name (str): A name for the output temporary layer to store selected features.
+
+        Returns:
+            QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
+        """
+        QgsMessageLog.logMessage(
+            f"{self.workflow_name} Select Features Started",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        output_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
+
+        # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
+        geometry_type = layer.wkbType()
+
+        # Determine geometry type name based on input layer's geometry
+        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
+            geometry_name = "Point"
+        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
+            geometry_name = "LineString"
+        else:
+            raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
+
+        # Create a memory layer to store the selected features with the correct geometry type
+        crs = layer.crs().authid()
+        temp_layer = QgsVectorLayer(
+            f"{geometry_name}?crs={crs}", output_prefix, "memory"
+        )
+        temp_layer_data = temp_layer.dataProvider()
+
+        # Add fields to the temporary layer
+        temp_layer_data.addAttributes(layer.fields())
+        temp_layer.updateFields()
+
+        # Iterate through features and select those that intersect with the area
+        request = QgsFeatureRequest(area_geom.boundingBox()).setFilterRect(
+            area_geom.boundingBox()
+        )
+        selected_features = [
+            feat
+            for feat in layer.getFeatures(request)
+            if feat.geometry().intersects(area_geom)
+        ]
+        temp_layer_data.addFeatures(selected_features)
+
+        QgsMessageLog.logMessage(
+            f"{self.workflow_name} writing {len(selected_features)} features",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        # Save the memory layer to a file for persistence
+        QgsVectorFileWriter.writeAsVectorFormat(
+            temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
+        )
+
+        QgsMessageLog.logMessage(
+            f"{self.workflow_name} Select Features Ending", tag="Geest", level=Qgis.Info
+        )
+
+        return QgsVectorLayer(output_path, output_prefix, "ogr")
+
+    def _rasterize(
+        self, input_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
+    ) -> str:
+        """
+
+        ⭐️🚩⭐️ Warning this is not DRY - almost same function exists in study_area.py
+
+        Rasterize the grid layer based on the 'value' attribute.
+
+        Args:
+            input_layer (QgsVectorLayer): The layer to rasterize.
+            bbox (QgsGeometry): The bounding box for the raster extents.
+            index (int): The current index used for naming the output raster.
+
+        Returns:
+            str: The file path to the rasterized output.
+        """
+        QgsMessageLog.logMessage("--- Rasterizingrid", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(f"--- bbox {bbox}", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage(f"--- index {index}", tag="Geest", level=Qgis.Info)
+
+        output_path = os.path.join(
+            self.workflow_directory,
+            f"{self.output_prefix}_buffered_{index}.tif",
+        )
+        if not input_layer.isValid():
+            QgsMessageLog.logMessage(
+                f"Layer failed to load! {input_layer}", "Geest", Qgis.Info
+            )
+            return
+        else:
+            QgsMessageLog.logMessage(f"Rasterizing {input_layer}", "Geest", Qgis.Info)
+
+        # Ensure resolution parameters are properly formatted as float values
+        x_res = 100.0  # 100m pixel size in X direction
+        y_res = 100.0  # 100m pixel size in Y direction
+        bbox = bbox.boundingBox()
+        # Define rasterization parameters for the temporary layer
+        params = {
+            "INPUT": input_layer,
+            "FIELD": "value",
+            "BURN": 0,
+            "USE_Z": False,
+            "UNITS": 1,
+            "WIDTH": x_res,
+            "HEIGHT": y_res,
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "NODATA": 0,
+            "OPTIONS": "",
+            "DATA_TYPE": 0,
+            "INIT": 1,
+            "INVERT": False,
+            "EXTRA": f"-a_srs {self.target_crs.authid()}",
+            "OUTPUT": output_path,
+        }
+
+        #'OUTPUT':'TEMPORARY_OUTPUT'})
+
+        processing.run("gdal:rasterize", params)
+        QgsMessageLog.logMessage(
+            f"Rasterize Parameter: {params}", tag="Geest", level=Qgis.Info
+        )
+
+        QgsMessageLog.logMessage(
+            f"Rasterize complete for: {output_path}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        QgsMessageLog.logMessage(
+            f"Created raster: {output_path}", tag="Geest", level=Qgis.Info
+        )
+        return output_path
