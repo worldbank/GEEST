@@ -10,7 +10,7 @@ from qgis.core import (
     QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
-from geest.core import JsonTreeItem
+from geest.core import JsonTreeItem, setting
 
 
 class WorkflowBase(ABC):
@@ -67,6 +67,21 @@ class WorkflowBase(ABC):
         Executes the workflow logic.
         :return: True if the workflow completes successfully, False if canceled or failed.
         """
+        QgsMessageLog.logMessage(
+            f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
+        )
+        QgsMessageLog.logMessage(
+            "----------------------------------", tag="Geest", level=Qgis.Info
+        )
+        verbose_mode = int(setting(key="verbose_mode", default=0))
+        if verbose_mode:
+            for item in self.attributes.items():
+                QgsMessageLog.logMessage(
+                    f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
+                )
+            QgsMessageLog.logMessage(
+                "----------------------------------", tag="Geest", level=Qgis.Info
+            )
         # call the execute method of the concrete class and then add a time stamp to the attributes
         try:
             self.attributes["Execution Start Time"] = (

@@ -189,6 +189,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QSpinBox" name="cell_size_spinbox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="minimum">
            <number>10</number>
           </property>
@@ -202,6 +205,9 @@
         </item>
         <item>
          <widget class="QLabel" name="label">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Analysis cell size (m)</string>
           </property>

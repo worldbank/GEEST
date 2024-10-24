@@ -48,23 +48,6 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
-        verbose_mode = int(setting(key="verbose_mode", default=0))
-
-        QgsMessageLog.logMessage(
-            f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
-        )
-        if verbose_mode:
-            QgsMessageLog.logMessage(
-                "----------------------------------", tag="Geest", level=Qgis.Info
-            )
-            for item in self.attributes.items():
-                QgsMessageLog.logMessage(
-                    f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
-                )
-            QgsMessageLog.logMessage(
-                "----------------------------------", tag="Geest", level=Qgis.Info
-            )
-
         self.distances = self.attributes.get("Multi Buffer Travel Distances", None)
         if not self.distances:
             QgsMessageLog.logMessage(

@@ -1,6 +1,5 @@
 import os
 import glob
-import shutil
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -10,7 +9,6 @@ from qgis.core import (
     QgsField,
     QgsGeometry,
     QgsRasterLayer,
-    QgsProject,
     QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
@@ -37,39 +35,12 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.attributes = item.data(3)
-        self.layer_id = self.attributes["Layer"].lower().replace(" ", "_")
-        self.project_base_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../..")
-        )
-
-        # Initialize GridAligner with grid size
-        self.grid_aligner = GridAligner(grid_size=100)
+        self.workflow_name = "Use Default Index Score"
 
     def do_execute(self):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
-
-        QgsMessageLog.logMessage(
-            "Executing Use Default Index Score", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
-        for item in self.attributes.items():
-            QgsMessageLog.logMessage(
-                f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
-            )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
-
-        self.workflow_directory = self._create_workflow_directory(
-            "contextual",
-            self.layer_id,
-        )
-
         # loop through self.bboxes_layer and the self.areas_layer  and create a raster for each feature
         index_score = self.attributes["Default Index Score"]
         for feature in self.areas_layer.getFeatures():
@@ -139,11 +110,6 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             )
             return
 
-        # Align the bounding box using GridAligner before proceeding
-        aligned_bbox = self.grid_aligner.align_bbox(
-            geom.boundingBox(), self.areas_layer.extent()
-        )
-
         raster_filepath = os.path.join(self.workflow_directory, f"{raster_name}.tif")
         index_score = (self.attributes["Default Index Score"] / 100) * 5
 
@@ -166,7 +132,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Ensure resolution parameters are properly formatted as float values
         x_res = 100.0  # 100m pixel size in X direction
         y_res = 100.0  # 100m pixel size in Y direction
-
+        aligned_box = aligned_box.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
             "INPUT": temp_layer,
@@ -176,8 +142,8 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "UNITS": 1,
             "WIDTH": x_res,
             "HEIGHT": y_res,
-            "EXTENT": f"{aligned_bbox.xMinimum()},{aligned_bbox.xMaximum()},"
-            f"{aligned_bbox.yMinimum()},{aligned_bbox.yMaximum()}",  # Extent of the aligned bbox
+            "EXTENT": f"{aligned_box.xMinimum()},{aligned_box.xMaximum()},"
+            f"{aligned_box.yMinimum()},{aligned_box.yMaximum()} [{self.output_crs.authid()}]",  # Extent of the aligned bbox
             "NODATA": None,
             "OPTIONS": "",
             "DATA_TYPE": 0,  # byte
@@ -277,48 +243,4 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
                 f"VRT Is not valid", tag="Geest", level=Qgis.Critical
             )
             return None
-
-        # Copy the style (.qml) file to the same directory as the VRT
-        style_folder = os.path.join(
-            self.project_base_dir, "resources", "qml"
-        )  # assuming 'style' folder path
-        qml_src_path = os.path.join(style_folder, "Contextual.qml")
-        qml_dest_path = os.path.join(
-            raster_dir, os.path.basename(vrt_filepath).replace(".vrt", ".qml")
-        )
-        if not os.path.exists(qml_src_path):
-            QgsMessageLog.logMessage(
-                f"QML style file not found: {qml_src_path}",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-        shutil.copy(qml_src_path, qml_dest_path)
-        QgsMessageLog.logMessage(
-            f"Copied QML style file to {qml_dest_path}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-
-        if not os.path.exists(qml_dest_path):
-            QgsMessageLog.logMessage(
-                "QML not in the directory.", tag="Geest", level=Qgis.Critical
-            )
-        else:
-            result = vrt_layer.loadNamedStyle(qml_dest_path)
-            if result[0]:  # Check if the style was successfully loaded
-                QgsMessageLog.logMessage(
-                    "Successfully applied QML style.", tag="Geest", level=Qgis.Info
-                )
-            else:
-                QgsMessageLog.logMessage(
-                    f"Failed to apply QML style: {result[1]}",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-
-        self.context.project().addMapLayer(vrt_layer)
-        QgsMessageLog.logMessage(
-            "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-        )
-
         return vrt_filepath

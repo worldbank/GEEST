@@ -1,14 +1,7 @@
-import os
-import glob
-import shutil
 from qgis.core import QgsMessageLog, Qgis, QgsFeedback, QgsProcessingContext
-from qgis.PyQt.QtCore import QVariant
-import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.utilities import GridAligner
 from geest.core.algorithms import AcledImpactRasterProcessor
-from geest.core import setting
 
 
 class AcledImpactWorkflow(WorkflowBase):
@@ -29,29 +22,12 @@ class AcledImpactWorkflow(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use CSV to Point Layer"
-        # Initialize GridAligner with grid size
-        self.grid_aligner = GridAligner(grid_size=100)
 
     def do_execute(self):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
 
-        QgsMessageLog.logMessage(
-            f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
-        verbose_mode = int(setting(key="verbose_mode", default=0))
-        if verbose_mode:
-            for item in self.attributes.items():
-                QgsMessageLog.logMessage(
-                    f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
-                )
-            QgsMessageLog.logMessage(
-                "----------------------------------", tag="Geest", level=Qgis.Info
-            )
         csv_file = self.attributes.get("Use CSV to Point Layer CSV File", "")
         processor = AcledImpactRasterProcessor(
             output_prefix=self.layer_id,
