@@ -57,9 +57,25 @@ class PolylinePerCellWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             "----------------------------------", tag="Geest", level=Qgis.Info
         )
-        features_layer = QgsVectorLayer(
-            self.attributes.get("Polyline per Cell Layer Source", "")
-        )
+
+        layer_name = self.attributes.get("Polyline per Cell Shapefile", None)
+
+        if not layer_name:
+            QgsMessageLog.logMessage(
+                "Invalid raster found in Polyline per Cell Shapefile, trying Polyline per Cell Layer Source.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            layer_name = self.attributes.get("Polyline per Cell Layer Source", None)
+            if not layer_name:
+                QgsMessageLog.logMessage(
+                    "No points layer found in Polyline per Cell Layer Source.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+            return False
+
+        features_layer = QgsVectorLayer(layer_name, "Polyline per Cell", "ogr")
         processor = FeaturesPerCellProcessor(
             output_prefix=self.layer_id,
             features_layer=features_layer,
