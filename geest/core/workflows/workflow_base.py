@@ -70,11 +70,12 @@ class WorkflowBase(ABC):
         )
         self.features_layer = None  # set in concrete class if needed
         self.raster_layer = None  # set in concrete class if needed
-        self.output_crs = self.bboxes_layer.crs()
+        self.target_crs = self.bboxes_layer.crs()
         # Will be populated by the workflow
         self.attributes = self.item.data(3)
         self.layer_id = self.attributes.get("ID", "").lower().replace(" ", "_")
         self.attributes["Result"] = "Not Run"
+        self.workflow_is_legacy = True
 
     def execute(self) -> bool:
         """
@@ -90,6 +91,8 @@ class WorkflowBase(ABC):
         Returns:
             True if the workflow completes successfully, False if canceled or failed.
         """
+        if self.workflow_is_legacy:
+            return self.do_execute()
         QgsMessageLog.logMessage(
             f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
         )
@@ -112,6 +115,10 @@ class WorkflowBase(ABC):
 
         feedback = QgsProcessingFeedback()
         output_rasters = []
+
+        if self.features_layer:
+            self.features_layer = self._check_and_reproject_layer()
+
         area_iterator = AreaIterator(self.gpkg_path)
         try:
             for index, (current_area, current_bbox, progress) in enumerate(
@@ -128,9 +135,8 @@ class WorkflowBase(ABC):
                     )
                 raster_output = None
                 # Step 1: Select features that intersect with the current area
-                if self.features_layer:
+                if self.features_layer:  # we are processing a vector input
                     area_features = self._select_features(
-                        self.features_layer,
                         current_area,
                         output_prefix=f"{self.layer_id}_area_features_{index}",
                     )
@@ -240,16 +246,14 @@ class WorkflowBase(ABC):
         return directory
 
     def _select_features(
-        self, layer: QgsVectorLayer, area_geom: QgsGeometry, output_prefix: str
+        self, area_geom: QgsGeometry, output_prefix: str
     ) -> QgsVectorLayer:
         """
-        Select features from the input layer that intersect with the given area geometry
-        using the QGIS API. The selected features are stored in the working directory layer.
+        Select features from the features layer that intersect with the given area geometry.
 
         Args:
-            layer (QgsVectorLayer): The input layer to select features from (e.g., points, lines, polygons).
             area_geom (QgsGeometry): The current area geometry for which intersections are evaluated.
-            output_name (str): A name for the output temporary layer to store selected features.
+            output_prefix (str): A name for the output temporary layer to store selected features.
 
         Returns:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
@@ -262,7 +266,7 @@ class WorkflowBase(ABC):
         output_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
 
         # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
-        geometry_type = layer.wkbType()
+        geometry_type = self.features_layer.wkbType()
 
         # Determine geometry type name based on input layer's geometry
         if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
@@ -272,44 +276,46 @@ class WorkflowBase(ABC):
         else:
             raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
 
-        # Create a memory layer to store the selected features with the correct geometry type
-        crs = layer.crs().authid()
-        temp_layer = QgsVectorLayer(
-            f"{geometry_name}?crs={crs}", output_prefix, "memory"
-        )
-        temp_layer_data = temp_layer.dataProvider()
+        params = {
+            "INPUT": self.features_layer,
+            "PREDICATE": [0],  # Intersects predicate
+            "GEOMETRY": area_geom,
+            "EXTENT": area_geom.boundingBox(),
+            "OUTPUT": output_path,
+        }
+        result = processing.run("native:extractbyextent", params)
+        return QgsVectorLayer(result["OUTPUT"], output_prefix, "ogr")
 
-        # Add fields to the temporary layer
-        temp_layer_data.addAttributes(layer.fields())
-        temp_layer.updateFields()
+    def _check_and_reproject_layer(self):
+        """
+        Checks if the features layer has the expected CRS. If not, it reprojects the layer.
 
-        # Iterate through features and select those that intersect with the area
-        request = QgsFeatureRequest(area_geom.boundingBox()).setFilterRect(
-            area_geom.boundingBox()
-        )
-        selected_features = [
-            feat
-            for feat in layer.getFeatures(request)
-            if feat.geometry().intersects(area_geom)
-        ]
-        temp_layer_data.addFeatures(selected_features)
+        Returns:
+            QgsVectorLayer: The input layer, either reprojected or unchanged.
 
-        QgsMessageLog.logMessage(
-            f"{self.workflow_name} writing {len(selected_features)} features",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-
-        # Save the memory layer to a file for persistence
-        QgsVectorFileWriter.writeAsVectorFormat(
-            temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
-        )
-
-        QgsMessageLog.logMessage(
-            f"{self.workflow_name} Select Features Ending", tag="Geest", level=Qgis.Info
-        )
-
-        return QgsVectorLayer(output_path, output_prefix, "ogr")
+        Note: Also updates self.features_layer to point to the reprojected layer.
+        """
+        if self.features_layer.crs() != self.target_crs:
+            QgsMessageLog.logMessage(
+                f"Reprojecting layer from {self.features_layer.crs().authid()} to {self.target_crs.authid()}",
+                "Geest",
+                level=Qgis.Info,
+            )
+            reproject_result = processing.run(
+                "native:reprojectlayer",
+                {
+                    "INPUT": self.features_layer,
+                    "TARGET_CRS": self.target_crs,
+                    "OUTPUT": "memory:",  # Reproject in memory
+                },
+                feedback=QgsProcessingFeedback(),
+            )
+            reprojected_layer = reproject_result["OUTPUT"]
+            if not reprojected_layer.isValid():
+                raise QgsProcessingException("Reprojected layer is invalid.")
+            self.features_layer = reprojected_layer
+        # If CRS matches, return the original layer
+        return self.features_layer
 
     def _rasterize(
         self, input_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
@@ -334,7 +340,7 @@ class WorkflowBase(ABC):
 
         output_path = os.path.join(
             self.workflow_directory,
-            f"{self.output_prefix}_buffered_{index}.tif",
+            f"{self.layer_id}_buffered_{index}.tif",
         )
         if not input_layer.isValid():
             QgsMessageLog.logMessage(
@@ -384,3 +390,13 @@ class WorkflowBase(ABC):
             f"Created raster: {output_path}", tag="Geest", level=Qgis.Info
         )
         return output_path
+
+    @abstractmethod
+    def do_execute(self) -> bool:
+        """
+        Executes the actual workflow logic.
+        Must be implemented by subclasses.
+
+        :return: True if the workflow completes successfully, False if canceled or failed.
+        """
+        pass

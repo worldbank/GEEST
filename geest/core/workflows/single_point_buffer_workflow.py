@@ -1,6 +1,7 @@
 import os
 from qgis.core import (
     QgsMessageLog,
+    QgsField,
     Qgis,
     QgsFeedback,
     QgsVectorLayer,
@@ -8,6 +9,7 @@ from qgis.core import (
     QgsVectorLayer,
     QgsGeometry,
 )
+from qgis.PyQt.QtCore import QVariant
 import processing
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
@@ -57,6 +59,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
             return False
 
         self.buffer_distance = self.attributes.get("Single Buffer Distance", 1000)
+        self.workflow_is_legacy = False  # This is a new workflow, not a legacy one
 
     def _process_area(
         self,
@@ -82,7 +85,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
         # Step 1: Buffer the selected features
         buffered_layer = self._buffer_features(
-            area_features, f"{self.output_prefix}_buffered_{index}"
+            area_features, f"{self.layer_id}_buffered_{index}"
         )
 
         # Step 2: Assign values to the buffered polygons
