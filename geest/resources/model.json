@@ -920,7 +920,7 @@
                     "layers": [
                         {
                             "Layer": "Water points (OSM), catch basins, water valves and fire hydrants",
-                            "ID": "",
+                            "ID": "Water_Sanitation",
                             "Text": "Water and Sanitation concerns the availability of clean water and sanitation facilities, affecting women\u2019s time allocation and capacity to engage in employment.",
                             "Default Index Score": 0,
                             "Index Score": 0,

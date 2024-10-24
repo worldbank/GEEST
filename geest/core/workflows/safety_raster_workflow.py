@@ -1,6 +1,3 @@
-import os
-import glob
-import shutil
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -8,11 +5,8 @@ from qgis.core import (
     QgsRasterLayer,
     QgsProcessingContext,
 )
-from qgis.PyQt.QtCore import QVariant
-import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.utilities import GridAligner
 from geest.core.algorithms import SafetyRasterReclassificationProcessor
 
 
@@ -36,27 +30,12 @@ class SafetyRasterWorkflow(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Nighttime Lights"
-        # Initialize GridAligner with grid size
-        self.grid_aligner = GridAligner(grid_size=100)
 
     def do_execute(self):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
 
-        QgsMessageLog.logMessage(
-            f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
-        for item in self.attributes.items():
-            QgsMessageLog.logMessage(
-                f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
-            )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
         features_layer = QgsRasterLayer(
             self.attributes.get("Use Nighttime Lights Layer Source", "")
         )

@@ -40,20 +40,6 @@ class RasterReclassificationWorkflow(WorkflowBase):
         """
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
-
-        QgsMessageLog.logMessage(
-            f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
-        for item in self.attributes.items():
-            QgsMessageLog.logMessage(
-                f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info
-            )
-        QgsMessageLog.logMessage(
-            "----------------------------------", tag="Geest", level=Qgis.Info
-        )
         features_layer = QgsRasterLayer(
             self.attributes.get("Use Environmental Hazards Layer Source", "")
         )
