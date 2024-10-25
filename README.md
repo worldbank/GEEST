@@ -1,4 +1,4 @@
-# 🌟**Welcome to GEEST**
+# 🌟 **Welcome to GEEST**
 
 **Empowering Women Across Multiple Sectors**
 <p align="justify">
