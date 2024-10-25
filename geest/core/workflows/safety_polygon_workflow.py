@@ -74,5 +74,8 @@ class SafetyPolygonWorkflow(WorkflowBase):
 
         vrt_path = processor.process_areas()
         self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = "Use Safety Per Cell Workflow Completed"
+        self.attributes["Result"] = "Use Safety Per Cell Workflow Completed"
         return True
+
+    def _process_area(self):
+        pass

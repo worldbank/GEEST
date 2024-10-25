@@ -39,3 +39,6 @@ class DontUseWorkflow(WorkflowBase):
             "Dont use workflow workflow completed", tag="Geest", level=Qgis.Info
         )
         return True
+
+    def _process_area(self):
+        pass

@@ -73,9 +73,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             )
         )
         self.attributes["Indicator Result File"] = vrt_filepath
-        self.attributes["Indicator Result"] = (
-            "Use Default Index Score Workflow Completed"
-        )
+        self.attributes["Result"] = "Use Default Index Score Workflow Completed"
         QgsMessageLog.logMessage(
             f"self.attributes after Use Default Index Score workflow\n\n {self.attributes}",
             tag="Geest",
@@ -115,7 +113,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
 
         # Create a memory layer to hold the geometry
         temp_layer = QgsVectorLayer(
-            f"Polygon?crs={self.output_crs.authid()}", "temp_raster_layer", "memory"
+            f"Polygon?crs={self.target_crs.authid()}", "temp_raster_layer", "memory"
         )
         temp_layer_data_provider = temp_layer.dataProvider()
 
@@ -143,7 +141,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "WIDTH": x_res,
             "HEIGHT": y_res,
             "EXTENT": f"{aligned_box.xMinimum()},{aligned_box.xMaximum()},"
-            f"{aligned_box.yMinimum()},{aligned_box.yMaximum()} [{self.output_crs.authid()}]",  # Extent of the aligned bbox
+            f"{aligned_box.yMinimum()},{aligned_box.yMaximum()} [{self.target_crs.authid()}]",  # Extent of the aligned bbox
             "NODATA": None,
             "OPTIONS": "",
             "DATA_TYPE": 0,  # byte
@@ -244,3 +242,6 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             )
             return None
         return vrt_filepath
+
+    def _process_area(self):
+        pass

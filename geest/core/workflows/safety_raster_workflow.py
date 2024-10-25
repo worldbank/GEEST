@@ -71,5 +71,8 @@ class SafetyRasterWorkflow(WorkflowBase):
 
         vrt_path = processor.process_areas()
         self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = "Use Nighttime Lights Workflow Completed"
+        self.attributes["Result"] = "Use Nighttime Lights Workflow Completed"
         return True
+
+    def _process_area(self):
+        pass

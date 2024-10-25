@@ -135,3 +135,6 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         )
         self.attributes["Indicator Result File"] = vrt_path
         return True
+
+    def _process_area(self):
+        pass

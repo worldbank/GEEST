@@ -191,7 +191,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
 
         vrt_path = processor.reclassify()
         self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = (
-            "Use Environmental Hazards Workflow Completed"
-        )
+        self.attributes["Result"] = "Use Environmental Hazards Workflow Completed"
         return True
+
+    def _process_area(self):
+        pass
