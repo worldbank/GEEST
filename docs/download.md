@@ -8,4 +8,4 @@ To install the tool, please follow the installation instructions provided under 
 
 ---
 
-For any additional help, feel free to check our [User Guide](#) for more detailed guidance.
+For any additional help, feel free to check our [User Guide](docs/userguide/install.md) for more detailed guidance.
