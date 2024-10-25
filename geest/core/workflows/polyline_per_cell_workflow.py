@@ -67,3 +67,6 @@ class PolylinePerCellWorkflow(WorkflowBase):
         self.attributes["Indicator Result File"] = vrt_path
         self.attributes["Result"] = "Use Polyline per Cell Workflow Completed"
         return True
+
+    def _process_area(self):
+        pass

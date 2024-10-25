@@ -193,3 +193,6 @@ class RasterReclassificationWorkflow(WorkflowBase):
         self.attributes["Indicator Result File"] = vrt_path
         self.attributes["Result"] = "Use Environmental Hazards Workflow Completed"
         return True
+
+    def _process_area(self):
+        pass

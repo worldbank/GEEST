@@ -53,3 +53,6 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
             directory,
             f"aggregate_{self.id}" + f".{extension}",
         )
+
+    def _process_area(self):
+        pass

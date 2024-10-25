@@ -150,8 +150,8 @@ class WorkflowBase(ABC):
                         current_area,
                         output_prefix=f"{self.layer_id}_area_features_{index}",
                     )
-                    if area_features.featureCount() == 0:
-                        continue
+                    # if area_features.featureCount() == 0:
+                    #    continue
 
                     # Step 2: Process the area features - work happens in concrete class
                     raster_output = self._process_area(

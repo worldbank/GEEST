@@ -51,3 +51,6 @@ class RasterLayerWorkflow(WorkflowBase):
             "Spatial analysis workflow completed", "Custom Workflows", Qgis.Info
         )
         return True
+
+    def _process_area(self):
+        pass

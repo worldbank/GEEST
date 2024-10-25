@@ -325,3 +325,6 @@ class AggregationWorkflowBase(WorkflowBase):
                 f"{self.analysis_mode} Aggregation Workflow Failed"
             )
             return False
+
+    def _process_area(self):
+        pass
