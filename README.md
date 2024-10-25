@@ -8,7 +8,8 @@ By leveraging advanced geospatial mapping and a multi-criteria evaluation (MCE) 
 
 ---
 </p>
-### Discover Opportunities. Drive Change.
+
+**Discover Opportunities. Drive Change.**
 <p align="justify">
 Join us in advancing women’s empowerment and shaping a more equitable future across diverse sectors.
 
