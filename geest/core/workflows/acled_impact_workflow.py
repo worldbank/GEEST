@@ -2,7 +2,6 @@ import os
 import csv
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.algorithms import AcledImpactRasterProcessor
 
 from qgis.core import (
     Qgis,
@@ -288,9 +287,8 @@ class AcledImpactWorkflow(WorkflowBase):
             return
 
         # Step 2: Create a memory layer to store the result
-        result_layer = QgsVectorLayer(
-            f"Polygon?crs=EPSG:{self.target_crs.authid()}", "result_layer", "memory"
-        )
+        result_layer = QgsVectorLayer(f"Polygon", "result_layer", "memory")
+        result_layer.setCrs(self.target_crs)
         provider = result_layer.dataProvider()
 
         # Step 3: Add a field to store the minimum value (lower number = higher rank)
