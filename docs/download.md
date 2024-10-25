@@ -1,4 +1,4 @@
-# 🚀 **Download GEEST**
+# **Download GEEST**
 
 Welcome to the **GEEST** download page! Start your journey by downloading the latest version of the tool using the link below:
 
