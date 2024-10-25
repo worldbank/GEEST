@@ -32,7 +32,7 @@ GEEST uses a <strong>Multi-Criteria Evaluation (MCE)</strong> framework to evalu
 </p>
 
 <p style="text-align: justify;">
-By incorporating 15 spatial factors across three dimensions—Contextual, Accessibility, and Place Characterization—GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all.
+By incorporating <strong>15 spatial factors</strong> across <strong>three dimensions - Contextual, Accessibility, and Place Characterization</strong> - GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all.
 </p>
 
 #### GEEST serves to:
