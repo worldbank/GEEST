@@ -1,6 +1,6 @@
-# ℹ️ **About GEEST**
+# ℹ️ About GEEST
 
-### ❓ **What is GEEST**
+### ❓ What is GEEST
 
 
 **GEEST is a QGIS plugin**, designed to empower users with robust geospatial tools directly within the QGIS platform, making it accessible and integrable for users worldwide.
@@ -8,7 +8,7 @@
 
 ---
 
-### 🎯 **GEEST Vision**
+### 🎯 GEEST Vision
 
 
 With GEEST, we are dedicated to advancing gender equality worldwide by identifying key opportunities for women in diverse sectors. Through sophisticated geospatial analysis, we seek to create pathways for women to thrive in industries such as:
@@ -25,7 +25,7 @@ With GEEST, we are dedicated to advancing gender equality worldwide by identifyi
 
 ---
 
-### 🔍 **GEEST Approach**
+### 🔍 GEEST Approach
 
 
 GEEST uses a **Multi-Criteria Evaluation (MCE)** framework to evaluate various socio-economic, infrastructural, and environmental factors that influence women's access to employment and business opportunities. This open-source tool consolidates data from multiple sectors to produce **visual maps** that highlight areas where women can flourish, helping to shape gender-responsive initiatives.
@@ -38,7 +38,7 @@ GEEST uses a **Multi-Criteria Evaluation (MCE)** framework to evaluate various s
 
 ---
 
-### 💡 **Why It Matters**
+### 💡 Why It Matters
 
 
 Women continue to face significant challenges in accessing employment and business opportunities in many sectors, limiting both economic growth and gender equality. GEEST seeks to close this gap by equipping stakeholders with the data needed to empower women in various industries, fostering sustainable development and social progress.
@@ -46,7 +46,7 @@ Women continue to face significant challenges in accessing employment and busine
 
 ---
 
-### 🤝 **How to Get Involved**
+### 🤝 How to Get Involved
 
 
 Whether you are a policymaker, researcher, business leader, or advocate for gender equality, GEEST provides the tools and insights you need to make a difference. **Join us** in exploring the tool, contributing to our mission, and driving meaningful change for women around the world.
