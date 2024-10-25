@@ -1,5 +1,13 @@
 # About GEEST
 
+### ❓ **What is GEEST**
+
+
+**GEEST is a QGIS plugin**, designed to empower users with robust geospatial tools directly within the QGIS platform, making it accessible and integrable for users worldwide.
+
+
+---
+
 ### 🎯 **GEEST Vision**
 
 
@@ -14,14 +22,6 @@ With GEEST, we are dedicated to advancing gender equality worldwide by identifyi
 - 🏗️ Infrastructure Development
 - 🧑‍🎓 Capacity Building
 - 📦 Supply Chain and Logistics, and much more.
-
----
-
-### ❓ **What is GEEST**
-
-
-**GEEST is a QGIS plugin**, designed to empower users with robust geospatial tools directly within the QGIS platform, making it accessible and integrable for users worldwide.
-
 
 ---
 
