@@ -1,4 +1,4 @@
-# 🤝 **Acknowledgements**
+# 🤝 Acknowledgements
 <p style="text-align: justify;">
 This project would not have been possible without the invaluable support and collaboration of our dedicated partners and contributors. 
 
@@ -8,7 +8,7 @@ Special thanks to **Clara Ivanescu**, **Carolina Iris Mayen Huerta**, **Benny Is
 
 Thank you to everyone who has been part of this journey.
 
-# 📧 **Contact Us**
+# 📧 Contact Us
 
 For further inquiries or to get involved, please feel free to contact us at:
 
