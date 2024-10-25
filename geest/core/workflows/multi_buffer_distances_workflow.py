@@ -79,7 +79,6 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             raise Exception("Invalid travel distances provided.")
 
         layer_path = self.attributes.get("Multi Buffer Shapefile", None)
-
         if not layer_path:
             QgsMessageLog.logMessage(
                 "Invalid points layer found in Multi Buffer Shapefile, trying Multi Buffer Point Layer Name.",
@@ -89,11 +88,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             layer_path = self.attributes.get("Multi Buffer Point Layer Source", None)
             if not layer_path:
                 QgsMessageLog.logMessage(
-                    "No points layer found in Multi Buffer Point Layer Name.",
+                    f"No points layer found  at Multi Buffer Point Layer Source {layer_path}.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            raise Exception("Invalid points layer found.")
+                raise Exception("Invalid points layer found.")
+        QgsMessageLog.logMessage(
+            f"Using points layer at {layer_path}", tag="Geest", level=Qgis.Info
+        )
         self.features_layer = QgsVectorLayer(layer_path, "points", "ogr")
         if not self.features_layer.isValid():
             QgsMessageLog.logMessage(
@@ -124,6 +126,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
         )
         self.temp_layers = []  # Store intermediate layers
+        # We can remove this next line once all workflows are refactored
+        self.workflow_is_legacy = False
+        QgsMessageLog.logMessage(
+            f"Using ORS API key: {self.masked_api_key}", "Geest", Qgis.Info
+        )
+        QgsMessageLog.logMessage(
+            "Multi Buffer Distances Workflow initialized", "Geest", Qgis.Info
+        )
 
     def _process_area(
         self,
@@ -150,11 +160,16 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             index=index,
         )
 
-        raster_output = self.rasterize(
-            input_path=buffers,
-            distance_field="distance",
+        scored_buffers = self._assign_scores(buffers)
+
+        raster_output = self._rasterize(
+            input_layer=scored_buffers,
             bbox=current_bbox,
+            index=index,
+            value_field="value",
         )
+
+        return raster_output
 
     def create_multibuffers(
         self,
@@ -216,19 +231,18 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 "Geest",
                 Qgis.Info,
             )
-            crs = point_layer.crs()
-            merged_layer = self._merge_layers(self.temp_layers, crs, index)
+            merged_layer = self._merge_layers(self.temp_layers, index)
             QgsMessageLog.logMessage(
-                f"Merged isochrone layer created at {output_path}",
+                f"Merged isochrone layer created at {merged_layer.source()}",
                 "Geest",
                 Qgis.Info,
             )
             QgsMessageLog.logMessage(
-                f"Removing overlaps between isochrones for {merged_layer}",
+                f"Removing overlaps between isochrones for {merged_layer.source()}",
                 "Geest",
                 Qgis.Info,
             )
-            result = self._create_bands(merged_layer, crs, index)
+            result = self._create_bands(merged_layer, index)
             return result
         else:
             QgsMessageLog.logMessage(
@@ -490,7 +504,6 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             "Geest",
             Qgis.Info,
         )
-        QgsMessageLog.logMessage(f"Layer written to {output_path}", "Geest", Qgis.Info)
         return final_layer
 
     def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
@@ -503,6 +516,9 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         Returns:
             QgsVectorLayer: The same layer with a "value" field containing the assigned scores.
         """
+        if not layer or not layer.isValid():
+            return False
+
         # Check if the "value" field already exists
         field_names = [field.name() for field in layer.fields()]
         QgsMessageLog.logMessage(f"Field names: {field_names}", "Geest", Qgis.Info)
@@ -525,7 +541,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         layer.startEditing()
         for i, feature in enumerate(layer.getFeatures()):
             # Get the value of the burn field from the feature
-            distance_field_value = feature.attribute(self.distance_field)
+            distance_field_value = feature.attribute("distance")
             # Get the index of the burn field value from the distances list
             if distance_field_value in self.distances:
                 distance_field_index = self.distances.index(distance_field_value)
