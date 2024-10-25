@@ -18,7 +18,7 @@ For a comprehensive understanding of the Analytical Framework and the associated
 </p>
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/framework.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/framework.jpg" alt="Analytical Framework" width="700" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/framework.jpg" alt="Analytical Framework" width="700" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view the Analytical Framework">
 </a>
 
 
