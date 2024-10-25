@@ -3,7 +3,7 @@ root: README
 
 parts:
   - caption:
-    numbered: false
+    numbered: true
     chapters:
       - file: docs/about
       - file: docs/download
