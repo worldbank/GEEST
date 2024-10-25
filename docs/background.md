@@ -32,8 +32,9 @@ The GEEST generates raw score outputs for 15 factors outlined in the Analytical 
 </p>
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3%20countries%20maps.png" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3%20countries%20maps.png" alt="Examples" width="700" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3%20countries%20maps.png" alt="Examples" width="700" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view map">
 </a>
+
 
 
 
@@ -52,8 +53,9 @@ The GEEST generates raw score outputs for 15 factors outlined in the Analytical 
 The Contextual Dimension (CD) factors were evaluated using the World Bank's Women, Business, and the Law study, a reputable non-governmental resource that assigns country-level scores ranging from 0 to 100 based on the presence of relevant laws and regulations. Scores for factors in this dimension were standardized on a scale of 0 to 5, with 5 representing the most favorable environment for that specific factor.  
 </p>
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Contextual_new.png" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Contextual_new.png" alt="Contextual Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Contextual_new.png" alt="Contextual Image" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view map">
 </a>
+
 
 
 
@@ -62,8 +64,9 @@ The Contextual Dimension (CD) factors were evaluated using the World Bank's Wome
 The factors in the Accessibility Dimension were assessed using service areas through network analyses around key facilities, which defined varying levels of access. As anticipated, the highest levels of access to each factor are concentrated in urban centers. Women's Travel Patterns, which relate to essential services needed by women to fulfill their caregiving and household responsibilities, is the factor in this dimension with the fewest highly enabling areas. The latter underscores the need for environments that are better planned with the unique needs and responsibilities of women in mind. This includes ensuring that essential services, such as childcare, pharmacies, and grocery stores, are easily accessible to support women in their roles as caregivers and members of the workforce.
 </p>
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Acc.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Acc.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/Acc.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view map">
 </a>
+
 
 
 
@@ -73,8 +76,9 @@ The factors in the Accessibility Dimension were assessed using service areas thr
 The Place-Characterization Dimension encompasses seven factors, each evaluated through distinct analytical methods. Notably, the analyses of factors such as Active Transport, Education, and Water and Sanitation reveal some areas where these elements fail to be even moderately supportive of women's access to employment.
 </p>
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/PD.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/PD.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/PD.jpg" alt="Accessibility Image" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view map">
 </a>
+
 
 
 
@@ -82,8 +86,9 @@ The Place-Characterization Dimension encompasses seven factors, each evaluated t
 The overall enablement scores for Saint Lucia reveal that, although some areas in the northwest and south exhibit a somewhat supportive environment, the country largely lacks regions that are highly conducive to facilitating women’s access to employment opportunities. Notably, the area around the solar plant in Vieux Fort provides a moderately enabling environment for women's job access, but it still falls short of achieving the highest level of enablement.
 </p>
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/WEE%20score%20solar.png" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/WEE%20score%20solar.png" alt="WEE Score Solar" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/WEE%20score%20solar.png" alt="WEE Score Solar" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view map">
 </a>
+
 
 
 
@@ -93,8 +98,9 @@ When the enablement scores are combined with data on the distribution of women o
 </p>
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3D%20Score%20map.png" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3D%20Score%20map.png" alt="3D Score Map" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/3D%20Score%20map.png" alt="3D Score Map" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view map">
 </a>
+
 
 
 <h3 id="data-gap-assessment">4. Gender Spatial Data Gap Assessment</h3>
@@ -243,8 +249,9 @@ This undertaking involved the identification and compilation of essential open-s
 
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/data%20availability%20per%20country.JPG" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/data%20availability%20per%20country.JPG" alt="Data Availability per Country" width="600" style="display: block; margin-left: auto; margin-right: auto;">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/data%20availability%20per%20country.JPG" alt="Data Availability per Country" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to view data availability">
 </a>
+
 
 
 <h3 id="geospatial-databases">5.	Geospatial Databases</h3>
