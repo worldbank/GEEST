@@ -55,7 +55,7 @@ class WorkflowFactory:
             return RasterLayerWorkflow(item, feedback, context)
         elif analysis_mode == "Use Default Index Score":
             return DefaultIndexScoreWorkflow(item, feedback, context)
-        elif analysis_mode == "Don’t Use":
+        elif analysis_mode == "Don't Use":
             return DontUseWorkflow(item, feedback, context)
         elif analysis_mode == "Use Multi Buffer Point":
             return MultiBufferDistancesWorkflow(item, feedback, context)
