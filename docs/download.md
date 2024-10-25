@@ -8,4 +8,4 @@ To install the tool, please follow the installation instructions provided under 
 
 ---
 
-For any additional help, feel free to check our [User Guide](docs/userguide/install.md) for more detailed guidance.
+For any additional help, feel free to check our [User Guide](https://github.com/elbeejay/draft-docs/blob/a98b79d90c6d2bdb3860ed669cfa33202ae4cde2/docs/userguide/install.md) for more detailed guidance.
