@@ -1,4 +1,4 @@
-## Project Background
+# 📜 Project Background
   
 <h2 id="introduction">Introduction</h2>
     
@@ -8,8 +8,10 @@
 
 
 <h2 id="project-scope">Project Scope</h2>
-<h3 id="novel-analytical-framework">1. Novel Analytical Framework</h3>
-<hr style="height: 3px; background-color: grey; border: none;">
+
+### 1. Novel Analytical Framework
+
+---
 
 <p align="justify">  
 An extensive literature review, focusing on the barriers women face in securing jobs, particularly within SIDS, was conducted. This comprehensive review resulted in the formulation of a Multicriteria Evaluation (MCE) framework comprising 15 key factors, both spatial and non-spatial, that affect women’s job opportunities. These factors are categorized into three dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>. The latter two dimensions concentrate on geographical factors.
@@ -23,8 +25,10 @@ For a comprehensive understanding of the Analytical Framework and the associated
 
 
 
-<h3 id="geest-tool">2. Gender Enabling Environments Tool (GEEST)</h3>
-<hr style="height: 3px; background-color: grey; border: none;">
+### 2. Gender Enabling Environments Tool (GEEST)
+
+---
+
 <p align="justify"> 
 Based on the Methodological Framework, the GEEST, an open-source plugin in QGIS, was developed for the automatic computation of the factors and dimensions. The GEEST characterizes communities based on women’s prospects to secure jobs or establish their own businesses within the RE sector. It aims to assist decision-makers in selecting optimal locations for RE projects, ensuring the maximum positive impact on communities and addressing gender disparities. Additionally, it provides insights for building the necessary infrastructure around RE projects to create enabling environments that enhance women’s participation in the RE sector in SIDS.
 
@@ -36,10 +40,10 @@ The GEEST generates raw score outputs for 15 factors outlined in the Analytical 
 </a>
 
 
+### 3. Study Case: Saint Lucia
 
+---
 
-<h3 id="saint-lucia-case">3. Study Case: Saint Lucia</h3>
-<hr style="height: 3px; background-color: black; border: none;">
 <p align="justify"> 
   The GEEST was tested in Saint Lucia to assess its functionality. The selection of this country was strategic, considering its varied geographic region, size, population densities, and data availability. Testing the GEEST across such a broad range of conditions ensured that its usefulness, applicability, and functionality in different contexts could be accurately tested. The findings and insights derived from the GEEST implementation are documented in the Implementation Report, accessible through the following link: 
   <a href="https://worldbankgroup-my.sharepoint.com/:w:/r/personal/civanescu_worldbank_org/Documents/Desktop/Work/Gender/TORs/Task%203/St%20Lucia%20-%20GEEST/Implementation%20Report/Implementation%20Report%20Saint%20Lucia.docx?d=wd12a9d054d5747f49788597e3fdc4ff8&csf=1&web=1&e=q6UcU0" target="_blank">Implementation Report St. Lucia</a>
@@ -103,8 +107,10 @@ When the enablement scores are combined with data on the distribution of women o
 
 
 
-<h3 id="data-gap-assessment">4. Gender Spatial Data Gap Assessment</h3>
-<hr style="height: 3px; background-color: black; border: none;">
+### 4. Gender Spatial Data Gap Assessment
+
+---
+
 <p align="justify"> 
 This undertaking involved the identification and compilation of essential open-source geospatial information layers that are crucial for assessing women’s development, employment, and business prospects within the Renewable Energy (RE) sector. A thorough research was conducted for 38 data layers within each country, organized into 11 thematic categories. The table below presents the 38 layers identified during the desk research, grouped into 11 categories, as outlined below:
 </p>
@@ -254,8 +260,10 @@ This undertaking involved the identification and compilation of essential open-s
 
 
 
-<h3 id="geospatial-databases">5.	Geospatial Databases</h3>
-<hr style="height: 3px; background-color: black; border: none;">
+### 5.	Geospatial Databases
+
+---
+
 <p align="justify"> 
   In parallel with the Gender Data Gap Assessment, a comprehensive geospatial database was compiled for each of the 31 Small Island Developing States (SIDS) targeted in the project. The repository containing the geospatial databases can be found in the following link: 
   <a href="https://datacatalog.worldbank.org/search/collections/genderspatial" target="_blank">Data Catalog</a>.
