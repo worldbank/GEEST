@@ -1,11 +1,5 @@
 # About GEEST
 
-## 🌍 Empowering Women Across Multiple Sectors
-
-**GEEST (Geospatial Assessment of Women Employment and Business Opportunities)** is an innovative, open-source tool designed to support women’s economic empowerment across various sectors globally. By utilizing geospatial data and a multi-criteria evaluation (MCE) framework, GEEST identifies regions with the highest potential for women’s employment and entrepreneurial opportunities, providing critical insights for projects aimed at fostering inclusive environments for women.
-
----
-
 ### 🎯 **GEEST Vision**
 
 With GEEST, we are dedicated to advancing gender equality worldwide by identifying key opportunities for women in diverse sectors. Through sophisticated geospatial analysis, we seek to create pathways for women to thrive in industries such as:
