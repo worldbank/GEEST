@@ -1,4 +1,4 @@
-# About GEEST
+# ℹ️ **About GEEST**
 
 ### ❓ **What is GEEST**
 
