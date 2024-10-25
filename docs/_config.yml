@@ -35,3 +35,5 @@ sphinx:
   config:
     html_show_copyright: false
     html_last_updated_fmt: "%b %d, %Y"
+     html_theme_options:
+      toc_numbered: false
