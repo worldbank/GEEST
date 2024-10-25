@@ -67,12 +67,6 @@ class JsonTreeItem:
         return None
 
     def setData(self, column, value):
-        if column == 3:
-            QgsMessageLog.logMessage(
-                f"JsonTreeItem setData: {value} for column {column} ",
-                tag="Geest",
-                level=Qgis.Info,
-            )
         if column < len(self.itemData):
             self.itemData[column] = value
             return True
