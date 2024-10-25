@@ -329,6 +329,7 @@ class WorkflowBase(ABC):
         input_layer: QgsVectorLayer,
         bbox: QgsGeometry,
         index: int,
+        value_field: str = "value",
         default_value: int = 0,
     ) -> str:
         """
@@ -345,12 +346,13 @@ class WorkflowBase(ABC):
             input_layer (QgsVectorLayer): The layer to rasterize.
             bbox (QgsGeometry): The bounding box for the raster extents.
             index (int): The current index used for naming the output raster.
+            value_field (str): The field to use for rasterization.
             default_value (int): The default value to use for the raster.
 
         Returns:
             str: The file path to the rasterized output.
         """
-        QgsMessageLog.logMessage("--- Rasterizingrid", tag="Geest", level=Qgis.Info)
+        QgsMessageLog.logMessage("--- Rasterizing grid", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage(f"--- bbox {bbox}", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage(f"--- index {index}", tag="Geest", level=Qgis.Info)
 
@@ -373,7 +375,7 @@ class WorkflowBase(ABC):
         # Define rasterization parameters for the temporary layer
         params = {
             "INPUT": input_layer,
-            "FIELD": "value",
+            "FIELD": f"{value_field}",
             "BURN": 0,
             "USE_Z": False,
             "UNITS": 1,
