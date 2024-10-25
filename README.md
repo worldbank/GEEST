@@ -1,19 +1,19 @@
 # Welcome to GEEST
 
-<span style="font-size:22px !important; font-weight:bold !important;">
-Empowering Women in the Renewable Energy Sector
-</span>
+**Empowering Women Across Multiple Sectors**
+<p align="justify">
+GEEST (Geospatial Assessment of Women Employment and Business Opportunities) is an innovative, open-source tool designed to support women’s economic empowerment globally.
 
-GEEST (Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector) is an innovative, open-source tool designed to support women's economic empowerment in Small Island Developing States (SIDS).
+By leveraging advanced geospatial mapping and a multi-criteria evaluation (MCE) framework, GEEST identifies regions with the greatest potential for women’s employment and business opportunities across various sectors. Our tool helps bridge the gender gap by guiding new projects toward creating inclusive, enabling environments for women.
 
-By leveraging advanced geospatial mapping and a multi-criteria evaluation (MCE)framework, GEEST identifies regions with the greatest potential for women's employment and business opportunities in renewable energy.
-Our tool helps bridge the gender gap in the energy sector by guiding new projects toward creating inclusive, enabling environments for women.
+---
+</p>
+### Discover Opportunities. Drive Change.
+<p align="justify">
+Join us in advancing women’s empowerment and shaping a more equitable future across diverse sectors.
 
-<span style="font-size:18px !important; font-weight:bold !important;">
-Discover Opportunities. Drive Change.
-</span>
-
-Join us in advancing women's empowerment and shaping a more equitable future in the renewable energy sector.
+---
+</p>
 
 <p align="center">
   <img src="https://github.com/elbeejay/draft-docs/blob/main/framework.png?raw=true" height=600 alt="GEEST Framework" style="border-radius:10px;">
