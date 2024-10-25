@@ -76,7 +76,13 @@ class AcledImpactWorkflow(WorkflowBase):
         dissolved_layer = self._overlay_analysis(scored_layer)
 
         # Step 4: Rasterize the dissolved layer
-        raster_output = self._rasterize(dissolved_layer, current_bbox, index)
+        raster_output = self._rasterize(
+            dissolved_layer,
+            current_bbox,
+            index,
+            value_field="min_value",
+            default_value=5,
+        )
 
         return raster_output
 
