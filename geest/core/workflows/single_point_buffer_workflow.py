@@ -58,7 +58,9 @@ class SinglePointBufferWorkflow(WorkflowBase):
             )
             return False
 
-        self.buffer_distance = self.attributes.get("Single Buffer Distance", 1000)
+        self.buffer_distance = int(
+            self.attributes.get("Single Buffer Point Layer Distance", "5000")
+        )
         self.workflow_is_legacy = False  # This is a new workflow, not a legacy one
 
     def _process_area(
@@ -152,3 +154,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         layer.commitChanges()
 
         return layer
+
+    # Remove once all workflows are updated
+    def do_execute(self):
+        pass

@@ -9,13 +9,13 @@ from qgis.core import (
     Qgis,
     QgsProcessingContext,
     QgsProcessingFeedback,
-    QgsFeatureRequest,
+    QgsFeature,
     QgsGeometry,
     QgsProcessingFeedback,
     QgsProcessingException,
+    QgsRasterLayer,
     QgsVectorLayer,
     QgsMessageLog,
-    QgsVectorFileWriter,
     QgsWkbTypes,
     Qgis,
 )
@@ -91,8 +91,7 @@ class WorkflowBase(ABC):
         Returns:
             True if the workflow completes successfully, False if canceled or failed.
         """
-        if self.workflow_is_legacy:
-            return self.do_execute()
+
         QgsMessageLog.logMessage(
             f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info
         )
@@ -112,6 +111,17 @@ class WorkflowBase(ABC):
         self.attributes["Execution Start Time"] = datetime.datetime.now().isoformat()
 
         QgsMessageLog.logMessage("Processing Started", tag="Geest", level=Qgis.Info)
+
+        #
+        # TODO: Remove this once all workflows are updated to the new structure
+        #
+
+        if self.workflow_is_legacy:
+            return self.do_execute()
+
+        #
+        # END TODO
+        #
 
         feedback = QgsProcessingFeedback()
         output_rasters = []
@@ -143,7 +153,7 @@ class WorkflowBase(ABC):
                     if area_features.featureCount() == 0:
                         continue
 
-                    # Step 2: Process the area features
+                    # Step 2: Process the area features - work happens in concrete class
                     raster_output = self._process_area(
                         current_area=current_area,
                         current_bbox=current_bbox,
@@ -155,23 +165,20 @@ class WorkflowBase(ABC):
                     raster_output = self._subset_raster(
                         self.raster_layer,
                         current_area,
-                        output_prefix=f"{self.output_prefix}_area_features_{index}",
+                        output_prefix=f"{self.layer_id}_area_features_{index}",
                     )
 
                 # Multiply the area by its matching mask layer in study_area folder
                 masked_layer = self._mask_raster(
                     raster_path=raster_output,
                     area_geometry=current_area,
-                    output_name=f"{self.output_prefix}_masked_{index}.shp",
                     index=index,
                 )
                 output_rasters.append(masked_layer)
             # Combine all area rasters into a VRT
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
             self.attributes["Indicator Result File"] = vrt_filepath
-            self.attributes["Indicator Result"] = (
-                f"{self.workflow_name} Workflow Completed"
-            )
+            self.attributes["Result"] = f"{self.workflow_name} Workflow Completed"
 
             QgsMessageLog.logMessage(
                 f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
@@ -198,7 +205,7 @@ class WorkflowBase(ABC):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            self.attributes["Indicator Result"] = f"{self.workflow_name} Workflow Error"
+            self.attributes["Result"] = f"{self.workflow_name} Workflow Error"
             self.attributes["Indicator Result File"] = ""
 
             # Write the traceback to error.txt in the workflow_directory
@@ -318,18 +325,27 @@ class WorkflowBase(ABC):
         return self.features_layer
 
     def _rasterize(
-        self, input_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
+        self,
+        input_layer: QgsVectorLayer,
+        bbox: QgsGeometry,
+        index: int,
+        default_value: int = 0,
     ) -> str:
         """
 
         ⭐️🚩⭐️ Warning this is not DRY - almost same function exists in study_area.py
 
-        Rasterize the grid layer based on the 'value' attribute.
+        Rasterize the grid layer based on the 🔴'value'🔴 attribute field.
+
+        Nodata will be set to 255
+
+        On-land pixels will be set to 0 or whatever is specified in the default_value parameter.
 
         Args:
             input_layer (QgsVectorLayer): The layer to rasterize.
             bbox (QgsGeometry): The bounding box for the raster extents.
             index (int): The current index used for naming the output raster.
+            default_value (int): The default value to use for the raster.
 
         Returns:
             str: The file path to the rasterized output.
@@ -364,10 +380,10 @@ class WorkflowBase(ABC):
             "WIDTH": x_res,
             "HEIGHT": y_res,
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
-            "NODATA": 0,
+            "NODATA": 255,
             "OPTIONS": "",
-            "DATA_TYPE": 0,
-            "INIT": 1,
+            "DATA_TYPE": 0,  # byte
+            "INIT": default_value,  # will set all cells to this value if not otherwise set
             "INVERT": False,
             "EXTRA": f"-a_srs {self.target_crs.authid()}",
             "OUTPUT": output_path,
@@ -390,6 +406,142 @@ class WorkflowBase(ABC):
             f"Created raster: {output_path}", tag="Geest", level=Qgis.Info
         )
         return output_path
+
+    def _mask_raster(
+        self, raster_path: str, area_geometry: QgsGeometry, index: int
+    ) -> str:
+        """
+        Multiply the raster by the area geometry to mask the raster to the area.
+
+        Args:
+            raster_path (str): The path to the raster file.
+            area_geometry (QgsGeometry): The geometry to use as a mask.
+            index (int): The index of the current area.
+
+        Returns:
+            str: The path to the masked raster.
+        """
+        output_name = f"{self.layer_id}_masked_{index}.tif"
+        output_path = os.path.join(self.workflow_directory, output_name)
+        QgsMessageLog.logMessage(
+            f"Masking raster {raster_path} with area {index} to {output_path}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        # verify the raster path exists
+        if not os.path.exists(raster_path):
+            QgsMessageLog.logMessage(
+                f"Raster file not found at {raster_path}",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            raise QgsProcessingException(f"Raster file not found at {raster_path}")
+        # Convert the geometry to a memory layer in the self.tartget_crs
+        mask_layer = QgsVectorLayer(f"Polygon", "mask", "memory")
+        mask_layer.setCrs(self.target_crs)
+        feature = QgsFeature()
+        feature.setGeometry(area_geometry)
+        mask_layer.dataProvider().addFeatures([feature])
+        mask_layer.commitChanges()
+        # Clip the raster by the mask layer
+        params = {
+            "INPUT": f"{raster_path}",
+            "MASK": mask_layer,
+            "OUTPUT": f"{output_path}",
+            "SOURCE_CRS": None,
+            "TARGET_CRS": None,
+            "TARGET_EXTENT": None,
+            "NODATA": None,
+            "ALPHA_BAND": False,
+            "CROP_TO_CUTLINE": True,
+            "KEEP_RESOLUTION": False,
+            "SET_RESOLUTION": False,
+            "X_RESOLUTION": None,
+            "Y_RESOLUTION": None,
+            "MULTITHREADING": False,
+            "OPTIONS": "",
+            "DATA_TYPE": 0,
+            "EXTRA": "",
+        }
+        processing.run("gdal:cliprasterbymasklayer", params)
+        return output_path
+
+    def _combine_rasters_to_vrt(self, rasters: list) -> None:
+        """
+        Combine all the rasters into a single VRT file.
+
+        Args:
+            rasters: The rasters to combine into a VRT.
+
+        Returns:
+            vrtpath (str): The file path to the VRT file.
+        """
+        if not rasters:
+            QgsMessageLog.logMessage(
+                "No valid raster layers found to combine into VRT.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+        vrt_filepath = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_final_combined.vrt",
+        )
+
+        QgsMessageLog.logMessage(
+            f"Creating VRT of layers '{vrt_filepath}' layer to the map.",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        checked_rasters = []
+        for raster in rasters:
+            if os.path.exists(raster) and QgsRasterLayer(raster).isValid():
+                checked_rasters.append(raster)
+            else:
+                QgsMessageLog.logMessage(
+                    f"Skipping invalid or non-existent raster: {raster}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        if not checked_rasters:
+            QgsMessageLog.logMessage(
+                "No valid raster layers found to combine into VRT.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
+
+        # Define the VRT parameters
+        params = {
+            "INPUT": checked_rasters,
+            "RESOLUTION": 0,  # Use highest resolution among input files
+            "SEPARATE": False,  # Combine all input rasters as a single band
+            "OUTPUT": vrt_filepath,
+            "PROJ_DIFFERENCE": False,
+            "ADD_ALPHA": False,
+            "ASSIGN_CRS": self.target_crs,
+            "RESAMPLING": 0,
+            "SRC_NODATA": "255",
+            "EXTRA": "",
+        }
+
+        # Run the gdal:buildvrt processing algorithm to create the VRT
+        processing.run("gdal:buildvirtualraster", params)
+        QgsMessageLog.logMessage(
+            f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
+        )
+
+        # Add the VRT to the QGIS map
+        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}_final VRT")
+
+        if not vrt_layer.isValid():
+            QgsMessageLog.logMessage(
+                "VRT Layer generation failed.", tag="Geest", level=Qgis.Critical
+            )
+            return False
+
+        return vrt_filepath
 
     @abstractmethod
     def do_execute(self) -> bool:

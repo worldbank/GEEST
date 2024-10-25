@@ -42,5 +42,5 @@ class AcledImpactWorkflow(WorkflowBase):
 
         vrt_path = processor.process_areas()
         self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = "Use Acled Impact Workflow Completed"
+        self.attributes["Result"] = "Use Acled Impact Workflow Completed"
         return True

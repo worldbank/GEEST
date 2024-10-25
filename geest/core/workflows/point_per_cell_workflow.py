@@ -64,5 +64,5 @@ class PointPerCellWorkflow(WorkflowBase):
 
         vrt_path = processor.process_areas()
         self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = "Use Point per Cell Workflow Completed"
+        self.attributes["Result"] = "Use Point per Cell Workflow Completed"
         return True

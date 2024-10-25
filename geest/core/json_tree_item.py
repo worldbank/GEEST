@@ -212,9 +212,7 @@ class JsonTreeItem:
             attributes["Indicator Result File"] = self.itemData[3].get(
                 "Indicator Result File", ""
             )
-            attributes["Indicator Result"] = self.itemData[3].get(
-                "Indicator Result", ""
-            )
+            attributes["Result"] = self.itemData[3].get("Result", "")
         return attributes
 
     def getFactorAttributes(self):

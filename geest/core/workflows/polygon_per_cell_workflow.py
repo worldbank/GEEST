@@ -66,5 +66,5 @@ class PolygonPerCellWorkflow(WorkflowBase):
 
         vrt_path = processor.process_areas()
         self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Indicator Result"] = "Use Polygon per Cell Workflow Completed"
+        self.attributes["Result"] = "Use Polygon per Cell Workflow Completed"
         return True
