@@ -68,6 +68,9 @@ class WorkflowBase(ABC):
             "study_area_polygons",
             "ogr",
         )
+        self.grid_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_grid", "study_area_grid", "ogr"
+        )
         self.features_layer = None  # set in concrete class if needed
         self.raster_layer = None  # set in concrete class if needed
         self.target_crs = self.bboxes_layer.crs()
