@@ -40,47 +40,64 @@ class WorkflowFactory:
 
         :return: The workflow object to execute.
         """
-        if not item:
-            return DontUseWorkflow({}, feedback)
-        attributes = item.data(3)
-        QgsMessageLog.logMessage(f"Workflow Factory Called", "Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(f"-----------------------", "Geest", level=Qgis.Info)
-        for key, value in attributes.items():
-            QgsMessageLog.logMessage(f"{key}: {value}", "Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(f"-----------------------", "Geest", level=Qgis.Info)
+        try:
+            if not item:
+                return DontUseWorkflow({}, feedback)
+            attributes = item.data(3)
+            QgsMessageLog.logMessage(
+                f"Workflow Factory Called", "Geest", level=Qgis.Info
+            )
+            QgsMessageLog.logMessage(
+                f"-----------------------", "Geest", level=Qgis.Info
+            )
+            for key, value in attributes.items():
+                QgsMessageLog.logMessage(f"{key}: {value}", "Geest", level=Qgis.Info)
+            QgsMessageLog.logMessage(
+                f"-----------------------", "Geest", level=Qgis.Info
+            )
 
-        analysis_mode = attributes.get("Analysis Mode", "")
+            analysis_mode = attributes.get("Analysis Mode", "")
 
-        if analysis_mode == "Spatial Analysis":
-            return RasterLayerWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Default Index Score":
-            return DefaultIndexScoreWorkflow(item, feedback, context)
-        elif analysis_mode == "Don’t Use":
+            if analysis_mode == "Spatial Analysis":
+                return RasterLayerWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Default Index Score":
+                return DefaultIndexScoreWorkflow(item, feedback, context)
+            elif analysis_mode == "Don't Use":
+                return DontUseWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Multi Buffer Point":
+                return MultiBufferDistancesWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Single Buffer Point":
+                return SinglePointBufferWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Point per Cell":
+                return PointPerCellWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Polyline per Cell":
+                return PolylinePerCellWorkflow(item, feedback, context)
+            # TODO fix inconsistent abbreviation below for Poly
+            elif analysis_mode == "Use Poly per Cell":
+                return PolygonPerCellWorkflow(item, feedback, context)
+            elif analysis_mode == "Factor Aggregation":
+                return FactorAggregationWorkflow(item, feedback, context)
+            elif analysis_mode == "Dimension Aggregation":
+                return DimensionAggregationWorkflow(item, feedback, context)
+            elif analysis_mode == "Analysis Aggregation":
+                return AnalysisAggregationWorkflow(item, feedback, context)
+            elif analysis_mode == "Use CSV to Point Layer":
+                return AcledImpactWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Classify Poly into Classes":
+                return SafetyPolygonWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Nighttime Lights":
+                return SafetyRasterWorkflow(item, feedback, context)
+            elif analysis_mode == "Use Environmental Hazards":
+                return RasterReclassificationWorkflow(item, feedback, context)
+            else:
+                raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Error creating workflow: {e}", "Geest", level=Qgis.Critical
+            )
+            import traceback
+
+            QgsMessageLog.logMessage(
+                traceback.format_exc(), "Geest", level=Qgis.Critical
+            )
             return DontUseWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Multi Buffer Point":
-            return MultiBufferDistancesWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Single Buffer Point":
-            return SinglePointBufferWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Point per Cell":
-            return PointPerCellWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Polyline per Cell":
-            return PolylinePerCellWorkflow(item, feedback, context)
-        # TODO fix inconsistent abbreviation below for Poly
-        elif analysis_mode == "Use Poly per Cell":
-            return PolygonPerCellWorkflow(item, feedback, context)
-        elif analysis_mode == "Factor Aggregation":
-            return FactorAggregationWorkflow(item, feedback, context)
-        elif analysis_mode == "Dimension Aggregation":
-            return DimensionAggregationWorkflow(item, feedback, context)
-        elif analysis_mode == "Analysis Aggregation":
-            return AnalysisAggregationWorkflow(item, feedback, context)
-        elif analysis_mode == "Use CSV to Point Layer":
-            return AcledImpactWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Classify Poly into Classes":
-            return SafetyPolygonWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Nighttime Lights":
-            return SafetyRasterWorkflow(item, feedback, context)
-        elif analysis_mode == "Use Environmental Hazards":
-            return RasterReclassificationWorkflow(item, feedback, context)
-        else:
-            raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")

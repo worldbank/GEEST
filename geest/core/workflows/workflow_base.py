@@ -354,13 +354,15 @@ class WorkflowBase(ABC):
         Returns:
             str: The file path to the rasterized output.
         """
+        if not input_layer or not input_layer.isValid():
+            return False
         QgsMessageLog.logMessage("--- Rasterizing grid", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage(f"--- bbox {bbox}", tag="Geest", level=Qgis.Info)
         QgsMessageLog.logMessage(f"--- index {index}", tag="Geest", level=Qgis.Info)
 
         output_path = os.path.join(
             self.workflow_directory,
-            f"{self.layer_id}_buffered_{index}.tif",
+            f"{self.layer_id}_{index}.tif",
         )
         if not input_layer.isValid():
             QgsMessageLog.logMessage(
@@ -425,6 +427,8 @@ class WorkflowBase(ABC):
         Returns:
             str: The path to the masked raster.
         """
+        if not raster_path:
+            return False
         output_name = f"{self.layer_id}_masked_{index}.tif"
         output_path = os.path.join(self.workflow_directory, output_name)
         QgsMessageLog.logMessage(
@@ -499,7 +503,7 @@ class WorkflowBase(ABC):
         )
         checked_rasters = []
         for raster in rasters:
-            if os.path.exists(raster) and QgsRasterLayer(raster).isValid():
+            if raster and os.path.exists(raster) and QgsRasterLayer(raster).isValid():
                 checked_rasters.append(raster)
             else:
                 QgsMessageLog.logMessage(

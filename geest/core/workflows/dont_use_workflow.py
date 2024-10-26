@@ -22,23 +22,12 @@ class DontUseWorkflow(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Don't Use"
-
-    def do_execute(self):
-        """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
-        """
-        if self.feedback.isCanceled():
-            QgsMessageLog.logMessage(
-                "Dont use workflow canceled.", tag="Geest", level=Qgis.Warning
-            )
-            return False
-
-        QgsMessageLog.logMessage("Executing 'dont use'", tag="Geest", level=Qgis.Info)
-        self.attributes["Result"] = "Dont use workflow completed"
-        QgsMessageLog.logMessage(
-            "Dont use workflow workflow completed", tag="Geest", level=Qgis.Info
-        )
-        return True
+        self.attributes["Indicator Result File"] = ""
+        self.attributes["Indicator Result"] = ""
+        self.attributes["Result"] = "Don't Use Completed"
 
     def _process_area(self):
+        pass
+
+    def do_execute(self):
         pass
