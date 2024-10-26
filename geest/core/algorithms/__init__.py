@@ -1,6 +1,6 @@
 from .area_iterator import AreaIterator
 from .point_and_paths_processor import PointAndPathsProcessor
-from .features_per_cell_processor import FeaturesPerCellProcessor
+from .features_per_cell_processor import assign_values_to_grid, select_grid_cells
 from .polygon_per_cell_processor import PolygonPerCellProcessor
 from .single_point_buffer_processor import SinglePointBufferProcessor
 from .safety_polygon_processor import SafetyPerCellProcessor

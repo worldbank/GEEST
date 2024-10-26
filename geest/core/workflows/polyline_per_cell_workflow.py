@@ -1,13 +1,18 @@
+import os
 from qgis.core import (
     QgsMessageLog,
     Qgis,
+    QgsGeometry,
     QgsFeedback,
     QgsVectorLayer,
     QgsProcessingContext,
 )
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.algorithms import FeaturesPerCellProcessor
+from geest.core.algorithms.features_per_cell_processor import (
+    select_grid_cells,
+    assign_values_to_grid,
+)
 
 
 class PolylinePerCellWorkflow(WorkflowBase):
@@ -29,44 +34,75 @@ class PolylinePerCellWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Polyline per Cell"
 
-    def do_execute(self):
-        """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
-        """
+        layer_path = self.attributes.get("Polyline per Cell Shapefile", None)
 
-        layer_name = self.attributes.get("Polyline per Cell Shapefile", None)
-
-        if not layer_name:
+        if not layer_path:
             QgsMessageLog.logMessage(
-                "Invalid raster found in Polyline per Cell Shapefile, trying Polyline per Cell Layer Source.",
+                "Nothing found in Polyline per Cell Shapefile, trying Point per Cell Layer Source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_name = self.attributes.get("Polyline per Cell Layer Source", None)
-            if not layer_name:
+            layer_path = self.attributes.get("Polyline per Cell Layer Source", None)
+            if not layer_path:
                 QgsMessageLog.logMessage(
                     "No points layer found in Polyline per Cell Layer Source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            return False
+                return False
 
-        features_layer = QgsVectorLayer(layer_name, "Polyline per Cell", "ogr")
-
-        processor = FeaturesPerCellProcessor(
-            output_prefix=self.layer_id,
-            features_layer=features_layer,
-            gpkg_path=self.gpkg_path,
-            workflow_directory=self.workflow_directory,
+        self.features_layer = QgsVectorLayer(
+            layer_path, "Polyline per Cell Layer", "ogr"
         )
+        self.workflow_is_legacy = False
+
+    def _process_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
+        """
+        Executes the actual workflow logic for a single area
+        Must be implemented by subclasses.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: True if the workflow completes successfully, False if canceled or failed.
+        """
+        area_features_count = area_features.featureCount()
         QgsMessageLog.logMessage(
-            "Polyline per Cell Processor Created", tag="Geest", level=Qgis.Info
+            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            tag="Geest",
+            level=Qgis.Info,
         )
+        # Step 1: Select grid cells that intersect with features
+        output_path = os.path.join(
+            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
+        )
+        area_grid = select_grid_cells(self.grid_layer, area_features, output_path)
 
-        vrt_path = processor.process_areas()
-        self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Result"] = "Use Polyline per Cell Workflow Completed"
-        return True
+        # Step 2: Assign values to grid cells
+        grid = assign_values_to_grid(area_grid)
 
-    def _process_area(self):
-        pass
+        # Step 3: Rasterize the grid layer using the assigned values
+        # Create a scored boundary layer
+        raster_output = self._rasterize(
+            grid,
+            current_bbox,
+            index,
+            value_field="value",
+            default_value=255,
+        )
+        return raster_output
+
+    # TODO Remove when all workflows are refactored
+    def do_execute(self):
+        """
+        Execute the workflow.
+        """
+        self._execute()
