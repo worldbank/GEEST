@@ -151,7 +151,7 @@ def select_grid_cells(
     )
 
     return QgsVectorLayer(
-        f"{output_path}",
+        f"{output_path}|layername=grid_with_feature_counts",
         "grid_with_feature_counts",
         "ogr",
     )

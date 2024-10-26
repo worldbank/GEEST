@@ -80,7 +80,7 @@ class PointPerCellWorkflow(WorkflowBase):
         )
         # Step 1: Select grid cells that intersect with features
         output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.shp"
+            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
         )
         area_grid = select_grid_cells(self.grid_layer, area_features, output_path)
 
