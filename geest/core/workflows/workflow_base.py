@@ -126,7 +126,7 @@ class WorkflowBase(ABC):
         feedback = QgsProcessingFeedback()
         output_rasters = []
 
-        if self.features_layer:
+        if self.features_layer and type(self.features_layer) == QgsVectorLayer:
             self.features_layer = self._check_and_reproject_layer()
 
         area_iterator = AreaIterator(self.gpkg_path)
@@ -265,6 +265,8 @@ class WorkflowBase(ABC):
         Returns:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
+        if type(self.features_layer) != QgsVectorLayer:
+            return None
         QgsMessageLog.logMessage(
             f"{self.workflow_name} Select Features Started",
             tag="Geest",
