@@ -280,6 +280,8 @@ class WorkflowBase(ABC):
             geometry_name = "Point"
         elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
             geometry_name = "LineString"
+        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PolygonGeometry:
+            geometry_name = "Polygon"
         else:
             raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
 

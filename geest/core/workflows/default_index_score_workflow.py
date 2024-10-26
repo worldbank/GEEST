@@ -35,10 +35,16 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Default Index Score"
-        self.index_score = self.attributes["Default Index Score"]
+        self.index_score = (self.attributes.get("Default Index Score", 0) / 100) * 5
         self.workflow_is_legacy = False
         self.gpkg_path = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
+        )
+        # Initialize features_layer from a layer in the GeoPackage
+        self.features_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_polygons",
+            "Study Area Polygons",
+            "ogr",
         )
 
     def _process_area(
@@ -62,9 +68,18 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         QgsMessageLog.logMessage(
             f"Processing area {index} score workflow", "Geest", Qgis.Info
         )
+        output_prefix = f"{self.layer_id}_area_features_{index}"
+
+        QgsMessageLog.logMessage(
+            f"Index score: {self.index_score}",
+            "Geest",
+            Qgis.Info,
+        )
+
+        # Create a scored boundary layer filtered by current_area
+        scored_layer = self.create_scored_boundary_layer(output_prefix)
 
         # Create a scored boundary layer
-        scored_layer = self.create_scored_boundary_layer()
         raster_output = self._rasterize(
             scored_layer,
             current_bbox,
@@ -78,47 +93,51 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         )
         return raster_output
 
-    def create_scored_boundary_layer(self):
-        # Load the boundary polygon layer from the GeoPackage
-        boundary_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_polygons", "Study Area", "ogr"
-        )
+    def create_scored_boundary_layer(self, output_prefix: str) -> QgsVectorLayer:
+        """
+        Create a scored boundary layer, filtering features by the current_area.
 
-        if not boundary_layer.isValid():
-            raise QgsProcessingException(
-                "Boundary layer could not be loaded from the GeoPackage."
-            )
+        :param current_area: The geometry of the current processing area.
+        :return: A memory vector layer with a 'score' attribute.
+        """
 
-        # Prepare the new layer with the same CRS and geometry type
+        shapefile_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
         scored_layer = QgsVectorLayer(
-            "Polygon?crs=" + boundary_layer.crs().authid(),
+            shapefile_path,
             "scored_boundary_layer",
-            "memory",
+            "ogr",
         )
-        scored_layer_data_provider = scored_layer.dataProvider()
+        if not scored_layer.isValid():
+            raise QgsProcessingException(f"Failed to load shapefile: {shapefile_path}")
 
-        # Add the original fields + "score" field
-        scored_layer_data_provider.addAttributes(
-            boundary_layer.fields()
-        )  # copy original fields
-        scored_layer_data_provider.addAttributes(
-            [QgsField("score", QVariant.Int)]
-        )  # add score field
-        scored_layer.updateFields()
+        # Start editing mode
+        scored_layer.startEditing()
 
-        # Copy each feature and set the score
-        features = []
-        for feature in boundary_layer.getFeatures():
-            new_feature = QgsFeature()
-            new_feature.setGeometry(feature.geometry())
-            new_feature.setAttributes(feature.attributes())  # copy original attributes
-            new_feature.setAttribute("score", self.index_score)  # set score value
-            features.append(new_feature)
+        # Check if the "score" field already exists
+        if scored_layer.fields().indexFromName("score") == -1:
+            # Add the "score" field if it doesn't exist
+            scored_layer.dataProvider().addAttributes(
+                [QgsField("score", QVariant.Double)]
+            )
+            scored_layer.updateFields()  # Make sure the layer is aware of the new field
 
-        # Add all features to the scored layer
-        scored_layer_data_provider.addFeatures(features)
+        # Get the index of the "score" field
+        score_field_index = scored_layer.fields().indexFromName("score")
 
-        QgsMessageLog.logMessage("Scored boundary layer created.", "Geest", Qgis.Info)
+        # Update each feature with the score value
+        for feature in scored_layer.getFeatures():
+            feature.setAttribute(score_field_index, self.index_score)
+            scored_layer.updateFeature(feature)  # Apply changes to the feature
+
+            # Commit changes to save edits
+        if not scored_layer.commitChanges():
+            QgsMessageLog.logMessage(
+                "Failed to commit changes to score layer", "Geest", Qgis.Critical
+            )
+        else:
+            QgsMessageLog.logMessage(
+                "Score field added and updated in shapefile.", "Geest", Qgis.Info
+            )
         return scored_layer
 
     def do_execute(self):
