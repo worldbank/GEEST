@@ -175,73 +175,33 @@ class RasterReclassificationWorkflow(WorkflowBase):
         )
         self.workflow_is_legacy = False
 
-    def _process_area(
+    def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
         current_bbox: QgsGeometry,
-        area_features: QgsVectorLayer,
+        area_raster: str,
         index: int,
-    ) -> str:
+    ):
         """
-        Executes the actual workflow logic for a single area
-        Must be implemented by subclasses.
+        Executes the actual workflow logic for a single area using a raster.
 
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-        :index: Iteration / number of area being processed.
+        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
+        :index: Index of the current area.
 
-        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        :return: Path to the reclassified raster.
         """
-
-        # Use the current_bbox (bounding box of the area) for reclassification
-        reprojected_raster = self._clip_and_reproject(current_bbox, index)
+        _ = current_area  # Unused in this analysis
 
         # Apply the reclassification rules
         reclassified_raster = self._apply_reclassification(
-            reprojected_raster,
+            area_raster,
             index,
             bbox=current_bbox,
         )
 
         return reclassified_raster
-
-    def _clip_and_reproject(self, raster_path: str, bbox: QgsGeometry, index: int):
-        """
-        Reproject and clip the raster to the bounding box of the current area.
-        """
-        # Convert the bbox to QgsRectangle
-        bbox = bbox.boundingBox()
-
-        reprojected_raster_path = os.path.join(
-            self.workflow_directory,
-            f"{self.layer_id}_clipped_and_reprojected_{index}.tif",
-        )
-
-        params = {
-            "INPUT": raster_path,
-            "TARGET_CRS": self.crs,
-            "RESAMPLING": 0,
-            "TARGET_RESOLUTION": self.pixel_size,
-            "NODATA": -9999,
-            "OUTPUT": "TEMPORARY_OUTPUT",
-            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
-        }
-
-        aoi = processing.run(
-            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
-        )["OUTPUT"]
-
-        params = {
-            "INPUT": aoi,
-            "BAND": 1,
-            "FILL_VALUE": 0,
-            "OUTPUT": reprojected_raster_path,
-        }
-
-        processing.run("native:fillnodata", params)
-
-        return reprojected_raster_path
 
     def _apply_reclassification(
         self,
@@ -254,8 +214,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
         """
         bbox = bbox.boundingBox()
 
-        reclassified_raster = os.path.join(
-            self.workflow_directory, f"{self.output_prefix}_reclassified_{index}.tif"
+        reclassified_raster_path = os.path.join(
+            self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif"
         )
 
         # Set up the reclassification using reclassifybytable
@@ -277,20 +237,20 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "MASK": self.grid_layer,
             "CROP_TO_CUTLINE": True,
             "KEEP_RESOLUTION": False,
-            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
-            "OUTPUT": reclassified_raster,
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "OUTPUT": reclassified_raster_path,
         }
 
         processing.run(
             "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
         )
         QgsMessageLog.logMessage(
-            f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
+            f"Reclassification for area {index} complete. Saved to {reclassified_raster_path}",
             "Geest",
             Qgis.Info,
         )
 
-        return reclassified_raster
+        return reclassified_raster_path
 
     # TODO Remove when all workflows are refactored
     def do_execute(self):
@@ -298,3 +258,24 @@ class RasterReclassificationWorkflow(WorkflowBase):
         Execute the workflow.
         """
         self._execute()
+
+    # Not used in this workflow since we work with rasters
+    def _process_features_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
+        """
+        Executes the actual workflow logic for a single area
+        Must be implemented by subclasses.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        """
+        pass

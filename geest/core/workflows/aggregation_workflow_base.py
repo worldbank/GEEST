@@ -6,8 +6,8 @@ from qgis.core import (
     Qgis,
     QgsFeedback,
     QgsRasterLayer,
-    QgsProject,
     QgsProcessingContext,
+    QgsGeometry,
 )
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
@@ -326,5 +326,25 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             return False
 
-    def _process_area(self):
+    def _process_features_for_area(self):
+        pass
+
+    # Default implementation of the abstract method - not used in this workflow
+    def _process_raster_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_raster: str,
+        index: int,
+    ):
+        """
+        Executes the actual workflow logic for a single area using a raster.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
+        :index: Index of the current area.
+
+        :return: Path to the reclassified raster.
+        """
         pass

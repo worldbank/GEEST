@@ -4,6 +4,7 @@ from qgis.core import (
     QgsField,
     Qgis,
     QgsFeedback,
+    QgsGeometry,
     QgsVectorLayer,
     QgsProcessingContext,
     QgsVectorLayer,
@@ -63,7 +64,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         )
         self.workflow_is_legacy = False  # This is a new workflow, not a legacy one
 
-    def _process_area(
+    def _process_features_for_area(
         self,
         current_area: QgsGeometry,
         current_bbox: QgsGeometry,
@@ -157,4 +158,24 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
     # Remove once all workflows are updated
     def do_execute(self):
+        pass
+
+    # Default implementation of the abstract method - not used in this workflow
+    def _process_raster_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_raster: str,
+        index: int,
+    ):
+        """
+        Executes the actual workflow logic for a single area using a raster.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
+        :index: Index of the current area.
+
+        :return: Path to the reclassified raster.
+        """
         pass

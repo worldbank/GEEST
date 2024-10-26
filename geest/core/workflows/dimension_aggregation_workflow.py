@@ -54,5 +54,5 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
             f"aggregate_{self.id}" + f".{extension}",
         )
 
-    def _process_area(self):
+    def _process_features_for_area(self):
         pass

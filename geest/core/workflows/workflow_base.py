@@ -55,6 +55,7 @@ class WorkflowBase(ABC):
             raise ValueError("Working directory not set.")
         # This is the lower level directory for this workflow
         self.workflow_directory = self._create_workflow_directory()
+        self.pixel_size = 100.0  # TODO get from data model
         self.gpkg_path: str = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
         )
@@ -79,6 +80,63 @@ class WorkflowBase(ABC):
         self.layer_id = self.attributes.get("ID", "").lower().replace(" ", "_")
         self.attributes["Result"] = "Not Run"
         self.workflow_is_legacy = True
+
+    #
+    # Every concrete subclass needs to implement these three methods
+    #
+
+    @abstractmethod
+    def do_execute(self) -> bool:
+        """
+        Executes the actual workflow logic.
+        Must be implemented by subclasses.
+
+        :return: True if the workflow completes successfully, False if canceled or failed.
+        """
+        pass
+
+    @abstractmethod
+    def _process_features_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
+        """
+        Executes the actual workflow logic for a single area
+        Must be implemented by subclasses.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        """
+        pass
+
+    @abstractmethod
+    def _process_raster_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_raster: str,
+        index: int,
+    ):
+        """
+        Executes the actual workflow logic for a single area using a raster.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
+        :index: Index of the current area.
+
+        :return: Path to the reclassified raster.
+        """
+        pass
+
+    # ------------------- END OF ABSCRACT METHODS -------------------
 
     def execute(self) -> bool:
         """
@@ -149,7 +207,7 @@ class WorkflowBase(ABC):
                 raster_output = None
                 # Step 1: Select features that intersect with the current area
                 if self.features_layer:  # we are processing a vector input
-                    area_features = self._select_features(
+                    area_features = self._subset_vector_layer(
                         current_area,
                         output_prefix=f"{self.layer_id}_area_features_{index}",
                     )
@@ -157,7 +215,7 @@ class WorkflowBase(ABC):
                     #    continue
 
                     # Step 2: Process the area features - work happens in concrete class
-                    raster_output = self._process_area(
+                    raster_output = self._process_features_for_area(
                         current_area=current_area,
                         current_bbox=current_bbox,
                         area_features=area_features,
@@ -165,10 +223,15 @@ class WorkflowBase(ABC):
                     )
 
                 else:  # assumes we are processing a raster input
-                    raster_output = self._subset_raster(
-                        self.raster_layer,
-                        current_area,
-                        output_prefix=f"{self.layer_id}_area_features_{index}",
+
+                    area_raster = self._subset_raster_layer(
+                        bbox=current_bbox, index=index
+                    )
+                    raster_output = self._process_raster_for_area(
+                        current_area=current_area,
+                        current_bbox=current_bbox,
+                        area_raster=area_raster,
+                        index=index,
                     )
 
                 # Multiply the area by its matching mask layer in study_area folder
@@ -219,27 +282,6 @@ class WorkflowBase(ABC):
             self.attributes["Error File"] = error_path
             return False
 
-    @abstractmethod
-    def _process_area(
-        self,
-        current_area: QgsGeometry,
-        current_bbox: QgsGeometry,
-        area_features: QgsVectorLayer,
-        index: int,
-    ) -> str:
-        """
-        Executes the actual workflow logic for a single area
-        Must be implemented by subclasses.
-
-        :current_area: Current polygon from our study area.
-        :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-        :index: Iteration / number of area being processed.
-
-        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
-        """
-        pass
-
     def _create_workflow_directory(self, *subdirs: str) -> str:
         """
         Creates the directory for this workflow if it doesn't already exist.
@@ -255,7 +297,7 @@ class WorkflowBase(ABC):
 
         return directory
 
-    def _select_features(
+    def _subset_vector_layer(
         self, area_geom: QgsGeometry, output_prefix: str
     ) -> QgsVectorLayer:
         """
@@ -299,6 +341,46 @@ class WorkflowBase(ABC):
         }
         result = processing.run("native:extractbyextent", params)
         return QgsVectorLayer(result["OUTPUT"], output_prefix, "ogr")
+
+    def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
+        """
+        Reproject and clip the raster to the bounding box of the current area.
+
+        :param bbox: The bounding box of the current area.
+        :param index: The index of the current area.
+
+        :return: The path to the reprojected and clipped raster.
+        """
+        # Convert the bbox to QgsRectangle
+        bbox = bbox.boundingBox()
+
+        reprojected_raster_path = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_clipped_and_reprojected_{index}.tif",
+        )
+
+        params = {
+            "INPUT": self.raster_layer,
+            "TARGET_CRS": self.target_crs,
+            "RESAMPLING": 0,
+            "TARGET_RESOLUTION": self.pixel_size,
+            "NODATA": -9999,
+            "OUTPUT": "TEMPORARY_OUTPUT",
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+        }
+
+        aoi = processing.run(
+            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+
+        params = {
+            "INPUT": aoi,
+            "BAND": 1,
+            "FILL_VALUE": 0,
+            "OUTPUT": reprojected_raster_path,
+        }
+        processing.run("native:fillnodata", params)
+        return reprojected_raster_path
 
     def _check_and_reproject_layer(self):
         """
@@ -555,13 +637,3 @@ class WorkflowBase(ABC):
             return False
 
         return vrt_filepath
-
-    @abstractmethod
-    def do_execute(self) -> bool:
-        """
-        Executes the actual workflow logic.
-        Must be implemented by subclasses.
-
-        :return: True if the workflow completes successfully, False if canceled or failed.
-        """
-        pass
