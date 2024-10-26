@@ -4,9 +4,12 @@ import shutil
 from qgis.core import (
     QgsMessageLog,
     Qgis,
+    QgsGeometry,
     QgsFeedback,
     QgsRasterLayer,
     QgsProcessingContext,
+    QgsProcessingFeedback,
+    QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
@@ -36,16 +39,11 @@ class RasterReclassificationWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Environmental Hazards"
 
-    def do_execute(self):
-        """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
-        """
-
         layer_name = self.attributes.get("Use Environmental Hazards Raster", None)
 
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid points layer found in Use Environmental Hazards Raster, trying Use Environmental Hazards Layer Source.",
+                "Invalid layer found in Use Environmental Hazards Raster, trying Use Environmental Hazards Layer Source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
@@ -54,18 +52,18 @@ class RasterReclassificationWorkflow(WorkflowBase):
             )
             if not layer_name:
                 QgsMessageLog.logMessage(
-                    "No points layer found in Use Environmental Hazards Layer Source.",
+                    "No layer found in Use Environmental Hazards Layer Source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            return False
+                return False
 
-        features_layer = QgsRasterLayer(
+        self.raster_layer = QgsRasterLayer(
             layer_name, "Environmental Hazards Raster", "gdal"
         )
 
         if self.layer_id == "fire":
-            reclassification_rules = [
+            self.reclassification_rules = [
                 "-inf",
                 0,
                 5.00,  # new value = 5
@@ -86,7 +84,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 0,  # new value = 0
             ]
         elif self.layer_id == "flood":
-            reclassification_rules = [
+            self.reclassification_rules = [
                 -1,
                 0,
                 5.00,  # new value = 5
@@ -107,7 +105,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 0,  # new value = 0
             ]
         elif self.layer_id == "landslide":
-            reclassification_rules = [
+            self.reclassification_rules = [
                 0,
                 0,
                 5.00,  # new value = 5
@@ -128,7 +126,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 0,  # new value = 0
             ]
         elif self.layer_id == "cyclone":
-            reclassification_rules = [
+            self.reclassification_rules = [
                 0,
                 0,
                 5.00,  # new value = 5
@@ -149,7 +147,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 0,  # new value = 0
             ]
         elif self.layer_id == "drought":
-            reclassification_rules = [
+            self.reclassification_rules = [
                 -3.4e38,
                 -3.4e38,
                 5.00,  # new value = 5
@@ -169,30 +167,134 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 5,
                 0,  # new value = 0
             ]
+
         QgsMessageLog.logMessage(
-            f"Reclassification Rules for {self.layer_id}: {reclassification_rules}",
+            f"Reclassification Rules for {self.layer_id}: {self.reclassification_rules}",
             tag="Geest",
             level=Qgis.Info,
         )
+        self.workflow_is_legacy = False
 
-        processor = RasterReclassificationProcessor(
-            input_raster=features_layer,
-            output_prefix=self.layer_id,
-            reclassification_table=reclassification_rules,
-            pixel_size=100,
-            gpkg_path=self.gpkg_path,
-            workflow_directory=self.workflow_directory,
-            context=self.context,
+    def _process_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
+        """
+        Executes the actual workflow logic for a single area
+        Must be implemented by subclasses.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        """
+
+        # Use the current_bbox (bounding box of the area) for reclassification
+        reprojected_raster = self._clip_and_reproject(current_bbox, index)
+
+        # Apply the reclassification rules
+        reclassified_raster = self._apply_reclassification(
+            reprojected_raster,
+            index,
+            bbox=current_bbox,
         )
 
+        return reclassified_raster
+
+    def _clip_and_reproject(self, raster_path: str, bbox: QgsGeometry, index: int):
+        """
+        Reproject and clip the raster to the bounding box of the current area.
+        """
+        # Convert the bbox to QgsRectangle
+        bbox = bbox.boundingBox()
+
+        reprojected_raster_path = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_clipped_and_reprojected_{index}.tif",
+        )
+
+        params = {
+            "INPUT": raster_path,
+            "TARGET_CRS": self.crs,
+            "RESAMPLING": 0,
+            "TARGET_RESOLUTION": self.pixel_size,
+            "NODATA": -9999,
+            "OUTPUT": "TEMPORARY_OUTPUT",
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
+        }
+
+        aoi = processing.run(
+            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+
+        params = {
+            "INPUT": aoi,
+            "BAND": 1,
+            "FILL_VALUE": 0,
+            "OUTPUT": reprojected_raster_path,
+        }
+
+        processing.run("native:fillnodata", params)
+
+        return reprojected_raster_path
+
+    def _apply_reclassification(
+        self,
+        input_raster: QgsRasterLayer,
+        index: int,
+        bbox: QgsGeometry,
+    ):
+        """
+        Apply the reclassification using the raster calculator and save the output.
+        """
+        bbox = bbox.boundingBox()
+
+        reclassified_raster = os.path.join(
+            self.workflow_directory, f"{self.output_prefix}_reclassified_{index}.tif"
+        )
+
+        # Set up the reclassification using reclassifybytable
+        params = {
+            "INPUT_RASTER": input_raster,
+            "RASTER_BAND": 1,  # Band number to apply the reclassification
+            "TABLE": self.reclassification_rules,  # Reclassification table
+            "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
+            "OUTPUT": "TEMPORARY_OUTPUT",
+        }
+
+        # Perform the reclassification using the raster calculator
+        reclass = processing.run(
+            "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+
+        clip_params = {
+            "INPUT": reclass,
+            "MASK": self.grid_layer,
+            "CROP_TO_CUTLINE": True,
+            "KEEP_RESOLUTION": False,
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.crs.authid()}]",
+            "OUTPUT": reclassified_raster,
+        }
+
+        processing.run(
+            "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
+        )
         QgsMessageLog.logMessage(
-            "Use Environmental Hazards Processor Created", tag="Geest", level=Qgis.Info
+            f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
+            "Geest",
+            Qgis.Info,
         )
 
-        vrt_path = processor.reclassify()
-        self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Result"] = "Use Environmental Hazards Workflow Completed"
-        return True
+        return reclassified_raster
 
-    def _process_area(self):
-        pass
+    # TODO Remove when all workflows are refactored
+    def do_execute(self):
+        """
+        Execute the workflow.
+        """
+        self._execute()

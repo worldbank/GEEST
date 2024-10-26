@@ -151,7 +151,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
 
-        :return: A raster layer if processing completes successfully, False if canceled or failed.
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
 
         # Step 2: Process these areas in batches and create buffers

@@ -57,7 +57,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
 
-        :return: True if the workflow completes successfully, False if canceled or failed.
+        :return: Raster file path of the output.
         """
         QgsMessageLog.logMessage(
             f"Processing area {index} score workflow", "Geest", Qgis.Info

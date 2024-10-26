@@ -63,7 +63,7 @@ class AcledImpactWorkflow(WorkflowBase):
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
 
-        :return: True if the workflow completes successfully, False if canceled or failed.
+        :return: Raster file path of the output.
         """
 
         # Step 1: Buffer the selected features by 5 km

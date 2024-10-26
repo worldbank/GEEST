@@ -70,7 +70,7 @@ class PointPerCellWorkflow(WorkflowBase):
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
 
-        :return: True if the workflow completes successfully, False if canceled or failed.
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         area_features_count = area_features.featureCount()
         QgsMessageLog.logMessage(
