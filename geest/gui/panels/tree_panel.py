@@ -17,7 +17,14 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QMovie
-from qgis.PyQt.QtWidgets import QProgressBar
+from qgis.PyQt.QtWidgets import (
+    QProgressBar,
+    QDialog,
+    QVBoxLayout,
+    QTableWidget,
+    QTableWidgetItem,
+    QPushButton,
+)
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
@@ -481,7 +488,44 @@ class TreePanel(QWidget):
         QgsMessageLog.logMessage(
             "Attributes stored in tree:", tag="Geest", level=Qgis.Info
         )
-        QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
+        attributes = item.data(3)
+        QgsMessageLog.logMessage(str(attributes), tag="Geest", level=Qgis.Info)
+
+        # Sort the data alphabetically by key name
+        sorted_data = dict(sorted(attributes.items()))
+
+        dialog = QDialog()
+        dialog.setWindowTitle("Attributes")
+        dialog.resize(600, 400)
+
+        layout = QVBoxLayout()
+        dialog.setLayout(layout)
+
+        # Create a table to display the data
+        table = QTableWidget()
+        table.setRowCount(len(sorted_data))
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(["Key", "Value"])
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # Populate the table with the sorted data
+        for row, (key, value) in enumerate(sorted_data.items()):
+            key_item = QTableWidgetItem(key)
+            value_item = QTableWidgetItem(str(value))
+            key_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            value_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+            table.setItem(row, 0, key_item)
+            table.setItem(row, 1, value_item)
+
+        layout.addWidget(table)
+
+        # Add a close button
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(dialog.close)
+        layout.addWidget(close_button)
+
+        dialog.exec_()
+
         QgsMessageLog.logMessage(
             "----------------------------", tag="Geest", level=Qgis.Info
         )
