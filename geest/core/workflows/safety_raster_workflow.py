@@ -1,12 +1,13 @@
 import os
 import numpy as np
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
-    QgsGeometry,
     QgsFeedback,
-    QgsRasterLayer,
+    QgsGeometry,
+    QgsMessageLog,
     QgsProcessingContext,
+    QgsProcessingFeedback,
+    QgsRasterLayer,
     QgsVectorLayer,
 )
 import processing  # QGIS processing toolbox
@@ -95,11 +96,59 @@ class SafetyRasterWorkflow(WorkflowBase):
         )
         return reclassified_raster
 
+    def _apply_reclassification(
+        self,
+        input_raster: QgsRasterLayer,
+        index: int,
+        reclass_table: list,
+        bbox: QgsGeometry,
+    ):
+        """
+        Apply the reclassification using the raster calculator and save the output.
+        """
+        bbox = bbox.boundingBox()
+
+        reclassified_raster = os.path.join(
+            self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif"
+        )
+
+        # Set up the reclassification using reclassifybytable
+        params = {
+            "INPUT_RASTER": input_raster,
+            "RASTER_BAND": 1,  # Band number to apply the reclassification
+            "TABLE": reclass_table,  # Reclassification table
+            "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
+            "NODATA_FOR_MISSING": False,
+            "NO_DATA": 255,  # No data value
+            "OUTPUT": reclassified_raster,
+        }
+
+        # Perform the reclassification using the raster calculator
+        reclass = processing.run(
+            "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+
+        QgsMessageLog.logMessage(
+            f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
+            "Geest",
+            Qgis.Info,
+        )
+
+        return reclassified_raster
+
     def calculate_raster_stats(self, raster_path):
         """
         Calculate statistics (max, median, 75th percentile) from a QGIS raster layer using as_numpy.
         """
         raster_layer = QgsRasterLayer(raster_path, "Input Raster")
+
+        # Check if the raster layer loaded successfully
+        if not raster_layer.isValid():
+            QgsMessageLog.logMessage(
+                "Raster layer failed to load", "Geest", level=Qgis.Warning
+            )
+            return None, None, None
+
         provider = raster_layer.dataProvider()
         extent = raster_layer.extent()
         width = raster_layer.width()
@@ -107,27 +156,49 @@ class SafetyRasterWorkflow(WorkflowBase):
 
         # Fetch the raster data for band 1
         block = provider.block(1, extent, width, height)
-
         byte_array = block.data()  # This returns a QByteArray
 
-        # Convert list to a numpy array
-        raster_array = np.frombuffer(byte_array, dtype=np.float32).reshape(
-            (height, width)
-        )
+        # Determine the correct dtype based on the provider's data type
+        data_type = provider.dataType(1)
+        dtype = None
+        if data_type == 5:  # Float32
+            dtype = np.float32
+        elif data_type == 3:  # Int16
+            dtype = np.int16
+        elif data_type == 4:  # UInt16
+            dtype = np.uint16
+        elif data_type == 6:  # Int32
+            dtype = np.int32
+        elif data_type == 7:  # UInt32
+            dtype = np.uint32
+        elif data_type == 1:  # Byte
+            dtype = np.uint8
 
-        # Filter out NoData values (assumes NoData is represented by some large value like 3.4e+38 or negative values)
+        if dtype is None:
+            QgsMessageLog.logMessage(
+                "Unsupported data type", "Geest", level=Qgis.Warning
+            )
+            return None, None, None
+
+        # Convert QByteArray to a numpy array with the correct dtype
+        raster_array = np.frombuffer(byte_array, dtype=dtype).reshape((height, width))
+
+        # Filter out NoData values
         no_data_value = provider.sourceNoDataValue(1)
         valid_data = raster_array[raster_array != no_data_value]
 
         if valid_data.size > 0:
             # Compute statistics
-            max_value = np.max(valid_data).astype(np.float32)
-            median = np.median(valid_data).astype(np.float32)
-            percentile_75 = np.percentile(valid_data, 75).astype(np.float32)
+            max_value = np.max(valid_data)
+            median = np.median(valid_data)
+            percentile_75 = np.percentile(valid_data, 75)
 
             return max_value, median, percentile_75
-
         else:
+            # Handle case with no valid data
+            QgsMessageLog.logMessage(
+                "No valid data in the raster", "Geest", level=Qgis.Warning
+            )
             return None, None, None
 
     def _build_reclassification_table(
