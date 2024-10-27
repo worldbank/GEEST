@@ -1,14 +1,17 @@
+import os
+import numpy as np
 from qgis.core import (
     QgsMessageLog,
     Qgis,
-    QgsFeedback,
     QgsGeometry,
+    QgsFeedback,
     QgsRasterLayer,
     QgsProcessingContext,
+    QgsVectorLayer,
 )
+import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.algorithms import SafetyRasterReclassificationProcessor
 
 
 class SafetyRasterWorkflow(WorkflowBase):
@@ -31,12 +34,6 @@ class SafetyRasterWorkflow(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Nighttime Lights"
-
-    def do_execute(self):
-        """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
-        """
-
         layer_name = self.attributes.get("Use Nighttime Lights Raster", None)
 
         if not layer_name:
@@ -52,33 +49,12 @@ class SafetyRasterWorkflow(WorkflowBase):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            return False
-
-        features_layer = QgsRasterLayer(layer_name, "Nighttime Lights Raster", "gdal")
-
-        processor = SafetyRasterReclassificationProcessor(
-            output_prefix=self.layer_id,
-            input_raster=features_layer,
-            pixel_size=100,
-            gpkg_path=self.gpkg_path,
-            grid_layer=self.bboxes_layer,
-            workflow_directory=self.workflow_directory,
-            context=self.context,
+                return False
+        self.raster_layer = QgsRasterLayer(
+            layer_name, "Nighttime Lights Raster", "gdal"
         )
+        self.workflow_is_legacy = False
 
-        QgsMessageLog.logMessage(
-            "Use Nighttime Lights Processor Created", tag="Geest", level=Qgis.Info
-        )
-
-        vrt_path = processor.process_areas()
-        self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Result"] = "Use Nighttime Lights Workflow Completed"
-        return True
-
-    def _process_features_for_area(self):
-        pass
-
-    # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
@@ -95,5 +71,147 @@ class SafetyRasterWorkflow(WorkflowBase):
         :index: Index of the current area.
 
         :return: Path to the reclassified raster.
+        """
+        _ = current_area  # Unused in this analysis
+
+        max_val, median, percentile_75 = self.calculate_raster_stats(area_raster)
+
+        # Dynamically build the reclassification table using the max value
+        reclass_table = self._build_reclassification_table(
+            max_val, median, percentile_75
+        )
+        QgsMessageLog.logMessage(
+            f"Reclassification table for area {index}: {reclass_table}",
+            "Geest",
+            Qgis.Info,
+        )
+
+        # Apply the reclassification rules
+        reclassified_raster = self._apply_reclassification(
+            area_raster,
+            index,
+            reclass_table=reclass_table,
+            bbox=current_bbox,
+        )
+        return reclassified_raster
+
+    def calculate_raster_stats(self, raster_path):
+        """
+        Calculate statistics (max, median, 75th percentile) from a QGIS raster layer using as_numpy.
+        """
+        raster_layer = QgsRasterLayer(raster_path, "Input Raster")
+        provider = raster_layer.dataProvider()
+        extent = raster_layer.extent()
+        width = raster_layer.width()
+        height = raster_layer.height()
+
+        # Fetch the raster data for band 1
+        block = provider.block(1, extent, width, height)
+
+        byte_array = block.data()  # This returns a QByteArray
+
+        # Convert list to a numpy array
+        raster_array = np.frombuffer(byte_array, dtype=np.float32).reshape(
+            (height, width)
+        )
+
+        # Filter out NoData values (assumes NoData is represented by some large value like 3.4e+38 or negative values)
+        no_data_value = provider.sourceNoDataValue(1)
+        valid_data = raster_array[raster_array != no_data_value]
+
+        if valid_data.size > 0:
+            # Compute statistics
+            max_value = np.max(valid_data).astype(np.float32)
+            median = np.median(valid_data).astype(np.float32)
+            percentile_75 = np.percentile(valid_data, 75).astype(np.float32)
+
+            return max_value, median, percentile_75
+
+        else:
+            return None, None, None
+
+    def _build_reclassification_table(
+        self, max_val: float, median: float, percentile_75: float
+    ):
+        """
+        Build a reclassification table dynamically using the max value from the raster.
+        """
+        # Low NTL Classification Scheme
+        if max_val < 0.05:
+            reclass_table = [
+                0,
+                0,
+                0,  # No Light
+                0.01,
+                max_val * 0.2,
+                1,  # Very Low
+                max_val * 0.2 + 0.01,
+                max_val * 0.4,
+                2,  # Low
+                max_val * 0.4 + 0.01,
+                max_val * 0.6,
+                3,  # Moderate
+                max_val * 0.6 + 0.01,
+                max_val * 0.8,
+                4,  # High
+                max_val * 0.8 + 0.01,
+                max_val,
+                5,  # Highest
+            ]
+            reclass_table = list(map(str, reclass_table))
+            return reclass_table
+        else:
+            # Standard Classification Scheme
+            quarter_median = 0.25 * median
+            half_median = 0.5 * median
+
+            reclass_table = [
+                0.00,
+                0.05,
+                0,  # No Access
+                0.05,
+                quarter_median,
+                1,  # Very Low
+                quarter_median,
+                half_median,
+                2,  # Low
+                half_median,
+                median,
+                3,  # Moderate
+                median,
+                percentile_75,
+                4,  # High
+                percentile_75,
+                "inf",
+                5,  # Very High
+            ]
+            reclass_table = list(map(str, reclass_table))
+            return reclass_table
+
+    # TODO Remove when all workflows are refactored
+    def do_execute(self):
+        """
+        Execute the workflow.
+        """
+        self._execute()
+
+    # Not used in this workflow since we work with rasters
+    def _process_features_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
+        """
+        Executes the actual workflow logic for a single area
+        Must be implemented by subclasses.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         pass
