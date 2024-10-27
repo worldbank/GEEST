@@ -32,23 +32,23 @@ in pkgs.mkShell rec {
     pythonPackages.pip
     pythonPackages.pyqtwebengine
     pinnedPkgs.vim
-    pre-commit
-    git
-    qgis
-    qt5.full # so we get designer
-    qt5.qtbase
-    qt5.qtsvg
-    qt5.qttools
+    pinnedPkgs.pre-commit
+    pinnedPkgs.git
+    pinnedPkgs.qgis
+    pinnedPkgs.qt5.full # so we get designer
+    pinnedPkgs.qt5.qtbase
+    pinnedPkgs.qt5.qtsvg
+    pinnedPkgs.qt5.qttools
     #qt5.qtwebkit
-    qt5.qtlocation
-    qt5.qtquickcontrols2
-    vscode
+    pinnedPkgs.qt5.qtlocation
+    pinnedPkgs.qt5.qtquickcontrols2
+    pinnedPkgs.vscode
     # Would be nice if this worked, we could replace the same logic in the QGIS start script
     #qgis.override { extraPythonPackages = ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ];}
-    gum # UX for TUIs
-    skate # Distributed key/value store
-    glow # terminal markdown viewer
-    gdb
+    pinnedPkgs.gum # UX for TUIs
+    pinnedPkgs.skate # Distributed key/value store
+    pinnedPkgs.glow # terminal markdown viewer
+    pinnedPkgs.gdb
   ];
   # Run this command, only after creating the virtual environment
   PROJECT_ROOT = builtins.getEnv "PWD";
