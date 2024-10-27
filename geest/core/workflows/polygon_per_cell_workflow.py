@@ -9,6 +9,9 @@ from qgis.core import (
 )
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
+from geest.core.algorithms.polygon_per_cell_processor import (
+    assign_reclassification_to_polygons,
+)
 
 
 class PolygonPerCellWorkflow(WorkflowBase):
@@ -46,7 +49,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            return False
+                return False
 
         self.features_layer = QgsVectorLayer(
             layer_path, "Polygon per Cell Layer", "ogr"
@@ -60,6 +63,17 @@ class PolygonPerCellWorkflow(WorkflowBase):
         area_features: QgsVectorLayer,
         index: int,
     ) -> str:
+        """
+        Executes the actual workflow logic for a single area
+        Must be implemented by subclasses.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        """
         area_features_count = area_features.featureCount()
         QgsMessageLog.logMessage(
             f"Features layer for area {index+1} loaded with {area_features_count} features.",
@@ -71,7 +85,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
             self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
         )
         # Step 2: Assign reclassification values to polygons based on their perimeter
-        polygon_areas = self._assign_reclassification_to_polygons(area_features)
+        polygon_areas = assign_reclassification_to_polygons(area_features)
         raster_output = self._rasterize(
             polygon_areas,
             current_bbox,
