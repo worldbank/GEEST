@@ -1,3 +1,4 @@
+import os
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -5,10 +6,12 @@ from qgis.core import (
     QgsGeometry,
     QgsVectorLayer,
     QgsProcessingContext,
+    edit,
+    QgsField,
 )
+from qgis.PyQt.QtCore import QVariant
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.algorithms import SafetyPerCellProcessor
 
 
 class SafetyPolygonWorkflow(WorkflowBase):
@@ -31,55 +34,93 @@ class SafetyPolygonWorkflow(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "Use Classify Poly into Classes"
+        layer_path = self.attributes.get("Classify Poly into Classes Shapefile", None)
 
-    def do_execute(self):
-        """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
-        """
-
-        layer_name = self.attributes.get("Classify Poly into Classes Shapefile", None)
-
-        if not layer_name:
+        if not layer_path:
             QgsMessageLog.logMessage(
                 "Invalid raster found in Classify Poly into Classes Shapefile, trying Classify Poly into Classes Layer Source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_name = self.attributes.get(
+            layer_path = self.attributes.get(
                 "Classify Poly into Classes Layer Source", None
             )
-            if not layer_name:
+            if not layer_path:
                 QgsMessageLog.logMessage(
                     "No points layer found in Classify Poly into Classes Layer Source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-            return False
+                return False
 
-        features_layer = QgsVectorLayer(layer_name, "features_layer", "ogr")
+        self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
 
-        selected_field = self.attributes.get(
+        self.selected_field = self.attributes.get(
             "Classify Poly into Classes Selected Field", ""
         )
-        processor = SafetyPerCellProcessor(
-            output_prefix=self.layer_id,
-            safety_layer=features_layer,
-            safety_field=selected_field,
-            workflow_directory=self.workflow_directory,
-            gpkg_path=self.gpkg_path,
-            context=self.context,
-        )
+        self.workflow_is_legacy = False
+
+    def _process_features_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        area_features: QgsVectorLayer,
+        index: int,
+    ) -> str:
+        """
+        Executes the actual workflow logic for a single area
+        Must be implemented by subclasses.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :area_features: A vector layer of features to analyse that includes only features in the study area.
+        :index: Iteration / number of area being processed.
+
+        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        """
+        area_features_count = area_features.featureCount()
         QgsMessageLog.logMessage(
-            "Safety Per Cell Processor Created", tag="Geest", level=Qgis.Info
+            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            tag="Geest",
+            level=Qgis.Info,
         )
+        # Step 1: Assign reclassification values based on perceived safety
+        reclassified_layer = self._assign_reclassification_to_safety(area_features)
 
-        vrt_path = processor.process_areas()
-        self.attributes["Indicator Result File"] = vrt_path
-        self.attributes["Result"] = "Use Safety Per Cell Workflow Completed"
-        return True
+        # Step 2: Rasterize the safety data
+        raster_output = self._rasterize(
+            reclassified_layer,
+            current_bbox,
+            index,
+            value_field="value",
+            default_value=255,
+        )
+        return raster_output
 
-    def _process_features_for_area(self):
-        pass
+    def _assign_reclassification_to_safety(
+        self, layer: QgsVectorLayer
+    ) -> QgsVectorLayer:
+        """
+        Assign reclassification values to polygons based on perceived safety.
+        """
+        with edit(layer):
+            if layer.fields().indexFromName("value") == -1:
+                layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+                layer.updateFields()
+
+            for feature in layer.getFeatures():
+                perceived_safety = feature[self.selected_field]
+                # Scale perceived safety values between 0 and 5
+                reclass_val = self._scale_value(perceived_safety, 0, 100, 0, 5)
+                feature.setAttribute("value", reclass_val)
+                layer.updateFeature(feature)
+        return layer
+
+    def _scale_value(self, value, min_in, max_in, min_out, max_out):
+        """
+        Scale value from input range (min_in, max_in) to output range (min_out, max_out).
+        """
+        return (value - min_in) / (max_in - min_in) * (max_out - min_out) + min_out
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
@@ -100,3 +141,10 @@ class SafetyPolygonWorkflow(WorkflowBase):
         :return: Path to the reclassified raster.
         """
         pass
+
+    # TODO Remove when all workflows are refactored
+    def do_execute(self):
+        """
+        Execute the workflow.
+        """
+        self._execute()
