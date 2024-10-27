@@ -20,7 +20,7 @@ from qgis.core import (
     Qgis,
 )
 import processing
-from qgis.PyQt.QtCore import QSettings, pyqtSignal, QVariant
+from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from geest.core import JsonTreeItem, setting
 from geest.core.algorithms import AreaIterator
 
