@@ -59,9 +59,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
         OSM
     </a>
 </td>
-
-
-  </tr>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of primary schools</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
@@ -73,25 +71,40 @@ This page provides guidance on finding and collecting relevant data for the GEES
         OSM
     </a>
 </td>
-
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of groceries</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for grocery locations</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22shop%22=%22greengrocer%22](area.area_0);way[%22shop%22=%22greengrocer%22](area.area_0);relation[%22shop%22=%22greengrocer%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of pharmacies</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for pharmacy locations</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22pharmacy%22](area.area_0);way[%22amenity%22=%22pharmacy%22](area.area_0);relation[%22amenity%22=%22pharmacy%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of green spaces</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for green space locations</td>
-  </tr>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22leisure%22=%22park%22](area.area_0);node[%22boundary%22=%22national_park%22](area.area_0);way[%22leisure%22=%22park%22](area.area_0);way[%22boundary%22=%22national_park%22](area.area_0);relation[%22leisure%22=%22park%22](area.area_0);relation[%22boundary%22=%22national_park%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Public Transport</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of public transportation stops, including maritime (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OpenStreetMap (OSM) - Public transport locations</td>
-  </tr>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22public_transport%22=%22stop_position%22](area.area_0);node[%22public_transport%22=%22platform%22](area.area_0);node[%22public_transport%22=%22station%22](area.area_0);node[%22public_transport%22=%22stop_area%22](area.area_0);node[%22highway%22=%22bus_stop%22](area.area_0);node[%22highway%22=%22platform%22](area.area_0);way[%22public_transport%22=%22stop_position%22](area.area_0);way[%22public_transport%22=%22platform%22](area.area_0);way[%22public_transport%22=%22station%22](area.area_0);way[%22public_transport%22=%22stop_area%22](area.area_0);way[%22highway%22=%22bus_stop%22](area.area_0);way[%22highway%22=%22platform%22](area.area_0);relation[%22public_transport%22=%22stop_position%22](area.area_0);relation[%22public_transport%22=%22platform%22](area.area_0);relation[%22public_transport%22=%22station%22](area.area_0);relation[%22public_transport%22=%22stop_area%22](area.area_0);relation[%22highway%22=%22bus_stop%22](area.area_0);relation[%22highway%22=%22platform%22](area.area_0);node[%22amenity%22=%22ferry_terminal%22](area.area_0);way[%22amenity%22=%22ferry_terminal%22](area.area_0);relation[%22amenity%22=%22ferry_terminal%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Health Facilities</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of hospitals and clinics (OSM)</td>
