@@ -25,7 +25,14 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QPushButton,
 )
-from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
+from qgis.core import (
+    QgsMessageLog,
+    Qgis,
+    QgsRasterLayer,
+    QgsProject,
+    QgsVectorLayer,
+    QgsLayerTreeGroup,
+)
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
 from geest.utilities import resources_path
@@ -806,8 +813,50 @@ class TreePanel(QWidget):
 
         output_file = item.data(3).get("Indicator Result File", None)
         if output_file:
-            layer = QgsRasterLayer(output_file, item.data(0))
-            QgsProject.instance().addMapLayer(layer)
+            layer_name = item.data(0)
+            layer = QgsRasterLayer(output_file, layer_name)
+
+            if not layer.isValid():
+                QgsMessageLog.logMessage(
+                    f"Layer {layer_name} is invalid and cannot be added.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                return
+
+            project = QgsProject.instance()
+
+            # Check if 'Geest' group exists, otherwise create it
+            geest_group = project.layerTreeRoot().findGroup("Geest")
+            if geest_group is None:
+                geest_group = project.layerTreeRoot().addGroup("Geest")
+
+            # Check if a layer with the same data source exists in the 'Geest' group
+            existing_layer = None
+            for layer_id in QgsProject.instance().mapLayers().keys():
+                current_layer = QgsProject.instance().mapLayer(layer_id)
+                if current_layer.source() == output_file and geest_group.findLayer(
+                    current_layer.id()
+                ):
+                    existing_layer = current_layer
+                    break
+
+            # If the layer exists, refresh it instead of removing and re-adding
+            if existing_layer is not None:
+                QgsMessageLog.logMessage(
+                    f"Refreshing existing layer: {existing_layer.name()}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                existing_layer.reload()
+            else:
+                # Add the new layer to the 'Geest' group
+                QgsProject.instance().addMapLayer(layer, False)
+                geest_group.addLayer(layer)
+                QgsMessageLog.logMessage(
+                    f"Added layer: {layer.name()}", tag="Geest", level=Qgis.Info
+                )
+
         item.updateStatus()
         self.save_json_to_working_directory()
 
