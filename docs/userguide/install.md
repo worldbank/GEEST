@@ -57,7 +57,7 @@ In the **Repository Details** window:
 > **Note:** To obtain an ORS API key, visit the [OpenRouteService website](https://openrouteservice.org/). This API key is essential for enabling routing services within the GEEST tool.
 
 
-4. **Optional**: Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, to enhance performance and debugging.
+3. **Optional**: Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, to enhance performance and debugging.
 
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
