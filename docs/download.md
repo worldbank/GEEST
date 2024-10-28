@@ -9,4 +9,4 @@ To install the tool, please follow the installation instructions provided in the
 
 ---
 
-For any additional help, explore our [User Guide](https://github.com/elbeejay/draft-docs/blob/a98b79d90c6d2bdb3860ed669cfa33202ae4cde2/docs/userguide/install.md) for detailed guidance on setup and usage.
+For any additional help, explore our [User Guide](https://jayaramhariharan.com/draft-docs/docs/userguide/install.html) for detailed guidance on setup and usage.
