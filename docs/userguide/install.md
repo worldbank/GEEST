@@ -19,8 +19,9 @@ Follow the steps below to install the GEEST QGIS plugin using the custom reposit
 3. Under **Plugin Repositories**, click on **Add…**.
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins%20settings.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins%20settings.jpg" alt="QGIS Plugin Settings" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins%20settings.jpg" alt="QGIS Plugin Settings" width="500" style="float: left;" title="Click to enlarge">
 </a>
+
 
 ### Step 3: Enter Repository Details
 
@@ -32,9 +33,10 @@ In the **Repository Details** window:
 - Ensure the **Enabled** checkbox is checked.
 - Click **OK** to save.
 
-  <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg" alt="QGIS Repository Settings" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg" alt="QGIS Repository Settings" width="500" style="float: left;" title="Click to enlarge">
 </a>
+
 
 
 ### Step 4: Install the Plugin
@@ -44,8 +46,9 @@ In the **Repository Details** window:
 3. Select the plugin and click **Install Experimental Plugin**.
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/install.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/install.jpg" alt="QGIS Plugin Installation" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/install.jpg" alt="QGIS Plugin Installation" width="500" style="float: left;" title="Click to enlarge">
 </a>
+
 
 ### Step 5: Verify the Installation and Configure the Tool
 
@@ -62,5 +65,6 @@ In the **Repository Details** window:
 
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" alt="GEEST Settings" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" alt="GEEST Settings" width="500" style="float: left;" title="Click to enlarge">
 </a>
+
