@@ -17,7 +17,14 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QMovie
-from qgis.PyQt.QtWidgets import QProgressBar
+from qgis.PyQt.QtWidgets import (
+    QProgressBar,
+    QDialog,
+    QVBoxLayout,
+    QTableWidget,
+    QTableWidgetItem,
+    QPushButton,
+)
 from qgis.core import QgsMessageLog, Qgis, QgsRasterLayer, QgsProject, QgsVectorLayer
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
@@ -91,6 +98,13 @@ class TreePanel(QWidget):
         self.treeView.header().setStretchLastSection(False)
         # Now hide the header
         self.treeView.header().hide()
+        # Action fow when we double click an item
+        self.treeView.setExpandsOnDoubleClick(
+            False
+        )  # Prevent double-click from collapsing the tree view
+        self.treeView.doubleClicked.connect(
+            self.on_item_double_clicked
+        )  # Will show properties dialogs
 
         # Set layout
         layout.addWidget(self.treeView)
@@ -171,6 +185,18 @@ class TreePanel(QWidget):
         # to prevent race conditions
         self.workflow_queue = []
         self.queue_manager.processing_completed.connect(self.run_next_worflow_queue)
+
+    def on_item_double_clicked(self, index):
+        # Action to trigger on double-click
+        item = index.internalPointer()
+        if item.role == "layer":
+            self.show_layer_properties(item)
+        elif item.role == "dimension":
+            self.edit_dimension_aggregation(item)
+        elif item.role == "factor":
+            self.edit_factor_aggregation(item)
+        elif item.role == "analysis":
+            self.show_attributes(item)
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -481,7 +507,44 @@ class TreePanel(QWidget):
         QgsMessageLog.logMessage(
             "Attributes stored in tree:", tag="Geest", level=Qgis.Info
         )
-        QgsMessageLog.logMessage(str(item.data(3)), tag="Geest", level=Qgis.Info)
+        attributes = item.data(3)
+        QgsMessageLog.logMessage(str(attributes), tag="Geest", level=Qgis.Info)
+
+        # Sort the data alphabetically by key name
+        sorted_data = dict(sorted(attributes.items()))
+
+        dialog = QDialog()
+        dialog.setWindowTitle("Attributes")
+        dialog.resize(600, 400)
+
+        layout = QVBoxLayout()
+        dialog.setLayout(layout)
+
+        # Create a table to display the data
+        table = QTableWidget()
+        table.setRowCount(len(sorted_data))
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(["Key", "Value"])
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # Populate the table with the sorted data
+        for row, (key, value) in enumerate(sorted_data.items()):
+            key_item = QTableWidgetItem(key)
+            value_item = QTableWidgetItem(str(value))
+            key_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            value_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+            table.setItem(row, 0, key_item)
+            table.setItem(row, 1, value_item)
+
+        layout.addWidget(table)
+
+        # Add a close button
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(dialog.close)
+        layout.addWidget(close_button)
+
+        dialog.exec_()
+
         QgsMessageLog.logMessage(
             "----------------------------", tag="Geest", level=Qgis.Info
         )
@@ -607,7 +670,7 @@ class TreePanel(QWidget):
 
         # Enable or disable double-click editing in the tree view
         if edit_mode:
-            self.treeView.setEditTriggers(QTreeView.DoubleClicked)
+            self.treeView.setEditTriggers(QTreeView.RightClicked)
         else:
             self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
@@ -761,6 +824,8 @@ class TreePanel(QWidget):
         self.movie.stop()
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, None)
+        # Emit dataChanged to refresh the decoration
+        self.model.dataChanged.emit(second_column_index, second_column_index)
 
     def update_tree_item_status(self, item, status):
         """

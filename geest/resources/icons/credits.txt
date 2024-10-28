@@ -14,3 +14,5 @@ AUTHOR: Dazzle UI
 
 Factor and Indicator icons were further modified by Tim Sutton, Oct 2024.
 
+queued.svg - original art by Tim Sutton
+
