@@ -157,7 +157,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </td>
 </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of cycle paths (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of cycle paths</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
     <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22highway%22=%22cycleway%22](area.area_0);node[%22highway%22=%22track%22](area.area_0);node[%22cycleway%22=%22track%22](area.area_0);node[%22cycleway%22=%22lane%22](area.area_0);node[%22cycleway%22=%22share_busway%22](area.area_0);node[%22cycleway%22=%22shared_lane%22](area.area_0);way[%22highway%22=%22cycleway%22](area.area_0);way[%22highway%22=%22track%22](area.area_0);way[%22cycleway%22=%22track%22](area.area_0);way[%22cycleway%22=%22lane%22](area.area_0);way[%22cycleway%22=%22share_busway%22](area.area_0);way[%22cycleway%22=%22shared_lane%22](area.area_0);relation[%22highway%22=%22cycleway%22](area.area_0);relation[%22highway%22=%22track%22](area.area_0);relation[%22cycleway%22=%22track%22](area.area_0);relation[%22cycleway%22=%22lane%22](area.area_0);relation[%22cycleway%22=%22share_busway%22](area.area_0);relation[%22cycleway%22=%22shared_lane%22](area.area_0););(._;>;);out%20body;" target="_blank">
         OSM
@@ -165,7 +165,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </td>
 </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of footpaths (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of footpaths</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
     <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22highway%22=%22footway%22](area.area_0);way[%22highway%22=%22footway%22](area.area_0);relation[%22highway%22=%22footway%22](area.area_0););(._;>;);out%20body;" target="_blank">
         OSM
@@ -173,7 +173,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </td>
 </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Block Layout (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Block Layout</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
     <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22landuse%22=%22residential%22](area.area_0);node[%22landuse%22=%22commercial%22](area.area_0);node[%22landuse%22=%22industrial%22](area.area_0);node[%22boundary%22=%22administrative%22](area.area_0);way[%22landuse%22=%22residential%22](area.area_0);way[%22landuse%22=%22commercial%22](area.area_0);way[%22landuse%22=%22industrial%22](area.area_0);way[%22boundary%22=%22administrative%22](area.area_0);relation[%22landuse%22=%22residential%22](area.area_0);relation[%22landuse%22=%22commercial%22](area.area_0);relation[%22landuse%22=%22industrial%22](area.area_0);relation[%22boundary%22=%22administrative%22](area.area_0););(._;>;);out%20body;" target="_blank">
         OSM
@@ -195,7 +195,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">FCV</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">ACLED data (Violence Estimated Events)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">ACLED data</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
     <a href="mailto:civanescu@worldbank.org">
       mail for ACLED data
@@ -205,23 +205,39 @@ This page provides guidance on finding and collecting relevant data for the GEES
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Education</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Percentage of the labor force comprising women with university degrees</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National labor statistics - University degree holders among women</td>
-  </tr>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://data.worldbank.org/indicator/SL.TLF.ADVN.FE.ZS?locations=LC" target="_blank">
+        WB data
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Digital Inclusion</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Individuals using the Internet (% of population)</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">World Bank, ITU - Internet usage data</td>
-  </tr>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://data.worldbank.org/indicator/IT.NET.USER.ZS?locations=LC" target="_blank">
+        WB data
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Environmental Hazards</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Global Natural Hazards Data</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">ceva</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Benny</td>
  </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Water Sanitation</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Water points (OSM), catch basins, water valves, and fire hydrants (Mapillary)</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">altceva</td>
-  </tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Water points</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://www.mapillary.com/developer/api-documentation/points" target="_blank">
+        Mapillary
+    </a>
+    or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22emergency%22=%22fire_hydrant%22](area.area_0);node[%22emergency%22=%22water_tank%22](area.area_0);node[%22amenity%22=%22drinking_water%22](area.area_0);node[%22amenity%22=%22water_point%22](area.area_0);way[%22emergency%22=%22fire_hydrant%22](area.area_0);way[%22emergency%22=%22water_tank%22](area.area_0);way[%22amenity%22=%22drinking_water%22](area.area_0);way[%22amenity%22=%22water_point%22](area.area_0);relation[%22emergency%22=%22fire_hydrant%22](area.area_0);relation[%22emergency%22=%22water_tank%22](area.area_0);relation[%22amenity%22=%22drinking_water%22](area.area_0);relation[%22amenity%22=%22water_point%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
 </table>
 
 
