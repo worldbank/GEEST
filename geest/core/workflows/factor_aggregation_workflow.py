@@ -33,35 +33,3 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         self.raster_path_key = "Indicator Result File"
         self.workflow_is_legacy = False
         self.layer_id = self.id
-
-    def output_path(self, extension: str) -> str:
-        """
-        Define output path for the aggregated raster based on the analysis mode.
-
-        Parameters:
-            extension (str): The file extension for the output file.
-
-        Returns:
-            str: Path to the aggregated raster file.
-
-        """
-        directory = os.path.join(
-            self.workflow_directory,
-        )
-        # Create the directory if it doesn't exist
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        return os.path.join(
-            directory,
-            f"aggregate_{self.id}" + f".{extension}",
-        )
-
-    def _process_features_for_area(self):
-        pass
-
-    def _process_raster_for_area(self):
-        pass
-
-    def do_execute(self):
-        self._execute()

@@ -170,36 +170,11 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             return None
 
-        converter = RasterConverter()
-        aggregation_output_8bit = aggregation_output.replace(".tif", "_8bit.tif")
-        # Convert the aggregated raster to 8-bit
-        converter.convert_to_8bit(aggregation_output, aggregation_output_8bit)
-        if os.path.exists(aggregation_output_8bit):
-            # TODO We should check if developer mode is set and keep the 32-bit raster if it is
-            # os.remove(aggregation_output)
-            pass
-
-        QgsMessageLog.logMessage(
-            "Raster aggregation completed successfully.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        # Add the aggregated raster to the map
-        aggregated_layer = QgsRasterLayer(
-            aggregation_output_8bit, f"aggregated_{self.id}.tif"
-        )
-        if not aggregated_layer.isValid():
-            QgsMessageLog.logMessage(
-                "Aggregate layer is not valid.",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            return None
         # WRite the output path to the attributes
         # That will get passed back to the json model
-        self.attributes[self.result_file_tag] = aggregation_output_8bit
+        self.attributes[self.result_file_tag] = aggregation_output
 
-        return aggregation_output_8bit
+        return aggregation_output
 
     def get_raster_list(self, index) -> list:
         """
@@ -243,6 +218,7 @@ class AggregationWorkflowBase(WorkflowBase):
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
         _ = current_area  # Unused in this analysis
+        _ = current_bbox  # Unused in this analysis
 
         # Log the execution
         QgsMessageLog.logMessage(
@@ -281,5 +257,11 @@ class AggregationWorkflowBase(WorkflowBase):
 
         return result_file
 
+    def _process_features_for_area(self):
+        pass
+
+    def _process_raster_for_area(self):
+        pass
+
     def do_execute(self):
-        self._execute()
+        pass

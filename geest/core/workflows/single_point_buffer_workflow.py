@@ -179,3 +179,14 @@ class SinglePointBufferWorkflow(WorkflowBase):
         :return: Path to the reclassified raster.
         """
         pass
+
+    def _process_aggregate_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+    ):
+        """
+        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
+        """
+        pass

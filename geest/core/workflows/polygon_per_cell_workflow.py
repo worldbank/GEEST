@@ -121,3 +121,14 @@ class PolygonPerCellWorkflow(WorkflowBase):
         Execute the workflow.
         """
         self._execute()
+
+    def _process_aggregate_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+    ):
+        """
+        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
+        """
+        pass

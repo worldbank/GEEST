@@ -142,6 +142,17 @@ class SafetyPolygonWorkflow(WorkflowBase):
         """
         pass
 
+    def _process_aggregate_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+    ):
+        """
+        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
+        """
+        pass
+
     # TODO Remove when all workflows are refactored
     def do_execute(self):
         """
