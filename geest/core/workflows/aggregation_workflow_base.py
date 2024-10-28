@@ -33,7 +33,6 @@ class AggregationWorkflowBase(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.attributes = item.data(3)
         self.aggregation_attributes = None  # This should be set by the child class e.g. item.getIndicatorAttributes()
         self.analysis_mode = self.attributes.get("Analysis Mode", "")
         self.id = None  # This should be set by the child class
@@ -46,6 +45,7 @@ class AggregationWorkflowBase(WorkflowBase):
             None  # This should be set by the child class e.g. "Indicator Result File"
         )
         self.aggregation = True
+        self.workflow_is_legacy = False
 
     def get_weights(self) -> list:
         """
@@ -66,24 +66,12 @@ class AggregationWorkflowBase(WorkflowBase):
             weights.append(weight)
         return weights
 
-    def output_path(self, extension: str) -> str:
-        """
-        Define output path for the aggregated raster based on the analysis mode.
-
-        Parameters:
-            extension (str): The file extension for the output file.
-
-        Returns:
-            str: Path to the aggregated raster file.
-
-        """
-        pass
-
-    def aggregate(self, input_files: list) -> str:
+    def aggregate(self, input_files: list, index: int) -> str:
         """
         Perform weighted raster aggregation on the found raster files.
 
         :param input_files: List of raster file paths to aggregate.
+        :param index: The index of the area being processed.
 
         :return: Path to the aggregated raster file.
         """
@@ -147,7 +135,9 @@ class AggregationWorkflowBase(WorkflowBase):
         # Wrap the weighted sum and divide by the sum of weights
         expression = f"({expression}) / {layer_count}"
 
-        aggregation_output = self.output_path("tif")
+        aggregation_output = os.path.join(
+            self.workflow_directory, f"{self.layer_id}_aggregated_{index}.tif"
+        )
         QgsMessageLog.logMessage(
             f"Aggregating {len(input_files)} raster layers to {aggregation_output}",
             tag="Geest",
@@ -209,16 +199,16 @@ class AggregationWorkflowBase(WorkflowBase):
         # That will get passed back to the json model
         self.attributes[self.result_file_tag] = aggregation_output_8bit
 
-        QgsMessageLog.logMessage(
-            "Added raster layer to the map.", tag="Geest", level=Qgis.Info
-        )
         return aggregation_output_8bit
 
-    def get_raster_list(self) -> list:
+    def get_raster_list(self, index) -> list:
         """
         Get the list of rasters from the attributes that will be aggregated.
 
         (Factor Aggregation, Dimension Aggregation, Analysis).
+
+        Parameters:
+            index (int): The index of the area being processed.
 
         Returns:
             list: List of found raster file paths.
@@ -226,7 +216,11 @@ class AggregationWorkflowBase(WorkflowBase):
         raster_files = []
 
         for layer in self.layers:
-            path = layer.get(self.raster_path_key, "")
+            id = layer.get("Indicator ID", "").lower()
+            layer_folder = os.path.dirname(layer.get("Indicator Result File", ""))
+            path = os.path.join(
+                self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
+            )
             if path:
                 raster_files.append(path)
                 QgsMessageLog.logMessage(
@@ -263,7 +257,7 @@ class AggregationWorkflowBase(WorkflowBase):
             level=Qgis.Info,
         )
 
-        raster_files = self.get_raster_list()
+        raster_files = self.get_raster_list(index)
 
         if not raster_files or not isinstance(raster_files, list):
             QgsMessageLog.logMessage(
@@ -283,7 +277,7 @@ class AggregationWorkflowBase(WorkflowBase):
         )
 
         # Perform aggregation only if raster files are provided
-        result_file = self.aggregate(raster_files)
+        result_file = self.aggregate(raster_files, index)
 
         return result_file
 
