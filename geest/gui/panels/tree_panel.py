@@ -595,20 +595,63 @@ class TreePanel(QWidget):
             layer_uri = item.data(3).get(
                 f"{item.role.title()} Result File"
             )  # title = title case string
-        layer_name = item.data(0)
-        QgsMessageLog.logMessage(
-            f"Adding {layer_uri} to the map.", tag="Geest", level=Qgis.Info
-        )
-        # Add the aggregated raster to the map
-        layer = QgsRasterLayer(layer_uri, layer_name)
-        if layer.isValid():
-            QgsProject.instance().addMapLayer(layer)
-        else:
-            QgsMessageLog.logMessage(
-                f"Failed to add the {layer_name} raster to the map.",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
+        if layer_uri:
+            layer_name = item.data(0)
+            layer = QgsRasterLayer(layer_uri, layer_name)
+
+            if not layer.isValid():
+                QgsMessageLog.logMessage(
+                    f"Layer {layer_name} is invalid and cannot be added.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                return
+
+            project = QgsProject.instance()
+
+            # Check if 'Geest' group exists, otherwise create it
+            root = project.layerTreeRoot()
+            geest_group = root.findGroup("Geest")
+            if geest_group is None:
+                geest_group = root.insertGroup(
+                    0, "Geest"
+                )  # Insert at the top of the layers panel
+
+            # Traverse the tree view structure to determine the appropriate subgroup based on paths
+            path_list = item.getPaths()
+            parent_group = geest_group
+            for path in path_list:
+                sub_group = parent_group.findGroup(path)
+                if sub_group is None:
+                    sub_group = parent_group.addGroup(path)
+                parent_group = sub_group
+
+            # Check if a layer with the same data source exists in the correct group
+            existing_layer = None
+            for child in parent_group.children():
+                if isinstance(child, QgsLayerTreeGroup):
+                    continue
+                if child.layer().source() == layer_uri:
+                    existing_layer = child.layer()
+                    break
+
+            # If the layer exists, refresh it instead of removing and re-adding
+            if existing_layer is not None:
+                QgsMessageLog.logMessage(
+                    f"Refreshing existing layer: {existing_layer.name()}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                existing_layer.reload()
+            else:
+                # Add the new layer to the appropriate subgroup
+                QgsProject.instance().addMapLayer(layer, False)
+                parent_group.addLayer(layer)
+                QgsMessageLog.logMessage(
+                    f"Added layer: {layer.name()} to group: {parent_group.name()}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
 
     def edit_dimension_aggregation(self, dimension_item):
         """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension."""
@@ -811,54 +854,10 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
         self.workflow_progress_bar.setValue(100)
 
-        output_file = item.data(3).get("Indicator Result File", None)
-        if output_file:
-            layer_name = item.data(0)
-            layer = QgsRasterLayer(output_file, layer_name)
-
-            if not layer.isValid():
-                QgsMessageLog.logMessage(
-                    f"Layer {layer_name} is invalid and cannot be added.",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-                return
-
-            project = QgsProject.instance()
-
-            # Check if 'Geest' group exists, otherwise create it
-            geest_group = project.layerTreeRoot().findGroup("Geest")
-            if geest_group is None:
-                geest_group = project.layerTreeRoot().addGroup("Geest")
-
-            # Check if a layer with the same data source exists in the 'Geest' group
-            existing_layer = None
-            for layer_id in QgsProject.instance().mapLayers().keys():
-                current_layer = QgsProject.instance().mapLayer(layer_id)
-                if current_layer.source() == output_file and geest_group.findLayer(
-                    current_layer.id()
-                ):
-                    existing_layer = current_layer
-                    break
-
-            # If the layer exists, refresh it instead of removing and re-adding
-            if existing_layer is not None:
-                QgsMessageLog.logMessage(
-                    f"Refreshing existing layer: {existing_layer.name()}",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
-                existing_layer.reload()
-            else:
-                # Add the new layer to the 'Geest' group
-                QgsProject.instance().addMapLayer(layer, False)
-                geest_group.addLayer(layer)
-                QgsMessageLog.logMessage(
-                    f"Added layer: {layer.name()}", tag="Geest", level=Qgis.Info
-                )
-
         item.updateStatus()
         self.save_json_to_working_directory()
+
+        self.add_to_map(item)
 
         # Now cancel the animated icon
         node_index = self.model.itemIndex(item)
