@@ -54,7 +54,9 @@ In the **Repository Details** window:
 
 2. To configure the tool, go to **GEEST Settings** in the QGIS options menu. Here, you can input your ORS (Open Route Service) API key to enable additional functionality.
 
-   [![GEEST Settings](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg)](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg "Click to enlarge")
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" alt="GEEST Settings" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+</a>
 
 3. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.
 4. Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, for better performance and debugging.
