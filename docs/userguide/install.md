@@ -54,7 +54,8 @@ In the **Repository Details** window:
 
 2. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.
 
-`For more information on obtaining an ORS API key, please refer to the [OpenRouteService website](https://openrouteservice.org/).`
+> **Note:** To obtain an ORS API key, visit the [OpenRouteService website](https://openrouteservice.org/). This API key is essential for enabling routing services within the GEEST tool.
+
 
 4. **Optional**: Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, to enhance performance and debugging.
 
