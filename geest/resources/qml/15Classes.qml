@@ -1,18 +1,18 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="3.32.0-Lima" hasScaleBasedVisibilityFlag="0" maxScale="0" minScale="1e+08" styleCategories="AllStyleCategories">
+<qgis styleCategories="AllStyleCategories" maxScale="0" version="3.34.1-Prizren" hasScaleBasedVisibilityFlag="0" minScale="1e+08">
   <flags>
     <Identifiable>1</Identifiable>
     <Removable>1</Removable>
     <Searchable>1</Searchable>
     <Private>0</Private>
   </flags>
-  <temporal mode="0" enabled="0" fetchMode="0">
+  <temporal enabled="0" mode="0" fetchMode="0">
     <fixedRange>
       <start></start>
       <end></end>
     </fixedRange>
   </temporal>
-  <elevation zscale="1" enabled="0" band="1" symbology="Line" zoffset="0">
+  <elevation enabled="0" zoffset="0" symbology="Line" band="-1" zscale="1">
     <data-defined-properties>
       <Option type="Map">
         <Option value="" type="QString" name="name"/>
@@ -21,7 +21,7 @@
       </Option>
     </data-defined-properties>
     <profileLineSymbol>
-      <symbol type="line" name="" force_rhr="0" clip_to_extent="1" frame_rate="10" alpha="1" is_animated="0">
+      <symbol alpha="1" type="line" is_animated="0" clip_to_extent="1" frame_rate="10" force_rhr="0" name="">
         <data_defined_properties>
           <Option type="Map">
             <Option value="" type="QString" name="name"/>
@@ -29,7 +29,7 @@
             <Option value="collection" type="QString" name="type"/>
           </Option>
         </data_defined_properties>
-        <layer class="SimpleLine" enabled="1" locked="0" pass="0" id="{dcc3eec4-255f-492e-bb00-e0127b09c0b0}">
+        <layer locked="0" class="SimpleLine" enabled="1" pass="0" id="{c0eafdc1-1d1d-477f-9e32-12b7727021a0}">
           <Option type="Map">
             <Option value="0" type="QString" name="align_dash_pattern"/>
             <Option value="square" type="QString" name="capstyle"/>
@@ -41,7 +41,7 @@
             <Option value="MM" type="QString" name="dash_pattern_offset_unit"/>
             <Option value="0" type="QString" name="draw_inside_polygon"/>
             <Option value="bevel" type="QString" name="joinstyle"/>
-            <Option value="183,72,75,255" type="QString" name="line_color"/>
+            <Option value="125,139,143,255" type="QString" name="line_color"/>
             <Option value="solid" type="QString" name="line_style"/>
             <Option value="0.6" type="QString" name="line_width"/>
             <Option value="MM" type="QString" name="line_width_unit"/>
@@ -70,7 +70,7 @@
       </symbol>
     </profileLineSymbol>
     <profileFillSymbol>
-      <symbol type="fill" name="" force_rhr="0" clip_to_extent="1" frame_rate="10" alpha="1" is_animated="0">
+      <symbol alpha="1" type="fill" is_animated="0" clip_to_extent="1" frame_rate="10" force_rhr="0" name="">
         <data_defined_properties>
           <Option type="Map">
             <Option value="" type="QString" name="name"/>
@@ -78,17 +78,17 @@
             <Option value="collection" type="QString" name="type"/>
           </Option>
         </data_defined_properties>
-        <layer class="SimpleFill" enabled="1" locked="0" pass="0" id="{0cb2f0e0-c6a4-4cc3-b280-bb2a300c8b62}">
+        <layer locked="0" class="SimpleFill" enabled="1" pass="0" id="{0e3b0bea-dc64-4e05-9069-49ad23a90ed1}">
           <Option type="Map">
             <Option value="3x:0,0,0,0,0,0" type="QString" name="border_width_map_unit_scale"/>
-            <Option value="183,72,75,255" type="QString" name="color"/>
+            <Option value="125,139,143,255" type="QString" name="color"/>
             <Option value="bevel" type="QString" name="joinstyle"/>
             <Option value="0,0" type="QString" name="offset"/>
             <Option value="3x:0,0,0,0,0,0" type="QString" name="offset_map_unit_scale"/>
             <Option value="MM" type="QString" name="offset_unit"/>
-            <Option value="131,51,54,255" type="QString" name="outline_color"/>
-            <Option value="solid" type="QString" name="outline_style"/>
-            <Option value="0.2" type="QString" name="outline_width"/>
+            <Option value="35,35,35,255" type="QString" name="outline_color"/>
+            <Option value="no" type="QString" name="outline_style"/>
+            <Option value="0.26" type="QString" name="outline_width"/>
             <Option value="MM" type="QString" name="outline_width_unit"/>
             <Option value="solid" type="QString" name="style"/>
           </Option>
@@ -108,8 +108,7 @@
       <Option value="false" type="bool" name="WMSBackgroundLayer"/>
       <Option value="false" type="bool" name="WMSPublishDataSourceUrl"/>
       <Option value="0" type="int" name="embeddedWidgets/count"/>
-      <Option type="invalid" name="variableNames"/>
-      <Option type="invalid" name="variableValues"/>
+      <Option value="Value" type="QString" name="identify/format"/>
     </Option>
   </customproperties>
   <mapTip enabled="1"></mapTip>
@@ -122,9 +121,9 @@
   </pipe-data-defined-properties>
   <pipe>
     <provider>
-      <resampling zoomedInResamplingMethod="nearestNeighbour" zoomedOutResamplingMethod="nearestNeighbour" maxOversampling="2" enabled="false"/>
+      <resampling maxOversampling="2" enabled="false" zoomedOutResamplingMethod="nearestNeighbour" zoomedInResamplingMethod="nearestNeighbour"/>
     </provider>
-    <rasterrenderer alphaBand="-1" opacity="1" type="paletted" band="1" nodataColor="">
+    <rasterrenderer nodataColor="" alphaBand="-1" type="paletted" band="1" opacity="1">
       <rasterTransparency/>
       <minMaxOrigin>
         <limits>None</limits>
@@ -135,11 +134,21 @@
         <stdDevFactor>2</stdDevFactor>
       </minMaxOrigin>
       <colorPalette>
-        <paletteEntry value="1" label="Very low enablement" color="#ef5911" alpha="255"/>
-        <paletteEntry value="2" label="Low enablement" color="#e2dc61" alpha="255"/>
-        <paletteEntry value="3" label="Moderately enabling" color="#48f882" alpha="255"/>
-        <paletteEntry value="4" label="Enabling" color="#3e9cfe" alpha="255"/>
-        <paletteEntry value="5" label="Highly enabling" color="#30123b" alpha="255"/>
+        <paletteEntry value="1" alpha="255" label="Very low enablement, low population" color="#b11419"/>
+        <paletteEntry value="2" alpha="255" label="Very low enablement, medium population" color="#d7191c"/>
+        <paletteEntry value="3" alpha="255" label="Very low enablement, high population" color="#f14247"/>
+        <paletteEntry value="4" alpha="255" label="Low enablement, low population" color="#d68f47"/>
+        <paletteEntry value="5" alpha="255" label="Low enablement, medium population" color="#fdae61"/>
+        <paletteEntry value="6" alpha="255" label="Low enablement, high population" color="#ffc688"/>
+        <paletteEntry value="7" alpha="255" label="Moderately enabling, low population" color="#e0e09f"/>
+        <paletteEntry value="8" alpha="255" label="Moderately enabling, medium population" color="#ffffb4"/>
+        <paletteEntry value="9" alpha="255" label="Moderately enabling, high population" color="#ffffee"/>
+        <paletteEntry value="10" alpha="255" label="Enabling, low population" color="#93bd9b"/>
+        <paletteEntry value="11" alpha="255" label="Enabling, medium population" color="#bce1b8"/>
+        <paletteEntry value="12" alpha="255" label="Enabling, high population" color="#dbfbd5"/>
+        <paletteEntry value="13" alpha="255" label="Highly enabling, low population" color="#1d5c8d"/>
+        <paletteEntry value="14" alpha="255" label="Highly enabling, medium population" color="#2c7bb6"/>
+        <paletteEntry value="15" alpha="255" label="Highly enabling, high population" color="#4ab8e0"/>
       </colorPalette>
       <colorramp type="gradient" name="[source]">
         <Option type="Map">
@@ -153,8 +162,8 @@
         </Option>
       </colorramp>
     </rasterrenderer>
-    <brightnesscontrast contrast="0" gamma="1" brightness="0"/>
-    <huesaturation saturation="0" colorizeRed="255" colorizeGreen="128" colorizeBlue="128" grayscaleMode="0" colorizeOn="0" invertColors="0" colorizeStrength="100"/>
+    <brightnesscontrast contrast="0" brightness="0" gamma="1"/>
+    <huesaturation colorizeRed="255" colorizeStrength="100" saturation="0" invertColors="0" colorizeGreen="128" colorizeOn="0" grayscaleMode="0" colorizeBlue="128"/>
     <rasterresampler maxOversampling="2"/>
     <resamplingStage>resamplingFilter</resamplingStage>
   </pipe>
