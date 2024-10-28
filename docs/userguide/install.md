@@ -7,7 +7,9 @@ Follow the steps below to install the GEEST QGIS plugin using the custom reposit
 1. Launch QGIS.
 2. Go to **Plugins** > **Manage and Install Plugins…**.
 
-[image](https://github.com/elbeejay/draft-docs/blob/main/docs/images/new%20images/plugins.JPG)
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins.JPG" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins.JPG" alt="QGIS Plugin Setup" width="700" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+</a>
 
 ### Step 2: Add a New Plugin Repository
 
