@@ -52,7 +52,7 @@ In the **Repository Details** window:
 
    [![GEEST Toolbar Icons](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg)](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg "Click to enlarge")
 
-2. To configure the tool, go to **GEEST Settings** in the QGIS options menu. Here, you can input your ORS (Open Route Service) API key to enable additional functionality.
+2. To configure the tool, go to **GEEST Settings** and input your ORS (Open Route Service) API key to enable additional functionality.
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
   <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" alt="GEEST Settings" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
