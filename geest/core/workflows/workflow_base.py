@@ -1,5 +1,6 @@
 import datetime
 import os
+import shutil
 import traceback
 from abc import ABC, abstractmethod
 from qgis.core import (
@@ -22,6 +23,7 @@ from qgis.core import (
 import processing
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from geest.core import JsonTreeItem, setting
+from geest.utilities import resources_path
 from geest.core.algorithms import AreaIterator
 
 
@@ -582,7 +584,10 @@ class WorkflowBase(ABC):
             self.workflow_directory,
             f"{self.layer_id}_final_combined.vrt",
         )
-
+        qml_filepath = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_final_combined.qml",
+        )
         QgsMessageLog.logMessage(
             f"Creating VRT of layers '{vrt_filepath}' layer to the map.",
             tag="Geest",
@@ -629,6 +634,15 @@ class WorkflowBase(ABC):
 
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}_final VRT")
+        # Copy the appropriate QML over too
+        role = self.item.role
+        source_qml = resources_path("resources", "qml", f"{role}.qml")
+        QgsMessageLog.logMessage(
+            f"Copying QML from {source_qml} to {qml_filepath}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        shutil.copyfile(source_qml, qml_filepath)
 
         if not vrt_layer.isValid():
             QgsMessageLog.logMessage(
