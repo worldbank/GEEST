@@ -10,122 +10,143 @@ This page provides guidance on finding and collecting relevant data for the GEES
 
 <table style="border-collapse: collapse; width: 100%; font-size: small;">
   <tr>
-    <th style="border: 1px solid black; padding: 1px;">DIMENSION</th>
-    <th style="border: 1px solid black; padding: 1px;">FACTOR</th>
-    <th style="border: 1px solid black; padding: 1px;">Layer</th>
-    <th style="border: 1px solid black; padding: 1px;">Data Source/Query</th>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>DIMENSION</b></th>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>FACTOR</b></th>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>LAYER</b></th>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>DATA SOURCE/QUERY</b></th>
   </tr>
   
   <!-- Contextual Section with Merged DIMENSION Cell -->
   <tr>
-    <td rowspan="3" style="border: 1px solid black; padding: 1px;">CONTEXTUAL</td>
-    <td style="border: 1px solid black; padding: 1px;">Workplace Discrimination</td>
-    <td style="border: 1px solid black; padding: 1px;">WBL 2024 Workplace Index Score</td>
-    <td style="border: 1px solid black; padding: 1px;">Women, Business and the Law - WBL 2024 index score: 83.8</td>
+    <td rowspan="3" style="border: 1px solid black; padding: 1px; text-align: center; ">CONTEXTUAL</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Workplace Discrimination</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">WBL 2024 Workplace Index Score</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank" style="text-decoration: none; color: inherit;">
+        WBL 2024 index score: 83.8
+    </a>
+</td>
+
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Regulatory Frameworks</td>
-    <td style="border: 1px solid black; padding: 1px;">WBL 2024 Pay+Parenthood Index Score</td>
-    <td style="border: 1px solid black; padding: 1px;">Women, Business and the Law - WBL 2024 Pay (100) + Parenthood (40) Score</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Regulatory Frameworks</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">WBL 2024 Pay+Parenthood Index Score</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank" style="text-decoration: none; color: inherit;">
+        WBL 2024 index score: Pay 100  and Parenthood 40
+    </a>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Financial Inclusion</td>
-    <td style="border: 1px solid black; padding: 1px;">WBL 2024 Entrepreneurship Index Score</td>
-    <td style="border: 1px solid black; padding: 1px;">Women, Business and the Law - Entrepreneurship Index Score</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Financial Inclusion</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">WBL 2024 Entrepreneurship Index Score</td>
+ <td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank" style="text-decoration: none; color: inherit;">
+        WBL 2024 index score: Entrepreneurship 75
+    </a>
   </tr>
   
   <!-- Accessibility Section with Merged DIMENSION Cell -->
   <tr>
-    <td rowspan="9" style="border: 1px solid black; padding: 1px;">ACCESSIBILITY</td>
-    <td rowspan="5" style="border: 1px solid black; padding: 1px;">Women's Travel Patterns</td>
-    <td style="border: 1px solid black; padding: 1px;">Location of kindergartens/childcare</td>
-    <td style="border: 1px solid black; padding: 1px;">National and local datasets; query for locations</td>
+    <td rowspan="9" style="border: 1px solid black; padding: 1px; text-align: center; ">ACCESSIBILITY</td>
+    <td rowspan="5" style="border: 1px solid black; padding: 1px; text-align: center; ">Women's Travel Patterns</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of kindergartens/childcare</td>
+ <td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://data.humdata.org/dataset/hotosm-saint-lucia-schools" target="_blank" style="text-decoration: none; color: inherit;">
+        Humdata
+    </a>
+    <br>
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22kindergarten%22](area.area_0);way[%22amenity%22=%22kindergarten%22](area.area_0);relation[%22amenity%22=%22kindergarten%22](area.area_0););(._;>;);out%20body;" target="_blank" style="text-decoration: none; color: inherit;">
+        OSM
+    </a>
+</td>
+
+
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Location of primary schools</td>
-    <td style="border: 1px solid black; padding: 1px;">National and local datasets; query for locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of primary schools</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Location of groceries</td>
-    <td style="border: 1px solid black; padding: 1px;">National and local datasets; query for grocery locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of groceries</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for grocery locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Location of pharmacies</td>
-    <td style="border: 1px solid black; padding: 1px;">National and local datasets; query for pharmacy locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of pharmacies</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for pharmacy locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Location of green spaces</td>
-    <td style="border: 1px solid black; padding: 1px;">National and local datasets; query for green space locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of green spaces</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for green space locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Access to Public Transport</td>
-    <td style="border: 1px solid black; padding: 1px;">Location of public transportation stops, including maritime (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px;">OpenStreetMap (OSM) - Public transport locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Public Transport</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of public transportation stops, including maritime (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OpenStreetMap (OSM) - Public transport locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Access to Health Facilities</td>
-    <td style="border: 1px solid black; padding: 1px;">Location of hospitals and clinics (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px;">OpenStreetMap (OSM) - Health facility locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Health Facilities</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of hospitals and clinics (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OpenStreetMap (OSM) - Health facility locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Access to Education and Training Facilities</td>
-    <td style="border: 1px solid black; padding: 1px;">Location of universities and technical schools (OSM, Humanitarian Data Exchange)</td>
-    <td style="border: 1px solid black; padding: 1px;">OSM, HDX - University and technical school locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Education and Training Facilities</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of universities and technical schools (OSM, Humanitarian Data Exchange)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OSM, HDX - University and technical school locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Access to Financial Facilities</td>
-    <td style="border: 1px solid black; padding: 1px;">Location of Banks and other FF (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px;">OpenStreetMap (OSM) - Financial facility locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Financial Facilities</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of Banks and other FF (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OpenStreetMap (OSM) - Financial facility locations</td>
   </tr>
   
   <!-- Place Characterization Section with Merged DIMENSION Cell -->
   <tr>
-    <td rowspan="10" style="border: 1px solid black; padding: 1px;">PLACE CHARACTERIZATION</td>
-    <td rowspan="4" style="border: 1px solid black; padding: 1px;">Active Transport</td>
-    <td style="border: 1px solid black; padding: 1px;">Location of street crossings</td>
-    <td style="border: 1px solid black; padding: 1px;">OSM - Street crossing locations</td>
+    <td rowspan="10" style="border: 1px solid black; padding: 1px; text-align: center; ">PLACE CHARACTERIZATION</td>
+    <td rowspan="4" style="border: 1px solid black; padding: 1px; text-align: center; ">Active Transport</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of street crossings</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OSM - Street crossing locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Location of cycle paths (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px;">OSM - Cycle path locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of cycle paths (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OSM - Cycle path locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Location of footpaths (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px;">OSM - Footpath locations</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of footpaths (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OSM - Footpath locations</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Block Layout (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px;">OSM - Block layout data</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Block Layout (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OSM - Block layout data</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Safety</td>
-    <td style="border: 1px solid black; padding: 1px;">Street lights/Nighttime lights</td>
-    <td style="border: 1px solid black; padding: 1px;">Local data sources for street lights and nighttime light data</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Safety</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Street lights/Nighttime lights</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Local data sources for street lights and nighttime light data</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">FCV</td>
-    <td style="border: 1px solid black; padding: 1px;">ACLED data (Violence Estimated Events)</td>
-    <td style="border: 1px solid black; padding: 1px;">ACLED - Query for estimated violence events</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">FCV</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">ACLED data (Violence Estimated Events)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">ACLED - Query for estimated violence events</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Education</td>
-    <td style="border: 1px solid black; padding: 1px;">Percentage of the labor force comprising women with university degrees</td>
-    <td style="border: 1px solid black; padding: 1px;">National labor statistics - University degree holders among women</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Education</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Percentage of the labor force comprising women with university degrees</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National labor statistics - University degree holders among women</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Digital Inclusion</td>
-    <td style="border: 1px solid black; padding: 1px;">Individuals using the Internet (% of population)</td>
-    <td style="border: 1px solid black; padding: 1px;">World Bank, ITU - Internet usage data</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Digital Inclusion</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Individuals using the Internet (% of population)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">World Bank, ITU - Internet usage data</td>
   </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Environmental Hazards</td>
-    <td style="border: 1px solid black; padding: 1px;">Global Natural Hazards Data</td>
-    <td style="border: 1px solid black; padding: 1px;">ceva</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Environmental Hazards</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Global Natural Hazards Data</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">ceva</td>
  </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px;">Water Sanitation</td>
-    <td style="border: 1px solid black; padding: 1px;">Water points (OSM), catch basins, water valves, and fire hydrants (Mapillary)</td>
-    <td style="border: 1px solid black; padding: 1px;">altceva</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Water Sanitation</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Water points (OSM), catch basins, water valves, and fire hydrants (Mapillary)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">altceva</td>
   </tr>
 </table>
 
