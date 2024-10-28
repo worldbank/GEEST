@@ -386,7 +386,7 @@ class JsonTreeModel(QAbstractItemModel):
             factor_item.setData(2, f"{factor_weighting:.2f}")
         # Update the dimension's total weighting
         dimension_item.setData(2, "1.00")
-        self.update_font_color(dimension_item, QColor(Qt.green))
+        # self.update_font_color(dimension_item, QColor(Qt.green))
         self.layoutChanged.emit()
 
     def clear_layer_weightings(self, factor_item):

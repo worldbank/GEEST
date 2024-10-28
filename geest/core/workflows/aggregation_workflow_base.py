@@ -135,9 +135,14 @@ class AggregationWorkflowBase(WorkflowBase):
         # Wrap the weighted sum and divide by the sum of weights
         expression = f"({expression}) / {layer_count}"
 
-        aggregation_output = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_aggregated_{index}.tif"
-        )
+        if self.weight_key == "Indicator Weighting":
+            aggregation_output = os.path.join(
+                self.workflow_directory, f"{self.layer_id}_aggregated_{index}.tif"
+            )
+        elif self.weight_key == "Factor Weighting":
+            aggregation_output = os.path.join(
+                self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
+            )
         QgsMessageLog.logMessage(
             f"Aggregating {len(input_files)} raster layers to {aggregation_output}",
             tag="Geest",
@@ -190,17 +195,32 @@ class AggregationWorkflowBase(WorkflowBase):
         """
         raster_files = []
 
-        for layer in self.layers:
-            id = layer.get("Indicator ID", "").lower()
-            layer_folder = os.path.dirname(layer.get("Indicator Result File", ""))
-            path = os.path.join(
-                self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
-            )
-            if path:
-                raster_files.append(path)
-                QgsMessageLog.logMessage(
-                    f"Adding raster: {path}", tag="Geest", level=Qgis.Info
+        if self.weight_key == "Indicator Weighting":
+            for layer in self.layers:
+                id = layer.get("Indicator ID", "").lower()
+                layer_folder = os.path.dirname(layer.get("Indicator Result File", ""))
+                path = os.path.join(
+                    self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
                 )
+                if path:
+                    raster_files.append(path)
+                    QgsMessageLog.logMessage(
+                        f"Adding raster: {path}", tag="Geest", level=Qgis.Info
+                    )
+        elif self.weight_key == "Factor Weighting":
+            for layer in self.layers:
+                id = layer.get("Factor Name", "").lower().replace(" ", "_")
+                layer_folder = os.path.dirname(layer.get("Factor Result File", ""))
+                path = os.path.join(
+                    self.workflow_directory,
+                    layer_folder,
+                    f"{id}_aggregated_{index}.tif",
+                )
+                if path:
+                    raster_files.append(path)
+                    QgsMessageLog.logMessage(
+                        f"Adding raster: {path}", tag="Geest", level=Qgis.Info
+                    )
         QgsMessageLog.logMessage(
             f"Total raster files found: {len(raster_files)}",
             tag="Geest",
@@ -247,7 +267,7 @@ class AggregationWorkflowBase(WorkflowBase):
             return False
 
         QgsMessageLog.logMessage(
-            f"Found {len(raster_files)} raster files in 'Indicator Result File'. Proceeding with aggregation.",
+            f"Found {len(raster_files)} raster files in 'Result File'. Proceeding with aggregation.",
             tag="Geest",
             level=Qgis.Info,
         )

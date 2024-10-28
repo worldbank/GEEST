@@ -148,8 +148,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
             ]
         elif self.layer_id == "drought":
             self.reclassification_rules = [
-                -3.4e38,
-                -3.4e38,
+                0,
+                0,
                 5.00,  # new value = 5
                 0,
                 1,
@@ -234,9 +234,10 @@ class RasterReclassificationWorkflow(WorkflowBase):
 
         clip_params = {
             "INPUT": reclass,
-            "MASK": self.grid_layer,
+            "MASK": self.areas_layer,
             "CROP_TO_CUTLINE": True,
-            "KEEP_RESOLUTION": False,
+            "KEEP_RESOLUTION": True,
+            "DATA_TYPE": 1,  #  Byte
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
             "OUTPUT": reclassified_raster_path,
         }
@@ -287,6 +288,12 @@ class RasterReclassificationWorkflow(WorkflowBase):
         index: int,
     ):
         """
-        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
+        Executes the actual workflow logic for a single area using an aggregate.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
+        :index: Index of the current area.
+
+        :return: Path to the reclassified raster.
         """
         pass

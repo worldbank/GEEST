@@ -364,3 +364,29 @@ class JsonTreeItem:
             QgsMessageLog.logMessage(
                 f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
             )
+
+    def updateFactorWeighting(self, factor_name, new_weighting):
+        """Update the weighting of a specific factor by its name."""
+        try:
+            # Search for the factor by name
+            factor_item = next(
+                (child for child in self.childItems if child.data(0) == factor_name),
+                None,
+            )
+
+            # If found, update the weighting
+            if factor_item:
+                factor_item.setData(2, f"{new_weighting:.2f}")
+            else:
+                # Log if the factor name is not found
+                QgsMessageLog.logMessage(
+                    f"Indicator '{factor_name}' not found.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        except Exception as e:
+            # Handle any exceptions and log the error
+            QgsMessageLog.logMessage(
+                f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
+            )
