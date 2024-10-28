@@ -43,7 +43,7 @@ class RadioButtonFactory:
             )
 
         try:
-            if key == "Layer Required" and value == 0:
+            if key == "Indicator Required" and value == 0:
                 return DontUseRadioButton(label_text="Don't Use", attributes=attributes)
             if key == "Use Default Index Score" and value == 1:
                 return IndexScoreRadioButton(label_text=key, attributes=attributes)

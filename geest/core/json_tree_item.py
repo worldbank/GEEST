@@ -81,7 +81,7 @@ class JsonTreeItem:
         return 0
 
     def isIndicator(self):
-        return self.role == "layer"
+        return self.role == "indicator"
 
     def isFactor(self):
         return self.role == "factor"
@@ -112,13 +112,13 @@ class JsonTreeItem:
             else:
                 return "Dimension"
         elif self.isFactor():
-            description = data.get("Text", "")
+            description = data.get("description", "")
             if description:
                 return f"{description}"
             else:
                 return "Factor"
         elif self.isIndicator():
-            description = data.get("Text", "")
+            description = data.get("description", "")
             if description:
                 return f"{description}"
             else:
@@ -177,12 +177,12 @@ class JsonTreeItem:
                 return "x"
             # Item required and not configured
             if "Don’t Use" in data.get("Analysis Mode", "") and data.get(
-                "Layer Required", False
+                "Indicator Required", False
             ):
                 return "-"
             # Item not required but not configured
             if "Don’t Use" in data.get("Analysis Mode", "") and not data.get(
-                "Layer Required", False
+                "Indicator Required", False
             ):
                 return "!"
             if "Workflow Completed" not in data.get("Result", ""):
@@ -247,7 +247,7 @@ class JsonTreeItem:
             path.append(
                 self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
             )
-            path.append(self.itemData[3].get("ID", "").lower().replace(" ", "_"))
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
         elif self.isFactor():
             path.append(
                 self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
@@ -265,8 +265,8 @@ class JsonTreeItem:
                 "id", ""
             )
             attributes["Factor ID"] = self.parentItem.itemData[3].get("id", "")
-            attributes["Indicator ID"] = self.itemData[3].get("ID", "")
-            attributes["Indicator Name"] = self.itemData[3].get("Layer", "")
+            attributes["Indicator ID"] = self.itemData[3].get("id", "")
+            attributes["Indicator Name"] = self.itemData[3].get("indicator", "")
             attributes["Indicator Weighting"] = self.itemData[3].get(
                 "Factor Weighting", ""
             )
@@ -286,7 +286,7 @@ class JsonTreeItem:
             attributes["Indicators"] = [
                 {
                     "Indicator No": i,
-                    "Indicator ID": child.data(3).get("ID", ""),
+                    "Indicator ID": child.data(3).get("id", ""),
                     "Indicator Name": child.data(0),
                     "Indicator Weighting": child.data(2),
                     "Indicator Result File": child.data(3).get(
@@ -306,7 +306,7 @@ class JsonTreeItem:
             attributes["Factors"] = [
                 {
                     "Factor No": i,
-                    "Factor ID": child.data(3).get("ID", ""),
+                    "Factor ID": child.data(3).get("id", ""),
                     "Factor Name": child.data(0),
                     "Factor Weighting": child.data(2),
                     "Factor Result File": child.data(3).get(f"Factor Result File", ""),

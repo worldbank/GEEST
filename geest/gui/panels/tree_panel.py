@@ -196,7 +196,7 @@ class TreePanel(QWidget):
     def on_item_double_clicked(self, index):
         # Action to trigger on double-click
         item = index.internalPointer()
-        if item.role == "layer":
+        if item.role == "indicator":
             self.show_layer_properties(item)
         elif item.role == "dimension":
             self.edit_dimension_aggregation(item)
@@ -445,7 +445,7 @@ class TreePanel(QWidget):
             menu.addAction(auto_assign_action)
             menu.addAction(run_item_action)
 
-        elif item.role == "layer":
+        elif item.role == "indicator":
             # Context menu for layers
             show_properties_action = QAction("🔘 Show Properties", self)
             remove_layer_action = QAction("❌ Remove Layer", self)
@@ -502,7 +502,7 @@ class TreePanel(QWidget):
             QgsMessageLog.logMessage(
                 str(item.getDimensionAttributes()), tag="Geest", level=Qgis.Info
             )
-        elif item.role == "layer":
+        elif item.role == "indicator":
             QgsMessageLog.logMessage(
                 "Indicator attributes that get passed to workflow",
                 tag="Geest",
@@ -589,7 +589,7 @@ class TreePanel(QWidget):
                         level=Qgis.Critical,
                     )
 
-        if item.role == "layer":
+        if item.role == "indicator":
             layer_uri = item.data(3).get(f"Indicator Result File")
         else:
             layer_uri = item.data(3).get(
@@ -731,7 +731,7 @@ class TreePanel(QWidget):
         is a dependency between them. For example, a factor depends on its layers.
         """
         if type == "indicators":
-            self._start_workflows(self.treeView.model().rootItem, role="layer")
+            self._start_workflows(self.treeView.model().rootItem, role="indicator")
         elif type == "factors":
             self._start_workflows(self.treeView.model().rootItem, role="factor")
         elif type == "dimensions":
@@ -759,7 +759,7 @@ class TreePanel(QWidget):
             The task directly modifies the item's properties to update the tree.
         """
         task = None
-        if role == item.role and role == "layer":
+        if role == item.role and role == "indicator":
             task = self.queue_manager.add_workflow(item)
         if role == item.role and role == "factor":
             item.data(3)["Analysis Mode"] = "Factor Aggregation"

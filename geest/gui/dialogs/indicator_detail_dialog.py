@@ -138,7 +138,7 @@ class IndicatorDetailDialog(QDialog):
 
         # Create the QTextEdit for Markdown editing (left side)
         self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(self.layer_data.get("Text", ""))
+        self.text_edit_left.setPlainText(self.layer_data.get("description", ""))
         self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
         if self.editing:
             splitter.addWidget(self.text_edit_left)
@@ -312,6 +312,6 @@ class IndicatorDetailDialog(QDialog):
             )
 
         # Include the Markdown text from the left text edit
-        updated_data["Text"] = self.text_edit_left.toPlainText()
+        updated_data["description"] = self.text_edit_left.toPlainText()
 
         return updated_data

@@ -32,9 +32,10 @@ class SpreadsheetToJsonParser:
                 "Factor",
                 "Factor Required",
                 "Default Factor Dimension Weighting",
-                "Layer",
+                "Indicator",
+                "Default Indicator Factor Weighting",
                 "ID",
-                "Text",
+                "Factor Description",
                 "Default Index Score",
                 "Index Score",
                 "Use Default Index Score",
@@ -60,7 +61,7 @@ class SpreadsheetToJsonParser:
                 "Use Nighttime Lights",
                 "Use Environmental Hazards",
                 "Analysis Mode",  # New column
-                "Layer Required",  # New column
+                "Indicator Required",  # New column
             ]
         ]
 
@@ -139,6 +140,11 @@ class SpreadsheetToJsonParser:
                     "required": factor_required,
                     "default_dimension_weighting": default_factor_dimension_weighting,
                     "layers": [],
+                    "description": (
+                        row["Factor Description"]
+                        if not pd.isna(row["Factor Description"])
+                        else ""
+                    ),
                 }
                 dimension_map[dimension]["factors"].append(new_factor)
                 factor_map[factor] = new_factor
@@ -146,9 +152,14 @@ class SpreadsheetToJsonParser:
             # Add layer data to the current Factor, including new columns
             layer_data = {
                 # These are all parsed from the spreadsheet
-                "Layer": row["Layer"] if not pd.isna(row["Layer"]) else "",
-                "ID": row["ID"] if not pd.isna(row["ID"]) else "",
-                "Text": row["Text"] if not pd.isna(row["Text"]) else "",
+                "indicator": row["Indicator"] if not pd.isna(row["Indicator"]) else "",
+                "id": row["ID"] if not pd.isna(row["ID"]) else "",
+                "description": "",
+                "Default Indicator Factor Weighting": (
+                    row["Default Indicator Factor Weighting"]
+                    if not pd.isna(row["Default Indicator Factor Weighting"])
+                    else ""
+                ),
                 "Default Index Score": (
                     row["Default Index Score"]
                     if not pd.isna(row["Default Index Score"])
@@ -268,8 +279,10 @@ class SpreadsheetToJsonParser:
                 "Analysis Mode": (
                     row["Analysis Mode"] if not pd.isna(row["Analysis Mode"]) else ""
                 ),  # New column
-                "Layer Required": (
-                    row["Layer Required"] if not pd.isna(row["Layer Required"]) else ""
+                "Indicator Required": (
+                    row["Indicator Required"]
+                    if not pd.isna(row["Indicator Required"])
+                    else ""
                 ),  # New column
             }
 

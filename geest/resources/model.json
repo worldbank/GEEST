@@ -14,9 +14,10 @@
                     "default_dimension_weighting": 0.333333,
                     "layers": [
                         {
-                            "Layer": "WBL 2024 Workplace Index Score",
-                            "ID": "Workplace_Index",
-                            "Text": "Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.",
+                            "indicator": "WBL 2024 Workplace Index Score",
+                            "id": "Workplace_Index",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
@@ -42,9 +43,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields."
                 },
                 {
                     "id": "regulatory_frameworks",
@@ -53,9 +55,10 @@
                     "default_dimension_weighting": 0.3333333,
                     "layers": [
                         {
-                            "Layer": "WBL 2024 Pay+Parenthood Index Score",
-                            "ID": "Pay_Parenthood_Index",
-                            "Text": "Regulatory Frameworks pertain to laws and policies that protect women\u2019s employment rights, such as childcare support and parental leave, influencing their workforce participation",
+                            "indicator": "WBL 2024 Pay+Parenthood Index Score",
+                            "id": "Pay_Parenthood_Index",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
@@ -81,9 +84,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Regulatory Frameworks pertain to laws and policies that protect women\u2019s employment rights, such as childcare support and parental leave, influencing their workforce participation"
                 },
                 {
                     "id": "financial_inclusion",
@@ -92,9 +96,10 @@
                     "default_dimension_weighting": 0.333333,
                     "layers": [
                         {
-                            "Layer": "WBL 2024 Entrepeneurship Index Score",
-                            "ID": "Entrepeneurship_Index",
-                            "Text": "Financial Inclusion involves laws concerning women\u2019s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities.",
+                            "indicator": "WBL 2024 Entrepeneurship Index Score",
+                            "id": "Entrepeneurship_Index",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
@@ -120,9 +125,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Financial Inclusion involves laws concerning women\u2019s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities."
                 }
             ]
         },
@@ -140,9 +146,10 @@
                     "default_dimension_weighting": 0.2,
                     "layers": [
                         {
-                            "Layer": "Location of kindergartens/childcare",
-                            "ID": "Kindergartens_Location",
-                            "Text": "Women\u2019s Travel Patterns (WTP) refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial.",
+                            "indicator": "Location of kindergartens/childcare",
+                            "id": "Kindergartens_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -168,12 +175,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Location of primary schools",
-                            "ID": "Primary_School_Location",
-                            "Text": "",
+                            "indicator": "Location of primary schools",
+                            "id": "Primary_School_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -199,12 +207,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Location of groceries",
-                            "ID": "Groceries_Location",
-                            "Text": "",
+                            "indicator": "Location of groceries",
+                            "id": "Groceries_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -230,12 +239,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Location of pharmacies",
-                            "ID": "Pharmacies_Location",
-                            "Text": "",
+                            "indicator": "Location of pharmacies",
+                            "id": "Pharmacies_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -261,12 +271,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Location of green spaces",
-                            "ID": "Green_Space_location",
-                            "Text": "",
+                            "indicator": "Location of green spaces",
+                            "id": "Green_Space_location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -292,9 +303,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Women\u2019s Travel Patterns (WTP) refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial."
                 },
                 {
                     "id": "access_to_public_transport",
@@ -303,9 +315,10 @@
                     "default_dimension_weighting": 0.2,
                     "layers": [
                         {
-                            "Layer": "Location of public transportation stops, including maritime",
-                            "ID": "Pulic_Transport_location",
-                            "Text": "Access to Public Transport focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.",
+                            "indicator": "Location of public transportation stops, including maritime",
+                            "id": "Pulic_Transport_location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -331,9 +344,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Access to Public Transport focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services."
                 },
                 {
                     "id": "access_to_health_facilities",
@@ -342,9 +356,10 @@
                     "default_dimension_weighting": 0.2,
                     "layers": [
                         {
-                            "Layer": "Location of hospitals and clinics",
-                            "ID": "Hospital_Location",
-                            "Text": "Access to Health Facilities evaluates how easily women can reach healthcare services in terms of distance, impacting their well-being and ability to participate in the workforce.",
+                            "indicator": "Location of hospitals and clinics",
+                            "id": "Hospital_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -370,9 +385,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Access to Health Facilities evaluates how easily women can reach healthcare services in terms of distance, impacting their well-being and ability to participate in the workforce."
                 },
                 {
                     "id": "access_to_education_and_training_facilities",
@@ -381,9 +397,10 @@
                     "default_dimension_weighting": 0.2,
                     "layers": [
                         {
-                            "Layer": "Location of universities and technical schools",
-                            "ID": "Universities_Location",
-                            "Text": "Access to Education and Training Facilities assesses the proximity to higher education institutions and training centers, influencing women's ability to gain necessary qualifications.",
+                            "indicator": "Location of universities and technical schools",
+                            "id": "Universities_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -409,9 +426,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Access to Education and Training Facilities assesses the proximity to higher education institutions and training centers, influencing women's ability to gain necessary qualifications."
                 },
                 {
                     "id": "access_to_financial_facilities",
@@ -420,9 +438,10 @@
                     "default_dimension_weighting": 0.2,
                     "layers": [
                         {
-                            "Layer": "Location of Banks and other FF",
-                            "ID": "Banks_Location",
-                            "Text": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for women\u2019s economic empowerment and ability to access credit.",
+                            "indicator": "Location of Banks and other FF",
+                            "id": "Banks_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -448,9 +467,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for women\u2019s economic empowerment and ability to access credit."
                 }
             ]
         },
@@ -468,9 +488,10 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "Location of street crossings",
-                            "ID": "Street_Crossing_Location",
-                            "Text": "Active Transport refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands.",
+                            "indicator": "Location of street crossings",
+                            "id": "Street_Crossing_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.25,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -496,12 +517,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Location of cycle paths",
-                            "ID": "Cycle_Paths_Location",
-                            "Text": "",
+                            "indicator": "Location of cycle paths",
+                            "id": "Cycle_Paths_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.25,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -527,12 +549,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Location of footpaths",
-                            "ID": "Footpaths_Location",
-                            "Text": "",
+                            "indicator": "Location of footpaths",
+                            "id": "Footpaths_Location",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.25,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -558,12 +581,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Block Layout",
-                            "ID": "Block_Layout",
-                            "Text": "",
+                            "indicator": "Block Layout",
+                            "id": "Block_Layout",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.25,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -589,9 +613,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Active Transport refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands."
                 },
                 {
                     "id": "safety",
@@ -600,9 +625,10 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "Street lights/Nigthttime lights",
-                            "ID": "Street_Lights",
-                            "Text": "Safety addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women\u2019s ability to move freely, seek employment, and access essential services.",
+                            "indicator": "Street lights/Nigthttime lights",
+                            "id": "Street_Lights",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
@@ -628,9 +654,10 @@
                             "Use Nighttime Lights": 1,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Safety addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women\u2019s ability to move freely, seek employment, and access essential services."
                 },
                 {
                     "id": "fcv",
@@ -639,9 +666,10 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "ACLED data (Violence Estimated Events)",
-                            "ID": "FCV",
-                            "Text": "Fragility, Conflict, and Violence (FCV) considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women\u2019s vulnerability and limit their access to employment and essential services.",
+                            "indicator": "ACLED data (Violence Estimated Events)",
+                            "id": "FCV",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -667,9 +695,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Fragility, Conflict, and Violence (FCV) considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women\u2019s vulnerability and limit their access to employment and essential services."
                 },
                 {
                     "id": "education",
@@ -678,9 +707,10 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "percentage of the labor force comprising women with university degrees",
-                            "ID": "Education",
-                            "Text": "Education refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector.",
+                            "indicator": "percentage of the labor force comprising women with university degrees",
+                            "id": "Education",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
@@ -706,9 +736,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Education refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector."
                 },
                 {
                     "id": "digital_inclusion",
@@ -717,9 +748,10 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "Individuals using the Internet (% of population)",
-                            "ID": "Digital_Inclusion",
-                            "Text": "Digital Inclusion assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training band education opportunities, and use financial services.",
+                            "indicator": "Individuals using the Internet (% of population)",
+                            "id": "Digital_Inclusion",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 100,
                             "Use Default Index Score": 1,
@@ -745,9 +777,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Digital Inclusion assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training band education opportunities, and use financial services."
                 },
                 {
                     "id": "environmental_hazards",
@@ -756,9 +789,10 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "Fire Hazards",
-                            "ID": "Fire",
-                            "Text": "Environmental Hazards relate to the impact of environmental risks, such as floods, droughts, landslides, fires, and extreme weather events, which can disrupt job stability, particularly for women in vulnerable sectors.",
+                            "indicator": "Fire Hazards",
+                            "id": "Fire",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -784,12 +818,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Flood Hazards",
-                            "ID": "Flood",
-                            "Text": "",
+                            "indicator": "Flood Hazards",
+                            "id": "Flood",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -815,12 +850,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Landslide",
-                            "ID": "Landslide",
-                            "Text": "",
+                            "indicator": "Landslide",
+                            "id": "Landslide",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -846,12 +882,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Tropical Cyclone",
-                            "ID": "Cyclone",
-                            "Text": "",
+                            "indicator": "Tropical Cyclone",
+                            "id": "Cyclone",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -877,12 +914,13 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         },
                         {
-                            "Layer": "Drought",
-                            "ID": "Drought",
-                            "Text": "",
+                            "indicator": "Drought",
+                            "id": "Drought",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 0.2,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -908,9 +946,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 1,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Environmental Hazards relate to the impact of environmental risks, such as floods, droughts, landslides, fires, and extreme weather events, which can disrupt job stability, particularly for women in vulnerable sectors."
                 },
                 {
                     "id": "water_sanitation",
@@ -919,9 +958,10 @@
                     "default_dimension_weighting": 0.142857142857143,
                     "layers": [
                         {
-                            "Layer": "Water points (OSM), catch basins, water valves and fire hydrants",
-                            "ID": "Water_Sanitation",
-                            "Text": "Water and Sanitation concerns the availability of clean water and sanitation facilities, affecting women\u2019s time allocation and capacity to engage in employment.",
+                            "indicator": "Water points (OSM), catch basins, water valves and fire hydrants",
+                            "id": "Water_Sanitation",
+                            "description": "",
+                            "Default Indicator Factor Weighting": 1.0,
                             "Default Index Score": 0,
                             "Index Score": 0,
                             "Use Default Index Score": 0,
@@ -947,9 +987,10 @@
                             "Use Nighttime Lights": 0,
                             "Use Environmental Hazards": 0,
                             "Analysis Mode": "Don\u2019t Use",
-                            "Layer Required": 1
+                            "Indicator Required": 1
                         }
-                    ]
+                    ],
+                    "description": "Water and Sanitation concerns the availability of clean water and sanitation facilities, affecting women\u2019s time allocation and capacity to engage in employment."
                 }
             ]
         }

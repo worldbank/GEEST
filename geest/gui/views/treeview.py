@@ -124,7 +124,7 @@ class JsonTreeModel(QAbstractItemModel):
         dimension_attributes = {
             "id": dimension.get("id", ""),
             "name": dimension.get("name", ""),
-            "text": dimension.get("text", ""),
+            "description": dimension.get("description", ""),
             "description": dimension.get("description", ""),
             "required": dimension.get("required", False),
             "default_analysis_weighting": dimension.get(
@@ -163,7 +163,7 @@ class JsonTreeModel(QAbstractItemModel):
         factor_attributes = {
             "id": factor.get("id", ""),
             "name": factor.get("name", ""),
-            "text": factor.get("text", ""),
+            "description": factor.get("description", ""),
             "required": factor.get("required", False),
             "default_dimension_weighting": factor.get(
                 "default_analysis_weighting", 0.0
@@ -201,12 +201,12 @@ class JsonTreeModel(QAbstractItemModel):
         guid = indicator.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         indicator_item = JsonTreeItem(
             [
-                indicator["Layer"],
+                indicator["indicator"],
                 status,
                 indicator.get("Factor Weighting", 0),
                 indicator,
             ],
-            role="layer",
+            role="indicator",
             guid=guid,
             parent=parent_item,
         )
@@ -339,7 +339,7 @@ class JsonTreeModel(QAbstractItemModel):
                 }
                 json_data.update(item.data(3))
                 return json_data
-            elif item.role == "layer":
+            elif item.role == "indicator":
                 json_data = item.data(3)
                 json_data["Factor Weighting"] = item.data(2)
                 json_data["guid"] = item.guid  # Serialize UUID
@@ -455,7 +455,7 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        indicator = JsonTreeItem(["New Layer", "x", "1.00"], "layer", factor_item)
+        indicator = JsonTreeItem(["New Layer", "x", "1.00"], "indicator", factor_item)
         factor_item.appendChild(indicator)
         self.layoutChanged.emit()
 

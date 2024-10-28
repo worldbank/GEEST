@@ -23,13 +23,13 @@
                                     "items": {
                                         "type": "object",
                                         "properties": {
-                                            "Layer": {
+                                            "indicator": {
                                                 "type": "string"
                                             },
-                                            "ID": {
+                                            "id": {
                                                 "type": "string"
                                             },
-                                            "Text": {
+                                            "description": {
                                                 "type": "string"
                                             },
                                             "Default Index Score": {
@@ -100,9 +100,9 @@
                                             }
                                         },
                                         "required": [
-                                            "Layer",
-                                            "ID",
-                                            "Text",
+                                            "indicator",
+                                            "id",
+                                            "description",
                                             "Default Index Score",
                                             "Index Score",
                                             "Use Default Index Score",
