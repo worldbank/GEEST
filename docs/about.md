@@ -1,6 +1,6 @@
 # About GEEST
 
-### What is GEEST
+### What is GEEST?
 
 <p style="text-align: justify;">
 <strong>GEEST is a QGIS plugin</strong>, designed to empower users with robust geospatial tools directly within the QGIS platform, making it accessible and integrable for users worldwide.
