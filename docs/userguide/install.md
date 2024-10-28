@@ -52,9 +52,11 @@ In the **Repository Details** window:
 
    [![GEEST Toolbar Icons](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg)](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg "Click to enlarge")
 
-2. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services. For more information on obtaining an ORS API key, please refer to the [OpenRouteService website](https://openrouteservice.org/).
+2. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.
 
-3. **Optional**: Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, to enhance performance and debugging.
+`For more information on obtaining an ORS API key, please refer to the [OpenRouteService website](https://openrouteservice.org/).`
+
+4. **Optional**: Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, to enhance performance and debugging.
 
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
