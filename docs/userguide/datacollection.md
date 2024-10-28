@@ -120,14 +120,26 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Education and Training Facilities</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of universities and technical schools (OSM, Humanitarian Data Exchange)</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OSM, HDX - University and technical school locations</td>
-  </tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of universities and technical schools</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://data.humdata.org/dataset/hotosm-saint-lucia-schools" target="_blank">
+        Humdata
+    </a>
+    or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22university%22](area.area_0);way[%22amenity%22=%22university%22](area.area_0);relation[%22amenity%22=%22university%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Financial Facilities</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of Banks and other FF (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OpenStreetMap (OSM) - Financial facility locations</td>
-  </tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of Banks and other financial facilities</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22bank%22](area.area_0);node[%22office%22=%22financial%22](area.area_0);way[%22amenity%22=%22bank%22](area.area_0);way[%22office%22=%22financial%22](area.area_0);relation[%22amenity%22=%22bank%22](area.area_0);relation[%22office%22=%22financial%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
   
   <!-- Place Characterization Section with Merged DIMENSION Cell -->
   <tr>
