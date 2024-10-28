@@ -98,7 +98,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Public Transport</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of public transportation stops, including maritime (OSM)</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of public transportation stops, including maritime</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
     <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22public_transport%22=%22stop_position%22](area.area_0);node[%22public_transport%22=%22platform%22](area.area_0);node[%22public_transport%22=%22station%22](area.area_0);node[%22public_transport%22=%22stop_area%22](area.area_0);node[%22highway%22=%22bus_stop%22](area.area_0);node[%22highway%22=%22platform%22](area.area_0);way[%22public_transport%22=%22stop_position%22](area.area_0);way[%22public_transport%22=%22platform%22](area.area_0);way[%22public_transport%22=%22station%22](area.area_0);way[%22public_transport%22=%22stop_area%22](area.area_0);way[%22highway%22=%22bus_stop%22](area.area_0);way[%22highway%22=%22platform%22](area.area_0);relation[%22public_transport%22=%22stop_position%22](area.area_0);relation[%22public_transport%22=%22platform%22](area.area_0);relation[%22public_transport%22=%22station%22](area.area_0);relation[%22public_transport%22=%22stop_area%22](area.area_0);relation[%22highway%22=%22bus_stop%22](area.area_0);relation[%22highway%22=%22platform%22](area.area_0);node[%22amenity%22=%22ferry_terminal%22](area.area_0);way[%22amenity%22=%22ferry_terminal%22](area.area_0);relation[%22amenity%22=%22ferry_terminal%22](area.area_0););(._;>;);out%20body;" target="_blank">
         OSM
@@ -107,9 +107,17 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Health Facilities</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of hospitals and clinics (OSM)</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OpenStreetMap (OSM) - Health facility locations</td>
-  </tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of hospitals and clinics</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://data.humdata.org/dataset/hotosm_lca_health_facilities" target="_blank">
+        Humdata
+    </a>
+    or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22dentist%22](area.area_0);node[%22amenity%22=%22doctors%22](area.area_0);node[%22amenity%22=%22hospital%22](area.area_0);node[%22amenity%22=%22clinic%22](area.area_0);way[%22amenity%22=%22dentist%22](area.area_0);way[%22amenity%22=%22doctors%22](area.area_0);way[%22amenity%22=%22hospital%22](area.area_0);way[%22amenity%22=%22clinic%22](area.area_0);relation[%22amenity%22=%22dentist%22](area.area_0);relation[%22amenity%22=%22doctors%22](area.area_0);relation[%22amenity%22=%22hospital%22](area.area_0);relation[%22amenity%22=%22clinic%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Access to Education and Training Facilities</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of universities and technical schools (OSM, Humanitarian Data Exchange)</td>
