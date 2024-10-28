@@ -1,4 +1,4 @@
-# 📜 Project Background
+# Project Background
   
 <h2 id="introduction">Introduction</h2>
     
