@@ -52,17 +52,11 @@ In the **Repository Details** window:
 
    [![GEEST Toolbar Icons](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg)](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg "Click to enlarge")
 
-2. To configure the tool, go to **GEEST Settings** and input your ORS (Open Route Service) API key to enable additional functionality.
+2. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services. For more information on obtaining an ORS API key, please refer to the [OpenRouteService website](https://openrouteservice.org/).
+
+3. **Optional**: Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, to enhance performance and debugging.
+
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
   <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/geest%20settings.jpg" alt="GEEST Settings" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
-</a>
-
-3. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.
-4. Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, for better performance and debugging.
-
-
-
-<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg" alt="QGIS Icons" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
