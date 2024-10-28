@@ -54,7 +54,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <a href="https://data.humdata.org/dataset/hotosm-saint-lucia-schools" target="_blank">
         Humdata
     </a>
-    <br>
+    or
     <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22kindergarten%22](area.area_0);way[%22amenity%22=%22kindergarten%22](area.area_0);relation[%22amenity%22=%22kindergarten%22](area.area_0););(._;>;);out%20body;" target="_blank">
         OSM
     </a>
@@ -64,7 +64,16 @@ This page provides guidance on finding and collecting relevant data for the GEES
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of primary schools</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">National and local datasets; query for locations</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://data.humdata.org/dataset/hotosm-saint-lucia-schools" target="_blank">
+        Humdata
+    </a>
+   or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22school%22](area.area_0);way[%22amenity%22=%22school%22](area.area_0);relation[%22amenity%22=%22school%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of groceries</td>
