@@ -32,7 +32,7 @@ class PointPerCellWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Point per Cell"
+        self.workflow_name = "use_point_per_cell"
 
         layer_path = self.attributes.get("Point per Cell Shapefile", None)
 

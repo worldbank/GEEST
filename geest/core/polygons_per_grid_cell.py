@@ -164,7 +164,7 @@ class RasterPolygonGridScore:
         # Merge the output vector layers
         merge = processing.run(
             "native:mergevectorlayers",
-            {"LAYERS": [grid_layer], "CRS": self.crs, "OUTPUT": "TEMPORARY_OUTPUT"},
+            {"indicators": [grid_layer], "CRS": self.crs, "OUTPUT": "TEMPORARY_OUTPUT"},
             feedback=QgsProcessingFeedback(),
         )["OUTPUT"]
 

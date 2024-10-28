@@ -80,7 +80,7 @@ class WorkflowBase(ABC):
         # Will be populated by the workflow
         self.attributes = self.item.data(3)
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
-        self.attributes["Result"] = "Not Run"
+        self.attributes["result"] = "Not Run"
         self.workflow_is_legacy = True
         self.aggregation = False
 
@@ -190,7 +190,7 @@ class WorkflowBase(ABC):
                 "----------------------------------", tag="Geest", level=Qgis.Info
             )
 
-        self.attributes["Execution Start Time"] = datetime.datetime.now().isoformat()
+        self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
 
         QgsMessageLog.logMessage("Processing Started", tag="Geest", level=Qgis.Info)
 
@@ -270,16 +270,16 @@ class WorkflowBase(ABC):
                 output_rasters.append(masked_layer)
             # Combine all area rasters into a VRT
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
-            self.attributes["Indicator Result File"] = vrt_filepath
-            self.attributes["Result"] = f"{self.workflow_name} Workflow Completed"
+            self.attributes["result_file"] = vrt_filepath
+            self.attributes["result"] = f"{self.workflow_name} Workflow Completed"
 
             QgsMessageLog.logMessage(
                 f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.attributes["Execution End Time"] = datetime.datetime.now().isoformat()
-            self.attributes["Error File"] = None
+            self.attributes["execution_end_time"] = datetime.datetime.now().isoformat()
+            self.attributes["error_file"] = None
             return True
 
         except Exception as e:
@@ -298,15 +298,15 @@ class WorkflowBase(ABC):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            self.attributes["Result"] = f"{self.workflow_name} Workflow Error"
-            self.attributes["Indicator Result File"] = ""
+            self.attributes["result"] = f"{self.workflow_name} Workflow Error"
+            self.attributes["result_file"] = ""
 
             # Write the traceback to error.txt in the workflow_directory
             error_path = os.path.join(self.workflow_directory, "error.txt")
             with open(error_path, "w") as f:
                 f.write(f"Failed to process {self.workflow_name}: {e}\n")
                 f.write(traceback.format_exc())
-            self.attributes["Error File"] = error_path
+            self.attributes["error_file"] = error_path
             return False
 
     def _create_workflow_directory(self, *subdirs: str) -> str:

@@ -130,7 +130,7 @@ class DimensionAggregationDialog(QDialog):
         for row, factor in enumerate(self.factors):
             # Display indicator name (not editable)
             factor_id = factor.get("Factor Name")
-            factor_weighting = factor.get("Factor Weighting", 0)
+            factor_weighting = factor.get("factor_weighting", 0)
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)

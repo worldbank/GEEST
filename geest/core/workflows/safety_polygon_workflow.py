@@ -33,7 +33,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Classify Poly into Classes"
+        self.workflow_name = "use_classify_poly_into_classes"
         layer_path = self.attributes.get("Classify Poly into Classes Shapefile", None)
 
         if not layer_path:

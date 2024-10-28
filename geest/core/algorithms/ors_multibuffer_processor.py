@@ -521,7 +521,7 @@ class ORSMultiBufferProcessor:
             self.workflow_directory, f"merged_isochrones_{index}.shp"
         )
         merge_params = {
-            "LAYERS": temp_layers,
+            "indicators": temp_layers,
             "CRS": crs,
             "OUTPUT": merge_output,
         }
@@ -623,7 +623,7 @@ class ORSMultiBufferProcessor:
         band_layers.append(smallest_layer)
 
         merge_bands_params = {
-            "LAYERS": band_layers,
+            "indicators": band_layers,
             "CRS": crs,
             "OUTPUT": output_path,
         }

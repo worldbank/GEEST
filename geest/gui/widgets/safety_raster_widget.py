@@ -40,7 +40,7 @@ class SafetyRasterWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "Use Nighttime Lights"
+            self.widget_key = "use_nighttime_lights"
             self.settings = QSettings()
 
             # Raster Layer Section

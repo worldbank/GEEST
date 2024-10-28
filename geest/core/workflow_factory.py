@@ -1,5 +1,10 @@
-from qgis.core import QgsMessageLog, Qgis, QgsProcessingContext
-from qgis.core import QgsFeedback
+from qgis.core import (
+    QgsMessageLog,
+    Qgis,
+    QgsProcessingContext,
+    QgsFeedback,
+)
+
 from geest.core.workflows import (
     RasterLayerWorkflow,
     DontUseWorkflow,
@@ -17,6 +22,7 @@ from geest.core.workflows import (
     SafetyRasterWorkflow,
     RasterReclassificationWorkflow,
 )
+
 from .json_tree_item import JsonTreeItem
 
 
@@ -43,6 +49,7 @@ class WorkflowFactory:
         try:
             if not item:
                 return DontUseWorkflow({}, feedback)
+
             attributes = item.data(3)
             QgsMessageLog.logMessage(
                 f"Workflow Factory Called", "Geest", level=Qgis.Info
@@ -56,41 +63,40 @@ class WorkflowFactory:
                 f"-----------------------", "Geest", level=Qgis.Info
             )
 
-            analysis_mode = attributes.get("Analysis Mode", "")
+            analysis_mode = attributes.get("analysis_mode", "")
 
-            if analysis_mode == "Spatial Analysis":
-                return RasterLayerWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Default Index Score":
+            if analysis_mode == "use_default_index_score":
                 return DefaultIndexScoreWorkflow(item, feedback, context)
-            elif analysis_mode == "Don't Use":
+            elif analysis_mode == "do_not_use":
                 return DontUseWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Multi Buffer Point":
+            elif analysis_mode == "use_multi_buffer_point":
                 return MultiBufferDistancesWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Single Buffer Point":
+            elif analysis_mode == "use_single_buffer_point":
                 return SinglePointBufferWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Point per Cell":
+            elif analysis_mode == "use_point_per_cell":
                 return PointPerCellWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Polyline per Cell":
+            elif analysis_mode == "use_polyline_per_cell":
                 return PolylinePerCellWorkflow(item, feedback, context)
             # TODO fix inconsistent abbreviation below for Poly
-            elif analysis_mode == "Use Poly per Cell":
+            elif analysis_mode == "use_poly_per_cell":
                 return PolygonPerCellWorkflow(item, feedback, context)
-            elif analysis_mode == "Factor Aggregation":
+            elif analysis_mode == "factor_aggregation":
                 return FactorAggregationWorkflow(item, feedback, context)
-            elif analysis_mode == "Dimension Aggregation":
+            elif analysis_mode == "dimension_aggregation":
                 return DimensionAggregationWorkflow(item, feedback, context)
-            elif analysis_mode == "Analysis Aggregation":
+            elif analysis_mode == "analysis_aggregation":
                 return AnalysisAggregationWorkflow(item, feedback, context)
-            elif analysis_mode == "Use CSV to Point Layer":
+            elif analysis_mode == "use_csv_to_point_layer":
                 return AcledImpactWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Classify Poly into Classes":
+            elif analysis_mode == "use_classify_poly_into_classes":
                 return SafetyPolygonWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Nighttime Lights":
+            elif analysis_mode == "use_nighttime_lights":
                 return SafetyRasterWorkflow(item, feedback, context)
-            elif analysis_mode == "Use Environmental Hazards":
+            elif analysis_mode == "use_environmental_hazards":
                 return RasterReclassificationWorkflow(item, feedback, context)
             else:
                 raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
+
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error creating workflow: {e}", "Geest", level=Qgis.Critical

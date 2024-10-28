@@ -37,7 +37,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Environmental Hazards"
+        self.workflow_name = "use_environmental_hazards"
 
         layer_name = self.attributes.get("Use Environmental Hazards Raster", None)
 

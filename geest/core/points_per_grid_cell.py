@@ -100,7 +100,7 @@ class RasterPointGridScore:
         # Merge grids into a single Shapefile layer
         Merge = processing.run(
             "native:mergevectorlayers",
-            {"LAYERS": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
+            {"indicators": [grid_layer], "CRS": None, "OUTPUT": "memory:"},
         )
 
         merge = Merge["OUTPUT"]

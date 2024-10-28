@@ -34,7 +34,7 @@ class SafetyRasterWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Nighttime Lights"
+        self.workflow_name = "use_nighttime_lights"
         layer_name = self.attributes.get("Use Nighttime Lights Raster", None)
 
         if not layer_name:

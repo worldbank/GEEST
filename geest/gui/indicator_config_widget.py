@@ -30,7 +30,7 @@ class IndicatorConfigWidget(QWidget):
         """
         Uses the factory to create radio buttons from attributes dictionary.
         """
-        analysis_mode = attributes_dict.get("Analysis Mode", "")
+        analysis_mode = attributes_dict.get("analysis_mode", "")
         for key, value in attributes_dict.items():
             radio_button_widget = RadioButtonFactory.create_radio_button(
                 key, value, attributes_dict
@@ -38,11 +38,11 @@ class IndicatorConfigWidget(QWidget):
             if radio_button_widget:
                 if key == analysis_mode:
                     radio_button_widget.setChecked(True)
-                # Special case for "Don't Use" radio button
+                # Special case for "do_not_use" radio button
                 if (
-                    key == "Indicator Required"
+                    key == "indicator_required"
                     and value == 0
-                    and analysis_mode == "Don't Use"
+                    and analysis_mode == "do_not_use"
                 ):
                     radio_button_widget.setChecked(True)
                 self.button_group.addButton(radio_button_widget)
@@ -53,7 +53,13 @@ class IndicatorConfigWidget(QWidget):
         """
         Updates the attributes dictionary with new data from radio buttons.
         """
-        new_data["Analysis Mode"] = self.button_group.checkedButton().label_text
+        # In the ctor of the widget factor we humanise the name
+        # now we roll it back to the snake case version so it matches keys
+        # in the JSON data model
+        snake_case_mode = (
+            self.button_group.checkedButton().label_text.lower().replace(" ", "_")
+        )
+        new_data["analysis_mode"] = snake_case_mode
         self.attributes_dict.update(new_data)
         self.data_changed.emit(self.attributes_dict)
         QgsMessageLog.logMessage(

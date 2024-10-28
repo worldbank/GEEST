@@ -590,7 +590,7 @@ class TreePanel(QWidget):
                     )
 
         if item.role == "indicator":
-            layer_uri = item.data(3).get(f"Indicator Result File")
+            layer_uri = item.data(3).get(f"result_file")
         else:
             layer_uri = item.data(3).get(
                 f"{item.role.title()} Result File"
@@ -762,13 +762,13 @@ class TreePanel(QWidget):
         if role == item.role and role == "indicator":
             task = self.queue_manager.add_workflow(item)
         if role == item.role and role == "factor":
-            item.data(3)["Analysis Mode"] = "Factor Aggregation"
+            item.data(3)["analysis_mode"] = "factor_aggregation"
             task = self.queue_manager.add_workflow(item)
         if role == item.role and role == "dimension":
-            item.data(3)["Analysis Mode"] = "Dimension Aggregation"
+            item.data(3)["analysis_mode"] = "dimension_aggregation"
             task = self.queue_manager.add_workflow(item)
         if role == item.role and role == "analysis":
-            item.data(3)["Analysis Mode"] = "Analysis Aggregation"
+            item.data(3)["analysis_mode"] = "analysis_aggregation"
             task = self.queue_manager.add_workflow(item)
         if task is None:
             return

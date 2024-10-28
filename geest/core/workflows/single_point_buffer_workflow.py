@@ -33,7 +33,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Single Buffer Point"
+        self.workflow_name = "use_single_buffer_point"
 
         layer_source = self.attributes.get("Single Buffer Point Layer Shapefile", None)
         provider_type = "ogr"

@@ -34,9 +34,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Default Index Score"
+        self.workflow_name = "use_default_index_score"
         self.index_score = int(
-            (self.attributes.get("Default Index Score", 0) / 100) * 5
+            (self.attributes.get("default_index_score", 0) / 100) * 5
         )
         self.workflow_is_legacy = False
         self.features_layer = True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed

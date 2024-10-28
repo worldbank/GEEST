@@ -278,7 +278,7 @@ class IndicatorDetailDialog(QDialog):
         # Taken from IndicatorConfigWidget now
         # selected_button = self.button_group.checkedButton()
         # if selected_button:
-        #    updated_data["Analysis Mode"] = selected_button.text()
+        #    updated_data["analysis_mode"] = selected_button.text()
 
         self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
         self.accept()  # Close the dialog
