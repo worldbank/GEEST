@@ -22,7 +22,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Workplace Discrimination</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">WBL 2024 Workplace Index Score</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
-    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank" style="text-decoration: none; color: inherit;">
+    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank">
         WBL 2024 index score: 83.8
     </a>
 </td>
@@ -32,7 +32,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Regulatory Frameworks</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">WBL 2024 Pay+Parenthood Index Score</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center;">
-    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank" style="text-decoration: none; color: inherit;">
+    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank">
         WBL 2024 index score: Pay 100  and Parenthood 40
     </a>
   </tr>
@@ -40,7 +40,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Financial Inclusion</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">WBL 2024 Entrepreneurship Index Score</td>
  <td style="border: 1px solid black; padding: 1px; text-align: center;">
-    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank" style="text-decoration: none; color: inherit;">
+    <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank">
         WBL 2024 index score: Entrepreneurship 75
     </a>
   </tr>
@@ -51,11 +51,11 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td rowspan="5" style="border: 1px solid black; padding: 1px; text-align: center; ">Women's Travel Patterns</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of kindergartens/childcare</td>
  <td style="border: 1px solid black; padding: 1px; text-align: center;">
-    <a href="https://data.humdata.org/dataset/hotosm-saint-lucia-schools" target="_blank" style="text-decoration: none; color: inherit;">
+    <a href="https://data.humdata.org/dataset/hotosm-saint-lucia-schools" target="_blank">
         Humdata
     </a>
     <br>
-    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22kindergarten%22](area.area_0);way[%22amenity%22=%22kindergarten%22](area.area_0);relation[%22amenity%22=%22kindergarten%22](area.area_0););(._;>;);out%20body;" target="_blank" style="text-decoration: none; color: inherit;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22kindergarten%22](area.area_0);way[%22amenity%22=%22kindergarten%22](area.area_0);relation[%22amenity%22=%22kindergarten%22](area.area_0););(._;>;);out%20body;" target="_blank">
         OSM
     </a>
 </td>
