@@ -94,7 +94,7 @@ class PointPerCellWorkflow(WorkflowBase):
             current_bbox,
             index,
             value_field="value",
-            default_value=255,
+            default_value=0,
         )
         return raster_output
 

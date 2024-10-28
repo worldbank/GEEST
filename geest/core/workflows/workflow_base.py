@@ -80,6 +80,7 @@ class WorkflowBase(ABC):
         self.layer_id = self.attributes.get("ID", "").lower().replace(" ", "_")
         self.attributes["Result"] = "Not Run"
         self.workflow_is_legacy = True
+        self.aggregation = False
 
     #
     # Every concrete subclass needs to implement these three methods
@@ -130,6 +131,24 @@ class WorkflowBase(ABC):
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
+        :index: Index of the current area.
+
+        :return: Path to the reclassified raster.
+        """
+        pass
+
+    @abstractmethod
+    def _process_aggregate_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+    ):
+        """
+        Executes the actual workflow logic for a single area using an aggregate.
+
+        :current_area: Current polygon from our study area.
+        :current_bbox: Bounding box of the above area.
         :index: Index of the current area.
 
         :return: Path to the reclassified raster.
@@ -221,9 +240,9 @@ class WorkflowBase(ABC):
                         area_features=area_features,
                         index=index,
                     )
-
-                else:  # assumes we are processing a raster input
-
+                elif (
+                    self.aggregate == False
+                ):  # assumes we are processing a raster input
                     area_raster = self._subset_raster_layer(
                         bbox=current_bbox, index=index
                     )
@@ -231,6 +250,12 @@ class WorkflowBase(ABC):
                         current_area=current_area,
                         current_bbox=current_bbox,
                         area_raster=area_raster,
+                        index=index,
+                    )
+                if self.aggregation == True:  # we are processing an aggregate
+                    raster_output = self._process_aggregate_for_area(
+                        current_area=current_area,
+                        current_bbox=current_bbox,
                         index=index,
                     )
 

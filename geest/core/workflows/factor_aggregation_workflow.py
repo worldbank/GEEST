@@ -31,6 +31,8 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         self.weight_key = "Indicator Weighting"
         self.result_file_tag = "Factor Result File"
         self.raster_path_key = "Indicator Result File"
+        self.workflow_is_legacy = False
+        self.layer_id = self.id
 
     def output_path(self, extension: str) -> str:
         """
@@ -45,8 +47,6 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         """
         directory = os.path.join(
             self.workflow_directory,
-            self.aggregation_attributes.get("Dimension ID").lower().replace(" ", "_"),
-            self.aggregation_attributes.get("Factor ID").lower().replace(" ", "_"),
         )
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):
@@ -59,3 +59,9 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
 
     def _process_features_for_area(self):
         pass
+
+    def _process_raster_for_area(self):
+        pass
+
+    def do_execute(self):
+        self._execute()
