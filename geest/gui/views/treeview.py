@@ -233,8 +233,18 @@ class JsonTreeModel(QAbstractItemModel):
             return item.data(index.column())
         elif role == Qt.ForegroundRole and index.column() == 2:
             return item.font_color
-        elif role == Qt.DecorationRole and index.column() == 0:
+        elif (
+            role == Qt.DecorationRole and index.column() == 0
+        ):  # Icon for the name column
             return item.getIcon()
+        elif (
+            role == Qt.DecorationRole and index.column() == 1
+        ):  # Icon for the status columen
+            return item.getStatusIcon()
+        elif role == Qt.ToolTipRole and index.column() == 1:
+            return item.getStatusTooltip()
+        elif role == Qt.ToolTipRole and index.column() == 0:
+            return item.getItemTooltip()
         elif role == Qt.FontRole:
             return item.getFont()
 

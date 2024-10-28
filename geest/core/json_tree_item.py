@@ -102,27 +102,94 @@ class JsonTreeItem:
             return self.indicator_icon
         return None
 
+    def getItemTooltip(self):
+        """Retrieve the appropriate tooltip for the item based on its role."""
+        data = self.itemData[3]
+        if self.isDimension():
+            description = data.get("description", "")
+            if description:
+                return f"{description}"
+            else:
+                return "Dimension"
+        elif self.isFactor():
+            description = data.get("Text", "")
+            if description:
+                return f"{description}"
+            else:
+                return "Factor"
+        elif self.isIndicator():
+            description = data.get("Text", "")
+            if description:
+                return f"{description}"
+            else:
+                return "Indicator"
+        return ""
+
+    def getStatusIcon(self):
+        """Retrieve the appropriate icon for the item based on its role."""
+        status = self.getStatus()
+        # Use a case statement to determine the icon based on the status
+        match status:
+            case "✔️":
+                return QIcon(
+                    resources_path("resources", "icons", "completed-success.svg")
+                )
+            case "-":
+                return QIcon(
+                    resources_path("resources", "icons", "required-not-configured.svg")
+                )
+            case "!":
+                return QIcon(resources_path("resources", "icons", "not-configured.svg"))
+            case "x":
+                return QIcon(resources_path("resources", "icons", "failed.svg"))
+            case "e":
+                return QIcon(resources_path("resources", "icons", ".svg"))
+            case _:
+                return QIcon(resources_path("resources", "icons", ".svg"))
+
+    def getStatusTooltip(self):
+        """Retrieve the appropriate tooltip for the item based on its role."""
+        status = self.getStatus()
+        # Use a case statement to determine the icon based on the status
+        match status:
+            case "✔️":
+                return "Completed successfully"
+            case "-":
+                return "Required and not configured"
+            case "!":
+                return "Not configured (optional)"
+            case "x":
+                return "Workflow failed"
+            case "e":
+                return "WRITE TOOL TIP"
+            case _:
+                return ""
+
     def getStatus(self):
         """Return the status of the item as single character."""
         try:
             data = self.itemData[3]
             # QgsMessageLog.logMessage(f"Data: {data}", tag="Geest", level=Qgis.Info)
-            status = "✔️"
+            status = ""
             if "Error" in data.get("Result", ""):
-                status = "!"
-            # Item not required and not configured
-            elif "Don’t Use" in data.get("Analysis Mode", "") and data.get(
+                return "x"
+            if "Failed" in data.get("Result", ""):
+                return "x"
+            # Item required and not configured
+            if "Don’t Use" in data.get("Analysis Mode", "") and data.get(
                 "Layer Required", False
             ):
-                status = "-"
-            # Item required but not configured
-            elif "Don’t Use" in data.get("Analysis Mode", "") and not data.get(
+                return "-"
+            # Item not required but not configured
+            if "Don’t Use" in data.get("Analysis Mode", "") and not data.get(
                 "Layer Required", False
             ):
-                status = "!"
-            elif "Workflow Completed" not in data.get("Result", ""):
-                status = "x"
-            return status
+                return "!"
+            if "Workflow Completed" not in data.get("Result", ""):
+                return "x"
+            if "Workflow Completed" in data.get("Result", ""):
+                return "✔️"
+
         except Exception as e:
             verbose_mode = setting.value("verbose_mode", False)
             if verbose_mode:
@@ -150,7 +217,7 @@ class JsonTreeItem:
         try:
             if status is None:
                 status = self.getStatus()
-            self.itemData[1] = status
+            # self.itemData[1] = status - taken care of by decoration role rather
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error updating status: {e}", tag="Geest", level=Qgis.Warning
