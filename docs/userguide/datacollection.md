@@ -196,8 +196,12 @@ This page provides guidance on finding and collecting relevant data for the GEES
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">FCV</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">ACLED data (Violence Estimated Events)</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">ACLED - Query for estimated violence events</td>
-  </tr>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="mailto:civanescu@worldbank.org">
+      mail for ACLED data
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Education</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Percentage of the labor force comprising women with university degrees</td>
