@@ -1,11 +1,13 @@
-# Installing the QGIS Plugin
+# Installing GEEST
 
-Follow the steps below to install the WEE QGIS plugin using the custom repository.
+Follow the steps below to install the GEEST QGIS plugin using the custom repository.
 
 ### Step 1: Open the Plugin Manager in QGIS
 
 1. Launch QGIS.
 2. Go to **Plugins** > **Manage and Install Plugins…**.
+
+[image](https://github.com/elbeejay/draft-docs/blob/main/docs/images/new%20images/plugins.JPG)
 
 ### Step 2: Add a New Plugin Repository
 
