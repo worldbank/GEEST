@@ -33,7 +33,7 @@ class SpreadsheetToJsonParser:
                 "Factor Required",
                 "Default Factor Dimension Weighting",
                 "Indicator",
-                "Default Indicator Factor Weighting",
+                "default_indicator_factor_weighting",
                 "ID",
                 "Factor Description",
                 "Default Index Score",
