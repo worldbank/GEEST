@@ -239,7 +239,7 @@ class JsonTreeModel(QAbstractItemModel):
             return item.getIcon()
         elif (
             role == Qt.DecorationRole and index.column() == 1
-        ):  # Icon for the status columen
+        ):  # Icon for the status column
             return item.getStatusIcon()
         elif role == Qt.ToolTipRole and index.column() == 1:
             return item.getStatusTooltip()
@@ -266,7 +266,7 @@ class JsonTreeModel(QAbstractItemModel):
             item = index.internalPointer()
             column = index.column()
 
-            if column == 2:  # Weighting column
+            if column == 2:  # tree_view column
                 try:
                     value = float(value)
                     return item.setData(column, f"{value:.2f}")
@@ -428,7 +428,7 @@ class JsonTreeModel(QAbstractItemModel):
             layer_item.setData(2, f"{layer_weighting:.2f}")
         # Update the factor's total weighting
         factor_item.setData(2, "1.00")
-        self.update_font_color(factor_item, QColor(Qt.green))
+        # self.update_font_color(factor_item, QColor(Qt.green))
         self.layoutChanged.emit()
 
     def add_factor(self, dimension_item):

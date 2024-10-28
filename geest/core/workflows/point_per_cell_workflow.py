@@ -94,7 +94,7 @@ class PointPerCellWorkflow(WorkflowBase):
             current_bbox,
             index,
             value_field="value",
-            default_value=255,
+            default_value=0,
         )
         return raster_output
 
@@ -122,5 +122,16 @@ class PointPerCellWorkflow(WorkflowBase):
         :index: Index of the current area.
 
         :return: Path to the reclassified raster.
+        """
+        pass
+
+    def _process_aggregate_for_area(
+        self,
+        current_area: QgsGeometry,
+        current_bbox: QgsGeometry,
+        index: int,
+    ):
+        """
+        Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
         pass

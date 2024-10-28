@@ -31,27 +31,3 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.weight_key = "Dimension Weighting"
         self.result_file_tag = "Analysis Result File"
         self.raster_path_key = "Dimension Result File"
-
-    def output_path(self, extension: str) -> str:
-        """
-        Define output path for the aggregated raster based on the analysis mode.
-
-        Parameters:
-            extension (str): The file extension for the output file.
-
-        Returns:
-            str: Path to the aggregated raster file.
-
-        """
-        directory = self.workflow_directory
-        # Create the directory if it doesn't exist
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        return os.path.join(
-            directory,
-            f"aggregate_{self.id}" + f".{extension}",
-        )
-
-    def _process_features_for_area(self):
-        pass

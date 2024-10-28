@@ -285,7 +285,8 @@ class JsonTreeItem:
             attributes["Factor ID"] = self.data(0)
             attributes["Indicators"] = [
                 {
-                    "Indicator ID": i,
+                    "Indicator No": i,
+                    "Indicator ID": child.data(3).get("ID", ""),
                     "Indicator Name": child.data(0),
                     "Indicator Weighting": child.data(2),
                     "Indicator Result File": child.data(3).get(
@@ -304,7 +305,8 @@ class JsonTreeItem:
             attributes["Dimension ID"] = self.data(0)
             attributes["Factors"] = [
                 {
-                    "Factor ID": i,
+                    "Factor No": i,
+                    "Factor ID": child.data(3).get("ID", ""),
                     "Factor Name": child.data(0),
                     "Factor Weighting": child.data(2),
                     "Factor Result File": child.data(3).get(f"Factor Result File", ""),
@@ -325,7 +327,8 @@ class JsonTreeItem:
 
             attributes["Dimensions"] = [
                 {
-                    "Dimension ID": i,
+                    "Dimension No": i,
+                    "Dimension ID": child.data(3).get("id", ""),
                     "Dimension Name": child.data(0),
                     "Dimension Weighting": child.data(2),
                     "Dimension Result File": child.data(3).get(

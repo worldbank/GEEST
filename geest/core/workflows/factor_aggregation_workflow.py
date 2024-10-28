@@ -31,31 +31,5 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         self.weight_key = "Indicator Weighting"
         self.result_file_tag = "Factor Result File"
         self.raster_path_key = "Indicator Result File"
-
-    def output_path(self, extension: str) -> str:
-        """
-        Define output path for the aggregated raster based on the analysis mode.
-
-        Parameters:
-            extension (str): The file extension for the output file.
-
-        Returns:
-            str: Path to the aggregated raster file.
-
-        """
-        directory = os.path.join(
-            self.workflow_directory,
-            self.aggregation_attributes.get("Dimension ID").lower().replace(" ", "_"),
-            self.aggregation_attributes.get("Factor ID").lower().replace(" ", "_"),
-        )
-        # Create the directory if it doesn't exist
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        return os.path.join(
-            directory,
-            f"aggregate_{self.id}" + f".{extension}",
-        )
-
-    def _process_features_for_area(self):
-        pass
+        self.workflow_is_legacy = False
+        self.layer_id = self.id
