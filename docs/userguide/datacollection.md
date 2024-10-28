@@ -146,7 +146,16 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td rowspan="10" style="border: 1px solid black; padding: 1px; text-align: center; ">PLACE CHARACTERIZATION</td>
     <td rowspan="4" style="border: 1px solid black; padding: 1px; text-align: center; ">Active Transport</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of street crossings</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">OSM - Street crossing locations</td>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://www.mapillary.com/developer/api-documentation/points" target="_blank">
+        Mapillary
+    </a>
+   or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22highway%22=%22crossing%22](area.area_0);node[%22railway%22=%22crossing%22](area.area_0);way[%22highway%22=%22crossing%22](area.area_0);way[%22railway%22=%22crossing%22](area.area_0);relation[%22highway%22=%22crossing%22](area.area_0);relation[%22railway%22=%22crossing%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Location of cycle paths (OSM)</td>
