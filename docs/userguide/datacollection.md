@@ -183,8 +183,16 @@ This page provides guidance on finding and collecting relevant data for the GEES
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Safety</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">Street lights/Nighttime lights</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">Local data sources for street lights and nighttime light data</td>
-  </tr>
+<td style="border: 1px solid black; padding: 1px; text-align: center;">
+    <a href="https://www.mapillary.com/developer/api-documentation/points" target="_blank">
+        Mapillary
+    </a>
+   or
+    <a href="https://eogdata.mines.edu/products/vnl/" target="_blank">
+        NTL
+    </a>
+</td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">FCV</td>
     <td style="border: 1px solid black; padding: 1px; text-align: center; ">ACLED data (Violence Estimated Events)</td>
