@@ -46,3 +46,21 @@ In the **Repository Details** window:
   <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/install.jpg" alt="QGIS Plugin Installation" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 
+### Step 5: Verify the Installation and Configure the Tool
+
+1. After installation, check the QGIS toolbar for the new **GEEST** icons. You should see options like **GEEST Settings** and **GEEST Debug Mode** (as shown in the image below).
+
+   [![GEEST Toolbar Icons](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg)](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg "Click to enlarge")
+
+2. To configure the tool, go to **GEEST Settings** in the QGIS options menu. Here, you can input your ORS (Open Route Service) API key to enable additional functionality.
+
+   [![GEEST Settings](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg)](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg "Click to enlarge")
+
+3. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.
+4. Adjust other settings as needed, such as **Concurrent Tasks**, **Enable Editing**, and **Verbose Logging Mode**, for better performance and debugging.
+
+
+
+<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg" target="_blank">
+  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg" alt="QGIS Icons" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+</a>
