@@ -7,7 +7,19 @@
             "items": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string"
+                    },
                     "name": {
+                        "type": "string"
+                    },
+                    "required": {
+                        "type": "number"
+                    },
+                    "default_analysis_weighting": {
+                        "type": "number"
+                    },
+                    "description": {
                         "type": "string"
                     },
                     "factors": {
@@ -15,8 +27,17 @@
                         "items": {
                             "type": "object",
                             "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
                                 "name": {
                                     "type": "string"
+                                },
+                                "required": {
+                                    "type": "number"
+                                },
+                                "default_dimension_weighting": {
+                                    "type": "number"
                                 },
                                 "indicators": {
                                     "type": "array",
@@ -32,8 +53,11 @@
                                             "description": {
                                                 "type": "string"
                                             },
-                                            "default_index_score": {
+                                            "default_indicator_factor_weighting": {
                                                 "type": "number"
+                                            },
+                                            "default_index_score": {
+                                                "type": "integer"
                                             },
                                             "index_score": {
                                                 "type": "integer"
@@ -47,7 +71,7 @@
                                             "use_multi_buffer_point": {
                                                 "type": "integer"
                                             },
-                                            "Default Single Buffer Distances": {
+                                            "default_single_buffer_distance": {
                                                 "type": "integer"
                                             },
                                             "use_single_buffer_point": {
@@ -92,12 +116,22 @@
                                             "use_poly_per_cell": {
                                                 "type": "integer"
                                             },
-                                            "use_polyline_per_cell"
-: {
+                                            "use_polyline_per_cell": {
                                                 "type": "integer"
                                             },
-                                            "use_point_per_cell"
-: {
+                                            "use_point_per_cell": {
+                                                "type": "integer"
+                                            },
+                                            "use_nighttime_lights": {
+                                                "type": "integer"
+                                            },
+                                            "use_environmental_hazards": {
+                                                "type": "integer"
+                                            },
+                                            "analysis_mode": {
+                                                "type": "string"
+                                            },
+                                            "indicator_required": {
                                                 "type": "integer"
                                             }
                                         },
@@ -105,12 +139,13 @@
                                             "indicator",
                                             "id",
                                             "description",
+                                            "default_indicator_factor_weighting",
                                             "default_index_score",
                                             "index_score",
                                             "use_default_index_score",
                                             "default_multi_buffer_distances",
                                             "use_multi_buffer_point",
-                                            "Default Single Buffer Distances",
+                                            "default_single_buffer_distance",
                                             "use_single_buffer_point",
                                             "default_pixel",
                                             "use_create_grid",
@@ -125,23 +160,36 @@
                                             "use_classify_poly_into_classes",
                                             "use_csv_to_point_layer",
                                             "use_poly_per_cell",
-                                            "use_polyline_per_cell"
-,
-                                            "use_point_per_cell"
-
+                                            "use_polyline_per_cell",
+                                            "use_point_per_cell",
+                                            "use_nighttime_lights",
+                                            "use_environmental_hazards",
+                                            "analysis_mode",
+                                            "indicator_required"
                                         ]
                                     }
+                                },
+                                "description": {
+                                    "type": "string"
                                 }
                             },
                             "required": [
+                                "id",
                                 "name",
-                                "indicators"
+                                "required",
+                                "default_dimension_weighting",
+                                "indicators",
+                                "description"
                             ]
                         }
                     }
                 },
                 "required": [
+                    "id",
                     "name",
+                    "required",
+                    "default_analysis_weighting",
+                    "description",
                     "factors"
                 ]
             }
