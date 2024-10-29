@@ -1,9 +1,8 @@
 import uuid
-from qgis.PyQt.QtCore import Qt
+import traceback
 
-# Change to this when implementing in QGIS
-# from qgis.PyQt.QtGui import (
-from PyQt5.QtGui import QColor, QFont, QIcon
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QColor, QFont, QIcon
 from qgis.core import QgsMessageLog, Qgis
 from geest.utilities import resources_path
 from geest.core import setting
@@ -168,6 +167,11 @@ class JsonTreeItem:
     def getStatus(self):
         """Return the status of the item as single character."""
         try:
+            if not type(self.itemData) == list:
+                return ""
+            if len(self.itemData) < 4:
+                return ""
+
             data = self.itemData[3]
             # QgsMessageLog.logMessage(f"Data: {data}", tag="Geest", level=Qgis.Info)
             status = ""
@@ -191,10 +195,8 @@ class JsonTreeItem:
                 return "✔️"
 
         except Exception as e:
-            verbose_mode = setting.value("verbose_mode", False)
+            verbose_mode = setting("verbose_mode", False)
             if verbose_mode:
-                import traceback
-
                 QgsMessageLog.logMessage(
                     f"Error getting status: {e}", tag="Geest", level=Qgis.Warning
                 )
@@ -221,6 +223,9 @@ class JsonTreeItem:
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error updating status: {e}", tag="Geest", level=Qgis.Warning
+            )
+            QgsMessageLog.logMessage(
+                traceback.format_exc(), tag="Geest", level=Qgis.Warning
             )
 
     def getFont(self):
