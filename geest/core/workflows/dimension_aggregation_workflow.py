@@ -31,4 +31,4 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         self.layers = self.aggregation_attributes.get(f"Factors", [])
         self.weight_key = "factor_weighting"
         self.result_file_tag = "Dimension Result File"
-        self.raster_path_key = "Factor Result File"
+        self.raster_path_key = "result_file"
