@@ -39,7 +39,7 @@ class AggregationWorkflowBase(WorkflowBase):
         self.layers = None  # This should be set by the child class
         self.weight_key = None  # This should be set by the child class
         self.result_file_tag = (
-            None  # This should be set by the child class e.g. "Factor Result File"
+            None  # This should be set by the child class e.g. "result_file"
         )
         self.raster_path_key = (
             None  # This should be set by the child class e.g. "result_file"
@@ -191,7 +191,7 @@ class AggregationWorkflowBase(WorkflowBase):
         raster_files = []
 
         for layer in self.layers:
-            id = layer.get("Indicator ID", "").lower()
+            id = layer.get(indicator_id, "").lower()
             layer_folder = os.path.dirname(layer.get("result_file", ""))
             path = os.path.join(
                 self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"

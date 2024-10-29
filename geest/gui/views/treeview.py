@@ -171,7 +171,7 @@ class JsonTreeModel(QAbstractItemModel):
             "analysis_mode": factor.get("factor_aggregation", ""),
             "result": factor.get("result", ""),
             "execution_start_time": factor.get("execution_start_time", ""),
-            "Factor Result File": factor.get("Factor Result File", ""),
+            "result_file": factor.get("result_file", ""),
             "execution_end_time": factor.get("execution_end_time", ""),
         }
         status = ""  # Use item.getStatus to get after constructing the item
