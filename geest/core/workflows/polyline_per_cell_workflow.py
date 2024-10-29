@@ -32,7 +32,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Polyline per Cell"
+        self.workflow_name = "use_polyline_per_cell"
 
         layer_path = self.attributes.get("Polyline per Cell Shapefile", None)
 

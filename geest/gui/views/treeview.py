@@ -104,7 +104,7 @@ class JsonTreeModel(QAbstractItemModel):
                 factor_item = self._create_factor_item(factor, dimension_item)
 
                 # Process indicators (layers) under each factor
-                for indicator in factor.get("layers", []):
+                for indicator in factor.get("indicators", []):
                     self._create_indicator_item(indicator, factor_item)
 
         self.endResetModel()
@@ -124,17 +124,17 @@ class JsonTreeModel(QAbstractItemModel):
         dimension_attributes = {
             "id": dimension.get("id", ""),
             "name": dimension.get("name", ""),
-            "text": dimension.get("text", ""),
+            "description": dimension.get("description", ""),
             "description": dimension.get("description", ""),
             "required": dimension.get("required", False),
             "default_analysis_weighting": dimension.get(
                 "default_analysis_weighting", 0.0
             ),
-            "Analysis Mode": dimension.get("Factor Aggregation", ""),
-            "Result": dimension.get("Result", ""),
-            "Execution Start Time": dimension.get("Execution Start Time", ""),
+            "analysis_mode": dimension.get("factor_aggregation", ""),
+            "result": dimension.get("result", ""),
+            "execution_start_time": dimension.get("execution_start_time", ""),
             "Dimension Result File": dimension.get("Dimension Result File", ""),
-            "Execution End Time": dimension.get("Execution End Time", ""),
+            "execution_end_time": dimension.get("execution_end_time", ""),
         }
         guid = dimension.get("guid", str(uuid.uuid4()))  # Deserialize UUID
 
@@ -163,16 +163,16 @@ class JsonTreeModel(QAbstractItemModel):
         factor_attributes = {
             "id": factor.get("id", ""),
             "name": factor.get("name", ""),
-            "text": factor.get("text", ""),
+            "description": factor.get("description", ""),
             "required": factor.get("required", False),
             "default_dimension_weighting": factor.get(
                 "default_analysis_weighting", 0.0
             ),
-            "Analysis Mode": factor.get("Factor Aggregation", ""),
-            "Result": factor.get("Result", ""),
-            "Execution Start Time": factor.get("Execution Start Time", ""),
+            "analysis_mode": factor.get("factor_aggregation", ""),
+            "result": factor.get("result", ""),
+            "execution_start_time": factor.get("execution_start_time", ""),
             "Factor Result File": factor.get("Factor Result File", ""),
-            "Execution End Time": factor.get("Execution End Time", ""),
+            "execution_end_time": factor.get("execution_end_time", ""),
         }
         status = ""  # Use item.getStatus to get after constructing the item
         guid = factor.get("guid", str(uuid.uuid4()))  # Deserialize UUID
@@ -201,12 +201,12 @@ class JsonTreeModel(QAbstractItemModel):
         guid = indicator.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         indicator_item = JsonTreeItem(
             [
-                indicator["Layer"],
+                indicator["indicator"],
                 status,
-                indicator.get("Factor Weighting", 0),
+                indicator.get("factor_weighting", 0),
                 indicator,
             ],
-            role="layer",
+            role="indicator",
             guid=guid,
             parent=parent_item,
         )
@@ -334,14 +334,14 @@ class JsonTreeModel(QAbstractItemModel):
                 json_data = {
                     "name": item.data(0),
                     "guid": item.guid,  # Serialize UUID
-                    "layers": [recurse_tree(child) for child in item.childItems],
+                    "indicators": [recurse_tree(child) for child in item.childItems],
                     "Dimension Weighting": item.data(2),
                 }
                 json_data.update(item.data(3))
                 return json_data
-            elif item.role == "layer":
+            elif item.role == "indicator":
                 json_data = item.data(3)
-                json_data["Factor Weighting"] = item.data(2)
+                json_data["factor_weighting"] = item.data(2)
                 json_data["guid"] = item.guid  # Serialize UUID
                 return json_data
 
@@ -455,7 +455,7 @@ class JsonTreeModel(QAbstractItemModel):
         Returns:
             None
         """
-        indicator = JsonTreeItem(["New Layer", "x", "1.00"], "layer", factor_item)
+        indicator = JsonTreeItem(["New Layer", "x", "1.00"], "indicator", factor_item)
         factor_item.appendChild(indicator)
         self.layoutChanged.emit()
 

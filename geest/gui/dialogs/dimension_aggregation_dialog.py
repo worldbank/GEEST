@@ -92,7 +92,9 @@ class DimensionAggregationDialog(QDialog):
         In this dialog you can set the weightings for each indicator in the dimension.
         """
         self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(self.dimension_data.get("text", default_text))
+        self.text_edit_left.setPlainText(
+            self.dimension_data.get("description", default_text)
+        )
         self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
         if self.editing:
             splitter.addWidget(self.text_edit_left)
@@ -128,7 +130,7 @@ class DimensionAggregationDialog(QDialog):
         for row, factor in enumerate(self.factors):
             # Display indicator name (not editable)
             factor_id = factor.get("Factor Name")
-            factor_weighting = factor.get("Factor Weighting", 0)
+            factor_weighting = factor.get("factor_weighting", 0)
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
@@ -173,6 +175,6 @@ class DimensionAggregationDialog(QDialog):
         if self.editing:
             updated_data = self.layer_data
             # Include the Markdown text from the left text edit
-            updated_data["text"] = self.text_edit_left.toPlainText()
+            updated_data["description"] = self.text_edit_left.toPlainText()
             self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
         self.accept()  # Close the dialog

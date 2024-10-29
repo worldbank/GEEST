@@ -52,7 +52,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Use Multi Buffer Point"
+        self.workflow_name = "use_multi_buffer_point"
         self.distances = self.attributes.get("Multi Buffer Travel Distances", None)
         if not self.distances:
             QgsMessageLog.logMessage(
@@ -60,7 +60,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            distances = self.attributes.get("Default Multi Buffer Distances", None)
+            distances = self.attributes.get("default_multi_buffer_distances", None)
             if not distances:
                 QgsMessageLog.logMessage(
                     "Invalid default travel distances and no default specified.",
@@ -392,7 +392,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             self.workflow_directory, f"{self.layer_id}_merged_isochrones_{index}.shp"
         )
         merge_params = {
-            "LAYERS": layers,
+            "indicators": layers,
             "CRS": self.target_crs,
             "OUTPUT": merge_output,
         }
@@ -491,7 +491,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         band_layers.append(smallest_layer)
 
         merge_bands_params = {
-            "LAYERS": band_layers,
+            "indicators": band_layers,
             "CRS": self.target_crs,
             "OUTPUT": output_path,
         }

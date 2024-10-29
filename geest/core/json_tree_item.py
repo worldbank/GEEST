@@ -81,7 +81,7 @@ class JsonTreeItem:
         return 0
 
     def isIndicator(self):
-        return self.role == "layer"
+        return self.role == "indicator"
 
     def isFactor(self):
         return self.role == "factor"
@@ -112,13 +112,13 @@ class JsonTreeItem:
             else:
                 return "Dimension"
         elif self.isFactor():
-            description = data.get("Text", "")
+            description = data.get("description", "")
             if description:
                 return f"{description}"
             else:
                 return "Factor"
         elif self.isIndicator():
-            description = data.get("Text", "")
+            description = data.get("description", "")
             if description:
                 return f"{description}"
             else:
@@ -171,23 +171,23 @@ class JsonTreeItem:
             data = self.itemData[3]
             # QgsMessageLog.logMessage(f"Data: {data}", tag="Geest", level=Qgis.Info)
             status = ""
-            if "Error" in data.get("Result", ""):
+            if "Error" in data.get("result", ""):
                 return "x"
-            if "Failed" in data.get("Result", ""):
+            if "Failed" in data.get("result", ""):
                 return "x"
             # Item required and not configured
-            if "Don’t Use" in data.get("Analysis Mode", "") and data.get(
-                "Layer Required", False
+            if "Don’t Use" in data.get("analysis_mode", "") and data.get(
+                "indicator_required", False
             ):
                 return "-"
             # Item not required but not configured
-            if "Don’t Use" in data.get("Analysis Mode", "") and not data.get(
-                "Layer Required", False
+            if "Don’t Use" in data.get("analysis_mode", "") and not data.get(
+                "indicator_required", False
             ):
                 return "!"
-            if "Workflow Completed" not in data.get("Result", ""):
+            if "Workflow Completed" not in data.get("result", ""):
                 return "x"
-            if "Workflow Completed" in data.get("Result", ""):
+            if "Workflow Completed" in data.get("result", ""):
                 return "✔️"
 
         except Exception as e:
@@ -247,7 +247,7 @@ class JsonTreeItem:
             path.append(
                 self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
             )
-            path.append(self.itemData[3].get("ID", "").lower().replace(" ", "_"))
+            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
         elif self.isFactor():
             path.append(
                 self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
@@ -265,15 +265,13 @@ class JsonTreeItem:
                 "id", ""
             )
             attributes["Factor ID"] = self.parentItem.itemData[3].get("id", "")
-            attributes["Indicator ID"] = self.itemData[3].get("ID", "")
-            attributes["Indicator Name"] = self.itemData[3].get("Layer", "")
+            attributes["Indicator ID"] = self.itemData[3].get("id", "")
+            attributes["Indicator Name"] = self.itemData[3].get("indicator", "")
             attributes["Indicator Weighting"] = self.itemData[3].get(
-                "Factor Weighting", ""
+                "factor_weighting", ""
             )
-            attributes["Indicator Result File"] = self.itemData[3].get(
-                "Indicator Result File", ""
-            )
-            attributes["Result"] = self.itemData[3].get("Result", "")
+            attributes["result_file"] = self.itemData[3].get("result_file", "")
+            attributes["result"] = self.itemData[3].get("result", "")
         return attributes
 
     def getFactorAttributes(self):
@@ -281,17 +279,15 @@ class JsonTreeItem:
         attributes = {}
         if self.isFactor():
             attributes["Dimension ID"] = self.parentItem.itemData[3].get("id", "")
-            attributes["Analysis Mode"] = "Factor Aggregation"
+            attributes["analysis_mode"] = "factor_aggregation"
             attributes["Factor ID"] = self.data(0)
             attributes["Indicators"] = [
                 {
                     "Indicator No": i,
-                    "Indicator ID": child.data(3).get("ID", ""),
+                    "Indicator ID": child.data(3).get("id", ""),
                     "Indicator Name": child.data(0),
                     "Indicator Weighting": child.data(2),
-                    "Indicator Result File": child.data(3).get(
-                        "Indicator Result File", ""
-                    ),
+                    "result_file": child.data(3).get("result_file", ""),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -301,14 +297,14 @@ class JsonTreeItem:
         """Return the dict of factors under this dimension."""
         attributes = {}
         if self.isDimension():
-            attributes["Analysis Mode"] = "Dimension Aggregation"
+            attributes["analysis_mode"] = "dimension_aggregation"
             attributes["Dimension ID"] = self.data(0)
             attributes["Factors"] = [
                 {
                     "Factor No": i,
-                    "Factor ID": child.data(3).get("ID", ""),
+                    "Factor ID": child.data(3).get("id", ""),
                     "Factor Name": child.data(0),
-                    "Factor Weighting": child.data(2),
+                    "factor_weighting": child.data(2),
                     "Factor Result File": child.data(3).get(f"Factor Result File", ""),
                 }
                 for i, child in enumerate(self.childItems)

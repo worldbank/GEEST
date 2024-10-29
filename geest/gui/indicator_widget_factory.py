@@ -43,27 +43,29 @@ class RadioButtonFactory:
             )
 
         try:
-            if key == "Layer Required" and value == 0:
-                return DontUseRadioButton(label_text="Don't Use", attributes=attributes)
-            if key == "Use Default Index Score" and value == 1:
+            if key == "indicator_required" and value == 0:
+                return DontUseRadioButton(
+                    label_text="do_not_use", attributes=attributes
+                )
+            if key == "use_default_index_score" and value == 1:
                 return IndexScoreRadioButton(label_text=key, attributes=attributes)
-            if key == "Use Multi Buffer Point" and value == 1:
+            if key == "use_multi_buffer_point" and value == 1:
                 return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
-            if key == "Use Single Buffer Point" and value == 1:
+            if key == "use_single_buffer_point" and value == 1:
                 return SingleBufferDistanceWidget(label_text=key, attributes=attributes)
-            if key == "Use Poly per Cell" and value == 1:
+            if key == "use_poly_per_cell" and value == 1:
                 return PolygonWidget(label_text=key, attributes=attributes)
-            if key == "Use Polyline per Cell" and value == 1:
+            if key == "use_polyline_per_cell" and value == 1:
                 return PolylineWidget(label_text=key, attributes=attributes)
-            if key == "Use Point per Cell" and value == 1:
+            if key == "use_point_per_cell" and value == 1:
                 return PointLayerWidget(label_text=key, attributes=attributes)
-            if key == "Use CSV to Point Layer" and value == 1:
+            if key == "use_csv_to_point_layer" and value == 1:
                 return AcledCsvLayerWidget(label_text=key, attributes=attributes)
-            if key == "Use Classify Poly into Classes" and value == 1:
+            if key == "use_classify_poly_into_classes" and value == 1:
                 return SafetyPolygonWidget(label_text=key, attributes=attributes)
-            if key == "Use Nighttime Lights" and value == 1:
+            if key == "use_nighttime_lights" and value == 1:
                 return SafetyRasterWidget(label_text=key, attributes=attributes)
-            if key == "Use Environmental Hazards" and value == 1:
+            if key == "use_environmental_hazards" and value == 1:
                 return RasterReclassificationWidget(
                     label_text=key, attributes=attributes
                 )
