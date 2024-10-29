@@ -176,12 +176,12 @@ class JsonTreeItem:
             if "Failed" in data.get("result", ""):
                 return "x"
             # Item required and not configured
-            if "Don’t Use" in data.get("analysis_mode", "") and data.get(
+            if "Do Not Use" in data.get("analysis_mode", "") and data.get(
                 "indicator_required", False
             ):
                 return "-"
             # Item not required but not configured
-            if "Don’t Use" in data.get("analysis_mode", "") and not data.get(
+            if "Do Not Use" in data.get("analysis_mode", "") and not data.get(
                 "indicator_required", False
             ):
                 return "!"
@@ -320,6 +320,7 @@ class JsonTreeItem:
                 "analysis_description", "Not Set"
             )
             attributes["working_folder"] = self.data(3).get("working_folder", "Not Set")
+            attributes["cell_size_m"] = self.data(3).get("cell_size_m", 100)
 
             attributes["dimensions"] = [
                 {

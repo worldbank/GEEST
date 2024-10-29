@@ -1,4 +1,5 @@
 import os
+import json
 import platform
 import shutil
 from PyQt5.QtWidgets import (
@@ -205,6 +206,12 @@ class SetupPanel(FORM_CLASS, QWidget):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to copy model.json: {e}")
                 return
+            # open the model.json to set the analysis cell size, then close it again
+            with open(model_path, "r") as f:
+                model = json.load(f)
+                model["analysis_cell_size_m"] = self.cell_size_spinbox.value()
+            with open(model_path, "w") as f:
+                json.dump(model, f)
 
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
@@ -217,6 +224,7 @@ class SetupPanel(FORM_CLASS, QWidget):
                     name="Study Area Processing",
                     layer=layer,
                     field_name=field_name,
+                    cell_size_m=self.cell_size_spinbox.value(),
                     crs=crs,
                     working_dir=self.working_dir,
                     context=context,
