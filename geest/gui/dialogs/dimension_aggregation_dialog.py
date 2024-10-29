@@ -36,7 +36,7 @@ class DimensionAggregationDialog(QDialog):
             f"Edit Dimension Weightings for Dimension: {self.tree_item.data(0)}"
         )
 
-        self.factors = self.tree_item.getDimensionAttributes()["Factors"]
+        self.factors = self.tree_item.getDimensionAttributes()["factors"]
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
@@ -129,7 +129,7 @@ class DimensionAggregationDialog(QDialog):
         # Populate the table
         for row, factor in enumerate(self.factors):
             # Display indicator name (not editable)
-            factor_id = factor.get("Factor Name")
+            factor_id = factor.get("factor_name")
             factor_weighting = factor.get("factor_weighting", 0)
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable

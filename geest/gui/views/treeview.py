@@ -78,9 +78,9 @@ class JsonTreeModel(QAbstractItemModel):
 
         # Store special properties in the data(3) dictionary
         analysis_attributes = {
-            "Analysis Name": analysis_name,
-            "Description": analysis_description,
-            "Working Folder": working_folder,
+            "analysis_name": analysis_name,
+            "description": analysis_description,
+            "working_folder": working_folder,
         }
 
         # Create the "Analysis" item
@@ -125,7 +125,6 @@ class JsonTreeModel(QAbstractItemModel):
             "id": dimension.get("id", ""),
             "name": dimension.get("name", ""),
             "description": dimension.get("description", ""),
-            "description": dimension.get("description", ""),
             "required": dimension.get("required", False),
             "default_analysis_weighting": dimension.get(
                 "default_analysis_weighting", 0.0
@@ -133,14 +132,19 @@ class JsonTreeModel(QAbstractItemModel):
             "analysis_mode": dimension.get("factor_aggregation", ""),
             "result": dimension.get("result", ""),
             "execution_start_time": dimension.get("execution_start_time", ""),
-            "Dimension Result File": dimension.get("Dimension Result File", ""),
+            "result_file": dimension.get("result_file", ""),
             "execution_end_time": dimension.get("execution_end_time", ""),
         }
         guid = dimension.get("guid", str(uuid.uuid4()))  # Deserialize UUID
 
         status = ""  # Will be set in the item ctor
         dimension_item = JsonTreeItem(
-            [dimension_name, status, "", dimension_attributes],
+            [
+                dimension_name,
+                status,
+                dimension.get("analysis_weighting", 0),
+                dimension_attributes,
+            ],
             role="dimension",
             guid=guid,
             parent=parent_item,
@@ -177,7 +181,12 @@ class JsonTreeModel(QAbstractItemModel):
         status = ""  # Use item.getStatus to get after constructing the item
         guid = factor.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         factor_item = JsonTreeItem(
-            [factor["name"], status, "", factor_attributes],
+            [
+                factor["name"],
+                status,
+                factor.get("dimension_weighting", 0),
+                factor_attributes,
+            ],
             role="factor",
             guid=guid,
             parent=parent_item,
@@ -313,9 +322,9 @@ class JsonTreeModel(QAbstractItemModel):
             # Serialize each item, including UUID
             if item.role == "analysis":
                 json_data = {
-                    "analysis_name": item.data(3)["Analysis Name"],
-                    "description": item.data(3)["Description"],
-                    "working_folder": item.data(3)["Working Folder"],
+                    "analysis_name": item.data(3)["analysis_name"],
+                    "description": item.data(3)["description"],
+                    "working_folder": item.data(3)["working_folder"],
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }
@@ -325,7 +334,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "name": item.data(0).lower(),
                     "guid": item.guid,  # Serialize UUID
                     "factors": [recurse_tree(child) for child in item.childItems],
-                    "Analysis Weighting": item.data(2),
+                    "analysis_weighting": item.data(2),
                     "description": item.data(3)["description"],
                 }
                 json_data.update(item.data(3))
@@ -335,7 +344,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "name": item.data(0),
                     "guid": item.guid,  # Serialize UUID
                     "indicators": [recurse_tree(child) for child in item.childItems],
-                    "Dimension Weighting": item.data(2),
+                    "dimension_weighting": item.data(2),
                 }
                 json_data.update(item.data(3))
                 return json_data
@@ -386,7 +395,7 @@ class JsonTreeModel(QAbstractItemModel):
             factor_item.setData(2, f"{factor_weighting:.2f}")
         # Update the dimension's total weighting
         dimension_item.setData(2, "1.00")
-        self.update_font_color(dimension_item, QColor(Qt.green))
+        # self.update_font_color(dimension_item, QColor(Qt.green))
         self.layoutChanged.emit()
 
     def clear_layer_weightings(self, factor_item):

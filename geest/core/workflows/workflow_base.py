@@ -243,7 +243,7 @@ class WorkflowBase(ABC):
                         index=index,
                     )
                 elif (
-                    self.aggregate == False
+                    self.aggregation == False
                 ):  # assumes we are processing a raster input
                     area_raster = self._subset_raster_layer(
                         bbox=current_bbox, index=index

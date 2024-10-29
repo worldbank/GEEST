@@ -36,7 +36,7 @@ class FactorAggregationDialog(QDialog):
             f"Edit Aggregation Weightings for Factor: {self.tree_item.data(0)}"
         )
 
-        self.indicators = self.tree_item.getFactorAttributes()["Indicators"]
+        self.indicators = self.tree_item.getFactorAttributes()["indicators"]
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
@@ -117,14 +117,14 @@ class FactorAggregationDialog(QDialog):
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.indicators))
         self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels(["indicator", "Weighting"])
+        self.table.setHorizontalHeaderLabels(["Indicator", "Weighting"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Populate the table
         for row, indicator in enumerate(self.indicators):
             # Display indicator name (not editable)
-            indicator_id = indicator.get("Indicator Name")
-            indicator_weighting = indicator.get("Indicator Weighting", 0)
+            indicator_id = indicator.get("indicator_name")
+            indicator_weighting = indicator.get("indicator_weighting", 0)
             name_item = QTableWidgetItem(indicator_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
@@ -132,7 +132,7 @@ class FactorAggregationDialog(QDialog):
             # Display indicator weighting in a QLineEdit for editing
             weighting_item = QLineEdit(str(indicator_weighting))
             self.table.setCellWidget(row, 1, weighting_item)
-            self.weightings[indicator_id] = weighting_item
+            self.weightings["indicator_id"] = weighting_item
 
         layout.addWidget(self.table)
 

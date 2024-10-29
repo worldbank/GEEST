@@ -28,7 +28,6 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.aggregation_attributes = self.item.getDimensionAttributes()
         self.id = self.attributes["id"].lower().replace(" ", "_")
-        self.layers = self.aggregation_attributes.get(f"Factors", [])
+        self.layers = self.aggregation_attributes.get(f"factors", [])
         self.weight_key = "factor_weighting"
-        self.result_file_tag = "Dimension Result File"
-        self.raster_path_key = "result_file"
+        self.workflow_name = "dimension_aggregation"
