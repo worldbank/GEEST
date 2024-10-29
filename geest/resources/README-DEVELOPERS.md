@@ -1,5 +1,5 @@
 ```mermaid
-graph TD
+graph TB
     A[dimensions] --> B[Dimension Object]
     B --> B1[id: string]
     B --> B2[name: string]
