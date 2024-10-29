@@ -18,7 +18,11 @@ class WorkflowJob(QgsTask):
     job_finished = pyqtSignal(bool)
 
     def __init__(
-        self, description: str, context: QgsProcessingContext, item: JsonTreeItem
+        self,
+        description: str,
+        context: QgsProcessingContext,
+        item: JsonTreeItem,
+        cell_size_m: float = 100.0,
     ):
         """
         Initialize the workflow job.
@@ -27,16 +31,21 @@ class WorkflowJob(QgsTask):
                 to keep things thread safe
         :param item: JsonTreeItem object representing the task - this is a reference
               so it will update the tree directly when modified
+        :param cell_size_m: Cell size in meters for raster operations
         """
         super().__init__(description)
         self.context = (
             context  # QgsProcessingContext object used to pass objects to the thread
         )
         self._item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
+        self._cell_size_m = cell_size_m  # Cell size in meters for raster operations
         self._feedback = QgsFeedback()  # Feedback object for progress and cancellation
         workflow_factory = WorkflowFactory()
         self._workflow = workflow_factory.create_workflow(
-            item, self._feedback, self.context
+            item=self._item,
+            cell_size_m=self._cell_size_m,
+            feedback=self._feedback,
+            context=self.context,
         )  # Create the workflow
         # TODO this raises an error... need to figure out how to connect this signal
         # self._workflow.progressChanged.connect(self.setProgress)

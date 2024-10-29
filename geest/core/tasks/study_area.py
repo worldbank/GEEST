@@ -399,8 +399,9 @@ class StudyAreaProcessingTask(QgsTask):
 
     def grid_aligned_bbox(self, bbox: QgsRectangle) -> QgsRectangle:
         """
-        Transforms and aligns the bounding box to a 100m grid in the output CRS.
-        The alignment ensures that the bbox aligns with the study area grid, offset by an exact multiple of 100m.
+        Transforms and aligns the bounding box to the grid in the output CRS.
+        The alignment ensures that the bbox aligns with the study area grid, offset by an exact multiple of
+        the grid size in m.
 
         :param bbox: The bounding box to be aligned, in the CRS of the input layer.
         :return: A new bounding box aligned to the grid, in the output CRS.

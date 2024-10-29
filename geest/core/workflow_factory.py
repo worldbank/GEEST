@@ -33,13 +33,18 @@ class WorkflowFactory:
     """
 
     def create_workflow(
-        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+        self,
+        item: JsonTreeItem,
+        cell_size_m: float,
+        feedback: QgsFeedback,
+        context: QgsProcessingContext,
     ):
         """
         Determines the workflow to return based on 'Analysis Mode' in the attributes.
         Passes the feedback object to the workflow for progress reporting.
 
         :param item: The JsonTreeItem object representing the task.
+        :param cell_size_m: The cell size in meters for the analysis.
         :param feedback: The QgsFeedback object for progress reporting.
         :param context: The QgsProcessingContext object for processing. This can be used to
             pass objects to the thread. e.g. the QgsProject Instance
@@ -66,34 +71,42 @@ class WorkflowFactory:
             analysis_mode = attributes.get("analysis_mode", "")
 
             if analysis_mode == "use_default_index_score":
-                return DefaultIndexScoreWorkflow(item, feedback, context)
+                return DefaultIndexScoreWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "do_not_use":
-                return DontUseWorkflow(item, feedback, context)
+                return DontUseWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_multi_buffer_point":
-                return MultiBufferDistancesWorkflow(item, feedback, context)
+                return MultiBufferDistancesWorkflow(
+                    item, cell_size_m, feedback, context
+                )
             elif analysis_mode == "use_single_buffer_point":
-                return SinglePointBufferWorkflow(item, feedback, context)
+                return SinglePointBufferWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_point_per_cell":
-                return PointPerCellWorkflow(item, feedback, context)
+                return PointPerCellWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_polyline_per_cell":
-                return PolylinePerCellWorkflow(item, feedback, context)
+                return PolylinePerCellWorkflow(item, cell_size_m, feedback, context)
             # TODO fix inconsistent abbreviation below for Poly
             elif analysis_mode == "use_poly_per_cell":
-                return PolygonPerCellWorkflow(item, feedback, context)
+                return PolygonPerCellWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "factor_aggregation":
-                return FactorAggregationWorkflow(item, feedback, context)
+                return FactorAggregationWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "dimension_aggregation":
-                return DimensionAggregationWorkflow(item, feedback, context)
+                return DimensionAggregationWorkflow(
+                    item, cell_size_m, feedback, context
+                )
             elif analysis_mode == "analysis_aggregation":
-                return AnalysisAggregationWorkflow(item, feedback, context)
+                return AnalysisAggregationWorkflow(
+                    item, cell_size_m, cell_size_m, feedback, context
+                )
             elif analysis_mode == "use_csv_to_point_layer":
-                return AcledImpactWorkflow(item, feedback, context)
+                return AcledImpactWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_classify_poly_into_classes":
-                return SafetyPolygonWorkflow(item, feedback, context)
+                return SafetyPolygonWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_nighttime_lights":
-                return SafetyRasterWorkflow(item, feedback, context)
+                return SafetyRasterWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_environmental_hazards":
-                return RasterReclassificationWorkflow(item, feedback, context)
+                return RasterReclassificationWorkflow(
+                    item, cell_size_m, feedback, context
+                )
             else:
                 raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
 
@@ -106,4 +119,4 @@ class WorkflowFactory:
             QgsMessageLog.logMessage(
                 traceback.format_exc(), "Geest", level=Qgis.Critical
             )
-            return DontUseWorkflow(item, feedback, context)
+            return DontUseWorkflow(item, cell_size_m, feedback, context)

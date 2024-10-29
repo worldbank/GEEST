@@ -13,7 +13,11 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
     """
 
     def __init__(
-        self, item: dict, feedback: QgsFeedback, context: QgsProcessingContext
+        self,
+        item: dict,
+        cell_size_m: float,
+        feedback: QgsFeedback,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the workflow with attributes and feedback.
@@ -22,7 +26,7 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback, context
+            item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
 
         self.aggregation_attributes = self.item.getFactorAttributes()
