@@ -755,17 +755,18 @@ class TreePanel(QWidget):
             The task directly modifies the item's properties to update the tree.
         """
         task = None
+        cell_size_m = 1000
         if role == item.role and role == "indicator":
-            task = self.queue_manager.add_workflow(item)
+            task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "factor":
             item.data(3)["analysis_mode"] = "factor_aggregation"
-            task = self.queue_manager.add_workflow(item)
+            task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "dimension":
             item.data(3)["analysis_mode"] = "dimension_aggregation"
-            task = self.queue_manager.add_workflow(item)
+            task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "analysis":
             item.data(3)["analysis_mode"] = "analysis_aggregation"
-            task = self.queue_manager.add_workflow(item)
+            task = self.queue_manager.add_workflow(item, cell_size_m)
         if task is None:
             return
 

@@ -15,16 +15,21 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
     """
 
     def __init__(
-        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+        self,
+        item: JsonTreeItem,
+        cell_size_m: float,
+        feedback: QgsFeedback,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: Item containing workflow parameters.
+        :param cell_size_m: Cell size in meters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback, context
+            item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.aggregation_attributes = self.item.getDimensionAttributes()
         self.id = self.attributes["id"].lower().replace(" ", "_")

@@ -37,15 +37,21 @@ class WorkflowBase(ABC):
     progressChanged = pyqtSignal(int)
 
     def __init__(
-        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+        self,
+        item: JsonTreeItem,
+        cell_size_m: 100.0,
+        feedback: QgsFeedback,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem object representing the task.
+        :param cell_size_m: The cell size in meters for the analysis.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
+        self.cell_size_m = cell_size_m
         self.feedback = feedback
         self.context = context  # QgsProcessingContext
         self.workflow_name = None  # This is set in the concrete class
@@ -57,7 +63,6 @@ class WorkflowBase(ABC):
             raise ValueError("Working directory not set.")
         # This is the lower level directory for this workflow
         self.workflow_directory = self._create_workflow_directory()
-        self.pixel_size = 100.0  # TODO get from data model
         self.gpkg_path: str = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
         )
@@ -390,7 +395,7 @@ class WorkflowBase(ABC):
             "INPUT": self.raster_layer,
             "TARGET_CRS": self.target_crs,
             "RESAMPLING": 0,
-            "TARGET_RESOLUTION": self.pixel_size,
+            "TARGET_RESOLUTION": self.cell_size_m,
             "NODATA": -9999,
             "OUTPUT": "TEMPORARY_OUTPUT",
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
@@ -487,8 +492,8 @@ class WorkflowBase(ABC):
             QgsMessageLog.logMessage(f"Rasterizing {input_layer}", "Geest", Qgis.Info)
 
         # Ensure resolution parameters are properly formatted as float values
-        x_res = 100.0  # 100m pixel size in X direction
-        y_res = 100.0  # 100m pixel size in Y direction
+        x_res = self.cell_size_m  # pixel size in X direction
+        y_res = self.cell_size_m  # pixel size in Y direction
         bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
@@ -546,7 +551,7 @@ class WorkflowBase(ABC):
         output_name = f"{self.layer_id}_masked_{index}.tif"
         output_path = os.path.join(self.workflow_directory, output_name)
         QgsMessageLog.logMessage(
-            f"Masking raster {raster_path} with area {index} to {output_path}",
+            f"Masking raster {raster_path} for area {index} to {output_path}",
             tag="Geest",
             level=Qgis.Info,
         )

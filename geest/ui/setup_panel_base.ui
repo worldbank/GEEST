@@ -190,7 +190,7 @@
         <item>
          <widget class="QSpinBox" name="cell_size_spinbox">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="minimum">
            <number>10</number>
@@ -206,7 +206,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Analysis cell size (m)</string>

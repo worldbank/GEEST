@@ -1,6 +1,4 @@
 import os
-import shutil
-import glob
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -11,8 +9,6 @@ from qgis.core import (
 )
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
-from geest.core.convert_to_8bit import RasterConverter
-from geest.utilities import resources_path
 from geest.core import JsonTreeItem
 
 
@@ -22,16 +18,21 @@ class AggregationWorkflowBase(WorkflowBase):
     """
 
     def __init__(
-        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+        self,
+        item: JsonTreeItem,
+        cell_size_m: float,
+        feedback: QgsFeedback,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: Item containing workflow parameters.
+        :param cell_size_m: Cell size in meters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback, context
+            item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.aggregation_attributes = None  # This should be set by the child class e.g. item.getIndicatorAttributes()
         self.analysis_mode = self.attributes.get("analysis_mode", "")

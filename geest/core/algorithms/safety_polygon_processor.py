@@ -33,11 +33,23 @@ class SafetyPerCellProcessor:
     - Assigning values based on perceived safety.
     - Rasterizing the results.
     - Combining rasterized results into a single VRT file.
+
+    Args:
+        output_prefix (str): Prefix for the output files.
+        cell_size_m (float): The cell size in meters for the analysis.
+        safety_layer (QgsVectorLayer): The input layer containing safety data.
+        safety_field (str): The field in the safety layer containing perceived safety values.
+        workflow_directory (str): Directory where output files will be stored.
+        gpkg_path (str): Path to the GeoPackage with study areas.
+        context (QgsProcessingContext): The processing context to pass objects to the thread.
+    Returns:
+        str: The path to the created VRT file.
     """
 
     def __init__(
         self,
         output_prefix: str,
+        cell_size_m: float,
         safety_layer: QgsVectorLayer,
         safety_field: str,
         workflow_directory: str,
@@ -54,6 +66,7 @@ class SafetyPerCellProcessor:
             gpkg_path (str): Path to the GeoPackage with study areas.
         """
         self.output_prefix = output_prefix
+        self.cell_size_m = cell_size_m
         self.safety_layer = safety_layer
         self.workflow_directory = workflow_directory
         self.gpkg_path = gpkg_path
@@ -187,8 +200,8 @@ class SafetyPerCellProcessor:
             "BURN": None,
             "USE_Z": False,
             "UNITS": 1,
-            "WIDTH": 100.0,
-            "HEIGHT": 100.0,
+            "WIDTH": self.cell_size_m,
+            "HEIGHT": self.cell_size_m,
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()}",
             "NODATA": 255,
             "DATA_TYPE": 0,

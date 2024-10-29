@@ -37,7 +37,7 @@ class StudyAreaProcessingTask(QgsTask):
     It works through the (multi)part geometries in the input layer, creating bounding boxes and masks.
     The masks are stored as individual tif files and then a vrt file is created to combine them.
     The grids are in two forms - the entire bounding box and the individual parts.
-    The grids are aligned to 100m intervals and saved as vector features in a GeoPackage.
+    The grids are aligned to cell_size_m intervals and saved as vector features in a GeoPackage.
     Any invalid geometries are discarded, and fixed geometries are processed.
 
     Args:
@@ -52,6 +52,7 @@ class StudyAreaProcessingTask(QgsTask):
         name: str,
         layer: QgsVectorLayer,
         field_name: str,
+        cell_size_m: float,
         working_dir: str,
         mode: str = "raster",
         crs: Optional[QgsCoordinateReferenceSystem] = None,
@@ -64,6 +65,7 @@ class StudyAreaProcessingTask(QgsTask):
         :param name: The name of the task.
         :param layer: The vector layer containing study area features.
         :param field_name: The name of the field containing area names.
+        :param cell_size: The size of the grid cells in meters.
         :param working_dir: Directory path where outputs will be saved.
         :param mode: Processing mode, either 'vector' or 'raster'. Default is raster.
         :param crs: Optional CRS for the output CRS. If None, a UTM zone
@@ -75,6 +77,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.feedback = feedback
         self.layer: QgsVectorLayer = layer
         self.field_name: str = field_name
+        self.cell_size_m: float = cell_size_m
         self.working_dir: str = working_dir
         self.mode: str = mode
         self.context: QgsProcessingContext = context
@@ -127,7 +130,7 @@ class StudyAreaProcessingTask(QgsTask):
             tag="Geest",
             level=Qgis.Info,
         )
-        # Reproject and align the transformed layer_bbox to a 100m grid and output crs
+        # Reproject and align the transformed layer_bbox to a cell_size_m grid and output crs
         self.layer_bbox = self.grid_aligned_bbox(self.layer_bbox)
 
     def run(self) -> bool:
@@ -396,8 +399,9 @@ class StudyAreaProcessingTask(QgsTask):
 
     def grid_aligned_bbox(self, bbox: QgsRectangle) -> QgsRectangle:
         """
-        Transforms and aligns the bounding box to a 100m grid in the output CRS.
-        The alignment ensures that the bbox aligns with the study area grid, offset by an exact multiple of 100m.
+        Transforms and aligns the bounding box to the grid in the output CRS.
+        The alignment ensures that the bbox aligns with the study area grid, offset by an exact multiple of
+        the grid size in m.
 
         :param bbox: The bounding box to be aligned, in the CRS of the input layer.
         :return: A new bounding box aligned to the grid, in the output CRS.
@@ -410,33 +414,63 @@ class StudyAreaProcessingTask(QgsTask):
         bbox_transformed = transform.transformBoundingBox(bbox)
 
         # Align the bounding box to a grid aligned at 100m intervals, offset by the study area origin
-        study_area_origin_x = int(self.layer_bbox.xMinimum() // 100) * 100
-        study_area_origin_y = int(self.layer_bbox.yMinimum() // 100) * 100
+        study_area_origin_x = (
+            int(self.layer_bbox.xMinimum() // self.cell_size_m) * self.cell_size_m
+        )
+        study_area_origin_y = (
+            int(self.layer_bbox.yMinimum() // self.cell_size_m) * self.cell_size_m
+        )
 
         # Align bbox to the grid based on the study area origin
         x_min = (
             study_area_origin_x
-            + int((bbox_transformed.xMinimum() - study_area_origin_x) // 100) * 100
+            + int(
+                (bbox_transformed.xMinimum() - study_area_origin_x) // self.cell_size_m
+            )
+            * self.cell_size_m
         )
         y_min = (
             study_area_origin_y
-            + int((bbox_transformed.yMinimum() - study_area_origin_y) // 100) * 100
+            + int(
+                (bbox_transformed.yMinimum() - study_area_origin_y) // self.cell_size_m
+            )
+            * self.cell_size_m
         )
         x_max = (
             study_area_origin_x
-            + (int((bbox_transformed.xMaximum() - study_area_origin_x) // 100) + 1)
-            * 100
+            + (
+                int(
+                    (bbox_transformed.xMaximum() - study_area_origin_x)
+                    // self.cell_size_m
+                )
+                + 1
+            )
+            * self.cell_size_m
         )
         y_max = (
             study_area_origin_y
-            + (int((bbox_transformed.yMaximum() - study_area_origin_y) // 100) + 1)
-            * 100
+            + (
+                int(
+                    (bbox_transformed.yMaximum() - study_area_origin_y)
+                    // self.cell_size_m
+                )
+                + 1
+            )
+            * self.cell_size_m
         )
 
-        y_min -= 100  # Offset by 100m to ensure the grid covers the entire geometry
-        y_max += 100  # Offset by 100m to ensure the grid covers the entire geometry
-        x_min -= 100  # Offset by 100m to ensure the grid covers the entire geometry
-        x_max += 100  # Offset by 100m to ensure the grid covers the entire geometry
+        y_min -= (
+            self.cell_size_m
+        )  # Offset to ensure the grid covers the entire geometry
+        y_max += (
+            self.cell_size_m
+        )  # Offset to ensure the grid covers the entire geometry
+        x_min -= (
+            self.cell_size_m
+        )  # Offset to ensure the grid covers the entire geometry
+        x_max += (
+            self.cell_size_m
+        )  # Offset to ensure the grid covers the entire geometry
 
         # Return the aligned bbox in the output CRS
         return QgsRectangle(x_min, y_min, x_max, y_max)
@@ -572,7 +606,7 @@ class StudyAreaProcessingTask(QgsTask):
             )
             return
 
-        step = 100  # 100m grid cells
+        step = self.cell_size_m  # cell_size_mm grid cells
         feature_id += 1
         feature_batch = []
 
@@ -696,8 +730,8 @@ class StudyAreaProcessingTask(QgsTask):
         temp_layer_data_provider.addFeature(temp_feature)
 
         # Ensure resolution parameters are properly formatted as float values
-        x_res = 100.0  # 100m pixel size in X direction
-        y_res = 100.0  # 100m pixel size in Y direction
+        x_res = self.cell_size_m  # 100m pixel size in X direction
+        y_res = self.cell_size_m  # 100m pixel size in Y direction
 
         # Define rasterization parameters for the temporary layer
         params = {

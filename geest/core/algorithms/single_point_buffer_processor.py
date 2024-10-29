@@ -24,6 +24,7 @@ class SinglePointBufferProcessor:
     def __init__(
         self,
         output_prefix: str,
+        cell_size_m: float,
         input_layer: QgsVectorLayer,
         buffer_distance: float,
         workflow_directory: str,
@@ -34,12 +35,14 @@ class SinglePointBufferProcessor:
 
         Args:
             output_prefix (str): Prefix for naming output files.
+            cell_size_m (float): The cell size in meters for the analysis.
             input_layer (QgsVectorLayer): The input layer containing the points to buffer.
             buffer_distance (float): The distance in meters to buffer the points.
             workflow_directory (str): Directory where temporary and output files will be stored.
             gpkg_path (str): Path to the GeoPackage containing study areas and bounding boxes.
         """
         self.output_prefix = output_prefix
+        self.cell_size_m = cell_size_m
         self.features_layer = input_layer
         self.buffer_distance = buffer_distance
         self.workflow_directory = workflow_directory
@@ -287,8 +290,8 @@ class SinglePointBufferProcessor:
             QgsMessageLog.logMessage(f"Rasterizing {input_layer}", "Geest", Qgis.Info)
 
         # Ensure resolution parameters are properly formatted as float values
-        x_res = 100.0  # 100m pixel size in X direction
-        y_res = 100.0  # 100m pixel size in Y direction
+        x_res = self.cell_size_m  # pixel size in X direction
+        y_res = self.cell_size_m  # pixel size in Y direction
         bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
@@ -386,8 +389,8 @@ class SinglePointBufferProcessor:
             "CROP_TO_CUTLINE": True,
             "KEEP_RESOLUTION": False,
             "SET_RESOLUTION": True,
-            "X_RESOLUTION": 100,
-            "Y_RESOLUTION": 100,
+            "X_RESOLUTION": self.cell_size_m,
+            "Y_RESOLUTION": self.cell_size_m,
             "MULTITHREADING": True,
             "DATA_TYPE": 0,  # byte
             "EXTRA": "",

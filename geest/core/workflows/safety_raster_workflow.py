@@ -23,6 +23,7 @@ class SafetyRasterWorkflow(WorkflowBase):
     def __init__(
         self,
         item: JsonTreeItem,
+        cell_size_m: float,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
     ):
@@ -32,7 +33,7 @@ class SafetyRasterWorkflow(WorkflowBase):
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         """
         super().__init__(
-            item, feedback, context
+            item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_nighttime_lights"
         layer_name = self.attributes.get("Use Nighttime Lights Raster", None)

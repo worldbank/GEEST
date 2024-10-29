@@ -73,6 +73,7 @@ class JsonTreeModel(QAbstractItemModel):
         # Create the 'Analysis' parent item
         analysis_name = json_data.get("analysis_name", "Analysis")
         analysis_description = json_data.get("description", "No Description")
+        analysis_cell_size_m = json_data.get("analysis_cell_size_m", 100.0)
         working_folder = json_data.get("working_folder", "Not Set")
         guid = json_data.get("guid", str(uuid.uuid4()))  # Deserialize UUID
 
@@ -81,6 +82,7 @@ class JsonTreeModel(QAbstractItemModel):
             "analysis_name": analysis_name,
             "description": analysis_description,
             "working_folder": working_folder,
+            "analysis_cell_size_m": analysis_cell_size_m,
         }
 
         # Create the "Analysis" item
@@ -325,6 +327,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "analysis_name": item.data(3)["analysis_name"],
                     "description": item.data(3)["description"],
                     "working_folder": item.data(3)["working_folder"],
+                    "analysis_cell_size_m": item.data(3)["analysis_cell_size_m"],
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }

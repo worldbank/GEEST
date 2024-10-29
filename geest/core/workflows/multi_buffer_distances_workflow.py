@@ -41,16 +41,21 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
     """
 
     def __init__(
-        self, item: JsonTreeItem, feedback: QgsFeedback, context: QgsProcessingContext
+        self,
+        item: JsonTreeItem,
+        cell_size_m: float,
+        feedback: QgsFeedback,
+        context: QgsProcessingContext,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param: item: Item containing workflow parameters.
+        :cell_size_m: Cell size in meters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
-            item, feedback, context
+            item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_multi_buffer_point"
         self.distances = self.attributes.get("Multi Buffer Travel Distances", None)
@@ -392,7 +397,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             self.workflow_directory, f"{self.layer_id}_merged_isochrones_{index}.shp"
         )
         merge_params = {
-            "indicators": layers,
+            "LAYERS": layers,
             "CRS": self.target_crs,
             "OUTPUT": merge_output,
         }
@@ -491,7 +496,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         band_layers.append(smallest_layer)
 
         merge_bands_params = {
-            "indicators": band_layers,
+            "LAYERS": band_layers,
             "CRS": self.target_crs,
             "OUTPUT": output_path,
         }

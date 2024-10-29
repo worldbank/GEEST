@@ -742,8 +742,8 @@ class ORSMultiBufferProcessor:
             )
 
         # Ensure resolution parameters are properly formatted as float values
-        x_res = 100.0  # 100m pixel size in X direction
-        y_res = 100.0  # 100m pixel size in Y direction
+        x_res = self.cell_size_m  # pixel size in X direction
+        y_res = self.cell_size_m  # pixel size in Y direction
         bbox = bbox.boundingBox()
         # Define rasterization parameters for the temporary layer
         params = {
@@ -755,7 +755,6 @@ class ORSMultiBufferProcessor:
             "WIDTH": x_res,
             "HEIGHT": y_res,
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
-            #'EXTENT':'280518.114000000,296308.326900000,3998456.316800000,4003763.812500000 [EPSG:32630]',
             "NODATA": 0,
             "OPTIONS": "",
             "DATA_TYPE": 0,
