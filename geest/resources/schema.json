@@ -18,120 +18,124 @@
                                 "name": {
                                     "type": "string"
                                 },
-                                "layers": {
+                                "indicators": {
                                     "type": "array",
                                     "items": {
                                         "type": "object",
                                         "properties": {
-                                            "Layer": {
+                                            "indicator": {
                                                 "type": "string"
                                             },
-                                            "ID": {
+                                            "id": {
                                                 "type": "string"
                                             },
-                                            "Text": {
+                                            "description": {
                                                 "type": "string"
                                             },
-                                            "Default Index Score": {
+                                            "default_index_score": {
                                                 "type": "number"
                                             },
-                                            "Index Score": {
+                                            "index_score": {
                                                 "type": "integer"
                                             },
-                                            "Use Default Index Score": {
+                                            "use_default_index_score": {
                                                 "type": "integer"
                                             },
-                                            "Default Multi Buffer Distances": {
+                                            "default_multi_buffer_distances": {
                                                 "type": "string"
                                             },
-                                            "Use Multi Buffer Point": {
+                                            "use_multi_buffer_point": {
                                                 "type": "integer"
                                             },
                                             "Default Single Buffer Distances": {
                                                 "type": "integer"
                                             },
-                                            "Use Single Buffer Point": {
+                                            "use_single_buffer_point": {
                                                 "type": "integer"
                                             },
-                                            "Default pixel": {
+                                            "default_pixel": {
                                                 "type": "integer"
                                             },
-                                            "Use Create Grid": {
+                                            "use_create_grid": {
                                                 "type": "integer"
                                             },
-                                            "Use OSM Downloader": {
+                                            "use_osm_downloader": {
                                                 "type": "integer"
                                             },
-                                            "Use Bbox for AOI": {
+                                            "use_bbox_for_aoi": {
                                                 "type": "integer"
                                             },
-                                            "Use Rasterize Layer": {
+                                            "use_rasterize_layer": {
                                                 "type": "integer"
                                             },
-                                            "Use WBL Downloader": {
+                                            "use_wbl_downloader": {
                                                 "type": "integer"
                                             },
-                                            "Use Humdata Downloader": {
+                                            "use_humdata_downloader": {
                                                 "type": "integer"
                                             },
-                                            "Use Mapillary Downloader": {
+                                            "use_mapilliary_downloader": {
                                                 "type": "integer"
                                             },
-                                            "Use Other Downloader": {
+                                            "use_other_downloader": {
                                                 "type": "integer"
                                             },
-                                            "Use Add Layers Manually": {
+                                            "use_add_layers_manually": {
                                                 "type": "integer"
                                             },
-                                            "Use Classify Poly into Classes": {
+                                            "use_classify_poly_into_classes": {
                                                 "type": "integer"
                                             },
-                                            "Use CSV to Point Layer": {
+                                            "use_csv_to_point_layer": {
                                                 "type": "integer"
                                             },
-                                            "Use Poly per Cell": {
+                                            "use_poly_per_cell": {
                                                 "type": "integer"
                                             },
-                                            "Use Polyline per Cell": {
+                                            "use_polyline_per_cell"
+: {
                                                 "type": "integer"
                                             },
-                                            "Use Point per Cell": {
+                                            "use_point_per_cell"
+: {
                                                 "type": "integer"
                                             }
                                         },
                                         "required": [
-                                            "Layer",
-                                            "ID",
-                                            "Text",
-                                            "Default Index Score",
-                                            "Index Score",
-                                            "Use Default Index Score",
-                                            "Default Multi Buffer Distances",
-                                            "Use Multi Buffer Point",
+                                            "indicator",
+                                            "id",
+                                            "description",
+                                            "default_index_score",
+                                            "index_score",
+                                            "use_default_index_score",
+                                            "default_multi_buffer_distances",
+                                            "use_multi_buffer_point",
                                             "Default Single Buffer Distances",
-                                            "Use Single Buffer Point",
-                                            "Default pixel",
-                                            "Use Create Grid",
-                                            "Use OSM Downloader",
-                                            "Use Bbox for AOI",
-                                            "Use Rasterize Layer",
-                                            "Use WBL Downloader",
-                                            "Use Humdata Downloader",
-                                            "Use Mapillary Downloader",
-                                            "Use Other Downloader",
-                                            "Use Add Layers Manually",
-                                            "Use Classify Poly into Classes",
-                                            "Use CSV to Point Layer",
-                                            "Use Poly per Cell",
-                                            "Use Polyline per Cell",
-                                            "Use Point per Cell"
+                                            "use_single_buffer_point",
+                                            "default_pixel",
+                                            "use_create_grid",
+                                            "use_osm_downloader",
+                                            "use_bbox_for_aoi",
+                                            "use_rasterize_layer",
+                                            "use_wbl_downloader",
+                                            "use_humdata_downloader",
+                                            "use_mapilliary_downloader",
+                                            "use_other_downloader",
+                                            "use_add_layers_manually",
+                                            "use_classify_poly_into_classes",
+                                            "use_csv_to_point_layer",
+                                            "use_poly_per_cell",
+                                            "use_polyline_per_cell"
+,
+                                            "use_point_per_cell"
+
                                         ]
                                     }
                                 }
                             },
                             "required": [
                                 "name",
-                                "layers"
+                                "indicators"
                             ]
                         }
                     }

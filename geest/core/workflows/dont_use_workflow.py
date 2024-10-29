@@ -27,10 +27,10 @@ class DontUseWorkflow(WorkflowBase):
         super().__init__(
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "Don't Use"
-        self.attributes["Indicator Result File"] = ""
+        self.workflow_name = "do_not_use"
+        self.attributes["result_file"] = ""
         self.attributes["Indicator Result"] = ""
-        self.attributes["Result"] = "Don't Use Completed"
+        self.attributes["result"] = "Don't Use Completed"
 
     def _process_features_for_area(self):
         pass

@@ -40,7 +40,7 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "Use Environmental Hazards"
+            self.widget_key = "use_environmental_hazards"
             self.settings = QSettings()
 
             # Raster Layer Section

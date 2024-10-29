@@ -32,9 +32,10 @@ class SpreadsheetToJsonParser:
                 "Factor",
                 "Factor Required",
                 "Default Factor Dimension Weighting",
-                "Layer",
+                "Indicator",
+                "Default Indicator Factor Weighting",
                 "ID",
-                "Text",
+                "Factor Description",
                 "Default Index Score",
                 "Index Score",
                 "Use Default Index Score",
@@ -42,7 +43,7 @@ class SpreadsheetToJsonParser:
                 "Use Multi Buffer Point",
                 "Default Single Buffer Distance",
                 "Use Single Buffer Point",
-                "Default pixel",
+                "Default Pixel",
                 "Use Create Grid",
                 "Use OSM Downloader",
                 "Use Bbox for AOI",
@@ -60,7 +61,7 @@ class SpreadsheetToJsonParser:
                 "Use Nighttime Lights",
                 "Use Environmental Hazards",
                 "Analysis Mode",  # New column
-                "Layer Required",  # New column
+                "Indicator Required",  # New column
             ]
         ]
 
@@ -138,7 +139,12 @@ class SpreadsheetToJsonParser:
                     "name": factor,
                     "required": factor_required,
                     "default_dimension_weighting": default_factor_dimension_weighting,
-                    "layers": [],
+                    "indicators": [],
+                    "description": (
+                        row["Factor Description"]
+                        if not pd.isna(row["Factor Description"])
+                        else ""
+                    ),
                 }
                 dimension_map[dimension]["factors"].append(new_factor)
                 factor_map[factor] = new_factor
@@ -146,134 +152,141 @@ class SpreadsheetToJsonParser:
             # Add layer data to the current Factor, including new columns
             layer_data = {
                 # These are all parsed from the spreadsheet
-                "Layer": row["Layer"] if not pd.isna(row["Layer"]) else "",
-                "ID": row["ID"] if not pd.isna(row["ID"]) else "",
-                "Text": row["Text"] if not pd.isna(row["Text"]) else "",
-                "Default Index Score": (
+                "indicator": row["Indicator"] if not pd.isna(row["Indicator"]) else "",
+                "id": row["ID"] if not pd.isna(row["ID"]) else "",
+                "description": "",
+                "default_indicator_factor_weighting": (
+                    row["Default Indicator Factor Weighting"]
+                    if not pd.isna(row["Default Indicator Factor Weighting"])
+                    else ""
+                ),
+                "default_index_score": (
                     row["Default Index Score"]
                     if not pd.isna(row["Default Index Score"])
                     else ""
                 ),
-                "Index Score": (
+                "index_score": (
                     row["Index Score"] if not pd.isna(row["Index Score"]) else ""
                 ),
-                "Use Default Index Score": (
+                "use_default_index_score": (
                     row["Use Default Index Score"]
                     if not pd.isna(row["Use Default Index Score"])
                     else ""
                 ),
-                "Default Multi Buffer Distances": (
+                "default_multi_buffer_distances": (
                     row["Default Multi Buffer Distances"]
                     if not pd.isna(row["Default Multi Buffer Distances"])
                     else ""
                 ),
-                "Use Multi Buffer Point": (
+                "use_multi_buffer_point": (
                     row["Use Multi Buffer Point"]
                     if not pd.isna(row["Use Multi Buffer Point"])
                     else ""
                 ),
-                "Default Single Buffer Distance": (
+                "default_single_buffer_distance": (
                     row["Default Single Buffer Distance"]
                     if not pd.isna(row["Default Single Buffer Distance"])
                     else ""
                 ),
-                "Use Single Buffer Point": (
+                "use_single_buffer_point": (
                     row["Use Single Buffer Point"]
                     if not pd.isna(row["Use Single Buffer Point"])
                     else ""
                 ),
-                "Default pixel": (
-                    row["Default pixel"] if not pd.isna(row["Default pixel"]) else ""
+                "default_pixel": (
+                    row["Default Pixel"] if not pd.isna(row["Default Pixel"]) else ""
                 ),
-                "Use Create Grid": (
+                "use_create_grid": (
                     row["Use Create Grid"]
                     if not pd.isna(row["Use Create Grid"])
                     else ""
                 ),
-                "Use OSM Downloader": (
+                "use_osm_downloader": (
                     row["Use OSM Downloader"]
                     if not pd.isna(row["Use OSM Downloader"])
                     else ""
                 ),
-                "Use Bbox for AOI": (
+                "use_bbox_for_aoi": (
                     row["Use Bbox for AOI"]
                     if not pd.isna(row["Use Bbox for AOI"])
                     else ""
                 ),
-                "Use Rasterize Layer": (
+                "use_rasterize_layer": (
                     row["Use Rasterize Layer"]
                     if not pd.isna(row["Use Rasterize Layer"])
                     else ""
                 ),
-                "Use WBL Downloader": (
+                "use_wbl_downloader": (
                     row["Use WBL Downloader"]
                     if not pd.isna(row["Use WBL Downloader"])
                     else ""
                 ),
-                "Use Humdata Downloader": (
+                "use_humdata_downloader": (
                     row["Use Humdata Downloader"]
                     if not pd.isna(row["Use Humdata Downloader"])
                     else ""
                 ),
-                "Use Mapillary Downloader": (
+                "use_mapilliary_downloader": (
                     row["Use Mapillary Downloader"]
                     if not pd.isna(row["Use Mapillary Downloader"])
                     else ""
                 ),
-                "Use Other Downloader": (
+                "use_other_downloader": (
                     row["Use Other Downloader"]
                     if not pd.isna(row["Use Other Downloader"])
                     else ""
                 ),
-                "Use Add Layers Manually": (
+                "use_add_layers_manually": (
                     row["Use Add Layers Manually"]
                     if not pd.isna(row["Use Add Layers Manually"])
                     else ""
                 ),
-                "Use Classify Poly into Classes": (
+                "use_classify_poly_into_classes": (
                     row["Use Classify Poly into Classes"]
                     if not pd.isna(row["Use Classify Poly into Classes"])
                     else ""
                 ),
-                "Use CSV to Point Layer": (
+                "use_csv_to_point_layer": (
                     row["Use CSV to Point Layer"]
                     if not pd.isna(row["Use CSV to Point Layer"])
                     else ""
                 ),
-                "Use Poly per Cell": (
+                "use_poly_per_cell": (
                     row["Use Poly per Cell"]
                     if not pd.isna(row["Use Poly per Cell"])
                     else ""
                 ),
-                "Use Polyline per Cell": (
+                "use_polyline_per_cell": (
                     row["Use Polyline per Cell"]
                     if not pd.isna(row["Use Polyline per Cell"])
                     else ""
                 ),
-                "Use Point per Cell": (
+                "use_point_per_cell": (
                     row["Use Point per Cell"]
                     if not pd.isna(row["Use Point per Cell"])
                     else ""
                 ),
-                "Use Nighttime Lights": (
+                "use_nighttime_lights": (
                     row["Use Nighttime Lights"]
                     if not pd.isna(row["Use Nighttime Lights"])
                     else ""
                 ),
-                "Use Environmental Hazards": (
+                "use_environmental_hazards": (
                     row["Use Environmental Hazards"]
                     if not pd.isna(row["Use Environmental Hazards"])
                     else ""
                 ),
-                "Analysis Mode": (
+                "analysis_mode": (
                     row["Analysis Mode"] if not pd.isna(row["Analysis Mode"]) else ""
                 ),  # New column
-                "Layer Required": (
-                    row["Layer Required"] if not pd.isna(row["Layer Required"]) else ""
+                "indicator_required": (
+                    row["Indicator Required"]
+                    if not pd.isna(row["Indicator Required"])
+                    else ""
                 ),  # New column
             }
 
-            factor_map[factor]["layers"].append(layer_data)
+            factor_map[factor]["indicators"].append(layer_data)
 
     def get_json(self):
         """

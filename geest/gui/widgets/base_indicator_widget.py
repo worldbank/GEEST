@@ -11,8 +11,9 @@ class BaseIndicatorWidget(QRadioButton):
     data_changed = pyqtSignal(dict)
 
     def __init__(self, label_text: str, attributes: dict) -> None:
-        super().__init__(label_text)
-        self.label_text = label_text
+        humanised_label = label_text.replace("_", " ").title()
+        super().__init__(humanised_label)
+        self.label_text = humanised_label
         self.attributes = attributes
         self.container: QWidget = QWidget()
         self.layout: QHBoxLayout = QHBoxLayout(self.container)

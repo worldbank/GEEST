@@ -34,15 +34,15 @@ class AggregationWorkflowBase(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.aggregation_attributes = None  # This should be set by the child class e.g. item.getIndicatorAttributes()
-        self.analysis_mode = self.attributes.get("Analysis Mode", "")
+        self.analysis_mode = self.attributes.get("analysis_mode", "")
         self.id = None  # This should be set by the child class
         self.layers = None  # This should be set by the child class
         self.weight_key = None  # This should be set by the child class
         self.result_file_tag = (
-            None  # This should be set by the child class e.g. "Factor Result File"
+            None  # This should be set by the child class e.g. "result_file"
         )
         self.raster_path_key = (
-            None  # This should be set by the child class e.g. "Indicator Result File"
+            None  # This should be set by the child class e.g. "result_file"
         )
         self.aggregation = True
         self.workflow_is_legacy = False
@@ -195,10 +195,10 @@ class AggregationWorkflowBase(WorkflowBase):
         """
         raster_files = []
 
-        if self.weight_key == "Indicator Weighting":
+        if self.weight_key == "indicator_weighting":
             for layer in self.layers:
-                id = layer.get("Indicator ID", "").lower()
-                layer_folder = os.path.dirname(layer.get("Indicator Result File", ""))
+                id = layer.get(indicator_id, "").lower()
+                layer_folder = os.path.dirname(layer.get("result_file", ""))
                 path = os.path.join(
                     self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
                 )
@@ -207,9 +207,9 @@ class AggregationWorkflowBase(WorkflowBase):
                     QgsMessageLog.logMessage(
                         f"Adding raster: {path}", tag="Geest", level=Qgis.Info
                     )
-        elif self.weight_key == "Factor Weighting":
+        elif self.weight_key == "factor_weighting":
             for layer in self.layers:
-                id = layer.get("Factor Name", "").lower().replace(" ", "_")
+                id = layer.get(factor_name, "").lower().replace(" ", "_")
                 layer_folder = os.path.dirname(layer.get("Factor Result File", ""))
                 path = os.path.join(
                     self.workflow_directory,
@@ -261,7 +261,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            self.attributes["Result"] = (
+            self.attributes["result"] = (
                 f"{self.analysis_mode} Aggregation Workflow Failed"
             )
             return False

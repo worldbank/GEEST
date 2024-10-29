@@ -32,7 +32,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
             item, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         # TODO fix inconsistent abbreviation below for Poly
-        self.workflow_name = "Use Poly per Cell"
+        self.workflow_name = "use_poly_per_cell"
 
         layer_path = self.attributes.get("Polygon per Cell Shapefile", None)
 

@@ -33,7 +33,7 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "Use CSV to Point Layer"
+            self.widget_key = "use_csv_to_point_layer"
 
             # CSV File Section
             self._add_csv_file_widgets()

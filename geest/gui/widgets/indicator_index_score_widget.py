@@ -18,7 +18,7 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
             self.index_input.setRange(0, 100)
             self.layout.addWidget(self.info_label)
             self.layout.addWidget(self.index_input)
-            self.index_input.setValue(self.attributes["Default Index Score"])
+            self.index_input.setValue(self.attributes["default_index_score"])
             # Connect the valueChanged signal to update data
             self.index_input.valueChanged.connect(self.update_data)
         except Exception as e:
@@ -31,7 +31,7 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
         Return the data as a dictionary, updating attributes with current value.
         """
         if self.isChecked():
-            self.attributes["Default Index Score"] = self.index_input.value()
+            self.attributes["default_index_score"] = self.index_input.value()
         return self.attributes
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:
