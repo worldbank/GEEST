@@ -551,7 +551,7 @@ class WorkflowBase(ABC):
         output_name = f"{self.layer_id}_masked_{index}.tif"
         output_path = os.path.join(self.workflow_directory, output_name)
         QgsMessageLog.logMessage(
-            f"Masking raster {raster_path} with area {index} to {output_path}",
+            f"Masking raster {raster_path} for area {index} to {output_path}",
             tag="Geest",
             level=Qgis.Info,
         )
