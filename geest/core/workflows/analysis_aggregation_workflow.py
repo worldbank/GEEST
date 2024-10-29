@@ -28,6 +28,6 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.id = "geest_analysis"
         self.aggregation_attributes = self.item.getAnalysisAttributes()
         self.layers = self.aggregation_attributes.get(f"Dimensions", [])
-        self.weight_key = "Dimension Weighting"
+        self.weight_key = "dimension_weighting"
         self.result_file_tag = "Analysis Result File"
         self.raster_path_key = "Dimension Result File"

@@ -335,7 +335,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "name": item.data(0),
                     "guid": item.guid,  # Serialize UUID
                     "indicators": [recurse_tree(child) for child in item.childItems],
-                    "Dimension Weighting": item.data(2),
+                    "dimension_weighting": item.data(2),
                 }
                 json_data.update(item.data(3))
                 return json_data

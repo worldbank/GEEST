@@ -326,7 +326,7 @@ class JsonTreeItem:
                     "Dimension No": i,
                     "Dimension ID": child.data(3).get("id", ""),
                     "Dimension Name": child.data(0),
-                    "Dimension Weighting": child.data(2),
+                    "dimension_weighting": child.data(2),
                     "Dimension Result File": child.data(3).get(
                         f"Dimension Result File", ""
                     ),
