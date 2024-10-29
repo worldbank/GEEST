@@ -521,7 +521,7 @@ class ORSMultiBufferProcessor:
             self.workflow_directory, f"merged_isochrones_{index}.shp"
         )
         merge_params = {
-            "indicators": temp_layers,
+            "LAYERS": temp_layers,
             "CRS": crs,
             "OUTPUT": merge_output,
         }
