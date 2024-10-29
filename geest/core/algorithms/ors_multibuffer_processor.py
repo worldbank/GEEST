@@ -623,7 +623,7 @@ class ORSMultiBufferProcessor:
         band_layers.append(smallest_layer)
 
         merge_bands_params = {
-            "indicators": band_layers,
+            "LAYERS": band_layers,
             "CRS": crs,
             "OUTPUT": output_path,
         }
