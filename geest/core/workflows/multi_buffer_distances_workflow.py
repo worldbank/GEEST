@@ -397,7 +397,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             self.workflow_directory, f"{self.layer_id}_merged_isochrones_{index}.shp"
         )
         merge_params = {
-            "indicators": layers,
+            "LAYERS": layers,
             "CRS": self.target_crs,
             "OUTPUT": merge_output,
         }
@@ -496,7 +496,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         band_layers.append(smallest_layer)
 
         merge_bands_params = {
-            "indicators": band_layers,
+            "LAYERS": band_layers,
             "CRS": self.target_crs,
             "OUTPUT": output_path,
         }
