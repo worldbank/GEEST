@@ -27,7 +27,5 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.id = "geest_analysis"
         self.aggregation_attributes = self.item.getAnalysisAttributes()
-        self.layers = self.aggregation_attributes.get(f"Dimensions", [])
+        self.layers = self.aggregation_attributes.get(f"dimensions", [])
         self.weight_key = "dimension_weighting"
-        self.result_file_tag = "Analysis Result File"
-        self.raster_path_key = "Dimension Result File"

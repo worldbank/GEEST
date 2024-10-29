@@ -233,17 +233,17 @@ class TreePanel(QWidget):
                 QgsMessageLog.logMessage(
                     str(analysis_data), tag="Geest", level=Qgis.Info
                 )
-                if analysis_data.get("Working Folder", "Not Set"):
-                    analysis_data["Working Folder"] = self.working_directory
+                if analysis_data.get("working_folder", "Not Set"):
+                    analysis_data["working_folder"] = self.working_directory
                 else:
-                    if not os.path.exists(analysis_data["Working Folder"]):
-                        analysis_data["Working Folder"] = self.working_directory
+                    if not os.path.exists(analysis_data["working_folder"]):
+                        analysis_data["working_folder"] = self.working_directory
                 # Use the last dir in the working directory path as the analysis name
-                if analysis_data.get("Analysis Name", "Not Set"):
-                    analysis_data["Analysis Name"] = os.path.basename(
+                if analysis_data.get("analysis_name", "Not Set"):
+                    analysis_data["analysis_name"] = os.path.basename(
                         self.working_directory
                     )
-                analysis_item.setData(0, analysis_data.get("Analysis Name", "Analysis"))
+                analysis_item.setData(0, analysis_data.get("analysis_name", "Analysis"))
                 settings = QSettings()
                 # This is the top level folder for work files
                 settings.setValue("last_working_directory", self.working_directory)

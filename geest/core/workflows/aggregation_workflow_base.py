@@ -38,9 +38,6 @@ class AggregationWorkflowBase(WorkflowBase):
         self.id = None  # This should be set by the child class
         self.layers = None  # This should be set by the child class
         self.weight_key = None  # This should be set by the child class
-        self.result_file_tag = (
-            None  # This should be set by the child class e.g. "result_file"
-        )
         self.raster_path_key = (
             None  # This should be set by the child class e.g. "result_file"
         )
@@ -135,11 +132,11 @@ class AggregationWorkflowBase(WorkflowBase):
         # Wrap the weighted sum and divide by the sum of weights
         expression = f"({expression}) / {layer_count}"
 
-        if self.weight_key == "Indicator Weighting":
+        if self.weight_key == "indicator_weighting":
             aggregation_output = os.path.join(
                 self.workflow_directory, f"{self.layer_id}_aggregated_{index}.tif"
             )
-        elif self.weight_key == "Factor Weighting":
+        elif self.weight_key == "factor_weighting":
             aggregation_output = os.path.join(
                 self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
             )
@@ -175,9 +172,9 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             return None
 
-        # WRite the output path to the attributes
+        # Write the output path to the attributes
         # That will get passed back to the json model
-        self.attributes[self.result_file_tag] = aggregation_output
+        self.attributes["result_file"] = aggregation_output
 
         return aggregation_output
 
@@ -197,7 +194,7 @@ class AggregationWorkflowBase(WorkflowBase):
 
         if self.weight_key == "indicator_weighting":
             for layer in self.layers:
-                id = layer.get(indicator_id, "").lower()
+                id = layer.get("indicator_id", "").lower()
                 layer_folder = os.path.dirname(layer.get("result_file", ""))
                 path = os.path.join(
                     self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
@@ -209,8 +206,8 @@ class AggregationWorkflowBase(WorkflowBase):
                     )
         elif self.weight_key == "factor_weighting":
             for layer in self.layers:
-                id = layer.get(factor_name, "").lower().replace(" ", "_")
-                layer_folder = os.path.dirname(layer.get("Factor Result File", ""))
+                id = layer.get("factor_name", "").lower().replace(" ", "_")
+                layer_folder = os.path.dirname(layer.get("result_file", ""))
                 path = os.path.join(
                     self.workflow_directory,
                     layer_folder,

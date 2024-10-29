@@ -78,9 +78,9 @@ class JsonTreeModel(QAbstractItemModel):
 
         # Store special properties in the data(3) dictionary
         analysis_attributes = {
-            "Analysis Name": analysis_name,
-            "Description": analysis_description,
-            "Working Folder": working_folder,
+            "analysis_name": analysis_name,
+            "description": analysis_description,
+            "working_folder": working_folder,
         }
 
         # Create the "Analysis" item
@@ -133,7 +133,7 @@ class JsonTreeModel(QAbstractItemModel):
             "analysis_mode": dimension.get("factor_aggregation", ""),
             "result": dimension.get("result", ""),
             "execution_start_time": dimension.get("execution_start_time", ""),
-            "Dimension Result File": dimension.get("Dimension Result File", ""),
+            "result_file": dimension.get("result_file", ""),
             "execution_end_time": dimension.get("execution_end_time", ""),
         }
         guid = dimension.get("guid", str(uuid.uuid4()))  # Deserialize UUID
@@ -313,9 +313,9 @@ class JsonTreeModel(QAbstractItemModel):
             # Serialize each item, including UUID
             if item.role == "analysis":
                 json_data = {
-                    "analysis_name": item.data(3)["Analysis Name"],
-                    "description": item.data(3)["Description"],
-                    "working_folder": item.data(3)["Working Folder"],
+                    "analysis_name": item.data(3)["analysis_name"],
+                    "description": item.data(3)["description"],
+                    "working_folder": item.data(3)["working_folder"],
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }

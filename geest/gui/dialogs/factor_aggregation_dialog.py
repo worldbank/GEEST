@@ -36,7 +36,7 @@ class FactorAggregationDialog(QDialog):
             f"Edit Aggregation Weightings for Factor: {self.tree_item.data(0)}"
         )
 
-        self.indicators = self.tree_item.getFactorAttributes()["Indicators"]
+        self.indicators = self.tree_item.getFactorAttributes()["indicators"]
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
@@ -123,16 +123,16 @@ class FactorAggregationDialog(QDialog):
         # Populate the table
         for row, indicator in enumerate(self.indicators):
             # Display indicator name (not editable)
-            indicator_id = indicator.get("Indicator Name")
-            indicator_weighting = indicator.get("Indicator Weighting", 0)
-            name_item = QTableWidgetItem(indicator_id)
+            "indicator_id" = indicator.get("indicator_name")
+            indicator_weighting = indicator.get("indicator_weighting", 0)
+            name_item = QTableWidgetItem("indicator_id")
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
             weighting_item = QLineEdit(str(indicator_weighting))
             self.table.setCellWidget(row, 1, weighting_item)
-            self.weightings[indicator_id] = weighting_item
+            self.weightings["indicator_id"] = weighting_item
 
         layout.addWidget(self.table)
 
@@ -149,11 +149,11 @@ class FactorAggregationDialog(QDialog):
 
     def assignWeightings(self):
         """Assign new weightings to the factor's indicators."""
-        for indicator_id, line_edit in self.weightings.items():
+        for "indicator_id", line_edit in self.weightings.items():
             try:
                 new_weighting = float(line_edit.text())
                 # Update the indicator's weighting in the factor item (use your own update logic here)
-                self.tree_item.updateIndicatorWeighting(indicator_id, new_weighting)
+                self.tree_item.updateIndicatorWeighting("indicator_id", new_weighting)
             except ValueError:
                 # Handle invalid input (non-numeric)
                 pass
