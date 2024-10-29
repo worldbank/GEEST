@@ -30,3 +30,4 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         self.id = self.attributes["id"].lower().replace(" ", "_")
         self.layers = self.aggregation_attributes.get(f"factors", [])
         self.weight_key = "factor_weighting"
+        self.workflow_name = "dimension_aggregation"

@@ -117,7 +117,7 @@ class FactorAggregationDialog(QDialog):
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.indicators))
         self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels(["indicator", "Weighting"])
+        self.table.setHorizontalHeaderLabels(["Indicator", "Weighting"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Populate the table
@@ -125,7 +125,7 @@ class FactorAggregationDialog(QDialog):
             # Display indicator name (not editable)
             indicator_id = indicator.get("indicator_name")
             indicator_weighting = indicator.get("indicator_weighting", 0)
-            name_item = QTableWidgetItem("indicator_id")
+            name_item = QTableWidgetItem(indicator_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
 

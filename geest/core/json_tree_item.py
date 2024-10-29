@@ -374,7 +374,7 @@ class JsonTreeItem:
             else:
                 # Log if the factor name is not found
                 QgsMessageLog.logMessage(
-                    f"Indicator '{factor_name}' not found.",
+                    f"Factor '{factor_name}' not found.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

@@ -589,12 +589,8 @@ class TreePanel(QWidget):
                         level=Qgis.Critical,
                     )
 
-        if item.role == "indicator":
-            layer_uri = item.data(3).get(f"result_file")
-        else:
-            layer_uri = item.data(3).get(
-                f"{item.role.title()} Result File"
-            )  # title = title case string
+        layer_uri = item.data(3).get(f"result_file")
+
         if layer_uri:
             layer_name = item.data(0)
             layer = QgsRasterLayer(layer_uri, layer_name)

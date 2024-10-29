@@ -33,3 +33,4 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         self.raster_path_key = "result_file"
         self.workflow_is_legacy = False
         self.layer_id = self.id
+        self.workflow_name = "factor_aggregation"

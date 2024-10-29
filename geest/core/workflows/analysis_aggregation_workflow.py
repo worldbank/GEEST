@@ -29,3 +29,4 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.aggregation_attributes = self.item.getAnalysisAttributes()
         self.layers = self.aggregation_attributes.get(f"dimensions", [])
         self.weight_key = "dimension_weighting"
+        self.workflow_name = "analysis_aggregation"
