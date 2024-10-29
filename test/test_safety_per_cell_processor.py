@@ -54,6 +54,7 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
             output_prefix="test",
             safety_layer=self.safety_layer,
             safety_field="safety",
+            cell_size_m=100.0,
             workflow_directory=self.workflow_directory,
             gpkg_path=self.gpkg_path,
             context=self.context,
