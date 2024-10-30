@@ -42,20 +42,20 @@ class RasterReclassificationWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_environmental_hazards"
 
-        layer_name = self.attributes.get("Use Environmental Hazards Raster", None)
+        layer_name = self.attributes.get("use_environmental_hazards Raster", None)
 
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid layer found in Use Environmental Hazards Raster, trying Use Environmental Hazards Layer Source.",
+                "Invalid layer found in Use_environmental_hazards Raster, trying Use_environmental_hazards Layer Source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_name = self.attributes.get(
-                "Use Environmental Hazards Layer Source", None
+                "Use_environmental_hazards Layer Source", None
             )
             if not layer_name:
                 QgsMessageLog.logMessage(
-                    "No layer found in Use Environmental Hazards Layer Source.",
+                    "No layer found in Use_environmental_hazards Layer Source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

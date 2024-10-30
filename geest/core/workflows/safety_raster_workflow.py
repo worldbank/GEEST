@@ -36,18 +36,18 @@ class SafetyRasterWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_nighttime_lights"
-        layer_name = self.attributes.get("Use Nighttime Lights Raster", None)
+        layer_name = self.attributes.get("use_nighttime_lights Raster", None)
 
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid raster found in Use Nighttime Lights Raster, trying Use Nighttime Lights Layer Source.",
+                "Invalid raster found in use_nighttime_lights Raster, trying use_nighttime_lights Layer Source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_name = self.attributes.get("Use Nighttime Lights Layer Source", None)
+            layer_name = self.attributes.get("use_nighttime_lights Layer Source", None)
             if not layer_name:
                 QgsMessageLog.logMessage(
-                    "No points layer found in Use Nighttime Lights Layer Source.",
+                    "No points layer found in use_nighttime_lights Layer Source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
