@@ -20,8 +20,8 @@ This page provides guidance on finding and collecting relevant data for the GEES
 
   <tr>
     <td rowspan="3" style="border: 1px solid black; padding: 1px; text-align: center; ">📝CONTEXTUAL</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">🏢Workplace Discrimination</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: center; ">WBL 2024 Workplace Index Score</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🏢Workplace Discrimination</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">WBL 2024 Workplace Index Score</td>
 <td style="border: 1px solid black; padding: 1px; text-align: center;">
     <a href="https://wbl.worldbank.org/content/dam/documents/wbl/2024/snapshots/St-lucia.pdf" target="_blank">
         WBL 2024 index score: 83.8
