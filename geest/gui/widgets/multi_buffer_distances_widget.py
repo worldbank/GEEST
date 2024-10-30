@@ -39,12 +39,12 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.main_layout.addWidget(self.layer_combo)
 
             # Set the selected QgsVectorLayer in QgsMapLayerComboBox
-            layer_id = self.attributes.get("Multi Buffer Point Layer ID", None)
+            layer_id = self.attributes.get("multi_buffer_point_layer_id", None)
             if layer_id:
                 layer = QgsProject.instance().mapLayer(layer_id)
                 if layer:
                     self.layer_combo.setLayer(layer)
-            layer_id = self.attributes.get("Multi Buffer Point Layer ID")
+            layer_id = self.attributes.get("multi_buffer_point_layer_id")
             layer = QgsProject.instance().mapLayer(layer_id)
 
             if layer and isinstance(layer, QgsVectorLayer):
@@ -56,9 +56,9 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.shapefile_button = QToolButton()
             self.shapefile_button.setText("...")
             self.shapefile_button.clicked.connect(self.select_shapefile)
-            if self.attributes.get("Multi Buffer Shapefile", False):
+            if self.attributes.get("multi_buffer_shapefile", False):
                 self.shapefile_line_edit.setText(
-                    self.attributes["Multi Buffer Shapefile"]
+                    self.attributes["multi_buffer_shapefile"]
                 )
             self.shapefile_layout.addWidget(self.shapefile_line_edit)
             self.shapefile_layout.addWidget(self.shapefile_button)
@@ -69,7 +69,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.travel_mode_layout = QHBoxLayout()
             self.walking_radio = QRadioButton("Walking")
             self.driving_radio = QRadioButton("Driving")
-            if self.attributes.get("Multi Buffer Travel Mode", "") == "Walking":
+            if self.attributes.get("multi_buffer_travel_mode", "") == "Walking":
                 self.walking_radio.setChecked(True)
             else:
                 self.driving_radio.setChecked(True)  # Default selection
@@ -82,7 +82,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.measurement_layout = QHBoxLayout()
             self.distance_radio = QRadioButton("Distance")
             self.time_radio = QRadioButton("Time")
-            if self.attributes.get("Multi Buffer Travel Units", "") == "Distance":
+            if self.attributes.get("multi_buffer_travel_units", "") == "Distance":
                 self.distance_radio.setChecked(True)
             else:
                 self.time_radio.setChecked(True)  # Default selection
@@ -96,13 +96,13 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.increments_input = QLineEdit("")
             self.travel_increments_layout.addWidget(self.increments_label)
             self.travel_increments_layout.addWidget(self.increments_input)
-            if self.attributes.get("Multi Buffer Travel Distances", False):
+            if self.attributes.get("multi_buffer_travel_distances", False):
                 self.increments_input.setText(
-                    self.attributes["Multi Buffer Travel Distances"]
+                    self.attributes["multi_buffer_travel_distances"]
                 )
             else:
                 self.increments_input.setText(
-                    self.attributes.get("Default Multi Buffer Travel Distances", "")
+                    self.attributes.get("Default multi_buffer_travel_distances", "")
                 )
 
             # Add all layouts to the main layout
@@ -158,35 +158,35 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
 
         layer = self.layer_combo.currentLayer()
         if not layer:
-            self.attributes["Multi Buffer Point Layer"] = None
+            self.attributes["multi_buffer_point_layer"] = None
         else:
-            self.attributes["Multi Buffer Point Layer Name"] = layer.name()
-            self.attributes["Multi Buffer Point Layer Source"] = layer.source()
-            self.attributes["Multi Buffer Point Layer Provider Type"] = (
+            self.attributes["multi_buffer_point_layer_name"] = layer.name()
+            self.attributes["multi_buffer_point_layer_source"] = layer.source()
+            self.attributes["multi_buffer_point_layer_provider_type"] = (
                 layer.providerType()
             )
-            self.attributes["Multi Buffer Point Layer CRS"] = (
+            self.attributes["multi_buffer_point_layer_crs"] = (
                 layer.crs().authid()
             )  # Coordinate Reference System
-            self.attributes["Multi Buffer Point Layer Wkb Type"] = (
+            self.attributes["multi_buffer_point_layer_wkb_type"] = (
                 layer.wkbType()
             )  # Geometry type (e.g., Point, Polygon)
-            self.attributes["Multi Buffer Point Layer ID"] = (
+            self.attributes["multi_buffer_point_layer_id"] = (
                 layer.id()
             )  # Unique ID of the layer
 
         if self.walking_radio.isChecked():
-            self.attributes["Multi Buffer Travel Mode"] = "Walking"
+            self.attributes["multi_buffer_travel_mode"] = "Walking"
         else:
-            self.attributes["Multi Buffer Travel Mode"] = "Driving"
+            self.attributes["multi_buffer_travel_mode"] = "Driving"
 
         if self.distance_radio.isChecked():
-            self.attributes["Multi Buffer Travel Units"] = "Distance"
+            self.attributes["multi_buffer_travel_units"] = "Distance"
         else:
-            self.attributes["Multi Buffer Travel Units"] = "Time"
+            self.attributes["multi_buffer_travel_units"] = "Time"
 
-        self.attributes["Multi Buffer Travel Distances"] = self.increments_input.text()
-        self.attributes["Multi Buffer Shapefile"] = self.shapefile_line_edit.text()
+        self.attributes["multi_buffer_travel_distances"] = self.increments_input.text()
+        self.attributes["multi_buffer_shapefile"] = self.shapefile_line_edit.text()
 
         return self.attributes
 
