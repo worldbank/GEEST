@@ -239,7 +239,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
 
 ## Potential Data Sources for Other Countries
 
-<p align="justify">  
+<p style="text-align: justify;">
 While the above table showcases data specific to Saint Lucia, similar data can be found for other countries through the following sources:
 
 1. **World Bank - Women, Business and the Law**: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
