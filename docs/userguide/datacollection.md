@@ -147,7 +147,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td rowspan="10" style="border: 1px solid black; padding: 1px; text-align: center; ">🌍PLACE CHARACTERIZATION</td>
     <td rowspan="4" style="border: 1px solid black; padding: 1px; text-align: left; ">🚴Active Transport</td>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">🚸Location of street crossings</td>
-<td style="border: 1px solid black; padding: 1px; text-align: center;">
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
     <a href="https://www.mapillary.com/developer/api-documentation/points" target="_blank">
         Mapillary
     </a>
