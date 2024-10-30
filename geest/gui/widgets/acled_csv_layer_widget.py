@@ -69,7 +69,7 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
         self.main_layout.addLayout(self.csv_file_layout)
 
         # If there is a pre-existing file path in the attributes, set it in the line edit
-        csv_file_path = self.attributes.get(f"{self.widget_key} CSV File", None)
+        csv_file_path = self.attributes.get(f"{self.widget_key}_csv_file", None)
         if csv_file_path:
             self.csv_file_line_edit.setText(csv_file_path)
 
@@ -139,7 +139,7 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
             return None
 
         # Collect data for the CSV file
-        self.attributes[f"{self.widget_key} CSV File"] = self.csv_file_line_edit.text()
+        self.attributes[f"{self.widget_key}_csv_file"] = self.csv_file_line_edit.text()
 
         return self.attributes
 
