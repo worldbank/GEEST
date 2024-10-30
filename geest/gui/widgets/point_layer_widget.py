@@ -35,7 +35,7 @@ class PointLayerWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "Point per Cell"
+            self.widget_key = "point_per_cell"
 
             # Point Layer Section
             self._add_point_layer_widgets()
@@ -66,21 +66,21 @@ class PointLayerWidget(BaseIndicatorWidget):
         self.main_layout.addWidget(self.point_layer_combo)
 
         # Restore previously selected point layer
-        point_layer_id = self.attributes.get(f"{self.widget_key} Point Layer ID", None)
+        point_layer_id = self.attributes.get(f"{self.widget_key}_point_layer_id", None)
         if point_layer_id:
             point_layer = QgsProject.instance().mapLayer(point_layer_id)
             if point_layer:
                 self.point_layer_combo.setLayer(point_layer)
 
-        # Shapefile Input for Point Layer
+        # _shapefile Input for Point Layer
         self.point_shapefile_layout = QHBoxLayout()
         self.point_shapefile_line_edit = QLineEdit()
         self.point_shapefile_button = QToolButton()
         self.point_shapefile_button.setText("...")
         self.point_shapefile_button.clicked.connect(self.select_point_shapefile)
-        if self.attributes.get(f"{self.widget_key} Point Shapefile", False):
+        if self.attributes.get(f"{self.widget_key}_point_shapefile", False):
             self.point_shapefile_line_edit.setText(
-                self.attributes[f"{self.widget_key} Point Shapefile"]
+                self.attributes[f"{self.widget_key}_point_shapefile"]
             )
         self.point_shapefile_layout.addWidget(self.point_shapefile_line_edit)
         self.point_shapefile_layout.addWidget(self.point_shapefile_button)
@@ -117,15 +117,15 @@ class PointLayerWidget(BaseIndicatorWidget):
         # Collect data for the point layer
         point_layer = self.point_layer_combo.currentLayer()
         if point_layer:
-            self.attributes[f"{self.widget_key} Layer Name"] = point_layer.name()
-            self.attributes[f"{self.widget_key} Layer Source"] = point_layer.source()
-            self.attributes[f"{self.widget_key} Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key}_layer_name"] = point_layer.name()
+            self.attributes[f"{self.widget_key}_layer_source"] = point_layer.source()
+            self.attributes[f"{self.widget_key}_layer_provider_type"] = (
                 point_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Layer CRS"] = point_layer.crs().authid()
-            self.attributes[f"{self.widget_key} Layer Wkb Type"] = point_layer.wkbType()
-            self.attributes[f"{self.widget_key} Layer ID"] = point_layer.id()
-        self.attributes[f"{self.widget_key} Shapefile"] = (
+            self.attributes[f"{self.widget_key}_layer_crs"] = point_layer.crs().authid()
+            self.attributes[f"{self.widget_key}_layer_wkb_type"] = point_layer.wkbType()
+            self.attributes[f"{self.widget_key}_layer_id"] = point_layer.id()
+        self.attributes[f"{self.widget_key}_shapefile"] = (
             self.point_shapefile_line_edit.text()
         )
 

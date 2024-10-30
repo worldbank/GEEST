@@ -38,12 +38,12 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.main_layout.addWidget(self.layer_combo)
 
             # Set the selected QgsVectorLayer in QgsMapLayerComboBox
-            layer_id = self.attributes.get("Single Buffer Point Layer ID", None)
+            layer_id = self.attributes.get("single_buffer_point_layer_id", None)
             if layer_id:
                 layer = QgsProject.instance().mapLayer(layer_id)
                 if layer:
                     self.layer_combo.setLayer(layer)
-            layer_id = self.attributes.get("Single Buffer Point Layer ID")
+            layer_id = self.attributes.get("single_buffer_point_layer_id")
             layer = QgsProject.instance().mapLayer(layer_id)
 
             if layer and isinstance(layer, QgsVectorLayer):
@@ -55,9 +55,9 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.shapefile_button = QToolButton()
             self.shapefile_button.setText("...")
             self.shapefile_button.clicked.connect(self.select_shapefile)
-            if self.attributes.get("Single Buffer Point Layer Shapefile", False):
+            if self.attributes.get("single_buffer_point_layer_shapefile", False):
                 self.shapefile_line_edit.setText(
-                    self.attributes["Single Buffer Point Layer Shapefile"]
+                    self.attributes["single_buffer_point_layer_shapefile"]
                 )
             self.shapefile_layout.addWidget(self.shapefile_line_edit)
             self.shapefile_layout.addWidget(self.shapefile_button)
@@ -71,10 +71,10 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.buffer_distance_layout.addWidget(self.buffer_distance_label)
             self.buffer_distance_layout.addWidget(self.buffer_distance_input)
             default_distance = self.attributes.get(
-                "Default Single Buffer Travel Distance", 0
+                "default_single_buffer_travel_distance", 0
             )
             buffer_distance = self.attributes.get(
-                "Single Buffer Point Layer Distance", default_distance
+                "single_buffer_point_layer_distance", default_distance
             )
             try:
                 self.buffer_distance_input.setValue(int(buffer_distance))
@@ -127,27 +127,27 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
 
         layer = self.layer_combo.currentLayer()
         if not layer:
-            self.attributes["Single Buffer Point Layer"] = None
+            self.attributes["single_buffer_point_layer"] = None
         else:
-            self.attributes["Single Buffer Point Layer Name"] = layer.name()
-            self.attributes["Single Buffer Point Layer Source"] = layer.source()
-            self.attributes["Single Buffer Point Layer Provider Type"] = (
+            self.attributes["single_buffer_point_layer_name"] = layer.name()
+            self.attributes["single_buffer_point_layer_source"] = layer.source()
+            self.attributes["single_buffer_point_layer_provider_type"] = (
                 layer.providerType()
             )
-            self.attributes["Single Buffer Point Layer CRS"] = (
+            self.attributes["single_buffer_point_layer_crs"] = (
                 layer.crs().authid()
             )  # Coordinate Reference System
-            self.attributes["Single Buffer Point Layer Wkb Type"] = (
+            self.attributes["single_buffer_point_layer_wkb_type"] = (
                 layer.wkbType()
             )  # Geometry type (e.g., Point, Polygon)
-            self.attributes["Single Buffer Point Layer ID"] = (
+            self.attributes["single_buffer_point_layer_id"] = (
                 layer.id()
             )  # Unique ID of the layer
 
-        self.attributes["Single Buffer Point Layer Distance"] = (
+        self.attributes["single_buffer_point_layer_distance"] = (
             self.buffer_distance_input.text()
         )
-        self.attributes["Single Buffer Point Layer Shapefile"] = (
+        self.attributes["single_buffer_point_layer_shapefile"] = (
             self.shapefile_line_edit.text()
         )
 

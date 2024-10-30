@@ -20,7 +20,7 @@ from geest.core.algorithms import RasterReclassificationProcessor
 
 class RasterReclassificationWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use Classify Poly into Classes' workflow.
+    Concrete implementation of a 'use_environmental_hazards' workflow.
     """
 
     def __init__(
@@ -42,20 +42,20 @@ class RasterReclassificationWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_environmental_hazards"
 
-        layer_name = self.attributes.get("Use Environmental Hazards Raster", None)
+        layer_name = self.attributes.get("use_environmental_hazards_raster", None)
 
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid layer found in Use Environmental Hazards Raster, trying Use Environmental Hazards Layer Source.",
+                "Invalid layer found in use_environmental_hazards_raster, trying use_environmental_hazards_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_name = self.attributes.get(
-                "Use Environmental Hazards Layer Source", None
+                "use_environmental_hazards_layer_source", None
             )
             if not layer_name:
                 QgsMessageLog.logMessage(
-                    "No layer found in Use Environmental Hazards Layer Source.",
+                    "No layer found in use_environmental_hazards_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

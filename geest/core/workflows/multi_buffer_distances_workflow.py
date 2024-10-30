@@ -24,7 +24,7 @@ from geest.core import JsonTreeItem, setting
 
 class MultiBufferDistancesWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Multi Buffer Distances' workflow.
+    Concrete implementation of a 'multi_buffer_distances' workflow.
 
     This uses ORS (OpenRouteService) to calculate the distances between the study area
     and the selected points of interest.
@@ -58,7 +58,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_multi_buffer_point"
-        self.distances = self.attributes.get("Multi Buffer Travel Distances", None)
+        self.distances = self.attributes.get("multi_buffer_travel_distances", None)
         if not self.distances:
             QgsMessageLog.logMessage(
                 "Invalid travel distances, using default.",
@@ -83,17 +83,17 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
             raise Exception("Invalid travel distances provided.")
 
-        layer_path = self.attributes.get("Multi Buffer Shapefile", None)
+        layer_path = self.attributes.get("multi_buffer_shapefile", None)
         if not layer_path:
             QgsMessageLog.logMessage(
-                "Invalid points layer found in Multi Buffer Shapefile, trying Multi Buffer Point Layer Name.",
+                "Invalid points layer found in multi_buffer_shapefile, trying Multi Buffer Point_layer_name.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("Multi Buffer Point Layer Source", None)
+            layer_path = self.attributes.get("multi_buffer_point_layer_source", None)
             if not layer_path:
                 QgsMessageLog.logMessage(
-                    f"No points layer found  at Multi Buffer Point Layer Source {layer_path}.",
+                    f"No points layer found  at multi_buffer_point_layer_source {layer_path}.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
@@ -110,14 +110,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             )
             raise Exception("Invalid points layer found.")
 
-        mode = self.attributes.get("Multi Buffer Travel Mode", "Walking")
+        mode = self.attributes.get("multi_buffer_travel_mode", "Walking")
         self.mode = None
         if mode == "Walking":
             self.mode = "foot-walking"
         else:
             self.mode = "driving-car"
         self.measurement = None
-        measurement = self.attributes.get("Multi Buffer Travel Units", "Distance")
+        measurement = self.attributes.get("multi_buffer_travel_units", "Distance")
         if measurement == "Distance":
             self.measurement = "distance"
         else:

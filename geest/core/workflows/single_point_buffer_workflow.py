@@ -18,7 +18,7 @@ from geest.core import JsonTreeItem
 
 class SinglePointBufferWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use Single Buffer Point' workflow.
+    Concrete implementation of a 'use_single_buffer_point' workflow.
     """
 
     def __init__(
@@ -40,16 +40,16 @@ class SinglePointBufferWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_single_buffer_point"
 
-        layer_source = self.attributes.get("Single Buffer Point Layer Shapefile", None)
+        layer_source = self.attributes.get("single_buffer_point_layer_shapefile", None)
         provider_type = "ogr"
         if not layer_source:
-            layer_source = self.attributes.get("Single Buffer Point Layer Source", None)
+            layer_source = self.attributes.get("single_buffer_point_layer_source", None)
             provider_type = self.attributes.get(
-                "Single Buffer Point Layer Provider Type", "ogr"
+                "single_buffer_point_layer_provider_type", "ogr"
             )
         if not layer_source:
             QgsMessageLog.logMessage(
-                "Single Buffer Point Layer Shapefile not found",
+                "single_buffer_point_layer_shapefile not found",
                 tag="Geest",
                 level=Qgis.Critical,
             )
@@ -57,7 +57,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         self.features_layer = QgsVectorLayer(layer_source, "points", provider_type)
         if not self.features_layer.isValid():
             QgsMessageLog.logMessage(
-                "Single Buffer Point Layer not valid", tag="Geest", level=Qgis.Critical
+                "single_buffer_point_layer not valid", tag="Geest", level=Qgis.Critical
             )
             QgsMessageLog.logMessage(
                 f"Layer Source: {layer_source}", tag="Geest", level=Qgis.Critical
@@ -65,7 +65,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
             return False
 
         self.buffer_distance = int(
-            self.attributes.get("Single Buffer Point Layer Distance", "5000")
+            self.attributes.get("single_buffer_point_layer_distance", "5000")
         )
         self.workflow_is_legacy = False  # This is a new workflow, not a legacy one
 

@@ -19,7 +19,7 @@ from geest.core import JsonTreeItem
 
 class DefaultIndexScoreWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use Default Index Score' workflow.
+    Concrete implementation of a 'use_default_index_score' workflow.
     """
 
     def __init__(

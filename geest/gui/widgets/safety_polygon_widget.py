@@ -42,7 +42,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "Classify Poly into Classes"
+            self.widget_key = "classify_poly_into_classes"
             self.settings = QSettings()
 
             # Polygon Layer Section
@@ -91,22 +91,22 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
 
         # Restore previously selected polygon layer
         polygon_layer_id = self.attributes.get(
-            f"{self.widget_key} Polygon Layer ID", None
+            f"{self.widget_key} Polygon_layer_id", None
         )
         if polygon_layer_id:
             polygon_layer = QgsProject.instance().mapLayer(polygon_layer_id)
             if polygon_layer:
                 self.polygon_layer_combo.setLayer(polygon_layer)
 
-        # Shapefile Input for Polygon Layer
+        # _shapefile Input for Polygon Layer
         self.polygon_shapefile_layout = QHBoxLayout()
         self.polygon_shapefile_line_edit = QLineEdit()
         self.polygon_shapefile_button = QToolButton()
         self.polygon_shapefile_button.setText("...")
         self.polygon_shapefile_button.clicked.connect(self.select_polygon_shapefile)
-        if self.attributes.get(f"{self.widget_key} Polygon Shapefile", False):
+        if self.attributes.get(f"{self.widget_key} Polygon_shapefile", False):
             self.polygon_shapefile_line_edit.setText(
-                self.attributes[f"{self.widget_key} Polygon Shapefile"]
+                self.attributes[f"{self.widget_key} Polygon_shapefile"]
             )
         self.polygon_shapefile_layout.addWidget(self.polygon_shapefile_line_edit)
         self.polygon_shapefile_layout.addWidget(self.polygon_shapefile_button)
@@ -160,7 +160,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         try:
             # Store the currently selected field
             previous_field = self.settings.value(
-                f"{self.widget_key} Selected Field", None
+                f"{self.widget_key}_selected_field", None
             )
 
             vector_layer = QgsVectorLayer(shapefile_path, "polygon_layer", "ogr")
@@ -189,7 +189,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         Updates the field combo box when the polygon layer or shapefile is changed.
         """
         # Store the currently selected field
-        previous_field = self.settings.value(f"{self.widget_key} Selected Field", None)
+        previous_field = self.settings.value(f"{self.widget_key}_selected_field", None)
 
         if self.polygon_layer_combo.currentLayer():
             # Populate field combo from the selected polygon layer
@@ -216,19 +216,19 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         # Collect data for the polygon layer
         polygon_layer = self.polygon_layer_combo.currentLayer()
         if polygon_layer:
-            self.attributes[f"{self.widget_key} Layer Name"] = polygon_layer.name()
-            self.attributes[f"{self.widget_key} Layer Source"] = polygon_layer.source()
-            self.attributes[f"{self.widget_key} Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key}_layer_name"] = polygon_layer.name()
+            self.attributes[f"{self.widget_key}_layer_source"] = polygon_layer.source()
+            self.attributes[f"{self.widget_key}_layer_provider_type"] = (
                 polygon_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Layer CRS"] = (
+            self.attributes[f"{self.widget_key}_layer_crs"] = (
                 polygon_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Layer Wkb Type"] = (
+            self.attributes[f"{self.widget_key}_layer_wkb_type"] = (
                 polygon_layer.wkbType()
             )
-            self.attributes[f"{self.widget_key} Layer ID"] = polygon_layer.id()
-        self.attributes[f"{self.widget_key} Shapefile"] = (
+            self.attributes[f"{self.widget_key}_layer_id"] = polygon_layer.id()
+        self.attributes[f"{self.widget_key}_shapefile"] = (
             self.polygon_shapefile_line_edit.text()
         )
         # Get the selected field if field combo box is enabled
@@ -237,7 +237,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
             if self.field_selection_combo.isEnabled()
             else None
         )
-        self.attributes[f"{self.widget_key} Selected Field"] = selected_field
+        self.attributes[f"{self.widget_key}_selected_field"] = selected_field
 
         return self.attributes
 
@@ -247,12 +247,12 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         """
         if self.field_selection_combo.isEnabled():
             selected_field = self.field_selection_combo.currentText()
-            self.attributes[f"{self.widget_key} Selected Field"] = selected_field
+            self.attributes[f"{self.widget_key}_selected_field"] = selected_field
 
             # Store the selected field in QSettings
-            self.settings.setValue(f"{self.widget_key} Selected Field", selected_field)
+            self.settings.setValue(f"{self.widget_key}_selected_field", selected_field)
         else:
-            self.attributes[f"{self.widget_key} Selected Field"] = None
+            self.attributes[f"{self.widget_key}_selected_field"] = None
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:
         """

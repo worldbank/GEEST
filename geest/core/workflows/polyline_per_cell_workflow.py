@@ -17,7 +17,7 @@ from geest.core.algorithms.features_per_cell_processor import (
 
 class PolylinePerCellWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use Polyline per Cell' workflow.
+    Concrete implementation of a 'use_polyline_per_cell' workflow.
     """
 
     def __init__(
@@ -39,25 +39,25 @@ class PolylinePerCellWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_polyline_per_cell"
 
-        layer_path = self.attributes.get("Polyline per Cell Shapefile", None)
+        layer_path = self.attributes.get("polyline_per_cell_shapefile", None)
 
         if not layer_path:
             QgsMessageLog.logMessage(
-                "Nothing found in Polyline per Cell Shapefile, trying Point per Cell Layer Source.",
+                "Nothing found in polyline_per_cell_shapefile, trying Point per Cell_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("Polyline per Cell Layer Source", None)
+            layer_path = self.attributes.get("polyline_per_cell_layer_source", None)
             if not layer_path:
                 QgsMessageLog.logMessage(
-                    "No points layer found in Polyline per Cell Layer Source.",
+                    "No points layer found in polyline_per_cell_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
                 return False
 
         self.features_layer = QgsVectorLayer(
-            layer_path, "Polyline per Cell Layer", "ogr"
+            layer_path, "polyline_per_cell Layer", "ogr"
         )
         self.workflow_is_legacy = False
 

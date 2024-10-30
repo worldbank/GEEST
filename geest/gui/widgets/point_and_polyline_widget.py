@@ -73,21 +73,21 @@ class PointAndPolylineWidget(BaseIndicatorWidget):
         self.main_layout.addWidget(self.point_layer_combo)
 
         # Restore previously selected point layer
-        point_layer_id = self.attributes.get(f"{self.widget_key} Point Layer ID", None)
+        point_layer_id = self.attributes.get(f"{self.widget_key} Point_layer_id", None)
         if point_layer_id:
             point_layer = QgsProject.instance().mapLayer(point_layer_id)
             if point_layer:
                 self.point_layer_combo.setLayer(point_layer)
 
-        # Shapefile Input for Point Layer
+        # _shapefile Input for Point Layer
         self.point_shapefile_layout = QHBoxLayout()
         self.point_shapefile_line_edit = QLineEdit()
         self.point_shapefile_button = QToolButton()
         self.point_shapefile_button.setText("...")
         self.point_shapefile_button.clicked.connect(self.select_point_shapefile)
-        if self.attributes.get(f"{self.widget_key} Point Shapefile", False):
+        if self.attributes.get(f"{self.widget_key} Point_shapefile", False):
             self.point_shapefile_line_edit.setText(
-                self.attributes[f"{self.widget_key} Point Shapefile"]
+                self.attributes[f"{self.widget_key} Point_shapefile"]
             )
         self.point_shapefile_layout.addWidget(self.point_shapefile_line_edit)
         self.point_shapefile_layout.addWidget(self.point_shapefile_button)
@@ -109,22 +109,22 @@ class PointAndPolylineWidget(BaseIndicatorWidget):
 
         # Restore previously selected polyline layer
         polyline_layer_id = self.attributes.get(
-            f"{self.widget_key} Polyline Layer ID", None
+            f"{self.widget_key} Polyline_layer_id", None
         )
         if polyline_layer_id:
             polyline_layer = QgsProject.instance().mapLayer(polyline_layer_id)
             if polyline_layer:
                 self.polyline_layer_combo.setLayer(polyline_layer)
 
-        # Shapefile Input for Polyline Layer
+        # _shapefile Input for Polyline Layer
         self.polyline_shapefile_layout = QHBoxLayout()
         self.polyline_shapefile_line_edit = QLineEdit()
         self.polyline_shapefile_button = QToolButton()
         self.polyline_shapefile_button.setText("...")
         self.polyline_shapefile_button.clicked.connect(self.select_polyline_shapefile)
-        if self.attributes.get(f"{self.widget_key} Polyline Shapefile", False):
+        if self.attributes.get(f"{self.widget_key} Polyline_shapefile", False):
             self.polyline_shapefile_line_edit.setText(
-                self.attributes[f"{self.widget_key} Polyline Shapefile"]
+                self.attributes[f"{self.widget_key} Polyline_shapefile"]
             )
         self.polyline_shapefile_layout.addWidget(self.polyline_shapefile_line_edit)
         self.polyline_shapefile_layout.addWidget(self.polyline_shapefile_button)
@@ -139,7 +139,7 @@ class PointAndPolylineWidget(BaseIndicatorWidget):
             last_dir = settings.value("Geest/lastShapefileDir", "")
 
             file_path, _ = QFileDialog.getOpenFileName(
-                self, "Select Point Shapefile", last_dir, "Shapefiles (*.shp)"
+                self, "Select Point_shapefile", last_dir, "Shapefiles (*.shp)"
             )
             if file_path:
                 self.point_shapefile_line_edit.setText(file_path)
@@ -157,7 +157,7 @@ class PointAndPolylineWidget(BaseIndicatorWidget):
             last_dir = settings.value("Geest/lastShapefileDir", "")
 
             file_path, _ = QFileDialog.getOpenFileName(
-                self, "Select Polyline Shapefile", last_dir, "Shapefiles (*.shp)"
+                self, "Select Polyline_shapefile", last_dir, "Shapefiles (*.shp)"
             )
             if file_path:
                 self.polyline_shapefile_line_edit.setText(file_path)
@@ -181,46 +181,46 @@ class PointAndPolylineWidget(BaseIndicatorWidget):
         # Collect data for the point layer
         point_layer = self.point_layer_combo.currentLayer()
         if point_layer:
-            self.attributes[f"{self.widget_key} Point Layer Name"] = point_layer.name()
-            self.attributes[f"{self.widget_key} Point Layer Source"] = (
+            self.attributes[f"{self.widget_key} Point_layer_name"] = point_layer.name()
+            self.attributes[f"{self.widget_key} Point_layer_source"] = (
                 point_layer.source()
             )
-            self.attributes[f"{self.widget_key} Point Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key} Point_layer_provider_type"] = (
                 point_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Point Layer CRS"] = (
+            self.attributes[f"{self.widget_key} Point_layer_crs"] = (
                 point_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Point Layer Wkb Type"] = (
+            self.attributes[f"{self.widget_key} Point_layer_wkb_type"] = (
                 point_layer.wkbType()
             )
-            self.attributes[f"{self.widget_key} Point Layer ID"] = point_layer.id()
-        self.attributes[f"{self.widget_key} Point Shapefile"] = (
+            self.attributes[f"{self.widget_key} Point_layer_id"] = point_layer.id()
+        self.attributes[f"{self.widget_key} Point_shapefile"] = (
             self.point_shapefile_line_edit.text()
         )
 
         # Collect data for the polyline layer
         polyline_layer = self.polyline_layer_combo.currentLayer()
         if polyline_layer:
-            self.attributes[f"{self.widget_key} Polyline Layer Name"] = (
+            self.attributes[f"{self.widget_key} Polyline_layer_name"] = (
                 polyline_layer.name()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer Source"] = (
+            self.attributes[f"{self.widget_key} Polyline_layer_source"] = (
                 polyline_layer.source()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key} Polyline_layer_provider_type"] = (
                 polyline_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer CRS"] = (
+            self.attributes[f"{self.widget_key} Polyline_layer_crs"] = (
                 polyline_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer Wkb Type"] = (
+            self.attributes[f"{self.widget_key} Polyline_layer_wkb_type"] = (
                 polyline_layer.wkbType()
             )
-            self.attributes[f"{self.widget_key} Polyline Layer ID"] = (
+            self.attributes[f"{self.widget_key} Polyline_layer_id"] = (
                 polyline_layer.id()
             )
-        self.attributes[f"{self.widget_key} Polyline Shapefile"] = (
+        self.attributes[f"{self.widget_key} Polyline_shapefile"] = (
             self.polyline_shapefile_line_edit.text()
         )
 

@@ -36,7 +36,7 @@ class PolygonWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "Polygon per Cell"
+            self.widget_key = "polygon_per_cell"
 
             # Polygon Layer Section
             self._add_polygon_layer_widgets()
@@ -69,22 +69,22 @@ class PolygonWidget(BaseIndicatorWidget):
 
         # Restore previously selected polygon layer
         polygon_layer_id = self.attributes.get(
-            f"{self.widget_key} Polygon Layer ID", None
+            f"{self.widget_key}_polygon_layer_id", None
         )
         if polygon_layer_id:
             polygon_layer = QgsProject.instance().mapLayer(polygon_layer_id)
             if polygon_layer:
                 self.polygon_layer_combo.setLayer(polygon_layer)
 
-        # Shapefile Input for Polygon Layer
+        # _shapefile Input for Polygon Layer
         self.polygon_shapefile_layout = QHBoxLayout()
         self.polygon_shapefile_line_edit = QLineEdit()
         self.polygon_shapefile_button = QToolButton()
         self.polygon_shapefile_button.setText("...")
         self.polygon_shapefile_button.clicked.connect(self.select_polygon_shapefile)
-        if self.attributes.get(f"{self.widget_key} Polygon Shapefile", False):
+        if self.attributes.get(f"{self.widget_key}_polygon_shapefile", False):
             self.polygon_shapefile_line_edit.setText(
-                self.attributes[f"{self.widget_key} Polygon Shapefile"]
+                self.attributes[f"{self.widget_key}_polygon_shapefile"]
             )
         self.polygon_shapefile_layout.addWidget(self.polygon_shapefile_line_edit)
         self.polygon_shapefile_layout.addWidget(self.polygon_shapefile_button)
@@ -121,19 +121,19 @@ class PolygonWidget(BaseIndicatorWidget):
         # Collect data for the polygon layer
         polygon_layer = self.polygon_layer_combo.currentLayer()
         if polygon_layer:
-            self.attributes[f"{self.widget_key} Layer Name"] = polygon_layer.name()
-            self.attributes[f"{self.widget_key} Layer Source"] = polygon_layer.source()
-            self.attributes[f"{self.widget_key} Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key}_layer_name"] = polygon_layer.name()
+            self.attributes[f"{self.widget_key}_layer_source"] = polygon_layer.source()
+            self.attributes[f"{self.widget_key}_layer_provider_type"] = (
                 polygon_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Layer CRS"] = (
+            self.attributes[f"{self.widget_key}_layer_crs"] = (
                 polygon_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Layer Wkb Type"] = (
+            self.attributes[f"{self.widget_key}_layer_wkb_type"] = (
                 polygon_layer.wkbType()
             )
-            self.attributes[f"{self.widget_key} Layer ID"] = polygon_layer.id()
-        self.attributes[f"{self.widget_key} Shapefile"] = (
+            self.attributes[f"{self.widget_key}_layer_id"] = polygon_layer.id()
+        self.attributes[f"{self.widget_key}_shapefile"] = (
             self.polygon_shapefile_line_edit.text()
         )
 

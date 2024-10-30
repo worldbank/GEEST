@@ -72,7 +72,7 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
 
         # Restore previously selected raster layer
         raster_layer_id = self.attributes.get(
-            f"{self.widget_key} Raster Layer ID", None
+            f"{self.widget_key}_raster_layer_id", None
         )
         if raster_layer_id:
             raster_layer = QgsProject.instance().mapLayer(raster_layer_id)
@@ -85,9 +85,9 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         self.raster_button = QToolButton()
         self.raster_button.setText("...")
         self.raster_button.clicked.connect(self.select_raster)
-        if self.attributes.get(f"{self.widget_key} Raster Layer", False):
+        if self.attributes.get(f"{self.widget_key}_raster_layer", False):
             self.raster_line_edit.setText(
-                self.attributes[f"{self.widget_key} Raster Layer"]
+                self.attributes[f"{self.widget_key}_raster_layer"]
             )
         self.raster_layout.addWidget(self.raster_line_edit)
         self.raster_layout.addWidget(self.raster_button)
@@ -125,16 +125,16 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         # Collect data for the raster layer
         raster_layer = self.raster_layer_combo.currentLayer()
         if raster_layer:
-            self.attributes[f"{self.widget_key} Layer Name"] = raster_layer.name()
-            self.attributes[f"{self.widget_key} Layer Source"] = raster_layer.source()
-            self.attributes[f"{self.widget_key} Layer Provider Type"] = (
+            self.attributes[f"{self.widget_key}_layer_name"] = raster_layer.name()
+            self.attributes[f"{self.widget_key}_layer_source"] = raster_layer.source()
+            self.attributes[f"{self.widget_key}_layer_provider_type"] = (
                 raster_layer.providerType()
             )
-            self.attributes[f"{self.widget_key} Layer CRS"] = (
+            self.attributes[f"{self.widget_key}_layer_crs"] = (
                 raster_layer.crs().authid()
             )
-            self.attributes[f"{self.widget_key} Layer ID"] = raster_layer.id()
-        self.attributes[f"{self.widget_key} Raster"] = self.raster_line_edit.text()
+            self.attributes[f"{self.widget_key}_layer_id"] = raster_layer.id()
+        self.attributes[f"{self.widget_key}_raster"] = self.raster_line_edit.text()
 
         return self.attributes
 

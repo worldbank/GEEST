@@ -27,7 +27,7 @@ import processing
 
 class AcledImpactWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use CSV to Point Layer' workflow.
+    Concrete implementation of a 'use_csv_to_point_layer' workflow.
     """
 
     def __init__(
@@ -47,7 +47,7 @@ class AcledImpactWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_csv_to_point_layer"
-        self.csv_file = self.attributes.get("use_csv_to_point_layer CSV File", "")
+        self.csv_file = self.attributes.get("use_csv_to_point_layer_csv_file", "")
         self.features_layer = self._load_csv_as_point_layer()
         self.workflow_is_legacy = False
 

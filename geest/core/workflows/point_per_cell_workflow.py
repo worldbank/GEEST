@@ -17,7 +17,7 @@ from geest.core.algorithms.features_per_cell_processor import (
 
 class PointPerCellWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use Point per Cell' workflow.
+    Concrete implementation of a 'use_point_per_cell' workflow.
     """
 
     def __init__(
@@ -39,24 +39,24 @@ class PointPerCellWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_point_per_cell"
 
-        layer_path = self.attributes.get("Point per Cell Shapefile", None)
+        layer_path = self.attributes.get("point_per_cell_shapefile", None)
 
         if not layer_path:
             QgsMessageLog.logMessage(
-                "Nothing found in Point per Cell Shapefile, trying Point per Cell Layer Source.",
+                "Nothing found in point_per_cell_shapefile, trying point_per_cell_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("Point per Cell Layer Source", None)
+            layer_path = self.attributes.get("point_per_cell_layer_source", None)
             if not layer_path:
                 QgsMessageLog.logMessage(
-                    "No points layer found in Point per Cell Layer Source.",
+                    "No points layer found in point_per_cell_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
                 return False
 
-        self.features_layer = QgsVectorLayer(layer_path, "Point per Cell Layer", "ogr")
+        self.features_layer = QgsVectorLayer(layer_path, "point_per_cell_layer", "ogr")
         self.workflow_is_legacy = False
 
     def _process_features_for_area(
