@@ -111,6 +111,15 @@ class JsonTreeModel(QAbstractItemModel):
 
         self.endResetModel()
 
+    def get_analysis_item(self):
+        """
+        Returns the 'Analysis' item from the tree model.
+
+        Returns:
+            JsonTreeItem: The 'Analysis' item.
+        """
+        return self.rootItem.child(0)
+
     def _create_dimension_item(self, dimension, parent_item):
         """
         Creates a new Dimension item under the specified parent item (Analysis) and populates it with custom attributes.
