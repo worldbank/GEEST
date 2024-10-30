@@ -9,16 +9,18 @@ class IndicatorConfigWidget(QWidget):
     Widget for configuring indicators based on a dictionary.
     """
 
-    data_changed = pyqtSignal(dict)
+    data_changed = pyqtSignal()
 
-    def __init__(self, attributes_dict: dict) -> None:
+    def __init__(self, attributes: dict) -> None:
         super().__init__()
-        self.attributes_dict = attributes_dict
+        # This is a reference to the attributes dictionary
+        # So any changes made will propogate to the JSONTreeItem
+        self.attributes = attributes
         self.layout: QVBoxLayout = QVBoxLayout()
         self.button_group: QButtonGroup = QButtonGroup(self)
 
         try:
-            self.create_radio_buttons(attributes_dict)
+            self.create_radio_buttons(attributes)
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical
@@ -26,14 +28,18 @@ class IndicatorConfigWidget(QWidget):
 
         self.setLayout(self.layout)
 
-    def create_radio_buttons(self, attributes_dict: dict) -> None:
+    def create_radio_buttons(self, attributes: dict) -> None:
         """
         Uses the factory to create radio buttons from attributes dictionary.
         """
-        analysis_mode = attributes_dict.get("analysis_mode", "")
-        for key, value in attributes_dict.items():
+        # make a deep copy of the dictionary in case it changes while we
+        # are using it
+        attributes = attributes.copy()
+        analysis_mode = attributes.get("analysis_mode", "")
+
+        for key, value in attributes.items():
             radio_button_widget = RadioButtonFactory.create_radio_button(
-                key, value, attributes_dict
+                key, value, attributes
             )
             if radio_button_widget:
                 if key == analysis_mode:
@@ -60,10 +66,10 @@ class IndicatorConfigWidget(QWidget):
             self.button_group.checkedButton().label_text.lower().replace(" ", "_")
         )
         new_data["analysis_mode"] = snake_case_mode
-        self.attributes_dict.update(new_data)
-        self.data_changed.emit(self.attributes_dict)
+        self.attributes.update(new_data)
+        self.data_changed.emit()
         QgsMessageLog.logMessage(
-            f"Updated attributes dictionary: {self.attributes_dict}",
+            f"Updated attributes dictionary: {self.attributes}",
             "Geest",
             level=Qgis.Info,
         )
