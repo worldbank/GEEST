@@ -34,14 +34,26 @@ class IndicatorDetailDialog(QDialog):
     """Dialog to show layer properties, with a Markdown editor and preview for the 'indicator' field."""
 
     # Signal to emit the updated data as a dictionary
-    dataUpdated = pyqtSignal(dict)
+    dataUpdated = pyqtSignal()
 
-    def __init__(self, layer_name, layer_data, tree_item, editing=False, parent=None):
+    def __init__(self, item, editing=False, parent=None):
+        """
+        Initializes the dialog with the given item and optional editing mode.
+
+        :param item: The QTreeView item to show the properties for.
+        :param editing: Whether the dialog is in editing mode (default: False).
+        :param parent: The parent widget (default: None).
+
+        Note: The item is a reference to the QTreeView item, so any changes will update the tree.
+
+        """
         super().__init__(parent)
 
-        self.setWindowTitle(layer_name)
-        self.layer_data = layer_data
-        self.tree_item = tree_item  # Reference to the QTreeView item to update
+        self.setWindowTitle(item.name())
+        # Note this is a reference to the tree item
+        # any changes you make will update the tree
+        self.item = item  # Reference to the QTreeView item to update
+        self.attributes = self.item.data(3)  # Reference to the attributes dictionary
         self.editing = editing
         self.config_widget = None  # To hold the configuration from widget factory
         self.radio_buttons = []  # To keep track of the radio buttons for later
@@ -57,7 +69,7 @@ class IndicatorDetailDialog(QDialog):
 
         # Left-hand tab for Markdown editor and preview
         self.markdown_tab = QWidget()
-        self.setup_markdown_tab(layer_name)
+        self.setup_markdown_tab()
 
         # Right-hand tab for editing properties (table)
         self.edit_tab = QWidget()
@@ -84,7 +96,7 @@ class IndicatorDetailDialog(QDialog):
         # Initial call to update the preview with existing content
         self.update_preview()
 
-    def setup_markdown_tab(self, layer_name):
+    def setup_markdown_tab(self):
         """Sets up the left-hand tab for the Markdown editor and preview."""
         markdown_layout = QVBoxLayout(self.markdown_tab)
 
@@ -96,10 +108,8 @@ class IndicatorDetailDialog(QDialog):
         markdown_layout.addWidget(self.title_label)
 
         # Get the grandparent and parent items
-        grandparent_item = (
-            self.tree_item.parent().parent() if self.tree_item.parent() else None
-        )
-        parent_item = self.tree_item.parent()
+        grandparent_item = self.item.parent().parent() if self.item.parent() else None
+        parent_item = self.item.parent()
 
         # If both grandparent and parent exist, create the label
         if grandparent_item and parent_item:
@@ -114,7 +124,7 @@ class IndicatorDetailDialog(QDialog):
             )  # Add the label above the heading
 
         # Heading for the dialog
-        heading_label = QLabel(layer_name)
+        heading_label = QLabel(self.item.name())
         heading_label.setStyleSheet(
             "font-size: 18px; font-weight: bold;"
         )  # Bold heading
@@ -138,7 +148,7 @@ class IndicatorDetailDialog(QDialog):
 
         # Create the QTextEdit for Markdown editing (left side)
         self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(self.layer_data.get("description", ""))
+        self.text_edit_left.setPlainText(self.attributes.get("description", ""))
         self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
         if self.editing:
             splitter.addWidget(self.text_edit_left)
@@ -190,7 +200,7 @@ class IndicatorDetailDialog(QDialog):
 
     def populate_table(self):
         """Populate the table with all key-value pairs except 'indicator'."""
-        filtered_data = {k: v for k, v in self.layer_data.items() if k != "indicator"}
+        filtered_data = {k: v for k, v in self.attributes.items() if k != "indicator"}
         self.table.setRowCount(len(filtered_data))
 
         for row, (key, value) in enumerate(filtered_data.items()):
@@ -215,7 +225,7 @@ class IndicatorDetailDialog(QDialog):
         """
         Returns an appropriate widget for the table based on the data type or key.
         """
-        if "Use" in key or "Rasterise" in key:
+        if "use" in key or "rasterise" in key:
             toggle_widget = ToggleSwitch(initial_value=bool(value))
             return toggle_widget
         elif isinstance(value, bool):
@@ -244,7 +254,7 @@ class IndicatorDetailDialog(QDialog):
     def add_config_widgets(self, layout):
         if not self.editing:
 
-            self.config_widget = IndicatorConfigWidget(self.layer_data)
+            self.config_widget = IndicatorConfigWidget(self.attributes)
             if self.config_widget:
                 layout.addWidget(self.config_widget)
                 # connect to the stateChanged signal
@@ -258,7 +268,7 @@ class IndicatorDetailDialog(QDialog):
 
     def handle_config_change(self, new_config):
         """Optionally handle configuration changes."""
-        self.layer_data = new_config
+        self.attributes = new_config
         QgsMessageLog.logMessage(
             f"LayerDetailDialog config set to: {new_config}",
             tag="Geest",
@@ -270,22 +280,19 @@ class IndicatorDetailDialog(QDialog):
         if self.editing:
             # In editing mode, the edit table is canonical
             updated_data = self.get_updated_data_from_table()
+            # Update the layer data with the new data
+            # This directly updates the tree item
+            self.attributes = updated_data
         else:
             # Otherwise, the custom widget is canonical
-            updated_data = self.config_widget.attributes_dict
+            pass
 
-        # Set 'Analysis Mode' based on the selected radio button
-        # Taken from IndicatorConfigWidget now
-        # selected_button = self.button_group.checkedButton()
-        # if selected_button:
-        #    updated_data["analysis_mode"] = selected_button.text()
-
-        self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
+        self.dataUpdated.emit()  # Emit the updated data as a dictionary
         self.accept()  # Close the dialog
 
     def get_updated_data_from_table(self):
         """Convert the table back into a dictionary with any changes made, including the Markdown text."""
-        updated_data = self.layer_data
+        updated_data = self.attributes
 
         # Loop through the table and collect other data
         for row in range(self.table.rowCount()):

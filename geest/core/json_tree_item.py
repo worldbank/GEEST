@@ -79,6 +79,9 @@ class JsonTreeItem:
             return self.parentItem.childItems.index(self)
         return 0
 
+    def name(self):
+        return self.data(0)
+
     def isIndicator(self):
         return self.role == "indicator"
 
