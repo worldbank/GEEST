@@ -16,7 +16,7 @@ from geest.core import JsonTreeItem
 
 class SafetyPolygonWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use Classify Poly into Classes' workflow.
+    Concrete implementation of a 'use_classify_poly_into_classes' workflow.
     """
 
     def __init__(
@@ -37,20 +37,20 @@ class SafetyPolygonWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_poly_into_classes"
-        layer_path = self.attributes.get("Classify Poly into Classes Shapefile", None)
+        layer_path = self.attributes.get("classify_poly_into_classes_shapefile", None)
 
         if not layer_path:
             QgsMessageLog.logMessage(
-                "Invalid raster found in Classify Poly into Classes Shapefile, trying Classify Poly into Classes Layer Source.",
+                "Invalid raster found in classify_poly_into_classes_shapefile, trying classify_poly_into_classes_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get(
-                "Classify Poly into Classes Layer Source", None
+                "classify_poly_into_classes_layer_source", None
             )
             if not layer_path:
                 QgsMessageLog.logMessage(
-                    "No points layer found in Classify Poly into Classes Layer Source.",
+                    "No points layer found in classify_poly_into_classes_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
@@ -59,7 +59,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
         self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
 
         self.selected_field = self.attributes.get(
-            "Classify Poly into Classes Selected Field", ""
+            "classify_poly_into_classes_selected_field", ""
         )
         self.workflow_is_legacy = False
 

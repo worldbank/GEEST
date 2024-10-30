@@ -86,7 +86,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         layer_path = self.attributes.get("multi_buffer_shapefile", None)
         if not layer_path:
             QgsMessageLog.logMessage(
-                "Invalid points layer found in multi_buffer_shapefile, trying Multi Buffer Point Layer Name.",
+                "Invalid points layer found in multi_buffer_shapefile, trying Multi Buffer Point_layer_name.",
                 tag="Geest",
                 level=Qgis.Warning,
             )

@@ -46,16 +46,16 @@ class RasterReclassificationWorkflow(WorkflowBase):
 
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid layer found in Use_environmental_hazards Raster, trying Use_environmental_hazards Layer Source.",
+                "Invalid layer found in Use_environmental_hazards Raster, trying Use_environmental_hazards_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_name = self.attributes.get(
-                "Use_environmental_hazards Layer Source", None
+                "Use_environmental_hazards_layer_source", None
             )
             if not layer_name:
                 QgsMessageLog.logMessage(
-                    "No layer found in Use_environmental_hazards Layer Source.",
+                    "No layer found in Use_environmental_hazards_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

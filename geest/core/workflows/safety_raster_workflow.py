@@ -40,14 +40,14 @@ class SafetyRasterWorkflow(WorkflowBase):
 
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid raster found in use_nighttime_lights Raster, trying use_nighttime_lights Layer Source.",
+                "Invalid raster found in use_nighttime_lights Raster, trying use_nighttime_lights_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_name = self.attributes.get("use_nighttime_lights Layer Source", None)
+            layer_name = self.attributes.get("use_nighttime_lights_layer_source", None)
             if not layer_name:
                 QgsMessageLog.logMessage(
-                    "No points layer found in use_nighttime_lights Layer Source.",
+                    "No points layer found in use_nighttime_lights_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

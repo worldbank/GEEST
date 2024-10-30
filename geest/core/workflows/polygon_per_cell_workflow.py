@@ -39,18 +39,18 @@ class PolygonPerCellWorkflow(WorkflowBase):
         # TODO fix inconsistent abbreviation below for Poly
         self.workflow_name = "use_poly_per_cell"
 
-        layer_path = self.attributes.get("Polygon per Cell Shapefile", None)
+        layer_path = self.attributes.get("Polygon per Cellshapefile", None)
 
         if not layer_path:
             QgsMessageLog.logMessage(
-                "Invalid raster found in Polygon per Cell Shapefile, trying Polygon per Cell Layer Source.",
+                "Invalid raster found in Polygon per Cellshapefile, trying Polygon per Cell_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("Polygon per Cell Layer Source", None)
+            layer_path = self.attributes.get("Polygon per Cell_layer_source", None)
             if not layer_path:
                 QgsMessageLog.logMessage(
-                    "No points layer found in Polygon per Cell Layer Source.",
+                    "No points layer found in Polygon per Cell_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
