@@ -36,7 +36,7 @@ class PolygonWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "polygon_per_Cell"
+            self.widget_key = "polygon_per_cell"
 
             # Polygon Layer Section
             self._add_polygon_layer_widgets()

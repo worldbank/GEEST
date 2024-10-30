@@ -27,7 +27,7 @@ import processing
 
 class AcledImpactWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use CSV to Point Layer' workflow.
+    Concrete implementation of a 'use_csv_to_point_layer' workflow.
     """
 
     def __init__(

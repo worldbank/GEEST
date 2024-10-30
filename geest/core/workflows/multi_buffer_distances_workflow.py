@@ -24,7 +24,7 @@ from geest.core import JsonTreeItem, setting
 
 class MultiBufferDistancesWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Multi Buffer Distances' workflow.
+    Concrete implementation of a 'multi_buffer_distances' workflow.
 
     This uses ORS (OpenRouteService) to calculate the distances between the study area
     and the selected points of interest.

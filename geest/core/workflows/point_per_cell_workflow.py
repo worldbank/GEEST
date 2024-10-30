@@ -17,7 +17,7 @@ from geest.core.algorithms.features_per_cell_processor import (
 
 class PointPerCellWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use point_per_cell' workflow.
+    Concrete implementation of a 'use_point_per_cell' workflow.
     """
 
     def __init__(

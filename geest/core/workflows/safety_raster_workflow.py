@@ -17,7 +17,7 @@ from geest.core import JsonTreeItem
 
 class SafetyRasterWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use Classify Poly into Classes' workflow.
+    Concrete implementation of a 'use_nighttime_lights' workflow.
     """
 
     def __init__(
@@ -36,11 +36,11 @@ class SafetyRasterWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_nighttime_lights"
-        layer_name = self.attributes.get("use_nighttime_lights Raster", None)
+        layer_name = self.attributes.get("use_nighttime_lights_raster", None)
 
         if not layer_name:
             QgsMessageLog.logMessage(
-                "Invalid raster found in use_nighttime_lights Raster, trying use_nighttime_lights_layer_source.",
+                "Invalid raster found in use_nighttime_lights_raster, trying use_nighttime_lights_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )

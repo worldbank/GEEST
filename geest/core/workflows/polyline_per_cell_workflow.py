@@ -17,7 +17,7 @@ from geest.core.algorithms.features_per_cell_processor import (
 
 class PolylinePerCellWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use polyline_per_cell' workflow.
+    Concrete implementation of a 'use_polyline_per_cell' workflow.
     """
 
     def __init__(

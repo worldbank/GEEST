@@ -18,7 +18,7 @@ from geest.core import JsonTreeItem
 
 class SinglePointBufferWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'Use single_buffer_point' workflow.
+    Concrete implementation of a 'use_single_buffer_point' workflow.
     """
 
     def __init__(
