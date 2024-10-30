@@ -8,12 +8,14 @@ def infer_schema(data):
     """Infers the JSON schema from the given JSON data."""
     if isinstance(data, dict):
         properties = {}
+        required_keys = []
         for key, value in data.items():
             properties[key] = infer_schema(value)
+            required_keys.append(key)
         return {
             "type": "object",
             "properties": properties,
-            "required": list(data.keys()),  # Mark all keys as required
+            "required": required_keys,
         }
     elif isinstance(data, list):
         if len(data) > 0:
