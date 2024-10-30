@@ -243,6 +243,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
 
 ## Potential Data Sources for Other Countries
 
+<p align="justify">  
 While the above table showcases data specific to Saint Lucia, similar data can be found for other countries through the following sources:
 
 1. **World Bank - Women, Business and the Law**: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
@@ -260,7 +261,7 @@ While the above table showcases data specific to Saint Lucia, similar data can b
 7. **Global Natural Hazards Data**: Provides data on environmental hazards, including earthquakes, floods, cyclones, landslides, fires and others across regions. This data is essential for assessing natural risks and planning in vulnerable areas.
 
 8. **Mapillary**: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
-
+</p>
 
 **Instructions for Data Collection**:
 - **Query the Source**: Use the query instructions provided in the table to filter and collect specific data.
