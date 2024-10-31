@@ -34,7 +34,7 @@ from qgis.core import (
     QgsLayerTreeGroup,
 )
 from functools import partial
-from geest.gui.views import JsonTreeView, JsonTreeModel
+from geest.gui.views import JsonTreeView, JsonTreeModel, PromotionProxyModel
 from geest.utilities import resources_path
 from geest.core import setting
 from geest.core import WorkflowQueueManager
@@ -74,7 +74,14 @@ class TreePanel(QWidget):
 
         # Create a model for the QTreeView using custom JsonTreeModel
         self.model = JsonTreeModel(self.json_data)
-        self.treeView.setModel(self.model)
+        self.proxy_model = PromotionProxyModel()
+        self.proxy_model.setSourceModel(self.model)
+        self.active_model = "default"  # or "promotion"
+        self.treeView.setModel(
+            self.model
+        )  # Simple model where we allow single childred
+        # self.treeView.setModel(self.proxy_model) # more complicated where we only allow nodes to have children if child count > 1
+
         # Connect signals to track changes in the model and save automatically
         self.model.dataChanged.connect(self.save_json_to_working_directory)
         self.model.rowsInserted.connect(self.save_json_to_working_directory)
@@ -138,6 +145,12 @@ class TreePanel(QWidget):
         self.prepare_analysis_button = QPushButton("▶️")
         self.prepare_analysis_button.clicked.connect(self.prepare_analysis_pressed)
         button_bar.addWidget(self.prepare_analysis_button)
+
+        # This is for switching between the original tree view and the promotion proxy model
+        self.model_button = QPushButton("Model")
+        self.model_button.clicked.connect(self.switch_model)
+        button_bar.addWidget(self.model_button)
+
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
@@ -911,3 +924,14 @@ class TreePanel(QWidget):
             self.queue_manager.start_processing_in_foreground()
         else:
             self.queue_manager.start_processing()
+
+    def switch_model(self):
+        """
+        Switch between the default model and the promotion model
+        """
+        if self.active_model == "default":
+            self.active_model = "promotion"
+            self.treeView.setModel(self.proxy_model)
+        else:
+            self.active_model = "default"
+            self.treeView.setModel(self.model)
