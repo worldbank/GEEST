@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject
+from geest.core import JsonTreeItem
 from typing import Optional, Dict, List
 
 """
@@ -16,8 +17,14 @@ class PromotionProxyModel(QAbstractProxyModel):
     def __init__(self, parent: Optional[QObject] = None) -> None:
         super().__init__(parent)
         self.source_model: Optional[QAbstractProxyModel] = None
-        self.flattened_structure: List[QModelIndex] = []
-        self.parent_mapping: Dict[int, int] = {}
+        self.flattened_structure: List[str] = []  # Store guids instead of QModelIndex
+        self.parent_mapping: Dict[str, Optional[str]] = {}  # Map guid to parent guid
+        self.guid_item_mapping: Dict[str, "JsonTreeItem"] = (
+            {}
+        )  # Map guid to JsonTreeItem
+        self.guid_index_mapping: Dict[str, QModelIndex] = (
+            {}
+        )  # Map guid to QModelIndex for easy lookups
 
     def setSourceModel(self, source_model: QAbstractProxyModel) -> None:
         if source_model is None:
@@ -26,30 +33,33 @@ class PromotionProxyModel(QAbstractProxyModel):
         super().setSourceModel(source_model)
         self._buildFlattenedStructure()
 
-    def _buildFlattenedStructure(self):
-        """Build a flattened representation of the source model."""
-        self.flattened_structure.clear()
-        self.parent_mapping.clear()
+    def _buildFlattenedStructure(self, parent_item=None):
+        if parent_item is None:
+            self.flattened_structure.clear()
+            self.parent_mapping.clear()
+            self.guid_item_mapping.clear()
+            self.guid_index_mapping.clear()
+            parent_item = self.source_model.rootItem
+            self._buildFlattenedStructure(parent_item)
 
-        def _traverse(parent: QModelIndex, parent_flat_index: int):
-            row_count = self.source_model.rowCount(parent)
-            if row_count == 1:
-                # Promote single child to parent level
-                child = self.source_model.index(0, 0, parent)
-                self.flattened_structure.append(child)
-                current_index = len(self.flattened_structure) - 1
-                self.parent_mapping[current_index] = parent_flat_index
-                _traverse(child, current_index)
-            else:
-                for row in range(row_count):
-                    child = self.source_model.index(row, 0, parent)
-                    self.flattened_structure.append(child)
-                    current_index = len(self.flattened_structure) - 1
-                    self.parent_mapping[current_index] = parent_flat_index
-                    _traverse(child, current_index)
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+            child_guid = child_item.guid
+            self.flattened_structure.append(child_guid)
+            self.parent_mapping[child_guid] = (
+                parent_item.guid if parent_item is not None else None
+            )
+            self.guid_item_mapping[child_guid] = child_item
 
-        # Start with the root items
-        _traverse(QModelIndex(), -1)
+            # Create a QModelIndex for each child item and store it in guid_index_mapping
+            index = self.source_model.index(
+                i, 0, self.guid_index_mapping.get(parent_item.guid, QModelIndex())
+            )
+            if index.isValid():
+                self.guid_index_mapping[child_guid] = index
+
+            # Recursively traverse all child nodes
+            self._buildFlattenedStructure(child_item)
 
     def index(
         self, row: int, column: int, parent: QModelIndex = QModelIndex()
@@ -62,33 +72,27 @@ class PromotionProxyModel(QAbstractProxyModel):
         ):
             return QModelIndex()
 
-        if not parent.isValid():
-            # Root level index
-            if row < len(self.flattened_structure):
-                source_index = self.flattened_structure[row]
-                return self.createIndex(row, column, source_index.internalPointer())
-            return QModelIndex()
-
-        # Non-root level index, find it using flattened structure
-        parent_flat_index = self.parent_mapping.get(parent.row(), -1)
-        for idx, flat_parent in self.parent_mapping.items():
-            if flat_parent == parent_flat_index and row == idx:
-                source_index = self.flattened_structure[idx]
-                return self.createIndex(row, column, source_index.internalPointer())
-        return QModelIndex()
+        # Retrieve guid from the flattened structure
+        guid = self.flattened_structure[row]
+        item = self.guid_item_mapping[guid]
+        return self.createIndex(row, column, item)
 
     def parent(self, index: QModelIndex) -> QModelIndex:
         if not index.isValid() or self.source_model is None:
             return QModelIndex()
 
-        flat_index = index.row()
-        parent_flat_index = self.parent_mapping.get(flat_index, -1)
+        # Retrieve the item and find its parent guid
+        item = index.internalPointer()
+        if not hasattr(item, "guid"):
+            return QModelIndex()
 
-        if parent_flat_index == -1:
-            return QModelIndex()  # No parent (root level)
+        parent_guid = self.parent_mapping.get(item.guid, None)
+        if parent_guid is None:
+            return QModelIndex()
 
-        source_index = self.flattened_structure[parent_flat_index]
-        return self.createIndex(parent_flat_index, 0, source_index.internalPointer())
+        # Retrieve the parent QModelIndex
+        parent_index = self.guid_index_mapping.get(parent_guid, QModelIndex())
+        return parent_index
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         if not parent.isValid():
@@ -105,17 +109,22 @@ class PromotionProxyModel(QAbstractProxyModel):
         if not proxy_index.isValid() or self.source_model is None:
             return QModelIndex()
 
-        flat_index = proxy_index.row()
-        if flat_index < len(self.flattened_structure):
-            return self.flattened_structure[flat_index]
+        # Use the internal pointer to locate the actual JsonTreeItem
+        item = proxy_index.internalPointer()
+        if isinstance(item, JsonTreeItem):
+            guid = item.guid
+            return self.guid_index_mapping.get(guid, QModelIndex())
         return QModelIndex()
 
     def mapFromSource(self, source_index: QModelIndex) -> QModelIndex:
         if not source_index.isValid():
             return QModelIndex()
 
-        try:
-            flat_index = self.flattened_structure.index(source_index)
-            return self.createIndex(flat_index, 0, source_index.internalPointer())
-        except ValueError:
-            return QModelIndex()
+        item = source_index.internalPointer()
+        if isinstance(item, JsonTreeItem):
+            try:
+                row = self.flattened_structure.index(item.guid)
+                return self.createIndex(row, 0, item)
+            except ValueError:
+                return QModelIndex()
+        return QModelIndex()

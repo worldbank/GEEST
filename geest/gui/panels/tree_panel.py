@@ -928,6 +928,7 @@ class TreePanel(QWidget):
         if self.active_model == "default":
             self.active_model = "promotion"
             self.treeView.setModel(self.proxy_model)
+            self.proxy_model.setSourceModel(self.model)
         else:
             self.active_model = "default"
             self.treeView.setModel(self.model)

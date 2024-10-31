@@ -48,6 +48,10 @@ class JsonTreeItem:
         self.factor_font.setItalic(True)
         self.updateStatus()
 
+    def internalPointer(self):
+        """Returns a reference to itself, or any unique identifier for the item."""
+        return self.guid
+
     def appendChild(self, item):
         self.childItems.append(item)
 
