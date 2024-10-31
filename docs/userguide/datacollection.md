@@ -1,6 +1,6 @@
 # Data Collection
 
-This page provides guidance on finding and collecting relevant data for the GEEST tool, using Saint Lucia as an example. The data sources, layers, and indicators shown here can serve as references when gathering data for other countries.
+This page provides guidance on finding and collecting relevant data for the GEEST tool, using Saint Lucia as an example. The data sources, layers, indicators and the table structure shown here can serve as references when gathering data for other countries.
 
 ## Data Sources for Saint Lucia
 
