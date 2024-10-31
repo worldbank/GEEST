@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject
+from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject, Qt
+from qgis.PyQt.QtGui import QIcon
+
 from geest.core import JsonTreeItem
 from typing import Optional, Dict, List
 
@@ -128,3 +130,28 @@ class PromotionProxyModel(QAbstractProxyModel):
             except ValueError:
                 return QModelIndex()
         return QModelIndex()
+
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole):
+        if not index.isValid() or self.source_model is None:
+            return None
+
+        # Get the source model index using mapToSource
+        source_index = self.mapToSource(index)
+
+        if role == Qt.DisplayRole and index.column() == 0:
+            # Return the data from the source model for the requested column
+            return self.source_model.data(source_index, role)
+        elif role == Qt.DecorationRole and index.column() == 0:
+            # Return the data from the source model for the requested column
+            item = index.internalPointer()
+            if isinstance(item, JsonTreeItem):
+                return item.getIcon()
+        elif role == Qt.DisplayRole and index.column() == 1:
+            return None  # We only show the icon in column 1
+        elif role == Qt.DecorationRole and index.column() == 1:
+            # Assuming column 1 is supposed to have an icon
+            item = index.internalPointer()
+            if isinstance(item, JsonTreeItem):
+                return item.getStatusIcon()  # Assuming item has `status_icon_path`
+
+        return None
