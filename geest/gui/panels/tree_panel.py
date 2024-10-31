@@ -2,29 +2,25 @@ import json
 import os
 import shutil
 from qgis.PyQt.QtWidgets import (
-    QTreeView,
-    QVBoxLayout,
+    QAction,
+    QCheckBox,
+    QDialog,
+    QFileDialog,
     QHBoxLayout,
-    QPushButton,
-    QWidget,
+    QHeaderView,
     QLabel,
     QMenu,
-    QAction,
     QMessageBox,
-    QFileDialog,
-    QHeaderView,
-    QCheckBox,
-)
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
-from qgis.PyQt.QtGui import QMovie
-from qgis.PyQt.QtWidgets import (
     QProgressBar,
-    QDialog,
-    QVBoxLayout,
+    QPushButton,
     QTableWidget,
     QTableWidgetItem,
-    QPushButton,
+    QTreeView,
+    QVBoxLayout,
+    QWidget,
 )
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal, QModelIndex
+from qgis.PyQt.QtGui import QMovie
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -935,3 +931,29 @@ class TreePanel(QWidget):
         else:
             self.active_model = "default"
             self.treeView.setModel(self.model)
+
+        self.expand_all_nodes()
+
+    def expand_all_nodes(self, index=None):
+        """
+        :param index: QModelIndex - if None the root index is used
+
+        Recursively expand all nodes in the tree view starting from the root.
+        """
+        if self.treeView.model() is None:
+            return
+        else:
+            model = self.treeView.model()
+        if index is None:
+            index = model.index(0, 0, QModelIndex())
+
+        if not index.isValid():
+            return
+
+        self.treeView.expand(index)
+
+        # Loop through all children and expand them as well
+        row_count = self.treeView.model().rowCount(index)
+        for row in range(row_count):
+            child_index = self.treeView.model().index(row, 0, index)
+            self.expand_all_nodes(child_index)
