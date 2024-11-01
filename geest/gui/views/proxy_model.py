@@ -2,7 +2,7 @@
 
 from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject, Qt
 from qgis.PyQt.QtGui import QIcon
-
+from qgis.core import QgsMessageLog, Qgis
 from geest.core import JsonTreeItem
 from typing import Optional, Dict, List
 
@@ -27,6 +27,9 @@ class PromotionProxyModel(QAbstractProxyModel):
         self.guid_index_mapping: Dict[str, QModelIndex] = (
             {}
         )  # Map guid to QModelIndex for easy lookups
+        self.promoted_mapping: Dict[str, str] = (
+            {}
+        )  # Map promoted child guid to its original parent's guid
 
     def setSourceModel(self, source_model: QAbstractProxyModel) -> None:
         if source_model is None:
@@ -41,27 +44,55 @@ class PromotionProxyModel(QAbstractProxyModel):
             self.parent_mapping.clear()
             self.guid_item_mapping.clear()
             self.guid_index_mapping.clear()
+            self.promoted_mapping.clear()
             parent_item = self.source_model.rootItem
             self._buildFlattenedStructure(parent_item)
 
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
             child_guid = child_item.guid
-            self.flattened_structure.append(child_guid)
-            self.parent_mapping[child_guid] = (
-                parent_item.guid if parent_item is not None else None
-            )
-            self.guid_item_mapping[child_guid] = child_item
 
-            # Create a QModelIndex for each child item and store it in guid_index_mapping
-            index = self.source_model.index(
-                i, 0, self.guid_index_mapping.get(parent_item.guid, QModelIndex())
-            )
-            if index.isValid():
-                self.guid_index_mapping[child_guid] = index
-
-            # Recursively traverse all child nodes
-            self._buildFlattenedStructure(child_item)
+            # Promote child if parent has only one child
+            if (
+                parent_item.childCount() == 1
+                and parent_item is not self.source_model.rootItem
+                and parent_item.role is not "analysis"
+            ):
+                QgsMessageLog.logMessage(
+                    f"Found node with only one child {parent_item.data(0)}",
+                    "Geest",
+                    Qgis.Info,
+                )
+                # Replace parent with the child
+                if parent_item.role in ["factor"] and child_item.role in ["indicator"]:
+                    self.flattened_structure.append(child_guid)
+                    self.promoted_mapping[child_guid] = parent_item.guid
+                    self.guid_item_mapping[child_guid] = child_item
+                    # Create a QModelIndex for each promoted child item and store it in guid_index_mapping
+                    index = self.source_model.index(
+                        i,
+                        0,
+                        self.guid_index_mapping.get(parent_item.guid, QModelIndex()),
+                    )
+                    if index.isValid():
+                        self.guid_index_mapping[child_guid] = index
+                    # Recursively traverse all child nodes
+                    self._buildFlattenedStructure(child_item)
+            else:
+                # Normal addition to the flattened structure
+                self.flattened_structure.append(child_guid)
+                self.parent_mapping[child_guid] = (
+                    parent_item.guid if parent_item is not None else None
+                )
+                self.guid_item_mapping[child_guid] = child_item
+                # Create a QModelIndex for each child item and store it in guid_index_mapping
+                index = self.source_model.index(
+                    i, 0, self.guid_index_mapping.get(parent_item.guid, QModelIndex())
+                )
+                if index.isValid():
+                    self.guid_index_mapping[child_guid] = index
+                # Recursively traverse all child nodes
+                self._buildFlattenedStructure(child_item)
 
     def index(
         self, row: int, column: int, parent: QModelIndex = QModelIndex()
@@ -88,13 +119,21 @@ class PromotionProxyModel(QAbstractProxyModel):
         if not hasattr(item, "guid"):
             return QModelIndex()
 
-        parent_guid = self.parent_mapping.get(item.guid, None)
+        # Check if this item was promoted
+        parent_guid = self.promoted_mapping.get(item.guid)
+        if parent_guid is None:
+            parent_guid = self.parent_mapping.get(item.guid, None)
+
         if parent_guid is None:
             return QModelIndex()
 
         # Retrieve the parent QModelIndex
-        parent_index = self.guid_index_mapping.get(parent_guid, QModelIndex())
-        return parent_index
+        parent_item = self.guid_item_mapping.get(parent_guid, None)
+        if parent_item is None:
+            return QModelIndex()
+
+        parent_row = self.flattened_structure.index(parent_guid)
+        return self.createIndex(parent_row, 0, parent_item)
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         if not parent.isValid():
