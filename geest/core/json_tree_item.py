@@ -130,42 +130,36 @@ class JsonTreeItem:
     def getStatusIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
         status = self.getStatus()
-        # Use a case statement to determine the icon based on the status
-        match status:
-            case "✔️":
-                return QIcon(
-                    resources_path("resources", "icons", "completed-success.svg")
-                )
-            case "-":
-                return QIcon(
-                    resources_path("resources", "icons", "required-not-configured.svg")
-                )
-            case "!":
-                return QIcon(resources_path("resources", "icons", "not-configured.svg"))
-            case "x":
-                return QIcon(resources_path("resources", "icons", "failed.svg"))
-            case "e":
-                return QIcon(resources_path("resources", "icons", ".svg"))
-            case _:
-                return QIcon(resources_path("resources", "icons", ".svg"))
+        if status == "✔️":
+            return QIcon(resources_path("resources", "icons", "completed-success.svg"))
+        elif status == "-":
+            return QIcon(
+                resources_path("resources", "icons", "required-not-configured.svg")
+            )
+        elif status == "!":
+            return QIcon(resources_path("resources", "icons", "not-configured.svg"))
+        elif status == "x":
+            return QIcon(resources_path("resources", "icons", "failed.svg"))
+        elif status == "e":
+            return QIcon(resources_path("resources", "icons", ".svg"))
+        else:
+            return QIcon(resources_path("resources", "icons", ".svg"))
 
     def getStatusTooltip(self):
         """Retrieve the appropriate tooltip for the item based on its role."""
         status = self.getStatus()
-        # Use a case statement to determine the icon based on the status
-        match status:
-            case "✔️":
-                return "Completed successfully"
-            case "-":
-                return "Required and not configured"
-            case "!":
-                return "Not configured (optional)"
-            case "x":
-                return "Workflow failed"
-            case "e":
-                return "WRITE TOOL TIP"
-            case _:
-                return ""
+        if status == "✔️":
+            return "Completed successfully"
+        elif status == "-":
+            return "Required and not configured"
+        elif status == "!":
+            return "Not configured (optional)"
+        elif status == "x":
+            return "Workflow failed"
+        elif status == "e":
+            return "WRITE TOOL TIP"
+        else:
+            return ""
 
     def getStatus(self):
         """Return the status of the item as single character."""
