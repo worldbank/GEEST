@@ -832,8 +832,10 @@ class TreePanel(QWidget):
     def run_item(self, item, role):
 
         self.items_to_run = 0
-        self._count_workflows_to_run(item)
+        self.run_only_incomplete = False
+
         self.queue_workflow_task(item, role)
+        self._count_workflows_to_run(item)
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
