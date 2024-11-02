@@ -641,6 +641,9 @@ class TreePanel(QWidget):
                 geest_group = root.insertGroup(
                     0, "Geest"
                 )  # Insert at the top of the layers panel
+                geest_group.setIsMutuallyExclusive(
+                    True
+                )  # Make the group mutually exclusive
 
             # Traverse the tree view structure to determine the appropriate subgroup based on paths
             path_list = item.getPaths()
@@ -649,6 +652,10 @@ class TreePanel(QWidget):
                 sub_group = parent_group.findGroup(path)
                 if sub_group is None:
                     sub_group = parent_group.addGroup(path)
+                    sub_group.setIsMutuallyExclusive(
+                        True
+                    )  # Make each subgroup mutually exclusive
+
                 parent_group = sub_group
 
             # Check if a layer with the same data source exists in the correct group
@@ -671,7 +678,10 @@ class TreePanel(QWidget):
             else:
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)
-                parent_group.addLayer(layer)
+                layer_tree_layer = parent_group.addLayer(layer)
+                layer_tree_layer.setExpanded(
+                    False
+                )  # Collapse the legend for the layer by default
                 QgsMessageLog.logMessage(
                     f"Added layer: {layer.name()} to group: {parent_group.name()}",
                     tag="Geest",
