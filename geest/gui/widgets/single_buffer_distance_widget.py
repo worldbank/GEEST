@@ -70,12 +70,12 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.buffer_distance_input.setRange(0, 100000)
             self.buffer_distance_layout.addWidget(self.buffer_distance_label)
             self.buffer_distance_layout.addWidget(self.buffer_distance_input)
-            default_distance = self.attributes.get(
-                "default_single_buffer_travel_distance", 0
-            )
+            default_distance = self.attributes.get("default_single_buffer_distance", 0)
             buffer_distance = self.attributes.get(
                 "single_buffer_point_layer_distance", default_distance
             )
+            if buffer_distance == 0:
+                buffer_distance = default_distance
             try:
                 self.buffer_distance_input.setValue(int(buffer_distance))
             except (ValueError, TypeError):
@@ -145,7 +145,7 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             )  # Unique ID of the layer
 
         self.attributes["single_buffer_point_layer_distance"] = (
-            self.buffer_distance_input.text()
+            self.buffer_distance_input.value()
         )
         self.attributes["single_buffer_point_layer_shapefile"] = (
             self.shapefile_line_edit.text()
