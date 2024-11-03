@@ -9,6 +9,11 @@ from qgis.core import (
     QgsProcessingContext,
     QgsVectorLayer,
     QgsGeometry,
+    QgsRasterBlock,
+    QgsRaster,
+    QgsRasterFileWriter,
+    QgsRectangle,
+    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing
@@ -67,7 +72,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             )
             return False
 
-        self.buffer_distance = 30  # 30m buffer
+        self.buffer_distance = 20  # 20m buffer
         self.workflow_is_legacy = False  # This is a new workflow, not a legacy one
 
     def _process_features_for_area(
@@ -97,11 +102,8 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             area_features, f"{self.layer_id}_buffered_{index}"
         )
 
-        # Step 2: Assign values to the buffered polygons
-        scored_layer = self._assign_scores(buffered_layer)
-
-        # Step 3: Rasterize the scored buffer layer
-        raster_output = self._rasterize(scored_layer, current_bbox, index)
+        # Step 2: Rasterize the buffered layer and assign scores
+        raster_output = self._rasterize_and_score(buffered_layer, current_bbox, index)
 
         return raster_output
 
@@ -123,7 +125,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             "native:buffer",
             {
                 "INPUT": layer,
-                "DISTANCE": self.buffer_distance,  # 5 km buffer
+                "DISTANCE": self.buffer_distance,  # 20m buffer
                 "SEGMENTS": 15,
                 "DISSOLVE": True,
                 "OUTPUT": output_path,
@@ -132,35 +134,6 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
         buffered_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return buffered_layer
-
-    def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
-        """
-        Assign values to buffered polygons based 5 for presence of a polygon.
-
-        Args:
-            layer QgsVectorLayer: The buffered features layer.
-
-        Returns:
-            QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
-        """
-
-        QgsMessageLog.logMessage(
-            f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info
-        )
-        # Create a new field in the layer for the scores
-        layer.startEditing()
-        layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
-        layer.updateFields()
-
-        # Assign scores to the buffered polygons
-        score = 5
-        for feature in layer.getFeatures():
-            feature.setAttribute("value", score)
-            layer.updateFeature(feature)
-
-        layer.commitChanges()
-
-        return layer
 
     # Remove once all workflows are updated
     def do_execute(self):
@@ -196,3 +169,83 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
         pass
+
+    def _rasterize_and_score(
+        self, buffered_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
+    ) -> str:
+        """
+        Rasterize the buffered layer and assign scores based on the overlap percentage
+        Args:
+            buffered_layer (QgsVectorLayer): Buffered layer to rasterize.
+            bbox (QgsGeometry): Bounding box of the study area.
+            index (int): Index of the current area.
+
+        Returns:
+            str: Path to the raster file.
+        """
+        QgsMessageLog.logMessage(
+            "Rasterizing and scoring buffered layer", tag="Geest", level=Qgis.Info
+        )
+
+        xmin, ymin, xmax, ymax = bbox.boundingBox().toRectF().getCoords()
+        width = int((xmax - xmin) / self.cell_size_m)
+        height = int((ymax - ymin) / self.cell_size_m)
+
+        raster_block = QgsRasterBlock(QgsRaster.DataType_Int32, width, height)
+        raster_block.fill(0)  # Initialize with zeros
+
+        for feature in buffered_layer.getFeatures():
+            geom = feature.geometry()
+            if geom.type() == QgsWkbTypes.PolygonGeometry:
+                for row in range(height):
+                    for col in range(width):
+                        cell_geom = QgsGeometry.fromRect(
+                            QgsRectangle(
+                                xmin + col * self.cell_size_m,
+                                ymax - (row + 1) * self.cell_size_m,
+                                xmin + (col + 1) * self.cell_size_m,
+                                ymax - row * self.cell_size_m,
+                            )
+                        )
+                        intersection = geom.intersection(cell_geom)
+                        if intersection.isEmpty():
+                            continue
+                        overlap_percent = (intersection.area() / cell_geom.area()) * 100
+
+                        # Assign scores based on overlap percentage
+                        if 80 <= overlap_percent <= 100:
+                            raster_block.setValue(
+                                col, row, max(raster_block.value(col, row), 5)
+                            )
+                        elif 60 <= overlap_percent < 80:
+                            raster_block.setValue(
+                                col, row, max(raster_block.value(col, row), 4)
+                            )
+                        elif 40 <= overlap_percent < 60:
+                            raster_block.setValue(
+                                col, row, max(raster_block.value(col, row), 3)
+                            )
+                        elif 20 <= overlap_percent < 40:
+                            raster_block.setValue(
+                                col, row, max(raster_block.value(col, row), 2)
+                            )
+                        elif 1 <= overlap_percent < 20:
+                            raster_block.setValue(
+                                col, row, max(raster_block.value(col, row), 1)
+                            )
+
+        # Write the raster to file
+        output_path = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_{index}.tif",
+        )
+        writer = QgsRasterFileWriter(output_path)
+        writer.writeRaster(
+            raster_block.data(), width, height, bbox.boundingBox(), buffered_layer.crs()
+        )
+
+        QgsMessageLog.logMessage(
+            f"Raster written to {output_path}", tag="Geest", level=Qgis.Info
+        )
+
+        return output_path
