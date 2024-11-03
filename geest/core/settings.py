@@ -141,7 +141,8 @@ def set_setting(key, value, qsettings=None, store_in_project=False):
     set_general_setting(full_key, value, qsettings)
 
     if store_in_project:
-        QgsProject.instance().writeEntry("animation", key, str(value))
+        return
+        QgsProject.instance().writeEntry("geest", key, str(value))
 
 
 def setting(
@@ -174,7 +175,7 @@ def setting(
         default = default_settings.get(key, None)
 
     if prefer_project_setting:
-        val, ok = QgsProject.instance().readEntry("animation", key)
+        val, ok = QgsProject.instance().readEntry("geest", key)
         if ok:
             return val
 
@@ -214,7 +215,7 @@ def export_setting(file_path, qsettings=None):
     if not qsettings:
         qsettings = QSettings()
 
-    qsettings.beginGroup("AnimationWorkbench")
+    qsettings.beginGroup("geest")
     all_keys = qsettings.allKeys()
     qsettings.endGroup()
 
@@ -252,7 +253,7 @@ def import_setting(file_path, qsettings=None):
         qsettings = QSettings()
 
     # Clear the previous setting
-    qsettings.beginGroup("AnimationWorkbench")
+    qsettings.beginGroup("geest")
     qsettings.remove("")
     qsettings.endGroup()
 

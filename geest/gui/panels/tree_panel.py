@@ -40,7 +40,7 @@ from qgis.core import (
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel, PromotionProxyModel
 from geest.utilities import resources_path
-from geest.core import setting
+from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
 from geest.gui.dialogs import (
     IndicatorDetailDialog,
@@ -261,6 +261,10 @@ class TreePanel(QWidget):
         self.working_directory = new_directory
         model_path = os.path.join(new_directory, "model.json")
 
+        project_path = QgsProject.instance().fileName()
+        if project_path:
+            checksum = hash(project_path)
+
         if os.path.exists(model_path):
             try:
                 self.json_file = model_path
@@ -291,6 +295,11 @@ class TreePanel(QWidget):
                 settings = QSettings()
                 # This is the top level folder for work files
                 settings.setValue("last_working_directory", self.working_directory)
+                # Use QGIS internal settings for the association between model path and QGIS project
+                set_setting(
+                    str(checksum), self.working_directory, store_in_project=True
+                )
+
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical

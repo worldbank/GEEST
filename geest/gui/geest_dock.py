@@ -128,13 +128,13 @@ class GeestDock(QDockWidget):
         if project_path:
             checksum = hash(project_path)
             # Check our settings to see if we have a Geest project associated with this project
-            geest_project = setting(checksum, None)
+            geest_project = setting(str(checksum), None, prefer_project_setting=True)
             QgsMessageLog.logMessage(
                 f"Geest project path: {geest_project} ({checksum})", "Geest", Qgis.Info
             )
             if geest_project and os.path.exists(geest_project):
-                self.load_json_file(geest_project)
-                self.stacked_widget.setCurrentIndex(2)
+                self.tree_widget.set_working_directory(geest_project)
+                self.stacked_widget.setCurrentIndex(2)  # Tree tab
 
     def on_panel_changed(self, index: int) -> None:
         """
@@ -151,32 +151,3 @@ class GeestDock(QDockWidget):
             self.tree_widget.set_working_directory(self.setup_widget.working_dir)
         elif index == 3:
             QgsMessageLog.logMessage("Switched to Help panel", "Geest", Qgis.Info)
-
-    def load_json_file(self, json_file: str) -> None:
-        """
-        Load a new JSON file into the TreePanel.
-
-        :param json_file: The path to the new JSON file to be loaded.
-        """
-        try:
-            self.json_file = json_file
-            self.tree_widget.load_data_from_json(json_file)
-            QgsMessageLog.logMessage(
-                f"Loaded JSON file: {json_file}", "Geest", Qgis.Info
-            )
-            qgis_project = QgsProject.instance().fileName()
-            # Remember the last loaded JSON file for this project
-            # make a checksum of the qgis project path
-            checksum = hash(qgis_project)
-            set_setting(checksum, json_file)
-            QgsMessageLog.logMessage(
-                f"Associating geest project to {qgis_project} ({checksum})",
-                "Geest",
-                Qgis.Info,
-            )
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error loading JSON file: {str(e)}",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
