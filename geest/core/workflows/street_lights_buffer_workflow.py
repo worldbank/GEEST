@@ -1,7 +1,7 @@
 import os
+import numpy as np
 from qgis.core import (
     QgsMessageLog,
-    QgsField,
     Qgis,
     QgsFeedback,
     QgsGeometry,
@@ -9,16 +9,15 @@ from qgis.core import (
     QgsProcessingContext,
     QgsVectorLayer,
     QgsGeometry,
-    QgsRasterBlock,
-    QgsRaster,
-    QgsRasterFileWriter,
-    QgsRectangle,
-    QgsWkbTypes,
+    QgsField,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
+from geest.core.algorithms.features_per_cell_processor import (
+    select_grid_cells,
+)
 
 
 class StreetLightsBufferWorkflow(WorkflowBase):
@@ -101,9 +100,23 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         buffered_layer = self._buffer_features(
             area_features, f"{self.layer_id}_buffered_{index}"
         )
+        # Step 2: Select grid cells that intersect with features
+        output_path = os.path.join(
+            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
+        )
+        area_grid = select_grid_cells(self.grid_layer, area_features, output_path)
 
-        # Step 2: Rasterize the buffered layer and assign scores
-        raster_output = self._rasterize_and_score(buffered_layer, current_bbox, index)
+        # Step 3: Assign scores to the grid layer
+        grid_layer = self._score_grid(area_grid, buffered_layer)
+
+        # Step 4: Rasterize the grid layer using the assigned scores
+        raster_output = self._rasterize(
+            grid_layer,
+            current_bbox,
+            index,
+            value_field="score",
+            default_value=0,
+        )
 
         return raster_output
 
@@ -170,82 +183,66 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         """
         pass
 
-    def _rasterize_and_score(
-        self, buffered_layer: QgsVectorLayer, bbox: QgsGeometry, index: int
-    ) -> str:
+    def _score_grid(
+        self, grid_layer: QgsVectorLayer, buffered_layer: QgsVectorLayer
+    ) -> QgsVectorLayer:
         """
-        Rasterize the buffered layer and assign scores based on the overlap percentage
+        Assign scores to a grid layer and rasterize it.
+
         Args:
-            buffered_layer (QgsVectorLayer): Buffered layer to rasterize.
-            bbox (QgsGeometry): Bounding box of the study area.
-            index (int): Index of the current area.
+            grid_layer (QgsVectorLayer): The grid layer representing the study area.
+            buffered_layer (QgsVectorLayer): Buffered layer to evaluate intersections.
+            index (int): Index for output file naming.
 
         Returns:
-            str: Path to the raster file.
+            str: Path to the output raster file.
         """
         QgsMessageLog.logMessage(
-            "Rasterizing and scoring buffered layer", tag="Geest", level=Qgis.Info
+            "Assigning scores to grid layer based on intersection with buffered layer",
+            tag="Geest",
+            level=Qgis.Info,
         )
 
-        xmin, ymin, xmax, ymax = bbox.boundingBox().toRectF().getCoords()
-        width = int((xmax - xmin) / self.cell_size_m)
-        height = int((ymax - ymin) / self.cell_size_m)
+        # Add a new attribute to the grid layer for storing the score
+        grid_layer.startEditing()
+        if not grid_layer.fields().indexFromName("score") >= 0:
+            grid_layer.dataProvider().addAttributes([QgsField("score", QVariant.Int)])
+            grid_layer.updateFields()
 
-        raster_block = QgsRasterBlock(QgsRaster.DataType_Int32, width, height)
-        raster_block.fill(0)  # Initialize with zeros
+        # Assign scores based on intersection with the buffered layer
+        for grid_feature in grid_layer.getFeatures():
+            grid_geom = grid_feature.geometry()
+            max_score = 0
 
-        for feature in buffered_layer.getFeatures():
-            geom = feature.geometry()
-            if geom.type() == QgsWkbTypes.PolygonGeometry:
-                for row in range(height):
-                    for col in range(width):
-                        cell_geom = QgsGeometry.fromRect(
-                            QgsRectangle(
-                                xmin + col * self.cell_size_m,
-                                ymax - (row + 1) * self.cell_size_m,
-                                xmin + (col + 1) * self.cell_size_m,
-                                ymax - row * self.cell_size_m,
-                            )
-                        )
-                        intersection = geom.intersection(cell_geom)
-                        if intersection.isEmpty():
-                            continue
-                        overlap_percent = (intersection.area() / cell_geom.area()) * 100
+            for buffered_feature in buffered_layer.getFeatures():
+                buffered_geom = buffered_feature.geometry()
+                intersection = grid_geom.intersection(buffered_geom)
+                if intersection.isEmpty():
+                    continue
 
-                        # Assign scores based on overlap percentage
-                        if 80 <= overlap_percent <= 100:
-                            raster_block.setValue(
-                                col, row, max(raster_block.value(col, row), 5)
-                            )
-                        elif 60 <= overlap_percent < 80:
-                            raster_block.setValue(
-                                col, row, max(raster_block.value(col, row), 4)
-                            )
-                        elif 40 <= overlap_percent < 60:
-                            raster_block.setValue(
-                                col, row, max(raster_block.value(col, row), 3)
-                            )
-                        elif 20 <= overlap_percent < 40:
-                            raster_block.setValue(
-                                col, row, max(raster_block.value(col, row), 2)
-                            )
-                        elif 1 <= overlap_percent < 20:
-                            raster_block.setValue(
-                                col, row, max(raster_block.value(col, row), 1)
-                            )
+                overlap_percent = (intersection.area() / grid_geom.area()) * 100
 
-        # Write the raster to file
-        output_path = os.path.join(
-            self.workflow_directory,
-            f"{self.layer_id}_{index}.tif",
-        )
-        writer = QgsRasterFileWriter(output_path)
-        writer.writeRaster(
-            raster_block.data(), width, height, bbox.boundingBox(), buffered_layer.crs()
-        )
+                QgsMessageLog.logMessage(
+                    f"Overlap percentage: {overlap_percent}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
 
-        QgsMessageLog.logMessage(
-            f"Raster written to {output_path}", tag="Geest", level=Qgis.Info
-        )
+                # Determine score based on overlap percentage
+                if 80 <= overlap_percent <= 100:
+                    max_score = max(max_score, 5)
+                elif 60 <= overlap_percent < 80:
+                    max_score = max(max_score, 4)
+                elif 40 <= overlap_percent < 60:
+                    max_score = max(max_score, 3)
+                elif 20 <= overlap_percent < 40:
+                    max_score = max(max_score, 2)
+                elif 1 <= overlap_percent < 20:
+                    max_score = max(max_score, 1)
 
-        return output_path
+            # Update the "score" attribute for the feature
+            grid_feature.setAttribute("score", max_score)
+            grid_layer.updateFeature(grid_feature)
+
+        grid_layer.commitChanges()
+        return grid_layer
