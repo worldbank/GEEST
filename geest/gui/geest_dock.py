@@ -1,14 +1,15 @@
+import os
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
-    QPushButton,
 )
 from qgis.PyQt.QtCore import Qt
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsProject
 from typing import Optional
 from geest.gui.panels import IntroPanel, SetupPanel, TreePanel, HelpPanel
+from geest.core import set_setting, setting
 
 
 class GeestDock(QDockWidget):
@@ -105,7 +106,6 @@ class GeestDock(QDockWidget):
 
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
-
             QgsMessageLog.logMessage("GeestDock initialized successfully.", "Geest")
 
         except Exception as e:
@@ -114,6 +114,27 @@ class GeestDock(QDockWidget):
                 "Geest",
                 level=Qgis.Critical,
             )
+
+    def qgis_project_changed(self) -> None:
+        """
+        Handle QGIS project change events.
+
+        This is called by the main plugin class whenever the QGIS project changes.
+        """
+        project_path = QgsProject.instance().fileName()
+        QgsMessageLog.logMessage(
+            f"QGIS project changed to {project_path}", "Geest", Qgis.Info
+        )
+        if project_path:
+            checksum = hash(project_path)
+            # Check our settings to see if we have a Geest project associated with this project
+            geest_project = setting(checksum, None)
+            QgsMessageLog.logMessage(
+                f"Geest project path: {geest_project} ({checksum})", "Geest", Qgis.Info
+            )
+            if geest_project and os.path.exists(geest_project):
+                self.load_json_file(geest_project)
+                self.stacked_widget.setCurrentIndex(2)
 
     def on_panel_changed(self, index: int) -> None:
         """
@@ -142,6 +163,16 @@ class GeestDock(QDockWidget):
             self.tree_widget.load_data_from_json(json_file)
             QgsMessageLog.logMessage(
                 f"Loaded JSON file: {json_file}", "Geest", Qgis.Info
+            )
+            qgis_project = QgsProject.instance().fileName()
+            # Remember the last loaded JSON file for this project
+            # make a checksum of the qgis project path
+            checksum = hash(qgis_project)
+            set_setting(checksum, json_file)
+            QgsMessageLog.logMessage(
+                f"Associating geest project to {qgis_project} ({checksum})",
+                "Geest",
+                Qgis.Info,
             )
         except Exception as e:
             QgsMessageLog.logMessage(

@@ -22,15 +22,16 @@ import os
 import time
 from typing import Optional
 
-from qgis.PyQt.QtCore import Qt, QSettings
+from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (
     QMessageBox,
     QPushButton,
     QAction,
     QDockWidget,
+    QApplication,
 )
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsProject
 
 # Import your plugin components here
 from .core import setting  # , JSONValidator
@@ -46,6 +47,8 @@ class GeestPlugin:
     """
     GEEST 2 plugin interface
     """
+
+    project_changed = pyqtSignal()
 
     def __init__(self, iface):
         self.iface = iface
@@ -75,6 +78,7 @@ class GeestPlugin:
             | QDockWidget.DockWidgetMovable
             | QDockWidget.DockWidgetFloatable
         )
+        QgsProject.instance().readProject.connect(self.dock_widget.qgis_project_changed)
 
         # Restore geometry and dock area before adding to the main window
         self.restore_geometry()
@@ -160,6 +164,11 @@ class GeestPlugin:
         """
         # Save geometry before unloading
         self.save_geometry()
+
+        # Disconnect the project changed signal
+        QgsProject.instance().readProject.disconnect(
+            self.dock_widget.qgis_project_changed
+        )
 
         # Remove toolbar icons and clean up
         if self.run_action:
