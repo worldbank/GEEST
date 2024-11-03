@@ -1,15 +1,14 @@
 import os
-import numpy as np
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsFeedback,
+    QgsField,
     QgsGeometry,
-    QgsVectorLayer,
+    QgsGeometry,
+    QgsMessageLog,
     QgsProcessingContext,
     QgsVectorLayer,
-    QgsGeometry,
-    QgsField,
+    QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing
