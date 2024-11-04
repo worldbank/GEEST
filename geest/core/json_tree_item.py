@@ -151,6 +151,8 @@ class JsonTreeItem:
     def getStatusIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
         status = self.getStatus()
+        if self.isAnalysis():
+            return None
         if status == "Completed successfully":
             return QIcon(resources_path("resources", "icons", "completed-success.svg"))
         elif status == "Required and not configured":
