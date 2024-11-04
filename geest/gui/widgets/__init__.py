@@ -11,3 +11,4 @@ from .acled_csv_layer_widget import AcledCsvLayerWidget
 from .safety_polygon_widget import SafetyPolygonWidget
 from .safety_raster_widget import SafetyRasterWidget
 from .raster_reclassification_widget import RasterReclassificationWidget
+from .street_lights_widget import StreetLightsWidget

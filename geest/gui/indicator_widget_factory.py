@@ -12,6 +12,7 @@ from geest.gui.widgets import (
     SafetyPolygonWidget,
     SafetyRasterWidget,
     RasterReclassificationWidget,
+    StreetLightsWidget,
 )
 from geest.core import setting
 
@@ -69,6 +70,8 @@ class RadioButtonFactory:
                 return RasterReclassificationWidget(
                     label_text=key, attributes=attributes
                 )
+            if key == "use_street_lights" and value == 1:
+                return StreetLightsWidget(label_text=key, attributes=attributes)
             else:
                 QgsMessageLog.logMessage(
                     f"Factory did not match any widgets",

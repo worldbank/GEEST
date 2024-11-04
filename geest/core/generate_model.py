@@ -60,6 +60,7 @@ class SpreadsheetToJsonParser:
                 "Use Point per Cell",
                 "Use Nighttime Lights",
                 "Use Environmental Hazards",
+                "Use Street Lights",
                 "Analysis Mode",  # New column
                 "Indicator Required",  # New column
             ]
@@ -274,6 +275,11 @@ class SpreadsheetToJsonParser:
                 "use_environmental_hazards": (
                     row["Use Environmental Hazards"]
                     if not pd.isna(row["Use Environmental Hazards"])
+                    else ""
+                ),
+                "use_street_lights": (
+                    row["Use Street Lights"]
+                    if not pd.isna(row["Use Street Lights"])
                     else ""
                 ),
                 "analysis_mode": (

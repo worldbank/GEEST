@@ -21,6 +21,7 @@ from geest.core.workflows import (
     SafetyPolygonWorkflow,
     SafetyRasterWorkflow,
     RasterReclassificationWorkflow,
+    StreetLightsBufferWorkflow,
 )
 
 from .json_tree_item import JsonTreeItem
@@ -107,6 +108,8 @@ class WorkflowFactory:
                 return RasterReclassificationWorkflow(
                     item, cell_size_m, feedback, context
                 )
+            elif analysis_mode == "use_street_lights":
+                return StreetLightsBufferWorkflow(item, cell_size_m, feedback, context)
             else:
                 raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
 

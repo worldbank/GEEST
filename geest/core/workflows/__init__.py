@@ -13,3 +13,4 @@ from .single_point_buffer_workflow import SinglePointBufferWorkflow
 from .safety_polygon_workflow import SafetyPolygonWorkflow
 from .safety_raster_workflow import SafetyRasterWorkflow
 from .raster_reclassification_workflow import RasterReclassificationWorkflow
+from .street_lights_buffer_workflow import StreetLightsBufferWorkflow
