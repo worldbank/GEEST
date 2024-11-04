@@ -90,9 +90,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         self.main_layout.addWidget(self.polygon_layer_combo)
 
         # Restore previously selected polygon layer
-        polygon_layer_id = self.attributes.get(
-            f"{self.widget_key} Polygon_layer_id", None
-        )
+        polygon_layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
         if polygon_layer_id:
             polygon_layer = QgsProject.instance().mapLayer(polygon_layer_id)
             if polygon_layer:
