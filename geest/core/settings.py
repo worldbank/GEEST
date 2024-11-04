@@ -141,7 +141,6 @@ def set_setting(key, value, qsettings=None, store_in_project=False):
     set_general_setting(full_key, value, qsettings)
 
     if store_in_project:
-        return
         QgsProject.instance().writeEntry("geest", key, str(value))
 
 

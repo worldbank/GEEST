@@ -80,6 +80,11 @@ class GeestPlugin:
         )
         QgsProject.instance().readProject.connect(self.dock_widget.qgis_project_changed)
 
+        # This is mainly useful when reloading the plugin - check if we have a
+        # project loaded and if there is a model.json file associated with it
+        # If there is, we load that and set the tab to the tree panel
+        self.dock_widget.qgis_project_changed()
+
         # Restore geometry and dock area before adding to the main window
         self.restore_geometry()
 

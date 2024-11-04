@@ -180,7 +180,7 @@ class TreePanel(QWidget):
         # This is for switching between the original tree view and the promotion proxy model
         self.model_button = QPushButton("Model")
         self.model_button.clicked.connect(self.switch_model)
-        button_bar.addWidget(self.model_button)
+        # button_bar.addWidget(self.model_button)
 
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_previous_tab)
