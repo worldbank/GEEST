@@ -1,14 +1,15 @@
+import os
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
-    QPushButton,
 )
 from qgis.PyQt.QtCore import Qt
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsProject
 from typing import Optional
 from geest.gui.panels import IntroPanel, SetupPanel, TreePanel, HelpPanel
+from geest.core import set_setting, setting
 
 
 class GeestDock(QDockWidget):
@@ -105,7 +106,6 @@ class GeestDock(QDockWidget):
 
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
-
             QgsMessageLog.logMessage("GeestDock initialized successfully.", "Geest")
 
         except Exception as e:
@@ -114,6 +114,27 @@ class GeestDock(QDockWidget):
                 "Geest",
                 level=Qgis.Critical,
             )
+
+    def qgis_project_changed(self) -> None:
+        """
+        Handle QGIS project change events.
+
+        This is called by the main plugin class whenever the QGIS project changes.
+        """
+        project_path = QgsProject.instance().fileName()
+        QgsMessageLog.logMessage(
+            f"QGIS project changed to {project_path}", "Geest", Qgis.Info
+        )
+        if project_path:
+            checksum = hash(project_path)
+            # Check our settings to see if we have a Geest project associated with this project
+            geest_project = setting(str(checksum), None, prefer_project_setting=True)
+            QgsMessageLog.logMessage(
+                f"Geest project path: {geest_project} ({checksum})", "Geest", Qgis.Info
+            )
+            if geest_project and os.path.exists(geest_project):
+                self.tree_widget.set_working_directory(geest_project)
+                self.stacked_widget.setCurrentIndex(2)  # Tree tab
 
     def on_panel_changed(self, index: int) -> None:
         """
@@ -130,22 +151,3 @@ class GeestDock(QDockWidget):
             self.tree_widget.set_working_directory(self.setup_widget.working_dir)
         elif index == 3:
             QgsMessageLog.logMessage("Switched to Help panel", "Geest", Qgis.Info)
-
-    def load_json_file(self, json_file: str) -> None:
-        """
-        Load a new JSON file into the TreePanel.
-
-        :param json_file: The path to the new JSON file to be loaded.
-        """
-        try:
-            self.json_file = json_file
-            self.tree_widget.load_data_from_json(json_file)
-            QgsMessageLog.logMessage(
-                f"Loaded JSON file: {json_file}", "Geest", Qgis.Info
-            )
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error loading JSON file: {str(e)}",
-                tag="Geest",
-                level=Qgis.Critical,
-            )

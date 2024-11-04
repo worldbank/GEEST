@@ -2,14 +2,14 @@ import json
 import os
 import shutil
 from qgis.PyQt.QtWidgets import (
-    QTreeView,
-    QVBoxLayout,
+    QAction,
+    QCheckBox,
+    QDialog,
+    QFileDialog,
     QHBoxLayout,
-    QPushButton,
-    QWidget,
+    QHeaderView,
     QLabel,
     QMenu,
-    QAction,
     QMessageBox,
     QFileDialog,
     QHeaderView,
@@ -20,12 +20,15 @@ from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QMovie
 from qgis.PyQt.QtWidgets import (
     QProgressBar,
-    QDialog,
-    QVBoxLayout,
+    QPushButton,
     QTableWidget,
     QTableWidgetItem,
-    QPushButton,
+    QTreeView,
+    QVBoxLayout,
+    QWidget,
 )
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal, QModelIndex
+from qgis.PyQt.QtGui import QMovie
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -35,9 +38,9 @@ from qgis.core import (
     QgsLayerTreeGroup,
 )
 from functools import partial
-from geest.gui.views import JsonTreeView, JsonTreeModel
+from geest.gui.views import JsonTreeView, JsonTreeModel, PromotionProxyModel
 from geest.utilities import resources_path
-from geest.core import setting
+from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
 from geest.gui.dialogs import (
     IndicatorDetailDialog,
@@ -79,7 +82,14 @@ class TreePanel(QWidget):
 
         # Create a model for the QTreeView using custom JsonTreeModel
         self.model = JsonTreeModel(self.json_data)
-        self.treeView.setModel(self.model)
+        self.proxy_model = PromotionProxyModel()
+        self.proxy_model.setSourceModel(self.model)
+        self.active_model = "default"  # or "promotion"
+        self.treeView.setModel(
+            self.model
+        )  # Simple model where we allow single childred
+        # self.treeView.setModel(self.proxy_model) # more complicated where we only allow nodes to have children if child count > 1
+
         # Connect signals to track changes in the model and save automatically
         self.model.dataChanged.connect(self.save_json_to_working_directory)
         self.model.rowsInserted.connect(self.save_json_to_working_directory)
@@ -167,6 +177,11 @@ class TreePanel(QWidget):
         # Add the button to the button bar
         button_bar.addWidget(self.prepare_analysis_button)
 
+        # This is for switching between the original tree view and the promotion proxy model
+        self.model_button = QPushButton("Model")
+        self.model_button.clicked.connect(self.switch_model)
+        # button_bar.addWidget(self.model_button)
+
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
@@ -246,6 +261,10 @@ class TreePanel(QWidget):
         self.working_directory = new_directory
         model_path = os.path.join(new_directory, "model.json")
 
+        project_path = QgsProject.instance().fileName()
+        if project_path:
+            checksum = hash(project_path)
+
         if os.path.exists(model_path):
             try:
                 self.json_file = model_path
@@ -276,6 +295,11 @@ class TreePanel(QWidget):
                 settings = QSettings()
                 # This is the top level folder for work files
                 settings.setValue("last_working_directory", self.working_directory)
+                # Use QGIS internal settings for the association between model path and QGIS project
+                set_setting(
+                    str(checksum), self.working_directory, store_in_project=True
+                )
+
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical
@@ -986,3 +1010,41 @@ class TreePanel(QWidget):
             self.queue_manager.start_processing_in_foreground()
         else:
             self.queue_manager.start_processing()
+
+    def switch_model(self):
+        """
+        Switch between the default model and the promotion model
+        """
+        if self.active_model == "default":
+            self.active_model = "promotion"
+            self.treeView.setModel(self.proxy_model)
+            self.proxy_model.setSourceModel(self.model)
+        else:
+            self.active_model = "default"
+            self.treeView.setModel(self.model)
+
+        self.expand_all_nodes()
+
+    def expand_all_nodes(self, index=None):
+        """
+        :param index: QModelIndex - if None the root index is used
+
+        Recursively expand all nodes in the tree view starting from the root.
+        """
+        if self.treeView.model() is None:
+            return
+        else:
+            model = self.treeView.model()
+        if index is None:
+            index = model.index(0, 0, QModelIndex())
+
+        if not index.isValid():
+            return
+
+        self.treeView.expand(index)
+
+        # Loop through all children and expand them as well
+        row_count = self.treeView.model().rowCount(index)
+        for row in range(row_count):
+            child_index = self.treeView.model().index(row, 0, index)
+            self.expand_all_nodes(child_index)

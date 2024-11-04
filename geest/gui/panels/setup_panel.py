@@ -97,7 +97,6 @@ class SetupPanel(FORM_CLASS, QWidget):
             self.settings.setValue(
                 "last_working_directory", directory
             )  # Update last used project
-            self.set_project_directory()
 
     def create_new_project_folder(self):
         directory = QFileDialog.getExistingDirectory(
@@ -109,15 +108,6 @@ class SetupPanel(FORM_CLASS, QWidget):
             self.settings.setValue(
                 "last_working_directory", directory
             )  # Update last used project
-        self.set_project_directory()
-
-    def set_project_directory(self):
-        """
-        Updates the UI based on the selected working directory.
-        If the directory contains 'model.json', shows a message and hides layer/field selectors.
-        Otherwise, shows the layer/field selectors.
-        """
-        model_path = os.path.join(self.working_dir, "model.json")
 
     def add_world_map(self):
         """Adds the built-in QGIS world map to the canvas."""
@@ -290,3 +280,5 @@ class SetupPanel(FORM_CLASS, QWidget):
         # Update the combo box
         self.previous_project_combo.clear()
         self.previous_project_combo.addItems(reversed(recent_projects))
+        # Make sure the selected item is the directory passed in to ths function
+        self.previous_project_combo.setCurrentText(directory)
