@@ -67,7 +67,6 @@ class SinglePointBufferWorkflow(WorkflowBase):
         self.buffer_distance = int(
             self.attributes.get("single_buffer_point_layer_distance", "5000")
         )
-        self.workflow_is_legacy = False  # This is a new workflow, not a legacy one
 
     def _process_features_for_area(
         self,

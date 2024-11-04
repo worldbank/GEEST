@@ -131,8 +131,6 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
         )
         self.temp_layers = []  # Store intermediate layers
-        # We can remove this next line once all workflows are refactored
-        self.workflow_is_legacy = False
         QgsMessageLog.logMessage(
             f"Using ORS API key: {self.masked_api_key}", "Geest", Qgis.Info
         )

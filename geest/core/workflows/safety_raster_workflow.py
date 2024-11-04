@@ -55,7 +55,6 @@ class SafetyRasterWorkflow(WorkflowBase):
         self.raster_layer = QgsRasterLayer(
             layer_name, "Nighttime Lights Raster", "gdal"
         )
-        self.workflow_is_legacy = False
 
     def _process_raster_for_area(
         self,

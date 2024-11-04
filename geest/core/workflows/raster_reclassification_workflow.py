@@ -178,7 +178,6 @@ class RasterReclassificationWorkflow(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        self.workflow_is_legacy = False
 
     def _process_raster_for_area(
         self,

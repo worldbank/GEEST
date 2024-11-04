@@ -6,7 +6,6 @@ from qgis.core import (
 )
 
 from geest.core.workflows import (
-    RasterLayerWorkflow,
     DontUseWorkflow,
     DefaultIndexScoreWorkflow,
     FactorAggregationWorkflow,

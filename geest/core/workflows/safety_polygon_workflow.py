@@ -61,7 +61,6 @@ class SafetyPolygonWorkflow(WorkflowBase):
         self.selected_field = self.attributes.get(
             "classify_poly_into_classes_selected_field", ""
         )
-        self.workflow_is_legacy = False
 
     def _process_features_for_area(
         self,
