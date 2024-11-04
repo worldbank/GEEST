@@ -46,7 +46,18 @@ class JsonTreeItem:
 
         self.factor_font = QFont()
         self.factor_font.setItalic(True)
+
+        self._visible = True
+
         self.updateStatus()
+
+    def set_visibility(self, visible: bool):
+        """Sets the visibility of this item."""
+        self._visible = visible
+
+    def is_visible(self) -> bool:
+        """Returns the visibility status of this item."""
+        return self._visible
 
     def internalPointer(self):
         """Returns a reference to itself, or any unique identifier for the item."""

@@ -1,6 +1,3 @@
-import sys
-import os
-import json
 import uuid
 
 # Change to this when implementing in QGIS
@@ -17,15 +14,11 @@ from qgis.PyQt.QtCore import (
     Qt,
 )
 
-# Change to this when implementing in QGIS
-# from qgis.PyQt.QtGui import (
-from PyQt5.QtGui import QColor
-from geest.utilities import resources_path
-from geest.core import JsonTreeItem
-
+from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QTreeView, QMessageBox
 from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt
-from PyQt5.QtGui import QColor
+from qgis.core import QgsMessageLog, Qgis
+from geest.core import JsonTreeItem
 
 
 class JsonTreeModel(QAbstractItemModel):
@@ -232,6 +225,32 @@ class JsonTreeModel(QAbstractItemModel):
         )
         parent_item.appendChild(indicator_item)
 
+    def toggle_indicator_visibility(self, visible: bool, parent_item=None):
+        """
+        Toggles the visibility of all indicator nodes in the tree.
+
+        Args:
+            visible (bool): Whether to show or hide the indicator nodes.
+            parent_item (JsonTreeItem): Optional parent item to start from. If None, start from root.
+        """
+        QgsMessageLog.logMessage(
+            f"Toggling item visibility for item (was {visible})",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+        parent_item = parent_item if parent_item else self.rootItem
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+            if child_item.role == "indicator":
+                child_item.set_visibility(visible)
+            else:
+                # Recursively process children (dimensions, factors)
+                self.toggle_indicator_visibility(visible, child_item)
+
+        # Notify view about layout changes
+        self.layoutChanged.emit()
+
     def data(self, index, role):
         """
         Provides data for the given index and role, including displaying custom attributes such as the font color,
@@ -248,6 +267,14 @@ class JsonTreeModel(QAbstractItemModel):
             return None
 
         item = index.internalPointer()
+
+        # Skip rendering hidden indicators
+        if not item.is_visible():
+            return None
+
+        # Existing data handling code
+        if role == Qt.DisplayRole:
+            return item.data(index.column())
 
         if role == Qt.DisplayRole:
             return item.data(index.column())
@@ -497,19 +524,21 @@ class JsonTreeModel(QAbstractItemModel):
 
     def rowCount(self, parent=QModelIndex()):
         """
-        Returns the number of child items for the given parent.
+        Returns the number of child items for the given parent, excluding hidden items if visibility is off.
 
         Args:
             parent (QModelIndex): The parent index.
 
         Returns:
-            int: The number of child items under the parent.
+            int: The number of visible child items under the parent.
         """
         if not parent.isValid():
             parentItem = self.rootItem
         else:
             parentItem = parent.internalPointer()
-        return parentItem.childCount()
+
+        # Count only visible items
+        return len([child for child in parentItem.childItems if child.is_visible()])
 
     def columnCount(self, parent=QModelIndex()):
         """
@@ -673,6 +702,27 @@ class JsonTreeView(QTreeView):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.current_editing_index = None
+        self.current_editing_index = None
+
+    def toggle_indicator_nodes(self):
+        """Toggles visibility of all indicator nodes."""
+        indicators_visible = self._indicators_visible()
+        self.model().toggle_indicator_visibility(not indicators_visible)
+        QgsMessageLog.logMessage(
+            f"Toggled indicator nodes (was {indicators_visible})",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
+    def _indicators_visible(self):
+        """Checks if indicators are currently visible."""
+        model = self.model()
+        analysis_item = model.get_analysis_item()
+        for dimension in analysis_item.childItems:
+            for factor in dimension.childItems:
+                for indicator in factor.childItems:
+                    return indicator.is_visible()
+        return True
 
     def edit(self, index, trigger, event):
         """Start editing the item at the given index."""
