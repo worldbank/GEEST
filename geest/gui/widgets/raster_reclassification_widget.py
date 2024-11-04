@@ -85,10 +85,8 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         self.raster_button = QToolButton()
         self.raster_button.setText("...")
         self.raster_button.clicked.connect(self.select_raster)
-        if self.attributes.get(f"{self.widget_key}_raster_layer", False):
-            self.raster_line_edit.setText(
-                self.attributes[f"{self.widget_key}_raster_layer"]
-            )
+        if self.attributes.get(f"{self.widget_key}_raster", False):
+            self.raster_line_edit.setText(self.attributes[f"{self.widget_key}_raster"])
         self.raster_layout.addWidget(self.raster_line_edit)
         self.raster_layout.addWidget(self.raster_button)
         self.main_layout.addLayout(self.raster_layout)
