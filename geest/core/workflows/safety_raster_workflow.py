@@ -9,7 +9,6 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsRasterLayer,
     QgsVectorLayer,
-    QgsRaster,
 )
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
@@ -180,10 +179,6 @@ class SafetyRasterWorkflow(WorkflowBase):
                 "Unsupported data type", "Geest", level=Qgis.Warning
             )
             return None, None, None
-
-        QgsMessageLog.logMessage(
-            f"Raster data type: {data_type}", "Geest", level=Qgis.Info
-        )
 
         # Convert QByteArray to a numpy array with the correct dtype
         raster_array = np.frombuffer(byte_array, dtype=dtype).reshape((height, width))
