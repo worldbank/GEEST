@@ -71,9 +71,7 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         self.main_layout.addWidget(self.raster_layer_combo)
 
         # Restore previously selected raster layer
-        raster_layer_id = self.attributes.get(
-            f"{self.widget_key}_raster_layer_id", None
-        )
+        raster_layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
         if raster_layer_id:
             raster_layer = QgsProject.instance().mapLayer(raster_layer_id)
             if raster_layer:
@@ -85,10 +83,8 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         self.raster_button = QToolButton()
         self.raster_button.setText("...")
         self.raster_button.clicked.connect(self.select_raster)
-        if self.attributes.get(f"{self.widget_key}_raster_layer", False):
-            self.raster_line_edit.setText(
-                self.attributes[f"{self.widget_key}_raster_layer"]
-            )
+        if self.attributes.get(f"{self.widget_key}_raster", False):
+            self.raster_line_edit.setText(self.attributes[f"{self.widget_key}_raster"])
         self.raster_layout.addWidget(self.raster_line_edit)
         self.raster_layout.addWidget(self.raster_button)
         self.main_layout.addLayout(self.raster_layout)
