@@ -161,15 +161,15 @@ class SafetyRasterWorkflow(WorkflowBase):
         # Determine the correct dtype based on the provider's data type
         data_type = provider.dataType(1)
         dtype = None
-        if data_type == 5:  # Float32
+        if data_type == 6:  # Float32
             dtype = np.float32
         elif data_type == 3:  # Int16
             dtype = np.int16
-        elif data_type == 4:  # UInt16
+        elif data_type == 2:  # UInt16
             dtype = np.uint16
-        elif data_type == 6:  # Int32
+        elif data_type == 5:  # Int32
             dtype = np.int32
-        elif data_type == 7:  # UInt32
+        elif data_type == 4:  # UInt32
             dtype = np.uint32
         elif data_type == 1:  # Byte
             dtype = np.uint8
@@ -189,9 +189,9 @@ class SafetyRasterWorkflow(WorkflowBase):
 
         if valid_data.size > 0:
             # Compute statistics
-            max_value = np.max(valid_data)
-            median = np.median(valid_data)
-            percentile_75 = np.percentile(valid_data, 75)
+            max_value = np.max(valid_data).astype(dtype)
+            median = np.median(valid_data).astype(dtype)
+            percentile_75 = np.percentile(valid_data, 75).astype(dtype)
 
             return max_value, median, percentile_75
         else:
