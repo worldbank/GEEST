@@ -57,7 +57,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
             # Connect signals to update the data when user changes selections
             self.polygon_layer_combo.currentIndexChanged.connect(self.update_data)
             self.polygon_shapefile_line_edit.textChanged.connect(self.update_data)
-            # Connect signals to update the data when user changes selections
+            # Connect signals to update the fields when user changes selections
             self.polygon_layer_combo.layerChanged.connect(self.update_field_combo)
             self.polygon_shapefile_line_edit.textChanged.connect(
                 self.update_field_combo
@@ -90,9 +90,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         self.main_layout.addWidget(self.polygon_layer_combo)
 
         # Restore previously selected polygon layer
-        polygon_layer_id = self.attributes.get(
-            f"{self.widget_key} Polygon_layer_id", None
-        )
+        polygon_layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
         if polygon_layer_id:
             polygon_layer = QgsProject.instance().mapLayer(polygon_layer_id)
             if polygon_layer:
@@ -104,9 +102,9 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
         self.polygon_shapefile_button = QToolButton()
         self.polygon_shapefile_button.setText("...")
         self.polygon_shapefile_button.clicked.connect(self.select_polygon_shapefile)
-        if self.attributes.get(f"{self.widget_key} Polygon_shapefile", False):
+        if self.attributes.get(f"{self.widget_key}_shapefile", False):
             self.polygon_shapefile_line_edit.setText(
-                self.attributes[f"{self.widget_key} Polygon_shapefile"]
+                self.attributes[f"{self.widget_key}_shapefile"]
             )
         self.polygon_shapefile_layout.addWidget(self.polygon_shapefile_line_edit)
         self.polygon_shapefile_layout.addWidget(self.polygon_shapefile_button)
@@ -171,6 +169,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
                 return
 
             # Set the vector layer on the field selection combo box, which will automatically populate it
+            QgsProject.instance().addMapLayer(vector_layer, False)
             self.field_selection_combo.setLayer(vector_layer)
             self.field_selection_combo.setEnabled(True)  # Enable once layer is valid
 
