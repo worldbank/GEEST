@@ -71,9 +71,7 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         self.main_layout.addWidget(self.raster_layer_combo)
 
         # Restore previously selected raster layer
-        raster_layer_id = self.attributes.get(
-            f"{self.widget_key}_raster_layer_id", None
-        )
+        raster_layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
         if raster_layer_id:
             raster_layer = QgsProject.instance().mapLayer(raster_layer_id)
             if raster_layer:
