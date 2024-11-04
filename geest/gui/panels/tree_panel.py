@@ -14,6 +14,7 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QHeaderView,
     QCheckBox,
+    QToolButton,
 )
 from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QMovie
@@ -58,6 +59,10 @@ class TreePanel(QWidget):
         self.json_file = json_file
         self.tree_view_visible = True
         self.edit_mode = int(setting(key="edit_mode", default=0))
+        self.run_only_incomplete = (
+            True  # saves time by not running models that have already been run
+        )
+        self.items_to_run = 0  # Count of items that need to be run
 
         layout = QVBoxLayout()
 
@@ -135,9 +140,33 @@ class TreePanel(QWidget):
             self.export_json_button.setToolTip("Export JSON Model File")
             self.export_json_button.clicked.connect(self.export_json_to_file)
 
-        self.prepare_analysis_button = QPushButton("▶️")
-        self.prepare_analysis_button.clicked.connect(self.prepare_analysis_pressed)
+        # Create the split tool button
+        self.prepare_analysis_button = QToolButton()
+        self.prepare_analysis_button.setText("▶️ Run all")
+        self.prepare_analysis_button.setPopupMode(QToolButton.MenuButtonPopup)
+
+        # Connect the main button click to run all
+        self.prepare_analysis_button.clicked.connect(self.run_all)
+
+        # Create the menu for additional options
+        prepare_analysis_menu = QMenu(self.prepare_analysis_button)
+
+        # Add "Run all" action
+        run_all_action = QAction("Run all", self)
+        run_all_action.triggered.connect(self.run_all)
+        prepare_analysis_menu.addAction(run_all_action)
+
+        # Add "Run incomplete" action
+        run_incomplete_action = QAction("Run incomplete", self)
+        run_incomplete_action.triggered.connect(self.run_incomplete)
+        prepare_analysis_menu.addAction(run_incomplete_action)
+
+        # Set the menu on the tool button
+        self.prepare_analysis_button.setMenu(prepare_analysis_menu)
+
+        # Add the button to the button bar
         button_bar.addWidget(self.prepare_analysis_button)
+
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
@@ -612,6 +641,9 @@ class TreePanel(QWidget):
                 geest_group = root.insertGroup(
                     0, "Geest"
                 )  # Insert at the top of the layers panel
+                geest_group.setIsMutuallyExclusive(
+                    True
+                )  # Make the group mutually exclusive
 
             # Traverse the tree view structure to determine the appropriate subgroup based on paths
             path_list = item.getPaths()
@@ -620,6 +652,10 @@ class TreePanel(QWidget):
                 sub_group = parent_group.findGroup(path)
                 if sub_group is None:
                     sub_group = parent_group.addGroup(path)
+                    sub_group.setIsMutuallyExclusive(
+                        True
+                    )  # Make each subgroup mutually exclusive
+
                 parent_group = sub_group
 
             # Check if a layer with the same data source exists in the correct group
@@ -642,7 +678,10 @@ class TreePanel(QWidget):
             else:
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)
-                parent_group.addLayer(layer)
+                layer_tree_layer = parent_group.addLayer(layer)
+                layer_tree_layer.setExpanded(
+                    False
+                )  # Collapse the legend for the layer by default
                 QgsMessageLog.logMessage(
                     f"Added layer: {layer.name()} to group: {parent_group.name()}",
                     tag="Geest",
@@ -735,6 +774,23 @@ class TreePanel(QWidget):
             # Recursively process children (dimensions, factors)
             self._start_workflows(child_item, role)
 
+    def _count_workflows_to_run(self, parent_item=None):
+        """
+        Recursively count workflows that need to be run visiting each node in the tree.
+
+        :param parent_item: The parent item to process. If none, start from the root.
+        """
+        if parent_item is None:
+            parent_item = self.model.rootItem
+
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+            self._count_workflows_to_run(child_item)
+            if child_item.data(3).get("result_file", None) and self.run_only_incomplete:
+                self.items_to_run += 1
+            elif not self.run_only_incomplete:
+                self.items_to_run += 1
+
     def queue_workflow_task(self, item, role):
         """Queue a workflow task based on the role of the item.
 
@@ -742,10 +798,13 @@ class TreePanel(QWidget):
             The task directly modifies the item's properties to update the tree.
         """
         task = None
+
         cell_size_m = (
             self.model.get_analysis_item().data(3).get("analysis_cell_size_m", 100.0)
         )
-
+        attributes = item.data(3)
+        if attributes.get("result_file", None) and self.run_only_incomplete:
+            return
         if role == item.role and role == "indicator":
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "factor":
@@ -771,7 +830,12 @@ class TreePanel(QWidget):
         task.progressChanged.connect(self.task_progress_updated)
 
     def run_item(self, item, role):
+
+        self.items_to_run = 0
+        self.run_only_incomplete = False
+
         self.queue_workflow_task(item, role)
+        self._count_workflows_to_run(item)
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
@@ -871,13 +935,27 @@ class TreePanel(QWidget):
         # Assuming column 1 is where status updates are shown
         item.setData(1, status)
 
-    def prepare_analysis_pressed(self):
+    def run_all(self):
+        """Run all workflows in the tree, regardless of their status."""
+        self.run_only_incomplete = False
+        self.items_to_run = 0
+        self._count_workflows_to_run()
+        self._queue_workflows()
+
+    def run_incomplete(self):
         """
         This function processes all nodes in the QTreeView that have the 'layer' role.
         It iterates over the entire tree, collecting nodes with the 'layer' role, and
         processes each one by showing an animated icon, waiting for 2 seconds, and
         then removing the animation.
         """
+        self.run_only_incomplete = True
+        self.items_to_run = 0
+        self._count_workflows_to_run()
+        self._queue_workflows()
+
+    def _queue_workflows(self):
+
         self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
@@ -887,10 +965,7 @@ class TreePanel(QWidget):
         total_items = self.model.rowCount()
         self.overall_progress_bar.setMaximum(total_items)
         self.workflow_progress_bar.setValue(0)
-        self.overall_progress_bar.setMaximum(100)
         self.run_next_worflow_queue()
-        # rest will be called iteratively when the workflow queue managed completed slot is called
-        # this is set up in the ctor of the tree panel
 
     def run_next_worflow_queue(self):
         """

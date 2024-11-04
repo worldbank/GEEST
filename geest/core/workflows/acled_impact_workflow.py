@@ -332,24 +332,43 @@ class AcledImpactWorkflow(WorkflowBase):
             f"Unioned areas have {len(dissolve)} features", tag="Geest", level=Qgis.Info
         )
         # Step 6: Iterate through the unioned features to assign the minimum value in overlapping areas
+        unique_geometries = {}
+
         for feature in union.getFeatures():
-            geom = feature.geometry()
-            attrs = feature.attributes()
+            geom = feature.geometry().asWkt()
+            attrs = (
+                feature.attributes()
+            )  # Use geometry as a key to identify unique areas
             value_1 = attrs[input_layer.fields().indexFromName("value")]
             value_2 = attrs[
                 input_layer.fields().indexFromName("value_2")
             ]  # This comes from the unioned layer
 
-            # Assign the minimum value to the overlapping area (lower number = higher rank)
+            # Assign the minimum value to the overlapping area
             min_value = min(value_1, value_2)
 
-            # Create a new feature with this geometry and the min value
-            new_feature = QgsFeature()
-            new_feature.setGeometry(geom)
-            new_feature.setAttributes([min_value])
+            QgsMessageLog.logMessage(
+                f"Processing feature with min value: {min_value}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
 
-            # Add the new feature to the result layer
-            provider.addFeature(new_feature)
+            # Check if this geometry is already in the dictionary
+            if geom in unique_geometries:
+                # If it exists, update only if the new min_value is lower
+                if min_value < unique_geometries[geom].attributes()[0]:
+                    unique_geometries[geom].setAttribute("min_value", min_value)
+            else:
+                # Add new unique geometry with the min_value attribute
+                new_feature = QgsFeature()
+                new_feature.setGeometry(feature.geometry())
+                new_feature.setAttributes([min_value])
+                unique_geometries[geom] = new_feature
+
+        # Add the filtered features to the result layer
+        for unique_feature in unique_geometries.values():
+            provider.addFeature(unique_feature)
+
         full_output_filepath = os.path.join(
             self.workflow_directory, f"{self.layer_id}_final.shp"
         )
