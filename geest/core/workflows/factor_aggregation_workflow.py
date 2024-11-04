@@ -35,6 +35,5 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         self.weight_key = "indicator_weighting"
         self.result_file_tag = "result_file"
         self.raster_path_key = "result_file"
-        self.workflow_is_legacy = False
         self.layer_id = self.id
         self.workflow_name = "factor_aggregation"

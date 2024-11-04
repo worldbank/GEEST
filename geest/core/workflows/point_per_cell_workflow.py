@@ -57,7 +57,6 @@ class PointPerCellWorkflow(WorkflowBase):
                 return False
 
         self.features_layer = QgsVectorLayer(layer_path, "point_per_cell_layer", "ogr")
-        self.workflow_is_legacy = False
 
     def _process_features_for_area(
         self,

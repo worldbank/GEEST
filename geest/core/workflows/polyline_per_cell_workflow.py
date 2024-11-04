@@ -43,7 +43,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
 
         if not layer_path:
             QgsMessageLog.logMessage(
-                "Nothing found in polyline_per_cell_shapefile, trying Point per Cell_layer_source.",
+                "Nothing found in polyline_per_cell_shapefile, trying polygline_per_cell_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
@@ -59,7 +59,6 @@ class PolylinePerCellWorkflow(WorkflowBase):
         self.features_layer = QgsVectorLayer(
             layer_path, "polyline_per_cell Layer", "ogr"
         )
-        self.workflow_is_legacy = False
 
     def _process_features_for_area(
         self,

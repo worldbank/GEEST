@@ -135,6 +135,7 @@ class PolylineWidget(BaseIndicatorWidget):
                 polyline_layer.wkbType()
             )
             self.attributes[f"{self.widget_key}_layer_id"] = polyline_layer.id()
+
         self.attributes[f"{self.widget_key}_shapefile"] = (
             self.polyline_shapefile_line_edit.text()
         )

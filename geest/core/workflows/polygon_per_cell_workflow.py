@@ -59,7 +59,6 @@ class PolygonPerCellWorkflow(WorkflowBase):
         self.features_layer = QgsVectorLayer(
             layer_path, "polygon_per_cell_layer", "ogr"
         )
-        self.workflow_is_legacy = False
 
     def _process_features_for_area(
         self,

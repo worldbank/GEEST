@@ -1,6 +1,8 @@
 import json
 import os
 import shutil
+import re
+from typing import Union, Dict, List
 from qgis.PyQt.QtWidgets import (
     QAction,
     QCheckBox,
@@ -258,6 +260,9 @@ class TreePanel(QWidget):
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
         """Change the working directory and load the model.json if available."""
+        QgsMessageLog.logMessage(
+            f"Working directory changed to {new_directory}", "Geest", level=Qgis.Info
+        )
         self.working_directory = new_directory
         model_path = os.path.join(new_directory, "model.json")
 
@@ -268,7 +273,7 @@ class TreePanel(QWidget):
         if os.path.exists(model_path):
             try:
                 self.json_file = model_path
-                self.load_json()
+                self.load_json()  # sets the class member json_data
                 self.model.loadJsonData(self.json_data)
                 self.treeView.expandAll()
                 QgsMessageLog.logMessage(
@@ -376,6 +381,9 @@ class TreePanel(QWidget):
         """Load the JSON data from the file."""
         with open(self.json_file, "r") as f:
             self.json_data = json.load(f)
+            QgsMessageLog.logMessage(
+                f"Loaded JSON data from {self.json_file}", "Geest", level=Qgis.Info
+            )
 
     def load_json_from_file(self):
         """Prompt the user to load a JSON file and update the tree."""

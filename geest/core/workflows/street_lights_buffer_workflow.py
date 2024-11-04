@@ -71,7 +71,6 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             return False
 
         self.buffer_distance = 20  # 20m buffer
-        self.workflow_is_legacy = False  # This is a new workflow, not a legacy one
 
     def _process_features_for_area(
         self,

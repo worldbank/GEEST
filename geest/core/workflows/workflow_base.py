@@ -86,7 +86,6 @@ class WorkflowBase(ABC):
         self.attributes = self.item.data(3)
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
         self.attributes["result"] = "Not Run"
-        self.workflow_is_legacy = True
         self.aggregation = False
 
     #
@@ -198,17 +197,6 @@ class WorkflowBase(ABC):
         self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
 
         QgsMessageLog.logMessage("Processing Started", tag="Geest", level=Qgis.Info)
-
-        #
-        # TODO: Remove this once all workflows are updated to the new structure
-        #
-
-        if self.workflow_is_legacy:
-            return self.do_execute()
-
-        #
-        # END TODO
-        #
 
         feedback = QgsProcessingFeedback()
         output_rasters = []

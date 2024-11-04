@@ -43,7 +43,6 @@ class AggregationWorkflowBase(WorkflowBase):
             None  # This should be set by the child class e.g. "result_file"
         )
         self.aggregation = True
-        self.workflow_is_legacy = False
 
     def get_weights(self) -> list:
         """
