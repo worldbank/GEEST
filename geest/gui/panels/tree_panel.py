@@ -273,6 +273,7 @@ class TreePanel(QWidget):
 
         This method is needed to avoid passing bool via the slot.
         """
+        self.run_only_incomplete = False
         self._clear_workflows()
         self.save_json_to_working_directory()
 
@@ -1045,6 +1046,7 @@ class TreePanel(QWidget):
         self.run_only_incomplete = True
         self.items_to_run = 0
         self._count_workflows_to_run()
+        self._clear_workflows()
         self._queue_workflows()
 
     def _queue_workflows(self):
