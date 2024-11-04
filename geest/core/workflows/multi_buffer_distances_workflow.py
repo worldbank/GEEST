@@ -65,8 +65,8 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            distances = self.attributes.get("default_multi_buffer_distances", None)
-            if not distances:
+            self.distances = self.attributes.get("default_multi_buffer_distances", None)
+            if not self.distances:
                 QgsMessageLog.logMessage(
                     "Invalid default travel distances and no default specified.",
                     tag="Geest",
@@ -74,10 +74,10 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 )
                 raise Exception("Invalid travel distances.")
         try:
-            self.distances = [float(x) for x in self.distances.split(",")]
+            self.distances = [float(x.strip()) for x in self.distances.split(",")]
         except Exception as e:
             QgsMessageLog.logMessage(
-                "Invalid travel distances provided. Distances should be a comma separated list of up to 5 numbers.",
+                "Invalid travel distances provided. Distances should be a comma-separated list of up to 5 numbers.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
