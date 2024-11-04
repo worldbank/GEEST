@@ -184,6 +184,12 @@ class TreePanel(QWidget):
         self.model_button.clicked.connect(self.switch_model)
         # button_bar.addWidget(self.model_button)
 
+        self.toggle_visibility_button = QPushButton("👁️", self)
+        self.toggle_visibility_button.clicked.connect(
+            self.treeView.toggle_indicator_nodes
+        )
+        button_bar.addWidget(self.toggle_visibility_button)
+
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
