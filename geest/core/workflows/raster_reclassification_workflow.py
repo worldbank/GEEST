@@ -1,6 +1,4 @@
 import os
-import glob
-import shutil
 from qgis.core import (
     QgsMessageLog,
     Qgis,
@@ -15,7 +13,6 @@ from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.algorithms import RasterReclassificationProcessor
 
 
 class RasterReclassificationWorkflow(WorkflowBase):
@@ -41,6 +38,11 @@ class RasterReclassificationWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_environmental_hazards"
+
+        if self.layer_id == "landslide":
+            self.range_boundaries = 2  # min and max values are included
+        else:
+            self.range_boundaries = 0  # default value for range boundaries
 
         layer_name = self.attributes.get("use_environmental_hazards_raster", None)
 
@@ -226,7 +228,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "INPUT_RASTER": input_raster,
             "RASTER_BAND": 1,  # Band number to apply the reclassification
             "TABLE": self.reclassification_rules,  # Reclassification table
-            "RANGE_BOUNDARIES": 0,  # Inclusive lower boundary
+            "RANGE_BOUNDARIES": self.range_boundaries,
             "OUTPUT": "TEMPORARY_OUTPUT",
         }
 
