@@ -748,7 +748,7 @@
                             "use_add_layers_manually": 0,
                             "use_classify_poly_into_classes": 1,
                             "use_csv_to_point_layer": 0,
-                            "use_poly_per_cell": 1,
+                            "use_poly_per_cell": 0,
                             "use_polyline_per_cell": 0,
                             "use_point_per_cell": 0,
                             "use_nighttime_lights": 0,
