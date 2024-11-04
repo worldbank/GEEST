@@ -233,11 +233,11 @@ class JsonTreeModel(QAbstractItemModel):
             visible (bool): Whether to show or hide the indicator nodes.
             parent_item (JsonTreeItem): Optional parent item to start from. If None, start from root.
         """
-        QgsMessageLog.logMessage(
-            f"Toggling item visibility for item (was {visible})",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+        # QgsMessageLog.logMessage(
+        #    f"Toggling item visibility for item (was {visible})",
+        #    tag="Geest",
+        #    level=Qgis.Info,
+        # )
 
         parent_item = parent_item if parent_item else self.rootItem
         for i in range(parent_item.childCount()):
@@ -289,7 +289,7 @@ class JsonTreeModel(QAbstractItemModel):
         ):  # Icon for the status column
             return item.getStatusIcon()
         elif role == Qt.ToolTipRole and index.column() == 1:
-            return item.getStatusTooltip()
+            return item.getStatus()
         elif role == Qt.ToolTipRole and index.column() == 0:
             return item.getItemTooltip()
         elif role == Qt.FontRole:
@@ -708,11 +708,11 @@ class JsonTreeView(QTreeView):
         """Toggles visibility of all indicator nodes."""
         indicators_visible = self._indicators_visible()
         self.model().toggle_indicator_visibility(not indicators_visible)
-        QgsMessageLog.logMessage(
-            f"Toggled indicator nodes (was {indicators_visible})",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+        # QgsMessageLog.logMessage(
+        #    f"Toggled indicator nodes (was {indicators_visible})",
+        #    tag="Geest",
+        #    level=Qgis.Info,
+        # )
 
     def _indicators_visible(self):
         """Checks if indicators are currently visible."""

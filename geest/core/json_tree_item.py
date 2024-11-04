@@ -49,8 +49,6 @@ class JsonTreeItem:
 
         self._visible = True
 
-        self.updateStatus()
-
     def set_visibility(self, visible: bool):
         """Sets the visibility of this item."""
         self._visible = visible
@@ -109,6 +107,14 @@ class JsonTreeItem:
     def isAnalysis(self):
         return self.role == "analysis"
 
+    def clear(self):
+        """
+        Mark the item as not run, keeping any configurations made
+        """
+        data = self.itemData[3]
+        data["result"] = "Not run"
+        data["result_file"] = ""
+
     def getIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
         if self.isDimension():
@@ -145,36 +151,22 @@ class JsonTreeItem:
     def getStatusIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
         status = self.getStatus()
-        if status == "✔️":
+        if status == "Completed successfully":
             return QIcon(resources_path("resources", "icons", "completed-success.svg"))
-        elif status == "-":
+        elif status == "Required and not configured":
             return QIcon(
                 resources_path("resources", "icons", "required-not-configured.svg")
             )
-        elif status == "!":
+        elif status == "Not configured (optional)":
             return QIcon(resources_path("resources", "icons", "not-configured.svg"))
-        elif status == "x":
+        elif status == "Configured, not run":
+            return QIcon(resources_path("resources", "icons", "not-run.svg"))
+        elif status == "Workflow failed":
             return QIcon(resources_path("resources", "icons", "failed.svg"))
-        elif status == "e":
+        elif status == "WRITE TOOL TIP":
             return QIcon(resources_path("resources", "icons", ".svg"))
         else:
             return QIcon(resources_path("resources", "icons", ".svg"))
-
-    def getStatusTooltip(self):
-        """Retrieve the appropriate tooltip for the item based on its role."""
-        status = self.getStatus()
-        if status == "✔️":
-            return "Completed successfully"
-        elif status == "-":
-            return "Required and not configured"
-        elif status == "!":
-            return "Not configured (optional)"
-        elif status == "x":
-            return "Workflow failed"
-        elif status == "e":
-            return "WRITE TOOL TIP"
-        else:
-            return ""
 
     def getStatus(self):
         """Return the status of the item as single character."""
@@ -188,23 +180,26 @@ class JsonTreeItem:
             # QgsMessageLog.logMessage(f"Data: {data}", tag="Geest", level=Qgis.Info)
             status = ""
             if "Error" in data.get("result", ""):
-                return "x"
+                return "Workflow failed"
             if "Failed" in data.get("result", ""):
-                return "x"
+                return "Workflow failed"
             # Item required and not configured
             if "Do Not Use" in data.get("analysis_mode", "") and data.get(
                 "indicator_required", False
             ):
-                return "-"
+                return "Required and not configured"
             # Item not required but not configured
             if "Do Not Use" in data.get("analysis_mode", "") and not data.get(
                 "indicator_required", False
             ):
-                return "!"
+                return "Not configured (optional)"
+            if "Not run" in data.get("result", "") and not data.get("result_file", ""):
+                return "Configured, not run"
             if "Workflow Completed" not in data.get("result", ""):
-                return "x"
+                return "Workflow failed"
             if "Workflow Completed" in data.get("result", ""):
-                return "✔️"
+                return "Completed successfully"
+            return "WRITE TOOL TIP"
 
         except Exception as e:
             verbose_mode = setting("verbose_mode", False)
@@ -215,30 +210,7 @@ class JsonTreeItem:
                 QgsMessageLog.logMessage(
                     traceback.format_exc(), tag="Geest", level=Qgis.Warning
                 )
-                return "e"  # e for error
-
-    def updateStatus(self, status=None):
-        """Update the status of the item.
-
-        If no status is provided we will compute the best status based on the item's attributes.
-
-        :param status: The status to set the item to.
-
-        :return: None
-
-        Note: The status is stored in the second column of the itemData
-        """
-        try:
-            if status is None:
-                status = self.getStatus()
-            # self.itemData[1] = status - taken care of by decoration role rather
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error updating status: {e}", tag="Geest", level=Qgis.Warning
-            )
-            QgsMessageLog.logMessage(
-                traceback.format_exc(), tag="Geest", level=Qgis.Warning
-            )
+                return "WRITE TOOL TIP"
 
     def getFont(self):
         """Retrieve the appropriate font for the item based on its role."""

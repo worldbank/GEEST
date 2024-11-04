@@ -190,6 +190,10 @@ class TreePanel(QWidget):
         )
         button_bar.addWidget(self.toggle_visibility_button)
 
+        self.clear_button = QPushButton("Clear", self)
+        self.clear_button.clicked.connect(self.clear_button_clicked)
+        button_bar.addWidget(self.clear_button)
+
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
@@ -262,6 +266,15 @@ class TreePanel(QWidget):
 
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
+
+    def clear_button_clicked(self):
+        """
+        Slot for handling the clear button click.
+
+        This method is needed to avoid passing bool via the slot.
+        """
+        self._clear_workflows()
+        self.save_json_to_working_directory()
 
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
@@ -812,6 +825,49 @@ class TreePanel(QWidget):
             # Recursively process children (dimensions, factors)
             self._start_workflows(child_item, role)
 
+    def _clear_workflows(self, parent_item=None):
+        """
+        Recursively mark workflows as not done, delete their working directories and their file_paths.
+
+        It will reflect the self.run_only_incomplete flag to only clear incomplete workflows if requested.
+
+        :param parent_item: The parent item to process. If none, start from the root.
+        """
+        # if the parent item is a boolean, it means we are running this from the clear button
+        if parent_item is None:
+            parent_item = self.model.rootItem
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+            self._clear_workflows(child_item)
+            if child_item.data(3).get("result_file", None) and self.run_only_incomplete:
+                # if the item role is indicator, remove its entire folder
+                if child_item.role == "indicator":
+                    result_file = child_item.data(3).get("result_file")
+                    if result_file:
+                        folder = os.path.dirname(result_file)
+                        # check the folder exists
+                        if os.path.exists(folder):
+                            QgsMessageLog.logMessage(
+                                f"Removing {folder}", tag="Geest", level=Qgis.Info
+                            )
+                            shutil.rmtree(folder)
+                # if the item rols if factor or dimension, remove the files in it
+                # but not subdirs in case the user elected to keep them
+                else:
+                    result_file = child_item.data(3).get("result_file")
+                    if result_file:
+                        folder = os.path.dirname(result_file)
+                        # check if the folder exists
+                        if os.path.exists(folder):
+                            for file in os.listdir(folder):
+                                file_path = os.path.join(folder, file)
+                                if os.path.isfile(file_path):
+                                    os.remove(file_path)
+                child_item.clear()  # sets status to not run and blanks file path
+
+            elif not self.run_only_incomplete:
+                child_item.clear()
+
     def _count_workflows_to_run(self, parent_item=None):
         """
         Recursively count workflows that need to be run visiting each node in the tree.
@@ -942,8 +998,6 @@ class TreePanel(QWidget):
         """
         self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
         self.workflow_progress_bar.setValue(100)
-
-        item.updateStatus()
         self.save_json_to_working_directory()
 
         self.add_to_map(item)
@@ -978,6 +1032,7 @@ class TreePanel(QWidget):
         self.run_only_incomplete = False
         self.items_to_run = 0
         self._count_workflows_to_run()
+        self._clear_workflows()
         self._queue_workflows()
 
     def run_incomplete(self):
