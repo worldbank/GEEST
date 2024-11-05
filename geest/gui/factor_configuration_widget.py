@@ -2,6 +2,7 @@ from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QButtonGroup
 from qgis.core import QgsMessageLog, Qgis
 from qgis.PyQt.QtCore import pyqtSignal
 from .configuration_widget_factory import ConfigurationWidgetFactory
+from geest.core import JsonTreeItem
 
 
 class FactorConfigurationWidget(QWidget):
@@ -9,15 +10,26 @@ class FactorConfigurationWidget(QWidget):
     Widget for configuring factors.
 
     The idea here is that you do the configuration of the factor and it is
-    applied to all of teh indicators that are part of the factor.
+    applied to all of the indicators that are part of the factor.
+
+    It assumes that all indicators belonging to the factor have the same
+    configuration options.
     """
 
     data_changed = pyqtSignal()
 
-    def __init__(self, attributes: dict) -> None:
+    def __init__(self, item: JsonTreeItem, guids: list) -> None:
+        """
+        Initialize the widget with the item and guids.
+        :param item: Item containing the factor configuration.
+        :param guids: List of guids for the indicators that the settings in the config will be applied to.
+        """
         super().__init__()
-        # This is a reference to the attributes dictionary
-        # So any changes made will propogate to the JSONTreeItem
+        self.guids = guids  # List of guids for the indicators that the settings in the config will be applied to
+        self.item = item
+        # This returns a reference so any changes you make to attributes
+        # will also update the indicator item
+        attributes = item.getItemByGuid(guids[0]).attributes()
         self.attributes = attributes
         self.layout: QVBoxLayout = QVBoxLayout()
         self.button_group: QButtonGroup = QButtonGroup(self)
@@ -73,7 +85,19 @@ class FactorConfigurationWidget(QWidget):
             self.button_group.checkedButton().label_text.lower().replace(" ", "_")
         )
         new_data["analysis_mode"] = snake_case_mode
-        self.attributes.update(new_data)
+
+        # calculate the changes between new_data and self.attributes
+        # so that we can apply them to every indicator in self.guids list
+        changed_attributes = {
+            key: new_data[key]
+            for key in new_data
+            if key in self.attributes and self.attributes[key] != new_data[key]
+        }
+        for guid in self.guids:
+            indicator = self.item.getItemByGuid(guid)
+            indicator.attributes().update(changed_attributes)
+
+        # Do we need this?
         self.data_changed.emit()
         # QgsMessageLog.logMessage(
         #    f"Updated attributes dictionary: {self.attributes}",

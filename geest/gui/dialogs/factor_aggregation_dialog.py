@@ -116,10 +116,7 @@ class FactorAggregationDialog(QDialog):
         )
         layout.addSpacerItem(expanding_spacer)
 
-        indicator_guid = self.guids[0]
-        item = self.tree_item.getItemByGuid(indicator_guid)
-        attributes = item.attributes()
-        configuration_widget = FactorConfigurationWidget(attributes)
+        configuration_widget = FactorConfigurationWidget(self.tree_item, self.guids)
         layout.addWidget(configuration_widget)
 
         # Table setup
@@ -168,9 +165,9 @@ class FactorAggregationDialog(QDialog):
             indicator_weighting = item.attribute("factor_weighting", 0)
             weighting_item = QLineEdit(str(indicator_weighting))
             self.table.setCellWidget(row, 2, weighting_item)
-            self.weightings[indicator_guid] = weighting_item
+            self.weightings[guid] = weighting_item
 
-            guid_item = QTableWidgetItem(indicator_guid)
+            guid_item = QTableWidgetItem(guid)
             guid_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 3, guid_item)
 
