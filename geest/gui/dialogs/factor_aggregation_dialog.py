@@ -134,7 +134,7 @@ class FactorAggregationDialog(QDialog):
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
             data_source_widget = DataSourceWidgetFactory.create_widget(
-                "use_csv_to_point_layer", 1, attributes
+                attributes["analysis_mode"], 1, attributes
             )
             data_source_widget.setSizePolicy(
                 QSizePolicy.Expanding, QSizePolicy.Preferred

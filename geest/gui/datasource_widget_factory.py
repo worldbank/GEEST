@@ -2,6 +2,7 @@ from qgis.core import QgsMessageLog, Qgis
 from geest.gui.widgets.datasource_widgets import (
     BaseDataSourceWidget,
     AcledCsvLayerWidget,
+    RasterDataSourceWidget,
 )
 
 from geest.core import setting
@@ -49,15 +50,13 @@ class DataSourceWidgetFactory:
             # if key == "use_point_per_cell" and value == 1:
             #     return PointLayerWidget(label_text=key, attributes=attributes)
             if key == "use_csv_to_point_layer" and value == 1:
-                return AcledCsvLayerWidget(attributes=attributes)
+                return AcledCsvLayerWidget(key=key, attributes=attributes)
             # if key == "use_classify_poly_into_classes" and value == 1:
             #     return SafetyPolygonWidget(label_text=key, attributes=attributes)
             # if key == "use_nighttime_lights" and value == 1:
             #     return SafetyRasterWidget(label_text=key, attributes=attributes)
-            # if key == "use_environmental_hazards" and value == 1:
-            #     return RasterReclassificationWidget(
-            #         label_text=key, attributes=attributes
-            #     )
+            if key == "use_environmental_hazards" and value == 1:
+                return RasterDataSourceWidget(key=key, attributes=attributes)
             # if key == "use_street_lights" and value == 1:
             #     return StreetLightsWidget(label_text=key, attributes=attributes)
             else:
