@@ -240,17 +240,13 @@ class JsonTreeItem:
                 .lower()
                 .replace(" ", "_")
             )
-            path.append(
-                self.parentItem.attributes().get("id", "").lower().replace(" ", "_")
-            )
-            path.append(self.attributes().get("id", "").lower().replace(" ", "_"))
+            path.append(self.parentItem.attribute("id", "").lower().replace(" ", "_"))
+            path.append(self.attribute("id", "").lower().replace(" ", "_"))
         elif self.isFactor():
-            path.append(
-                self.parentItem.attributes().get("id", "").lower().replace(" ", "_")
-            )
-            path.append(self.attributes().get("id", "").lower().replace(" ", "_"))
+            path.append(self.parentItem.attribute("id", "").lower().replace(" ", "_"))
+            path.append(self.attribute("id", "").lower().replace(" ", "_"))
         if self.isDimension():
-            path.append(self.attributes().get("id", "").lower().replace(" ", "_"))
+            path.append(self.attribute("id", "").lower().replace(" ", "_"))
         return path
 
     def attributes(self):
@@ -261,21 +257,25 @@ class JsonTreeItem:
         """
         return self.itemData[3]
 
+    def attribute(self, key, default=None):
+        """Return the value of the attribute with the specified key."""
+        return self.attributes().get(key, default)
+
     def getFactorAttributes(self):
         """Return the dict of indicators (or layers) under this factor."""
         attributes = {}
         if self.isFactor():
-            attributes["dimension_id"] = self.parentItem.attributes().get("id", "")
+            attributes["dimension_id"] = self.parentItem.attribute("id", "")
             attributes["analysis_mode"] = "factor_aggregation"
             attributes["factor_id"] = self.data(0)
             attributes["indicators"] = [
                 {
                     "guid": child.guid,
                     "indicator_no": i,
-                    "indicator_id": child.attributes().get("id", ""),
+                    "indicator_id": child.attribute("id", ""),
                     "indicator_name": child.data(0),
                     "indicator_weighting": child.data(2),
-                    "result_file": child.attributes().get("result_file", ""),
+                    "result_file": child.attribute("result_file", ""),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -290,10 +290,10 @@ class JsonTreeItem:
             attributes["factors"] = [
                 {
                     "factor_no": i,
-                    "factor_id": child.attributes().get("id", ""),
+                    "factor_id": child.attribute("id", ""),
                     "factor_name": child.data(0),
                     "factor_weighting": child.data(2),
-                    "result_file": child.attributes().get(f"result_file", ""),
+                    "result_file": child.attribute(f"result_file", ""),
                 }
                 for i, child in enumerate(self.childItems)
             ]
@@ -303,24 +303,20 @@ class JsonTreeItem:
         """Return the dict of dimensions under this analysis."""
         attributes = {}
         if self.isAnalysis():
-            attributes["analysis_name"] = self.attributes().get(
-                "analysis_name", "Not Set"
-            )
-            attributes["description"] = self.attributes().get(
+            attributes["analysis_name"] = self.attribute("analysis_name", "Not Set")
+            attributes["description"] = self.attribute(
                 "analysis_description", "Not Set"
             )
-            attributes["working_folder"] = self.attributes().get(
-                "working_folder", "Not Set"
-            )
-            attributes["cell_size_m"] = self.attributes().get("cell_size_m", 100)
+            attributes["working_folder"] = self.attribute("working_folder", "Not Set")
+            attributes["cell_size_m"] = self.attribute("cell_size_m", 100)
 
             attributes["dimensions"] = [
                 {
                     "dimension_no": i,
-                    "dimension_id": child.attributes().get("id", ""),
+                    "dimension_id": child.attribute("id", ""),
                     "dimension_name": child.data(0),
                     "dimension_weighting": child.data(2),
-                    "result_file": child.attributes().get(f"result_file", ""),
+                    "result_file": child.attribute(f"result_file", ""),
                 }
                 for i, child in enumerate(self.childItems)
             ]

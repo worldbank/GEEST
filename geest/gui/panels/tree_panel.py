@@ -277,8 +277,6 @@ class TreePanel(QWidget):
         self.run_only_incomplete = False
         self._clear_workflows()
         self.save_json_to_working_directory()
-        # refresh the tree view
-        self.model.loadJsonData(self.json_data)
 
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
@@ -668,7 +666,7 @@ class TreePanel(QWidget):
                         level=Qgis.Critical,
                     )
 
-        layer_uri = item.attributes().get(f"result_file")
+        layer_uri = item.attribute(f"result_file")
 
         if layer_uri:
             layer_name = item.data(0)
@@ -838,13 +836,10 @@ class TreePanel(QWidget):
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
             self._clear_workflows(child_item)
-            if (
-                child_item.attributes().get("result_file", None)
-                and self.run_only_incomplete
-            ):
+            if child_item.attribute("result_file", None) and self.run_only_incomplete:
                 # if the item role is indicator, remove its entire folder
                 if child_item.role == "indicator":
-                    result_file = child_item.attributes().get("result_file")
+                    result_file = child_item.attribute("result_file")
                     if result_file:
                         folder = os.path.dirname(result_file)
                         # check the folder exists
@@ -856,7 +851,7 @@ class TreePanel(QWidget):
                 # if the item rols if factor or dimension, remove the files in it
                 # but not subdirs in case the user elected to keep them
                 else:
-                    result_file = child_item.attributes().get("result_file")
+                    result_file = child_item.attribute("result_file")
                     if result_file:
                         folder = os.path.dirname(result_file)
                         # check if the folder exists
@@ -882,10 +877,7 @@ class TreePanel(QWidget):
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
             self._count_workflows_to_run(child_item)
-            if (
-                child_item.attributes().get("result_file", None)
-                and self.run_only_incomplete
-            ):
+            if child_item.attribute("result_file", None) and self.run_only_incomplete:
                 self.items_to_run += 1
             elif not self.run_only_incomplete:
                 self.items_to_run += 1
@@ -904,7 +896,7 @@ class TreePanel(QWidget):
             .get("analysis_cell_size_m", 100.0)
         )
         attributes = item.attributes
-        if attributes.get("result_file", None) and self.run_only_incomplete:
+        if attributes().get("result_file", None) and self.run_only_incomplete:
             return
         if role == item.role and role == "indicator":
             task = self.queue_manager.add_workflow(item, cell_size_m)

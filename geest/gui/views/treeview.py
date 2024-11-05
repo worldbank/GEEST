@@ -360,10 +360,10 @@ class JsonTreeModel(QAbstractItemModel):
             # Serialize each item, including UUID
             if item.role == "analysis":
                 json_data = {
-                    "analysis_name": item.attributes["analysis_name"],
-                    "description": item.attributes["description"],
-                    "working_folder": item.attributes["working_folder"],
-                    "analysis_cell_size_m": item.attributes["analysis_cell_size_m"],
+                    "analysis_name": item.attribute("analysis_name"),
+                    "description": item.attribute("description"),
+                    "working_folder": item.attribute("working_folder"),
+                    "analysis_cell_size_m": item.attribute("analysis_cell_size_m"),
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }
@@ -374,9 +374,9 @@ class JsonTreeModel(QAbstractItemModel):
                     "guid": item.guid,  # Serialize UUID
                     "factors": [recurse_tree(child) for child in item.childItems],
                     "analysis_weighting": item.data(2),
-                    "description": item.attributes["description"],
+                    "description": item.attribute("description"),
                 }
-                json_data.update(item.attributes)
+                json_data.update(item.attributes())
                 return json_data
             elif item.role == "factor":
                 json_data = {
@@ -385,15 +385,29 @@ class JsonTreeModel(QAbstractItemModel):
                     "indicators": [recurse_tree(child) for child in item.childItems],
                     "dimension_weighting": item.data(2),
                 }
-                json_data.update(item.attributes)
+                json_data.update(item.attributes())
                 return json_data
             elif item.role == "indicator":
-                json_data = item.attributes
+                json_data = item.attributes()
                 json_data["factor_weighting"] = item.data(2)
                 json_data["guid"] = item.guid  # Serialize UUID
                 return json_data
 
-        return recurse_tree(self.rootItem.child(0))  # Start from the root item
+        try:
+            return recurse_tree(self.rootItem.child(0))  # Start from the root item
+        except Exception as e:
+            import traceback
+
+            QgsMessageLog.logMessage(
+                f"Error converting tree to JSON: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            # Show the traceback tpp
+            QgsMessageLog.logMessage(
+                f"{traceback.format_exc()}", tag="Geest", level=Qgis.Critical
+            )
+            raise e
 
     def clear_factor_weightings(self, dimension_item):
         """
