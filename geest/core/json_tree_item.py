@@ -261,43 +261,20 @@ class JsonTreeItem:
         """Return the value of the attribute with the specified key."""
         return self.attributes().get(key, default)
 
-    def getFactorAttributes(self):
-        """Return the dict of indicators (or layers) under this factor."""
-        attributes = {}
+    def getFactorIndicatorGuids(self):
+        """Return the list of indicators under this factor."""
+        guids = []
         if self.isFactor():
-            attributes["dimension_id"] = self.parentItem.attribute("id", "")
-            attributes["analysis_mode"] = "factor_aggregation"
-            attributes["factor_id"] = self.data(0)
-            attributes["indicators"] = [
-                {
-                    "guid": child.guid,
-                    "indicator_no": i,
-                    "indicator_id": child.attribute("id", ""),
-                    "indicator_name": child.data(0),
-                    "indicator_weighting": child.data(2),
-                    "result_file": child.attribute("result_file", ""),
-                }
-                for i, child in enumerate(self.childItems)
-            ]
-        return attributes
+            guids = [child.guid for i, child in enumerate(self.childItems)]
+        return guids
 
-    def getDimensionAttributes(self):
-        """Return the dict of factors under this dimension."""
-        attributes = {}
+    def getDimensionFactorGuids(self):
+        """Return the list of factors under this dimension."""
+        guids = []
         if self.isDimension():
-            attributes["analysis_mode"] = "dimension_aggregation"
-            attributes["dimension_id"] = self.data(0)
-            attributes["factors"] = [
-                {
-                    "factor_no": i,
-                    "factor_id": child.attribute("id", ""),
-                    "factor_name": child.data(0),
-                    "factor_weighting": child.data(2),
-                    "result_file": child.attribute(f"result_file", ""),
-                }
-                for i, child in enumerate(self.childItems)
-            ]
-        return attributes
+            guids = [child.guid for i, child in enumerate(self.childItems)]
+        return guids
+        # attributes["analysis_mode"] = "dimension_aggregation"
 
     def getAnalysisAttributes(self):
         """Return the dict of dimensions under this analysis."""
@@ -341,6 +318,7 @@ class JsonTreeItem:
             # If found, update the weighting
             if indicator_item:
                 indicator_item.setData(2, f"{new_weighting:.2f}")
+                indicator_item.attributes()["factor_weighting"] = new_weighting
             else:
                 # Log if the indicator name is not found
                 QgsMessageLog.logMessage(

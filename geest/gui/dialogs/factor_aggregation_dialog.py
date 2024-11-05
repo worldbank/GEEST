@@ -39,7 +39,7 @@ class FactorAggregationDialog(QDialog):
             f"Edit Aggregation Weightings for Factor: {self.tree_item.data(0)}"
         )
 
-        self.indicators = self.tree_item.getFactorAttributes()["indicators"]
+        self.guids = self.tree_item.getFactorIndicatorGuids()
         self.weightings = {}  # To store the temporary weightings
         self.data_sources = {}  # To store the temporary data sources
         # Layout setup
@@ -116,16 +116,15 @@ class FactorAggregationDialog(QDialog):
         )
         layout.addSpacerItem(expanding_spacer)
 
-        indicator = self.indicators[0]
-        indicator_guid = indicator.get("guid")
-        indicator_item = self.tree_item.getItemByGuid(indicator_guid)
-        attributes = indicator_item.attributes()
+        indicator_guid = self.guids[0]
+        item = self.tree_item.getItemByGuid(indicator_guid)
+        attributes = item.attributes()
         configuration_widget = FactorConfigurationWidget(attributes)
         layout.addWidget(configuration_widget)
 
         # Table setup
         self.table = QTableWidget(self)
-        self.table.setRowCount(len(self.indicators))
+        self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(
             ["Data Source", "Indicator", "Weighting", "GUID"]
@@ -133,11 +132,10 @@ class FactorAggregationDialog(QDialog):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Populate the table
-        for row, indicator in enumerate(self.indicators):
-            indicator_guid = indicator.get("guid")
+        for row, guid in enumerate(self.guids):
             # Get the child indicator item from this factor
-            indicator_item = self.tree_item.getItemByGuid(indicator_guid)
-            attributes = indicator_item.attributes()
+            item = self.tree_item.getItemByGuid(guid)
+            attributes = item.attributes()
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 "use_csv_to_point_layer", 1, attributes
             )
@@ -161,16 +159,16 @@ class FactorAggregationDialog(QDialog):
             self.data_sources["indicator_guid"] = data_source_widget
 
             # Display indicator name (not editable)
-            indicator_id = indicator.get("indicator_name")
-            name_item = QTableWidgetItem(indicator_id)
+            name = item.attribute("indicator")
+            name_item = QTableWidgetItem(name)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 1, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
-            indicator_weighting = indicator.get("indicator_weighting", 0)
+            indicator_weighting = item.attribute("factor_weighting", 0)
             weighting_item = QLineEdit(str(indicator_weighting))
             self.table.setCellWidget(row, 2, weighting_item)
-            self.weightings["indicator_guid"] = weighting_item
+            self.weightings[indicator_guid] = weighting_item
 
             guid_item = QTableWidgetItem(indicator_guid)
             guid_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable

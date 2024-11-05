@@ -572,17 +572,12 @@ class TreePanel(QWidget):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            QgsMessageLog.logMessage(
-                str(item.getFactorAttributes()), tag="Geest", level=Qgis.Info
-            )
+
         elif item.role == "dimension":
             QgsMessageLog.logMessage(
                 "Dimension attributes that get passed to workflow",
                 tag="Geest",
                 level=Qgis.Info,
-            )
-            QgsMessageLog.logMessage(
-                str(item.getDimensionAttributes()), tag="Geest", level=Qgis.Info
             )
         elif item.role == "indicator":
             QgsMessageLog.logMessage(
