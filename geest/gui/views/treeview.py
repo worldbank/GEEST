@@ -70,7 +70,7 @@ class JsonTreeModel(QAbstractItemModel):
         working_folder = json_data.get("working_folder", "Not Set")
         guid = json_data.get("guid", str(uuid.uuid4()))  # Deserialize UUID
 
-        # Store special properties in the data(3) dictionary
+        # Store special properties in the attributes dictionary
         analysis_attributes = {
             "analysis_name": analysis_name,
             "description": analysis_description,
@@ -350,7 +350,7 @@ class JsonTreeModel(QAbstractItemModel):
     def to_json(self):
         """
         Converts the tree structure back into a JSON document, recursively traversing the tree and including
-        the custom attributes stored in `data(3)` for each item. UUIDs are serialized for all items.
+        the custom attributes stored in `attributes` for each item. UUIDs are serialized for all items.
 
         Returns:
             dict: The JSON representation of the tree structure.
@@ -360,10 +360,10 @@ class JsonTreeModel(QAbstractItemModel):
             # Serialize each item, including UUID
             if item.role == "analysis":
                 json_data = {
-                    "analysis_name": item.data(3)["analysis_name"],
-                    "description": item.data(3)["description"],
-                    "working_folder": item.data(3)["working_folder"],
-                    "analysis_cell_size_m": item.data(3)["analysis_cell_size_m"],
+                    "analysis_name": item.attributes["analysis_name"],
+                    "description": item.attributes["description"],
+                    "working_folder": item.attributes["working_folder"],
+                    "analysis_cell_size_m": item.attributes["analysis_cell_size_m"],
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }
@@ -374,9 +374,9 @@ class JsonTreeModel(QAbstractItemModel):
                     "guid": item.guid,  # Serialize UUID
                     "factors": [recurse_tree(child) for child in item.childItems],
                     "analysis_weighting": item.data(2),
-                    "description": item.data(3)["description"],
+                    "description": item.attributes["description"],
                 }
-                json_data.update(item.data(3))
+                json_data.update(item.attributes)
                 return json_data
             elif item.role == "factor":
                 json_data = {
@@ -385,10 +385,10 @@ class JsonTreeModel(QAbstractItemModel):
                     "indicators": [recurse_tree(child) for child in item.childItems],
                     "dimension_weighting": item.data(2),
                 }
-                json_data.update(item.data(3))
+                json_data.update(item.attributes)
                 return json_data
             elif item.role == "indicator":
-                json_data = item.data(3)
+                json_data = item.attributes
                 json_data["factor_weighting"] = item.data(2)
                 json_data["guid"] = item.guid  # Serialize UUID
                 return json_data

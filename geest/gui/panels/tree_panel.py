@@ -305,7 +305,7 @@ class TreePanel(QWidget):
 
                 # If this is a first time use of the analysis project lets set some things up
                 analysis_item = self.model.rootItem.child(0)
-                analysis_data = analysis_item.data(3)
+                analysis_data = analysis_item.attributes()
                 QgsMessageLog.logMessage(
                     str(analysis_data), tag="Geest", level=Qgis.Info
                 )
@@ -592,13 +592,8 @@ class TreePanel(QWidget):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            QgsMessageLog.logMessage(
-                str(item.getIndicatorAttributes()), tag="Geest", level=Qgis.Info
-            )
-        QgsMessageLog.logMessage(
-            "Attributes stored in tree:", tag="Geest", level=Qgis.Info
-        )
-        attributes = item.data(3)
+
+        attributes = item.attributes()
         QgsMessageLog.logMessage(str(attributes), tag="Geest", level=Qgis.Info)
 
         # Sort the data alphabetically by key name
@@ -673,7 +668,7 @@ class TreePanel(QWidget):
                         level=Qgis.Critical,
                     )
 
-        layer_uri = item.data(3).get(f"result_file")
+        layer_uri = item.attributes().get(f"result_file")
 
         if layer_uri:
             layer_name = item.data(0)
@@ -747,7 +742,7 @@ class TreePanel(QWidget):
         """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension."""
         editing = self.edit_mode and self.edit_toggle.isChecked()
         dimension_name = dimension_item.data(0)
-        dimension_data = dimension_item.data(3)
+        dimension_data = dimension_item.attributes()
         if not dimension_data:
             dimension_data = {}
         dialog = DimensionAggregationDialog(
@@ -761,7 +756,7 @@ class TreePanel(QWidget):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
         editing = self.edit_mode and self.edit_toggle.isChecked()
         factor_name = factor_item.data(0)
-        factor_data = factor_item.data(3)
+        factor_data = factor_item.attributes()
         if not factor_data:
             factor_data = {}
         dialog = FactorAggregationDialog(
@@ -843,10 +838,13 @@ class TreePanel(QWidget):
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
             self._clear_workflows(child_item)
-            if child_item.data(3).get("result_file", None) and self.run_only_incomplete:
+            if (
+                child_item.attributes().get("result_file", None)
+                and self.run_only_incomplete
+            ):
                 # if the item role is indicator, remove its entire folder
                 if child_item.role == "indicator":
-                    result_file = child_item.data(3).get("result_file")
+                    result_file = child_item.attributes().get("result_file")
                     if result_file:
                         folder = os.path.dirname(result_file)
                         # check the folder exists
@@ -858,7 +856,7 @@ class TreePanel(QWidget):
                 # if the item rols if factor or dimension, remove the files in it
                 # but not subdirs in case the user elected to keep them
                 else:
-                    result_file = child_item.data(3).get("result_file")
+                    result_file = child_item.attributes().get("result_file")
                     if result_file:
                         folder = os.path.dirname(result_file)
                         # check if the folder exists
@@ -884,7 +882,10 @@ class TreePanel(QWidget):
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
             self._count_workflows_to_run(child_item)
-            if child_item.data(3).get("result_file", None) and self.run_only_incomplete:
+            if (
+                child_item.attributes().get("result_file", None)
+                and self.run_only_incomplete
+            ):
                 self.items_to_run += 1
             elif not self.run_only_incomplete:
                 self.items_to_run += 1
@@ -898,21 +899,23 @@ class TreePanel(QWidget):
         task = None
 
         cell_size_m = (
-            self.model.get_analysis_item().data(3).get("analysis_cell_size_m", 100.0)
+            self.model.get_analysis_item()
+            .attributes()
+            .get("analysis_cell_size_m", 100.0)
         )
-        attributes = item.data(3)
+        attributes = item.attributes
         if attributes.get("result_file", None) and self.run_only_incomplete:
             return
         if role == item.role and role == "indicator":
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "factor":
-            item.data(3)["analysis_mode"] = "factor_aggregation"
+            item.attributes["analysis_mode"] = "factor_aggregation"
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "dimension":
-            item.data(3)["analysis_mode"] = "dimension_aggregation"
+            item.attributes["analysis_mode"] = "dimension_aggregation"
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "analysis":
-            item.data(3)["analysis_mode"] = "analysis_aggregation"
+            item.attributes["analysis_mode"] = "analysis_aggregation"
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if task is None:
             return

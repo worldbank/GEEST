@@ -83,7 +83,7 @@ class WorkflowBase(ABC):
         self.raster_layer = None  # set in concrete class if needed
         self.target_crs = self.bboxes_layer.crs()
         # Will be populated by the workflow
-        self.attributes = self.item.data(3)
+        self.attributes = self.item.attributes()
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
         self.attributes["result"] = "Not Run"
         self.aggregation = False

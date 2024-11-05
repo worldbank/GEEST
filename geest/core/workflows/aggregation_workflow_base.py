@@ -34,7 +34,7 @@ class AggregationWorkflowBase(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.aggregation_attributes = None  # This should be set by the child class e.g. item.getIndicatorAttributes()
+        self.aggregation_attributes = None  # This should be set by the child class
         self.analysis_mode = self.attributes.get("analysis_mode", "")
         self.id = None  # This should be set by the child class
         self.layers = None  # This should be set by the child class

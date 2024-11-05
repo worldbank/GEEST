@@ -55,7 +55,7 @@ class WorkflowFactory:
             if not item:
                 return DontUseWorkflow({}, feedback)
 
-            attributes = item.data(3)
+            attributes = item.attributes()
             QgsMessageLog.logMessage(
                 f"Workflow Factory Called", "Geest", level=Qgis.Info
             )

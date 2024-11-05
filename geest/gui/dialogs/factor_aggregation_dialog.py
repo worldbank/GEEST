@@ -115,8 +115,14 @@ class FactorAggregationDialog(QDialog):
             20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
         )
         layout.addSpacerItem(expanding_spacer)
-        configuration_widget = FactorConfigurationWidget(self.factor_data)
+
+        indicator = self.indicators[0]
+        indicator_guid = indicator.get("guid")
+        indicator_item = self.tree_item.getItemByGuid(indicator_guid)
+        attributes = indicator_item.attributes()
+        configuration_widget = FactorConfigurationWidget(attributes)
         layout.addWidget(configuration_widget)
+
         # Table setup
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.indicators))
@@ -131,7 +137,7 @@ class FactorAggregationDialog(QDialog):
             indicator_guid = indicator.get("guid")
             # Get the child indicator item from this factor
             indicator_item = self.tree_item.getItemByGuid(indicator_guid)
-            attributes = indicator_item.data(3)
+            attributes = indicator_item.attributes()
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 "use_csv_to_point_layer", 1, attributes
             )

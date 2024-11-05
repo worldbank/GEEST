@@ -14,7 +14,7 @@ class BaseDataSourceWidget(QWidget):
         """Constructor
 
         Args:
-            attributes (dict): A reference to the attribute set for a JSONTreeItem (stored in data(3))
+            attributes (dict): A reference to the attribute set for a JSONTreeItem (stored in attributes)
         """
         super().__init__()
         self.attributes = attributes

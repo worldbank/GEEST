@@ -53,7 +53,9 @@ class IndicatorDetailDialog(QDialog):
         # Note this is a reference to the tree item
         # any changes you make will update the tree
         self.item = item  # Reference to the QTreeView item to update
-        self.attributes = self.item.data(3)  # Reference to the attributes dictionary
+        self.attributes = (
+            self.item.attributes()
+        )  # Reference to the attributes dictionary
         self.editing = editing
         self.config_widget = None  # To hold the configuration from widget factory
         self.radio_buttons = []  # To keep track of the radio buttons for later

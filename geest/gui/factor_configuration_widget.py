@@ -1,7 +1,7 @@
 from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QButtonGroup
 from qgis.core import QgsMessageLog, Qgis
 from qgis.PyQt.QtCore import pyqtSignal
-from .combined_widget_factory import CombinedWidgetFactory
+from .configuration_widget_factory import ConfigurationWidgetFactory
 
 
 class FactorConfigurationWidget(QWidget):
@@ -45,7 +45,7 @@ class FactorConfigurationWidget(QWidget):
             level=Qgis.Info,
         )
         for key, value in attributes.items():
-            radio_button_widget = CombinedWidgetFactory.create_radio_button(
+            radio_button_widget = ConfigurationWidgetFactory.create_radio_button(
                 key, value, attributes
             )
             if radio_button_widget:

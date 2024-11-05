@@ -87,7 +87,7 @@ class WorkflowJob(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            attributes = self._item.data(3)
+            attributes = self._item.attributes()
             QgsMessageLog.logMessage(
                 f"{attributes}",
                 tag="Geest",
