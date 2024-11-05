@@ -27,7 +27,7 @@ from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.core import QgsMessageLog, Qgis
 from ..toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
-from ..indicator_config_widget import IndicatorConfigWidget
+from ..indicator_configuration_widget import IndicatorConfigurationWidget
 
 
 class IndicatorDetailDialog(QDialog):
@@ -254,7 +254,7 @@ class IndicatorDetailDialog(QDialog):
     def add_config_widgets(self, layout):
         if not self.editing:
 
-            self.config_widget = IndicatorConfigWidget(self.attributes)
+            self.config_widget = IndicatorConfigurationWidget(self.attributes)
             if self.config_widget:
                 layout.addWidget(self.config_widget)
                 # connect to the stateChanged signal

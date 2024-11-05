@@ -17,7 +17,7 @@ from geest.gui.widgets.combined_widgets import (
 from geest.core import setting
 
 
-class RadioButtonFactory:
+class CombinedWidgetFactory:
     """
     Factory class for creating radio buttons based on key-value pairs.
     """

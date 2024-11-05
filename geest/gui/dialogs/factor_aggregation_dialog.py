@@ -19,6 +19,8 @@ from qgis.core import QgsMessageLog, Qgis
 from geest.utilities import resources_path
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
+from ..configuration_widget_factory import ConfigurationWidgetFactory
+from ..factor_configuration_widget import FactorConfigurationWidget
 
 
 class FactorAggregationDialog(QDialog):
@@ -113,7 +115,8 @@ class FactorAggregationDialog(QDialog):
             20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
         )
         layout.addSpacerItem(expanding_spacer)
-
+        configuration_widget = FactorConfigurationWidget(self.factor_data)
+        layout.addWidget(configuration_widget)
         # Table setup
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.indicators))
