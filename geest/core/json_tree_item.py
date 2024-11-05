@@ -279,6 +279,7 @@ class JsonTreeItem:
             attributes["factor_id"] = self.data(0)
             attributes["indicators"] = [
                 {
+                    "guid": child.guid,
                     "indicator_no": i,
                     "indicator_id": child.data(3).get("id", ""),
                     "indicator_name": child.data(0),
@@ -330,14 +331,21 @@ class JsonTreeItem:
             ]
         return attributes
 
-    def updateIndicatorWeighting(self, indicator_name, new_weighting):
+    def getItemByGuid(self, guid):
+        """Return the item with the specified guid."""
+        if self.guid == guid:
+            return self
+        for child in self.childItems:
+            item = child.getItemByGuid(guid)
+            if item:
+                return item
+        return None
+
+    def updateIndicatorWeighting(self, indicator_guid, new_weighting):
         """Update the weighting of a specific indicator by its name."""
         try:
             # Search for the indicator by name
-            indicator_item = next(
-                (child for child in self.childItems if child.data(0) == indicator_name),
-                None,
-            )
+            indicator_item = self.getItemByGuid(indicator_guid)
 
             # If found, update the weighting
             if indicator_item:
@@ -345,7 +353,7 @@ class JsonTreeItem:
             else:
                 # Log if the indicator name is not found
                 QgsMessageLog.logMessage(
-                    f"Indicator '{indicator_name}' not found.",
+                    f"Indicator '{indicator_guid}' not found.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

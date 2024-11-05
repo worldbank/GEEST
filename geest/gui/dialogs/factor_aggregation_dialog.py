@@ -18,6 +18,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsMessageLog, Qgis
 from geest.utilities import resources_path
 from ..datasource_widget_factory import DataSourceWidgetFactory
+from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
 
 
 class FactorAggregationDialog(QDialog):
@@ -38,7 +39,7 @@ class FactorAggregationDialog(QDialog):
 
         self.indicators = self.tree_item.getFactorAttributes()["indicators"]
         self.weightings = {}  # To store the temporary weightings
-
+        self.data_sources = {}  # To store the temporary data sources
         # Layout setup
         layout = QVBoxLayout(self)
         # Make the dialog wider and add padding
@@ -116,16 +117,18 @@ class FactorAggregationDialog(QDialog):
         # Table setup
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.indicators))
-        self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["Data Source", "Indicator", "Weighting"])
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(
+            ["Data Source", "Indicator", "Weighting", "GUID"]
+        )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Populate the table
         for row, indicator in enumerate(self.indicators):
-            # Data Source Selector
-            attributes = indicator.get(
-                "attributes", {}
-            )  # Example: attributes dict for widget
+            indicator_guid = indicator.get("guid")
+            # Get the child indicator item from this factor
+            indicator_item = self.tree_item.getItemByGuid(indicator_guid)
+            attributes = indicator_item.data(3)
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 "use_csv_to_point_layer", 1, attributes
             )
@@ -146,18 +149,23 @@ class FactorAggregationDialog(QDialog):
                     tag="Geest",
                     level=Qgis.Critical,
                 )
+            self.data_sources["indicator_guid"] = data_source_widget
 
             # Display indicator name (not editable)
             indicator_id = indicator.get("indicator_name")
-            indicator_weighting = indicator.get("indicator_weighting", 0)
             name_item = QTableWidgetItem(indicator_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 1, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
+            indicator_weighting = indicator.get("indicator_weighting", 0)
             weighting_item = QLineEdit(str(indicator_weighting))
             self.table.setCellWidget(row, 2, weighting_item)
-            self.weightings["indicator_id"] = weighting_item
+            self.weightings["indicator_guid"] = weighting_item
+
+            guid_item = QTableWidgetItem(indicator_guid)
+            guid_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
+            self.table.setItem(row, 3, guid_item)
 
         layout.addWidget(self.table)
 
@@ -174,11 +182,11 @@ class FactorAggregationDialog(QDialog):
 
     def assignWeightings(self):
         """Assign new weightings to the factor's indicators."""
-        for indicator_id, line_edit in self.weightings.items():
+        for indicator_guid, line_edit in self.weightings.items():
             try:
                 new_weighting = float(line_edit.text())
                 # Update the indicator's weighting in the factor item (use your own update logic here)
-                self.tree_item.updateIndicatorWeighting(indicator_id, new_weighting)
+                self.tree_item.updateIndicatorWeighting(indicator_guid, new_weighting)
             except ValueError:
                 # Handle invalid input (non-numeric)
                 pass

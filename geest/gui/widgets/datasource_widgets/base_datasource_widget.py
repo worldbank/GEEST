@@ -11,6 +11,11 @@ class BaseDataSourceWidget(QWidget):
     data_changed = pyqtSignal(dict)
 
     def __init__(self, attributes: dict) -> None:
+        """Constructor
+
+        Args:
+            attributes (dict): A reference to the attribute set for a JSONTreeItem (stored in data(3))
+        """
         super().__init__()
         self.attributes = attributes
         self.layout: QHBoxLayout = QHBoxLayout(self)
