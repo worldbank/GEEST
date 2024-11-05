@@ -1,11 +1,9 @@
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QFrame,
-    QHBoxLayout,
     QHeaderView,
     QLabel,
     QLineEdit,
-    QPushButton,
     QSpacerItem,
     QSizePolicy,
     QSplitter,
@@ -17,7 +15,9 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
+from qgis.core import QgsMessageLog, Qgis
 from geest.utilities import resources_path
+from ..datasource_widget_factory import DataSourceWidgetFactory
 
 
 class FactorAggregationDialog(QDialog):
@@ -116,22 +116,47 @@ class FactorAggregationDialog(QDialog):
         # Table setup
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.indicators))
-        self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels(["Indicator", "Weighting"])
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["Data Source", "Indicator", "Weighting"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Populate the table
         for row, indicator in enumerate(self.indicators):
+            # Data Source Selector
+            attributes = indicator.get(
+                "attributes", {}
+            )  # Example: attributes dict for widget
+            data_source_widget = DataSourceWidgetFactory.create_widget(
+                "use_csv_to_point_layer", 1, attributes
+            )
+            data_source_widget.setSizePolicy(
+                QSizePolicy.Expanding, QSizePolicy.Preferred
+            )
+
+            data_source_widget.setMinimumWidth(150)
+            data_source_widget.setMinimumHeight(30)
+            data_source_widget.setParent(self.table)  # Set the table as the parent
+            if data_source_widget:
+                self.table.setCellWidget(
+                    row, 0, data_source_widget
+                )  # Set widget in leftmost column
+            else:
+                QgsMessageLog.logMessage(
+                    "Failed to create data source widget",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+
             # Display indicator name (not editable)
             indicator_id = indicator.get("indicator_name")
             indicator_weighting = indicator.get("indicator_weighting", 0)
             name_item = QTableWidgetItem(indicator_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
-            self.table.setItem(row, 0, name_item)
+            self.table.setItem(row, 1, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
             weighting_item = QLineEdit(str(indicator_weighting))
-            self.table.setCellWidget(row, 1, weighting_item)
+            self.table.setCellWidget(row, 2, weighting_item)
             self.weightings["indicator_id"] = weighting_item
 
         layout.addWidget(self.table)

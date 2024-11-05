@@ -271,11 +271,14 @@ class TreePanel(QWidget):
         """
         Slot for handling the clear button click.
 
-        This method is needed to avoid passing bool via the slot.
+        This method is needed to avoid passing bool via the slot (which happens if you
+        connect directly to the button press).
         """
         self.run_only_incomplete = False
         self._clear_workflows()
         self.save_json_to_working_directory()
+        # refresh the tree view
+        self.model.loadJsonData(self.json_data)
 
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):

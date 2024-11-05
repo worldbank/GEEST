@@ -1,5 +1,5 @@
 from qgis.core import QgsMessageLog, Qgis
-from geest.gui.widgets import (
+from geest.gui.widgets.combined_widgets import (
     BaseIndicatorWidget,
     IndexScoreRadioButton,
     DontUseRadioButton,
