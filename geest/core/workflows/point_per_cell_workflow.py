@@ -38,25 +38,40 @@ class PointPerCellWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_point_per_cell"
-
         layer_path = self.attributes.get("point_per_cell_shapefile", None)
 
         if not layer_path:
-            QgsMessageLog.logMessage(
-                "Nothing found in point_per_cell_shapefile, trying point_per_cell_layer_source.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
             layer_path = self.attributes.get("point_per_cell_layer_source", None)
             if not layer_path:
-                QgsMessageLog.logMessage(
-                    "No points layer found in point_per_cell_layer_source.",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-                return False
+                error = "No point per cell layer provided."
+                self.attributes["error"] = error
+                # Raise an exception using our error message
+                raise Exception(error)
+        try:
+            QgsMessageLog.logMessage(
+                f"Loading point per cell layer: {layer_path}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            self.features_layer = QgsVectorLayer(
+                layer_path, "point_per_cell_layer", "ogr"
+            )
+            if not self.features_layer.isValid():
+                error = f"Point per cell layer is not valid. : {layer_path}"
+                self.attributes["error"] = error
+                self.attributes["result"] = f"{self.workflow_name} Workflow Failed"
+                raise Exception(error)
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Error loading point per cell layer: {str(e)}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            error = f"Error loading point per cell layer: {str(e)}"
+            self.attributes["error"] = error
+            self.attributes["result"] = f"{self.workflow_name} Workflow Failed"
 
-        self.features_layer = QgsVectorLayer(layer_path, "point_per_cell_layer", "ogr")
+            raise Exception(error)
 
     def _process_features_for_area(
         self,
@@ -101,13 +116,6 @@ class PointPerCellWorkflow(WorkflowBase):
             default_value=0,
         )
         return raster_output
-
-    # TODO Remove when all workflows are refactored
-    def do_execute(self):
-        """
-        Execute the workflow.
-        """
-        self._execute()
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(

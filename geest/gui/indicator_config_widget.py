@@ -68,8 +68,8 @@ class IndicatorConfigWidget(QWidget):
         new_data["analysis_mode"] = snake_case_mode
         self.attributes.update(new_data)
         self.data_changed.emit()
-        QgsMessageLog.logMessage(
-            f"Updated attributes dictionary: {self.attributes}",
-            "Geest",
-            level=Qgis.Info,
-        )
+        # QgsMessageLog.logMessage(
+        #    f"Updated attributes dictionary: {self.attributes}",
+        #    "Geest",
+        #    level=Qgis.Info,
+        # )

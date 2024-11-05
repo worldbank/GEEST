@@ -104,13 +104,6 @@ class PolylinePerCellWorkflow(WorkflowBase):
         )
         return raster_output
 
-    # TODO Remove when all workflows are refactored
-    def do_execute(self):
-        """
-        Execute the workflow.
-        """
-        self._execute()
-
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
         self,

@@ -93,16 +93,6 @@ class WorkflowBase(ABC):
     #
 
     @abstractmethod
-    def do_execute(self) -> bool:
-        """
-        Executes the actual workflow logic.
-        Must be implemented by subclasses.
-
-        :return: True if the workflow completes successfully, False if canceled or failed.
-        """
-        pass
-
-    @abstractmethod
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
@@ -161,7 +151,7 @@ class WorkflowBase(ABC):
         """
         pass
 
-    # ------------------- END OF ABSCRACT METHODS -------------------
+    # ------------------- END OF ABSTRACT METHODS -------------------
 
     def execute(self) -> bool:
         """

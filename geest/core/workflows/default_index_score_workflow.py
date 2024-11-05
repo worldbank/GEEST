@@ -138,10 +138,6 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
 
         return layer
 
-    # TODO remove when all concrete classes are refactored to new base class layout
-    def do_execute(self):
-        return super().do_execute()
-
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
         self,

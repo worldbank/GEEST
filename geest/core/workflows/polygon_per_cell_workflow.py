@@ -119,13 +119,6 @@ class PolygonPerCellWorkflow(WorkflowBase):
         """
         pass
 
-    # TODO Remove when all workflows are refactored
-    def do_execute(self):
-        """
-        Execute the workflow.
-        """
-        self._execute()
-
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,

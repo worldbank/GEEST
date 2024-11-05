@@ -253,15 +253,16 @@ class AggregationWorkflowBase(WorkflowBase):
         raster_files = self.get_raster_list(index)
 
         if not raster_files or not isinstance(raster_files, list):
+            error = f"No valid raster files found in '{self.layers}'. Cannot proceed with aggregation."
             QgsMessageLog.logMessage(
-                f"No valid raster files found in '{self.layers}'. Cannot proceed with aggregation.",
+                error,
                 tag="Geest",
                 level=Qgis.Warning,
             )
             self.attributes["result"] = (
                 f"{self.analysis_mode} Aggregation Workflow Failed"
             )
-            return False
+            self.attributes["error"] = error
 
         QgsMessageLog.logMessage(
             f"Found {len(raster_files)} raster files in 'Result File'. Proceeding with aggregation.",
@@ -278,7 +279,4 @@ class AggregationWorkflowBase(WorkflowBase):
         pass
 
     def _process_raster_for_area(self):
-        pass
-
-    def do_execute(self):
         pass

@@ -259,13 +259,6 @@ class SafetyRasterWorkflow(WorkflowBase):
             reclass_table = list(map(str, reclass_table))
             return reclass_table
 
-    # TODO Remove when all workflows are refactored
-    def do_execute(self):
-        """
-        Execute the workflow.
-        """
-        self._execute()
-
     # Not used in this workflow since we work with rasters
     def _process_features_for_area(
         self,

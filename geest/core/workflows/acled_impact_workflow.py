@@ -48,7 +48,15 @@ class AcledImpactWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_csv_to_point_layer"
         self.csv_file = self.attributes.get("use_csv_to_point_layer_csv_file", "")
+        if not self.csv_file:
+            error = "No CSV file provided."
+            self.attributes["error"] = error
+            raise Exception(error)
         self.features_layer = self._load_csv_as_point_layer()
+        if not self.features_layer.isValid():
+            error = f"ACLED CSV layer is not valid.: {self.csv_file}"
+            self.attributes["error"] = error
+            raise Exception(error)
 
     def _process_features_for_area(
         self,
@@ -391,10 +399,6 @@ class AcledImpactWorkflow(WorkflowBase):
                 f"Error saving dissolved layer to disk: {error[1]}"
             )
         return QgsVectorLayer(full_output_filepath, f"{self.layer_id}_final", "ogr")
-
-    # deleteme after migrating all workflows
-    def do_execute(self):
-        return super().do_execute()
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
