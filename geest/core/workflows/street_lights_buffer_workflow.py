@@ -146,10 +146,6 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         buffered_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return buffered_layer
 
-    # Remove once all workflows are updated
-    def do_execute(self):
-        pass
-
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
         self,

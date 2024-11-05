@@ -114,6 +114,8 @@ class JsonTreeItem:
         data = self.itemData[3]
         data["result"] = "Not run"
         data["result_file"] = ""
+        data["error"] = ""
+        data["error_file"] = ""
 
     def getIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
@@ -141,6 +143,9 @@ class JsonTreeItem:
             else:
                 return "Factor"
         elif self.isIndicator():
+            error = data.get("error", None)
+            if error:
+                return f"Error: {data.get('error')}"
             description = data.get("description", "")
             if description:
                 return f"{description}"

@@ -58,11 +58,11 @@ class PromotionProxyModel(QAbstractProxyModel):
                 and parent_item is not self.source_model.rootItem
                 and parent_item.role is not "analysis"
             ):
-                QgsMessageLog.logMessage(
-                    f"Found node with only one child {parent_item.data(0)}",
-                    "Geest",
-                    Qgis.Info,
-                )
+                # QgsMessageLog.logMessage(
+                #    f"Found node with only one child {parent_item.data(0)}",
+                #    "Geest",
+                #    Qgis.Info,
+                # )
                 # Replace parent with the child
                 if parent_item.role in ["factor"] and child_item.role in ["indicator"]:
                     self.flattened_structure.append(child_guid)

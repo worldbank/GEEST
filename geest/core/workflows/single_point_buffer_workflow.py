@@ -160,10 +160,6 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
         return layer
 
-    # Remove once all workflows are updated
-    def do_execute(self):
-        pass
-
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
         self,

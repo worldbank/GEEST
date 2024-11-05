@@ -154,10 +154,3 @@ class SafetyPolygonWorkflow(WorkflowBase):
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
         pass
-
-    # TODO Remove when all workflows are refactored
-    def do_execute(self):
-        """
-        Execute the workflow.
-        """
-        self._execute()

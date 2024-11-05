@@ -40,9 +40,6 @@ class DontUseWorkflow(WorkflowBase):
     def _process_features_for_area(self):
         pass
 
-    def do_execute(self):
-        pass
-
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
         self,
