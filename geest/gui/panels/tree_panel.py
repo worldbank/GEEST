@@ -896,18 +896,18 @@ class TreePanel(QWidget):
             .get("analysis_cell_size_m", 100.0)
         )
         attributes = item.attributes()
-        if attributes().get("result_file", None) and self.run_only_incomplete:
+        if attributes.get("result_file", None) and self.run_only_incomplete:
             return
         if role == item.role and role == "indicator":
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "factor":
-            item.attributes()["analysis_mode"] = "factor_aggregation"
+            attributes["analysis_mode"] = "factor_aggregation"
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "dimension":
-            item.attributes()["analysis_mode"] = "dimension_aggregation"
+            attributes["analysis_mode"] = "dimension_aggregation"
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "analysis":
-            item.attributes()["analysis_mode"] = "analysis_aggregation"
+            attributes["analysis_mode"] = "analysis_aggregation"
             task = self.queue_manager.add_workflow(item, cell_size_m)
         if task is None:
             return

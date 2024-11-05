@@ -134,11 +134,12 @@
         <stdDevFactor>2</stdDevFactor>
       </minMaxOrigin>
       <colorPalette>
-        <paletteEntry alpha="255" value="0" color="#fff5f0" label="0"/>
-        <paletteEntry alpha="255" value="1" color="#ffeed1" label="1"/>
-        <paletteEntry alpha="255" value="3" color="#fca486" label="3"/>
-        <paletteEntry alpha="255" value="4" color="#ea372a" label="4"/>
-        <paletteEntry alpha="255" value="5" color="#67000d" label="5"/>
+        <paletteEntry alpha="255" value="0" color="#FFF4EE" label="0"/>
+        <paletteEntry alpha="255" value="1" color="#FEE0D2" label="1"/>
+        <paletteEntry alpha="255" value="2" color="#FCB99F" label="2"/>
+        <paletteEntry alpha="255" value="3" color="#FC9879" label="3"/>
+        <paletteEntry alpha="255" value="4" color="#F96044" label="4"/>
+        <paletteEntry alpha="255" value="5" color="#C5171C" label="5"/>
       </colorPalette>
       <colorramp type="gradient" name="[source]">
         <Option type="Map">
