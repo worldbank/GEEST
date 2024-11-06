@@ -8,39 +8,31 @@
 
 ---
 
-### GEEST Vision
+### The Theory Behind
+
 
 <p style="text-align: justify;">
-With GEEST, we are dedicated to advancing gender equality worldwide by identifying key opportunities for women in diverse sectors. Through sophisticated geospatial analysis, we seek to create pathways for women to thrive in industries such as:
+GEEST was built for the practical implementation of the <a href="https://documents1.worldbank.org/curated/en/099121123091527675/pdf/P1792121dc820d04419928140a279022b42.pdf" target="_blank"><strong>Geospatial Women’s Employment Analytical Framework (GeoWEAF)</strong></a>, developed by the World Bank, which identifies the location-specific factors affecting women's access to jobs. <a href="https://jayaramhariharan.com/draft-docs/docs/background.html#" target="_blank">This framework</a> categorizes regions based on their level of support for enabling women’s access to employment. It identifies 15 critical, spatially varying factors that influence women’s job prospects, divided into three main dimensions: Contextual, Accessibility, and Place Characterization.
 </p>
-
-- 🌱 Energy
-- 📚 Education
-- 🏥 Healthcare
-- 💻 Digital Inclusion
-- 🌍 Tourism
-- 🏗️ Infrastructure Development
-- 🧑‍🎓 Capacity Building
-- 📦 Supply Chain and Logistics, and much more.
 
 ---
 
-### GEEST Approach
+### The Practical Implementation
 
 <p style="text-align: justify;">
-GEEST uses a <strong>Multi-Criteria Evaluation (MCE)</strong> framework to evaluate various socio-economic, infrastructural, and environmental factors that influence women's access to employment and business opportunities. This open-source tool consolidates data from multiple sectors to produce <strong>visual maps</strong> that highlight areas where women can flourish, helping to shape gender-responsive initiatives. 
-</p>
+One of GEEST's main strengths is its ability to address two critical concerns. First, it can detect regions where conditions are optimal—or at least favorable—for women to gain employment in specific sectors. This helps in targeting investment opportunities aimed at promoting gender equality in the workforce.  
 
-<p style="text-align: justify;">
-By incorporating <strong>15 spatial factors</strong> across <strong>three dimensions - Contextual, Accessibility, and Place Characterization</strong> - GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all.
-</p>
+Second, for existing job sites, GEEST highlights which infrastructure investment could be made to enhance women's participation in the workforce. By offering detailed visualizations and analysis for both dimensions and factors, GEEST enables users to identify specific gaps—such as the lack of digital infrastructure, childcare services, or hospitals in a region—that may act as barriers, negatively impacting the enablement scores. Once these barriers are identified, institutions can allocate targeted investments to strengthen these factors, ultimately creating environments that support increased female participation in the workforce.  
+</p> 
+
+---
 
 #### GEEST serves to:
 - <strong>Identify employment and business opportunities</strong> for women across multiple sectors.
 - <strong>Guide investment decisions</strong> that promote gender-inclusive infrastructure and reduce barriers.
 - <strong>Support policy-making</strong> through geospatial assessments that encourage gender equity across regions.
 
----
+
 
 ### Why It Matters
 
