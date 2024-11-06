@@ -1,11 +1,9 @@
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QFrame,
-    QHBoxLayout,
     QHeaderView,
     QLabel,
     QLineEdit,
-    QPushButton,
     QSpacerItem,
     QSizePolicy,
     QSplitter,
@@ -36,7 +34,7 @@ class DimensionAggregationDialog(QDialog):
             f"Edit Dimension Weightings for Dimension: {self.tree_item.data(0)}"
         )
         # Need to be refactored...
-        self.factors = self.tree_item.getDimensionAttributes()["factors"]
+        self.guids = self.tree_item.getDimensionFactorGuids()
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
@@ -121,16 +119,19 @@ class DimensionAggregationDialog(QDialog):
 
         # Table setup
         self.table = QTableWidget(self)
-        self.table.setRowCount(len(self.factors))
+        self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(2)
         self.table.setHorizontalHeaderLabels(["Factor", "Weighting"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Populate the table
-        for row, factor in enumerate(self.factors):
+        for row, guid in enumerate(self.guids):
+            # Get the child indicator item from this factor
+            item = self.tree_item.getItemByGuid(guid)
+            attributes = item.attributes()
             # Display indicator name (not editable)
-            factor_id = factor.get("factor_name")
-            factor_weighting = factor.get("factor_weighting", 0)
+            factor_id = attributes.get("name")
+            factor_weighting = attributes.get("factor_weighting", 0)
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
