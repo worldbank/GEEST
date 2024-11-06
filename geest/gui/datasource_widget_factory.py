@@ -4,6 +4,7 @@ from geest.gui.widgets.datasource_widgets import (
     AcledCsvLayerWidget,
     RasterDataSourceWidget,
     FixedValueDataSourceWidget,
+    VectorDataSourceWidget,
 )
 
 from geest.core import setting
@@ -39,13 +40,15 @@ class DataSourceWidgetFactory:
             # if widget_key == "indicator_required" and value == 0:
             #     return DontUseRadioButton(
             #         label_text="do_not_use", attributes=attributes
-            #     )
+            #     )            self.distance_radio.setEnabled(enabled)
             if widget_key == "use_default_index_score" and value == 1:
                 return FixedValueDataSourceWidget(
                     widget_key=widget_key, attributes=attributes
                 )
-            # if widget_key == "use_multi_buffer_point" and value == 1:
-            #     return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
+            if widget_key == "use_multi_buffer_point" and value == 1:
+                return VectorDataSourceWidget(
+                    widget_key=widget_key, attributes=attributes
+                )
             # if widget_key == "use_single_buffer_point" and value == 1:
             #     return SingleBufferDistanceWidget(label_text=key, attributes=attributes)
             # if widget_key == "use_poly_per_cell" and value == 1:

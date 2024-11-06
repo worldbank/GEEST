@@ -127,7 +127,21 @@ class FactorAggregationDialog(QDialog):
         self.table.setHorizontalHeaderLabels(
             ["Data Source", "Indicator", "Weighting", "GUID"]
         )
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # Set column widths: narrow weighting column and auto-resize others
+        self.table.setColumnWidth(2, 80)  # Narrower "Weighting" column
+        self.table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.Stretch
+        )  # Data Source
+        self.table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.Stretch
+        )  # Indicator
+        self.table.horizontalHeader().setSectionResizeMode(
+            3, QHeaderView.Stretch
+        )  # GUID column
+
+        # GUID column visibility flag
+        self.guid_column_visible = False
+        self.table.setColumnHidden(3, not self.guid_column_visible)
 
         # Populate the table
         for row, guid in enumerate(self.guids):
@@ -178,16 +192,24 @@ class FactorAggregationDialog(QDialog):
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         auto_calculate_button = QPushButton("Balance Weights")
         button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+        toggle_guid_button = QPushButton("Show GUIDs")
+        button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
 
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
+        toggle_guid_button.clicked.connect(self.toggle_guid_column)
 
         layout.addWidget(button_box)
 
         self.setLayout(layout)
         # Initial call to update the preview with existing content
         self.update_preview()
+
+    def toggle_guid_column(self):
+        """Toggle the visibility of the GUID column."""
+        self.guid_column_visible = not self.guid_column_visible
+        self.table.setColumnHidden(3, not self.guid_column_visible)
 
     def auto_calculate_weightings(self):
         """Calculate and set equal weighting for each indicator."""
