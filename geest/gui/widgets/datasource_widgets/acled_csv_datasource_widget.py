@@ -1,7 +1,4 @@
 from qgis.PyQt.QtWidgets import (
-    QLabel,
-    QVBoxLayout,
-    QHBoxLayout,
     QLineEdit,
     QToolButton,
     QFileDialog,
@@ -13,12 +10,12 @@ import os
 from .base_datasource_widget import BaseDataSourceWidget
 
 
-class CsvDataSourceWidget(BaseDataSourceWidget):
+class AcledCsvDataSourceWidget(BaseDataSourceWidget):
     """
-    A widget for selecting a generic CSV file and verifying its format.
+    A widget for selecting an ACLED CSV file and verifying its format.
 
     This widget allows the user to select a CSV file, checks if it's in the expected format
-    by verifying the presence of 'latitude', 'longitude' , and provides feedback
+    by verifying the presence of 'latitude', 'longitude', and 'event_type', and provides feedback
     on the validity of the selected file.
 
     Attributes:
@@ -76,7 +73,7 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
             last_dir = os.getenv("GEEST_LAST_CSV_DIR", "")
 
             file_path, _ = QFileDialog.getOpenFileName(
-                self, "Select CSV File", last_dir, "CSV Files (*.csv)"
+                self, "Select ACLED CSV File", last_dir, "CSV Files (*.csv)"
             )
             if file_path:
                 self.csv_file_line_edit.setText(file_path)
@@ -89,12 +86,12 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
     def validate_csv_file(self, file_path: str) -> None:
         """
         Validates the selected CSV file to ensure it contains the required columns:
-        'latitude', 'longitude'.
+        'latitude', 'longitude', and 'event_type'.
 
         :param file_path: The path to the selected CSV file.
         """
         try:
-            required_columns = ["latitude", "longitude"]
+            required_columns = ["latitude", "longitude", "event_type"]
             missing_columns = []
 
             with open(file_path, "r", encoding="utf-8") as file:

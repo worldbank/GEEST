@@ -1,7 +1,8 @@
 from qgis.core import QgsMessageLog, Qgis
 from geest.gui.widgets.datasource_widgets import (
     BaseDataSourceWidget,
-    AcledCsvLayerWidget,
+    AcledCsvDataSourceWidget,
+    CsvDataSourceWidget,
     RasterDataSourceWidget,
     FixedValueDataSourceWidget,
     VectorDataSourceWidget,
@@ -64,10 +65,16 @@ class DataSourceWidgetFactory:
                 return VectorDataSourceWidget(
                     widget_key=widget_key, attributes=attributes
                 )
-            # if widget_key == "use_point_per_cell" and value == 1:
-            #    return CsvDataSourceWidget(widget_key=widget_key, attributes=attributes)
+            if widget_key == "use_point_per_cell" and value == 1:
+                return VectorDataSourceWidget(
+                    widget_key=widget_key, attributes=attributes
+                )
+            if widget_key == "use_csv_point_per_cell" and value == 1:
+                return CsvDataSourceWidget(widget_key=widget_key, attributes=attributes)
             if widget_key == "use_csv_to_point_layer" and value == 1:
-                return AcledCsvLayerWidget(widget_key=widget_key, attributes=attributes)
+                return AcledCsvDataSourceWidget(
+                    widget_key=widget_key, attributes=attributes
+                )
             if widget_key == "use_classify_poly_into_classes" and value == 1:
                 return VectorAndFieldDataSourceWidget(
                     widget_key=widget_key, attributes=attributes
