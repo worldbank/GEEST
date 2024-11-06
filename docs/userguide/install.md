@@ -1,4 +1,5 @@
 # Installing GEEST
+>**NOTE: Amend the WB repository links**
 
 Follow the steps below to install the GEEST QGIS plugin using the custom repository.
 
