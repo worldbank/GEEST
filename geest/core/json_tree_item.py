@@ -318,6 +318,7 @@ class JsonTreeItem:
             # If found, update the weighting
             if indicator_item:
                 indicator_item.setData(2, f"{new_weighting:.2f}")
+                # weighting references the level above (i.e. factor)
                 indicator_item.attributes()["factor_weighting"] = new_weighting
             else:
                 # Log if the indicator name is not found
@@ -333,22 +334,21 @@ class JsonTreeItem:
                 f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
             )
 
-    def updateFactorWeighting(self, factor_name, new_weighting):
-        """Update the weighting of a specific factor by its name."""
+    def updateFactorWeighting(self, factor_guid, new_weighting):
+        """Update the weighting of a specific factor by its guid."""
         try:
             # Search for the factor by name
-            factor_item = next(
-                (child for child in self.childItems if child.data(0) == factor_name),
-                None,
-            )
-
+            factor_item = self.getItemByGuid(factor_guid)
             # If found, update the weighting
             if factor_item:
                 factor_item.setData(2, f"{new_weighting:.2f}")
+                # weighting references the level above (i.e. dimension)
+                factor_item.attributes()["dimension_weighting"] = new_weighting
+
             else:
                 # Log if the factor name is not found
                 QgsMessageLog.logMessage(
-                    f"Factor '{factor_name}' not found.",
+                    f"Factor '{factor_guid}' not found.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

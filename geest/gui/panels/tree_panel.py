@@ -4,6 +4,7 @@ import shutil
 import re
 from typing import Union, Dict, List
 from qgis.PyQt.QtWidgets import (
+    QApplication,
     QAction,
     QCheckBox,
     QDialog,
@@ -622,11 +623,35 @@ class TreePanel(QWidget):
         close_button.clicked.connect(dialog.close)
         layout.addWidget(close_button)
 
+        # Enable custom context menu for the table
+        table.setContextMenuPolicy(Qt.CustomContextMenu)
+        table.customContextMenuRequested.connect(
+            lambda pos: self.show_context_menu(table, pos)
+        )
+
         dialog.exec_()
 
         QgsMessageLog.logMessage(
             "----------------------------", tag="Geest", level=Qgis.Info
         )
+
+    def show_context_menu(self, table, pos):
+        """Show a context menu with a copy option on right-click."""
+        # Get the cell at the position where the right-click occurred
+        item = table.itemAt(pos)
+        if not item:
+            return  # If no cell is clicked, do nothing
+
+        # Create the context menu
+        menu = QMenu()
+        copy_action = menu.addAction("Copy")
+
+        # Execute the menu at the position and check if an action was selected
+        action = menu.exec_(table.viewport().mapToGlobal(pos))
+        if action == copy_action:
+            # If "Copy" was selected, copy the cell's content to the clipboard
+            clipboard = QApplication.clipboard()
+            clipboard.setText(item.text())
 
     def add_to_map(self, item):
         """Add the item to the map."""
