@@ -74,6 +74,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
 
         # Input for Raster Layer
         self.raster_line_edit = QLineEdit()
+        self.raster_line_edit.setVisible(False)  # Hide initially
         self.raster_button = QToolButton()
         self.raster_button.setText("...")
         self.raster_button.clicked.connect(self.select_raster)
@@ -97,6 +98,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
             )
             if file_path:
                 self.raster_line_edit.setText(file_path)
+                self.raster_line_edit.setVisible(True)
                 self.settings.setValue(
                     "Geest/lastRasterDir", os.path.dirname(file_path)
                 )

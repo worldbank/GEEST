@@ -36,6 +36,8 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                     self.layer_combo.setLayer(layer)
 
             self.shapefile_line_edit = QLineEdit()
+            self.shapefile_line_edit.setVisible(False)  # Hide initially
+
             self.shapefile_button = QToolButton()
             self.shapefile_button.setText("...")
             self.shapefile_button.clicked.connect(self.select_shapefile)
@@ -72,7 +74,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             if file_path:
                 # Update the line edit with the selected file path
                 self.shapefile_line_edit.setText(file_path)
-
+                self.shapefile_line_edit.setVisible(True)
                 # Save the directory of the selected file to QSettings
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
