@@ -25,14 +25,12 @@ One of GEEST's main strengths is its ability to address two critical concerns. F
 Second, for existing job sites, GEEST highlights which infrastructure investment could be made to enhance women's participation in the workforce. By offering detailed visualizations and analysis for both dimensions and factors, GEEST enables users to identify specific gaps—such as the lack of digital infrastructure, childcare services, or hospitals in a region—that may act as barriers, negatively impacting the enablement scores. Once these barriers are identified, institutions can allocate targeted investments to strengthen these factors, ultimately creating environments that support increased female participation in the workforce.  
 </p> 
 
----
-
 #### GEEST serves to:
 - <strong>Identify employment and business opportunities</strong> for women across multiple sectors.
 - <strong>Guide investment decisions</strong> that promote gender-inclusive infrastructure and reduce barriers.
 - <strong>Support policy-making</strong> through geospatial assessments that encourage gender equity across regions.
 
-
+---
 
 ### Why It Matters
 
