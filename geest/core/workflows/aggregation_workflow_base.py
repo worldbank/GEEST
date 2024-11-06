@@ -34,14 +34,10 @@ class AggregationWorkflowBase(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.aggregation_attributes = None  # This should be set by the child class e.g. item.getIndicatorAttributes()
-        self.analysis_mode = self.attributes.get("analysis_mode", "")
+        self.guids = None  # This should be set by the child class - a list of guids of JSONTreeItems to aggregate
+        self.analysis_mode = self.item.attributes().get("analysis_mode", "")
         self.id = None  # This should be set by the child class
-        self.layers = None  # This should be set by the child class
         self.weight_key = None  # This should be set by the child class
-        self.raster_path_key = (
-            None  # This should be set by the child class e.g. "result_file"
-        )
         self.aggregation = True
 
     def get_weights(self) -> list:
@@ -49,18 +45,21 @@ class AggregationWorkflowBase(WorkflowBase):
         Retrieve default weights based on the number of layers.
         :return: List of weights for the layers.
         """
+        if len(self.guids) == 1:
+            return [1.0]
+
         weights = []
 
-        for layer in self.layers:
-            weight = layer.get(self.weight_key, 1.0)
-            if weight == "" and len(self.layers) == 1:
-                weight = 1.0
-            # Ensure the weight is numeric, cast to float if necessary
-            try:
-                weight = float(weight)
-            except (ValueError, TypeError):
-                weight = 1.0  # Default fallback to 1.0 if weight is invalid
-            weights.append(weight)
+        for guid in self.guids:
+            item = self.item.getItemByGuid(guid)
+            # Only add the weight if there is an output layer
+            if item.attribute("result_file", None):
+                weight = item.attribute(self.weight_key, "")
+                try:
+                    weight = float(weight)
+                except (ValueError, TypeError):
+                    weight = 1.0  # Default fallback to 1.0 if weight is invalid
+                weights.append(weight)
         return weights
 
     def aggregate(self, input_files: list, index: int) -> str:
@@ -132,14 +131,10 @@ class AggregationWorkflowBase(WorkflowBase):
         # Wrap the weighted sum and divide by the sum of weights
         expression = f"({expression}) / {layer_count}"
 
-        if self.weight_key == "indicator_weighting":
-            aggregation_output = os.path.join(
-                self.workflow_directory, f"{self.layer_id}_aggregated_{index}.tif"
-            )
-        elif self.weight_key == "factor_weighting":
-            aggregation_output = os.path.join(
-                self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
-            )
+        aggregation_output = os.path.join(
+            self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
+        )
+
         QgsMessageLog.logMessage(
             f"Aggregating {len(input_files)} raster layers to {aggregation_output}",
             tag="Geest",
@@ -192,32 +187,19 @@ class AggregationWorkflowBase(WorkflowBase):
         """
         raster_files = []
 
-        if self.weight_key == "indicator_weighting":
-            for layer in self.layers:
-                id = layer.get("indicator_id", "").lower()
-                layer_folder = os.path.dirname(layer.get("result_file", ""))
-                path = os.path.join(
-                    self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
+        for guid in self.guids:
+            item = self.item.getItemByGuid(guid)
+            id = item.attribute("id").lower()
+            layer_folder = os.path.dirname(item.attribute("result_file", ""))
+            path = os.path.join(
+                self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
+            )
+            if path:
+                raster_files.append(path)
+                QgsMessageLog.logMessage(
+                    f"Adding raster: {path}", tag="Geest", level=Qgis.Info
                 )
-                if path:
-                    raster_files.append(path)
-                    QgsMessageLog.logMessage(
-                        f"Adding raster: {path}", tag="Geest", level=Qgis.Info
-                    )
-        elif self.weight_key == "factor_weighting":
-            for layer in self.layers:
-                id = layer.get("factor_name", "").lower().replace(" ", "_")
-                layer_folder = os.path.dirname(layer.get("result_file", ""))
-                path = os.path.join(
-                    self.workflow_directory,
-                    layer_folder,
-                    f"{id}_aggregated_{index}.tif",
-                )
-                if path:
-                    raster_files.append(path)
-                    QgsMessageLog.logMessage(
-                        f"Adding raster: {path}", tag="Geest", level=Qgis.Info
-                    )
+
         QgsMessageLog.logMessage(
             f"Total raster files found: {len(raster_files)}",
             tag="Geest",
@@ -244,16 +226,11 @@ class AggregationWorkflowBase(WorkflowBase):
             level=Qgis.Info,
         )
         QgsMessageLog.logMessage(f"ID: {self.id}", tag="Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(
-            f"Aggregation Layers: {self.layers}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
 
         raster_files = self.get_raster_list(index)
 
         if not raster_files or not isinstance(raster_files, list):
-            error = f"No valid raster files found in '{self.layers}'. Cannot proceed with aggregation."
+            error = f"No valid raster files found in '{self.guids}'. Cannot proceed with aggregation."
             QgsMessageLog.logMessage(
                 error,
                 tag="Geest",

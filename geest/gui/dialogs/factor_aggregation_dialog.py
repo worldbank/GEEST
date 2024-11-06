@@ -1,7 +1,6 @@
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QFrame,
-    QHBoxLayout,
     QHeaderView,
     QLabel,
     QLineEdit,
@@ -17,7 +16,12 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
+from qgis.core import QgsMessageLog, Qgis
 from geest.utilities import resources_path
+from ..datasource_widget_factory import DataSourceWidgetFactory
+from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
+from ..configuration_widget_factory import ConfigurationWidgetFactory
+from ..factor_configuration_widget import FactorConfigurationWidget
 
 
 class FactorAggregationDialog(QDialog):
@@ -36,9 +40,9 @@ class FactorAggregationDialog(QDialog):
             f"Edit Aggregation Weightings for Factor: {self.tree_item.data(0)}"
         )
 
-        self.indicators = self.tree_item.getFactorAttributes()["indicators"]
+        self.guids = self.tree_item.getFactorIndicatorGuids()
         self.weightings = {}  # To store the temporary weightings
-
+        self.data_sources = {}  # To store the temporary data sources
         # Layout setup
         layout = QVBoxLayout(self)
         # Make the dialog wider and add padding
@@ -113,33 +117,88 @@ class FactorAggregationDialog(QDialog):
         )
         layout.addSpacerItem(expanding_spacer)
 
+        configuration_widget = FactorConfigurationWidget(self.tree_item, self.guids)
+        layout.addWidget(configuration_widget)
+
         # Table setup
         self.table = QTableWidget(self)
-        self.table.setRowCount(len(self.indicators))
-        self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels(["Indicator", "Weighting"])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.setRowCount(len(self.guids))
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(
+            ["Data Source", "Indicator", "Weighting", "GUID"]
+        )
+        # Set column widths: narrow weighting column and auto-resize others
+        self.table.setColumnWidth(2, 80)  # Narrower "Weighting" column
+        self.table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.Stretch
+        )  # Data Source
+        self.table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.Stretch
+        )  # Indicator
+        self.table.horizontalHeader().setSectionResizeMode(
+            3, QHeaderView.Stretch
+        )  # GUID column
+
+        # GUID column visibility flag
+        self.guid_column_visible = False
+        self.table.setColumnHidden(3, not self.guid_column_visible)
 
         # Populate the table
-        for row, indicator in enumerate(self.indicators):
+        for row, guid in enumerate(self.guids):
+            # Get the child indicator item from this factor
+            item = self.tree_item.getItemByGuid(guid)
+            attributes = item.attributes()
+            data_source_widget = DataSourceWidgetFactory.create_widget(
+                attributes["analysis_mode"], 1, attributes
+            )
+            data_source_widget.setSizePolicy(
+                QSizePolicy.Expanding, QSizePolicy.Preferred
+            )
+
+            data_source_widget.setMinimumWidth(150)
+            data_source_widget.setMinimumHeight(30)
+            data_source_widget.setParent(self.table)  # Set the table as the parent
+            if data_source_widget:
+                self.table.setCellWidget(
+                    row, 0, data_source_widget
+                )  # Set widget in leftmost column
+            else:
+                QgsMessageLog.logMessage(
+                    "Failed to create data source widget",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+            self.data_sources["indicator_guid"] = data_source_widget
+
             # Display indicator name (not editable)
-            indicator_id = indicator.get("indicator_name")
-            indicator_weighting = indicator.get("indicator_weighting", 0)
-            name_item = QTableWidgetItem(indicator_id)
+            name = item.attribute("indicator")
+            name_item = QTableWidgetItem(name)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
-            self.table.setItem(row, 0, name_item)
+            self.table.setItem(row, 1, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
+            indicator_weighting = item.attribute("factor_weighting", 0)
             weighting_item = QLineEdit(str(indicator_weighting))
-            self.table.setCellWidget(row, 1, weighting_item)
-            self.weightings["indicator_id"] = weighting_item
+            self.table.setCellWidget(row, 2, weighting_item)
+            self.weightings[guid] = weighting_item
+
+            guid_item = QTableWidgetItem(guid)
+            guid_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
+            self.table.setItem(row, 3, guid_item)
 
         layout.addWidget(self.table)
 
         # QDialogButtonBox setup for OK and Cancel
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        auto_calculate_button = QPushButton("Balance Weights")
+        button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+        toggle_guid_button = QPushButton("Show GUIDs")
+        button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
+
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
+        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
+        toggle_guid_button.clicked.connect(self.toggle_guid_column)
 
         layout.addWidget(button_box)
 
@@ -147,13 +206,24 @@ class FactorAggregationDialog(QDialog):
         # Initial call to update the preview with existing content
         self.update_preview()
 
+    def toggle_guid_column(self):
+        """Toggle the visibility of the GUID column."""
+        self.guid_column_visible = not self.guid_column_visible
+        self.table.setColumnHidden(3, not self.guid_column_visible)
+
+    def auto_calculate_weightings(self):
+        """Calculate and set equal weighting for each indicator."""
+        equal_weighting = 1.0 / len(self.guids)
+        for guid, line_edit in self.weightings.items():
+            line_edit.setText(f"{equal_weighting:.4f}")
+
     def assignWeightings(self):
         """Assign new weightings to the factor's indicators."""
-        for indicator_id, line_edit in self.weightings.items():
+        for indicator_guid, line_edit in self.weightings.items():
             try:
                 new_weighting = float(line_edit.text())
                 # Update the indicator's weighting in the factor item (use your own update logic here)
-                self.tree_item.updateIndicatorWeighting(indicator_id, new_weighting)
+                self.tree_item.updateIndicatorWeighting(indicator_guid, new_weighting)
             except ValueError:
                 # Handle invalid input (non-numeric)
                 pass

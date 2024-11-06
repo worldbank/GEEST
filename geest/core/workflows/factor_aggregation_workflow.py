@@ -29,11 +29,11 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
 
-        self.aggregation_attributes = self.item.getFactorAttributes()
-        self.id = self.aggregation_attributes[f"factor_id"].lower().replace(" ", "_")
-        self.layers = self.aggregation_attributes.get(f"indicators", [])
+        self.guids = (
+            self.item.getFactorIndicatorGuids()
+        )  # get a list of the items to aggregate
+        self.id = (
+            self.item.attribute("id").lower().replace(" ", "_")
+        )  # should not be needed any more
         self.weight_key = "indicator_weighting"
-        self.result_file_tag = "result_file"
-        self.raster_path_key = "result_file"
-        self.layer_id = self.id
         self.workflow_name = "factor_aggregation"

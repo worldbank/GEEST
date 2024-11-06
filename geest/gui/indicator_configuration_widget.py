@@ -1,10 +1,10 @@
 from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QButtonGroup
 from qgis.core import QgsMessageLog, Qgis
 from qgis.PyQt.QtCore import pyqtSignal
-from .indicator_widget_factory import RadioButtonFactory
+from .combined_widget_factory import CombinedWidgetFactory
 
 
-class IndicatorConfigWidget(QWidget):
+class IndicatorConfigurationWidget(QWidget):
     """
     Widget for configuring indicators based on a dictionary.
     """
@@ -38,7 +38,7 @@ class IndicatorConfigWidget(QWidget):
         analysis_mode = attributes.get("analysis_mode", "")
 
         for key, value in attributes.items():
-            radio_button_widget = RadioButtonFactory.create_radio_button(
+            radio_button_widget = CombinedWidgetFactory.create_radio_button(
                 key, value, attributes
             )
             if radio_button_widget:

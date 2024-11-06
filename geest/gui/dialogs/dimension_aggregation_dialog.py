@@ -35,7 +35,7 @@ class DimensionAggregationDialog(QDialog):
         self.setWindowTitle(
             f"Edit Dimension Weightings for Dimension: {self.tree_item.data(0)}"
         )
-
+        # Need to be refactored...
         self.factors = self.tree_item.getDimensionAttributes()["factors"]
         self.weightings = {}  # To store the temporary weightings
 

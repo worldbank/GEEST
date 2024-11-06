@@ -111,7 +111,7 @@ class JsonTreeItem:
         """
         Mark the item as not run, keeping any configurations made
         """
-        data = self.itemData[3]
+        data = self.attributes()
         data["result"] = "Not run"
         data["result_file"] = ""
         data["error"] = ""
@@ -129,7 +129,7 @@ class JsonTreeItem:
 
     def getItemTooltip(self):
         """Retrieve the appropriate tooltip for the item based on its role."""
-        data = self.itemData[3]
+        data = self.attributes()
         if self.isDimension():
             description = data.get("description", "")
             if description:
@@ -183,7 +183,7 @@ class JsonTreeItem:
             if len(self.itemData) < 4:
                 return ""
 
-            data = self.itemData[3]
+            data = self.attributes()
             # QgsMessageLog.logMessage(f"Data: {data}", tag="Geest", level=Qgis.Info)
             status = ""
             if "Error" in data.get("result", ""):
@@ -235,117 +235,94 @@ class JsonTreeItem:
         path = []
         if self.isIndicator():
             path.append(
-                self.parentItem.parentItem.itemData[3]
+                self.parentItem.parentItem.attributes()
                 .get("id", "")
                 .lower()
                 .replace(" ", "_")
             )
-            path.append(
-                self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
-            )
-            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+            path.append(self.parentItem.attribute("id", "").lower().replace(" ", "_"))
+            path.append(self.attribute("id", "").lower().replace(" ", "_"))
         elif self.isFactor():
-            path.append(
-                self.parentItem.itemData[3].get("id", "").lower().replace(" ", "_")
-            )
-            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+            path.append(self.parentItem.attribute("id", "").lower().replace(" ", "_"))
+            path.append(self.attribute("id", "").lower().replace(" ", "_"))
         if self.isDimension():
-            path.append(self.itemData[3].get("id", "").lower().replace(" ", "_"))
+            path.append(self.attribute("id", "").lower().replace(" ", "_"))
         return path
 
-    def getIndicatorAttributes(self):
-        """Return the dict of indicators (or layers) under this indicator."""
-        attributes = {}
-        if self.isIndicator():
-            attributes["dimension_id"] = self.parentItem.parentItem.itemData[3].get(
-                "id", ""
-            )
-            attributes["factor_id"] = self.parentItem.itemData[3].get("id", "")
-            attributes["indicator_id"] = self.itemData[3].get("id", "")
-            attributes["indicator_name"] = self.itemData[3].get("indicator", "")
-            attributes["indicator_weighting"] = self.itemData[3].get(
-                "factor_weighting", ""
-            )
-            attributes["result_file"] = self.itemData[3].get("result_file", "")
-            attributes["result"] = self.itemData[3].get("result", "")
-        return attributes
+    def attributes(self):
+        """Return a reference to the dict of attributes for this item.
 
-    def getFactorAttributes(self):
-        """Return the dict of indicators (or layers) under this factor."""
-        attributes = {}
+        🚨 Beware of Side Effects! Any changes you make to the dict will be propogated
+           back to the tree model.🚨
+        """
+        return self.itemData[3]
+
+    def attribute(self, key, default=None):
+        """Return the value of the attribute with the specified key."""
+        return self.attributes().get(key, default)
+
+    def getFactorIndicatorGuids(self):
+        """Return the list of indicators under this factor."""
+        guids = []
         if self.isFactor():
-            attributes["dimension_id"] = self.parentItem.itemData[3].get("id", "")
-            attributes["analysis_mode"] = "factor_aggregation"
-            attributes["factor_id"] = self.data(0)
-            attributes["indicators"] = [
-                {
-                    "indicator_no": i,
-                    "indicator_id": child.data(3).get("id", ""),
-                    "indicator_name": child.data(0),
-                    "indicator_weighting": child.data(2),
-                    "result_file": child.data(3).get("result_file", ""),
-                }
-                for i, child in enumerate(self.childItems)
-            ]
-        return attributes
+            guids = [child.guid for i, child in enumerate(self.childItems)]
+        return guids
 
-    def getDimensionAttributes(self):
-        """Return the dict of factors under this dimension."""
-        attributes = {}
+    def getDimensionFactorGuids(self):
+        """Return the list of factors under this dimension."""
+        guids = []
         if self.isDimension():
-            attributes["analysis_mode"] = "dimension_aggregation"
-            attributes["dimension_id"] = self.data(0)
-            attributes["factors"] = [
-                {
-                    "factor_no": i,
-                    "factor_id": child.data(3).get("id", ""),
-                    "factor_name": child.data(0),
-                    "factor_weighting": child.data(2),
-                    "result_file": child.data(3).get(f"result_file", ""),
-                }
-                for i, child in enumerate(self.childItems)
-            ]
-        return attributes
+            guids = [child.guid for i, child in enumerate(self.childItems)]
+        return guids
+        # attributes["analysis_mode"] = "dimension_aggregation"
 
     def getAnalysisAttributes(self):
         """Return the dict of dimensions under this analysis."""
         attributes = {}
         if self.isAnalysis():
-            attributes["analysis_name"] = self.data(3).get("analysis_name", "Not Set")
-            attributes["description"] = self.data(3).get(
+            attributes["analysis_name"] = self.attribute("analysis_name", "Not Set")
+            attributes["description"] = self.attribute(
                 "analysis_description", "Not Set"
             )
-            attributes["working_folder"] = self.data(3).get("working_folder", "Not Set")
-            attributes["cell_size_m"] = self.data(3).get("cell_size_m", 100)
+            attributes["working_folder"] = self.attribute("working_folder", "Not Set")
+            attributes["cell_size_m"] = self.attribute("cell_size_m", 100)
 
             attributes["dimensions"] = [
                 {
                     "dimension_no": i,
-                    "dimension_id": child.data(3).get("id", ""),
+                    "dimension_id": child.attribute("id", ""),
                     "dimension_name": child.data(0),
                     "dimension_weighting": child.data(2),
-                    "result_file": child.data(3).get(f"result_file", ""),
+                    "result_file": child.attribute(f"result_file", ""),
                 }
                 for i, child in enumerate(self.childItems)
             ]
         return attributes
 
-    def updateIndicatorWeighting(self, indicator_name, new_weighting):
+    def getItemByGuid(self, guid):
+        """Return the item with the specified guid."""
+        if self.guid == guid:
+            return self
+        for child in self.childItems:
+            item = child.getItemByGuid(guid)
+            if item:
+                return item
+        return None
+
+    def updateIndicatorWeighting(self, indicator_guid, new_weighting):
         """Update the weighting of a specific indicator by its name."""
         try:
             # Search for the indicator by name
-            indicator_item = next(
-                (child for child in self.childItems if child.data(0) == indicator_name),
-                None,
-            )
+            indicator_item = self.getItemByGuid(indicator_guid)
 
             # If found, update the weighting
             if indicator_item:
                 indicator_item.setData(2, f"{new_weighting:.2f}")
+                indicator_item.attributes()["factor_weighting"] = new_weighting
             else:
                 # Log if the indicator name is not found
                 QgsMessageLog.logMessage(
-                    f"Indicator '{indicator_name}' not found.",
+                    f"Indicator '{indicator_guid}' not found.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
