@@ -1,7 +1,7 @@
 # Acknowledgements
 <p style="text-align: justify;">
 This work was funded by the <a href="https://www.worldbank.org/en/topic/climatechange/brief/canada-world-bank-clean-energy-and-forests-climate-facility">Canada Clean Energy and Forest Climate Facility (CCEFCFy)</a> and implemented by the World Bank Group <a href="https://worldbank.github.io/GOST">Geospatial Operational Support Team (GOST)</a>.
-The tool was developed by Kartoza.
+The tool was developed by <a href="https://kartoza.com/">Kartoza</a>.
 </p>
 <p align="center">
   <a href="https://www.worldbank.org/en/topic/climatechange/brief/canada-world-bank-clean-energy-and-forests-climate-facility">
