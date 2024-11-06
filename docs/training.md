@@ -1,9 +1,12 @@
 # Training
 
-### Upcoming Training
-A training on using the tool is currently under preparation. This training will cover key functionalities, provide hands-on practice, and help you become proficient in applying the tool to your projects.
+### Upcoming Course (March 2025)
 
-### Upcoming Course
-In addition to the training, a comprehensive course is also in development. This course will go deeper into advanced functionalities, case studies, and provide additional resources to enhance your learning experience.
+The course "Geographic Considerations in Evaluating Women's Employment Opportunities" equips participants with a comprehensive understanding of how geographic factors influence women's access to employment and business opportunities. Through a series of engaging modules, the course examines the intersection of geography and gender, highlighting how the characteristics of the environment where women live can either enable or hinder their empowerment. Participants will engage with animated videos, quizzes, and interactive content to learn about the innovative analytical framework developed by the World Bank Group (WBG), which assesses the supportiveness of environments for women's job access. 
+
+Additionally, participants will learn about the Gender Enabling Environments Spatial Tool (GEEST), a cutting-edge tool for applying this framework practically. Key modules cover the framework's three main dimensions: Contextual, Accessibility, and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts.
+
+The course will be open for everyone, available on the WBG Institute: https://wbginstitute.learnworlds.com/home
+
 
 Stay tuned for updates, and feel free to check back soon!
