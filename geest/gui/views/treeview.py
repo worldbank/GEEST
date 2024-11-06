@@ -176,6 +176,7 @@ class JsonTreeModel(QAbstractItemModel):
             "default_dimension_weighting": factor.get(
                 "default_analysis_weighting", 0.0
             ),
+            "dimension_weighting": factor.get("dimension_weighting", 0.0),
             "analysis_mode": factor.get("factor_aggregation", ""),
             "result": factor.get("result", ""),
             "execution_start_time": factor.get("execution_start_time", ""),

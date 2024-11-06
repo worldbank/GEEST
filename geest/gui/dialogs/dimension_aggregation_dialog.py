@@ -1,17 +1,18 @@
 from qgis.PyQt.QtWidgets import (
     QDialog,
+    QDialogButtonBox,
     QFrame,
     QHeaderView,
     QLabel,
     QLineEdit,
-    QSpacerItem,
+    QPushButton,
     QSizePolicy,
+    QSpacerItem,
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
     QTextEdit,
     QVBoxLayout,
-    QDialogButtonBox,  # Import the QDialogButtonBox
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
@@ -76,12 +77,6 @@ class DimensionAggregationDialog(QDialog):
 
         layout.addWidget(self.banner_label)
 
-        # Create a wordwrapped label for the dimension description
-        self.description_label = QLabel(
-            self.dimension_data.get("description", ""), self
-        )
-        self.description_label.setWordWrap(True)
-        layout.addWidget(self.description_label)
         # Create a horizontal splitter to hold both the Markdown editor and the preview
         splitter = QSplitter(Qt.Horizontal)
 
@@ -131,22 +126,25 @@ class DimensionAggregationDialog(QDialog):
             attributes = item.attributes()
             # Display indicator name (not editable)
             factor_id = attributes.get("name")
-            factor_weighting = attributes.get("factor_weighting", 0)
+            dimension_weighting = attributes.get("dimension_weighting", 0)
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 0, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
-            weighting_item = QLineEdit(str(factor_weighting))
+            weighting_item = QLineEdit(str(dimension_weighting))
             self.table.setCellWidget(row, 1, weighting_item)
-            self.weightings[factor_id] = weighting_item
+            self.weightings[guid] = weighting_item
 
         layout.addWidget(self.table)
 
         # QDialogButtonBox setup for OK and Cancel
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        auto_calculate_button = QPushButton("Balance Weights")
+        button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
+        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
 
         layout.addWidget(button_box)
 
@@ -154,13 +152,19 @@ class DimensionAggregationDialog(QDialog):
         # Initial call to update the preview with existing content
         self.update_preview()
 
+    def auto_calculate_weightings(self):
+        """Calculate and set equal weighting for each indicator."""
+        equal_weighting = 1.0 / len(self.guids)
+        for guid, line_edit in self.weightings.items():
+            line_edit.setText(f"{equal_weighting:.4f}")
+
     def assignWeightings(self):
-        """Assign new weightings to the dimension's indicators."""
-        for factor_id, line_edit in self.weightings.items():
+        """Assign new weightings to the factor's indicators."""
+        for guid, line_edit in self.weightings.items():
             try:
                 new_weighting = float(line_edit.text())
-                # Update the indicator's weighting in the dimension item (use your own update logic here)
-                self.tree_item.updateFactorWeighting(factor_id, new_weighting)
+                # Update the indicator's weighting in the factor item (use your own update logic here)
+                self.tree_item.updateFactorWeighting(guid, new_weighting)
             except ValueError:
                 # Handle invalid input (non-numeric)
                 pass
