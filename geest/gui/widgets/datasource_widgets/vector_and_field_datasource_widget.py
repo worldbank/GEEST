@@ -12,6 +12,7 @@ from qgis.core import (
     QgsMapLayerProxyModel,
     QgsProject,
     QgsFieldProxyModel,
+    QgsVectorLayer,
 )
 from qgis.gui import QgsFieldComboBox
 from qgis.PyQt.QtCore import QSettings
@@ -29,6 +30,8 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         Adds internal widgets specific to vector layer selection
 
         """
+        self.settings = QSettings()
+
         try:
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setFilters(QgsMapLayerProxyModel.PointLayer)
@@ -68,10 +71,8 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.layer_combo.currentIndexChanged.connect(self.update_data)
             self.shapefile_line_edit.textChanged.connect(self.update_data)
             # Connect signals to update the fields when user changes selections
-            self.polygon_layer_combo.layerChanged.connect(self.update_field_combo)
-            self.polygon_shapefile_line_edit.textChanged.connect(
-                self.update_field_combo
-            )
+            self.layer_combo.layerChanged.connect(self.update_field_combo)
+            self.shapefile_line_edit.textChanged.connect(self.update_field_combo)
 
             # Connect the field combo box to update the attributes when a field is selected
             self.field_selection_combo.currentIndexChanged.connect(
@@ -122,7 +123,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 f"{self.widget_key}_selected_field", None
             )
 
-            vector_layer = QgsVectorLayer(shapefile_path, "polygon_layer", "ogr")
+            vector_layer = QgsVectorLayer(shapefile_path, "layer", "ogr")
             if not vector_layer.isValid():
                 QgsMessageLog.logMessage(
                     f"Failed to load shapefile: {shapefile_path}", "Geest"
@@ -144,20 +145,33 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         except Exception as e:
             QgsMessageLog.logMessage(f"Error populating field combo: {e}", "Geest")
 
+    def update_selected_field(self) -> None:
+        """
+        Updates the selected field in the attributes dictionary when the field selection changes.
+        """
+        if self.field_selection_combo.isEnabled():
+            selected_field = self.field_selection_combo.currentText()
+            self.attributes[f"{self.widget_key}_selected_field"] = selected_field
+
+            # Store the selected field in QSettings
+            self.settings.setValue(f"{self.widget_key}_selected_field", selected_field)
+        else:
+            self.attributes[f"{self.widget_key}_selected_field"] = None
+
     def update_field_combo(self) -> None:
         """
-        Updates the field combo box when the polygon layer or shapefile is changed.
+        Updates the field combo box when the layer or shapefile is changed.
         """
         # Store the currently selected field
         previous_field = self.settings.value(f"{self.widget_key}_selected_field", None)
 
-        if self.polygon_layer_combo.currentLayer():
-            # Populate field combo from the selected polygon layer
-            self.field_selection_combo.setLayer(self.polygon_layer_combo.currentLayer())
+        if self.layer_combo.currentLayer():
+            # Populate field combo from the selected  layer
+            self.field_selection_combo.setLayer(self.layer_combo.currentLayer())
             self.field_selection_combo.setEnabled(True)
-        elif self.polygon_shapefile_line_edit.text():
+        elif self.shapefile_line_edit.text():
             # If shapefile is provided, populate the field combo
-            self._populate_field_combo(self.polygon_shapefile_line_edit.text())
+            self._populate_field_combo(self.shapefile_line_edit.text())
 
         # After the field combo is repopulated, re-select the previously selected field if it exists
         if previous_field and self.field_selection_combo.findText(previous_field) != -1:
