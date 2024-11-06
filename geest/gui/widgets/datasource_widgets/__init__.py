@@ -3,3 +3,4 @@ from .csv_datasource_widget import AcledCsvLayerWidget
 from .raster_datasource_widget import RasterDataSourceWidget
 from .fixed_value_datasource_widget import FixedValueDataSourceWidget
 from .vector_datasource_widget import VectorDataSourceWidget
+from .vector_and_field_dataset_widget import VectorAndFieldDataSourceWidget

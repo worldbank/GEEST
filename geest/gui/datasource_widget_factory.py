@@ -5,6 +5,7 @@ from geest.gui.widgets.datasource_widgets import (
     RasterDataSourceWidget,
     FixedValueDataSourceWidget,
     VectorDataSourceWidget,
+    VectorAndFieldDataSourceWidget,
 )
 
 from geest.core import setting
@@ -59,8 +60,10 @@ class DataSourceWidgetFactory:
             #     return PointLayerWidget(label_text=key, attributes=attributes)
             if widget_key == "use_csv_to_point_layer" and value == 1:
                 return AcledCsvLayerWidget(widget_key=widget_key, attributes=attributes)
-            # if widget_key == "use_classify_poly_into_classes" and value == 1:
-            #     return SafetyPolygonWidget(label_text=key, attributes=attributes)
+            if widget_key == "use_classify_poly_into_classes" and value == 1:
+                return VectorAndFieldDataSourceWidget(
+                    widget_key=widget_key, attributes=attributes
+                )
             # if widget_key == "use_nighttime_lights" and value == 1:
             #     return SafetyRasterWidget(label_text=key, attributes=attributes)
             if widget_key == "use_environmental_hazards" and value == 1:
