@@ -39,15 +39,10 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         This method is called during the widget initialization and sets up the layout for the UI components.
         """
         try:
-            self.main_layout = QVBoxLayout()
             self.settings = QSettings()
 
             # Raster Layer Section
             self._add_raster_layer_widgets()
-
-            # Add the main layout to the widget's layout
-            self.layout.addLayout(self.main_layout)
-
             # Connect signals to update the data when user changes selections
             self.raster_layer_combo.currentIndexChanged.connect(self.update_data)
             self.raster_line_edit.textChanged.connect(self.update_data)
@@ -62,12 +57,13 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         """
         Adds the widgets for selecting the raster layer, including a `QgsMapLayerComboBox` and input.
         """
-        self.raster_layer_label = QLabel("Raster Layer - will have preference")
-        self.main_layout.addWidget(self.raster_layer_label)
         # Raster Layer ComboBox (Filtered to raster layers)
         self.raster_layer_combo = QgsMapLayerComboBox()
         self.raster_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        self.main_layout.addWidget(self.raster_layer_combo)
+        self.raster_layer_combo.setToolTip(
+            "Raster chosen from file system will have preference"
+        )
+        self.layout.addWidget(self.raster_layer_combo)
 
         # Restore previously selected raster layer
         raster_layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
@@ -77,16 +73,17 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
                 self.raster_layer_combo.setLayer(raster_layer)
 
         # Input for Raster Layer
-        self.raster_layout = QHBoxLayout()
         self.raster_line_edit = QLineEdit()
         self.raster_button = QToolButton()
         self.raster_button.setText("...")
         self.raster_button.clicked.connect(self.select_raster)
         if self.attributes.get(f"{self.widget_key}_raster", False):
             self.raster_line_edit.setText(self.attributes[f"{self.widget_key}_raster"])
-        self.raster_layout.addWidget(self.raster_line_edit)
-        self.raster_layout.addWidget(self.raster_button)
-        self.main_layout.addLayout(self.raster_layout)
+        self.layout.addWidget(self.raster_line_edit)
+        self.layout.addWidget(self.raster_button)
+        self.raster_button.setToolTip(
+            "Raster chosen from file system will have preference"
+        )
 
     def select_raster(self) -> None:
         """

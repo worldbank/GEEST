@@ -14,7 +14,9 @@ class DataSourceWidgetFactory:
     """
 
     @staticmethod
-    def create_widget(key: str, value: int, attributes: dict) -> BaseDataSourceWidget:
+    def create_widget(
+        widget_key: str, value: int, attributes: dict
+    ) -> BaseDataSourceWidget:
         """
         Factory method to create a datasource widget based on key-value pairs.
         """
@@ -49,14 +51,16 @@ class DataSourceWidgetFactory:
             #     return PolylineWidget(label_text=key, attributes=attributes)
             # if key == "use_point_per_cell" and value == 1:
             #     return PointLayerWidget(label_text=key, attributes=attributes)
-            if key == "use_csv_to_point_layer" and value == 1:
-                return AcledCsvLayerWidget(key=key, attributes=attributes)
+            if widget_key == "use_csv_to_point_layer" and value == 1:
+                return AcledCsvLayerWidget(widget_key=widget_key, attributes=attributes)
             # if key == "use_classify_poly_into_classes" and value == 1:
             #     return SafetyPolygonWidget(label_text=key, attributes=attributes)
             # if key == "use_nighttime_lights" and value == 1:
             #     return SafetyRasterWidget(label_text=key, attributes=attributes)
-            if key == "use_environmental_hazards" and value == 1:
-                return RasterDataSourceWidget(key=key, attributes=attributes)
+            if widget_key == "use_environmental_hazards" and value == 1:
+                return RasterDataSourceWidget(
+                    widget_key=widget_key, attributes=attributes
+                )
             # if key == "use_street_lights" and value == 1:
             #     return StreetLightsWidget(label_text=key, attributes=attributes)
             else:
