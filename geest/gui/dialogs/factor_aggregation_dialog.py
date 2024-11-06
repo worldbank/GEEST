@@ -4,6 +4,7 @@ from qgis.PyQt.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
+    QPushButton,
     QSpacerItem,
     QSizePolicy,
     QSplitter,
@@ -175,14 +176,24 @@ class FactorAggregationDialog(QDialog):
 
         # QDialogButtonBox setup for OK and Cancel
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        auto_calculate_button = QPushButton("Balance Weights")
+        button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
+        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
 
         layout.addWidget(button_box)
 
         self.setLayout(layout)
         # Initial call to update the preview with existing content
         self.update_preview()
+
+    def auto_calculate_weightings(self):
+        """Calculate and set equal weighting for each indicator."""
+        equal_weighting = 1.0 / len(self.guids)
+        for guid, line_edit in self.weightings.items():
+            line_edit.setText(f"{equal_weighting:.4f}")
 
     def assignWeightings(self):
         """Assign new weightings to the factor's indicators."""
