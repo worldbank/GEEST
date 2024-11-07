@@ -142,6 +142,11 @@ class FactorAggregationDialog(QDialog):
         # GUID column visibility flag
         self.guid_column_visible = False
         self.table.setColumnHidden(3, not self.guid_column_visible)
+        # Hide the weighting column if there is only one indicator
+        self.weighting_column_visible = False
+        if len(self.guids) > 1:
+            self.weighting_column_visible = True
+        self.table.setColumnHidden(2, not self.weighting_column_visible)
 
         # Populate the table
         for row, guid in enumerate(self.guids):
@@ -177,7 +182,11 @@ class FactorAggregationDialog(QDialog):
             self.table.setItem(row, 1, name_item)
 
             # Display indicator weighting in a QLineEdit for editing
-            indicator_weighting = item.attribute("factor_weighting", 0)
+            # If there is only one indicator, its weighting is fixed to 1.0
+            if len(self.guids) > 1:
+                indicator_weighting = item.attribute("factor_weighting", 1.0)
+            else:
+                indicator_weighting = 1.0
             weighting_item = QLineEdit(str(indicator_weighting))
             self.table.setCellWidget(row, 2, weighting_item)
             self.weightings[guid] = weighting_item
@@ -191,7 +200,9 @@ class FactorAggregationDialog(QDialog):
         # QDialogButtonBox setup for OK and Cancel
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         auto_calculate_button = QPushButton("Balance Weights")
-        button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+        if len(self.guids) > 1:
+            button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+
         toggle_guid_button = QPushButton("Show GUIDs")
         button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
 

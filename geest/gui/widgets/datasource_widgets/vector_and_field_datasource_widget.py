@@ -64,6 +64,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 self.shapefile_line_edit.setText(
                     self.attributes[f"{self.widget_key}_shapefile"]
                 )
+                self.shapefile_line_edit.setVisible(True)
             self.layout.addWidget(self.shapefile_line_edit)
             self.layout.addWidget(self.shapefile_button)
 

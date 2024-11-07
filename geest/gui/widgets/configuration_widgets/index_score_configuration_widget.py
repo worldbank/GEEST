@@ -13,7 +13,7 @@ class IndexScoreConfigurationWidget(BaseConfigurationWidget):
         Adds internal widgets specific to IndexScore.
         """
         try:
-            self.info_label: QLabel = QLabel(self.label_text)
+            self.info_label: QLabel = QLabel("Fill each polygon with a fixed value")
             self.layout.addWidget(self.info_label)
         except Exception as e:
             QgsMessageLog.logMessage(
