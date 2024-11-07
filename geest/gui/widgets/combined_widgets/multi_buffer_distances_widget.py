@@ -102,7 +102,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
                 )
             else:
                 self.increments_input.setText(
-                    self.attributes.get("default_multi_buffer_distances", "")
+                    str(self.attributes.get("default_multi_buffer_distances", ""))
                 )
 
             # Add all layouts to the main layout

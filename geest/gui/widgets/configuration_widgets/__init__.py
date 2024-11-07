@@ -2,3 +2,4 @@ from .base_configuration_widget import BaseConfigurationWidget
 from .acled_csv_configuration_widget import AcledCsvConfigurationWidget
 from .dont_use_configuration_widget import DontUseConfigurationWidget
 from .index_score_configuration_widget import IndexScoreConfigurationWidget
+from .multi_buffer_configuration_widget import MultiBufferConfigurationWidget

@@ -122,6 +122,36 @@ class FactorAggregationDialog(QDialog):
 
         # Table setup
         self.table = QTableWidget(self)
+        self.populate_table()
+
+        configuration_widget.data_changed.connect(self.populate_table)
+
+        layout.addWidget(self.table)
+
+        # QDialogButtonBox setup for OK and Cancel
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        auto_calculate_button = QPushButton("Balance Weights")
+        if len(self.guids) > 1:
+            button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+
+        toggle_guid_button = QPushButton("Show GUIDs")
+        button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
+
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
+        toggle_guid_button.clicked.connect(self.toggle_guid_column)
+
+        layout.addWidget(button_box)
+
+        self.setLayout(layout)
+        # Initial call to update the preview with existing content
+        self.update_preview()
+
+    def populate_table(self):
+        """Populate the table with data source widgets, indicator names, weightings, and GUIDs."""
+        # first clear the table of any existing widgets
+        self.table.clear()
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(
@@ -148,7 +178,6 @@ class FactorAggregationDialog(QDialog):
             self.weighting_column_visible = True
         self.table.setColumnHidden(2, not self.weighting_column_visible)
 
-        # Populate the table
         for row, guid in enumerate(self.guids):
             # Get the child indicator item from this factor
             item = self.tree_item.getItemByGuid(guid)
@@ -194,28 +223,6 @@ class FactorAggregationDialog(QDialog):
             guid_item = QTableWidgetItem(guid)
             guid_item.setFlags(Qt.ItemIsEnabled)  # Make it non-editable
             self.table.setItem(row, 3, guid_item)
-
-        layout.addWidget(self.table)
-
-        # QDialogButtonBox setup for OK and Cancel
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        auto_calculate_button = QPushButton("Balance Weights")
-        if len(self.guids) > 1:
-            button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
-
-        toggle_guid_button = QPushButton("Show GUIDs")
-        button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
-
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
-        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
-        toggle_guid_button.clicked.connect(self.toggle_guid_column)
-
-        layout.addWidget(button_box)
-
-        self.setLayout(layout)
-        # Initial call to update the preview with existing content
-        self.update_preview()
 
     def toggle_guid_column(self):
         """Toggle the visibility of the GUID column."""
