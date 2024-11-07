@@ -236,8 +236,9 @@ class FactorAggregationDialog(QDialog):
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
+
         if self.editing:
-            updated_data = self.layer_data
+            updated_data = self.factor_data
             # Include the Markdown text from the left text edit
             updated_data["description"] = self.text_edit_left.toPlainText()
             self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
