@@ -89,7 +89,6 @@ class WorkflowBase(ABC):
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
 
-
     #
     # Every concrete subclass needs to implement these three methods
     #
