@@ -2,14 +2,9 @@ import os
 
 from qgis.PyQt.QtWidgets import (
     QDoubleSpinBox,
-    QToolButton,
-    QFileDialog,
 )
-from qgis.gui import QgsMapLayerComboBox
 from qgis.core import (
     QgsMessageLog,
-    QgsMapLayerProxyModel,
-    QgsProject,
 )
 from qgis.PyQt.QtCore import QSettings
 
@@ -57,9 +52,6 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
         self.spin_box.setSingleStep(1)
         self.spin_box.setValue(self.attributes.get(f"default_index_score", 0))
         self.layout.addWidget(self.spin_box)
-
-        # Restore previously set value
-        value = self.attributes.get(f"default_index_score", None)
 
     def update_attributes(self):
         """

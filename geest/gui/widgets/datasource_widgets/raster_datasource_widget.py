@@ -44,8 +44,8 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
             # Raster Layer Section
             self._add_raster_layer_widgets()
             # Connect signals to update the data when user changes selections
-            self.raster_layer_combo.currentIndexChanged.connect(self.update_data)
-            self.raster_line_edit.textChanged.connect(self.update_data)
+            self.raster_layer_combo.currentIndexChanged.connect(self.update_attributes)
+            self.raster_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
@@ -106,15 +106,15 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         except Exception as e:
             QgsMessageLog.logMessage(f"Error selecting raster: {e}", "Geest")
 
-    def get_data(self) -> dict:
+    def update_attributes(self):
         """
-        Retrieves and returns the current state of the widget, including selected raster layers.
+        Updates the attributes dict to match the current state of the widget.
+
+        The attributes dict is a reference so any tree item attributes will be updated directly.
 
         Returns:
-            dict: A dictionary containing the current attributes of the raster layers and/ors.
+            None
         """
-        if not self.isChecked():
-            return None
 
         # Collect data for the raster layer
         raster_layer = self.raster_layer_combo.currentLayer()
@@ -129,21 +129,3 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
             )
             self.attributes[f"{self.widget_key}_layer_id"] = raster_layer.id()
         self.attributes[f"{self.widget_key}_raster"] = self.raster_line_edit.text()
-
-        return self.attributes
-
-    def set_internal_widgets_enabled(self, enabled: bool) -> None:
-        """
-        Enables or disables the internal widgets (raster layers) based on the state of the radio button.
-
-        Args:
-            enabled (bool): Whether to enable or disable the internal widgets.
-        """
-        try:
-            self.raster_layer_combo.setEnabled(enabled)
-            self.raster_line_edit.setEnabled(enabled)
-            self.raster_button.setEnabled(enabled)
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )

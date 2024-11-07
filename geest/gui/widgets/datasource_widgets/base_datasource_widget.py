@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from qgis.PyQt.QtWidgets import QRadioButton, QHBoxLayout, QWidget
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import QgsMessageLog, Qgis
@@ -32,12 +33,14 @@ class BaseDataSourceWidget(QWidget):
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
 
+    @abstractmethod
     def add_internal_widgets(self) -> None:
         """
         Add internal widgets; to be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement add_internal_widgets.")
 
+    @abstractmethod
     def update_attributes(self):
         """
         Method to get data from internal widgets.
