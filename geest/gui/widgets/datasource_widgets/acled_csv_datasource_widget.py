@@ -38,7 +38,7 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
             self._add_csv_file_widgets()
 
             # Connect signals to update the data when user changes selections
-            self.csv_file_line_edit.textChanged.connect(self.update_data)
+            self.csv_file_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
@@ -119,14 +119,14 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
                 self, "CSV Validation Error", f"An error occurred: {e}"
             )
 
-    def get_data(self) -> dict:
+    def update_attributes(self):
         """
-        Retrieves and returns the current state of the widget, including the selected CSV file path.
+        Updates the attributes dict to match the current state of the widget.
+
+        The attributes dict is a reference so any tree item attributes will be updated directly.
 
         Returns:
-            dict: A dictionary containing the current attributes of the widget.
+            None
         """
         # Collect data for the CSV file
         self.attributes[f"{self.widget_key}_csv_file"] = self.csv_file_line_edit.text()
-
-        return self.attributes
