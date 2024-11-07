@@ -40,7 +40,7 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
             # Raster Layer Section
             self._add_raster_layer_widgets()
             # Connect signals to update the data when user changes selections
-            self.spin_box.valueChanged.connect(self.update_data)
+            self.spin_box.valueChanged.connect(self.update_attributes)
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
@@ -55,38 +55,21 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
         self.spin_box = QDoubleSpinBox()
         self.spin_box.setRange(0, 100)
         self.spin_box.setSingleStep(1)
-        self.spin_box.setValue(100)
+        self.spin_box.setValue(self.attributes.get(f"default_index_score", 0))
         self.layout.addWidget(self.spin_box)
 
         # Restore previously set value
         value = self.attributes.get(f"default_index_score", None)
 
-    def get_data(self) -> dict:
+    def update_attributes(self):
         """
-        Retrieves and returns the current state of the widget, including selected raster layers.
+        Updates the attributes dict to match the current state of the widget.
+
+        The attributes dict is a reference so any tree item attributes will be updated directly.
 
         Returns:
-            dict: A dictionary containing the current attributes of the raster layers and/ors.
+            None
         """
-        if not self.isChecked():
-            return None
-
-        # Collect data for the raster layer
+        # Collect data for the raster layerfactorlayer_data_weighting
         value = self.spin_box.value()
         self.attributes["default_index_score"] = value
-
-        return self.attributes
-
-    def set_internal_widgets_enabled(self, enabled: bool) -> None:
-        """
-        Enables or disables the internal widgets (raster layers) based on the state of the radio button.
-
-        Args:
-            enabled (bool): Whether to enable or disable the internal widgets.
-        """
-        try:
-            self.spin_box.setEnabled(enabled)
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
