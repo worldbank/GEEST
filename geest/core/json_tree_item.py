@@ -261,6 +261,10 @@ class JsonTreeItem:
         """Return the value of the attribute with the specified key."""
         return self.attributes().get(key, default)
 
+    def setAttributes(self, attributes):
+        """Set the attributes of the item."""
+        self.itemData[3] = attributes
+
     def getFactorIndicatorGuids(self):
         """Return the list of indicators under this factor."""
         guids = []
