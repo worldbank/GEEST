@@ -3,7 +3,7 @@ from geest.gui.widgets.configuration_widgets import (
     BaseConfigurationWidget,
     DontUseConfigurationWidget,
     AcledCsvConfigurationWidget,
-    IndexScoreConfigurationWidget
+    IndexScoreConfigurationWidget,
 )
 from geest.core import setting
 
@@ -45,9 +45,11 @@ class ConfigurationWidgetFactory:
             if key == "indicator_required" and value == 0:
                 return DontUseConfigurationWidget(
                     label_text="do_not_use", attributes=attributes
-            )
+                )
             if key == "use_default_index_score" and value == 1:
-                 return IndexScoreConfigurationWidget(label_text=key, attributes=attributes)
+                return IndexScoreConfigurationWidget(
+                    label_text=key, attributes=attributes
+                )
             # if key == "use_multi_buffer_point" and value == 1:
             #     return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
             # if key == "use_single_buffer_point" and value == 1:
