@@ -1,7 +1,9 @@
 from qgis.core import QgsMessageLog, Qgis
 from geest.gui.widgets.configuration_widgets import (
     BaseConfigurationWidget,
+    DontUseConfigurationWidget,
     AcledCsvConfigurationWidget,
+    IndexScoreConfigurationWidget
 )
 from geest.core import setting
 
@@ -24,11 +26,12 @@ class ConfigurationWidgetFactory:
         """
         Factory method to create a radio button based on key-value pairs.
         """
+        QgsMessageLog.logMessage(
+            "Configuration widget factory called", tag="Geest", level=Qgis.Info
+        )
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            QgsMessageLog.logMessage(
-                "Configuration widget factory called", tag="Geest", level=Qgis.Info
-            )
+
             QgsMessageLog.logMessage(
                 "----------------------------", tag="Geest", level=Qgis.Info
             )
@@ -39,12 +42,12 @@ class ConfigurationWidgetFactory:
             )
 
         try:
-            # if key == "indicator_required" and value == 0:
-            #     return DontUseRadioButton(
-            #         label_text="do_not_use", attributes=attributes
-            #     )
-            # if key == "use_default_index_score" and value == 1:
-            #     return IndexScoreRadioButton(label_text=key, attributes=attributes)
+            if key == "indicator_required" and value == 0:
+                return DontUseConfigurationWidget(
+                    label_text="do_not_use", attributes=attributes
+            )
+            if key == "use_default_index_score" and value == 1:
+                 return IndexScoreConfigurationWidget(label_text=key, attributes=attributes)
             # if key == "use_multi_buffer_point" and value == 1:
             #     return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
             # if key == "use_single_buffer_point" and value == 1:

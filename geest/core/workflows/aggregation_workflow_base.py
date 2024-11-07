@@ -35,7 +35,6 @@ class AggregationWorkflowBase(WorkflowBase):
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.guids = None  # This should be set by the child class - a list of guids of JSONTreeItems to aggregate
-        self.analysis_mode = self.item.attributes().get("analysis_mode", "")
         self.id = None  # This should be set by the child class
         self.weight_key = None  # This should be set by the child class
         self.aggregation = True
