@@ -4,3 +4,4 @@ from .dont_use_configuration_widget import DontUseConfigurationWidget
 from .index_score_configuration_widget import IndexScoreConfigurationWidget
 from .multi_buffer_configuration_widget import MultiBufferConfigurationWidget
 from .single_buffer_configuration_widget import SingleBufferConfigurationWidget
+from .feature_per_cell_widget import FeaturePerCellConfigurationWidget

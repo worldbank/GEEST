@@ -6,6 +6,7 @@ from geest.gui.widgets.configuration_widgets import (
     IndexScoreConfigurationWidget,
     MultiBufferConfigurationWidget,
     SingleBufferConfigurationWidget,
+    FeaturePerCellConfigurationWidget,
 )
 from geest.core import setting
 
@@ -60,16 +61,26 @@ class ConfigurationWidgetFactory:
                 return SingleBufferConfigurationWidget(
                     label_text=key, attributes=attributes
                 )
-            # if key == "use_poly_per_cell" and value == 1:
-            #     return PolygonWidget(label_text=key, attributes=attributes)
-            # if key == "use_polyline_per_cell" and value == 1:
-            #     return PolylineWidget(label_text=key, attributes=attributes)
-            # if key == "use_point_per_cell" and value == 1:
-            #     return PointLayerWidget(label_text=key, attributes=attributes)
+            # ------------------------------------------------
+            # These three all use the same configuration widgets
+            # but will have different datasource widgets generated as appropriate
+            if key == "use_poly_per_cell" and value == 1:  # poly = polygon
+                return FeaturePerCellConfigurationWidget(
+                    label_text=key, attributes=attributes
+                )
+            if key == "use_polyline_per_cell" and value == 1:
+                return FeaturePerCellConfigurationWidget(
+                    label_text=key, attributes=attributes
+                )
+            if key == "use_point_per_cell" and value == 1:
+                return FeaturePerCellConfigurationWidget(
+                    label_text=key, attributes=attributes
+                )
             if key == "use_csv_to_point_layer" and value == 1:
                 return AcledCsvConfigurationWidget(
                     label_text=key, attributes=attributes
                 )
+            # ------------------------------------------------
             # if key == "use_classify_poly_into_classes" and value == 1:
             #     return SafetyPolygonWidget(label_text=key, attributes=attributes)
             # if key == "use_nighttime_lights" and value == 1:

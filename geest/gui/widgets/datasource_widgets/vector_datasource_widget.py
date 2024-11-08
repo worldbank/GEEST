@@ -24,8 +24,17 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
         """
         try:
+            # check the attributes to decide what feature types to
+            # filter for.
+            filter = None
+            if self.attributes.get("use_points_per_cell", 0):
+                filter = QgsMapLayerProxyModel.PointLayer
+            elif self.attributes.get("use_polyline_per_cell", 0):
+                filter = QgsMapLayerProxyModel.LineLayer
+            else:
+                filter = QgsMapLayerProxyModel.PolygonLayer
             self.layer_combo = QgsMapLayerComboBox()
-            self.layer_combo.setFilters(QgsMapLayerProxyModel.PointLayer)
+            self.layer_combo.setFilters(filter)
             self.layout.addWidget(self.layer_combo)
 
             # Set the selected QgsVectorLayer in QgsMapLayerComboBox
