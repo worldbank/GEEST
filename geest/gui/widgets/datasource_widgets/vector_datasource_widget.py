@@ -24,8 +24,17 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
         """
         try:
+            # check the attributes to decide what feature types to
+            # filter for.
+            filter = None
+            if self.attributes.get("use_point_per_cell", 0):
+                filter = QgsMapLayerProxyModel.PointLayer
+            elif self.attributes.get("use_polyline_per_cell", 0):
+                filter = QgsMapLayerProxyModel.LineLayer
+            else:
+                filter = QgsMapLayerProxyModel.PolygonLayer
             self.layer_combo = QgsMapLayerComboBox()
-            self.layer_combo.setFilters(QgsMapLayerProxyModel.PointLayer)
+            self.layer_combo.setFilters(filter)
             self.layout.addWidget(self.layer_combo)
 
             # Set the selected QgsVectorLayer in QgsMapLayerComboBox
@@ -45,12 +54,13 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 self.shapefile_line_edit.setText(
                     self.attributes[f"{self.widget_key}_shapefile"]
                 )
+                self.shapefile_line_edit.setVisible(True)
             self.layout.addWidget(self.shapefile_line_edit)
             self.layout.addWidget(self.shapefile_button)
 
             # Emit the data_changed signal when any widget is changed
-            self.layer_combo.currentIndexChanged.connect(self.update_data)
-            self.shapefile_line_edit.textChanged.connect(self.update_data)
+            self.layer_combo.currentIndexChanged.connect(self.update_attributes)
+            self.shapefile_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
@@ -81,9 +91,14 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         except Exception as e:
             QgsMessageLog.logMessage(f"Error selecting shapefile: {e}", "Geest")
 
-    def get_data(self) -> dict:
+    def update_attributes(self):
         """
-        Return the data as a dictionary, updating attributes with current value.
+        Updates the attributes dict to match the current state of the widget.
+
+        The attributes dict is a reference so any tree item attributes will be updated directly.
+
+        Returns:
+            None
         """
         layer = self.layer_combo.currentLayer()
         if not layer:
@@ -106,18 +121,3 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         self.attributes[f"{self.widget_key}_shapefile"] = (
             self.shapefile_line_edit.text()
         )
-
-        return self.attributes
-
-    def set_internal_widgets_enabled(self, enabled: bool) -> None:
-        """
-        Enables or disables the internal widgets based on the state of the radio button.
-        """
-        try:
-            self.layer_combo.setEnabled(enabled)
-            self.shapefile_line_edit.setEnabled(enabled)
-            self.shapefile_button.setEnabled(enabled)
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )

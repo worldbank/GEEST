@@ -56,9 +56,9 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.shapefile_button = QToolButton()
             self.shapefile_button.setText("...")
             self.shapefile_button.clicked.connect(self.select_shapefile)
-            if self.attributes.get("multi_buffer_shapefile", False):
+            if self.attributes.get("multi_buffer_point_shapefile", False):
                 self.shapefile_line_edit.setText(
-                    self.attributes["multi_buffer_shapefile"]
+                    self.attributes["multi_buffer_point_shapefile"]
                 )
             self.shapefile_layout.addWidget(self.shapefile_line_edit)
             self.shapefile_layout.addWidget(self.shapefile_button)
@@ -102,7 +102,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
                 )
             else:
                 self.increments_input.setText(
-                    self.attributes.get("default_multi_buffer_distances", "")
+                    str(self.attributes.get("default_multi_buffer_distances", ""))
                 )
 
             # Add all layouts to the main layout
@@ -186,7 +186,9 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.attributes["multi_buffer_travel_units"] = "Time"
 
         self.attributes["multi_buffer_travel_distances"] = self.increments_input.text()
-        self.attributes["multi_buffer_shapefile"] = self.shapefile_line_edit.text()
+        self.attributes["multi_buffer_point_shapefile"] = (
+            self.shapefile_line_edit.text()
+        )
 
         return self.attributes
 

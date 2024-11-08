@@ -39,7 +39,6 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "use_default_index_score"
         self.index_score = int(
             (self.attributes.get("default_index_score", 0) / 100) * 5
         )

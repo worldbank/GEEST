@@ -43,6 +43,8 @@ class DataSourceWidgetFactory:
             )
 
         try:
+            # remove "use_" from start of widget key for passing to the datasource widget where needed
+            cleaned_key = widget_key[4:]
             if widget_key == "indicator_required" and value == 0:
                 return None
             if widget_key == "use_default_index_score" and value == 1:
@@ -51,23 +53,23 @@ class DataSourceWidgetFactory:
                 )
             if widget_key == "use_multi_buffer_point" and value == 1:
                 return VectorDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_single_buffer_point" and value == 1:
                 return VectorDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_poly_per_cell" and value == 1:
                 return VectorDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_polyline_per_cell" and value == 1:
                 return VectorDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_point_per_cell" and value == 1:
                 return VectorDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_csv_point_per_cell" and value == 1:
                 return CsvDataSourceWidget(widget_key=widget_key, attributes=attributes)
@@ -77,7 +79,7 @@ class DataSourceWidgetFactory:
                 )
             if widget_key == "use_classify_poly_into_classes" and value == 1:
                 return VectorAndFieldDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_nighttime_lights" and value == 1:
                 return RasterDataSourceWidget(
@@ -88,7 +90,7 @@ class DataSourceWidgetFactory:
                     widget_key=widget_key, attributes=attributes
                 )
             if widget_key == "use_street_lights" and value == 1:
-                return RasterDataSourceWidget(
+                return VectorDataSourceWidget(
                     widget_key=widget_key, attributes=attributes
                 )
             else:

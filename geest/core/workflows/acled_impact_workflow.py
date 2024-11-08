@@ -46,7 +46,6 @@ class AcledImpactWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "use_csv_to_point_layer"
         self.csv_file = self.attributes.get("use_csv_to_point_layer_csv_file", "")
         if not self.csv_file:
             error = "No CSV file provided."

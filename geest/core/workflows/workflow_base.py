@@ -87,6 +87,7 @@ class WorkflowBase(ABC):
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
         self.attributes["result"] = "Not Run"
         self.aggregation = False
+        self.analysis_mode = self.item.attribute("analysis_mode", "")
 
     #
     # Every concrete subclass needs to implement these three methods
