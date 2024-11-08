@@ -93,7 +93,7 @@ class SetupPanel(FORM_CLASS, QWidget):
         """Load a boundary layer from a file."""
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)
-        file_dialog.setNameFilter("GeoPackage (*.gpkg);;Shapefile (*.shp)")
+        file_dialog.setNameFilter("Shapefile (*.shp);;GeoPackage (*.gpkg)")
         if file_dialog.exec_():
             file_path = file_dialog.selectedFiles()[0]
             layer = QgsVectorLayer(file_path, "Boundary", "ogr")
@@ -102,6 +102,8 @@ class SetupPanel(FORM_CLASS, QWidget):
                     self, "Error", "Could not load the boundary layer."
                 )
                 return
+            # Load the layer in QGIS
+            QgsProject.instance().addMapLayer(layer)
             self.layer_combo.setLayer(layer)
             self.field_combo.setLayer(layer)
 
