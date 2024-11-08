@@ -90,7 +90,7 @@ class DataSourceWidgetFactory:
                     widget_key=widget_key, attributes=attributes
                 )
             if widget_key == "use_street_lights" and value == 1:
-                return RasterDataSourceWidget(
+                return VectorDataSourceWidget(
                     widget_key=widget_key, attributes=attributes
                 )
             else:
