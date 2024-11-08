@@ -19,6 +19,12 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
     A widget to define inputs for an open route services routing request.
     """
 
+    # Normally we dont need to reimplement the __init__ method, but in this case we need to
+    # change the label text next to the radio button
+    def __init__(self, label_text: str, attributes: dict) -> None:
+        humanised_label = "Feature per cell"
+        super().__init__(humanised_label, attributes)
+
     def add_internal_widgets(self) -> None:
         """
         Adds internal widgets specific to self.set_internal_widgets_visible(self.isChecked()) - in this case there are none.
@@ -39,7 +45,9 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         if not self.isChecked():
             return None
 
-        return self.attributes
+        return None  # Important to return None in this case as we dont want to assign
+        # different analysis modes to the indicators because this config widget is a
+        # special case where it caters for 3 different analysis modes.
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:
         """

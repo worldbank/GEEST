@@ -27,7 +27,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             # check the attributes to decide what feature types to
             # filter for.
             filter = None
-            if self.attributes.get("use_points_per_cell", 0):
+            if self.attributes.get("use_point_per_cell", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
             elif self.attributes.get("use_polyline_per_cell", 0):
                 filter = QgsMapLayerProxyModel.LineLayer

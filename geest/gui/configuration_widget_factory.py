@@ -100,4 +100,7 @@ class ConfigurationWidgetFactory:
                 return None
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in create_radio_button: {e}", "Geest")
+            import traceback
+
+            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
             return None
