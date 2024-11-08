@@ -126,6 +126,8 @@ class SetupPanel(FORM_CLASS, QWidget):
             self.settings.setValue(
                 "last_working_directory", directory
             )  # Update last used project
+            self.project_path_label.setText(directory)
+            self.create_project_directory_button.setText("📂 Change Project Folder")
 
     def add_world_map(self):
         """Adds the built-in QGIS world map to the canvas."""
