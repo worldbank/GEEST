@@ -9,6 +9,8 @@ from geest.gui.widgets.configuration_widgets import (
     FeaturePerCellConfigurationWidget,
     SafetyPolygonConfigurationWidget,
     StreetLightsConfigurationWidget,
+    RasterReclassificationConfigurationWidget,
+    SafetyRasterConfigurationWidget,
 )
 from geest.core import setting
 
@@ -83,16 +85,18 @@ class ConfigurationWidgetFactory:
                     label_text=key, attributes=attributes
                 )
             # ------------------------------------------------
-            # if key == "use_classify_poly_into_classes" and value == 1:
-            #    return (label_text=key, attributes=attributes)StreetLightsConfigurationWidget
-            if key == "use_nighttime_lights" and value == 1:
+            if key == "use_classify_poly_into_classes" and value == 1:
                 return SafetyPolygonConfigurationWidget(
                     label_text=key, attributes=attributes
                 )
-            # if key == "use_environmental_hazards" and value == 1:
-            #     return RasterReclassificationWidget(
-            #         label_text=key, attributes=attributes
-            #     )
+            if key == "use_nighttime_lights" and value == 1:
+                return SafetyRasterConfigurationWidget(
+                    label_text=key, attributes=attributes
+                )
+            if key == "use_environmental_hazards" and value == 1:
+                return RasterReclassificationConfigurationWidget(
+                    label_text=key, attributes=attributes
+                )
             if key == "use_street_lights" and value == 1:
                 return StreetLightsConfigurationWidget(
                     label_text=key, attributes=attributes

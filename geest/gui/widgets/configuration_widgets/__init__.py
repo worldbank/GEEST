@@ -7,3 +7,7 @@ from .single_buffer_configuration_widget import SingleBufferConfigurationWidget
 from .feature_per_cell_configuration_widget import FeaturePerCellConfigurationWidget
 from .safety_polygon_configuration_widget import SafetyPolygonConfigurationWidget
 from .street_lights_configuration_widget import StreetLightsConfigurationWidget
+from .raster_reclassification_configuration_widget import (
+    RasterReclassificationConfigurationWidget,
+)
+from .safety_raster_configuration_widget import SafetyRasterConfigurationWidget

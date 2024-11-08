@@ -30,8 +30,8 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         Adds internal widgets specific to self.set_internal_widgets_visible(self.isChecked()) - in this case there are none.
         """
         try:
-            self.label = QLabel("Count features per cell.")
-            self.layout.addWidget(self.layout)
+            self.info_label = QLabel("Count features per cell.")
+            self.layout.addWidget(self.info_label)
         except Exception as e:
             QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
@@ -54,7 +54,7 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         Enables or disables the internal widgets based on the state of the radio button.
         """
         try:
-            self.label.setEnabled(enabled)
+            self.info_label.setEnabled(enabled)
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error in set_internal_widgets_enabled: {e}", "Geest"
