@@ -5,6 +5,7 @@ from geest.gui.widgets.configuration_widgets import (
     AcledCsvConfigurationWidget,
     IndexScoreConfigurationWidget,
     MultiBufferConfigurationWidget,
+    SingleBufferConfigurationWidget,
 )
 from geest.core import setting
 
@@ -55,8 +56,10 @@ class ConfigurationWidgetFactory:
                 return MultiBufferConfigurationWidget(
                     label_text=key, attributes=attributes
                 )
-            # if key == "use_single_buffer_point" and value == 1:
-            #     return SingleBufferDistanceWidget(label_text=key, attributes=attributes)
+            if key == "use_single_buffer_point" and value == 1:
+                return SingleBufferConfigurationWidget(
+                    label_text=key, attributes=attributes
+                )
             # if key == "use_poly_per_cell" and value == 1:
             #     return PolygonWidget(label_text=key, attributes=attributes)
             # if key == "use_polyline_per_cell" and value == 1:
