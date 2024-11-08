@@ -85,7 +85,25 @@ class SetupPanel(FORM_CLASS, QWidget):
             self.working_dir = self.previous_project_combo.currentText()
             self.set_project_directory()
 
+        self.load_boundary_button.clicked.connect(self.load_boundary)
+
         self.progress_bar.setVisible(False)
+
+    def load_boundary(self):
+        """Load a boundary layer from a file."""
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("GeoPackage (*.gpkg);;Shapefile (*.shp)")
+        if file_dialog.exec_():
+            file_path = file_dialog.selectedFiles()[0]
+            layer = QgsVectorLayer(file_path, "Boundary", "ogr")
+            if not layer.isValid():
+                QMessageBox.critical(
+                    self, "Error", "Could not load the boundary layer."
+                )
+                return
+            self.layer_combo.setLayer(layer)
+            self.field_combo.setLayer(layer)
 
     def select_directory(self):
         directory = QFileDialog.getExistingDirectory(
