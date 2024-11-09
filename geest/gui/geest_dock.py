@@ -6,6 +6,8 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QPixmap, QPainter
+
 from qgis.core import QgsMessageLog, Qgis, QgsProject
 from typing import Optional
 from geest.gui.panels import (
@@ -18,6 +20,7 @@ from geest.gui.panels import (
     CreateProjectPanel,
 )
 from geest.core import set_setting, setting
+from geest.utilities import resources_path
 
 
 class GeestDock(QDockWidget):
@@ -42,6 +45,11 @@ class GeestDock(QDockWidget):
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for a cleaner look
         layout.setSpacing(0)  # Remove spacing between elements
 
+        # Load the background image
+        self.background_image = QPixmap(
+            resources_path("resources", "images", "background.png")
+        )
+
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
 
@@ -50,7 +58,7 @@ class GeestDock(QDockWidget):
             self.intro_widget: IntroPanel = IntroPanel()
             intro_panel: QWidget = QWidget()
             intro_layout: QVBoxLayout = QVBoxLayout(intro_panel)
-            intro_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
+            intro_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
             intro_layout.addWidget(self.intro_widget)
             self.stacked_widget.addWidget(intro_panel)
             self.intro_widget.switch_to_next_tab.connect(
@@ -61,7 +69,7 @@ class GeestDock(QDockWidget):
             self.ors_widget: OrsPanel = OrsPanel()
             ors_panel: QWidget = QWidget()
             ors_layout: QVBoxLayout = QVBoxLayout(ors_panel)
-            ors_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
+            ors_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
             ors_layout.addWidget(self.ors_widget)
             self.stacked_widget.addWidget(ors_panel)
             self.ors_widget.switch_to_next_tab.connect(
@@ -73,7 +81,7 @@ class GeestDock(QDockWidget):
             self.setup_widget: SetupPanel = SetupPanel()
             setup_panel: QWidget = QWidget()
             setup_layout: QVBoxLayout = QVBoxLayout(setup_panel)
-            setup_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
+            setup_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
             setup_layout.addWidget(self.setup_widget)
             self.stacked_widget.addWidget(setup_panel)
 
@@ -91,7 +99,7 @@ class GeestDock(QDockWidget):
             self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
             open_project_panel: QWidget = QWidget()
             open_project_layout: QVBoxLayout = QVBoxLayout(open_project_panel)
-            open_project_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
+            open_project_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
             open_project_layout.addWidget(self.open_project_widget)
             self.stacked_widget.addWidget(open_project_panel)
 
@@ -104,7 +112,7 @@ class GeestDock(QDockWidget):
             self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
             create_project_panel: QWidget = QWidget()
             create_project_layout: QVBoxLayout = QVBoxLayout(create_project_panel)
-            create_project_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
+            create_project_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
             create_project_layout.addWidget(self.create_project_widget)
             self.stacked_widget.addWidget(create_project_panel)
 
@@ -156,6 +164,7 @@ class GeestDock(QDockWidget):
 
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
+
             QgsMessageLog.logMessage("GeestDock initialized successfully.", "Geest")
 
         except Exception as e:
@@ -164,6 +173,22 @@ class GeestDock(QDockWidget):
                 "Geest",
                 level=Qgis.Critical,
             )
+
+    def paintEvent(self, event):
+        with QPainter(self) as painter:
+            # Calculate the scaling and cropping offsets
+            scaled_background = self.background_image.scaled(
+                self.size(), Qt.KeepAspectRatioByExpanding
+            )
+
+            # Calculate the offset to crop from top and right to keep bottom left anchored
+            x_offset = max(0, scaled_background.width() - self.width())
+            y_offset = max(0, scaled_background.height() - self.height())
+
+            # Draw the image at the negative offsets
+            painter.drawPixmap(-x_offset, -y_offset, scaled_background)
+
+        super().paintEvent(event)
 
     def qgis_project_changed(self) -> None:
         """

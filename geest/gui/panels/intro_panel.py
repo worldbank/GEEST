@@ -1,10 +1,7 @@
 from PyQt5.QtWidgets import (
     QWidget,
 )
-from qgis.core import (
-    QgsMessageLog,
-    Qgis,
-)
+from qgis.core import QgsMessageLog, Qgis, QPainter
 from qgis.PyQt import uic
 
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
