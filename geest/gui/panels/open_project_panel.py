@@ -16,6 +16,7 @@ FORM_CLASS = get_ui_class("open_project_panel_base.ui")
 
 class OpenProjectPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
     def __init__(self):
         super().__init__()
@@ -68,9 +69,11 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.previous_project_combo.setSizeAdjustPolicy(
             QComboBox.AdjustToMinimumContentsLengthWithIcon
         )
-        self.previous_project_combo.setMinimumContentsLength(
-            10
-        )  # or another length that fits your needs
+        self.previous_project_combo.setMinimumContentsLength(10)
+        self.previous_button.clicked.connect(self.on_previous_button_clicked)
+
+    def on_previous_button_clicked(self):
+        self.switch_to_previous_tab.emit()
 
     def add_project_to_combo(self, project_path: str):
         """Add a project path to the combo with elided text and full path as data."""

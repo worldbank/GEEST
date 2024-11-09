@@ -76,6 +76,10 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(2)
             )
+            self.ors_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(0)
+            )
 
             # Create and add the "Project" panel (SetupPanel)
             self.setup_widget: SetupPanel = SetupPanel()
@@ -95,6 +99,11 @@ class GeestDock(QDockWidget):
                 lambda: self.stacked_widget.setCurrentIndex(4)
             )
 
+            self.setup_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(1)
+            )
+
             # Create and add the "Open Project" panel
             self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
             open_project_panel: QWidget = QWidget()
@@ -106,6 +115,10 @@ class GeestDock(QDockWidget):
             self.open_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(5)
+            )
+            self.open_project_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(3)
             )
 
             # Create and add the "Create Project" panel
@@ -134,7 +147,7 @@ class GeestDock(QDockWidget):
             )
             self.tree_widget.switch_to_previous_tab.connect(
                 # Switch to the previous tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(1)
+                lambda: self.stacked_widget.setCurrentIndex(2)
             )
             # Create and add the "Help" panel (HelpPanel)
             help_widget: HelpPanel = HelpPanel()
@@ -209,7 +222,7 @@ class GeestDock(QDockWidget):
             )
             if geest_project and os.path.exists(geest_project):
                 self.tree_widget.set_working_directory(geest_project)
-                self.stacked_widget.setCurrentIndex(2)  # Tree tab
+                self.stacked_widget.setCurrentIndex(5)  # Tree tab
 
     def on_panel_changed(self, index: int) -> None:
         """

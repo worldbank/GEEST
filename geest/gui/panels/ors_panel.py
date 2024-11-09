@@ -19,6 +19,7 @@ FORM_CLASS = get_ui_class("ors_panel_base.ui")
 
 class OrsPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
     def __init__(self):
         super().__init__()
@@ -77,3 +78,6 @@ class OrsPanel(FORM_CLASS, QWidget):
 
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
+
+    def on_previous_button_clicked(self):
+        self.switch_to_previous_tab.emit()
