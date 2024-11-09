@@ -38,7 +38,7 @@ class WorkflowQueueManager(QObject):
         .
         :param task: A QgsTask object representing the task
         """
-        # ⭐️ Now we are passing the item reference to the WorkflowJob
+        # ⭐️ Now we are passing the item ritemeference to the WorkflowJob
         #    any changes made to the item will be reflected in the tree directly
 
         self.workflow_queue.add_job(task)

@@ -78,7 +78,12 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.previous_project_combo.addItem(elided_text, project_path)
 
     def elide_path(self, path: str) -> str:
-        """Return an elided version of the path, keeping the end visible."""
+        """Return an elided version of the path, keeping the end visible.
+
+        This helps with very long file paths not forcing the combo box to be very wide.
+
+        You may not notice any difference on many systems.
+        """
         metrics = QFontMetrics(self.previous_project_combo.font())
         available_width = self.previous_project_combo.width() - 20  # Add padding
         elided_text = metrics.elidedText(path, Qt.ElideLeft, available_width)
