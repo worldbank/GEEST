@@ -33,6 +33,9 @@ class OrsPanel(FORM_CLASS, QWidget):
         self.banner_label.setPixmap(
             QPixmap(resources_path("resources", "geest-banner.png"))
         )
+        self.status_label.setPixmap(
+            QPixmap(resources_path("resources", "images", "ors-not-configured.png"))
+        )
         self.next_button.clicked.connect(self.on_next_button_clicked)
         # Connect the rich text label's linkActivated signal to open URLs in browser
         self.description.linkActivated.connect(self.open_link_in_browser)
@@ -59,9 +62,14 @@ class OrsPanel(FORM_CLASS, QWidget):
     def task_completed(self, result):
         """Handle the result of the ORS key check."""
         if result:
-            QMessageBox.information(self, "Success", "ORS API key is valid.")
+            # Get the icon from the resource_path
+            self.status_label.setPixmap(
+                QPixmap(resources_path("resources", "images", "ors-ok.png"))
+            )
         else:
-            QMessageBox.critical(self, "Error", "Invalid ORS API key.")
+            self.status_label.setPixmap(
+                QPixmap(resources_path("resources", "images", "ors-error.png"))
+            )
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""

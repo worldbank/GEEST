@@ -101,7 +101,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="status_label">
        <property name="minimumSize">
         <size>
          <width>128</width>
