@@ -43,7 +43,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_street_lights"
 
-        layer_path = self.attributes.get("street_lights_shapefile", None)
+        layer_path = self.attributes.get("use_street_lights_shapefile", None)
 
         if not layer_path:
             QgsMessageLog.logMessage(
@@ -51,14 +51,16 @@ class StreetLightsBufferWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("street_lights_point_layer_source", None)
+            layer_path = self.attributes.get("use_street_lights_layer_source", None)
             if not layer_path:
                 QgsMessageLog.logMessage(
-                    "No points layer found in street_lights_point_layer_source.",
+                    "No points layer found in use_street_lights_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-                return False
+                error = f"Streetlights point layer is not set correctly: {self.csv_use_street_lights_layer_sourcefile}"
+                self.attributes["error"] = error
+                raise Exception(error)
 
         self.features_layer = QgsVectorLayer(layer_path, "points", "ogr")
         if not self.features_layer.isValid():
@@ -68,7 +70,9 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             QgsMessageLog.logMessage(
                 f"Layer Source: {layer_path}", tag="Geest", level=Qgis.Critical
             )
-            return False
+            error = f"Streetlights point layer is not valid: {layer_path}"
+            self.attributes["error"] = error
+            raise Exception(error)
 
         self.buffer_distance = 20  # 20m buffer
 

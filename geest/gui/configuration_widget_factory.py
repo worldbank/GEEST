@@ -33,9 +33,6 @@ class ConfigurationWidgetFactory:
         """
         Factory method to create a radio button based on key-value pairs.
         """
-        QgsMessageLog.logMessage(
-            "Configuration widget factory called", tag="Geest", level=Qgis.Info
-        )
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
 
@@ -51,59 +48,59 @@ class ConfigurationWidgetFactory:
         try:
             if key == "indicator_required" and value == 0:
                 return DontUseConfigurationWidget(
-                    label_text="do_not_use", attributes=attributes
+                    analysis_mode="do_not_use", attributes=attributes
                 )
             if key == "use_default_index_score" and value == 1:
                 return IndexScoreConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_multi_buffer_point" and value == 1:
                 return MultiBufferConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_single_buffer_point" and value == 1:
                 return SingleBufferConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             # ------------------------------------------------
             # These three all use the same configuration widgets
             # but will have different datasource widgets generated as appropriate
             if key == "use_poly_per_cell" and value == 1:  # poly = polygon
                 return FeaturePerCellConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_polyline_per_cell" and value == 1:
                 return FeaturePerCellConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_point_per_cell" and value == 1:
                 return FeaturePerCellConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_csv_to_point_layer" and value == 1:
                 return AcledCsvConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             # ------------------------------------------------
             if key == "use_classify_poly_into_classes" and value == 1:
                 return SafetyPolygonConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_nighttime_lights" and value == 1:
                 return SafetyRasterConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_environmental_hazards" and value == 1:
                 return RasterReclassificationConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             if key == "use_street_lights" and value == 1:
                 return StreetLightsConfigurationWidget(
-                    label_text=key, attributes=attributes
+                    analysis_mode=key, attributes=attributes
                 )
             else:
                 QgsMessageLog.logMessage(
-                    f"Factory did not match any widgets",
+                    f"Factory did not match any widgets for key: {key}",
                     tag="Geest",
                     level=Qgis.Critical,
                 )

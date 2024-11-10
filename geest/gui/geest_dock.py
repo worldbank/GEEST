@@ -127,6 +127,12 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+            self.open_project_widget.set_working_directory.connect(
+                # Switch to the previous tab when the button is clicked
+                lambda: self.tree_widget.set_working_directory(
+                    self.open_project_widget.working_dir
+                )
+            )
 
             # Create and add the "Create Project" panel
             self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
@@ -139,6 +145,12 @@ class GeestDock(QDockWidget):
             self.create_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+            self.create_project_widget.set_working_directory.connect(
+                # Switch to the previous tab when the button is clicked
+                lambda: self.tree_widget.set_working_directory(
+                    self.create_project_widget.working_dir
+                )
             )
 
             # Create and add the "Tree" panel (TreePanel)
@@ -227,7 +239,9 @@ class GeestDock(QDockWidget):
             QgsMessageLog.logMessage(
                 f"Geest project path: {geest_project} ({checksum})", "Geest", Qgis.Info
             )
-            if geest_project and os.path.exists(geest_project):
+            if geest_project and os.path.exists(
+                os.path.join(geest_project, "model.json")
+            ):
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(5)  # Tree tab
 

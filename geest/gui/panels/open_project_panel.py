@@ -17,6 +17,7 @@ FORM_CLASS = get_ui_class("open_project_panel_base.ui")
 class OpenProjectPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    set_working_directory = pyqtSignal(str)  # Signal to set the working directory
 
     def __init__(self):
         super().__init__()
@@ -145,7 +146,9 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             )  # Update last used project
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
+            self.set_working_directory.emit(self.working_dir)
         else:
-            QMessageBox.critical(
-                self, "Error", "Selected project does not contain a model.json file."
-            )
+            self.switch_to_previous_tab.emit()
+            # QMessageBox.critical(
+            #    self, "Error", "Selected project does not contain a model.json file."
+            # )

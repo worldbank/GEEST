@@ -2,7 +2,6 @@ import os
 import csv
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,

@@ -47,9 +47,6 @@ class FactorConfigurationWidget(QWidget):
         """
         Uses the factory to create radio buttons from attributes dictionary.
         """
-        # make a deep copy of the dictionary in case it changes while we
-        # are using it
-        attributes = attributes.copy()
         analysis_mode = attributes.get("analysis_mode", "")
         QgsMessageLog.logMessage(
             f"Creating radio buttons for analysis mode: {analysis_mode}",
@@ -57,22 +54,31 @@ class FactorConfigurationWidget(QWidget):
             level=Qgis.Info,
         )
         for key, value in attributes.items():
-            radio_button_widget = ConfigurationWidgetFactory.create_radio_button(
-                key, value, attributes
-            )
-            if radio_button_widget:
-                if key == analysis_mode:
-                    radio_button_widget.setChecked(True)
-                # Special case for "do_not_use" radio button
-                if (
-                    key == "indicator_required"
-                    and value == 0
-                    and analysis_mode == "do_not_use"
-                ):
-                    radio_button_widget.setChecked(True)
-                self.button_group.addButton(radio_button_widget)
-                self.layout.addWidget(radio_button_widget.get_container())
-                radio_button_widget.data_changed.connect(self.update_attributes)
+            if key.startswith("use_") or key == "indicator_required":
+                QgsMessageLog.logMessage(
+                    f"Creating radio button for key: {key} with value: {value}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                # We pass a copy of the attributes dictionary to the widget factory
+                # so that we can update the attributes as needed
+                # The widget factory will update the attributes dictionary with new data
+                radio_button_widget = ConfigurationWidgetFactory.create_radio_button(
+                    key, value, attributes.copy()
+                )
+                if radio_button_widget:
+                    if key == analysis_mode:
+                        radio_button_widget.setChecked(True)
+                    # Special case for "do_not_use" radio button
+                    if (
+                        key == "indicator_required"
+                        and value == 0
+                        and analysis_mode == "do_not_use"
+                    ):
+                        radio_button_widget.setChecked(True)
+                    self.button_group.addButton(radio_button_widget)
+                    self.layout.addWidget(radio_button_widget.get_container())
+                    radio_button_widget.data_changed.connect(self.update_attributes)
 
     def update_attributes(self, new_data: dict) -> None:
         """
@@ -81,10 +87,10 @@ class FactorConfigurationWidget(QWidget):
         # In the ctor of the widget factor we humanise the name
         # now we roll it back to the snake case version so it matches keys
         # in the JSON data model
-        snake_case_mode = (
-            self.button_group.checkedButton().label_text.lower().replace(" ", "_")
-        )
-        new_data["analysis_mode"] = snake_case_mode
+        # snake_case_mode = (
+        #    self.button_group.checkedButton().label_text.lower().replace(" ", "_")
+        # )
+        # new_data["analysis_mode"] = snake_case_mode
 
         # calculate the changes between new_data and self.attributes
         # so that we can apply them to every indicator in self.guids list
@@ -97,10 +103,4 @@ class FactorConfigurationWidget(QWidget):
             indicator = self.item.getItemByGuid(guid)
             indicator.attributes().update(changed_attributes)
 
-        # Do we need this?
         self.data_changed.emit()
-        # QgsMessageLog.logMessage(
-        #    f"Updated attributes dictionary: {self.attributes}",
-        #    "Geest",
-        #    level=Qgis.Info,
-        # )
