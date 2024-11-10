@@ -185,14 +185,15 @@ class FactorAggregationDialog(QDialog):
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 attributes["analysis_mode"], 1, attributes
             )
-            data_source_widget.setSizePolicy(
-                QSizePolicy.Expanding, QSizePolicy.Preferred
-            )
-
-            data_source_widget.setMinimumWidth(150)
-            data_source_widget.setMinimumHeight(30)
-            data_source_widget.setParent(self.table)  # Set the table as the parent
             if data_source_widget:
+                data_source_widget.setSizePolicy(
+                    QSizePolicy.Expanding, QSizePolicy.Preferred
+                )
+
+                data_source_widget.setMinimumWidth(150)
+                data_source_widget.setMinimumHeight(30)
+                data_source_widget.setParent(self.table)  # Set the table as the parent
+
                 self.table.setCellWidget(
                     row, 0, data_source_widget
                 )  # Set widget in leftmost column

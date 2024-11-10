@@ -29,6 +29,8 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             filter = None
             if self.attributes.get("use_point_per_cell", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+            elif self.attributes.get("use_multi_buffer_point", 0):
+                filter = QgsMapLayerProxyModel.PointLayer
             elif self.attributes.get("use_polyline_per_cell", 0):
                 filter = QgsMapLayerProxyModel.LineLayer
             else:
