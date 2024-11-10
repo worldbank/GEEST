@@ -1,17 +1,12 @@
 from PyQt5.QtWidgets import (
     QWidget,
 )
-from qgis.core import (
-    QgsMessageLog,
-    Qgis,
-)
-from qgis.PyQt import uic
+from qgis.core import QgsMessageLog, Qgis
 
-from qgis.PyQt.QtCore import QSettings, pyqtSignal
+from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.core.tasks import OrsCheckerTask
 from geest.utilities import get_ui_class, resources_path
-from geest.core import setting, set_setting
 
 FORM_CLASS = get_ui_class("intro_panel_base.ui")
 
