@@ -221,11 +221,15 @@ class GeestPlugin:
 
     def run(self):
         """
-        Shows the settings dialog.
+        Toggles the visibility of the dock widget.
         """
-        self.iface.showOptionsDialog(
-            parent=self.iface.mainWindow(), currentPage="geest"
-        )
+        if self.dock_widget.isVisible():
+            self.dock_widget.hide()
+            self.run_action.setText("Show GEEST Panel")
+        else:
+            self.dock_widget.show()
+            self.dock_widget.raise_()
+            self.run_action.setText("Hide GEEST Panel")
 
     def display_information_message_bar(
         self,

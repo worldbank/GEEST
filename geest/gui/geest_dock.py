@@ -54,6 +54,13 @@ class GeestDock(QDockWidget):
         self.stacked_widget: QStackedWidget = QStackedWidget()
 
         try:
+            INTRO_PANEL = 0
+            ORS_PANEL = 1
+            SETUP_PANEL = 2
+            OPEN_PROJECT_PANEL = 3
+            CREATE_PROJECT_PANEL = 4
+            TREE_PANEL = 5
+            HELP_PANEL = 6
             # Create and add the "Intro" panel (IntroPanel)
             self.intro_widget: IntroPanel = IntroPanel()
             intro_panel: QWidget = QWidget()
@@ -63,7 +70,7 @@ class GeestDock(QDockWidget):
             self.stacked_widget.addWidget(intro_panel)
             self.intro_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(1)
+                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
             )
             # Create and add the "ORS" panel (ORSPanel)
             self.ors_widget: OrsPanel = OrsPanel()
@@ -74,11 +81,11 @@ class GeestDock(QDockWidget):
             self.stacked_widget.addWidget(ors_panel)
             self.ors_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(2)
+                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
             self.ors_widget.switch_to_previous_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(0)
+                lambda: self.stacked_widget.setCurrentIndex(INTRO_PANEL)
             )
 
             # Create and add the "Project" panel (SetupPanel)
@@ -91,17 +98,17 @@ class GeestDock(QDockWidget):
 
             self.setup_widget.switch_to_load_project_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(3)
+                lambda: self.stacked_widget.setCurrentIndex(OPEN_PROJECT_PANEL)
             )
 
             self.setup_widget.switch_to_create_project_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(4)
+                lambda: self.stacked_widget.setCurrentIndex(CREATE_PROJECT_PANEL)
             )
 
             self.setup_widget.switch_to_previous_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(1)
+                # Switch to the previous tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
             )
 
             # Create and add the "Open Project" panel
@@ -114,11 +121,11 @@ class GeestDock(QDockWidget):
 
             self.open_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(5)
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
             self.open_project_widget.switch_to_previous_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(3)
+                # Switch to the previous tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
 
             # Create and add the "Create Project" panel
@@ -131,7 +138,7 @@ class GeestDock(QDockWidget):
 
             self.create_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(5)
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
 
             # Create and add the "Tree" panel (TreePanel)
@@ -143,11 +150,11 @@ class GeestDock(QDockWidget):
             self.stacked_widget.addWidget(tree_panel)
             self.tree_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(4)
+                lambda: self.stacked_widget.setCurrentIndex(HELP_PANEL)
             )
             self.tree_widget.switch_to_previous_tab.connect(
                 # Switch to the previous tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(2)
+                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
             # Create and add the "Help" panel (HelpPanel)
             help_widget: HelpPanel = HelpPanel()
@@ -158,7 +165,7 @@ class GeestDock(QDockWidget):
             self.stacked_widget.addWidget(help_panel)
             help_widget.switch_to_previous_tab.connect(
                 # Switch to the previous tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(5)
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
             # Add the stacked widget to the main layout
             layout.addWidget(self.stacked_widget)
@@ -167,7 +174,7 @@ class GeestDock(QDockWidget):
             self.setWidget(main_widget)
 
             # Start with the first panel selected
-            self.stacked_widget.setCurrentIndex(0)
+            self.stacked_widget.setCurrentIndex(INTRO_PANEL)
 
             # Customize allowed areas for docking
             self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
