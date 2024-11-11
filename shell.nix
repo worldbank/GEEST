@@ -33,6 +33,7 @@ in pkgs.mkShell rec {
     pythonPackages.pyqtwebengine
     pinnedPkgs.vim
     pinnedPkgs.pre-commit
+
     pinnedPkgs.git
     pinnedPkgs.qgis
     pinnedPkgs.qt5.full # so we get designer

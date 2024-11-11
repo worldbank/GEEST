@@ -12,6 +12,7 @@ from qgis.core import QgsMessageLog, Qgis, QgsProject
 from typing import Optional
 from geest.gui.panels import (
     IntroPanel,
+    CreditsPanel,
     SetupPanel,
     TreePanel,
     HelpPanel,
@@ -55,12 +56,13 @@ class GeestDock(QDockWidget):
 
         try:
             INTRO_PANEL = 0
-            ORS_PANEL = 1
-            SETUP_PANEL = 2
-            OPEN_PROJECT_PANEL = 3
-            CREATE_PROJECT_PANEL = 4
-            TREE_PANEL = 5
-            HELP_PANEL = 6
+            CREDITS_PANEL = 1
+            ORS_PANEL = 2
+            SETUP_PANEL = 3
+            OPEN_PROJECT_PANEL = 4
+            CREATE_PROJECT_PANEL = 5
+            TREE_PANEL = 6
+            HELP_PANEL = 7
             # Create and add the "Intro" panel (IntroPanel)
             self.intro_widget: IntroPanel = IntroPanel()
             intro_panel: QWidget = QWidget()
@@ -70,8 +72,23 @@ class GeestDock(QDockWidget):
             self.stacked_widget.addWidget(intro_panel)
             self.intro_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
+                lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
             )
+            # Create and add the "Credits" panel (CreditsPanel)
+            self.credits_widget: CreditsPanel = CreditsPanel()
+            credits_panel: QWidget = QWidget()
+            credits_layout: QVBoxLayout = QVBoxLayout(credits_panel)
+            credits_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
+            credits_layout.addWidget(self.credits_widget)
+            self.stacked_widget.addWidget(credits_panel)
+            self.credits_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
+            )            
+            self.credits_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
+            )            
             # Create and add the "ORS" panel (ORSPanel)
             self.ors_widget: OrsPanel = OrsPanel()
             ors_panel: QWidget = QWidget()
@@ -85,7 +102,7 @@ class GeestDock(QDockWidget):
             )
             self.ors_widget.switch_to_previous_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(INTRO_PANEL)
+                lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
             )
 
             # Create and add the "Project" panel (SetupPanel)
@@ -146,6 +163,10 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
+            self.create_project_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
+            )            
             self.create_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(
