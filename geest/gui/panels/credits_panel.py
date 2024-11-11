@@ -31,7 +31,6 @@ class CreditsPanel(FORM_CLASS, QWidget):
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
         self.description.linkActivated.connect(self.open_link_in_browser)
 
-
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
 
@@ -40,4 +39,4 @@ class CreditsPanel(FORM_CLASS, QWidget):
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""
-        QDesktopServices.openUrl(QUrl(url))        
+        QDesktopServices.openUrl(QUrl(url))

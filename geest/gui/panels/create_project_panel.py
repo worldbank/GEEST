@@ -71,7 +71,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         self.progress_bar.setVisible(False)
 
-
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
 

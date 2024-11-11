@@ -84,11 +84,11 @@ class GeestDock(QDockWidget):
             self.credits_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
-            )            
+            )
             self.credits_widget.switch_to_previous_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
-            )            
+            )
             # Create and add the "ORS" panel (ORSPanel)
             self.ors_widget: OrsPanel = OrsPanel()
             ors_panel: QWidget = QWidget()
@@ -166,7 +166,7 @@ class GeestDock(QDockWidget):
             self.create_project_widget.switch_to_previous_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
-            )            
+            )
             self.create_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(
