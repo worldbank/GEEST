@@ -4,7 +4,7 @@
     "qgisMinimumVersion": 3.0,
     "qgisMaximumVersion": 3.99,
     "icon": "icon.png",
-    "experimental": true,
+    "experimental": false,
     "deprecated": false,
     "homepage": "",
     "tracker": "https://github.com/kartoza/GEEST2/issues",
@@ -16,7 +16,7 @@
     "author": "Kartoza",
     "email": "info@kartoza.com",
     "description": "Gender Enabling Environments Spatial Tool",
-    "version": "0.2.8",
+    "version": "0.2.9",
     "changelog": "",
     "server": false
   }
