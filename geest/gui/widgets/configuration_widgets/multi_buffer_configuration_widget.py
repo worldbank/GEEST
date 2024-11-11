@@ -20,6 +20,10 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
         Adds internal widgets specific to self.set_internal_widgets_visible(self.isChecked()) - in this case there are none.
         """
         try:
+            QgsMessageLog.logMessage(
+                "Adding internal widgets for MultiBufferConfigurationWidget", "Geest"
+            )
+            QgsMessageLog.logMessage(f"Attributes: {self.attributes}", "Geest")
             # Travel Mode group
             self.travel_mode_group = QGroupBox("Travel Mode:")
             self.travel_mode_layout = QHBoxLayout()

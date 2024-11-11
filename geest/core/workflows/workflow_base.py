@@ -25,6 +25,7 @@ from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from geest.core import JsonTreeItem, setting
 from geest.utilities import resources_path
 from geest.core.algorithms import AreaIterator
+from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 
 
 class WorkflowBase(ABC):
@@ -486,7 +487,7 @@ class WorkflowBase(ABC):
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
             "NODATA": 255,
             "OPTIONS": "",
-            "DATA_TYPE": 0,  # byte
+            "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
             "INIT": default_value,  # will set all cells to this value if not otherwise set
             "INVERT": False,
             "EXTRA": f"-a_srs {self.target_crs.authid()}",
@@ -566,7 +567,7 @@ class WorkflowBase(ABC):
             "Y_RESOLUTION": None,
             "MULTITHREADING": False,
             "OPTIONS": "",
-            "DATA_TYPE": 0,  # byte - TODO softcode this for aggregation we want float
+            "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
             "EXTRA": "",
         }
         processing.run("gdal:cliprasterbymasklayer", params)

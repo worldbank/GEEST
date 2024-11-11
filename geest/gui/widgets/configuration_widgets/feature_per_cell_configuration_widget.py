@@ -10,20 +10,24 @@ from qgis.core import QgsMessageLog
 # This combines the point per cell, polyline per cell and polygon per cell
 # widgets that are in combined widgets. The reason for this is that
 # when working at the factor level, it can have indicators requiring different
-# spatial data types, but the user should only select on configuration type.
+# spatial data types, but the user should only select one configuration type.
 # The logic for whether to accept point, line or polygons will be implemented in the
 # datasource widget.
 #
 class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
     """
-    A widget to define inputs for an open route services routing request.
+    A widget to define inputs counting features per cell.
     """
 
     # Normally we dont need to reimplement the __init__ method, but in this case we need to
     # change the label text next to the radio button
-    def __init__(self, label_text: str, attributes: dict) -> None:
+    def __init__(self, analysis_mode: str, attributes: dict) -> None:
         humanised_label = "Feature per cell"
-        super().__init__(humanised_label, attributes)
+        super().__init__(
+            humanised_label=humanised_label,  # In this special case we override the label
+            analysis_mode=analysis_mode,
+            attributes=attributes,
+        )
 
     def add_internal_widgets(self) -> None:
         """

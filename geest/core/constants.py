@@ -19,3 +19,4 @@ __revision__ = "$Format:%H$"
 
 # Scope in QSettings
 APPLICATION_NAME = "Geest"
+GDAL_OUTPUT_DATA_TYPE = 6  # Float32

@@ -30,6 +30,9 @@ FORM_CLASS = get_ui_class("create_project_panel_base.ui")
 
 class CreateProjectPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+
+    set_working_directory = pyqtSignal(str)  # Signal to set the working directory
 
     def __init__(self):
         super().__init__()
@@ -62,10 +65,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.create_new_project_folder
         )
         self.next_button.clicked.connect(self.create_project)
+        self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
         self.load_boundary_button.clicked.connect(self.load_boundary)
 
         self.progress_bar.setVisible(False)
+
+    def on_previous_button_clicked(self):
+        self.switch_to_previous_tab.emit()
 
     def load_boundary(self):
         """Load a boundary layer from a file."""
@@ -175,6 +182,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
                 return
             self.settings.setValue("last_working_directory", self.working_dir)
+            self.set_working_directory.emit(self.working_dir)
 
     def progress_updated(self, progress):
         """Slot to be called when the task progress is updated."""

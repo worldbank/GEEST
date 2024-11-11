@@ -553,43 +553,8 @@ class TreePanel(QWidget):
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
 
     def show_attributes(self, item):
-        """Show the attributes of the item in a the message log."""
-        QgsMessageLog.logMessage("Item Attributes", tag="Geest", level=Qgis.Info)
-        QgsMessageLog.logMessage(
-            "----------------------------", tag="Geest", level=Qgis.Info
-        )
-        if item.role == "analysis":
-            QgsMessageLog.logMessage(
-                "Analysis attributes:",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            QgsMessageLog.logMessage(
-                str(item.getAnalysisAttributes()), tag="Geest", level=Qgis.Info
-            )
-        if item.role == "factor":
-            QgsMessageLog.logMessage(
-                "Factor attributes that get passed to workflow:",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-
-        elif item.role == "dimension":
-            QgsMessageLog.logMessage(
-                "Dimension attributes that get passed to workflow",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-        elif item.role == "indicator":
-            QgsMessageLog.logMessage(
-                "Indicator attributes that get passed to workflow",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-
+        """Show the attributes of the item in a table."""
         attributes = item.attributes()
-        QgsMessageLog.logMessage(str(attributes), tag="Geest", level=Qgis.Info)
-
         # Sort the data alphabetically by key name
         sorted_data = dict(sorted(attributes.items()))
 
@@ -716,6 +681,11 @@ class TreePanel(QWidget):
             # Traverse the tree view structure to determine the appropriate subgroup based on paths
             path_list = item.getPaths()
             parent_group = geest_group
+            # truncate the last item from the path list
+            # as we want to add the layer to the group
+            # that is the parent of the layer
+            path_list = path_list[:-1]
+
             for path in path_list:
                 sub_group = parent_group.findGroup(path)
                 if sub_group is None:

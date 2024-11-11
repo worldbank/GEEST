@@ -14,10 +14,20 @@ class BaseConfigurationWidget(QRadioButton):
 
     data_changed = pyqtSignal(dict)
 
-    def __init__(self, label_text: str, attributes: dict) -> None:
-        humanised_label = label_text.replace("_", " ").title()
+    def __init__(
+        self, analysis_mode: str, attributes: dict, humanised_label: str = None
+    ) -> None:
+        """
+
+        Args:
+            analysis_mode (str): The analysis mode for the widget.
+            attributes (dict): The json tree items attributes for the widget.
+            humanised_label (str): Optional custom label for the radio button.
+        """
+        self.analysis_mode = analysis_mode
+        if not humanised_label:
+            humanised_label = analysis_mode.replace("_", " ").title()
         super().__init__(humanised_label)
-        self.label_text = humanised_label
         self.attributes = attributes
         self.container: QWidget = QWidget()
         self.layout: QVBoxLayout = QVBoxLayout(self.container)
@@ -25,7 +35,9 @@ class BaseConfigurationWidget(QRadioButton):
 
         # Log creation of widget
         QgsMessageLog.logMessage(
-            f"Creating Indicator Configuration Widget", tag="Geest", level=Qgis.Info
+            f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'",
+            tag="Geest",
+            level=Qgis.Info,
         )
 
         try:
@@ -69,6 +81,13 @@ class BaseConfigurationWidget(QRadioButton):
         if self.isChecked():
             try:
                 data = self.get_data()
+                if not data:
+                    # In some edge cases, the widget (e.g. FeaturePerCellConfigurationWidget) may not return data
+                    # but we still need to emit the signal to update the attributes
+                    # to avoid breaking the datasource widget logic.
+                    data = self.attributes
+                data["analysis_mode"] = self.analysis_mode
+                QgsMessageLog.logMessage(f"Data changed: {data}", "Geest")
                 self.data_changed.emit(data)
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error in update_data: {e}", "Geest")
