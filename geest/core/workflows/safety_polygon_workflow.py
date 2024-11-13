@@ -1,6 +1,5 @@
 import os
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsFeedback,
     QgsGeometry,
@@ -12,6 +11,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class SafetyPolygonWorkflow(WorkflowBase):
@@ -40,7 +40,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
         layer_path = self.attributes.get("classify_poly_into_classes_shapefile", None)
 
         if not layer_path:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid raster found in classify_poly_into_classes_shapefile, trying classify_poly_into_classes_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -49,7 +49,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
                 "classify_poly_into_classes_layer_source", None
             )
             if not layer_path:
-                QgsMessageLog.logMessage(
+                log_message(
                     "No points layer found in classify_poly_into_classes_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -81,7 +81,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         area_features_count = area_features.featureCount()
-        QgsMessageLog.logMessage(
+        log_message(
             f"Features layer for area {index+1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,

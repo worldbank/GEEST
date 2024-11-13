@@ -11,12 +11,10 @@ from qgis.core import (
     QgsFieldProxyModel,
     QgsVectorLayer,
     QgsProject,
-    QgsMessageLog,
     Qgis,
     QgsProject,
     QgsProcessingContext,
     QgsFeedback,
-    QgsMessageLog,
 )
 
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
@@ -24,6 +22,8 @@ from qgis.PyQt.QtGui import QPixmap
 from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
 from geest.utilities import get_ui_class, resources_path
 from geest.core import WorkflowQueueManager
+from geest.utilities import log_message
+
 
 FORM_CLASS = get_ui_class("create_project_panel_base.ui")
 
@@ -46,7 +46,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         )  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
-        QgsMessageLog.logMessage(f"Loading setup panel", tag="Geest", level=Qgis.Info)
+        log_message(f"Loading setup panel", tag="Geest", level=Qgis.Info)
         self.initUI()
 
     def initUI(self):
@@ -191,7 +191,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     def on_task_completed(self):
         """Slot to be called when the task completes successfully."""
-        QgsMessageLog.logMessage(
+        log_message(
             "*** Study area processing completed successfully. ***",
             tag="Geest",
             level=Qgis.Info,

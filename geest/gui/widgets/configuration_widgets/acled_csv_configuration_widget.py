@@ -1,5 +1,5 @@
-from qgis.core import QgsMessageLog, Qgis
-
+from qgis.core import Qgis
+from geest.utilities import log_message
 from .base_configuration_widget import BaseConfigurationWidget
 
 
@@ -26,14 +26,12 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
             self.widget_key = "use_csv_to_point_layer"
 
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
             )
             import traceback
 
-            QgsMessageLog.logMessage(
-                traceback.format_exc(), tag="Geest", level=Qgis.Critical
-            )
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def get_data(self) -> dict:
         """

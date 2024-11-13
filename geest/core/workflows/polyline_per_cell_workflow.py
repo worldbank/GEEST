@@ -1,6 +1,5 @@
 import os
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsGeometry,
     QgsFeedback,
@@ -13,6 +12,7 @@ from geest.core.algorithms.features_per_cell_processor import (
     select_grid_cells,
     assign_values_to_grid,
 )
+from geest.utilities import log_message
 
 
 class PolylinePerCellWorkflow(WorkflowBase):
@@ -42,14 +42,14 @@ class PolylinePerCellWorkflow(WorkflowBase):
         layer_path = self.attributes.get("polyline_per_cell_shapefile", None)
 
         if not layer_path:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Nothing found in polyline_per_cell_shapefile, trying polygline_per_cell_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get("polyline_per_cell_layer_source", None)
             if not layer_path:
-                QgsMessageLog.logMessage(
+                log_message(
                     "No points layer found in polyline_per_cell_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -79,7 +79,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         area_features_count = area_features.featureCount()
-        QgsMessageLog.logMessage(
+        log_message(
             f"Features layer for area {index+1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,

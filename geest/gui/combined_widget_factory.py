@@ -1,4 +1,4 @@
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from geest.gui.widgets.combined_widgets import (
     BaseIndicatorWidget,
     IndexScoreRadioButton,
@@ -15,6 +15,7 @@ from geest.gui.widgets.combined_widgets import (
     StreetLightsWidget,
 )
 from geest.core import setting
+from geest.utilities import log_message
 
 
 class CombinedWidgetFactory:
@@ -31,17 +32,11 @@ class CombinedWidgetFactory:
         """
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            QgsMessageLog.logMessage(
-                "Dialog widget factory called", tag="Geest", level=Qgis.Info
-            )
-            QgsMessageLog.logMessage(
-                "----------------------------", tag="Geest", level=Qgis.Info
-            )
-            QgsMessageLog.logMessage(f"Key: {key}", tag="Geest", level=Qgis.Info)
-            QgsMessageLog.logMessage(f"Value: {value}", tag="Geest", level=Qgis.Info)
-            QgsMessageLog.logMessage(
-                "----------------------------", tag="Geest", level=Qgis.Info
-            )
+            log_message("Dialog widget factory called", tag="Geest", level=Qgis.Info)
+            log_message("----------------------------", tag="Geest", level=Qgis.Info)
+            log_message(f"Key: {key}", tag="Geest", level=Qgis.Info)
+            log_message(f"Value: {value}", tag="Geest", level=Qgis.Info)
+            log_message("----------------------------", tag="Geest", level=Qgis.Info)
 
         try:
             if key == "indicator_required" and value == 0:
@@ -73,12 +68,12 @@ class CombinedWidgetFactory:
             if key == "use_street_lights" and value == 1:
                 return StreetLightsWidget(label_text=key, attributes=attributes)
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Factory did not match any widgets",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
                 return None
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in create_radio_button: {e}", "Geest")
+            log_message(f"Error in create_radio_button: {e}", "Geest")
             return None

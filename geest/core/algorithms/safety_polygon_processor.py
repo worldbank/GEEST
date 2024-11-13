@@ -6,14 +6,11 @@ from qgis.core import (
     QgsGeometry,
     QgsField,
     QgsFeature,
-    QgsWkbTypes,
     QgsProcessingException,
-    QgsMessageLog,
     QgsVectorFileWriter,
     QgsFeatureRequest,
     edit,
     QgsRasterLayer,
-    QgsProject,
     QgsProcessingContext,
 )
 from qgis.PyQt.QtCore import QVariant
@@ -21,6 +18,7 @@ import processing
 import os
 from typing import List
 from .area_iterator import AreaIterator
+from geest.utilities import log_message
 
 
 class SafetyPerCellProcessor:
@@ -132,7 +130,7 @@ class SafetyPerCellProcessor:
         """
         Reproject the input layer to match the CRS of the grid layer.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reprojecting {layer.name()} to {target_crs.authid()}", level=Qgis.Info
         )
         return processing.run(
@@ -208,9 +206,7 @@ class SafetyPerCellProcessor:
             "OUTPUT": output_path,
         }
         processing.run("gdal:rasterize", params)
-        QgsMessageLog.logMessage(
-            f"Created raster for safety area: {output_path}", level=Qgis.Info
-        )
+        log_message(f"Created raster for safety area: {output_path}", level=Qgis.Info)
 
     def _combine_rasters_to_vrt(self, num_rasters: int) -> None:
         """
@@ -228,17 +224,15 @@ class SafetyPerCellProcessor:
         processing.run(
             "gdal:buildvirtualraster", {"INPUT": raster_files, "OUTPUT": vrt_path}
         )
-        QgsMessageLog.logMessage(f"Created combined VRT: {vrt_path}", level=Qgis.Info)
+        log_message(f"Created combined VRT: {vrt_path}", level=Qgis.Info)
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_path, f"{self.output_prefix}_combined VRT")
 
         if vrt_layer.isValid():
             self.context.project().addMapLayer(vrt_layer)
-            QgsMessageLog.logMessage(
-                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-            )
+            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
         else:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
             )
         return vrt_path

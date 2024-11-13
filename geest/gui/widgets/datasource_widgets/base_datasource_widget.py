@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from qgis.PyQt.QtWidgets import QRadioButton, QHBoxLayout, QWidget
-from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import QgsMessageLog, Qgis
+from qgis.PyQt.QtWidgets import QHBoxLayout, QWidget
+from qgis.core import Qgis
+from geest.utilities import log_message
 
 
 class BaseDataSourceWidget(QWidget):
@@ -22,7 +22,7 @@ class BaseDataSourceWidget(QWidget):
         self.layout: QHBoxLayout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         # Log creation of widget
-        QgsMessageLog.logMessage(
+        log_message(
             f"Creating DataSource Configuration Widget {widget_key}",
             tag="Geest",
             level=Qgis.Info,
@@ -31,7 +31,7 @@ class BaseDataSourceWidget(QWidget):
         try:
             self.add_internal_widgets()  # implemented in subclasses
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
 
     @abstractmethod
     def add_internal_widgets(self) -> None:

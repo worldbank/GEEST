@@ -5,10 +5,10 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
 )
 from qgis.gui import QgsMapLayerComboBox
-
 from .base_datasource_widget import BaseDataSourceWidget
-from qgis.core import QgsMessageLog, QgsMapLayerProxyModel, QgsProject, QgsVectorLayer
+from qgis.core import QgsMapLayerProxyModel, QgsProject, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings
+from geest.utilities import log_message
 
 
 class VectorDataSourceWidget(BaseDataSourceWidget):
@@ -67,10 +67,10 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.shapefile_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def select_shapefile(self):
         """
@@ -93,7 +93,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting shapefile: {e}", "Geest")
+            log_message(f"Error selecting shapefile: {e}", "Geest")
 
     def update_attributes(self):
         """

@@ -2,14 +2,13 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
 )
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
 from qgis.PyQt.QtWidgets import QMessageBox
 from geest.core.tasks import OrsCheckerTask
-from geest.utilities import get_ui_class, resources_path
+from geest.utilities import get_ui_class, resources_path, log_message
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
 
@@ -26,7 +25,7 @@ class OrsPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        QgsMessageLog.logMessage(f"Loading ORS panel", tag="Geest", level=Qgis.Info)
+        log_message(f"Loading ORS panel", tag="Geest", level=Qgis.Info)
         self.initUI()
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 

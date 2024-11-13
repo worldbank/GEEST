@@ -37,6 +37,22 @@ from qgis.core import Qgis, QgsProject
 from .core import setting  # , JSONValidator
 from .utilities import resources_path
 from .gui import GeestOptionsFactory, GeestDock
+import datetime
+import logging
+import tempfile
+
+# Set up logging - see utilites.py log_message for usage
+# use log_message instead of QgsMessageLog.logMessage everywhere please....
+temp_dir = tempfile.gettempdir()
+# Use a timestamp to ensure unique log file names
+datestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+log_file_path = os.path.join(temp_dir, f"geest_logfile_{datestamp}.log")
+logging.basicConfig(
+    filename=log_file_path,
+    filemode="a",  # Append mode
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    level=logging.DEBUG,
+)
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring

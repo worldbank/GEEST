@@ -1,12 +1,11 @@
 from qgis.core import (
     QgsFeatureRequest,
-    QgsMessageLog,
     QgsVectorLayer,
-    QgsProject,
     QgsGeometry,
     Qgis,
 )
 from typing import Iterator, Tuple
+from geest.utilities import log_message
 
 
 class AreaIterator:
@@ -31,9 +30,9 @@ class AreaIterator:
         area_iterator = AreaIterator(gpkg_path)
 
         for polygon_geometry, bbox_geometry, progress_percent in area_iterator:
-            QgsMessageLog.logMessage(f"Polygon Geometry: {polygon_geometry.asWkt()}", 'Geest')
-            QgsMessageLog.logMessage(f"BBox Geometry: {bbox_geometry.asWkt()}", 'Geest')
-            QgsMessageLog.logMessage(f"Progress: {progress_percent:.2f}%", 'Geest')
+            log_message(f"Polygon Geometry: {polygon_geometry.asWkt()}", 'Geest')
+            log_message(f"BBox Geometry: {bbox_geometry.asWkt()}", 'Geest')
+            log_message(f"Progress: {progress_percent:.2f}%", 'Geest')
         ```
     """
 
@@ -56,7 +55,7 @@ class AreaIterator:
 
         # Verify that both layers were loaded correctly
         if not self.polygon_layer.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 "Error: 'study_area_polygons' layer failed to load from the GeoPackage",
                 "Geest",
                 level=Qgis.Critical,
@@ -66,7 +65,7 @@ class AreaIterator:
             )
 
         if not self.bbox_layer.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 "Error: 'study_area_bboxes' layer failed to load from the GeoPackage",
                 "Geest",
                 level=Qgis.Critical,
@@ -90,7 +89,7 @@ class AreaIterator:
         try:
             # Ensure both layers have the same CRS
             if self.polygon_layer.crs() != self.bbox_layer.crs():
-                QgsMessageLog.logMessage(
+                log_message(
                     "Warning: CRS mismatch between polygon and bbox layers",
                     "Geest",
                     level=Qgis.Warning,
@@ -115,14 +114,14 @@ class AreaIterator:
                     yield polygon_feature.geometry(), bbox_feature.geometry(), progress_percent
 
                 else:
-                    QgsMessageLog.logMessage(
+                    log_message(
                         f"Warning: No matching bbox found for polygon ID {polygon_id}",
                         "Geest",
                         level=Qgis.Warning,
                     )
 
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Critical: Error during iteration - {str(e)}",
                 "Geest",
                 level=Qgis.Critical,

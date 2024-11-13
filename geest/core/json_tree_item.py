@@ -3,9 +3,10 @@ import traceback
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont, QIcon
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from geest.utilities import resources_path
 from geest.core import setting
+from geest.utilities import log_message
 
 
 class JsonTreeItem:
@@ -184,7 +185,7 @@ class JsonTreeItem:
                 return ""
 
             data = self.attributes()
-            # QgsMessageLog.logMessage(f"Data: {data}", tag="Geest", level=Qgis.Info)
+            # log_message(f"Data: {data}", tag="Geest", level=Qgis.Info)
             status = ""
             if "Error" in data.get("result", ""):
                 return "Workflow failed"
@@ -211,12 +212,10 @@ class JsonTreeItem:
         except Exception as e:
             verbose_mode = setting("verbose_mode", False)
             if verbose_mode:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error getting status: {e}", tag="Geest", level=Qgis.Warning
                 )
-                QgsMessageLog.logMessage(
-                    traceback.format_exc(), tag="Geest", level=Qgis.Warning
-                )
+                log_message(traceback.format_exc(), tag="Geest", level=Qgis.Warning)
                 return "WRITE TOOL TIP"
 
     def getFont(self):
@@ -326,7 +325,7 @@ class JsonTreeItem:
                 indicator_item.attributes()["factor_weighting"] = new_weighting
             else:
                 # Log if the indicator name is not found
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Indicator '{indicator_guid}' not found.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -334,7 +333,7 @@ class JsonTreeItem:
 
         except Exception as e:
             # Handle any exceptions and log the error
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
             )
 
@@ -351,7 +350,7 @@ class JsonTreeItem:
 
             else:
                 # Log if the factor name is not found
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Factor '{factor_guid}' not found.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -359,6 +358,6 @@ class JsonTreeItem:
 
         except Exception as e:
             # Handle any exceptions and log the error
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
             )

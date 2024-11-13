@@ -16,12 +16,13 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from geest.utilities import resources_path
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
 from ..configuration_widget_factory import ConfigurationWidgetFactory
 from ..factor_configuration_widget import FactorConfigurationWidget
+from geest.utilities import log_message
 
 
 class FactorAggregationDialog(QDialog):
@@ -198,7 +199,7 @@ class FactorAggregationDialog(QDialog):
                     row, 0, data_source_widget
                 )  # Set widget in leftmost column
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     "Failed to create data source widget",
                     tag="Geest",
                     level=Qgis.Critical,

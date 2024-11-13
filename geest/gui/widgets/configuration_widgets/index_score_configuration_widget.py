@@ -1,6 +1,7 @@
 from qgis.PyQt.QtWidgets import QLabel, QDoubleSpinBox
 from .base_configuration_widget import BaseConfigurationWidget
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
+from geest.utilities import log_message
 
 
 class IndexScoreConfigurationWidget(BaseConfigurationWidget):
@@ -16,7 +17,7 @@ class IndexScoreConfigurationWidget(BaseConfigurationWidget):
             self.info_label: QLabel = QLabel("Fill each polygon with a fixed value")
             self.layout.addWidget(self.info_label)
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical
             )
 
@@ -33,7 +34,7 @@ class IndexScoreConfigurationWidget(BaseConfigurationWidget):
         try:
             self.info_label.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in set_internal_widgets_enabled: {e}",
                 "Geest",
                 level=Qgis.Critical,

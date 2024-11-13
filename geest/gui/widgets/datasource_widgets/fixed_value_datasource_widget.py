@@ -1,14 +1,10 @@
 import os
-
 from qgis.PyQt.QtWidgets import (
     QDoubleSpinBox,
 )
-from qgis.core import (
-    QgsMessageLog,
-)
 from qgis.PyQt.QtCore import QSettings
-
 from .base_datasource_widget import BaseDataSourceWidget
+from geest.utilities import log_message
 
 
 class FixedValueDataSourceWidget(BaseDataSourceWidget):
@@ -38,10 +34,10 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
             self.spin_box.valueChanged.connect(self.update_attributes)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def _add_raster_layer_widgets(self) -> None:
         """

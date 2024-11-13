@@ -4,8 +4,9 @@ import shutil
 import re
 from typing import Union, Dict, List
 from qgis.PyQt.QtWidgets import (
-    QApplication,
     QAction,
+    QApplication,
+    QCheckBox,
     QCheckBox,
     QDialog,
     QFileDialog,
@@ -14,26 +15,20 @@ from qgis.PyQt.QtWidgets import (
     QLabel,
     QMenu,
     QMessageBox,
-    QFileDialog,
-    QHeaderView,
-    QCheckBox,
-    QToolButton,
-)
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
-from qgis.PyQt.QtGui import QMovie
-from qgis.PyQt.QtWidgets import (
     QProgressBar,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
+    QToolButton,
     QTreeView,
     QVBoxLayout,
     QWidget,
 )
+from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
+from qgis.PyQt.QtGui import QMovie
 from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal, QModelIndex
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsRasterLayer,
     QgsProject,
@@ -50,6 +45,7 @@ from geest.gui.dialogs import (
     FactorAggregationDialog,
     DimensionAggregationDialog,
 )
+from geest.utilities import log_message
 
 
 class TreePanel(QWidget):
@@ -282,8 +278,10 @@ class TreePanel(QWidget):
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
         """Change the working directory and load the model.json if available."""
-        QgsMessageLog.logMessage(
-            f"Working directory changed to {new_directory}", "Geest", level=Qgis.Info
+        log_message(
+            f"Working directory changed to {new_directory}",
+            tag="Geest",
+            level=Qgis.Info,
         )
         self.working_directory = new_directory
         model_path = os.path.join(new_directory, "model.json")
@@ -298,16 +296,14 @@ class TreePanel(QWidget):
                 self.load_json()  # sets the class member json_data
                 self.model.loadJsonData(self.json_data)
                 self.treeView.expandAll()
-                QgsMessageLog.logMessage(
-                    f"Loaded model.json from {model_path}", "Geest", level=Qgis.Info
+                log_message(
+                    f"Loaded model.json from {model_path}", tag="Geest", level=Qgis.Info
                 )
 
                 # If this is a first time use of the analysis project lets set some things up
                 analysis_item = self.model.rootItem.child(0)
                 analysis_data = analysis_item.attributes()
-                QgsMessageLog.logMessage(
-                    str(analysis_data), tag="Geest", level=Qgis.Info
-                )
+                log_message(str(analysis_data), tag="Geest", level=Qgis.Info)
                 if analysis_data.get("working_folder", "Not Set"):
                     analysis_data["working_folder"] = self.working_directory
                 else:
@@ -328,11 +324,13 @@ class TreePanel(QWidget):
                 )
 
             except Exception as e:
-                QgsMessageLog.logMessage(
-                    f"Error loading model.json: {str(e)}", "Geest", level=Qgis.Critical
+                log_message(
+                    f"Error loading model.json: {str(e)}",
+                    tag="Geest",
+                    level=Qgis.Critical,
                 )
         else:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"No model.json found in {new_directory}, using default.",
                 "Geest",
                 level=Qgis.Warning,
@@ -342,13 +340,13 @@ class TreePanel(QWidget):
             if os.path.exists(master_model_path):
                 try:
                     shutil.copy(master_model_path, model_path)
-                    QgsMessageLog.logMessage(
+                    log_message(
                         f"Copied master model.json to {model_path}",
                         "Geest",
                         level=Qgis.Info,
                     )
                 except Exception as e:
-                    QgsMessageLog.logMessage(
+                    log_message(
                         f"Error copying master model.json: {str(e)}",
                         "Geest",
                         level=Qgis.Critical,
@@ -367,7 +365,7 @@ class TreePanel(QWidget):
     def save_json_to_working_directory(self):
         """Automatically save the current JSON model to the working directory."""
         if not self.working_directory:
-            QgsMessageLog.logMessage(
+            log_message(
                 "No working directory set, cannot save JSON.",
                 "Geest",
                 level=Qgis.Warning,
@@ -377,12 +375,12 @@ class TreePanel(QWidget):
             save_path = os.path.join(self.working_directory, "model.json")
             with open(save_path, "w") as f:
                 json.dump(json_data, f, indent=4)
-            QgsMessageLog.logMessage(
-                f"Saved JSON model to {save_path}", "Geest", level=Qgis.Info
+            log_message(
+                f"Saved JSON model to {save_path}", tag="Geest", level=Qgis.Info
             )
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error saving JSON: {str(e)}", "Geest", level=Qgis.Critical
+            log_message(
+                f"Error saving JSON: {str(e)}", tag="Geest", level=Qgis.Critical
             )
 
     def edit(self, index, trigger, event):
@@ -403,8 +401,8 @@ class TreePanel(QWidget):
         """Load the JSON data from the file."""
         with open(self.json_file, "r") as f:
             self.json_data = json.load(f)
-            QgsMessageLog.logMessage(
-                f"Loaded JSON data from {self.json_file}", "Geest", level=Qgis.Info
+            log_message(
+                f"Loaded JSON data from {self.json_file}", tag="Geest", level=Qgis.Info
             )
 
     def load_json_from_file(self):
@@ -596,9 +594,7 @@ class TreePanel(QWidget):
 
         dialog.exec_()
 
-        QgsMessageLog.logMessage(
-            "----------------------------", tag="Geest", level=Qgis.Info
-        )
+        log_message("----------------------------", tag="Geest", level=Qgis.Info)
 
     def show_context_menu(self, table, pos):
         """Show a context menu with a copy option on right-click."""
@@ -639,13 +635,13 @@ class TreePanel(QWidget):
 
                 if layer.isValid():
                     QgsProject.instance().addMapLayer(layer)
-                    QgsMessageLog.logMessage(
+                    log_message(
                         f"Added '{layer_name}' layer to the map.",
                         tag="Geest",
                         level=Qgis.Info,
                     )
                 else:
-                    QgsMessageLog.logMessage(
+                    log_message(
                         f"Failed to add '{layer_name}' layer to the map.",
                         tag="Geest",
                         level=Qgis.Critical,
@@ -658,7 +654,7 @@ class TreePanel(QWidget):
             layer = QgsRasterLayer(layer_uri, layer_name)
 
             if not layer.isValid():
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Layer {layer_name} is invalid and cannot be added.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -707,7 +703,7 @@ class TreePanel(QWidget):
 
             # If the layer exists, refresh it instead of removing and re-adding
             if existing_layer is not None:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Refreshing existing layer: {existing_layer.name()}",
                     tag="Geest",
                     level=Qgis.Info,
@@ -720,7 +716,7 @@ class TreePanel(QWidget):
                 layer_tree_layer.setExpanded(
                     False
                 )  # Collapse the legend for the layer by default
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Added layer: {layer.name()} to group: {parent_group.name()}",
                     tag="Geest",
                     level=Qgis.Info,
@@ -834,7 +830,7 @@ class TreePanel(QWidget):
                         folder = os.path.dirname(result_file)
                         # check the folder exists
                         if os.path.exists(folder):
-                            QgsMessageLog.logMessage(
+                            log_message(
                                 f"Removing {folder}", tag="Geest", level=Qgis.Info
                             )
                             shutil.rmtree(folder)
@@ -946,7 +942,7 @@ class TreePanel(QWidget):
         node_index = self.model.itemIndex(item)
 
         if not node_index.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Failed to find index for item {item} - animation not started",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -995,7 +991,7 @@ class TreePanel(QWidget):
         node_index = self.model.itemIndex(item)
 
         if not node_index.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Failed to find index for item {item} - animation not started",
                 tag="Geest",
                 level=Qgis.Warning,

@@ -5,15 +5,14 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QLineEdit,
-    QMessageBox,
     QToolButton,
     QFileDialog,
 )
 from qgis.gui import QgsMapLayerComboBox
-
 from .base_indicator_widget import BaseIndicatorWidget
-from qgis.core import QgsMessageLog, QgsMapLayerProxyModel, QgsProject, QgsVectorLayer
+from qgis.core import QgsMapLayerProxyModel, QgsProject, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings
+from geest.utilities import log_message
 
 
 class MultiBufferDistancesWidget(BaseIndicatorWidget):
@@ -121,10 +120,10 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.shapefile_line_edit.textChanged.connect(self.update_data)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def select_shapefile(self):
         """
@@ -147,7 +146,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting shapefile: {e}", "Geest")
+            log_message(f"Error selecting shapefile: {e}", "Geest")
 
     def get_data(self) -> dict:
         """
@@ -211,6 +210,4 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.shapefile_line_edit.setEnabled(enabled)
             self.shapefile_button.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

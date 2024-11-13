@@ -9,10 +9,10 @@ from qgis.PyQt.QtWidgets import (
     QSpinBox,
 )
 from qgis.gui import QgsMapLayerComboBox
-
-from .base_indicator_widget import BaseIndicatorWidget
-from qgis.core import QgsMessageLog, QgsMapLayerProxyModel, QgsProject, QgsVectorLayer
+from qgis.core import QgsMapLayerProxyModel, QgsProject, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings
+from geest.utilities import log_message
+from .base_indicator_widget import BaseIndicatorWidget
 
 
 class SingleBufferDistanceWidget(BaseIndicatorWidget):
@@ -90,10 +90,10 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.buffer_distance_input.valueChanged.connect(self.update_data)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def select_shapefile(self):
         """
@@ -116,7 +116,7 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting shapefile: {e}", "Geest")
+            log_message(f"Error selecting shapefile: {e}", "Geest")
 
     def get_data(self) -> dict:
         """
@@ -166,6 +166,4 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.shapefile_line_edit.setEnabled(enabled)
             self.shapefile_button.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

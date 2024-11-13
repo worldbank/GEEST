@@ -9,7 +9,6 @@ from qgis.core import (
     QgsFeedback,
     QgsField,
     QgsGeometry,
-    QgsMessageLog,
     QgsPointXY,
     QgsProcessingContext,
     QgsVectorLayer,
@@ -20,6 +19,7 @@ import processing
 from geest.core.ors_client import ORSClient
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem, setting
+from geest.utilities import log_message
 
 
 class MultiBufferDistancesWorkflow(WorkflowBase):
@@ -60,14 +60,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         self.workflow_name = "use_multi_buffer_point"
         self.distances = self.attributes.get("multi_buffer_travel_distances", None)
         if not self.distances:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid travel distances, using default.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             self.distances = self.attributes.get("default_multi_buffer_distances", None)
             if not self.distances:
-                QgsMessageLog.logMessage(
+                log_message(
                     "Invalid default travel distances and no default specified.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -76,7 +76,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         try:
             self.distances = [float(x.strip()) for x in self.distances.split(",")]
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid travel distances provided. Distances should be a comma-separated list of up to 5 numbers.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -85,25 +85,23 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         layer_path = self.attributes.get("multi_buffer_shapefile", None)
         if not layer_path:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid points layer found in multi_buffer_shapefile, trying Multi Buffer Point_layer_name.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get("multi_buffer_point_layer_source", None)
             if not layer_path:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"No points layer found  at multi_buffer_point_layer_source {layer_path}.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
                 raise Exception("Invalid points layer found.")
-        QgsMessageLog.logMessage(
-            f"Using points layer at {layer_path}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Using points layer at {layer_path}", tag="Geest", level=Qgis.Info)
         self.features_layer = QgsVectorLayer(layer_path, "points", "ogr")
         if not self.features_layer.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Invalid points layer found in {layer_path}.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -131,12 +129,8 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
         )
         self.temp_layers = []  # Store intermediate layers
-        QgsMessageLog.logMessage(
-            f"Using ORS API key: {self.masked_api_key}", "Geest", Qgis.Info
-        )
-        QgsMessageLog.logMessage(
-            "Multi Buffer Distances Workflow initialized", "Geest", Qgis.Info
-        )
+        log_message(f"Using ORS API key: {self.masked_api_key}", "Geest", Qgis.Info)
+        log_message("Multi Buffer Distances Workflow initialized", "Geest", Qgis.Info)
 
     def _process_features_for_area(
         self,
@@ -190,7 +184,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         :param index: Index of the current area being processed.
         :return: QgsVectorLayer containing the buffers as polygons.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"Using ORS API key: {self.masked_api_key}",
             "Geest",
             Qgis.Info,
@@ -198,9 +192,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
-        QgsMessageLog.logMessage(
-            f"Creating buffers for {len(features)} points", "Geest", Qgis.Info
-        )
+        log_message(f"Creating buffers for {len(features)} points", "Geest", Qgis.Info)
         total_features = len(features)
 
         # Process features in subsets to handle large datasets
@@ -213,14 +205,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 json = self._fetch_isochrones(subset_layer)
                 layer = self._create_isochrone_layer(json)
                 self.temp_layers.append(layer)
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
                     "Geest",
                     Qgis.Info,
                 )
 
             except Exception as e:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error processing subset {i + 1} to {min(i + self.subset_size, total_features)}: {e}",
                     "Geest",
                     Qgis.Critical,
@@ -229,18 +221,18 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         # Merge all isochrone layers into one final output
         if self.temp_layers:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Merging {len(self.temp_layers)} isochrone layers",
                 "Geest",
                 Qgis.Info,
             )
             merged_layer = self._merge_layers(self.temp_layers, index)
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Merged isochrone layer created at {merged_layer.source()}",
                 "Geest",
                 Qgis.Info,
             )
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Removing overlaps between isochrones for {merged_layer.source()}",
                 "Geest",
                 Qgis.Info,
@@ -248,9 +240,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             result = self._create_bands(merged_layer, index)
             return result
         else:
-            QgsMessageLog.logMessage(
-                "No isochrones were created.", "Geest", Qgis.Warning
-            )
+            log_message("No isochrones were created.", "Geest", Qgis.Warning)
             return False
 
     def _create_subset_layer(self, subset_features, point_layer):
@@ -345,7 +335,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         # Parse the features from ORS response
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Creating isochrone layer with {len(isochrone_data['features'])} features",
                 "Geest",
                 Qgis.Info,
@@ -502,7 +492,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             "native:mergevectorlayers", merge_bands_params
         )
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
-        QgsMessageLog.logMessage(
+        log_message(
             f"Multi-buffer layer created at {output_path}",
             "Geest",
             Qgis.Info,
@@ -524,17 +514,15 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         # Check if the "value" field already exists
         field_names = [field.name() for field in layer.fields()]
-        QgsMessageLog.logMessage(f"Field names: {field_names}", "Geest", Qgis.Info)
+        log_message(f"Field names: {field_names}", "Geest", Qgis.Info)
         if "value" not in field_names:
-            QgsMessageLog.logMessage(
-                "Adding 'value' field to input layer", "Geest", Qgis.Info
-            )
+            log_message("Adding 'value' field to input layer", "Geest", Qgis.Info)
             # Add the burn field to the input layer if it doesn't exist
             layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             layer.updateFields()
 
             # Log message when the field is added
-            QgsMessageLog.logMessage(
+            log_message(
                 'Added "value" field to input layer',
                 "Geest",
                 Qgis.Info,
@@ -548,7 +536,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             # Get the index of the burn field value from the distances list
             if distance_field_value in self.distances:
                 distance_field_index = self.distances.index(distance_field_value)
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Found {distance_field_value} at index {distance_field_index}",
                     "Geest",
                     Qgis.Info,
@@ -585,7 +573,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             "TARGET_CRS": self.target_crs,
             "OUTPUT": reprojected_layer_path,
         }
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reprojecting input layer to {self.target_crs.authid()}",
             "Geest",
             Qgis.Info,

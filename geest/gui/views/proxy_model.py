@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject, Qt
-from qgis.PyQt.QtGui import QIcon
-from qgis.core import QgsMessageLog, Qgis
+
 from geest.core import JsonTreeItem
 from typing import Optional, Dict, List
 
@@ -58,7 +57,7 @@ class PromotionProxyModel(QAbstractProxyModel):
                 and parent_item is not self.source_model.rootItem
                 and parent_item.role is not "analysis"
             ):
-                # QgsMessageLog.logMessage(
+                # log_message(
                 #    f"Found node with only one child {parent_item.data(0)}",
                 #    "Geest",
                 #    Qgis.Info,

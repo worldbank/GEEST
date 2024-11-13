@@ -1,3 +1,4 @@
+import os
 from qgis.PyQt.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -8,13 +9,11 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.gui import QgsMapLayerComboBox
 from qgis.core import (
-    QgsMessageLog,
     QgsMapLayerProxyModel,
     QgsProject,
 )
 from qgis.PyQt.QtCore import QSettings
-import os
-
+from geest.utilities import log_message
 from .base_indicator_widget import BaseIndicatorWidget
 
 
@@ -54,10 +53,10 @@ class SafetyRasterWidget(BaseIndicatorWidget):
             self.raster_line_edit.textChanged.connect(self.update_data)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def _add_raster_layer_widgets(self) -> None:
         """
@@ -110,7 +109,7 @@ class SafetyRasterWidget(BaseIndicatorWidget):
                 )
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting raster: {e}", "Geest")
+            log_message(f"Error selecting raster: {e}", "Geest")
 
     def get_data(self) -> dict:
         """
@@ -150,6 +149,4 @@ class SafetyRasterWidget(BaseIndicatorWidget):
             self.raster_line_edit.setEnabled(enabled)
             self.raster_button.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

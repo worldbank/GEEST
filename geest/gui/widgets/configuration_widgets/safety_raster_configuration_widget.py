@@ -1,11 +1,8 @@
 from qgis.PyQt.QtWidgets import (
     QLabel,
 )
-from qgis.core import (
-    QgsMessageLog,
-)
-
 from .base_configuration_widget import BaseConfigurationWidget
+from geest.utilities import log_message
 
 
 class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
@@ -24,10 +21,10 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
             self.info_label = QLabel("A raster layer representing safety")
             self.layout.addWidget(self.info_label)
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def get_data(self) -> dict:
         """
@@ -50,6 +47,4 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
         try:
             self.info_label.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

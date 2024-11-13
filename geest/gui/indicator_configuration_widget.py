@@ -1,7 +1,8 @@
 from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QButtonGroup
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import pyqtSignal
 from .combined_widget_factory import CombinedWidgetFactory
+from geest.utilities import log_message
 
 
 class IndicatorConfigurationWidget(QWidget):
@@ -22,7 +23,7 @@ class IndicatorConfigurationWidget(QWidget):
         try:
             self.create_radio_buttons(attributes)
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical
             )
 
@@ -68,7 +69,7 @@ class IndicatorConfigurationWidget(QWidget):
         new_data["analysis_mode"] = snake_case_mode
         self.attributes.update(new_data)
         self.data_changed.emit()
-        # QgsMessageLog.logMessage(
+        # log_message(
         #    f"Updated attributes dictionary: {self.attributes}",
         #    "Geest",
         #    level=Qgis.Info,

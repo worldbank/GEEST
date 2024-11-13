@@ -1,6 +1,5 @@
 import os
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsFeedback,
     QgsRasterLayer,
@@ -10,6 +9,7 @@ from qgis.core import (
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class AggregationWorkflowBase(WorkflowBase):
@@ -71,7 +71,7 @@ class AggregationWorkflowBase(WorkflowBase):
         :return: Path to the aggregated raster file.
         """
         if len(input_files) == 0:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error: Found no Input files. Cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -88,7 +88,7 @@ class AggregationWorkflowBase(WorkflowBase):
             layer.source() for layer in raster_layers if not layer.isValid()
         ]
         if invalid_layers:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Invalid raster layers found: {', '.join(invalid_layers)}",
                 tag="Geest",
                 level=Qgis.Critical,
@@ -99,7 +99,7 @@ class AggregationWorkflowBase(WorkflowBase):
         entries = []
         ref_names = []
         for i, raster_layer in enumerate(raster_layers):
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Adding raster layer {i+1} to the raster calculator. {raster_layer.source()}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -134,12 +134,12 @@ class AggregationWorkflowBase(WorkflowBase):
             self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
         )
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Aggregating {len(input_files)} raster layers to {aggregation_output}",
             tag="Geest",
             level=Qgis.Info,
         )
-        QgsMessageLog.logMessage(
+        log_message(
             f"Aggregation Expression: {expression}", tag="Geest", level=Qgis.Info
         )
         # Set up the raster calculator
@@ -155,11 +155,11 @@ class AggregationWorkflowBase(WorkflowBase):
 
         # Run the calculation
         result = calc.processCalculation()
-        QgsMessageLog.logMessage(
+        log_message(
             f"Calculator errors: {calc.lastError()}", tag="Geest", level=Qgis.Info
         )
         if result != 0:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Raster aggregation completed successfully.",
                 tag="Geest",
                 level=Qgis.Info,
@@ -195,11 +195,9 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             if path:
                 raster_files.append(path)
-                QgsMessageLog.logMessage(
-                    f"Adding raster: {path}", tag="Geest", level=Qgis.Info
-                )
+                log_message(f"Adding raster: {path}", tag="Geest", level=Qgis.Info)
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Total raster files found: {len(raster_files)}",
             tag="Geest",
             level=Qgis.Info,
@@ -219,18 +217,18 @@ class AggregationWorkflowBase(WorkflowBase):
         _ = current_bbox  # Unused in this analysis
 
         # Log the execution
-        QgsMessageLog.logMessage(
+        log_message(
             f"Executing {self.analysis_mode} Aggregation Workflow",
             tag="Geest",
             level=Qgis.Info,
         )
-        QgsMessageLog.logMessage(f"ID: {self.id}", tag="Geest", level=Qgis.Info)
+        log_message(f"ID: {self.id}", tag="Geest", level=Qgis.Info)
 
         raster_files = self.get_raster_list(index)
 
         if not raster_files or not isinstance(raster_files, list):
             error = f"No valid raster files found in '{self.guids}'. Cannot proceed with aggregation."
-            QgsMessageLog.logMessage(
+            log_message(
                 error,
                 tag="Geest",
                 level=Qgis.Warning,
@@ -240,7 +238,7 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             self.attributes["error"] = error
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Found {len(raster_files)} raster files in 'Result File'. Proceeding with aggregation.",
             tag="Geest",
             level=Qgis.Info,

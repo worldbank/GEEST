@@ -1,4 +1,4 @@
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from geest.gui.widgets.configuration_widgets import (
     BaseConfigurationWidget,
     DontUseConfigurationWidget,
@@ -13,6 +13,7 @@ from geest.gui.widgets.configuration_widgets import (
     SafetyRasterConfigurationWidget,
 )
 from geest.core import setting
+from geest.utilities import log_message
 
 
 class ConfigurationWidgetFactory:
@@ -36,14 +37,10 @@ class ConfigurationWidgetFactory:
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
 
-            QgsMessageLog.logMessage(
-                "----------------------------", tag="Geest", level=Qgis.Info
-            )
-            QgsMessageLog.logMessage(f"Key: {key}", tag="Geest", level=Qgis.Info)
-            QgsMessageLog.logMessage(f"Value: {value}", tag="Geest", level=Qgis.Info)
-            QgsMessageLog.logMessage(
-                "----------------------------", tag="Geest", level=Qgis.Info
-            )
+            log_message("----------------------------", tag="Geest", level=Qgis.Info)
+            log_message(f"Key: {key}", tag="Geest", level=Qgis.Info)
+            log_message(f"Value: {value}", tag="Geest", level=Qgis.Info)
+            log_message("----------------------------", tag="Geest", level=Qgis.Info)
 
         try:
             if key == "indicator_required" and value == 0:
@@ -99,15 +96,15 @@ class ConfigurationWidgetFactory:
                     analysis_mode=key, attributes=attributes
                 )
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Factory did not match any widgets for key: {key}",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
                 return None
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in create_radio_button: {e}", "Geest")
+            log_message(f"Error in create_radio_button: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
             return None

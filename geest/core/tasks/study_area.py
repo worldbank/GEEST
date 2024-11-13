@@ -23,40 +23,11 @@ from qgis.core import (
     QgsVectorFileWriter,
     QgsFields,
     QgsCoordinateTransformContext,
-    QgsMessageLog,
     Qgis,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
-import logging
-import tempfile
-
-
-# Configure file logger
-temp_dir = tempfile.gettempdir()
-log_file_path = os.path.join(temp_dir, "geest_logfile.log")
-logging.basicConfig(
-    filename=log_file_path,
-    filemode="a",  # Append mode
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    level=logging.DEBUG,
-)
-
-
-def log_message(message: str, level: int = Qgis.Info, tag: str = "Geest") -> None:
-    """Logs a message to both QgsMessageLog and a text file."""
-    # Log to QGIS Message Log
-    QgsMessageLog.logMessage(message, tag=tag, level=level)
-
-    # Log to the file with appropriate logging level
-    if level == Qgis.Info:
-        logging.info(message)
-    elif level == Qgis.Warning:
-        logging.warning(message)
-    elif level == Qgis.Critical:
-        logging.critical(message)
-    else:
-        logging.debug(message)
+from geest.utilities import log_message
 
 
 class StudyAreaProcessingTask(QgsTask):

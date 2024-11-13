@@ -6,7 +6,6 @@ from qgis.core import (
     QgsFeatureRequest,
     QgsFields,
     QgsField,
-    QgsMessageLog,
     QgsProcessingException,
     QgsSpatialIndex,
     QgsVectorFileWriter,
@@ -16,6 +15,7 @@ from qgis.core import (
 import processing
 from qgis.PyQt.QtCore import QVariant
 from typing import List
+from geest.utilities import log_message
 
 
 def select_grid_cells(
@@ -35,7 +35,7 @@ def select_grid_cells(
     Returns:
         QgsVectorLayer: A new layer with grid cells containing a count of intersecting features.
     """
-    QgsMessageLog.logMessage(
+    log_message(
         "Selecting grid cells that intersect with features and counting intersections.",
         tag="Geest",
         level=Qgis.Info,
@@ -63,7 +63,7 @@ def select_grid_cells(
             intersecting_ids = grid_index.intersects(
                 feature_geom.boundingBox()
             )  # Initial rough filter
-            QgsMessageLog.logMessage(
+            log_message(
                 f"{len(intersecting_ids)} rough intersections found.",
                 tag="Geest",
                 level=Qgis.Info,
@@ -73,7 +73,7 @@ def select_grid_cells(
                 for grid_id in intersecting_ids
                 if grid_layer.getFeature(grid_id).geometry().intersects(feature_geom)
             ]
-            QgsMessageLog.logMessage(
+            log_message(
                 f"{len(intersecting_ids)} refined intersections found.",
                 tag="Geest",
                 level=Qgis.Info,
@@ -86,7 +86,7 @@ def select_grid_cells(
             else:
                 grid_feature_counts[grid_id] = 1
 
-    QgsMessageLog.logMessage(
+    log_message(
         f"{len(grid_feature_counts)} intersections found.",
         tag="Geest",
         level=Qgis.Info,
@@ -119,14 +119,14 @@ def select_grid_cells(
 
     # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
     request = QgsFeatureRequest().setFilterFids(list(grid_feature_counts.keys()))
-    QgsMessageLog.logMessage(
+    log_message(
         f"Looping over {len(grid_feature_counts.keys())} grid polygons",
         "Geest",
         Qgis.Info,
     )
     counter = 0
     for grid_feature in grid_layer.getFeatures(request):
-        QgsMessageLog.logMessage(f"Writing Feature #{counter}", "Geest", Qgis.Info)
+        log_message(f"Writing Feature #{counter}", "Geest", Qgis.Info)
         counter += 1
         new_feature = QgsFeature()
         new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
@@ -144,7 +144,7 @@ def select_grid_cells(
 
     del writer  # Finalize the writer and close the file
 
-    QgsMessageLog.logMessage(
+    log_message(
         f"Grid cells with feature counts saved to {output_path}",
         tag="Geest",
         level=Qgis.Info,
