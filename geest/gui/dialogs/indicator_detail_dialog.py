@@ -24,10 +24,11 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt, pyqtSignal
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from ..toggle_switch import ToggleSwitch
 from geest.utilities import resources_path
 from ..indicator_configuration_widget import IndicatorConfigurationWidget
+from geest.utilities import log_message
 
 
 class IndicatorDetailDialog(QDialog):
@@ -262,7 +263,7 @@ class IndicatorDetailDialog(QDialog):
                 # connect to the stateChanged signal
                 # config_widget.stateChanged.connect(self.handle_config_change)
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     "No configuration widgets were created for this layer.",
                     tag="Geest",
                     level=Qgis.CRITICAL,
@@ -271,7 +272,7 @@ class IndicatorDetailDialog(QDialog):
     def handle_config_change(self, new_config):
         """Optionally handle configuration changes."""
         self.attributes = new_config
-        QgsMessageLog.logMessage(
+        log_message(
             f"LayerDetailDialog config set to: {new_config}",
             tag="Geest",
             level=Qgis.Critical,

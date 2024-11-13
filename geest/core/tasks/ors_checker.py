@@ -2,12 +2,12 @@ from typing import Optional
 
 from qgis.core import (
     QgsTask,
-    QgsMessageLog,
     Qgis,
 )
 from qgis.PyQt.QtCore import pyqtSignal
 from geest.core import setting
 from geest.core.ors_client import ORSClient
+from geest.utilities import log_message
 
 
 class OrsCheckerTask(QgsTask):
@@ -36,7 +36,7 @@ class OrsCheckerTask(QgsTask):
             mode = "foot-walking"
             # Make the request to ORS API using ORSClient
             response = self.ors_client.make_request(mode, params)
-            QgsMessageLog.logMessage(
+            log_message(
                 f"ORS API Key Validation Task response: {response}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -44,20 +44,16 @@ class OrsCheckerTask(QgsTask):
             # Assuming the response JSON contains a 'status' field
             if response.get("type") == "FeatureCollection":
                 self.is_key_valid = True
-                QgsMessageLog.logMessage(
-                    "ORS API Key is valid.", tag="Geest", level=Qgis.Info
-                )
+                log_message("ORS API Key is valid.", tag="Geest", level=Qgis.Info)
             else:
                 self.is_key_valid = False
-                QgsMessageLog.logMessage(
-                    "ORS API Key is invalid.", tag="Geest", level=Qgis.Warning
-                )
+                log_message("ORS API Key is invalid.", tag="Geest", level=Qgis.Warning)
 
             self.setProgress(100)
             return True
         except Exception as e:
             self.exception = e
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Exception in ORS API Key Validation Task: {str(e)}",
                 tag="Geest",
                 level=Qgis.Critical,
@@ -67,7 +63,7 @@ class OrsCheckerTask(QgsTask):
     def finished(self, result):
         """Postprocessing after the run() method."""
         if self.isCanceled():
-            QgsMessageLog.logMessage(
+            log_message(
                 "ORS API Key Validation Task was canceled by the user.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -76,11 +72,11 @@ class OrsCheckerTask(QgsTask):
             return
 
         if not result:
-            QgsMessageLog.logMessage(
+            log_message(
                 "ORS API Key Validation Task failed.", tag="Geest", level=Qgis.Critical
             )
             if self.exception:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error: {self.exception}", tag="Geest", level=Qgis.Critical
                 )
             self.job_finished.emit(False)
@@ -88,12 +84,8 @@ class OrsCheckerTask(QgsTask):
 
         # Check the result of the API key validation
         if self.is_key_valid:
-            QgsMessageLog.logMessage(
-                "ORS API Key is valid.", tag="Geest", level=Qgis.Info
-            )
+            log_message("ORS API Key is valid.", tag="Geest", level=Qgis.Info)
             self.job_finished.emit(True)
         else:
-            QgsMessageLog.logMessage(
-                "ORS API Key is invalid.", tag="Geest", level=Qgis.Warning
-            )
+            log_message("ORS API Key is invalid.", tag="Geest", level=Qgis.Warning)
             self.job_finished.emit(False)

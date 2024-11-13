@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QWidget
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
+from geest.utilities import log_message
 
 
 class BaseConfigurationWidget(QRadioButton):
@@ -34,7 +35,7 @@ class BaseConfigurationWidget(QRadioButton):
         self.layout.addWidget(self)
 
         # Log creation of widget
-        QgsMessageLog.logMessage(
+        log_message(
             f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'",
             tag="Geest",
             level=Qgis.Info,
@@ -43,7 +44,7 @@ class BaseConfigurationWidget(QRadioButton):
         try:
             self.add_internal_widgets()
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
 
         # Connect toggled signal to enable/disable internal widgets
         self.toggled.connect(self.on_toggled)
@@ -87,10 +88,10 @@ class BaseConfigurationWidget(QRadioButton):
                     # to avoid breaking the datasource widget logic.
                     data = self.attributes
                 data["analysis_mode"] = self.analysis_mode
-                QgsMessageLog.logMessage(f"Data changed: {data}", "Geest")
+                log_message(f"Data changed: {data}", "Geest")
                 self.data_changed.emit(data)
             except Exception as e:
-                QgsMessageLog.logMessage(f"Error in update_data: {e}", "Geest")
+                log_message(f"Error in update_data: {e}", "Geest")
 
     def on_toggled(self, checked: bool) -> None:
         """

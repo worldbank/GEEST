@@ -1,6 +1,5 @@
 import os
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsGeometry,
     QgsFeedback,
@@ -13,6 +12,7 @@ from geest.core.algorithms.features_per_cell_processor import (
     select_grid_cells,
     assign_values_to_grid,
 )
+from geest.utilities import log_message
 
 
 class PointPerCellWorkflow(WorkflowBase):
@@ -48,7 +48,7 @@ class PointPerCellWorkflow(WorkflowBase):
                 # Raise an exception using our error message
                 raise Exception(error)
         try:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Loading point per cell layer: {layer_path}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -62,7 +62,7 @@ class PointPerCellWorkflow(WorkflowBase):
                 self.attributes["result"] = f"{self.workflow_name} Workflow Failed"
                 raise Exception(error)
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error loading point per cell layer: {str(e)}",
                 tag="Geest",
                 level=Qgis.Critical,
@@ -92,7 +92,7 @@ class PointPerCellWorkflow(WorkflowBase):
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         area_features_count = area_features.featureCount()
-        QgsMessageLog.logMessage(
+        log_message(
             f"Features layer for area {index+1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,

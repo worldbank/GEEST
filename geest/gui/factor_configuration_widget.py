@@ -1,8 +1,9 @@
 from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QButtonGroup
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import pyqtSignal
 from .configuration_widget_factory import ConfigurationWidgetFactory
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class FactorConfigurationWidget(QWidget):
@@ -37,7 +38,7 @@ class FactorConfigurationWidget(QWidget):
         try:
             self.create_radio_buttons(attributes)
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical
             )
 
@@ -48,14 +49,14 @@ class FactorConfigurationWidget(QWidget):
         Uses the factory to create radio buttons from attributes dictionary.
         """
         analysis_mode = attributes.get("analysis_mode", "")
-        QgsMessageLog.logMessage(
+        log_message(
             f"Creating radio buttons for analysis mode: {analysis_mode}",
             tag="Geest",
             level=Qgis.Info,
         )
         for key, value in attributes.items():
             if key.startswith("use_") or key == "indicator_required":
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Creating radio button for key: {key} with value: {value}",
                     tag="Geest",
                     level=Qgis.Info,

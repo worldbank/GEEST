@@ -1,6 +1,7 @@
 from qgis.PyQt.QtWidgets import QLabel, QDoubleSpinBox
 from .base_indicator_widget import BaseIndicatorWidget
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
+from geest.utilities import log_message
 
 
 class IndexScoreRadioButton(BaseIndicatorWidget):
@@ -22,7 +23,7 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
             # Connect the valueChanged signal to update data
             self.index_input.valueChanged.connect(self.update_data)
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical
             )
 
@@ -42,7 +43,7 @@ class IndexScoreRadioButton(BaseIndicatorWidget):
             self.info_label.setEnabled(enabled)
             self.index_input.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in set_internal_widgets_enabled: {e}",
                 "Geest",
                 level=Qgis.Critical,

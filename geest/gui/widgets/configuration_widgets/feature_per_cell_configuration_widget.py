@@ -1,9 +1,8 @@
 from qgis.PyQt.QtWidgets import (
     QLabel,
 )
-
+from geest.utilities import log_message
 from .base_configuration_widget import BaseConfigurationWidget
-from qgis.core import QgsMessageLog
 
 
 #
@@ -37,10 +36,10 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
             self.info_label = QLabel("Count features per cell.")
             self.layout.addWidget(self.info_label)
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def get_data(self) -> dict:
         """
@@ -60,6 +59,4 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         try:
             self.info_label.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

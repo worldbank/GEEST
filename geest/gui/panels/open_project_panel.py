@@ -3,13 +3,13 @@ from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox, QComboBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFontMetrics
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import get_ui_class, resources_path
 from geest.core import WorkflowQueueManager
+from geest.utilities import log_message
 
 FORM_CLASS = get_ui_class("open_project_panel_base.ui")
 
@@ -31,9 +31,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         )  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
-        QgsMessageLog.logMessage(
-            f"Loading open project panel", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Loading open project panel", tag="Geest", level=Qgis.Info)
         self.initUI()
 
     def initUI(self):
@@ -99,12 +97,8 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             for index in range(self.previous_project_combo.count()):
                 full_path = self.previous_project_combo.itemData(index)
                 elided_text = self.elide_path(full_path)
-                QgsMessageLog.logMessage(
-                    f"Full text  : {full_path}", tag="Geest", level=Qgis.Info
-                )
-                QgsMessageLog.logMessage(
-                    f"Elided text: {elided_text}", tag="Geest", level=Qgis.Info
-                )
+                log_message(f"Full text  : {full_path}", tag="Geest", level=Qgis.Info)
+                log_message(f"Elided text: {elided_text}", tag="Geest", level=Qgis.Info)
                 self.previous_project_combo.setItemText(index, elided_text)
         return super().eventFilter(obj, event)
 

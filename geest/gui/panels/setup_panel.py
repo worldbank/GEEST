@@ -1,31 +1,13 @@
-import os
-import json
-import platform
-import shutil
 from PyQt5.QtWidgets import (
     QWidget,
-    QFileDialog,
-    QMessageBox,
 )
-from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
-    QgsMapLayerProxyModel,
-    QgsFieldProxyModel,
-    QgsVectorLayer,
-    QgsProject,
-    QgsApplication,
-    QgsMessageLog,
     Qgis,
-    QgsProject,
-    QgsProcessingContext,
-    QgsFeedback,
 )
-from qgis.PyQt import uic
-
-from qgis.PyQt.QtCore import QSettings, pyqtSignal
+from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
-from geest.utilities import get_ui_class, resources_path
+from geest.utilities import get_ui_class, resources_path, log_message
 from geest.core import WorkflowQueueManager
 
 FORM_CLASS = get_ui_class("setup_panel_base.ui")
@@ -45,7 +27,7 @@ class SetupPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        QgsMessageLog.logMessage(f"Loading setup panel", tag="Geest", level=Qgis.Info)
+        log_message(f"Loading setup panel", tag="Geest", level=Qgis.Info)
         self.initUI()
 
     def initUI(self):

@@ -8,7 +8,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPixmap, QPainter
 
-from qgis.core import QgsMessageLog, Qgis, QgsProject
+from qgis.core import Qgis, QgsProject
 from typing import Optional
 from geest.gui.panels import (
     IntroPanel,
@@ -21,7 +21,7 @@ from geest.gui.panels import (
     CreateProjectPanel,
 )
 from geest.core import set_setting, setting
-from geest.utilities import resources_path
+from geest.utilities import resources_path, log_message
 
 
 class GeestDock(QDockWidget):
@@ -218,12 +218,14 @@ class GeestDock(QDockWidget):
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
 
-            QgsMessageLog.logMessage("GeestDock initialized successfully.", "Geest")
+            log_message(
+                "GeestDock initialized successfully.", tag="Geest", level=Qgis.Info
+            )
 
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error initializing GeestDock: {str(e)}",
-                "Geest",
+                tag="Geest",
                 level=Qgis.Critical,
             )
 
@@ -250,15 +252,17 @@ class GeestDock(QDockWidget):
         This is called by the main plugin class whenever the QGIS project changes.
         """
         project_path = QgsProject.instance().fileName()
-        QgsMessageLog.logMessage(
-            f"QGIS project changed to {project_path}", "Geest", Qgis.Info
+        log_message(
+            f"QGIS project changed to {project_path}", tag="Geest", level=Qgis.Info
         )
         if project_path:
             checksum = hash(project_path)
             # Check our settings to see if we have a Geest project associated with this project
             geest_project = setting(str(checksum), None, prefer_project_setting=True)
-            QgsMessageLog.logMessage(
-                f"Geest project path: {geest_project} ({checksum})", "Geest", Qgis.Info
+            log_message(
+                f"Geest project path: {geest_project} ({checksum})",
+                tag="Geest",
+                level=Qgis.Info,
             )
             if geest_project and os.path.exists(
                 os.path.join(geest_project, "model.json")
@@ -273,13 +277,13 @@ class GeestDock(QDockWidget):
         :param index: The index of the newly selected panel.
         """
         if index == 0:
-            QgsMessageLog.logMessage("Switched to Intro panel", "Geest", Qgis.Info)
+            log_message("Switched to Intro panel", tag="Geest", level=Qgis.Info)
         if index == 1:
-            QgsMessageLog.logMessage("Switched to ORS panel", "Geest", Qgis.Info)
+            log_message("Switched to ORS panel", tag="Geest", level=Qgis.Info)
         elif index == 2:
-            QgsMessageLog.logMessage("Switched to Project panel", "Geest", Qgis.Info)
+            log_message("Switched to Project panel", tag="Geest", level=Qgis.Info)
         elif index == 3:
-            QgsMessageLog.logMessage("Switched to Tree panel", "Geest", Qgis.Info)
+            log_message("Switched to Tree panel", tag="Geest", level=Qgis.Info)
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)
         elif index == 4:
-            QgsMessageLog.logMessage("Switched to Help panel", "Geest", Qgis.Info)
+            log_message("Switched to Help panel", tag="Geest", level=Qgis.Info)

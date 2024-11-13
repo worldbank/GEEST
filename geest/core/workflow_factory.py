@@ -1,5 +1,4 @@
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsProcessingContext,
     QgsFeedback,
@@ -24,6 +23,7 @@ from geest.core.workflows import (
 )
 
 from .json_tree_item import JsonTreeItem
+from geest.utilities import log_message
 
 
 class WorkflowFactory:
@@ -56,17 +56,11 @@ class WorkflowFactory:
                 return DontUseWorkflow({}, feedback)
 
             attributes = item.attributes()
-            QgsMessageLog.logMessage(
-                f"Workflow Factory Called", "Geest", level=Qgis.Info
-            )
-            QgsMessageLog.logMessage(
-                f"-----------------------", "Geest", level=Qgis.Info
-            )
+            log_message(f"Workflow Factory Called", "Geest", level=Qgis.Info)
+            log_message(f"-----------------------", "Geest", level=Qgis.Info)
             for key, value in attributes.items():
-                QgsMessageLog.logMessage(f"{key}: {value}", "Geest", level=Qgis.Info)
-            QgsMessageLog.logMessage(
-                f"-----------------------", "Geest", level=Qgis.Info
-            )
+                log_message(f"{key}: {value}", "Geest", level=Qgis.Info)
+            log_message(f"-----------------------", "Geest", level=Qgis.Info)
 
             analysis_mode = attributes.get("analysis_mode", "")
 
@@ -113,12 +107,8 @@ class WorkflowFactory:
                 raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
 
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error creating workflow: {e}", "Geest", level=Qgis.Critical
-            )
+            log_message(f"Error creating workflow: {e}", "Geest", level=Qgis.Critical)
             import traceback
 
-            QgsMessageLog.logMessage(
-                traceback.format_exc(), "Geest", level=Qgis.Critical
-            )
+            log_message(traceback.format_exc(), "Geest", level=Qgis.Critical)
             return DontUseWorkflow(item, cell_size_m, feedback, context)

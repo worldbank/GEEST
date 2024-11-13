@@ -1,7 +1,8 @@
-from qgis.core import QgsTask, QgsMessageLog, QgsFeedback, Qgis, QgsProcessingContext
+from qgis.core import QgsTask, QgsFeedback, Qgis, QgsProcessingContext
 from qgis.PyQt.QtCore import pyqtSignal
 from .json_tree_item import JsonTreeItem
 from .workflow_factory import WorkflowFactory
+from geest.utilities import log_message
 
 
 class WorkflowJob(QgsTask):
@@ -67,7 +68,7 @@ class WorkflowJob(QgsTask):
         """
 
         if not self._workflow:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error: No workflow assigned to {self.description()}",
                 tag="Geest",
                 level=Qgis.Critical,
@@ -75,33 +76,33 @@ class WorkflowJob(QgsTask):
             return False
 
         try:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Running workflow: {self.description()}", tag="Geest", level=Qgis.Info
             )
 
             # Emit the 'started' signal before running the workflow
             self.job_started.emit()
             result = self._workflow.execute()
-            QgsMessageLog.logMessage(
+            log_message(
                 f"WorkflowJob {self.description()} attributes.",
                 tag="Geest",
                 level=Qgis.Info,
             )
             attributes = self._item.attributes()
-            QgsMessageLog.logMessage(
+            log_message(
                 f"{attributes}",
                 tag="Geest",
                 level=Qgis.Info,
             )
             if result:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Workflow {self.description()} completed.",
                     tag="Geest",
                     level=Qgis.Info,
                 )
                 return True
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Workflow {self.description()} did not complete successfully.",
                     tag="Geest",
                     level=Qgis.Info,
@@ -109,7 +110,7 @@ class WorkflowJob(QgsTask):
                 return False
 
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error during task execution: {e}", tag="Geest", level=Qgis.Critical
             )
             return False
@@ -126,7 +127,7 @@ class WorkflowJob(QgsTask):
         Override the finished method to emit a custom signal when the task is finished.
         :param success: True if the task was completed successfully, False otherwise
         """
-        QgsMessageLog.logMessage(
+        log_message(
             "0000000000000 🏁 Job Finished 000000000000000000",
             tag="Geest",
             level=Qgis.Info,

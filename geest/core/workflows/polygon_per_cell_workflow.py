@@ -1,6 +1,5 @@
 import os
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsFeedback,
     QgsGeometry,
@@ -12,6 +11,7 @@ from geest.core import JsonTreeItem
 from geest.core.algorithms.polygon_per_cell_processor import (
     assign_reclassification_to_polygons,
 )
+from geest.utilities import log_message
 
 
 class PolygonPerCellWorkflow(WorkflowBase):
@@ -42,14 +42,14 @@ class PolygonPerCellWorkflow(WorkflowBase):
         layer_path = self.attributes.get("polygon_per_cell_shapefile", None)
 
         if not layer_path:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid raster found in polygon_per_cell_shapefile, trying polygon_per_cell_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get("polygon_per_cell_layer_source", None)
             if not layer_path:
-                QgsMessageLog.logMessage(
+                log_message(
                     "No points layer found in polygon_per_cell_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -79,7 +79,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
         area_features_count = area_features.featureCount()
-        QgsMessageLog.logMessage(
+        log_message(
             f"Features layer for area {index+1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,

@@ -5,10 +5,7 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
 )
 from qgis.gui import QgsMapLayerComboBox
-
-from .base_datasource_widget import BaseDataSourceWidget
 from qgis.core import (
-    QgsMessageLog,
     QgsMapLayerProxyModel,
     QgsProject,
     QgsFieldProxyModel,
@@ -16,6 +13,8 @@ from qgis.core import (
 )
 from qgis.gui import QgsFieldComboBox
 from qgis.PyQt.QtCore import QSettings
+from geest.utilities import log_message
+from .base_datasource_widget import BaseDataSourceWidget
 
 
 class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
@@ -89,10 +88,10 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.update_field_combo()  # Populate fields for the initially selected layer
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def select_shapefile(self):
         """
@@ -115,7 +114,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting shapefile: {e}", "Geest")
+            log_message(f"Error selecting shapefile: {e}", "Geest")
 
     def _populate_field_combo(self, shapefile_path: str) -> None:
         """
@@ -132,9 +131,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
 
             vector_layer = QgsVectorLayer(shapefile_path, "layer", "ogr")
             if not vector_layer.isValid():
-                QgsMessageLog.logMessage(
-                    f"Failed to load shapefile: {shapefile_path}", "Geest"
-                )
+                log_message(f"Failed to load shapefile: {shapefile_path}", "Geest")
                 return
 
             # Set the vector layer on the field selection combo box, which will automatically populate it
@@ -150,7 +147,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 self.field_selection_combo.setCurrentText(previous_field)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error populating field combo: {e}", "Geest")
+            log_message(f"Error populating field combo: {e}", "Geest")
 
     def update_selected_field(self) -> None:
         """

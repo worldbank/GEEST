@@ -1,3 +1,4 @@
+import os
 from qgis.PyQt.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -7,10 +8,9 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
 )
 from qgis.gui import QgsMapLayerComboBox
-from qgis.core import QgsMessageLog, QgsMapLayerProxyModel, QgsProject
+from qgis.core import QgsMapLayerProxyModel, QgsProject
 from qgis.PyQt.QtCore import QSettings
-import os
-
+from geest.utilities import log_message
 from .base_indicator_widget import BaseIndicatorWidget
 
 
@@ -48,10 +48,10 @@ class StreetLightsWidget(BaseIndicatorWidget):
             self.point_shapefile_line_edit.textChanged.connect(self.update_data)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def _add_point_layer_widgets(self) -> None:
         """
@@ -102,7 +102,7 @@ class StreetLightsWidget(BaseIndicatorWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting point shapefile: {e}", "Geest")
+            log_message(f"Error selecting point shapefile: {e}", "Geest")
 
     def get_data(self) -> dict:
         """
@@ -143,6 +143,4 @@ class StreetLightsWidget(BaseIndicatorWidget):
             self.point_shapefile_line_edit.setEnabled(enabled)
             self.point_shapefile_button.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

@@ -6,7 +6,6 @@ from qgis.core import (
     QgsFeedback,
     QgsField,
     QgsGeometry,
-    QgsMessageLog,
     QgsProcessingContext,
     QgsVectorFileWriter,
     QgsVectorLayer,
@@ -15,6 +14,7 @@ from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class DefaultIndexScoreWorkflow(WorkflowBase):
@@ -63,11 +63,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         :return: Raster file path of the output.
         """
         _ = area_features  # unused
-        QgsMessageLog.logMessage(
-            f"Processing area {index} score workflow", "Geest", Qgis.Info
-        )
+        log_message(f"Processing area {index} score workflow", "Geest", Qgis.Info)
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Index score: {self.index_score}",
             "Geest",
             Qgis.Info,
@@ -87,10 +85,8 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             value_field="score",
             default_value=255,
         )
-        QgsMessageLog.logMessage(f"Raster output: {raster_output}", "Geest", Qgis.Info)
-        QgsMessageLog.logMessage(
-            f"Worflow completed for area {index}", "Geest", Qgis.Info
-        )
+        log_message(f"Raster output: {raster_output}", "Geest", Qgis.Info)
+        log_message(f"Worflow completed for area {index}", "Geest", Qgis.Info)
         return raster_output
 
     def create_scored_boundary_layer(

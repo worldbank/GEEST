@@ -21,9 +21,6 @@ __revision__ = "$Format:%H$"
 from math import floor
 import os
 import sys
-from qgis.core import (
-    QgsRectangle,
-)
 
 
 class CoreUtils:

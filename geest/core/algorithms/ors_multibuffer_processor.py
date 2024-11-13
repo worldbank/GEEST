@@ -6,7 +6,6 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     edit,
     Qgis,
-    QgsMessageLog,
     QgsGeometry,
     QgsFeature,
     QgsPointXY,
@@ -27,6 +26,7 @@ import processing
 from geest.core.ors_client import ORSClient
 from geest.core import setting
 from geest.core.algorithms import AreaIterator
+from geest.utilities import log_message
 
 
 class ORSMultiBufferProcessor:
@@ -109,7 +109,7 @@ class ORSMultiBufferProcessor:
         if not self.points_layer.isValid():
             raise QgsProcessingException(f"Failed to load points layer")
 
-        QgsMessageLog.logMessage(
+        log_message(
             "ORS Multibuffer Processor Initialized", tag="Geest", level=Qgis.Info
         )
 
@@ -131,9 +131,7 @@ class ORSMultiBufferProcessor:
         Returns:
             str: The file path to the VRT file containing the combined rasters
         """
-        QgsMessageLog.logMessage(
-            "ORS  Mulitbuffer Processing Started", tag="Geest", level=Qgis.Info
-        )
+        log_message("ORS  Mulitbuffer Processing Started", tag="Geest", level=Qgis.Info)
 
         feedback = QgsProcessingFeedback()
         area_iterator = AreaIterator(self.gpkg_path)
@@ -161,13 +159,13 @@ class ORSMultiBufferProcessor:
                 index=index,
             )
             if not result:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error creating buffers for {vector_output_path}",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
                 return False
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Buffers created for {vector_output_path}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -182,7 +180,7 @@ class ORSMultiBufferProcessor:
                 self.workflow_directory, f"{self.output_prefix}_multibuffer_{index}.tif"
             )
             # Call the rasterize function from MultiBufferCreator
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Rasterizing buffers for area {index} with input_path {vector_output_path}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -205,7 +203,7 @@ class ORSMultiBufferProcessor:
         # Combine all area rasters into a VRT
         vrt_filepath = self._combine_rasters_to_vrt(index + 1)
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"ORS Impact Raster Processing Completed. Output VRT: {vrt_filepath}",
             tag="Geest",
             level=Qgis.Info,
@@ -227,9 +225,7 @@ class ORSMultiBufferProcessor:
         Returns:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
-        QgsMessageLog.logMessage(
-            "ORS Select Features Started", tag="Geest", level=Qgis.Info
-        )
+        log_message("ORS Select Features Started", tag="Geest", level=Qgis.Info)
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
         # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
@@ -268,7 +264,7 @@ class ORSMultiBufferProcessor:
         ]
         temp_layer_data.addFeatures(selected_features)
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"ORS writing {len(selected_features)} features",
             tag="Geest",
             level=Qgis.Info,
@@ -279,9 +275,7 @@ class ORSMultiBufferProcessor:
             temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
         )
 
-        QgsMessageLog.logMessage(
-            "ORS Select Features Ending", tag="Geest", level=Qgis.Info
-        )
+        log_message("ORS Select Features Ending", tag="Geest", level=Qgis.Info)
 
         return QgsVectorLayer(output_path, output_name, "ogr")
 
@@ -307,12 +301,12 @@ class ORSMultiBufferProcessor:
         :param index: Index of the current area being processed.
         :return: QgsVectorLayer containing the buffers as polygons.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"Using ORS API key: {self.masked_api_key}",
             "Geest",
             Qgis.Info,
         )
-        QgsMessageLog.logMessage(
+        log_message(
             f"Creating buffers for {point_layer.name()} in {output_path}",
             "Geest",
             Qgis.Info,
@@ -320,9 +314,7 @@ class ORSMultiBufferProcessor:
 
         # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
-        QgsMessageLog.logMessage(
-            f"Creating buffers for {len(features)} points", "Geest", Qgis.Info
-        )
+        log_message(f"Creating buffers for {len(features)} points", "Geest", Qgis.Info)
         total_features = len(features)
 
         # Process features in subsets to handle large datasets
@@ -335,14 +327,14 @@ class ORSMultiBufferProcessor:
                 json = self._fetch_isochrones(subset_layer, mode, measurement)
                 layer = self._create_isochrone_layer(json)
                 self.temp_layers.append(layer)
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
                     "Geest",
                     Qgis.Info,
                 )
 
             except Exception as e:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error processing subset {i + 1} to {min(i + self.subset_size, total_features)}: {e}",
                     "Geest",
                     Qgis.Critical,
@@ -351,19 +343,19 @@ class ORSMultiBufferProcessor:
 
         # Merge all isochrone layers into one final output
         if self.temp_layers:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Merging {len(self.temp_layers)} isochrone layers",
                 "Geest",
                 Qgis.Info,
             )
             crs = point_layer.crs()
             merged_layer = self._merge_layers(self.temp_layers, crs, index)
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Merged isochrone layer created at {output_path}",
                 "Geest",
                 Qgis.Info,
             )
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Removing overlaps between isochrones for {merged_layer}",
                 "Geest",
                 Qgis.Info,
@@ -371,9 +363,7 @@ class ORSMultiBufferProcessor:
             result = self._create_bands(merged_layer, crs, index)
             return result
         else:
-            QgsMessageLog.logMessage(
-                "No isochrones were created.", "Geest", Qgis.Warning
-            )
+            log_message("No isochrones were created.", "Geest", Qgis.Warning)
             return False
 
     def _create_subset_layer(self, subset_features, point_layer):
@@ -472,7 +462,7 @@ class ORSMultiBufferProcessor:
         # Parse the features from ORS response
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Creating isochrone layer with {len(isochrone_data['features'])} features",
                 "Geest",
                 Qgis.Info,
@@ -631,12 +621,12 @@ class ORSMultiBufferProcessor:
             "native:mergevectorlayers", merge_bands_params
         )
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
-        QgsMessageLog.logMessage(
+        log_message(
             f"Multi-buffer layer created at {output_path}",
             "Geest",
             Qgis.Info,
         )
-        QgsMessageLog.logMessage(f"Layer written to {output_path}", "Geest", Qgis.Info)
+        log_message(f"Layer written to {output_path}", "Geest", Qgis.Info)
         return output_path
 
     def rasterize(
@@ -658,7 +648,7 @@ class ORSMultiBufferProcessor:
         Returns:
             str: The path to the rasterized output.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"Rasterizing {input_path} to {output_path}",
             "Geest",
             Qgis.Info,
@@ -678,17 +668,15 @@ class ORSMultiBufferProcessor:
 
         # Check if the "value" field already exists
         field_names = [field.name() for field in input_layer.fields()]
-        QgsMessageLog.logMessage(f"Field names: {field_names}", "Geest", Qgis.Info)
+        log_message(f"Field names: {field_names}", "Geest", Qgis.Info)
         if "value" not in field_names:
-            QgsMessageLog.logMessage(
-                "Adding 'value' field to input layer", "Geest", Qgis.Info
-            )
+            log_message("Adding 'value' field to input layer", "Geest", Qgis.Info)
             # Add the burn field to the input layer if it doesn't exist
             input_layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             input_layer.updateFields()
 
             # Log message when the field is added
-            QgsMessageLog.logMessage(
+            log_message(
                 'Added "value" field to input layer',
                 "Geest",
                 Qgis.Info,
@@ -702,7 +690,7 @@ class ORSMultiBufferProcessor:
             # Get the index of the burn field value from the distances list
             if distance_field_value in self.distance_list:
                 distance_field_index = self.distance_list.index(distance_field_value)
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Found {distance_field_value} at index {distance_field_index}",
                     "Geest",
                     Qgis.Info,
@@ -724,7 +712,7 @@ class ORSMultiBufferProcessor:
             "TARGET_CRS": self.target_crs,
             "OUTPUT": reprojected_layer_path,
         }
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reprojecting input layer to {self.target_crs.authid()}",
             "Geest",
             Qgis.Info,
@@ -765,11 +753,9 @@ class ORSMultiBufferProcessor:
         }
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if not verbose_mode:
-            QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
+            log_message(str(params), tag="Geest", level=Qgis.Info)
         result = processing.run("gdal:rasterize", params)
-        QgsMessageLog.logMessage(
-            f"Rasterized output saved to {output_path}", "Geest", Qgis.Info
-        )
+        log_message(f"Rasterized output saved to {output_path}", "Geest", Qgis.Info)
         return output_path
 
     def _mask_raster(
@@ -831,10 +817,8 @@ class ORSMultiBufferProcessor:
         }
 
         processing.run("gdal:cliprasterbymasklayer", params)
-        QgsMessageLog.logMessage(
-            f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info
-        )
-        QgsMessageLog.logMessage(
+        log_message(f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info)
+        log_message(
             f"Masked raster saved to {masked_raster_filepath}",
             tag="Geest",
             level=Qgis.Info,
@@ -860,14 +844,14 @@ class ORSMultiBufferProcessor:
             if os.path.exists(raster_path) and QgsRasterLayer(raster_path).isValid():
                 raster_files.append(raster_path)
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Skipping invalid or non-existent raster: {raster_path}",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
 
         if not raster_files:
-            QgsMessageLog.logMessage(
+            log_message(
                 "No valid raster layers found to combine into VRT.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -878,14 +862,14 @@ class ORSMultiBufferProcessor:
             f"{self.output_prefix}_dissolved_combined.vrt",
         )
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Creating VRT of layers '{vrt_filepath}' layer to the map.",
             tag="Geest",
             level=Qgis.Info,
         )
 
         if not raster_files:
-            QgsMessageLog.logMessage(
+            log_message(
                 "No raster layers found to combine into VRT.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -908,9 +892,7 @@ class ORSMultiBufferProcessor:
 
         # Run the gdal:buildvrt processing algorithm to create the VRT
         results = processing.run("gdal:buildvirtualraster", params)
-        QgsMessageLog.logMessage(
-            f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info)
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.output_prefix}_combined VRT")
 
@@ -929,11 +911,9 @@ class ORSMultiBufferProcessor:
             #    self.context.takeResultLayer(vrt_layer.id()))
 
             # self.context.project().addMapLayer(vrt_layer)
-            QgsMessageLog.logMessage(
-                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-            )
+            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
         else:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
             )
         return vrt_filepath

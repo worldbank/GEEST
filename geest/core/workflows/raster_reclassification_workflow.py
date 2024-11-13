@@ -1,6 +1,5 @@
 import os
 from qgis.core import (
-    QgsMessageLog,
     Qgis,
     QgsGeometry,
     QgsFeedback,
@@ -14,6 +13,7 @@ import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
+from geest.utilities import log_message
 
 
 class RasterReclassificationWorkflow(WorkflowBase):
@@ -48,7 +48,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         layer_name = self.attributes.get("use_environmental_hazards_raster", None)
 
         if not layer_name:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid layer found in use_environmental_hazards_raster, trying use_environmental_hazards_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -57,7 +57,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 "use_environmental_hazards_layer_source", None
             )
             if not layer_name:
-                QgsMessageLog.logMessage(
+                log_message(
                     "No layer found in use_environmental_hazards_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -174,7 +174,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 0,  # new value = 0
             ]
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reclassification Rules for {self.layer_id}: {self.reclassification_rules}",
             tag="Geest",
             level=Qgis.Info,
@@ -250,7 +250,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         processing.run(
             "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
         )
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster_path}",
             "Geest",
             Qgis.Info,

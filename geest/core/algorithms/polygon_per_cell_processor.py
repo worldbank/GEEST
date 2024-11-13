@@ -2,10 +2,10 @@ from qgis.core import (
     edit,
     Qgis,
     QgsField,
-    QgsMessageLog,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
+from geest.utilities import log_message
 
 
 def assign_reclassification_to_polygons(layer: QgsVectorLayer) -> QgsVectorLayer:
@@ -37,7 +37,7 @@ def assign_reclassification_to_polygons(layer: QgsVectorLayer) -> QgsVectorLayer
                 feature.geometry().length()
             )  # Calculate the perimeter of the polygon
 
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Perimeter of polygon {feature.id()}: {perimeter}",
                 tag="Geest",
                 level=Qgis.Info,

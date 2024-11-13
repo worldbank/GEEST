@@ -4,7 +4,6 @@ from qgis.core import (
     Qgis,
     QgsFeedback,
     QgsGeometry,
-    QgsMessageLog,
     QgsProcessingContext,
     QgsProcessingFeedback,
     QgsRasterLayer,
@@ -13,6 +12,7 @@ from qgis.core import (
 import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class SafetyRasterWorkflow(WorkflowBase):
@@ -39,14 +39,14 @@ class SafetyRasterWorkflow(WorkflowBase):
         layer_name = self.attributes.get("use_nighttime_lights_raster", None)
 
         if not layer_name:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid raster found in use_nighttime_lights_raster, trying use_nighttime_lights_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_name = self.attributes.get("use_nighttime_lights_layer_source", None)
             if not layer_name:
-                QgsMessageLog.logMessage(
+                log_message(
                     "No points layer found in use_nighttime_lights_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -81,7 +81,7 @@ class SafetyRasterWorkflow(WorkflowBase):
         reclass_table = self._build_reclassification_table(
             max_val, median, percentile_75
         )
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reclassification table for area {index}: {reclass_table}",
             "Geest",
             Qgis.Info,
@@ -128,7 +128,7 @@ class SafetyRasterWorkflow(WorkflowBase):
             "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
         )["OUTPUT"]
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
             "Geest",
             Qgis.Info,
@@ -144,9 +144,7 @@ class SafetyRasterWorkflow(WorkflowBase):
 
         # Check if the raster layer loaded successfully
         if not raster_layer.isValid():
-            QgsMessageLog.logMessage(
-                "Raster layer failed to load", "Geest", level=Qgis.Warning
-            )
+            log_message("Raster layer failed to load", "Geest", level=Qgis.Warning)
             return None, None, None
 
         provider = raster_layer.dataProvider()
@@ -175,9 +173,7 @@ class SafetyRasterWorkflow(WorkflowBase):
             dtype = np.uint8
 
         if dtype is None:
-            QgsMessageLog.logMessage(
-                "Unsupported data type", "Geest", level=Qgis.Warning
-            )
+            log_message("Unsupported data type", "Geest", level=Qgis.Warning)
             return None, None, None
 
         # Convert QByteArray to a numpy array with the correct dtype
@@ -196,9 +192,7 @@ class SafetyRasterWorkflow(WorkflowBase):
             return max_value, median, percentile_75
         else:
             # Handle case with no valid data
-            QgsMessageLog.logMessage(
-                "No valid data in the raster", "Geest", level=Qgis.Warning
-            )
+            log_message("No valid data in the raster", "Geest", level=Qgis.Warning)
             return None, None, None
 
     def _build_reclassification_table(

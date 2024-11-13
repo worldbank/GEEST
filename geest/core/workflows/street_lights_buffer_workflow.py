@@ -4,10 +4,7 @@ from qgis.core import (
     QgsFeedback,
     QgsField,
     QgsGeometry,
-    QgsGeometry,
-    QgsMessageLog,
     QgsProcessingContext,
-    QgsVectorLayer,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
@@ -17,6 +14,7 @@ from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import (
     select_grid_cells,
 )
+from geest.utilities import log_message
 
 
 class StreetLightsBufferWorkflow(WorkflowBase):
@@ -46,14 +44,14 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         layer_path = self.attributes.get("use_street_lights_shapefile", None)
 
         if not layer_path:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Invalid raster found in street_lights_shapefile, trying street_lights_point_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get("use_street_lights_layer_source", None)
             if not layer_path:
-                QgsMessageLog.logMessage(
+                log_message(
                     "No points layer found in use_street_lights_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -64,12 +62,10 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
         self.features_layer = QgsVectorLayer(layer_path, "points", "ogr")
         if not self.features_layer.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 "street_lights_point_layer not valid", tag="Geest", level=Qgis.Critical
             )
-            QgsMessageLog.logMessage(
-                f"Layer Source: {layer_path}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Layer Source: {layer_path}", tag="Geest", level=Qgis.Critical)
             error = f"Streetlights point layer is not valid: {layer_path}"
             self.attributes["error"] = error
             raise Exception(error)
@@ -94,7 +90,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"{self.workflow_name}  Processing Started", tag="Geest", level=Qgis.Info
         )
 
@@ -195,7 +191,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         Returns:
             str: Path to the output raster file.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             "Assigning scores to grid layer based on intersection with buffered layer",
             tag="Geest",
             level=Qgis.Info,
@@ -220,7 +216,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
                 overlap_percent = (intersection.area() / grid_geom.area()) * 100
 
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Overlap percentage: {overlap_percent}",
                     tag="Geest",
                     level=Qgis.Info,

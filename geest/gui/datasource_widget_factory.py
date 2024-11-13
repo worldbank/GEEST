@@ -1,4 +1,4 @@
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 from geest.gui.widgets.datasource_widgets import (
     BaseDataSourceWidget,
     AcledCsvDataSourceWidget,
@@ -10,6 +10,7 @@ from geest.gui.widgets.datasource_widgets import (
 )
 
 from geest.core import setting
+from geest.utilities import log_message
 
 
 class DataSourceWidgetFactory:
@@ -24,7 +25,7 @@ class DataSourceWidgetFactory:
         """
         Factory method to create a datasource widget based on key-value pairs.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"Datasource widget factory called with key {widget_key}",
             tag="Geest",
             level=Qgis.Info,
@@ -33,14 +34,10 @@ class DataSourceWidgetFactory:
 
         if verbose_mode:
 
-            QgsMessageLog.logMessage(
-                "----------------------------", tag="Geest", level=Qgis.Info
-            )
-            QgsMessageLog.logMessage(f"Key: {widget_key}", tag="Geest", level=Qgis.Info)
-            QgsMessageLog.logMessage(f"Value: {value}", tag="Geest", level=Qgis.Info)
-            QgsMessageLog.logMessage(
-                "----------------------------", tag="Geest", level=Qgis.Info
-            )
+            log_message("----------------------------", tag="Geest", level=Qgis.Info)
+            log_message(f"Key: {widget_key}", tag="Geest", level=Qgis.Info)
+            log_message(f"Value: {value}", tag="Geest", level=Qgis.Info)
+            log_message("----------------------------", tag="Geest", level=Qgis.Info)
 
         try:
             # remove "use_" from start of widget key for passing to the datasource widget where needed
@@ -94,19 +91,17 @@ class DataSourceWidgetFactory:
                     widget_key=widget_key, attributes=attributes
                 )
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Datasource Factory did not match any widgets",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
                 return None
         except Exception as e:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error in datasource widget: {e}", tag="Geest", level=Qgis.Critical
             )
             import traceback
 
-            QgsMessageLog.logMessage(
-                traceback.format_exc(), tag="Geest", level=Qgis.Critical
-            )
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
             return None

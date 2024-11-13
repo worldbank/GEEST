@@ -19,9 +19,12 @@ __revision__ = "$Format:%H$"
 # ---------------------------------------------------------------------
 
 import os
-
+import logging
+import inspect
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt import uic
+from qgis.core import QgsMessageLog, Qgis
+from geest.core import setting
 
 
 def resources_path(*args):
@@ -82,3 +85,31 @@ def get_ui_class(ui_file):
         )
     )
     return uic.loadUiType(ui_file_path)[0]
+
+
+def log_message(message: str, level: int = Qgis.Info, tag: str = "Geest") -> None:
+    """Logs a message to both QgsMessageLog and a text file, including the caller's class or module name and line number."""
+    verbose_mode = setting(key="verbose_mode", default=0)
+    if not verbose_mode:
+        return
+    # Retrieve caller information
+    caller_frame = inspect.stack()[1]
+    caller_module = inspect.getmodule(caller_frame[0])
+    caller_name = caller_module.__name__ if caller_module else "Unknown"
+    line_number = caller_frame.lineno
+
+    # Combine caller information with message
+    full_message = f"[{caller_name}:{line_number}] {message}"
+
+    # Log to QGIS Message Log
+    QgsMessageLog.logMessage(full_message, tag=tag, level=level)
+
+    # Log to the file with appropriate logging level
+    if level == Qgis.Info:
+        logging.info(full_message)
+    elif level == Qgis.Warning:
+        logging.warning(full_message)
+    elif level == Qgis.Critical:
+        logging.critical(full_message)
+    else:
+        logging.debug(full_message)

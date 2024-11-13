@@ -1,12 +1,13 @@
 from PyQt5.QtWidgets import (
     QWidget,
 )
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
 
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from geest.core.tasks import OrsCheckerTask
 from geest.utilities import get_ui_class, resources_path
+from geest.utilities import log_message
 
 FORM_CLASS = get_ui_class("intro_panel_base.ui")
 
@@ -19,7 +20,7 @@ class IntroPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        QgsMessageLog.logMessage(f"Loading intro panel", tag="Geest", level=Qgis.Info)
+        log_message(f"Loading intro panel", tag="Geest", level=Qgis.Info)
         self.initUI()
 
     def initUI(self):

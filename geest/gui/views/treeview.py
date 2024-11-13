@@ -13,11 +13,11 @@ from qgis.PyQt.QtCore import (
     QModelIndex,
     Qt,
 )
-
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QTreeView, QMessageBox
 from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import Qgis
+from geest.utilities import log_message
 from geest.core import JsonTreeItem
 
 
@@ -234,7 +234,7 @@ class JsonTreeModel(QAbstractItemModel):
             visible (bool): Whether to show or hide the indicator nodes.
             parent_item (JsonTreeItem): Optional parent item to start from. If None, start from root.
         """
-        # QgsMessageLog.logMessage(
+        # log_message(
         #    f"Toggling item visibility for item (was {visible})",
         #    tag="Geest",
         #    level=Qgis.Info,
@@ -399,15 +399,13 @@ class JsonTreeModel(QAbstractItemModel):
         except Exception as e:
             import traceback
 
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Error converting tree to JSON: {e}",
                 tag="Geest",
                 level=Qgis.Critical,
             )
             # Show the traceback tpp
-            QgsMessageLog.logMessage(
-                f"{traceback.format_exc()}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"{traceback.format_exc()}", tag="Geest", level=Qgis.Critical)
             raise e
 
     def clear_factor_weightings(self, dimension_item):
@@ -723,7 +721,7 @@ class JsonTreeView(QTreeView):
         """Toggles visibility of all indicator nodes."""
         indicators_visible = self._indicators_visible()
         self.model().toggle_indicator_visibility(not indicators_visible)
-        # QgsMessageLog.logMessage(
+        # log_message(
         #    f"Toggled indicator nodes (was {indicators_visible})",
         #    tag="Geest",
         #    level=Qgis.Info,

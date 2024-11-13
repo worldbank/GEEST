@@ -1,18 +1,15 @@
 from qgis.core import (
     QgsRasterLayer,
     QgsProcessingFeedback,
-    QgsCoordinateReferenceSystem,
-    QgsRectangle,
     QgsGeometry,
-    QgsMessageLog,
     Qgis,
     QgsProcessingContext,
     QgsVectorLayer,
 )
-from qgis.analysis import QgsRasterCalculatorEntry
 import os
 import processing
 from .area_iterator import AreaIterator  # Import your area iterator
+from geest.utilities import log_message
 
 
 class RasterReclassificationProcessor:
@@ -90,7 +87,7 @@ class RasterReclassificationProcessor:
         # Combine the reclassified rasters into a VRT
         output_vrt = self._combine_rasters_to_vrt(temp_rasters)
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reclassification complete. VRT file saved to {output_vrt}",
             "RasterReclassificationProcessor",
             Qgis.Info,
@@ -178,7 +175,7 @@ class RasterReclassificationProcessor:
         processing.run(
             "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
         )
-        QgsMessageLog.logMessage(
+        log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
             "Geest",
             Qgis.Info,
@@ -207,11 +204,9 @@ class RasterReclassificationProcessor:
         vrt_layer = QgsRasterLayer(output_vrt, f"{self.output_prefix}_reclass_output")
         if vrt_layer.isValid():
             # self.context.project().addMapLayer(vrt_layer)
-            QgsMessageLog.logMessage(
-                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-            )
+            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
         else:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
             )
         return output_vrt

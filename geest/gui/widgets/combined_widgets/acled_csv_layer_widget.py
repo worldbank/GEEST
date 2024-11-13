@@ -1,3 +1,4 @@
+import os
 from qgis.PyQt.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -7,9 +8,8 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QMessageBox,
 )
-from qgis.core import QgsMessageLog, Qgis
-import os
-
+from qgis.core import Qgis
+from geest.utilities import log_message
 from .base_indicator_widget import BaseIndicatorWidget
 
 
@@ -45,10 +45,10 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
             self.csv_file_line_edit.textChanged.connect(self.update_data)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def _add_csv_file_widgets(self) -> None:
         """
@@ -90,7 +90,7 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
                 os.environ["GEEST_LAST_CSV_DIR"] = os.path.dirname(file_path)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting CSV file: {e}", "Geest")
+            log_message(f"Error selecting CSV file: {e}", "Geest")
 
     def validate_csv_file(self, file_path: str) -> None:
         """
@@ -112,18 +112,16 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
 
             if missing_columns:
                 error_message = f"Missing columns: {', '.join(missing_columns)}"
-                QgsMessageLog.logMessage(error_message, "Geest", Qgis.Critical)
+                log_message(error_message, "Geest", Qgis.Critical)
                 QMessageBox.critical(self, "Invalid CSV", error_message)
             else:
-                QgsMessageLog.logMessage(
-                    "CSV file validation successful.", "Geest", Qgis.Info
-                )
+                log_message("CSV file validation successful.", "Geest", Qgis.Info)
                 QMessageBox.information(
                     self, "Valid CSV", "The selected CSV file is valid."
                 )
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error validating CSV file: {e}", "Geest")
+            log_message(f"Error validating CSV file: {e}", "Geest")
             QMessageBox.critical(
                 self, "CSV Validation Error", f"An error occurred: {e}"
             )
@@ -154,6 +152,4 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
             self.csv_file_line_edit.setEnabled(enabled)
             self.csv_file_button.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

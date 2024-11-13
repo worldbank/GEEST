@@ -5,9 +5,8 @@ from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLineEdit,
 )
-
 from .base_configuration_widget import BaseConfigurationWidget
-from qgis.core import QgsMessageLog
+from geest.utilities import log_message
 
 
 class MultiBufferConfigurationWidget(BaseConfigurationWidget):
@@ -20,10 +19,10 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
         Adds internal widgets specific to self.set_internal_widgets_visible(self.isChecked()) - in this case there are none.
         """
         try:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Adding internal widgets for MultiBufferConfigurationWidget", "Geest"
             )
-            QgsMessageLog.logMessage(f"Attributes: {self.attributes}", "Geest")
+            log_message(f"Attributes: {self.attributes}", "Geest")
             # Travel Mode group
             self.travel_mode_group = QGroupBox("Travel Mode:")
             self.travel_mode_layout = QHBoxLayout()
@@ -78,10 +77,10 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.increments_input.textChanged.connect(self.update_data)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def get_data(self) -> dict:
         """
@@ -119,6 +118,4 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.measurement_group.setEnabled(enabled)
             self.travel_increments_layout.setEnabled(enabled)
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

@@ -1,6 +1,5 @@
 import os
 from qgis.core import (
-    QgsMessageLog,
     QgsField,
     Qgis,
     QgsFeedback,
@@ -14,6 +13,7 @@ from qgis.PyQt.QtCore import QVariant
 import processing
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class SinglePointBufferWorkflow(WorkflowBase):
@@ -48,7 +48,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
                 "single_buffer_point_layer_provider_type", "ogr"
             )
         if not layer_source:
-            QgsMessageLog.logMessage(
+            log_message(
                 "single_buffer_point_layer_shapefile not found",
                 tag="Geest",
                 level=Qgis.Critical,
@@ -56,10 +56,10 @@ class SinglePointBufferWorkflow(WorkflowBase):
             return False
         self.features_layer = QgsVectorLayer(layer_source, "points", provider_type)
         if not self.features_layer.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 "single_buffer_point_layer not valid", tag="Geest", level=Qgis.Critical
             )
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Layer Source: {layer_source}", tag="Geest", level=Qgis.Critical
             )
             return False
@@ -86,7 +86,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"{self.workflow_name}  Processing Started", tag="Geest", level=Qgis.Info
         )
 
@@ -142,9 +142,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
 
-        QgsMessageLog.logMessage(
-            f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info)
         # Create a new field in the layer for the scores
         layer.startEditing()
         layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])

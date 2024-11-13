@@ -5,10 +5,10 @@ from qgis.core import (
     QgsNetworkAccessManager,
     Qgis,
     QgsNetworkReplyContent,
-    QgsMessageLog,
 )
 import json
 from geest.core import setting
+from geest.utilities import log_message
 
 
 class ORSClient(QObject):
@@ -58,7 +58,7 @@ class ORSClient(QObject):
         data = json.dumps(params).encode("utf-8")
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            QgsMessageLog.logMessage(str(params), tag="Geest", level=Qgis.Info)
+            log_message(str(params), tag="Geest", level=Qgis.Info)
         # Send the request and connect the finished signal
         reply: QgsNetworkReplyContent = self.network_manager.blockingPost(request, data)
         response_data = reply.content()
@@ -67,5 +67,5 @@ class ORSClient(QObject):
         response_string = response_string[2:-1]
         response_json = json.loads(response_string)
         if verbose_mode:
-            QgsMessageLog.logMessage(str(response_json), tag="Geest", level=Qgis.Info)
+            log_message(str(response_json), tag="Geest", level=Qgis.Info)
         return response_json

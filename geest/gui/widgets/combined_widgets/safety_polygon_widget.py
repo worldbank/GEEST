@@ -1,3 +1,4 @@
+import os
 from qgis.PyQt.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -8,16 +9,14 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
-    QgsMessageLog,
     QgsMapLayerProxyModel,
     QgsProject,
     QgsVectorLayer,
     QgsFieldProxyModel,
 )
 from qgis.PyQt.QtCore import QSettings
-import os
-
 from .base_indicator_widget import BaseIndicatorWidget
+from geest.utilities import log_message
 
 
 class SafetyPolygonWidget(BaseIndicatorWidget):
@@ -71,10 +70,10 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
             self.update_field_combo()  # Populate fields for the initially selected layer
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(f"Error in add_internal_widgets: {e}", "Geest")
             import traceback
 
-            QgsMessageLog.logMessage(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), "Geest")
 
     def _add_polygon_layer_widgets(self) -> None:
         """
@@ -146,7 +145,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
                 self._populate_field_combo(file_path)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error selecting polygon shapefile: {e}", "Geest")
+            log_message(f"Error selecting polygon shapefile: {e}", "Geest")
 
     def _populate_field_combo(self, shapefile_path: str) -> None:
         """
@@ -163,9 +162,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
 
             vector_layer = QgsVectorLayer(shapefile_path, "polygon_layer", "ogr")
             if not vector_layer.isValid():
-                QgsMessageLog.logMessage(
-                    f"Failed to load shapefile: {shapefile_path}", "Geest"
-                )
+                log_message(f"Failed to load shapefile: {shapefile_path}", "Geest")
                 return
 
             # Set the vector layer on the field selection combo box, which will automatically populate it
@@ -181,7 +178,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
                 self.field_selection_combo.setCurrentText(previous_field)
 
         except Exception as e:
-            QgsMessageLog.logMessage(f"Error populating field combo: {e}", "Geest")
+            log_message(f"Error populating field combo: {e}", "Geest")
 
     def update_field_combo(self) -> None:
         """
@@ -268,6 +265,4 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
                 enabled and self.field_selection_combo.count() > 0
             )
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error in set_internal_widgets_enabled: {e}", "Geest"
-            )
+            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")

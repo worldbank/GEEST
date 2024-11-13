@@ -11,17 +11,15 @@ from qgis.core import (
     QgsField,
     QgsFields,
     QgsGeometry,
-    QgsMessageLog,
     QgsPointXY,
     QgsProcessingContext,
     QgsProcessingException,
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
-
 from qgis.PyQt.QtCore import QVariant
-
 import processing
+from geest.utilities import log_message
 
 
 class AcledImpactWorkflow(WorkflowBase):
@@ -145,7 +143,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 features.append(feature)
 
             point_provider.addFeatures(features)
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Loaded {len(features)} points from CSV", tag="Geest", level=Qgis.Info
             )
         # Save the layer to disk as a shapefile
@@ -155,9 +153,7 @@ class AcledImpactWorkflow(WorkflowBase):
         shapefile_path = os.path.join(
             self.workflow_directory, f"{self.layer_id}_acled_points.shp"
         )
-        QgsMessageLog.logMessage(
-            f"Writing points to {shapefile_path}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Writing points to {shapefile_path}", tag="Geest", level=Qgis.Info)
         error = QgsVectorFileWriter.writeAsVectorFormat(
             point_layer, shapefile_path, "utf-8", self.target_crs, "ESRI Shapefile"
         )
@@ -167,7 +163,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 f"Error saving point layer to disk: {error[1]}"
             )
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Point layer created from CSV saved to {shapefile_path}",
             tag="Geest",
             level=Qgis.Info,
@@ -217,9 +213,7 @@ class AcledImpactWorkflow(WorkflowBase):
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
 
-        QgsMessageLog.logMessage(
-            f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info)
         # Define scoring categories based on event_type
         event_scores = {
             "Battles": 0,
@@ -293,12 +287,12 @@ class AcledImpactWorkflow(WorkflowBase):
 
         overlay_analysis(qgis_vector_layer)
         """
-        QgsMessageLog.logMessage("Overlay analysis started", "Geest", Qgis.Info)
+        log_message("Overlay analysis started", "Geest", Qgis.Info)
         # Step 1: Load the input layer from the provided shapefile path
         # layer = QgsVectorLayer(input_filepath, "circles_layer", "ogr")
 
         if not input_layer.isValid():
-            QgsMessageLog.logMessage("Layer failed to load!", "Geest", Qgis.Info)
+            log_message("Layer failed to load!", "Geest", Qgis.Info)
             return
 
         # Step 2: Create a memory layer to store the result
@@ -319,7 +313,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 "OUTPUT": "TEMPORARY_OUTPUT",
             },
         )["OUTPUT"]
-        QgsMessageLog.logMessage(
+        log_message(
             f"Dissolved areas have {len(dissolve)} features",
             tag="Geest",
             level=Qgis.Info,
@@ -333,7 +327,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 "OUTPUT": "memory:",
             },
         )["OUTPUT"]
-        QgsMessageLog.logMessage(
+        log_message(
             f"Unioned areas have {len(dissolve)} features", tag="Geest", level=Qgis.Info
         )
         # Step 6: Iterate through the unioned features to assign the minimum value in overlapping areas
@@ -352,7 +346,7 @@ class AcledImpactWorkflow(WorkflowBase):
             # Assign the minimum value to the overlapping area
             min_value = min(value_1, value_2)
 
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Processing feature with min value: {min_value}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -387,7 +381,7 @@ class AcledImpactWorkflow(WorkflowBase):
         )
 
         if error[0] == 0:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Overlay analysis complete, output saved to {full_output_filepath}",
                 "Geest",
                 Qgis.Info,
