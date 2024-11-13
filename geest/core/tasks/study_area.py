@@ -655,7 +655,7 @@ class StudyAreaProcessingTask(QgsTask):
                         # Create cell rectangle
                         rect = QgsRectangle(x, y, x + step, y + step)
                         grid_geom = QgsGeometry.fromRect(rect)
-                        log_message(f"Creating rect: {rect}")
+                        # log_message(f"Creating rect: {rect}")
                         # Intersect check
                         if spatial_index.intersects(
                             grid_geom.boundingBox()
@@ -666,7 +666,7 @@ class StudyAreaProcessingTask(QgsTask):
                             feature.setAttributes([feature_id])
                             feature_batch.append(feature)
                             feature_id += 1
-                            log_message(f"Feature ID {feature_id} created.")
+                            # log_message(f"Feature ID {feature_id} created.")
 
                             # Commit in batches
                             if len(feature_batch) >= features_per_batch:
