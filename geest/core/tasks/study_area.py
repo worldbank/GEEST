@@ -633,7 +633,7 @@ class StudyAreaProcessingTask(QgsTask):
         total_cells = ((x_max - x_min) // step) * ((y_max - y_min) // step)
         cell_count = 0
         features_per_batch = 10000
-        progress_log_interval = 1000
+        progress_log_interval = 10000
         log_message("Preparing spatial index...")
 
         # Spatial index for efficient intersection checks
@@ -671,18 +671,18 @@ class StudyAreaProcessingTask(QgsTask):
                             # Commit in batches
                             if len(feature_batch) >= features_per_batch:
                                 provider.addFeatures(feature_batch)
-                                gpkg_layer.updateExtents()
+                                # gpkg_layer.updateExtents()
                                 feature_batch.clear()
                                 log_message(
                                     f"Committed {feature_id} features to {grid_layer_name}."
                                 )
-
+                                gpkg_layer.commitChanges()
                                 # Reset provider to free memory
-                                del provider
-                                gpkg_layer = QgsVectorLayer(
-                                    gpkg_layer_path, grid_layer_name, "ogr"
-                                )
-                                provider = gpkg_layer.dataProvider()
+                                # del provider
+                                # gpkg_layer = QgsVectorLayer(
+                                #    gpkg_layer_path, grid_layer_name, "ogr"
+                                # )
+                                # provider = gpkg_layer.dataProvider()
 
                         # Log progress periodically
                         cell_count += 1
@@ -696,10 +696,13 @@ class StudyAreaProcessingTask(QgsTask):
             # Commit any remaining features
             if feature_batch:
                 provider.addFeatures(feature_batch)
-                gpkg_layer.updateExtents()
-                log_message(
-                    f"Final commit: {feature_id} features written to {grid_layer_name}."
-                )
+            gpkg_layer.commitChanges()
+            gpkg_layer.updateExtents()
+            provider.forceReload()
+            del gpkg_layer
+            log_message(
+                f"Final commit: {feature_id} features written to {grid_layer_name}."
+            )
 
         except Exception as e:
             log_message(f"Error during grid creation: {str(e)}", level=Qgis.Critical)
