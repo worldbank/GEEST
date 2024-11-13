@@ -28,6 +28,35 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QVariant
 import processing  # QGIS processing toolbox
+import logging
+import tempfile
+
+
+# Configure file logger
+temp_dir = tempfile.gettempdir()
+log_file_path = os.path.join(temp_dir, "geest_logfile.log")
+logging.basicConfig(
+    filename=log_file_path,
+    filemode="a",  # Append mode
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    level=logging.DEBUG,
+)
+
+
+def log_message(message: str, level: int = Qgis.Info, tag: str = "Geest") -> None:
+    """Logs a message to both QgsMessageLog and a text file."""
+    # Log to QGIS Message Log
+    QgsMessageLog.logMessage(message, tag=tag, level=level)
+
+    # Log to the file with appropriate logging level
+    if level == Qgis.Info:
+        logging.info(message)
+    elif level == Qgis.Warning:
+        logging.warning(message)
+    elif level == Qgis.Critical:
+        logging.critical(message)
+    else:
+        logging.debug(message)
 
 
 class StudyAreaProcessingTask(QgsTask):
@@ -89,13 +118,13 @@ class StudyAreaProcessingTask(QgsTask):
         if os.path.exists(self.gpkg_path):
             try:
                 os.remove(self.gpkg_path)
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Existing GeoPackage removed: {self.gpkg_path}",
                     tag="Geest",
                     level=Qgis.Info,
                 )
             except Exception as e:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error removing existing GeoPackage: {e}",
                     tag="Geest",
                     level=Qgis.Critical,
@@ -125,7 +154,7 @@ class StudyAreaProcessingTask(QgsTask):
         else:
             self.output_crs = crs
 
-        QgsMessageLog.logMessage(
+        log_message(
             f"Project CRS Set to: {self.output_crs.authid()}",
             tag="Geest",
             level=Qgis.Info,
@@ -141,13 +170,9 @@ class StudyAreaProcessingTask(QgsTask):
             result = self.process_study_area()
             return result  # false if the task was canceled
         except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Task failed: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Task failed: {e}", tag="Geest", level=Qgis.Critical)
             # Print the traceback to the QgsMessageLog
-            QgsMessageLog.logMessage(
-                traceback.format_exc(), tag="Geest", level=Qgis.Critical
-            )
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
             # And write it to a text file called error.txt in the working directory
             with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
                 # first the date and time
@@ -163,20 +188,20 @@ class StudyAreaProcessingTask(QgsTask):
         Called when the task completes successfully.
         """
         if result:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Study Area Processing completed successfully.",
                 tag="Geest",
                 level=Qgis.Info,
             )
         else:
             if self.feedback.isCanceled():
-                QgsMessageLog.logMessage(
+                log_message(
                     "Study Area Processing was canceled by the user.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
             else:
-                QgsMessageLog.logMessage(
+                log_message(
                     "Study Area Processing encountered an error.",
                     tag="Geest",
                     level=Qgis.Critical,
@@ -188,7 +213,7 @@ class StudyAreaProcessingTask(QgsTask):
         """
         super().cancel()
         self.feedback.cancel()
-        QgsMessageLog.logMessage(
+        log_message(
             "Study Area Processing was canceled.", tag="Geest", level=Qgis.Warning
         )
 
@@ -203,9 +228,6 @@ class StudyAreaProcessingTask(QgsTask):
             geom=QgsGeometry.fromRect(self.layer_bbox),
             area_name="Study Area Bounding Box",
         )
-
-        # Add the study_area_bbox layer to the map
-        self.add_layer_to_map("study_area_bbox")
 
         # Initialize counters for tracking valid and invalid features
         invalid_feature_count = 0
@@ -228,7 +250,7 @@ class StudyAreaProcessingTask(QgsTask):
 
             # Check for geometry validity
             if geom.isEmpty() or not geom.isGeosValid():
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Feature ID {feature.id()} has an invalid geometry. Attempting to fix.",
                     tag="Geest",
                     level=Qgis.Warning,
@@ -240,7 +262,7 @@ class StudyAreaProcessingTask(QgsTask):
                 # Check if the fixed geometry is valid
                 if fixed_geom.isEmpty() or not fixed_geom.isGeosValid():
                     invalid_feature_count += 1
-                    QgsMessageLog.logMessage(
+                    log_message(
                         f"Feature ID {feature.id()} could not be fixed. Skipping.",
                         tag="Geest",
                         level=Qgis.Critical,
@@ -250,7 +272,7 @@ class StudyAreaProcessingTask(QgsTask):
                 # Use the fixed geometry if it is valid
                 geom = fixed_geom
                 fixed_feature_count += 1
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Feature ID {feature.id()} geometry fixed successfully.",
                     tag="Geest",
                     level=Qgis.Info,
@@ -266,7 +288,7 @@ class StudyAreaProcessingTask(QgsTask):
             except Exception as e:
                 # Log any unexpected errors during processing
                 invalid_feature_count += 1
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error processing geometry for feature {feature.id()}: {e}",
                     tag="Geest",
                     level=Qgis.Critical,
@@ -277,45 +299,15 @@ class StudyAreaProcessingTask(QgsTask):
             self.setProgress(progress)
 
         # Log the count of valid, fixed, and invalid features processed
-        QgsMessageLog.logMessage(
+        log_message(
             f"Processing completed. Valid features: {valid_feature_count}, Fixed features: {fixed_feature_count}, Invalid features: {invalid_feature_count}",
             tag="Geest",
             level=Qgis.Info,
         )
-
-        # Add the 'study_area_bboxes' layer to the QGIS map after processing is complete
-        # Not thread safe, use signal instead!
-        # self.add_layer_to_map("study_area_bboxes")
-        # self.add_layer_to_map("study_area_polygons")
-
         # Create and add the VRT of all generated raster masks if in raster mode
         if self.mode == "raster":
             self.create_raster_vrt()
         return True
-
-    def add_layer_to_map(self, layer_name: str) -> None:
-        """
-        Adds the specified layer from the GeoPackage to the QGIS map.
-
-        :param layer_name: Name of the layer to add from the GeoPackage.
-        """
-        gpkg_layer_path = f"{self.gpkg_path}|layername={layer_name}"
-        layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
-
-        if layer.isValid():
-            # Not thread safe, use signal instead
-            # QgsProject.instance().addMapLayer(layer)
-            QgsMessageLog.logMessage(
-                f"Added '{layer_name}' layer to the map.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-        else:
-            QgsMessageLog.logMessage(
-                f"Failed to add '{layer_name}' layer to the map.",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
 
     def process_singlepart_geometry(
         self, geom: QgsGeometry, normalized_name: str, area_name: str
@@ -345,7 +337,8 @@ class StudyAreaProcessingTask(QgsTask):
         transform: QgsCoordinateTransform = QgsCoordinateTransform(
             crs_src, self.output_crs, self.context.project()
         )
-        geom.transform(transform)
+        if crs_src != self.output_crs:
+            geom.transform(transform)
 
         # Create a feature for the original part
         # Always save the study area bounding boxes regardless of mode
@@ -354,20 +347,20 @@ class StudyAreaProcessingTask(QgsTask):
         )
         # Process the geometry based on the selected mode
         if self.mode == "vector":
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Creating vector grid for {normalized_name}.",
                 tag="Geest",
                 level=Qgis.Info,
             )
             self.create_and_save_grid(geom, bbox)
         elif self.mode == "raster":
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Creating raster mask for {normalized_name}.",
                 tag="Geest",
                 level=Qgis.Info,
             )
             self.create_raster_mask(geom, bbox, normalized_name)
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Creating vector grid for {normalized_name}.",
                 tag="Geest",
                 level=Qgis.Info,
@@ -411,7 +404,10 @@ class StudyAreaProcessingTask(QgsTask):
         transform: QgsCoordinateTransform = QgsCoordinateTransform(
             crs_src, self.output_crs, self.context.project()
         )
-        bbox_transformed = transform.transformBoundingBox(bbox)
+        if crs_src != self.output_crs:
+            bbox_transformed = transform.transformBoundingBox(bbox)
+        else:
+            bbox_transformed = bbox
 
         # Align the bounding box to a grid aligned at 100m intervals, offset by the study area origin
         study_area_origin_x = (
@@ -510,7 +506,7 @@ class StudyAreaProcessingTask(QgsTask):
         feature.setAttributes(attributes)
 
         if gpkg_layer.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Appending to existing layer: {layer_name}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -518,8 +514,11 @@ class StudyAreaProcessingTask(QgsTask):
             provider = gpkg_layer.dataProvider()
             provider.addFeatures([feature])
             gpkg_layer.updateExtents()
+            # Do not remove this line, QGIS will crash during the
+            # study area creation process.
+            del provider
         else:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Layer '{layer_name}' is not valid for appending.",
                 tag="Geest",
                 level=Qgis.Critical,
@@ -547,7 +546,7 @@ class StudyAreaProcessingTask(QgsTask):
         # Check if the GeoPackage file exists
         if not os.path.exists(self.gpkg_path):
             append = False
-            QgsMessageLog.logMessage(
+            log_message(
                 f"GeoPackage does not exist. Creating: {self.gpkg_path}",
                 tag="Geest",
                 level=Qgis.Info,
@@ -555,7 +554,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         # If the layer doesn't exist, create it
         if not layer.isValid():
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Layer '{layer_name}' does not exist. Creating it.",
                 tag="Geest",
                 level=Qgis.Info,
@@ -578,6 +577,7 @@ class StudyAreaProcessingTask(QgsTask):
                 transformContext=QgsCoordinateTransformContext(),
                 options=options,
             )
+            return
 
     def create_and_save_grid(self, geom: QgsGeometry, bbox: QgsRectangle) -> None:
         """
@@ -599,7 +599,7 @@ class StudyAreaProcessingTask(QgsTask):
             provider = gpkg_layer.dataProvider()
             feature_id = provider.featureCount()
         else:
-            QgsMessageLog.logMessage(
+            log_message(
                 f"Failed to access layer '{grid_layer_name}' in the GeoPackage.",
                 tag="Geest",
                 level=Qgis.Critical,
@@ -609,95 +609,109 @@ class StudyAreaProcessingTask(QgsTask):
         step = self.cell_size_m  # cell_size_mm grid cells
         feature_id += 1
         feature_batch = []
-
-        x_min, x_max = bbox.xMinimum(), bbox.xMaximum()
-        y_min, y_max = bbox.yMinimum(), bbox.yMaximum()
-
-        # Access the GeoPackage layer to append features
-        gpkg_layer_path = f"{self.gpkg_path}|layername={grid_layer_name}"
-        gpkg_layer = QgsVectorLayer(gpkg_layer_path, grid_layer_name, "ogr")
-        if not gpkg_layer.isValid():
-            QgsMessageLog.logMessage(
-                f"Failed to access layer '{grid_layer_name}' in the GeoPackage.",
-                tag="Geest",
-                level=Qgis.Critical,
+        log_message("Checking for meridian wrapping...")
+        try:
+            # Handle bounding box for meridian wrapping cases
+            x_min, x_max = bbox.xMinimum(), bbox.xMaximum()
+            y_min, y_max = bbox.yMinimum(), bbox.yMaximum()
+            if x_min > x_max:
+                # If spanning the meridian, adjust range to handle wraparound
+                x_ranges = [(x_min, 180), (-180, x_max)]
+            else:
+                x_ranges = [(x_min, x_max)]
+        except Exception as e:
+            log_message(
+                f"Error handling meridian wrapping: {str(e)}", level=Qgis.Critical
             )
-            return
+            import traceback
 
-        provider = gpkg_layer.dataProvider()
+            log_message(traceback.format_exc(), level=Qgis.Critical)
+            raise
+        log_message("Meridian wrapping handled.")
 
-        # Create a spatial index for efficient intersection checks
+        step = self.cell_size_m  # Grid cell size
+        total_cells = ((x_max - x_min) // step) * ((y_max - y_min) // step)
+        cell_count = 0
+        features_per_batch = 10000
+        progress_log_interval = 10000
+        log_message("Preparing spatial index...")
+
+        # Spatial index for efficient intersection checks
         spatial_index = QgsSpatialIndex()
         feature = QgsFeature()
         feature.setGeometry(geom)
-        spatial_index.addFeature(feature)  # Add the main geometry to the spatial index
+        spatial_index.addFeature(feature)
+        log_message("Spatial index prepared.")
 
-        # Loop through the grid cells
-        total_cells = ((x_max - x_min) // step) * ((y_max - y_min) // step)
-        cell_count = 0
-        features_per_batch = 10000  # Commit features every 10,000 records
-        progress_log_interval = 1000  # Log progress every 1,000 features
+        try:
+            log_message("Creating grid features...")
+            # Iterate through defined ranges for x to handle wraparounds
+            for x_range in x_ranges:
+                for x in range(int(x_range[0]), int(x_range[1]), step):
+                    for y in range(int(y_min), int(y_max), step):
+                        if self.feedback.isCanceled():
+                            return False
 
-        for x in range(int(x_min), int(x_max), step):
-            for y in range(int(y_min), int(y_max), step):
-                if self.feedback.isCanceled():
-                    return False
-                rect = QgsRectangle(x, y, x + step, y + step)
-                grid_geom = QgsGeometry.fromRect(rect)
+                        # Create cell rectangle
+                        rect = QgsRectangle(x, y, x + step, y + step)
+                        grid_geom = QgsGeometry.fromRect(rect)
+                        # log_message(f"Creating rect: {rect}")
+                        # Intersect check
+                        if spatial_index.intersects(
+                            grid_geom.boundingBox()
+                        ) and grid_geom.intersects(geom):
+                            # Create the grid feature
+                            feature = QgsFeature()
+                            feature.setGeometry(grid_geom)
+                            feature.setAttributes([feature_id])
+                            feature_batch.append(feature)
+                            feature_id += 1
+                            # log_message(f"Feature ID {feature_id} created.")
 
-                # Check if grid_geom intersects with the geometry using spatial index
-                if spatial_index.intersects(
-                    grid_geom.boundingBox()
-                ) and grid_geom.intersects(geom):
-                    # Create the grid feature
-                    feature = QgsFeature()
-                    feature.setGeometry(grid_geom)
-                    feature.setAttributes([feature_id])
-                    feature_batch.append(feature)
-                    feature_id += 1
+                            # Commit in batches
+                            if len(feature_batch) >= features_per_batch:
+                                provider.addFeatures(feature_batch)
+                                # gpkg_layer.updateExtents()
+                                feature_batch.clear()
+                                log_message(
+                                    f"Committed {feature_id} features to {grid_layer_name}."
+                                )
+                                gpkg_layer.commitChanges()
+                                # Reset provider to free memory
+                                # del provider
+                                # gpkg_layer = QgsVectorLayer(
+                                #    gpkg_layer_path, grid_layer_name, "ogr"
+                                # )
+                                # provider = gpkg_layer.dataProvider()
 
-                    # Commit features in batches
-                    if len(feature_batch) >= features_per_batch:
-                        provider.addFeatures(feature_batch)
-                        gpkg_layer.updateExtents()
-                        feature_batch = []
-                        QgsMessageLog.logMessage(
-                            f"Committed {feature_id} features to {grid_layer_name}.",
-                            tag="Geest",
-                            level=Qgis.Info,
-                        )
-                        # Close and reopen the dataset every 10,000 records
-                        del provider
-                        gpkg_layer = QgsVectorLayer(
-                            gpkg_layer_path, grid_layer_name, "ogr"
-                        )
-                        provider = gpkg_layer.dataProvider()
+                        # Log progress periodically
+                        cell_count += 1
+                        if cell_count % progress_log_interval == 0:
+                            progress = (cell_count / total_cells) * 100
+                            log_message(
+                                f"Processed {cell_count}/{total_cells} grid cells ({progress:.2f}% complete)."
+                            )
+                            self.setProgress(int(progress))
 
-                cell_count += 1
-                if cell_count % progress_log_interval == 0:
-                    progress = (cell_count / total_cells) * 100
-                    QgsMessageLog.logMessage(
-                        f"Processed {cell_count}/{total_cells} grid cells ({progress:.2f}% complete).",
-                        tag="Geest",
-                        level=Qgis.Info,
-                    )
-                    self.setProgress(int(progress))
-
-        # Commit any remaining features in the batch
-        if feature_batch:
-            provider.addFeatures(feature_batch)
+            # Commit any remaining features
+            if feature_batch:
+                provider.addFeatures(feature_batch)
+            gpkg_layer.commitChanges()
             gpkg_layer.updateExtents()
-            QgsMessageLog.logMessage(
-                f"Final commit: {feature_id} features written to {grid_layer_name}.",
-                tag="Geest",
-                level=Qgis.Info,
+            provider.forceReload()
+            del gpkg_layer
+            log_message(
+                f"Final commit: {feature_id} features written to {grid_layer_name}."
             )
 
-        QgsMessageLog.logMessage(
-            f"Grid creation completed. Total features written: {feature_id}.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+        except Exception as e:
+            log_message(f"Error during grid creation: {str(e)}", level=Qgis.Critical)
+            import traceback
+
+            log_message(traceback.format_exc(), level=Qgis.Critical)
+            return
+
+        log_message(f"Grid creation completed. Total features written: {feature_id}.")
 
     def create_raster_mask(
         self, geom: QgsGeometry, aligned_box: QgsRectangle, mask_name: str
@@ -753,7 +767,7 @@ class StudyAreaProcessingTask(QgsTask):
             "OUTPUT": mask_filepath,
         }
         processing.run("gdal:rasterize", params)
-        QgsMessageLog.logMessage(
+        log_message(
             f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info
         )
 
@@ -804,13 +818,13 @@ class StudyAreaProcessingTask(QgsTask):
         if not os.path.exists(study_area_dir):
             try:
                 os.makedirs(study_area_dir)
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Created study area directory: {study_area_dir}",
                     tag="Geest",
                     level=Qgis.Info,
                 )
             except Exception as e:
-                QgsMessageLog.logMessage(
+                log_message(
                     f"Error creating directory: {e}", tag="Geest", level=Qgis.Critical
                 )
 
@@ -820,7 +834,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         :param output_vrt_name: The name of the VRT file to create.
         """
-        QgsMessageLog.logMessage(
+        log_message(
             f"Creating VRT of masks '{output_vrt_name}' layer to the map.",
             tag="Geest",
             level=Qgis.Info,
@@ -830,7 +844,7 @@ class StudyAreaProcessingTask(QgsTask):
         raster_files = glob.glob(os.path.join(raster_dir, "*.tif"))
 
         if not raster_files:
-            QgsMessageLog.logMessage(
+            log_message(
                 "No raster masks found to combine into VRT.",
                 tag="Geest",
                 level=Qgis.Warning,
@@ -855,9 +869,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         # Run the gdal:buildvrt processing algorithm to create the VRT
         processing.run("gdal:buildvirtualraster", params)
-        QgsMessageLog.logMessage(
-            f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info)
 
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, "Combined Mask VRT")
@@ -865,10 +877,8 @@ class StudyAreaProcessingTask(QgsTask):
         if vrt_layer.isValid():
             # Not thread safe, use signal instead
             # QgsProject.instance().addMapLayer(vrt_layer)
-            QgsMessageLog.logMessage(
-                "Added VRT layer to the map.", tag="Geest", level=Qgis.Info
-            )
+            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
         else:
-            QgsMessageLog.logMessage(
+            log_message(
                 "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
             )
