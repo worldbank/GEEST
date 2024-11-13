@@ -23,6 +23,15 @@ from geest.gui.panels import (
 from geest.core import set_setting, setting
 from geest.utilities import resources_path, log_message
 
+INTRO_PANEL = 0
+CREDITS_PANEL = 1
+ORS_PANEL = 2
+SETUP_PANEL = 3
+OPEN_PROJECT_PANEL = 4
+CREATE_PROJECT_PANEL = 5
+TREE_PANEL = 6
+HELP_PANEL = 7
+
 
 class GeestDock(QDockWidget):
     def __init__(
@@ -55,14 +64,6 @@ class GeestDock(QDockWidget):
         self.stacked_widget: QStackedWidget = QStackedWidget()
 
         try:
-            INTRO_PANEL = 0
-            CREDITS_PANEL = 1
-            ORS_PANEL = 2
-            SETUP_PANEL = 3
-            OPEN_PROJECT_PANEL = 4
-            CREATE_PROJECT_PANEL = 5
-            TREE_PANEL = 6
-            HELP_PANEL = 7
             # Create and add the "Intro" panel (IntroPanel)
             self.intro_widget: IntroPanel = IntroPanel()
             intro_panel: QWidget = QWidget()
@@ -268,7 +269,7 @@ class GeestDock(QDockWidget):
                 os.path.join(geest_project, "model.json")
             ):
                 self.tree_widget.set_working_directory(geest_project)
-                self.stacked_widget.setCurrentIndex(5)  # Tree tab
+                self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
 
     def on_panel_changed(self, index: int) -> None:
         """
