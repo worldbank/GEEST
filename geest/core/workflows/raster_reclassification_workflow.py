@@ -62,7 +62,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-                return False
+                return
 
         self.raster_layer = QgsRasterLayer(
             layer_name, "Environmental Hazards Raster", "gdal"
@@ -252,8 +252,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
         )
         log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster_path}",
-            "Geest",
-            Qgis.Info,
+            tag="Geest",
+            level=Qgis.Info,
         )
 
         return reclassified_raster_path

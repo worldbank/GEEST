@@ -129,8 +129,12 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
         )
         self.temp_layers = []  # Store intermediate layers
-        log_message(f"Using ORS API key: {self.masked_api_key}", "Geest", Qgis.Info)
-        log_message("Multi Buffer Distances Workflow initialized", "Geest", Qgis.Info)
+        log_message(
+            f"Using ORS API key: {self.masked_api_key}", tag="Geest", level=Qgis.Info
+        )
+        log_message(
+            "Multi Buffer Distances Workflow initialized", tag="Geest", level=Qgis.Info
+        )
 
     def _process_features_for_area(
         self,
@@ -185,14 +189,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         :return: QgsVectorLayer containing the buffers as polygons.
         """
         log_message(
-            f"Using ORS API key: {self.masked_api_key}",
-            "Geest",
-            Qgis.Info,
+            f"Using ORS API key: {self.masked_api_key}", tag="Geest", level=Qgis.Info
         )
 
         # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
-        log_message(f"Creating buffers for {len(features)} points", "Geest", Qgis.Info)
+        log_message(
+            f"Creating buffers for {len(features)} points", tag="Geest", level=Qgis.Info
+        )
         total_features = len(features)
 
         # Process features in subsets to handle large datasets
@@ -207,15 +211,15 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 self.temp_layers.append(layer)
                 log_message(
                     f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
-                    "Geest",
-                    Qgis.Info,
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
 
             except Exception as e:
                 log_message(
                     f"Error processing subset {i + 1} to {min(i + self.subset_size, total_features)}: {e}",
-                    "Geest",
-                    Qgis.Critical,
+                    tag="Geest",
+                    level=Qgis.Critical,
                 )
                 continue
 
@@ -223,19 +227,19 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         if self.temp_layers:
             log_message(
                 f"Merging {len(self.temp_layers)} isochrone layers",
-                "Geest",
-                Qgis.Info,
+                tag="Geest",
+                level=Qgis.Info,
             )
             merged_layer = self._merge_layers(self.temp_layers, index)
             log_message(
                 f"Merged isochrone layer created at {merged_layer.source()}",
-                "Geest",
-                Qgis.Info,
+                tag="Geest",
+                level=Qgis.Info,
             )
             log_message(
                 f"Removing overlaps between isochrones for {merged_layer.source()}",
-                "Geest",
-                Qgis.Info,
+                tag="Geest",
+                level=Qgis.Info,
             )
             result = self._create_bands(merged_layer, index)
             return result
@@ -337,8 +341,8 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         if verbose_mode:
             log_message(
                 f"Creating isochrone layer with {len(isochrone_data['features'])} features",
-                "Geest",
-                Qgis.Info,
+                tag="Geest",
+                level=Qgis.Info,
             )
         features = []
         for feature_data in isochrone_data["features"]:
@@ -493,9 +497,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         )
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
         log_message(
-            f"Multi-buffer layer created at {output_path}",
-            "Geest",
-            Qgis.Info,
+            f"Multi-buffer layer created at {output_path}", tag="Geest", level=Qgis.Info
         )
         return final_layer
 
@@ -514,18 +516,18 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         # Check if the "value" field already exists
         field_names = [field.name() for field in layer.fields()]
-        log_message(f"Field names: {field_names}", "Geest", Qgis.Info)
+        log_message(f"Field names: {field_names}", tag="Geest", level=Qgis.Info)
         if "value" not in field_names:
-            log_message("Adding 'value' field to input layer", "Geest", Qgis.Info)
+            log_message(
+                "Adding 'value' field to input layer", tag="Geest", level=Qgis.Info
+            )
             # Add the burn field to the input layer if it doesn't exist
             layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             layer.updateFields()
 
             # Log message when the field is added
             log_message(
-                'Added "value" field to input layer',
-                "Geest",
-                Qgis.Info,
+                'Added "value" field to input layer', tag="Geest", level=Qgis.Info
             )
 
         # Calculate the burn field value based on the item number in the distance list
@@ -538,8 +540,8 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
                 distance_field_index = self.distances.index(distance_field_value)
                 log_message(
                     f"Found {distance_field_value} at index {distance_field_index}",
-                    "Geest",
-                    Qgis.Info,
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
                 # The list should have max 5 values in it. If the index is greater than 5, set it to 5
                 distance_field_index = min(distance_field_index, 5)
@@ -575,8 +577,8 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         }
         log_message(
             f"Reprojecting input layer to {self.target_crs.authid()}",
-            "Geest",
-            Qgis.Info,
+            tag="Geest",
+            level=Qgis.Info,
         )
         reprojected_layer_result = processing.run(
             "native:reprojectlayer", transform_params

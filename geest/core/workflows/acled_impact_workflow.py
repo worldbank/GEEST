@@ -287,12 +287,12 @@ class AcledImpactWorkflow(WorkflowBase):
 
         overlay_analysis(qgis_vector_layer)
         """
-        log_message("Overlay analysis started", "Geest", Qgis.Info)
+        log_message("Overlay analysis started", tag="Geest", level=Qgis.Info)
         # Step 1: Load the input layer from the provided shapefile path
         # layer = QgsVectorLayer(input_filepath, "circles_layer", "ogr")
 
         if not input_layer.isValid():
-            log_message("Layer failed to load!", "Geest", Qgis.Info)
+            log_message("Layer failed to load!", tag="Geest", level=Qgis.Info)
             return
 
         # Step 2: Create a memory layer to store the result
@@ -383,8 +383,8 @@ class AcledImpactWorkflow(WorkflowBase):
         if error[0] == 0:
             log_message(
                 f"Overlay analysis complete, output saved to {full_output_filepath}",
-                "Geest",
-                Qgis.Info,
+                tag="Geest",
+                level=Qgis.Info,
             )
         else:
             raise QgsProcessingException(

@@ -229,6 +229,9 @@ class GeestDock(QDockWidget):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+            import traceback
+
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def paintEvent(self, event):
         with QPainter(self) as painter:

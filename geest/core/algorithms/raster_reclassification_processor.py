@@ -177,8 +177,8 @@ class RasterReclassificationProcessor:
         )
         log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
-            "Geest",
-            Qgis.Info,
+            tag="Geest",
+            level=Qgis.Info,
         )
 
         return reclassified_raster

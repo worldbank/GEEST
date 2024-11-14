@@ -12,6 +12,7 @@ from qgis.PyQt.QtCore import (
     QAbstractItemModel,
     QModelIndex,
     Qt,
+    pyqtSignal,
 )
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QTreeView, QMessageBox
@@ -22,6 +23,10 @@ from geest.core import JsonTreeItem
 
 
 class JsonTreeModel(QAbstractItemModel):
+    collapseNodeRequested = pyqtSignal(
+        object
+    )  # Signal to notify the view to collapse a node
+
     """
     A custom tree model for managing hierarchical JSON data in a QTreeView, including an "Analysis" root item
     under which Dimensions, Factors, and Indicators are stored. Each tree item has attributes that store custom
@@ -234,11 +239,6 @@ class JsonTreeModel(QAbstractItemModel):
             visible (bool): Whether to show or hide the indicator nodes.
             parent_item (JsonTreeItem): Optional parent item to start from. If None, start from root.
         """
-        # log_message(
-        #    f"Toggling item visibility for item (was {visible})",
-        #    tag="Geest",
-        #    level=Qgis.Info,
-        # )
 
         parent_item = parent_item if parent_item else self.rootItem
         for i in range(parent_item.childCount()):
@@ -717,24 +717,54 @@ class JsonTreeView(QTreeView):
         self.current_editing_index = None
         self.current_editing_index = None
 
-    def toggle_indicator_nodes(self):
-        """Toggles visibility of all indicator nodes."""
-        indicators_visible = self._indicators_visible()
-        self.model().toggle_indicator_visibility(not indicators_visible)
-        # log_message(
-        #    f"Toggled indicator nodes (was {indicators_visible})",
-        #    tag="Geest",
-        #    level=Qgis.Info,
-        # )
+    def setModel(self, model: QAbstractItemModel):
+        """
+        Override setModel to connect signals after setting the model.
 
-    def _indicators_visible(self):
-        """Checks if indicators are currently visible."""
+        Args:
+            model (QAbstractItemModel): The model to set for the tree view.
+        """
+        super().setModel(model)
+        # Connect the collapseNodeRequested signal after setting the model
+        model.collapseNodeRequested.connect(self.collapse_node_in_view)
+
+    def collapse_single_nodes(self, parent_item=None):
+        """
+        Collapses nodes with only one child, streamlining the view by hiding extra details.
+
+        Args:
+            parent_item (JsonTreeItem): The starting item for collapsing; defaults to the root.
+        """
+        model = self.model()
+        parent_item = parent_item if parent_item else model.get_analysis_item()
+        for i in range(parent_item.childCount()):
+            child_item = parent_item.child(i)
+            # Collapse factor nodes with only one child
+            if child_item.role == "factor" and child_item.childCount() == 1:
+                index = model.itemIndex(child_item)
+                if index.isValid():
+                    self.setExpanded(index, False)
+            else:
+                # Recursively handle other nodes
+                self.collapse_single_nodes(child_item)
+
+    def collapse_node_in_view(self, item):
+        index = self.treeView.model().indexFromItem(item)
+        self.treeView.setExpanded(index, False)
+
+    def toggle_only_child_indicator_nodes(self):
+        """Toggles visibility of indicator nodes if it has no siblings."""
+        indicators_visible = self._indicators_only_child()
+        self.model().toggle_indicator_visibility(not indicators_visible)
+
+    def _indicators_only_child(self):
+        """Checks if indicators are currently the only one under the parent."""
         model = self.model()
         analysis_item = model.get_analysis_item()
         for dimension in analysis_item.childItems:
             for factor in dimension.childItems:
                 for indicator in factor.childItems:
-                    return indicator.is_visible()
+                    return indicator.is_only_child()
         return True
 
     def edit(self, index, trigger, event):

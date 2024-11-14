@@ -44,7 +44,9 @@ class BaseConfigurationWidget(QRadioButton):
         try:
             self.add_internal_widgets()
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
 
         # Connect toggled signal to enable/disable internal widgets
         self.toggled.connect(self.on_toggled)
@@ -88,10 +90,12 @@ class BaseConfigurationWidget(QRadioButton):
                     # to avoid breaking the datasource widget logic.
                     data = self.attributes
                 data["analysis_mode"] = self.analysis_mode
-                log_message(f"Data changed: {data}", "Geest")
+                log_message(f"Data changed: {data}", tag="Geest", level=Qgis.Info)
                 self.data_changed.emit(data)
             except Exception as e:
-                log_message(f"Error in update_data: {e}", "Geest")
+                log_message(
+                    f"Error in update_data: {e}", tag="Geest", level=Qgis.Critical
+                )
 
     def on_toggled(self, checked: bool) -> None:
         """
