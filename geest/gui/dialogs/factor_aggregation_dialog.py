@@ -224,6 +224,9 @@ class FactorAggregationDialog(QDialog):
             self.table.setItem(row, 3, guid_item)
 
         self.validate_weightings()  # Initial validation check
+        # If we dont have the weightings column, we can enable the OK button
+        if not self.weighting_column_visible:
+            self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
     def toggle_guid_column(self):
         """Toggle the visibility of the GUID column."""

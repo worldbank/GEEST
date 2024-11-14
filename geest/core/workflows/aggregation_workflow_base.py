@@ -185,6 +185,8 @@ class AggregationWorkflowBase(WorkflowBase):
             list: List of found raster file paths.
         """
         raster_files = []
+        if self.guids is None:
+            raise ValueError("No GUIDs provided for aggregation")
 
         for guid in self.guids:
 
@@ -245,8 +247,6 @@ class AggregationWorkflowBase(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        log_message(f"ID: {self.id}", tag="Geest", level=Qgis.Info)
-
         raster_files = self.get_raster_list(index)
 
         if not raster_files or not isinstance(raster_files, list):

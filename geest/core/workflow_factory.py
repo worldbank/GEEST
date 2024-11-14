@@ -88,9 +88,7 @@ class WorkflowFactory:
                     item, cell_size_m, feedback, context
                 )
             elif analysis_mode == "analysis_aggregation":
-                return AnalysisAggregationWorkflow(
-                    item, cell_size_m, cell_size_m, feedback, context
-                )
+                return AnalysisAggregationWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_csv_to_point_layer":
                 return AcledImpactWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_classify_poly_into_classes":

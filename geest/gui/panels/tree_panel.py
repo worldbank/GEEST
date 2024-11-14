@@ -24,9 +24,16 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal
-from qgis.PyQt.QtGui import QMovie
-from qgis.PyQt.QtCore import pyqtSlot, QPoint, Qt, QSettings, pyqtSignal, QModelIndex
+from qgis.PyQt.QtCore import (
+    pyqtSlot,
+    QPoint,
+    Qt,
+    QSettings,
+    pyqtSignal,
+    QModelIndex,
+    QTimer,
+    QPersistentModelIndex,
+)
 from qgis.PyQt.QtGui import QMovie
 from qgis.core import (
     Qgis,
@@ -953,16 +960,8 @@ class TreePanel(QWidget):
         Slot for handling when a workflow starts.
         Update the tree item to indicate that the workflow is running.
         """
-        # Now set up an animated icon
+        # Get the node index for the item
         node_index = self.model.itemIndex(item)
-        parent_second_column_index = None
-        if item.role == "indicator":
-            # Show an animation on its parent too
-            parent_index = node_index.parent()
-            parent_second_column_index = self.model.index(
-                parent_index.row(), 1, parent_index.parent()
-            )
-
         if not node_index.isValid():
             log_message(
                 f"Failed to find index for item {item} - animation not started",
@@ -970,30 +969,62 @@ class TreePanel(QWidget):
                 level=Qgis.Warning,
             )
             return
-        # Set an animated icon (using a QLabel and QMovie to simulate animation)
-        self.movie = QMovie(
-            resources_path("resources", "throbber.gif")
-        )  # Use a valid path to an animated gif
-        row_height = self.treeView.rowHeight(
-            node_index
-        )  # Get the height of the current row
-        self.movie.setScaledSize(
-            self.movie.currentPixmap()
+
+        # Ensure we work with QModelIndex instead of QPersistentModelIndex
+        child_index = QModelIndex(node_index)
+
+        # Get row height and prepare movies
+        row_height = self.treeView.rowHeight(child_index)
+        self.child_movie = QMovie(resources_path("resources", "throbber.gif"))
+        self.parent_movie = QMovie(resources_path("resources", "throbber.gif"))
+
+        # Scale movies
+        self.child_movie.setScaledSize(
+            self.child_movie.currentPixmap()
+            .size()
+            .scaled(row_height, row_height, Qt.KeepAspectRatio)
+        )
+        self.parent_movie.setScaledSize(
+            self.parent_movie.currentPixmap()
             .size()
             .scaled(row_height, row_height, Qt.KeepAspectRatio)
         )
 
-        label = QLabel()
-        label.setMovie(self.movie)
-        self.movie.start()
+        # Set animated icon for the child
+        child_label = QLabel()
+        child_label.setMovie(self.child_movie)
+        self.child_movie.start()
 
-        # Set the animated icon in the second column of the node
-        second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
-        self.treeView.setIndexWidget(second_column_index, label)
-        if parent_second_column_index:
-            parent_label = QLabel()
-            parent_label.setMovie(self.movie)
-            self.treeView.setIndexWidget(parent_second_column_index, parent_label)
+        # Place child animation
+        second_column_index = self.model.index(
+            child_index.row(), 1, child_index.parent()
+        )
+        self.treeView.setIndexWidget(second_column_index, child_label)
+
+        # Always show parent animation if this is an indicator
+        if item.role == "indicator":
+            parent_item = item.parent()
+            if parent_item:
+                parent_index = self.model.itemIndex(parent_item)
+                if parent_index.isValid():
+                    # Create parent animation
+                    parent_label = QLabel()
+                    parent_label.setMovie(self.parent_movie)
+                    self.parent_movie.start()
+
+                    # Get parent's second column index
+                    parent_second_column_index = self.model.index(
+                        parent_index.row(), 1, parent_index.parent()
+                    )
+
+                    # Set parent animation and ensure it's visible
+                    self.treeView.setIndexWidget(
+                        parent_second_column_index, parent_label
+                    )
+                    parent_label.show()
+
+                    # Force immediate update
+                    self.treeView.viewport().update()
 
     def task_progress_updated(self, progress):
         """Slot to be called when the task progress is updated."""
@@ -1030,7 +1061,8 @@ class TreePanel(QWidget):
                 parent_index.row(), 1, parent_index.parent()
             )
 
-        self.movie.stop()
+        self.child_movie.stop()
+        self.parent_movie.stop()
 
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, None)
