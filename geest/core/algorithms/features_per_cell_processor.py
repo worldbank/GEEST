@@ -119,8 +119,8 @@ def select_grid_cells(
     request = QgsFeatureRequest().setFilterFids(list(grid_feature_counts.keys()))
     log_message(
         f"Looping over {len(grid_feature_counts.keys())} grid polygons",
-        "Geest",
-        Qgis.Info,
+        tag="Geest",
+        level=Qgis.Info,
     )
     counter = 0
     for grid_feature in grid_layer.getFeatures(request):
