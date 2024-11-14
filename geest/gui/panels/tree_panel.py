@@ -181,12 +181,6 @@ class TreePanel(QWidget):
         self.model_button.clicked.connect(self.switch_model)
         # button_bar.addWidget(self.model_button)
 
-        self.toggle_visibility_button = QPushButton("👁️", self)
-        self.toggle_visibility_button.clicked.connect(
-            self.treeView.toggle_indicator_nodes
-        )
-        button_bar.addWidget(self.toggle_visibility_button)
-
         self.clear_button = QPushButton("Clear", self)
         self.clear_button.clicked.connect(self.clear_button_clicked)
         button_bar.addWidget(self.clear_button)
@@ -354,6 +348,8 @@ class TreePanel(QWidget):
             self.load_json()
             self.model.loadJsonData(self.json_data)
             self.treeView.expandAll()
+        # Collapse any factors that have only a single indicator
+        self.treeView.collapse_single_nodes()
 
     @pyqtSlot()
     def set_working_directory(self, working_directory):
