@@ -87,10 +87,14 @@ def get_ui_class(ui_file):
     return uic.loadUiType(ui_file_path)[0]
 
 
-def log_message(message: str, level: int = Qgis.Info, tag: str = "Geest") -> None:
-    """Logs a message to both QgsMessageLog and a text file, including the caller's class or module name and line number."""
+def log_message(
+    message: str, level: int = Qgis.Info, tag: str = "Geest", force: bool = False
+) -> None:
+    """
+    Logs a message to both QgsMessageLog and a text file,
+    including the caller's class or module name and line number."""
     verbose_mode = setting(key="verbose_mode", default=0)
-    if not verbose_mode:
+    if not verbose_mode and not force:
         return
     # Retrieve caller information
     caller_frame = inspect.stack()[1]

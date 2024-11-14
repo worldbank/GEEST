@@ -19,7 +19,7 @@ __revision__ = "$Format:%H$"
 # ---------------------------------------------------------------------
 
 import os
-import time
+import datetime
 from typing import Optional
 
 from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal
@@ -35,7 +35,7 @@ from qgis.core import Qgis, QgsProject
 
 # Import your plugin components here
 from .core import setting  # , JSONValidator
-from .utilities import resources_path
+from .utilities import resources_path, log_message
 from .gui import GeestOptionsFactory, GeestDock
 import datetime
 import logging
@@ -45,13 +45,21 @@ import tempfile
 # use log_message instead of QgsMessageLog.logMessage everywhere please....
 temp_dir = tempfile.gettempdir()
 # Use a timestamp to ensure unique log file names
-datestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+datestamp = datetime.datetime.now().strftime("%Y%m%d")
 log_file_path = os.path.join(temp_dir, f"geest_logfile_{datestamp}.log")
 logging.basicConfig(
     filename=log_file_path,
     filemode="a",  # Append mode
     format="%(asctime)s [%(levelname)s] %(message)s",
     level=logging.DEBUG,
+)
+date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+log_message(
+    f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", tag="Geest", level=Qgis.Info, force=True
+)
+log_message(f"Geest2 started at {date}", tag="Geest", level=Qgis.Info, force=True)
+log_message(
+    f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", tag="Geest", level=Qgis.Info, force=True
 )
 
 
