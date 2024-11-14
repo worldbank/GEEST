@@ -909,6 +909,13 @@ class TreePanel(QWidget):
         self.items_to_run = 0
         self.run_only_incomplete = False
 
+        for i in range(item.childCount()):
+            child_item = item.child(i)
+            if child_item.attribute("result_file", None) and self.run_only_incomplete:
+                self.queue_workflow_task(child_item, child_item.role)
+            elif not self.run_only_incomplete:
+                self.queue_workflow_task(child_item, child_item.role)
+
         self.queue_workflow_task(item, role)
         self._count_workflows_to_run(item)
 

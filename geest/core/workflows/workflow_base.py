@@ -399,7 +399,7 @@ class WorkflowBase(ABC):
         if self.features_layer.crs() != self.target_crs:
             log_message(
                 f"Reprojecting layer from {self.features_layer.crs().authid()} to {self.target_crs.authid()}",
-                "Geest",
+                tag="Geest",
                 level=Qgis.Info,
             )
             reproject_result = processing.run(
@@ -457,10 +457,12 @@ class WorkflowBase(ABC):
             f"{self.layer_id}_{index}.tif",
         )
         if not input_layer.isValid():
-            log_message(f"Layer failed to load! {input_layer}", "Geest", Qgis.Info)
+            log_message(
+                f"Layer failed to load! {input_layer}", tag="Geest", level=Qgis.Info
+            )
             return
         else:
-            log_message(f"Rasterizing {input_layer}", "Geest", Qgis.Info)
+            log_message(f"Rasterizing {input_layer}", tag="Geest", level=Qgis.Info)
 
         # Ensure resolution parameters are properly formatted as float values
         x_res = self.cell_size_m  # pixel size in X direction
@@ -491,9 +493,7 @@ class WorkflowBase(ABC):
         log_message(f"Rasterize Parameter: {params}", tag="Geest", level=Qgis.Info)
 
         log_message(
-            f"Rasterize complete for: {output_path}",
-            tag="Geest",
-            level=Qgis.Info,
+            f"Rasterize complete for: {output_path}", tag="Geest", level=Qgis.Info
         )
 
         log_message(f"Created raster: {output_path}", tag="Geest", level=Qgis.Info)

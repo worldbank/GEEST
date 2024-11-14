@@ -89,11 +89,7 @@ class WorkflowJob(QgsTask):
                 level=Qgis.Info,
             )
             attributes = self._item.attributes()
-            log_message(
-                f"{attributes}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
+            log_message(f"{attributes}", tag="Geest", level=Qgis.Info)
             if result:
                 log_message(
                     f"Workflow {self.description()} completed.",
@@ -112,6 +108,13 @@ class WorkflowJob(QgsTask):
         except Exception as e:
             log_message(
                 f"Error during task execution: {e}", tag="Geest", level=Qgis.Critical
+            )
+            import traceback
+
+            log_message(
+                f"{traceback.format_exc()}",
+                tag="Geest",
+                level=Qgis.Critical,
             )
             return False
 
