@@ -17,7 +17,7 @@ class FactorConfigurationWidget(QWidget):
     configuration options.
     """
 
-    data_changed = pyqtSignal()
+    selection_changed = pyqtSignal()  # New signal for selection changes
 
     def __init__(self, item: JsonTreeItem, guids: list) -> None:
         """
@@ -39,6 +39,8 @@ class FactorConfigurationWidget(QWidget):
         self.attributes = attributes
         self.layout: QVBoxLayout = QVBoxLayout()
         self.button_group: QButtonGroup = QButtonGroup(self)
+        # Connect the button group's buttonClicked signal to the selection change handler
+        self.button_group.buttonClicked.connect(self.on_selection_changed)
 
         try:
             self.create_radio_buttons(attributes)
@@ -95,9 +97,22 @@ class FactorConfigurationWidget(QWidget):
             default_radio = self.button_group.buttons()[0]
             default_radio.setChecked(True)
 
+    def on_selection_changed(self, button) -> None:
+        """
+        Slot called when the selection in the radio button group changes.
+        Emits the selection_changed signal.
+        :param button: The button that was clicked.
+        """
+        log_message(
+            "Radio button selection changed",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        self.selection_changed.emit()
+
     def update_attributes(self, new_data: dict) -> None:
         """
-        Updates the attributes dictionary with new data from radio buttons.
+        Updates the attributes dictionary with new data from the selected radio button.
         """
         # In the ctor of the widget factor we humanise the name
         # now we roll it back to the snake case version so it matches keys
@@ -123,5 +138,3 @@ class FactorConfigurationWidget(QWidget):
         for guid in self.guids:
             indicator = self.item.getItemByGuid(guid)
             indicator.attributes().update(changed_attributes)
-
-        self.data_changed.emit()

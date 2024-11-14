@@ -33,12 +33,9 @@ class DataSourceWidgetFactory:
         verbose_mode = int(setting(key="verbose_mode", default=0))
 
         if verbose_mode:
-
-            log_message("----------------------------", tag="Geest", level=Qgis.Info)
-            log_message(f"Key: {widget_key}", tag="Geest", level=Qgis.Info)
-            log_message(f"Value: {value}", tag="Geest", level=Qgis.Info)
-            log_message("----------------------------", tag="Geest", level=Qgis.Info)
-
+            log_message(
+                f"Key: {widget_key} Value: {value}", tag="Geest", level=Qgis.Info
+            )
         try:
             # remove "use_" from start of widget key for passing to the datasource widget where needed
             cleaned_key = widget_key[4:]
