@@ -929,9 +929,9 @@ class TreePanel(QWidget):
     def on_workflow_created(self, item):
         """
         Slot for handling when a workflow is created.
-        Update the tree item to indicate that the workflow is queued.
+        Does nothing right now...
         """
-        self.update_tree_item_status(item, "Q")
+        pass
 
     @pyqtSlot()
     def on_workflow_started(self, item):
@@ -939,10 +939,15 @@ class TreePanel(QWidget):
         Slot for handling when a workflow starts.
         Update the tree item to indicate that the workflow is running.
         """
-        # This is just a fall back in case our animation fails...
-        self.update_tree_item_status(item, "R")
         # Now set up an animated icon
         node_index = self.model.itemIndex(item)
+        parent_second_column_index = None
+        if item.role == "indicator":
+            # Show an animation on its parent too
+            parent_index = node_index.parent()
+            parent_second_column_index = self.model.index(
+                parent_index.row(), 1, parent_index.parent()
+            )
 
         if not node_index.isValid():
             log_message(
@@ -951,8 +956,6 @@ class TreePanel(QWidget):
                 level=Qgis.Warning,
             )
             return
-        # Set it blank again as we will show our animation in this space
-        self.update_tree_item_status(item, "")
         # Set an animated icon (using a QLabel and QMovie to simulate animation)
         self.movie = QMovie(
             resources_path("resources", "throbber.gif")
@@ -973,6 +976,10 @@ class TreePanel(QWidget):
         # Set the animated icon in the second column of the node
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, label)
+        if parent_second_column_index:
+            parent_label = QLabel()
+            parent_label.setMovie(self.movie)
+            self.treeView.setIndexWidget(parent_second_column_index, parent_label)
 
     def task_progress_updated(self, progress):
         """Slot to be called when the task progress is updated."""
@@ -1000,9 +1007,22 @@ class TreePanel(QWidget):
                 level=Qgis.Warning,
             )
             return
+
+        parent_second_column_index = None
+        if item.role == "indicator":
+            # Show an animation on its parent too
+            parent_index = node_index.parent()
+            parent_second_column_index = self.model.index(
+                parent_index.row(), 1, parent_index.parent()
+            )
+
         self.movie.stop()
+
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, None)
+        if parent_second_column_index:
+            self.treeView.setIndexWidget(parent_second_column_index, None)
+
         # Emit dataChanged to refresh the decoration
         self.model.dataChanged.emit(second_column_index, second_column_index)
 
