@@ -221,6 +221,10 @@ class JsonTreeItem:
                 return "Configured, not run"
             if "Workflow Completed" not in data.get("result", ""):
                 return "Workflow failed"
+            if "Workflow Completed" in data.get("result", "") and not data.get(
+                "result_file", ""
+            ):
+                return "Workflow failed"
             if "Workflow Completed" in data.get("result", ""):
                 return "Completed successfully"
             return "WRITE TOOL TIP"

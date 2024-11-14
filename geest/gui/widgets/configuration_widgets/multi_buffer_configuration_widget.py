@@ -5,6 +5,8 @@ from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLineEdit,
 )
+from qgis.PyQt.QtGui import QColor
+
 from qgis.core import Qgis
 from .base_configuration_widget import BaseConfigurationWidget
 from geest.utilities import log_message
@@ -79,6 +81,11 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.driving_radio.toggled.connect(self.update_data)
             self.increments_input.textChanged.connect(self.update_data)
 
+            # Connect the validation method to radio buttons to revalidate on state change
+            self.time_radio.toggled.connect(self.validate_increments_input)
+            self.distance_radio.toggled.connect(self.validate_increments_input)
+            self.increments_input.textChanged.connect(self.validate_increments_input)
+
         except Exception as e:
             log_message(
                 f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
@@ -86,6 +93,67 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             import traceback
 
             log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+
+    def validate_increments_input(self) -> bool:
+        """
+        Validates the increments input line edit.
+        Ensures it is a comma-separated list of unique, non-negative numbers.
+        If the units are set to time, ensures no number is greater than 3600.
+        Provides tooltips for specific violations.
+        """
+        input_text = self.increments_input.text().strip()
+
+        # Reset tool tip and border style for each validation check
+        self.increments_input.setToolTip("")
+        self.increments_input.setStyleSheet("")
+
+        if not input_text:
+            tooltip_text = (
+                "Input cannot be empty. Please enter a comma-separated list of numbers."
+            )
+            self.increments_input.setToolTip(tooltip_text)
+            self.increments_input.setStyleSheet("border: 1px solid red")
+            return False
+
+        try:
+            # Parse and validate each entry
+            values = [float(value.strip()) for value in input_text.split(",")]
+
+            # Check for negative values
+            if any(value < 0 for value in values):
+                tooltip_text = "Negative values are not allowed in travel increments."
+                self.increments_input.setToolTip(tooltip_text)
+                self.increments_input.setStyleSheet("border: 1px solid red")
+                return False
+
+            # Check for duplicate values
+            if len(values) != len(set(values)):
+                tooltip_text = "Duplicate values are not allowed in travel increments."
+                self.increments_input.setToolTip(tooltip_text)
+                self.increments_input.setStyleSheet("border: 1px solid red")
+                return False
+
+            # Check for values greater than 3600 if in time mode
+            if self.time_radio.isChecked() and any(value > 3600 for value in values):
+                tooltip_text = (
+                    "Values greater than 3600 are not allowed for time units."
+                )
+                self.increments_input.setToolTip(tooltip_text)
+                self.increments_input.setStyleSheet("border: 1px solid red")
+                return False
+
+            # If all checks pass, set border to green and clear the tooltip
+            self.increments_input.setStyleSheet("border: 1px solid green")
+            self.increments_input.setToolTip("All values are valid.")
+            return True
+
+        except ValueError:
+            tooltip_text = (
+                "Invalid entry. Please enter a comma-separated list of numbers."
+            )
+            self.increments_input.setToolTip(tooltip_text)
+            self.increments_input.setStyleSheet("border: 1px solid red")
+            return False
 
     def get_data(self) -> dict:
         """

@@ -187,8 +187,31 @@ class AggregationWorkflowBase(WorkflowBase):
         raster_files = []
 
         for guid in self.guids:
+
             item = self.item.getItemByGuid(guid)
+            status = item.getStatus() == "Completed successfully"
+            mode = item.attributes().get("analysis_mode", "do_not_use") == "do_not_use"
             id = item.attribute("id").lower()
+            if not status and not mode:
+                raise ValueError(
+                    f"{id} is not completed successfully and is not set to 'do_not_use'"
+                )
+
+            if mode:
+                log_message(
+                    f"Skipping {item.attribute('id')} as it is set to 'do_not_use'",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                continue
+            if not item.attribute("result_file", ""):
+                log_message(
+                    f"Skipping {id} as it has no result file",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+                raise ValueError(f"{id} has no result file")
+
             layer_folder = os.path.dirname(item.attribute("result_file", ""))
             path = os.path.join(
                 self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"

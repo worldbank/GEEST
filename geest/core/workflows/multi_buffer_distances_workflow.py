@@ -244,7 +244,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             result = self._create_bands(merged_layer, index)
             return result
         else:
-            log_message("No isochrones were created.", "Geest", Qgis.Warning)
+            log_message("No isochrones were created.", tag="Geest", level=Qgis.Warning)
             return False
 
     def _create_subset_layer(self, subset_features, point_layer):
