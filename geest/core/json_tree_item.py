@@ -58,6 +58,12 @@ class JsonTreeItem:
         """Returns the visibility status of this item."""
         return self._visible
 
+    def is_only_child(self) -> bool:
+        """Returns the only child status of this item."""
+        siblings_count = len(self.parentItem.childItems)
+        if siblings_count == 1:
+            return True
+
     def internalPointer(self):
         """Returns a reference to itself, or any unique identifier for the item."""
         return self.guid
