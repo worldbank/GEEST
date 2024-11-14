@@ -129,8 +129,9 @@ class FactorAggregationDialog(QDialog):
         self.table = QTableWidget(self)
         self.populate_table()
 
-        configuration_widget.data_changed.connect(self.populate_table)
-
+        # Update the table when the seleected radio button is changed
+        # in the configuration widget changes
+        configuration_widget.selection_changed.connect(self.populate_table)
         layout.addWidget(self.table)
 
         # QDialogButtonBox setup for OK and Cancel
