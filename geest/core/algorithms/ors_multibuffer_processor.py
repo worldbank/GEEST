@@ -329,8 +329,8 @@ class ORSMultiBufferProcessor:
                 self.temp_layers.append(layer)
                 log_message(
                     f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
-                    "Geest",
-                    Qgis.Info,
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
 
             except Exception as e:
@@ -690,8 +690,8 @@ class ORSMultiBufferProcessor:
                 distance_field_index = self.distance_list.index(distance_field_value)
                 log_message(
                     f"Found {distance_field_value} at index {distance_field_index}",
-                    "Geest",
-                    Qgis.Info,
+                    tag="Geest",
+                    level=Qgis.Info,
                 )
                 # The list should have max 5 values in it. If the index is greater than 5, set it to 5
                 distance_field_index = min(distance_field_index, 5)

@@ -1007,9 +1007,22 @@ class TreePanel(QWidget):
                 level=Qgis.Warning,
             )
             return
+
+        parent_second_column_index = None
+        if item.role == "indicator":
+            # Show an animation on its parent too
+            parent_index = node_index.parent()
+            parent_second_column_index = self.model.index(
+                parent_index.row(), 1, parent_index.parent()
+            )
+
         self.movie.stop()
+
         second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
         self.treeView.setIndexWidget(second_column_index, None)
+        if parent_second_column_index:
+            self.treeView.setIndexWidget(parent_second_column_index, None)
+
         # Emit dataChanged to refresh the decoration
         self.model.dataChanged.emit(second_column_index, second_column_index)
 
