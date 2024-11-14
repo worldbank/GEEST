@@ -252,8 +252,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
         )
         log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster_path}",
-            "Geest",
-            Qgis.Info,
+            tag="Geest",
+            level=Qgis.Info,
         )
 
         return reclassified_raster_path

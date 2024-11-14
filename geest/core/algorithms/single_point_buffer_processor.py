@@ -280,10 +280,12 @@ class SinglePointBufferProcessor:
             f"{self.output_prefix}_buffered_{index}.tif",
         )
         if not input_layer.isValid():
-            log_message(f"Layer failed to load! {input_layer}", "Geest", Qgis.Info)
+            log_message(
+                f"Layer failed to load! {input_layer}", tag="Geest", level=Qgis.Info
+            )
             return
         else:
-            log_message(f"Rasterizing {input_layer}", "Geest", Qgis.Info)
+            log_message(f"Rasterizing {input_layer}", tag="Geest", level=Qgis.Info)
 
         # Ensure resolution parameters are properly formatted as float values
         x_res = self.cell_size_m  # pixel size in X direction
@@ -314,9 +316,7 @@ class SinglePointBufferProcessor:
         log_message(f"Rasterize Parameter: {params}", tag="Geest", level=Qgis.Info)
 
         log_message(
-            f"Rasterize complete for: {output_path}",
-            tag="Geest",
-            level=Qgis.Info,
+            f"Rasterize complete for: {output_path}", tag="Geest", level=Qgis.Info
         )
 
         log_message(f"Created raster: {output_path}", tag="Geest", level=Qgis.Info)

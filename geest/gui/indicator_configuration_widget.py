@@ -72,5 +72,5 @@ class IndicatorConfigurationWidget(QWidget):
         # log_message(
         #    f"Updated attributes dictionary: {self.attributes}",
         #    "Geest",
-        #    level=Qgis.Info,
+        #    level=Qgis.Info
         # )

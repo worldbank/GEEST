@@ -302,19 +302,19 @@ class ORSMultiBufferProcessor:
         :return: QgsVectorLayer containing the buffers as polygons.
         """
         log_message(
-            f"Using ORS API key: {self.masked_api_key}",
-            "Geest",
-            Qgis.Info,
+            f"Using ORS API key: {self.masked_api_key}", tag="Geest", level=Qgis.Info
         )
         log_message(
             f"Creating buffers for {point_layer.name()} in {output_path}",
-            "Geest",
-            Qgis.Info,
+            tag="Geest",
+            level=Qgis.Info,
         )
 
         # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
-        log_message(f"Creating buffers for {len(features)} points", "Geest", Qgis.Info)
+        log_message(
+            f"Creating buffers for {len(features)} points", tag="Geest", level=Qgis.Info
+        )
         total_features = len(features)
 
         # Process features in subsets to handle large datasets
@@ -622,11 +622,9 @@ class ORSMultiBufferProcessor:
         )
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
         log_message(
-            f"Multi-buffer layer created at {output_path}",
-            "Geest",
-            Qgis.Info,
+            f"Multi-buffer layer created at {output_path}", tag="Geest", level=Qgis.Info
         )
-        log_message(f"Layer written to {output_path}", "Geest", Qgis.Info)
+        log_message(f"Layer written to {output_path}", tag="Geest", level=Qgis.Info)
         return output_path
 
     def rasterize(
@@ -649,9 +647,7 @@ class ORSMultiBufferProcessor:
             str: The path to the rasterized output.
         """
         log_message(
-            f"Rasterizing {input_path} to {output_path}",
-            "Geest",
-            Qgis.Info,
+            f"Rasterizing {input_path} to {output_path}", tag="Geest", level=Qgis.Info
         )
 
         if not input_path:
@@ -668,9 +664,11 @@ class ORSMultiBufferProcessor:
 
         # Check if the "value" field already exists
         field_names = [field.name() for field in input_layer.fields()]
-        log_message(f"Field names: {field_names}", "Geest", Qgis.Info)
+        log_message(f"Field names: {field_names}", tag="Geest", level=Qgis.Info)
         if "value" not in field_names:
-            log_message("Adding 'value' field to input layer", "Geest", Qgis.Info)
+            log_message(
+                "Adding 'value' field to input layer", tag="Geest", level=Qgis.Info
+            )
             # Add the burn field to the input layer if it doesn't exist
             input_layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             input_layer.updateFields()
@@ -714,8 +712,8 @@ class ORSMultiBufferProcessor:
         }
         log_message(
             f"Reprojecting input layer to {self.target_crs.authid()}",
-            "Geest",
-            Qgis.Info,
+            tag="Geest",
+            level=Qgis.Info,
         )
         reprojected_layer_result = processing.run(
             "native:reprojectlayer", transform_params
@@ -755,7 +753,9 @@ class ORSMultiBufferProcessor:
         if not verbose_mode:
             log_message(str(params), tag="Geest", level=Qgis.Info)
         result = processing.run("gdal:rasterize", params)
-        log_message(f"Rasterized output saved to {output_path}", "Geest", Qgis.Info)
+        log_message(
+            f"Rasterized output saved to {output_path}", tag="Geest", level=Qgis.Info
+        )
         return output_path
 
     def _mask_raster(

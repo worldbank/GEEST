@@ -103,7 +103,9 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
                 log_message(error_message, "Geest", Qgis.Critical)
                 QMessageBox.critical(self, "Invalid CSV", error_message)
             else:
-                log_message("CSV file validation successful.", "Geest", Qgis.Info)
+                log_message(
+                    "CSV file validation successful.", tag="Geest", level=Qgis.Info
+                )
                 QMessageBox.information(
                     self, "Valid CSV", "The selected CSV file is valid."
                 )
