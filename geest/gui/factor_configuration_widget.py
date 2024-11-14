@@ -54,6 +54,7 @@ class FactorConfigurationWidget(QWidget):
             tag="Geest",
             level=Qgis.Info,
         )
+        radio_count = 0
         for key, value in attributes.items():
             if key.startswith("use_") or key == "indicator_required":
                 log_message(
@@ -68,6 +69,7 @@ class FactorConfigurationWidget(QWidget):
                     key, value, attributes.copy()
                 )
                 if radio_button_widget:
+                    radio_count += 1
                     if key == analysis_mode:
                         radio_button_widget.setChecked(True)
                     # Special case for "do_not_use" radio button
@@ -80,6 +82,10 @@ class FactorConfigurationWidget(QWidget):
                     self.button_group.addButton(radio_button_widget)
                     self.layout.addWidget(radio_button_widget.get_container())
                     radio_button_widget.data_changed.connect(self.update_attributes)
+        checked_button = self.button_group.checkedButton()
+        if not checked_button:
+            default_radio = self.button_group.buttons()[0]
+            default_radio.setChecked(True)
 
     def update_attributes(self, new_data: dict) -> None:
         """

@@ -207,6 +207,16 @@ class JsonTreeItem:
                 "indicator_required", False
             ):
                 return "Not configured (optional)"
+            # Item required and not configured
+            if (data.get("analysis_mode", "") == "") and data.get(
+                "indicator_required", False
+            ):
+                return "Required and not configured"
+            # Item not required but not configured
+            if (data.get("analysis_mode", "") == "") and not data.get(
+                "indicator_required", False
+            ):
+                return "Not configured (optional)"
             if "Not run" in data.get("result", "") and not data.get("result_file", ""):
                 return "Configured, not run"
             if "Workflow Completed" not in data.get("result", ""):
