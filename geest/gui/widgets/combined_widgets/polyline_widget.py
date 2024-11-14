@@ -48,10 +48,12 @@ class PolylineWidget(BaseIndicatorWidget):
             self.polyline_shapefile_line_edit.textChanged.connect(self.update_data)
 
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def _add_polyline_layer_widgets(self) -> None:
         """
@@ -106,7 +108,11 @@ class PolylineWidget(BaseIndicatorWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            log_message(f"Error selecting polyline shapefile: {e}", "Geest")
+            log_message(
+                f"Error selecting polyline shapefile: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
 
     def get_data(self) -> dict:
         """
@@ -152,4 +158,8 @@ class PolylineWidget(BaseIndicatorWidget):
             self.polyline_shapefile_line_edit.setEnabled(enabled)
             self.polyline_shapefile_button.setEnabled(enabled)
         except Exception as e:
-            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")
+            log_message(
+                f"Error in set_internal_widgets_enabled: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )

@@ -103,8 +103,10 @@ class ConfigurationWidgetFactory:
                 )
                 return None
         except Exception as e:
-            log_message(f"Error in create_radio_button: {e}", "Geest")
+            log_message(
+                f"Error in create_radio_button: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
             return None

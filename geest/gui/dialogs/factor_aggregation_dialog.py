@@ -20,7 +20,6 @@ from qgis.core import Qgis
 from geest.utilities import resources_path
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
-from ..configuration_widget_factory import ConfigurationWidgetFactory
 from ..factor_configuration_widget import FactorConfigurationWidget
 from geest.utilities import log_message
 
@@ -42,6 +41,11 @@ class FactorAggregationDialog(QDialog):
         )
 
         self.guids = self.tree_item.getFactorIndicatorGuids()
+        log_message(
+            f"Creating configs and datasources for these Guids: {self.guids}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         self.weightings = {}  # To store the temporary weightings
         self.data_sources = {}  # To store the temporary data sources
         # Layout setup

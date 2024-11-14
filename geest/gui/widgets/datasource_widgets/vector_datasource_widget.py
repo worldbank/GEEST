@@ -67,10 +67,12 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.shapefile_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def select_shapefile(self):
         """
@@ -93,7 +95,9 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            log_message(f"Error selecting shapefile: {e}", "Geest")
+            log_message(
+                f"Error selecting shapefile: {e}", tag="Geest", level=Qgis.Critical
+            )
 
     def update_attributes(self):
         """

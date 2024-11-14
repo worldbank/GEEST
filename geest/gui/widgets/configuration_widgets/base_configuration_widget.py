@@ -47,7 +47,9 @@ class BaseConfigurationWidget(QRadioButton):
             log_message(
                 f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
             )
+            import traceback
 
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
         # Connect toggled signal to enable/disable internal widgets
         self.toggled.connect(self.on_toggled)
 
