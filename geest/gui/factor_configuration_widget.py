@@ -26,6 +26,11 @@ class FactorConfigurationWidget(QWidget):
         :param guids: List of guids for the indicators that the settings in the config will be applied to.
         """
         super().__init__()
+        log_message(
+            f"Creating FactorConfigurationWidget for guids: {guids}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         self.guids = guids  # List of guids for the indicators that the settings in the config will be applied to
         self.item = item
         # This returns a reference so any changes you make to attributes
@@ -48,6 +53,9 @@ class FactorConfigurationWidget(QWidget):
         """
         Uses the factory to create radio buttons from attributes dictionary.
         """
+        attributes = (
+            attributes.copy()
+        )  # guard against the tree changing while we are working with its data
         analysis_mode = attributes.get("analysis_mode", "")
         log_message(
             f"Creating radio buttons for analysis mode: {analysis_mode}",
@@ -106,6 +114,12 @@ class FactorConfigurationWidget(QWidget):
             for key in new_data
             if key in self.attributes and self.attributes[key] != new_data[key]
         }
+        log_message(
+            f"Updating factor aggregation changed attributes with new data: {changed_attributes}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+
         for guid in self.guids:
             indicator = self.item.getItemByGuid(guid)
             indicator.attributes().update(changed_attributes)

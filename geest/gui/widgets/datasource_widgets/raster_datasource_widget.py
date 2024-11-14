@@ -44,10 +44,12 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
             self.raster_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def _add_raster_layer_widgets(self) -> None:
         """
@@ -100,7 +102,9 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
                 )
 
         except Exception as e:
-            log_message(f"Error selecting raster: {e}", "Geest")
+            log_message(
+                f"Error selecting raster: {e}", tag="Geest", level=Qgis.Critical
+            )
 
     def update_attributes(self):
         """

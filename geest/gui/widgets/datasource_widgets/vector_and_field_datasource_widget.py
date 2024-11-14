@@ -88,10 +88,12 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.update_field_combo()  # Populate fields for the initially selected layer
 
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def select_shapefile(self):
         """
@@ -114,7 +116,9 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            log_message(f"Error selecting shapefile: {e}", "Geest")
+            log_message(
+                f"Error selecting shapefile: {e}", tag="Geest", level=Qgis.Critical
+            )
 
     def _populate_field_combo(self, shapefile_path: str) -> None:
         """
@@ -147,7 +151,9 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 self.field_selection_combo.setCurrentText(previous_field)
 
         except Exception as e:
-            log_message(f"Error populating field combo: {e}", "Geest")
+            log_message(
+                f"Error populating field combo: {e}", tag="Geest", level=Qgis.Critical
+            )
 
     def update_selected_field(self) -> None:
         """

@@ -90,10 +90,12 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.buffer_distance_input.valueChanged.connect(self.update_data)
 
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def select_shapefile(self):
         """
@@ -116,7 +118,9 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            log_message(f"Error selecting shapefile: {e}", "Geest")
+            log_message(
+                f"Error selecting shapefile: {e}", tag="Geest", level=Qgis.Critical
+            )
 
     def get_data(self) -> dict:
         """
@@ -166,4 +170,8 @@ class SingleBufferDistanceWidget(BaseIndicatorWidget):
             self.shapefile_line_edit.setEnabled(enabled)
             self.shapefile_button.setEnabled(enabled)
         except Exception as e:
-            log_message(f"Error in set_internal_widgets_enabled: {e}", "Geest")
+            log_message(
+                f"Error in set_internal_widgets_enabled: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )

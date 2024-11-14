@@ -38,10 +38,12 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
             self.csv_file_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def _add_csv_file_widgets(self) -> None:
         """
@@ -78,7 +80,9 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
                 os.environ["GEEST_LAST_CSV_DIR"] = os.path.dirname(file_path)
 
         except Exception as e:
-            log_message(f"Error selecting CSV file: {e}", "Geest")
+            log_message(
+                f"Error selecting CSV file: {e}", tag="Geest", level=Qgis.Critical
+            )
 
     def validate_csv_file(self, file_path: str) -> None:
         """
@@ -111,7 +115,9 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
                 )
 
         except Exception as e:
-            log_message(f"Error validating CSV file: {e}", "Geest")
+            log_message(
+                f"Error validating CSV file: {e}", tag="Geest", level=Qgis.Critical
+            )
             QMessageBox.critical(
                 self, "CSV Validation Error", f"An error occurred: {e}"
             )

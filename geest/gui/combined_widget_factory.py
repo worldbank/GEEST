@@ -75,5 +75,7 @@ class CombinedWidgetFactory:
                 )
                 return None
         except Exception as e:
-            log_message(f"Error in create_radio_button: {e}", "Geest")
+            log_message(
+                f"Error in create_radio_button: {e}", tag="Geest", level=Qgis.Critical
+            )
             return None

@@ -41,6 +41,11 @@ class FactorAggregationDialog(QDialog):
         )
 
         self.guids = self.tree_item.getFactorIndicatorGuids()
+        log_message(
+            f"Creating configs and datasources for these Guids: {self.guids}",
+            tag="Geest",
+            level=Qgis.Info,
+        )
         self.weightings = {}  # To store the temporary weightings
         self.data_sources = {}  # To store the temporary data sources
         # Layout setup

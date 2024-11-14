@@ -34,10 +34,12 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
             self.spin_box.valueChanged.connect(self.update_attributes)
 
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
             import traceback
 
-            log_message(traceback.format_exc(), "Geest")
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def _add_raster_layer_widgets(self) -> None:
         """

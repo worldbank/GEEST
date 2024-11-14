@@ -31,7 +31,9 @@ class BaseDataSourceWidget(QWidget):
         try:
             self.add_internal_widgets()  # implemented in subclasses
         except Exception as e:
-            log_message(f"Error in add_internal_widgets: {e}", "Geest")
+            log_message(
+                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
+            )
 
     @abstractmethod
     def add_internal_widgets(self) -> None:
