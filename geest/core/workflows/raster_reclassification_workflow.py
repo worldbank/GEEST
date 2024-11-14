@@ -62,7 +62,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-                return False
+                return
 
         self.raster_layer = QgsRasterLayer(
             layer_name, "Environmental Hazards Raster", "gdal"
