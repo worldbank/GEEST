@@ -16,7 +16,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
-from geest.utilities import resources_path
+from geest.utilities import resources_path, log_message
 
 
 class DimensionAggregationDialog(QDialog):
@@ -160,14 +160,16 @@ class DimensionAggregationDialog(QDialog):
 
     def assignWeightings(self):
         """Assign new weightings to the factor's indicators."""
-        for guid, line_edit in self.weightings.items():
+        for indicator_guid, line_edit in self.weightings.items():
             try:
                 new_weighting = float(line_edit.text())
-                # Update the indicator's weighting in the factor item (use your own update logic here)
-                self.tree_item.updateFactorWeighting(guid, new_weighting)
+                self.tree_item.updateIndicatorWeighting(indicator_guid, new_weighting)
             except ValueError:
-                # Handle invalid input (non-numeric)
-                pass
+                log_message(
+                    f"Invalid weighting input for GUID: {indicator_guid}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
 
     def update_preview(self):
         """Update the right text edit to show a live HTML preview of the Markdown."""
@@ -177,9 +179,9 @@ class DimensionAggregationDialog(QDialog):
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
+        self.assignWeightings()  # Ensure this is called when changes are accepted
         if self.editing:
-            updated_data = self.layer_data
-            # Include the Markdown text from the left text edit
+            updated_data = self.factor_data
             updated_data["description"] = self.text_edit_left.toPlainText()
-            self.dataUpdated.emit(updated_data)  # Emit the updated data as a dictionary
-        self.accept()  # Close the dialog
+            self.dataUpdated.emit(updated_data)
+        self.accept()

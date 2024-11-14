@@ -16,7 +16,7 @@ from qgis.PyQt.QtWidgets import (
     QDialogButtonBox,
     QWidget,
 )
-from qgis.PyQt.QtGui import QPixmap
+from qgis.PyQt.QtGui import QPixmap, QPalette, QColor, QDoubleValidator
 from qgis.PyQt.QtCore import Qt
 from qgis.core import Qgis
 from geest.utilities import resources_path
@@ -75,10 +75,13 @@ class FactorAggregationDialog(QDialog):
         self.banner_label.setScaledContents(True)
         self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         layout.addWidget(self.banner_label)
+
+        # Description label
         description_label = QLabel()
         description_label.setText(self.factor_data.get("description", ""))
         description_label.setWordWrap(True)
         layout.addWidget(description_label)
+
         # Create the QStackedWidget and pages
         self.stacked_widget = QStackedWidget()
 
@@ -88,7 +91,6 @@ class FactorAggregationDialog(QDialog):
         page_1_layout.addWidget(configuration_widget)
 
         self.table = QTableWidget(self)
-        self.populate_table()  # Populate the table after initializing data_sources and weightings
         configuration_widget.selection_changed.connect(self.populate_table)
         page_1_layout.addWidget(self.table)
 
@@ -128,25 +130,31 @@ class FactorAggregationDialog(QDialog):
         layout.addWidget(self.stacked_widget)
 
         # QDialogButtonBox setup for OK, Cancel, and Switch Page
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
         auto_calculate_button = QPushButton("Balance Weights")
         if len(self.guids) > 1:
-            button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+            self.button_box.addButton(
+                auto_calculate_button, QDialogButtonBox.ActionRole
+            )
 
         toggle_guid_button = QPushButton("Show GUIDs")
-        button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
+        self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
 
         if self.editing:
             self.switch_page_button = QPushButton("Edit Description")
-            button_box.addButton(self.switch_page_button, QDialogButtonBox.ActionRole)
+            self.button_box.addButton(
+                self.switch_page_button, QDialogButtonBox.ActionRole
+            )
             self.switch_page_button.clicked.connect(self.switch_page)
 
-        button_box.accepted.connect(self.accept_changes)
-        button_box.rejected.connect(self.reject)
+        self.button_box.accepted.connect(self.accept_changes)
+        self.button_box.rejected.connect(self.reject)
         auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
         toggle_guid_button.clicked.connect(self.toggle_guid_column)
 
-        layout.addWidget(button_box)
+        layout.addWidget(self.button_box)
 
         # Initial call to update the preview with existing content
         self.update_preview()
@@ -154,6 +162,7 @@ class FactorAggregationDialog(QDialog):
         # Connect the Markdown editor to update preview
         self.text_edit_left.textChanged.connect(self.update_preview)
         self.setLayout(layout)
+        self.populate_table()  # Populate the table after initializing data_sources and weightings
 
     def switch_page(self):
         """Switch to the next page in the stacked widget."""
@@ -166,7 +175,7 @@ class FactorAggregationDialog(QDialog):
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(
-            ["Data Source", "Indicator", "Weighting", "GUID"]
+            ["Data Source", "Indicator", "Weight 0-1", "GUID"]
         )
         self.table.setColumnWidth(2, 80)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
@@ -198,17 +207,23 @@ class FactorAggregationDialog(QDialog):
             name_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, 1, name_item)
 
-            if len(self.guids) > 1:
-                indicator_weighting = item.attribute("factor_weighting", 1.0)
-            else:
-                indicator_weighting = 1.0
-            weighting_item = QLineEdit(str(indicator_weighting))
+            # Add QLineEdit for weightings with initial validation
+            weighting_value = item.attribute(
+                "factor_weighting", 1.0 if len(self.guids) == 1 else 0.0
+            )
+            weighting_item = QLineEdit(str(weighting_value))
+            weighting_item.setValidator(QDoubleValidator(0.0, 1.0, 4, self))
+            weighting_item.textChanged.connect(
+                self.validate_weightings
+            )  # Connect for real-time validation
             self.table.setCellWidget(row, 2, weighting_item)
             self.weightings[guid] = weighting_item
 
             guid_item = QTableWidgetItem(guid)
             guid_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, 3, guid_item)
+
+        self.validate_weightings()  # Initial validation check
 
     def toggle_guid_column(self):
         """Toggle the visibility of the GUID column."""
@@ -220,6 +235,19 @@ class FactorAggregationDialog(QDialog):
         equal_weighting = 1.0 / len(self.guids)
         for guid, line_edit in self.weightings.items():
             line_edit.setText(f"{equal_weighting:.4f}")
+
+    def assignWeightings(self):
+        """Assign new weightings to the factor's indicators."""
+        for indicator_guid, line_edit in self.weightings.items():
+            try:
+                new_weighting = float(line_edit.text())
+                self.tree_item.updateIndicatorWeighting(indicator_guid, new_weighting)
+            except ValueError:
+                log_message(
+                    f"Invalid weighting input for GUID: {indicator_guid}",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
@@ -233,3 +261,26 @@ class FactorAggregationDialog(QDialog):
         """Update the right text edit to show a live HTML preview of the Markdown."""
         markdown_text = self.text_edit_left.toPlainText()
         self.text_edit_right.setMarkdown(markdown_text)
+
+    def validate_weightings(self):
+        """Validate weightings to ensure they sum to 1 and are within range."""
+        total_weighting = sum(
+            float(line_edit.text() or 0) for line_edit in self.weightings.values()
+        )
+        valid_sum = (
+            abs(total_weighting - 1.0) < 0.001
+        )  # Allow slight floating-point tolerance
+
+        # Update button state and cell highlighting
+        for line_edit in self.weightings.values():
+            if valid_sum:
+                line_edit.setStyleSheet(
+                    "color: black;"
+                )  # Reset font color to black if valid
+            else:
+                line_edit.setStyleSheet(
+                    "color: red;"
+                )  # Set font color to red if invalid
+
+        # Enable or disable the OK button based on the validity of the sum
+        self.button_box.button(QDialogButtonBox.Ok).setEnabled(valid_sum)
