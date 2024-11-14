@@ -441,8 +441,13 @@ class TreePanel(QWidget):
         add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
 
         run_item_action = QAction("Run Item Workflow", self)
-        run_item_action.triggered.connect(lambda: self.run_item(item, role=item.role))
-
+        run_item_action.triggered.connect(
+            lambda: self.run_item(
+                item,
+                role=item.role,
+                shift_pressed=QApplication.keyboardModifiers() & Qt.ShiftModifier,
+            )
+        )
         if item.role == "analysis":
             menu = QMenu(self)
             menu.addAction(show_json_attributes_action)
@@ -904,16 +909,25 @@ class TreePanel(QWidget):
         # Hook up the QTask feedback signal to the progress bar
         task.progressChanged.connect(self.task_progress_updated)
 
-    def run_item(self, item, role):
+    def run_item(self, item, role, shift_pressed):
+        """Run the item and the ones below it.
 
+        Args:
+            item (TreeItem): The item to run.
+            role (str): The role of the item.
+        """
         self.items_to_run = 0
-        self.run_only_incomplete = False
+        if shift_pressed:
+            self.run_only_incomplete = False
+        else:
+            self.run_only_incomplete = True
 
         for i in range(item.childCount()):
             child_item = item.child(i)
-            if child_item.attribute("result_file", None) and self.run_only_incomplete:
+            is_complete = child_item.getStatus() == "Workflow Completed"
+            if not is_complete:
                 self.queue_workflow_task(child_item, child_item.role)
-            elif not self.run_only_incomplete:
+            if is_complete and not self.run_only_incomplete:
                 self.queue_workflow_task(child_item, child_item.role)
 
         self.queue_workflow_task(item, role)
