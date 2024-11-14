@@ -38,6 +38,7 @@ class FactorConfigurationWidget(QWidget):
         attributes = item.getItemByGuid(guids[0]).attributes()
         self.attributes = attributes
         self.layout: QVBoxLayout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.button_group: QButtonGroup = QButtonGroup(self)
         # Connect the button group's buttonClicked signal to the selection change handler
         self.button_group.buttonClicked.connect(self.on_selection_changed)
