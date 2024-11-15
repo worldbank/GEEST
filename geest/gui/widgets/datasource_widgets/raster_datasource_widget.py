@@ -58,6 +58,22 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         # Raster Layer ComboBox (Filtered to raster layers)
         self.raster_layer_combo = QgsMapLayerComboBox()
         self.raster_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.raster_layer_combo.setAllowEmptyLayer(True)
+        # Insert placeholder text at the top (only visually, not as a selectable item)
+        self.raster_layer_combo.setCurrentIndex(-1)  # Ensure no selection initially
+        self.raster_layer_combo.setEditable(
+            True
+        )  # Make editable temporarily for placeholder
+        self.raster_layer_combo.lineEdit().setPlaceholderText(
+            "Select item"
+        )  # Add placeholder text
+
+        # Disable editing after setting placeholder (ensures only layer names are selectable)
+        self.raster_layer_combo.lineEdit().setReadOnly(True)
+        self.raster_layer_combo.setEditable(
+            False
+        )  # Lock back to non-editable after setting placeholder
+
         self.raster_layer_combo.setToolTip(
             "Raster chosen from file system will have preference"
         )

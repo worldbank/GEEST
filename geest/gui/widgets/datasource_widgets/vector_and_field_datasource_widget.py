@@ -40,6 +40,22 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 filter = QgsMapLayerProxyModel.PointLayer
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setFilters(filter)
+            self.layer_combo.setAllowEmptyLayer(True)
+            # Insert placeholder text at the top (only visually, not as a selectable item)
+            self.layer_combo.setCurrentIndex(-1)  # Ensure no selection initially
+            self.layer_combo.setEditable(
+                True
+            )  # Make editable temporarily for placeholder
+            self.layer_combo.lineEdit().setPlaceholderText(
+                "Select item"
+            )  # Add placeholder text
+
+            # Disable editing after setting placeholder (ensures only layer names are selectable)
+            self.layer_combo.lineEdit().setReadOnly(True)
+            self.layer_combo.setEditable(
+                False
+            )  # Lock back to non-editable after setting placeholder
+
             self.layout.addWidget(self.layer_combo)
 
             # Set the selected QgsVectorLayer in QgsMapLayerComboBox
