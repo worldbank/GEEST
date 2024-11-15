@@ -13,6 +13,7 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
     QgsFieldProxyModel,
+    Qgis,
 )
 from qgis.PyQt.QtCore import QSettings
 from .base_indicator_widget import BaseIndicatorWidget
@@ -120,7 +121,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
 
         self.field_selection_combo = QgsFieldComboBox()
         self.field_selection_combo.setFilters(
-            QgsFieldProxyModel.Numeric
+            QgsFieldProxyModel.String
         )  # Filter for numeric fields
         self.field_selection_combo.setEnabled(
             False
