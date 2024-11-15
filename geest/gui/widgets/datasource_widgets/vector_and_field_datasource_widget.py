@@ -66,9 +66,12 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                     self.layer_combo.setLayer(layer)
 
             # Adds a dropdown to select a specific field from the selected shapefile.
+            field_type = QgsFieldProxyModel.Numeric
+            if self.attributes.get("id", None) == "Street_Lights":
+                field_type = QgsFieldProxyModel.String
             self.field_selection_combo = QgsFieldComboBox()
             self.field_selection_combo.setFilters(
-                QgsFieldProxyModel.Numeric
+                field_type
             )  # Filter for numeric fields
             self.field_selection_combo.setEnabled(
                 False
