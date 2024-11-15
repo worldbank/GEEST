@@ -50,24 +50,15 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             def validate_value(value):
                 return 0 <= value <= 6
 
+            log_message(f"Classes: {classes}", tag="Geest", level=Qgis.Info)
             for row, class_name in enumerate(classes):
+                if not class_name:
+                    continue
                 name_item = QTableWidgetItem(class_name)
                 value_item = QSpinBox()
                 value_item.setRange(0, 6)
-
-                def on_value_change(value, row=row):
-                    if not validate_value(value):
-                        self.table_widget.item(row, 1).setBackground(
-                            QBrush(QColor("red"))
-                        )
-                    else:
-                        self.table_widget.item(row, 1).setBackground(
-                            QBrush(QColor("white"))
-                        )
-
                 self.table_widget.setItem(row, 0, name_item)
                 self.table_widget.setCellWidget(row, 1, value_item)
-                value_item.valueChanged.connect(on_value_change)
             self.layout.addWidget(self.table_widget)
 
         except Exception as e:

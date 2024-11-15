@@ -189,6 +189,8 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 vectorLayer = self.layer_combo.currentLayer()
                 idx = vectorLayer.fields().indexOf(selected_field)
                 values = vectorLayer.uniqueValues(idx)
+                # convert values from a set to a list
+                values = list(values)
                 self.attributes[f"{self.widget_key}_unique_values"] = values
 
         else:
