@@ -27,7 +27,9 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             # check the attributes to decide what feature types to
             # filter for.
             filter = None
-            if self.attributes.get("use_point_per_cell", 0):
+            if self.attributes.get("use_single_buffer_point", 0):
+                filter = QgsMapLayerProxyModel.PointLayer
+            elif self.attributes.get("use_point_per_cell", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
             elif self.attributes.get("use_multi_buffer_point", 0):
                 filter = QgsMapLayerProxyModel.PointLayer

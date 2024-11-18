@@ -1,9 +1,9 @@
-import os
 from qgis.PyQt.QtWidgets import (
     QLabel,
     QHBoxLayout,
     QSpinBox,
 )
+from qgis.core import Qgis
 from .base_configuration_widget import BaseConfigurationWidget
 from geest.utilities import log_message
 
