@@ -21,20 +21,16 @@ class BaseIndicatorWidget(QRadioButton):
         self.layout.addWidget(self)
 
         # Log creation of widget
-        log_message(
-            "Creating Indicator Configuration Widget", tag="Geest", level=Qgis.Info
-        )
-        log_message("----------------------------------", tag="Geest", level=Qgis.Info)
+        log_message("Creating Indicator Configuration Widget")
+        log_message("----------------------------------")
         for item in self.attributes.items():
-            log_message(f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info)
-        log_message("----------------------------------", tag="Geest", level=Qgis.Info)
+            log_message(f"{item[0]}: {item[1]}")
+        log_message("----------------------------------")
 
         try:
             self.add_internal_widgets()
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
 
         # Connect toggled signal to enable/disable internal widgets
         self.toggled.connect(self.on_toggled)
@@ -70,9 +66,7 @@ class BaseIndicatorWidget(QRadioButton):
                 data = self.get_data()
                 self.data_changed.emit(data)
             except Exception as e:
-                log_message(
-                    f"Error in update_data: {e}", tag="Geest", level=Qgis.Critical
-                )
+                log_message(f"Error in update_data: {e}", level=Qgis.Critical)
 
     def on_toggled(self, checked: bool) -> None:
         """

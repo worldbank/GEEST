@@ -48,12 +48,10 @@ class PolylineWidget(BaseIndicatorWidget):
             self.polyline_shapefile_line_edit.textChanged.connect(self.update_data)
 
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def _add_polyline_layer_widgets(self) -> None:
         """

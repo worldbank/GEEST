@@ -23,9 +23,7 @@ class IndicatorConfigurationWidget(QWidget):
         try:
             self.create_radio_buttons(attributes)
         except Exception as e:
-            log_message(
-                f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in create_radio_buttons: {e}", level=Qgis.Critical)
 
         self.setLayout(self.layout)
 

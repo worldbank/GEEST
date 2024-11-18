@@ -44,10 +44,10 @@ class OrsCheckerTask(QgsTask):
             # Assuming the response JSON contains a 'status' field
             if response.get("type") == "FeatureCollection":
                 self.is_key_valid = True
-                log_message("ORS API Key is valid.", tag="Geest", level=Qgis.Info)
+                log_message("ORS API Key is valid.")
             else:
                 self.is_key_valid = False
-                log_message("ORS API Key is invalid.", tag="Geest", level=Qgis.Warning)
+                log_message("ORS API Key is invalid.", level=Qgis.Warning)
 
             self.setProgress(100)
             return True
@@ -72,20 +72,16 @@ class OrsCheckerTask(QgsTask):
             return
 
         if not result:
-            log_message(
-                "ORS API Key Validation Task failed.", tag="Geest", level=Qgis.Critical
-            )
+            log_message("ORS API Key Validation Task failed.", level=Qgis.Critical)
             if self.exception:
-                log_message(
-                    f"Error: {self.exception}", tag="Geest", level=Qgis.Critical
-                )
+                log_message(f"Error: {self.exception}", level=Qgis.Critical)
             self.job_finished.emit(False)
             return
 
         # Check the result of the API key validation
         if self.is_key_valid:
-            log_message("ORS API Key is valid.", tag="Geest", level=Qgis.Info)
+            log_message("ORS API Key is valid.")
             self.job_finished.emit(True)
         else:
-            log_message("ORS API Key is invalid.", tag="Geest", level=Qgis.Warning)
+            log_message("ORS API Key is invalid.", level=Qgis.Warning)
             self.job_finished.emit(False)

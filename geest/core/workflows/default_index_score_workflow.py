@@ -63,11 +63,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         :return: Raster file path of the output.
         """
         _ = area_features  # unused
-        log_message(
-            f"Processing area {index} score workflow", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Processing area {index} score workflow")
 
-        log_message(f"Index score: {self.index_score}", tag="Geest", level=Qgis.Info)
+        log_message(f"Index score: {self.index_score}")
 
         # Create a scored boundary layer filtered by current_area
         scored_layer = self.create_scored_boundary_layer(
@@ -83,8 +81,8 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             value_field="score",
             default_value=255,
         )
-        log_message(f"Raster output: {raster_output}", tag="Geest", level=Qgis.Info)
-        log_message(f"Worflow completed for area {index}", tag="Geest", level=Qgis.Info)
+        log_message(f"Raster output: {raster_output}")
+        log_message(f"Worflow completed for area {index}")
         return raster_output
 
     def create_scored_boundary_layer(

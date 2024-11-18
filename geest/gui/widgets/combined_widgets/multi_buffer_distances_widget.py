@@ -120,12 +120,10 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.shapefile_line_edit.textChanged.connect(self.update_data)
 
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def select_shapefile(self):
         """
@@ -148,9 +146,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            log_message(
-                f"Error selecting shapefile: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error selecting shapefile: {e}", level=Qgis.Critical)
 
     def get_data(self) -> dict:
         """

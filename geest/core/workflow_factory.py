@@ -56,11 +56,11 @@ class WorkflowFactory:
                 return DontUseWorkflow({}, feedback)
 
             attributes = item.attributes()
-            log_message(f"Workflow Factory Called", tag="Geest", level=Qgis.Info)
-            log_message(f"-----------------------", tag="Geest", level=Qgis.Info)
+            log_message(f"Workflow Factory Called")
+            log_message(f"-----------------------")
             for key, value in attributes.items():
-                log_message(f"{key}: {value}", tag="Geest", level=Qgis.Info)
-            log_message(f"-----------------------", tag="Geest", level=Qgis.Info)
+                log_message(f"{key}: {value}")
+            log_message(f"-----------------------")
 
             analysis_mode = attributes.get("analysis_mode", "")
 
@@ -105,10 +105,8 @@ class WorkflowFactory:
                 raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
 
         except Exception as e:
-            log_message(
-                f"Error creating workflow: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error creating workflow: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
             return DontUseWorkflow(item, cell_size_m, feedback, context)

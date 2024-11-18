@@ -20,7 +20,7 @@ class CreditsPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading intro panel", tag="Geest", level=Qgis.Info)
+        log_message(f"Loading intro panel")
         self.initUI()
 
     def initUI(self):

@@ -61,6 +61,13 @@ class SafetyPolygonWorkflow(WorkflowBase):
         self.selected_field = self.attributes.get(
             "classify_poly_into_classes_selected_field", ""
         )
+        # This is a dict with keys being unique values from the selected field
+        # and values from the aggregation dialog configuration table
+        self.safety_mapping_table = self.attributes.get(
+            "classify_poly_into_classes_unique_values", None
+        )
+        if not isinstance(self.safety_mapping_table, dict):
+            raise Exception("Safety scoring table not configured.")
 
     def _process_features_for_area(
         self,
@@ -112,8 +119,9 @@ class SafetyPolygonWorkflow(WorkflowBase):
 
             for feature in layer.getFeatures():
                 perceived_safety = feature[self.selected_field]
+                score = self.safety_mapping_table.get(perceived_safety)
                 # Scale perceived safety values between 0 and 5
-                reclass_val = self._scale_value(perceived_safety, 0, 100, 0, 5)
+                reclass_val = self._scale_value(score, 0, 100, 0, 5)
                 feature.setAttribute("value", reclass_val)
                 layer.updateFeature(feature)
         return layer
@@ -122,7 +130,14 @@ class SafetyPolygonWorkflow(WorkflowBase):
         """
         Scale value from input range (min_in, max_in) to output range (min_out, max_out).
         """
-        return (value - min_in) / (max_in - min_in) * (max_out - min_out) + min_out
+        try:
+            result = (value - min_in) / (max_in - min_in) * (
+                max_out - min_out
+            ) + min_out
+            return result
+        except:
+            log_message(f"Invalid value, returning 0: {value}")
+            return 0
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(

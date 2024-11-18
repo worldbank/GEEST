@@ -44,12 +44,10 @@ class BaseConfigurationWidget(QRadioButton):
         try:
             self.add_internal_widgets()
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
         # Connect toggled signal to enable/disable internal widgets
         self.toggled.connect(self.on_toggled)
 
@@ -83,6 +81,7 @@ class BaseConfigurationWidget(QRadioButton):
         """
         Gathers data from internal widgets and emits the data_changed signal.
         """
+        log_message("Update data called.......checking checked status")
         if self.isChecked():
             try:
                 data = self.get_data()
@@ -92,12 +91,13 @@ class BaseConfigurationWidget(QRadioButton):
                     # to avoid breaking the datasource widget logic.
                     data = self.attributes
                 data["analysis_mode"] = self.analysis_mode
-                log_message(f"Data changed: {data}", tag="Geest", level=Qgis.Info)
+                # log_message(f"Data changed: {data}")
                 self.data_changed.emit(data)
             except Exception as e:
-                log_message(
-                    f"Error in update_data: {e}", tag="Geest", level=Qgis.Critical
-                )
+                log_message(f"Error in update_data: {e}", level=Qgis.Critical)
+                import traceback
+
+                log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def on_toggled(self, checked: bool) -> None:
         """

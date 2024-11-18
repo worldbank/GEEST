@@ -39,12 +39,10 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
             self.csv_file_line_edit.textChanged.connect(self.update_attributes)
 
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def _add_csv_file_widgets(self) -> None:
         """
@@ -81,9 +79,7 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
                 os.environ["GEEST_LAST_CSV_DIR"] = os.path.dirname(file_path)
 
         except Exception as e:
-            log_message(
-                f"Error selecting CSV file: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error selecting CSV file: {e}", level=Qgis.Critical)
 
     def validate_csv_file(self, file_path: str) -> None:
         """
@@ -108,17 +104,13 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
                 log_message(error_message, "Geest", Qgis.Critical)
                 QMessageBox.critical(self, "Invalid CSV", error_message)
             else:
-                log_message(
-                    "CSV file validation successful.", tag="Geest", level=Qgis.Info
-                )
+                log_message("CSV file validation successful.")
                 QMessageBox.information(
                     self, "Valid CSV", "The selected CSV file is valid."
                 )
 
         except Exception as e:
-            log_message(
-                f"Error validating CSV file: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error validating CSV file: {e}", level=Qgis.Critical)
             QMessageBox.critical(
                 self, "CSV Validation Error", f"An error occurred: {e}"
             )

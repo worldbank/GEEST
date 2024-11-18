@@ -54,13 +54,9 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-log_message(
-    f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", tag="Geest", level=Qgis.Info, force=True
-)
-log_message(f"Geest2 started at {date}", tag="Geest", level=Qgis.Info, force=True)
-log_message(
-    f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", tag="Geest", level=Qgis.Info, force=True
-)
+log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
+log_message(f"Geest2 started at {date}", force=True)
+log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
@@ -230,7 +226,6 @@ class GeestPlugin:
             title="GEEST",
             message="Close this dialog then open VSCode and start your debug client.",
         )
-        time.sleep(2)
         import multiprocessing  # pylint: disable=import-outside-toplevel
 
         if multiprocessing.current_process().pid > 1:

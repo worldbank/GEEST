@@ -33,9 +33,7 @@ class DataSourceWidgetFactory:
         verbose_mode = int(setting(key="verbose_mode", default=0))
 
         if verbose_mode:
-            log_message(
-                f"Key: {widget_key} Value: {value}", tag="Geest", level=Qgis.Info
-            )
+            log_message(f"Key: {widget_key} Value: {value}")
         try:
             # remove "use_" from start of widget key for passing to the datasource widget where needed
             cleaned_key = widget_key[4:]
@@ -95,10 +93,8 @@ class DataSourceWidgetFactory:
                 )
                 return None
         except Exception as e:
-            log_message(
-                f"Error in datasource widget: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in datasource widget: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
             return None

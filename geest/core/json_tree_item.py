@@ -191,7 +191,7 @@ class JsonTreeItem:
                 return ""
 
             data = self.attributes()
-            # log_message(f"Data: {data}", tag="Geest", level=Qgis.Info)
+            # log_message(f"Data: {data}")
             status = ""
             if "Error" in data.get("result", ""):
                 return "Workflow failed"
@@ -232,10 +232,8 @@ class JsonTreeItem:
         except Exception as e:
             verbose_mode = setting("verbose_mode", False)
             if verbose_mode:
-                log_message(
-                    f"Error getting status: {e}", tag="Geest", level=Qgis.Warning
-                )
-                log_message(traceback.format_exc(), tag="Geest", level=Qgis.Warning)
+                log_message(f"Error getting status: {e}", level=Qgis.Warning)
+                log_message(traceback.format_exc(), level=Qgis.Warning)
                 return "WRITE TOOL TIP"
 
     def getFont(self):
@@ -353,9 +351,7 @@ class JsonTreeItem:
 
         except Exception as e:
             # Handle any exceptions and log the error
-            log_message(
-                f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
-            )
+            log_message(f"Error updating weighting: {e}", level=Qgis.Warning)
 
     def updateFactorWeighting(self, factor_guid, new_weighting):
         """Update the weighting of a specific factor by its guid."""
@@ -378,6 +374,4 @@ class JsonTreeItem:
 
         except Exception as e:
             # Handle any exceptions and log the error
-            log_message(
-                f"Error updating weighting: {e}", tag="Geest", level=Qgis.Warning
-            )
+            log_message(f"Error updating weighting: {e}", level=Qgis.Warning)
