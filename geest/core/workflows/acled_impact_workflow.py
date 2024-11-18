@@ -143,9 +143,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 features.append(feature)
 
             point_provider.addFeatures(features)
-            log_message(
-                f"Loaded {len(features)} points from CSV", tag="Geest", level=Qgis.Info
-            )
+            log_message(f"Loaded {len(features)} points from CSV")
         # Save the layer to disk as a shapefile
         # Ensure the workflow directory exists
         if not os.path.exists(self.workflow_directory):
@@ -153,7 +151,7 @@ class AcledImpactWorkflow(WorkflowBase):
         shapefile_path = os.path.join(
             self.workflow_directory, f"{self.layer_id}_acled_points.shp"
         )
-        log_message(f"Writing points to {shapefile_path}", tag="Geest", level=Qgis.Info)
+        log_message(f"Writing points to {shapefile_path}")
         error = QgsVectorFileWriter.writeAsVectorFormat(
             point_layer, shapefile_path, "utf-8", self.target_crs, "ESRI Shapefile"
         )
@@ -213,7 +211,7 @@ class AcledImpactWorkflow(WorkflowBase):
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
 
-        log_message(f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info)
+        log_message(f"Assigning scores to {layer.name()}")
         # Define scoring categories based on event_type
         event_scores = {
             "Battles": 0,
@@ -287,12 +285,12 @@ class AcledImpactWorkflow(WorkflowBase):
 
         overlay_analysis(qgis_vector_layer)
         """
-        log_message("Overlay analysis started", tag="Geest", level=Qgis.Info)
+        log_message("Overlay analysis started")
         # Step 1: Load the input layer from the provided shapefile path
         # layer = QgsVectorLayer(input_filepath, "circles_layer", "ogr")
 
         if not input_layer.isValid():
-            log_message("Layer failed to load!", tag="Geest", level=Qgis.Info)
+            log_message("Layer failed to load!")
             return
 
         # Step 2: Create a memory layer to store the result
@@ -327,9 +325,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 "OUTPUT": "memory:",
             },
         )["OUTPUT"]
-        log_message(
-            f"Unioned areas have {len(dissolve)} features", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Unioned areas have {len(dissolve)} features")
         # Step 6: Iterate through the unioned features to assign the minimum value in overlapping areas
         unique_geometries = {}
 

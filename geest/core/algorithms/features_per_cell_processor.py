@@ -86,9 +86,7 @@ def select_grid_cells(
             else:
                 grid_feature_counts[grid_id] = 1
 
-    log_message(
-        f"{len(grid_feature_counts)} intersections found.", tag="Geest", level=Qgis.Info
-    )
+    log_message(f"{len(grid_feature_counts)} intersections found.")
 
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = "GPKG"
@@ -124,7 +122,7 @@ def select_grid_cells(
     )
     counter = 0
     for grid_feature in grid_layer.getFeatures(request):
-        log_message(f"Writing Feature #{counter}", tag="Geest", level=Qgis.Info)
+        log_message(f"Writing Feature #{counter}")
         counter += 1
         new_feature = QgsFeature()
         new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry

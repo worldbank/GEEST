@@ -219,9 +219,7 @@ class GeestDock(QDockWidget):
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
 
-            log_message(
-                "GeestDock initialized successfully.", tag="Geest", level=Qgis.Info
-            )
+            log_message("GeestDock initialized successfully.")
 
         except Exception as e:
             log_message(
@@ -231,7 +229,7 @@ class GeestDock(QDockWidget):
             )
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
@@ -256,9 +254,7 @@ class GeestDock(QDockWidget):
         This is called by the main plugin class whenever the QGIS project changes.
         """
         project_path = QgsProject.instance().fileName()
-        log_message(
-            f"QGIS project changed to {project_path}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"QGIS project changed to {project_path}")
         if project_path:
             checksum = hash(project_path)
             # Check our settings to see if we have a Geest project associated with this project
@@ -281,13 +277,13 @@ class GeestDock(QDockWidget):
         :param index: The index of the newly selected panel.
         """
         if index == 0:
-            log_message("Switched to Intro panel", tag="Geest", level=Qgis.Info)
+            log_message("Switched to Intro panel")
         if index == 1:
-            log_message("Switched to ORS panel", tag="Geest", level=Qgis.Info)
+            log_message("Switched to ORS panel")
         elif index == 2:
-            log_message("Switched to Project panel", tag="Geest", level=Qgis.Info)
+            log_message("Switched to Project panel")
         elif index == 3:
-            log_message("Switched to Tree panel", tag="Geest", level=Qgis.Info)
+            log_message("Switched to Tree panel")
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)
         elif index == 4:
-            log_message("Switched to Help panel", tag="Geest", level=Qgis.Info)
+            log_message("Switched to Help panel")

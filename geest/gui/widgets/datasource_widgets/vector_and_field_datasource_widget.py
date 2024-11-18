@@ -109,12 +109,10 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.update_field_combo()  # Populate fields for the initially selected layer
 
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def select_shapefile(self):
         """
@@ -137,9 +135,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
-            log_message(
-                f"Error selecting shapefile: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error selecting shapefile: {e}", level=Qgis.Critical)
 
     def _populate_field_combo(self, shapefile_path: str) -> None:
         """
@@ -172,9 +168,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 self.field_selection_combo.setCurrentText(previous_field)
 
         except Exception as e:
-            log_message(
-                f"Error populating field combo: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error populating field combo: {e}", level=Qgis.Critical)
 
     def update_selected_field(self) -> None:
         """
@@ -195,7 +189,9 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
 
                 #  list the data type of each value
                 for value in values:
-                    log_message(f"{type(value)} value {value}")
+                    # log_message(f"{type(value)} value {value}")
+                    # Dont remove this! It cleans to contents to remove QVariants
+                    # introduced from empty table rows!
                     if isinstance(value, str):
                         values_dict[value] = None
                 # Preserve existing values if they exist
@@ -208,12 +204,8 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                         values_dict[key] = None
                     else:
                         values_dict[key] = existing_values[key]
-                log_message(
-                    f"Existing values: {values_dict}", tag="Geest", level=Qgis.Info
-                )
-                log_message(
-                    f"New      values: {values_dict}", tag="Geest", level=Qgis.Info
-                )
+                log_message(f"Existing values: {values_dict}")
+                log_message(f"New      values: {values_dict}")
                 # will drop any keys in the json item that are not in values_dict
                 self.attributes[f"{self.widget_key}_unique_values"] = values_dict
 

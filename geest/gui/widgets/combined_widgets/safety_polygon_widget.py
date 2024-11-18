@@ -71,12 +71,10 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
             self.update_field_combo()  # Populate fields for the initially selected layer
 
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def _add_polygon_layer_widgets(self) -> None:
         """
@@ -185,9 +183,7 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
                 self.field_selection_combo.setCurrentText(previous_field)
 
         except Exception as e:
-            log_message(
-                f"Error populating field combo: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error populating field combo: {e}", level=Qgis.Critical)
 
     def update_field_combo(self) -> None:
         """

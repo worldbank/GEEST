@@ -56,17 +56,13 @@ class SinglePointBufferProcessor:
                 f"Failed to load GeoPackage layer for CRS retrieval."
             )
         self.target_crs = gpkg_layer.crs()  # Get the CRS of the GeoPackage layer
-        log_message(
-            f"Target CRS: {self.target_crs.authid()}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Target CRS: {self.target_crs.authid()}")
         if not self.features_layer.isValid():
             raise QgsProcessingException(
                 f"Failed to load features layer from {self.features_layer.source()}"
             )
 
-        log_message(
-            "Single Point Buffer Processor Initialized", tag="Geest", level=Qgis.Info
-        )
+        log_message("Single Point Buffer Processor Initialized")
 
     def process_areas(self) -> str:
         """
@@ -82,9 +78,7 @@ class SinglePointBufferProcessor:
         Returns:
             str: The file path to the VRT file containing the combined rasters
         """
-        log_message(
-            "Single Point Buffer Processing Started", tag="Geest", level=Qgis.Info
-        )
+        log_message("Single Point Buffer Processing Started")
 
         feedback = QgsProcessingFeedback()
         area_iterator = AreaIterator(self.gpkg_path)
@@ -146,9 +140,7 @@ class SinglePointBufferProcessor:
         Returns:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
-        log_message(
-            "Single Point Buffer Select Features Started", tag="Geest", level=Qgis.Info
-        )
+        log_message("Single Point Buffer Select Features Started")
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
         # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
@@ -193,9 +185,7 @@ class SinglePointBufferProcessor:
             temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
         )
 
-        log_message(
-            "Single Point Buffer Select Features Ending", tag="Geest", level=Qgis.Info
-        )
+        log_message("Single Point Buffer Select Features Ending")
 
         return QgsVectorLayer(output_path, output_name, "ogr")
 
@@ -238,7 +228,7 @@ class SinglePointBufferProcessor:
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
 
-        log_message(f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info)
+        log_message(f"Assigning scores to {layer.name()}")
         # Create a new field in the layer for the scores
         layer.startEditing()
         layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
@@ -271,21 +261,19 @@ class SinglePointBufferProcessor:
         Returns:
             str: The file path to the rasterized output.
         """
-        log_message("--- Rasterizingrid", tag="Geest", level=Qgis.Info)
-        log_message(f"--- bbox {bbox}", tag="Geest", level=Qgis.Info)
-        log_message(f"--- index {index}", tag="Geest", level=Qgis.Info)
+        log_message("--- Rasterizingrid")
+        log_message(f"--- bbox {bbox}")
+        log_message(f"--- index {index}")
 
         output_path = os.path.join(
             self.workflow_directory,
             f"{self.output_prefix}_buffered_{index}.tif",
         )
         if not input_layer.isValid():
-            log_message(
-                f"Layer failed to load! {input_layer}", tag="Geest", level=Qgis.Info
-            )
+            log_message(f"Layer failed to load! {input_layer}")
             return
         else:
-            log_message(f"Rasterizing {input_layer}", tag="Geest", level=Qgis.Info)
+            log_message(f"Rasterizing {input_layer}")
 
         # Ensure resolution parameters are properly formatted as float values
         x_res = self.cell_size_m  # pixel size in X direction
@@ -313,13 +301,11 @@ class SinglePointBufferProcessor:
         #'OUTPUT':'TEMPORARY_OUTPUT'})
 
         processing.run("gdal:rasterize", params)
-        log_message(f"Rasterize Parameter: {params}", tag="Geest", level=Qgis.Info)
+        log_message(f"Rasterize Parameter: {params}")
 
-        log_message(
-            f"Rasterize complete for: {output_path}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Rasterize complete for: {output_path}")
 
-        log_message(f"Created raster: {output_path}", tag="Geest", level=Qgis.Info)
+        log_message(f"Created raster: {output_path}")
         return output_path
 
     def _mask_raster(
@@ -390,7 +376,7 @@ class SinglePointBufferProcessor:
         }
 
         processing.run("gdal:cliprasterbymasklayer", params)
-        log_message(f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info)
+        log_message(f"Mask Parameter: {params}")
         log_message(
             f"Masked raster saved to {masked_raster_filepath}",
             tag="Geest",
@@ -465,16 +451,14 @@ class SinglePointBufferProcessor:
 
         # Run the gdal:buildvrt processing algorithm to create the VRT
         processing.run("gdal:buildvirtualraster", params)
-        log_message(f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info)
+        log_message(f"Created VRT: {vrt_filepath}")
 
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.output_prefix}_combined VRT")
 
         if vrt_layer.isValid():
             QgsProject.instance().addMapLayer(vrt_layer)
-            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
+            log_message("Added VRT layer to the map.")
         else:
-            log_message(
-                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
-            )
+            log_message("Failed to add VRT layer to the map.", level=Qgis.Critical)
         return vrt_filepath

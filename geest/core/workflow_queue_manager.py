@@ -43,7 +43,7 @@ class WorkflowQueueManager(QObject):
         #    any changes made to the item will be reflected in the tree directly
 
         self.workflow_queue.add_job(task)
-        log_message(f"Task added", tag="Geest", level=Qgis.Info)
+        log_message(f"Task added")
         return task
 
     def add_workflow(self, item: JsonTreeItem, cell_size_m: float) -> None:
@@ -68,14 +68,12 @@ class WorkflowQueueManager(QObject):
             context=context,
         )
         self.workflow_queue.add_job(task)
-        log_message(f"Task added: {task.description()}", tag="Geest", level=Qgis.Info)
+        log_message(f"Task added: {task.description()}")
         return task
 
     def start_processing(self) -> None:
         """Start processing the tasks in the WorkflowQueue."""
-        log_message(
-            "Starting workflow queue processing...", tag="Geest", level=Qgis.Info
-        )
+        log_message("Starting workflow queue processing...")
         self.workflow_queue.start_processing()
 
     def start_processing_in_foreground(self) -> None:
@@ -93,12 +91,12 @@ class WorkflowQueueManager(QObject):
 
     def cancel_processing(self) -> None:
         """Cancels all tasks in the WorkflowQueue."""
-        log_message("Cancelling workflow queue...", tag="Geest", level=Qgis.Info)
+        log_message("Cancelling workflow queue...")
         self.workflow_queue.cancel_processing()
 
     def update_status(self) -> None:
         """Update the status of the workflow queue (for UI updates, etc.)."""
-        log_message("Workflow queue status updated.", tag="Geest", level=Qgis.Info)
+        log_message("Workflow queue status updated.")
 
     def on_processing_completed(self, success: bool) -> None:
         """
@@ -112,9 +110,7 @@ class WorkflowQueueManager(QObject):
                 level=Qgis.Info,
             )
         else:
-            log_message(
-                "Workflow processing was canceled.", tag="Geest", level=Qgis.Info
-            )
+            log_message("Workflow processing was canceled.")
         self.processing_completed.emit()
 
     def log_status_message(self, message: str) -> None:
@@ -122,4 +118,4 @@ class WorkflowQueueManager(QObject):
         Logs status messages from the WorkflowQueue.
         :param message: Status message to log
         """
-        log_message(message, tag="Geest", level=Qgis.Info)
+        log_message(message)

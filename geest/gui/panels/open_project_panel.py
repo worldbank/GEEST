@@ -31,7 +31,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         )  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading open project panel", tag="Geest", level=Qgis.Info)
+        log_message(f"Loading open project panel")
         self.initUI()
 
     def initUI(self):
@@ -97,8 +97,8 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             for index in range(self.previous_project_combo.count()):
                 full_path = self.previous_project_combo.itemData(index)
                 elided_text = self.elide_path(full_path)
-                log_message(f"Full text  : {full_path}", tag="Geest", level=Qgis.Info)
-                log_message(f"Elided text: {elided_text}", tag="Geest", level=Qgis.Info)
+                log_message(f"Full text  : {full_path}")
+                log_message(f"Elided text: {elided_text}")
                 self.previous_project_combo.setItemText(index, elided_text)
         return super().eventFilter(obj, event)
 

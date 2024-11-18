@@ -130,9 +130,7 @@ class SafetyPerCellProcessor:
         """
         Reproject the input layer to match the CRS of the grid layer.
         """
-        log_message(
-            f"Reprojecting {layer.name()} to {target_crs.authid()}", level=Qgis.Info
-        )
+        log_message(f"Reprojecting {layer.name()} to {target_crs.authid()}")
         return processing.run(
             "native:reprojectlayer",
             {"INPUT": layer, "TARGET_CRS": target_crs, "OUTPUT": "memory:"},
@@ -206,7 +204,7 @@ class SafetyPerCellProcessor:
             "OUTPUT": output_path,
         }
         processing.run("gdal:rasterize", params)
-        log_message(f"Created raster for safety area: {output_path}", level=Qgis.Info)
+        log_message(f"Created raster for safety area: {output_path}")
 
     def _combine_rasters_to_vrt(self, num_rasters: int) -> None:
         """
@@ -224,17 +222,15 @@ class SafetyPerCellProcessor:
         processing.run(
             "gdal:buildvirtualraster", {"INPUT": raster_files, "OUTPUT": vrt_path}
         )
-        log_message(f"Created combined VRT: {vrt_path}", level=Qgis.Info)
+        log_message(f"Created combined VRT: {vrt_path}")
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_path, f"{self.output_prefix}_combined VRT")
 
         if vrt_layer.isValid():
             self.context.project().addMapLayer(vrt_layer)
-            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
+            log_message("Added VRT layer to the map.")
         else:
-            log_message(
-                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
-            )
+            log_message("Failed to add VRT layer to the map.", level=Qgis.Critical)
         return vrt_path
 
     def _write_features_to_layer(

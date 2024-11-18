@@ -405,7 +405,7 @@ class JsonTreeModel(QAbstractItemModel):
                 level=Qgis.Critical,
             )
             # Show the traceback tpp
-            log_message(f"{traceback.format_exc()}", tag="Geest", level=Qgis.Critical)
+            log_message(f"{traceback.format_exc()}", level=Qgis.Critical)
             raise e
 
     def clear_factor_weightings(self, dimension_item):

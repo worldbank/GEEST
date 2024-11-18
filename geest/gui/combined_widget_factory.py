@@ -32,11 +32,11 @@ class CombinedWidgetFactory:
         """
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            log_message("Dialog widget factory called", tag="Geest", level=Qgis.Info)
-            log_message("----------------------------", tag="Geest", level=Qgis.Info)
-            log_message(f"Key: {key}", tag="Geest", level=Qgis.Info)
-            log_message(f"Value: {value}", tag="Geest", level=Qgis.Info)
-            log_message("----------------------------", tag="Geest", level=Qgis.Info)
+            log_message("Dialog widget factory called")
+            log_message("----------------------------")
+            log_message(f"Key: {key}")
+            log_message(f"Value: {value}")
+            log_message("----------------------------")
 
         try:
             if key == "indicator_required" and value == 0:
@@ -75,7 +75,5 @@ class CombinedWidgetFactory:
                 )
                 return None
         except Exception as e:
-            log_message(
-                f"Error in create_radio_button: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in create_radio_button: {e}", level=Qgis.Critical)
             return None

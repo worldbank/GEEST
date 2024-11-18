@@ -139,9 +139,7 @@ class AggregationWorkflowBase(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        log_message(
-            f"Aggregation Expression: {expression}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Aggregation Expression: {expression}")
         # Set up the raster calculator
         calc = QgsRasterCalculator(
             expression,
@@ -155,9 +153,7 @@ class AggregationWorkflowBase(WorkflowBase):
 
         # Run the calculation
         result = calc.processCalculation()
-        log_message(
-            f"Calculator errors: {calc.lastError()}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Calculator errors: {calc.lastError()}")
         if result != 0:
             log_message(
                 "Raster aggregation completed successfully.",
@@ -220,7 +216,7 @@ class AggregationWorkflowBase(WorkflowBase):
             )
             if path:
                 raster_files.append(path)
-                log_message(f"Adding raster: {path}", tag="Geest", level=Qgis.Info)
+                log_message(f"Adding raster: {path}")
 
         log_message(
             f"Total raster files found: {len(raster_files)}",

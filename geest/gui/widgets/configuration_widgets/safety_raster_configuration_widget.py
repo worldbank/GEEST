@@ -21,12 +21,10 @@ class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
             self.info_label = QLabel("A raster layer representing safety")
             self.layout.addWidget(self.info_label)
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def get_data(self) -> dict:
         """

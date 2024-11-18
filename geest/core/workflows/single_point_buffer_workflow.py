@@ -56,12 +56,8 @@ class SinglePointBufferWorkflow(WorkflowBase):
             return False
         self.features_layer = QgsVectorLayer(layer_source, "points", provider_type)
         if not self.features_layer.isValid():
-            log_message(
-                "single_buffer_point_layer not valid", tag="Geest", level=Qgis.Critical
-            )
-            log_message(
-                f"Layer Source: {layer_source}", tag="Geest", level=Qgis.Critical
-            )
+            log_message("single_buffer_point_layer not valid", level=Qgis.Critical)
+            log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
 
         self.buffer_distance = int(
@@ -86,9 +82,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
-        log_message(
-            f"{self.workflow_name}  Processing Started", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"{self.workflow_name}  Processing Started")
 
         # Step 1: Buffer the selected features
         buffered_layer = self._buffer_features(
@@ -142,7 +136,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
             QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
 
-        log_message(f"Assigning scores to {layer.name()}", tag="Geest", level=Qgis.Info)
+        log_message(f"Assigning scores to {layer.name()}")
         # Create a new field in the layer for the scores
         layer.startEditing()
         layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])

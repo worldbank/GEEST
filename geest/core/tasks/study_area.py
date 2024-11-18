@@ -141,9 +141,9 @@ class StudyAreaProcessingTask(QgsTask):
             result = self.process_study_area()
             return result  # false if the task was canceled
         except Exception as e:
-            log_message(f"Task failed: {e}", tag="Geest", level=Qgis.Critical)
+            log_message(f"Task failed: {e}", level=Qgis.Critical)
             # Print the traceback to the QgsMessageLog
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
             # And write it to a text file called error.txt in the working directory
             with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
                 # first the date and time
@@ -184,9 +184,7 @@ class StudyAreaProcessingTask(QgsTask):
         """
         super().cancel()
         self.feedback.cancel()
-        log_message(
-            "Study Area Processing was canceled.", tag="Geest", level=Qgis.Warning
-        )
+        log_message("Study Area Processing was canceled.", level=Qgis.Warning)
 
     def process_study_area(self) -> None:
         """
@@ -738,9 +736,7 @@ class StudyAreaProcessingTask(QgsTask):
             "OUTPUT": mask_filepath,
         }
         processing.run("gdal:rasterize", params)
-        log_message(
-            f"Created raster mask: {mask_filepath}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Created raster mask: {mask_filepath}")
 
     def calculate_utm_zone(self, bbox: QgsRectangle) -> int:
         """
@@ -795,9 +791,7 @@ class StudyAreaProcessingTask(QgsTask):
                     level=Qgis.Info,
                 )
             except Exception as e:
-                log_message(
-                    f"Error creating directory: {e}", tag="Geest", level=Qgis.Critical
-                )
+                log_message(f"Error creating directory: {e}", level=Qgis.Critical)
 
     def create_raster_vrt(self, output_vrt_name: str = "combined_mask.vrt") -> None:
         """
@@ -840,7 +834,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         # Run the gdal:buildvrt processing algorithm to create the VRT
         processing.run("gdal:buildvirtualraster", params)
-        log_message(f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info)
+        log_message(f"Created VRT: {vrt_filepath}")
 
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, "Combined Mask VRT")
@@ -848,8 +842,6 @@ class StudyAreaProcessingTask(QgsTask):
         if vrt_layer.isValid():
             # Not thread safe, use signal instead
             # QgsProject.instance().addMapLayer(vrt_layer)
-            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
+            log_message("Added VRT layer to the map.")
         else:
-            log_message(
-                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
-            )
+            log_message("Failed to add VRT layer to the map.", level=Qgis.Critical)

@@ -46,9 +46,7 @@ class FactorConfigurationWidget(QWidget):
         try:
             self.create_radio_buttons(attributes)
         except Exception as e:
-            log_message(
-                f"Error in create_radio_buttons: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in create_radio_buttons: {e}", level=Qgis.Critical)
 
         self.setLayout(self.layout)
 
@@ -114,28 +112,55 @@ class FactorConfigurationWidget(QWidget):
     def update_attributes(self, new_data: dict) -> None:
         """
         Updates the attributes dictionary with new data from the selected radio button.
-        """
-        # In the ctor of the widget factor we humanise the name
-        # now we roll it back to the snake case version so it matches keys
-        # in the JSON data model
-        # snake_case_mode = (
-        #    self.button_group.checkedButton().label_text.lower().replace(" ", "_")
-        # )
-        # new_data["analysis_mode"] = snake_case_mode
 
-        # calculate the changes between new_data and self.attributes
-        # so that we can apply them to every indicator in self.guids list
+        Compares the incoming data with the current attributes and applies updates
+        to each indicator associated with the GUIDs in self.guids.
+
+        A change is detected if:
+        - A key exists in `new_data` but not in `self.attributes`.
+        - A key exists in both, but their values are different.
+
+        :param new_data: A dictionary containing the new attribute values to be updated.
+        """
+        # Log the received data
+        # log_message(f"Received new data: {new_data}", tag="Geest", level=Qgis.Info)
+
+        # Identify changed attributes: keys present in new_data with differing or new values
         changed_attributes = {
             key: new_data[key]
             for key in new_data
-            if key in self.attributes and self.attributes[key] != new_data[key]
+            if key not in self.attributes or self.attributes[key] != new_data[key]
         }
-        log_message(
-            f"Updating factor aggregation changed attributes with new data: {changed_attributes}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
 
+        # Log the changes that will be applied
+        if changed_attributes:
+            log_message(
+                f"Updating attributes with the following changes: {changed_attributes}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+        else:
+            log_message(
+                "No changes detected in the new data. No updates will be applied.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            return  # Exit early if there are no changes
+
+        # Apply the changes to each indicator associated with the GUIDs
         for guid in self.guids:
             indicator = self.item.getItemByGuid(guid)
-            indicator.attributes().update(changed_attributes)
+            if indicator is not None:
+                indicator_attributes = indicator.attributes()
+                indicator_attributes.update(changed_attributes)
+                log_message(
+                    f"Updated attributes for GUID {guid}: {changed_attributes}",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
+            else:
+                log_message(
+                    f"GUID {guid} could not be found. Skipping update.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )

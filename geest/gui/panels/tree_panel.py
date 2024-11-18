@@ -296,14 +296,12 @@ class TreePanel(QWidget):
                 self.load_json()  # sets the class member json_data
                 self.model.loadJsonData(self.json_data)
                 self.treeView.expandAll()
-                log_message(
-                    f"Loaded model.json from {model_path}", tag="Geest", level=Qgis.Info
-                )
+                log_message(f"Loaded model.json from {model_path}")
 
                 # If this is a first time use of the analysis project lets set some things up
                 analysis_item = self.model.rootItem.child(0)
                 analysis_data = analysis_item.attributes()
-                log_message(str(analysis_data), tag="Geest", level=Qgis.Info)
+                log_message(str(analysis_data))
                 if analysis_data.get("working_folder", "Not Set"):
                     analysis_data["working_folder"] = self.working_directory
                 else:
@@ -378,13 +376,9 @@ class TreePanel(QWidget):
             save_path = os.path.join(self.working_directory, "model.json")
             with open(save_path, "w") as f:
                 json.dump(json_data, f, indent=4)
-            log_message(
-                f"Saved JSON model to {save_path}", tag="Geest", level=Qgis.Info
-            )
+            log_message(f"Saved JSON model to {save_path}")
         except Exception as e:
-            log_message(
-                f"Error saving JSON: {str(e)}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error saving JSON: {str(e)}", level=Qgis.Critical)
 
     def edit(self, index, trigger, event):
         """
@@ -404,9 +398,7 @@ class TreePanel(QWidget):
         """Load the JSON data from the file."""
         with open(self.json_file, "r") as f:
             self.json_data = json.load(f)
-            log_message(
-                f"Loaded JSON data from {self.json_file}", tag="Geest", level=Qgis.Info
-            )
+            log_message(f"Loaded JSON data from {self.json_file}")
 
     def load_json_from_file(self):
         """Prompt the user to load a JSON file and update the tree."""
@@ -448,6 +440,22 @@ class TreePanel(QWidget):
         add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
 
         run_item_action = QAction("Run Item Workflow", self)
+
+        def update_action_text():
+            text = (
+                "Rerun Item Workflow"
+                if QApplication.keyboardModifiers() & Qt.ShiftModifier
+                else "Run Item Workflow"
+            )
+            run_item_action.setText(text)
+
+        # Update initially
+        update_action_text()
+        # Update when menu shows
+        menu = QMenu(self)
+        menu.aboutToShow.connect(update_action_text)
+        # Add event filter to menu to update when shift is pressed while menu is open
+        menu.installEventFilter(self)
         run_item_action.triggered.connect(
             lambda: self.run_item(
                 item,
@@ -623,7 +631,7 @@ class TreePanel(QWidget):
 
         dialog.exec_()
 
-        log_message("----------------------------", tag="Geest", level=Qgis.Info)
+        log_message("----------------------------")
 
     def create_nested_table(self, nested_data: dict) -> QTableWidget:
         """Create a QTableWidget to display nested dictionary data."""
@@ -891,9 +899,7 @@ class TreePanel(QWidget):
                         folder = os.path.dirname(result_file)
                         # check the folder exists
                         if os.path.exists(folder):
-                            log_message(
-                                f"Removing {folder}", tag="Geest", level=Qgis.Info
-                            )
+                            log_message(f"Removing {folder}")
                             shutil.rmtree(folder)
                 # if the item rols if factor or dimension, remove the files in it
                 # but not subdirs in case the user elected to keep them

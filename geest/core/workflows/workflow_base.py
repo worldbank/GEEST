@@ -169,19 +169,17 @@ class WorkflowBase(ABC):
             True if the workflow completes successfully, False if canceled or failed.
         """
 
-        log_message(f"Executing {self.workflow_name}", tag="Geest", level=Qgis.Info)
-        log_message("----------------------------------", tag="Geest", level=Qgis.Info)
+        log_message(f"Executing {self.workflow_name}")
+        log_message("----------------------------------")
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
             for item in self.attributes.items():
-                log_message(f"{item[0]}: {item[1]}", tag="Geest", level=Qgis.Info)
-            log_message(
-                "----------------------------------", tag="Geest", level=Qgis.Info
-            )
+                log_message(f"{item[0]}: {item[1]}")
+            log_message("----------------------------------")
 
         self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
 
-        log_message("Processing Started", tag="Geest", level=Qgis.Info)
+        log_message("Processing Started")
 
         feedback = QgsProcessingFeedback()
         output_rasters = []
@@ -448,21 +446,19 @@ class WorkflowBase(ABC):
         """
         if not input_layer or not input_layer.isValid():
             return False
-        log_message("--- Rasterizing grid", tag="Geest", level=Qgis.Info)
-        log_message(f"--- bbox {bbox}", tag="Geest", level=Qgis.Info)
-        log_message(f"--- index {index}", tag="Geest", level=Qgis.Info)
+        log_message("--- Rasterizing grid")
+        log_message(f"--- bbox {bbox}")
+        log_message(f"--- index {index}")
 
         output_path = os.path.join(
             self.workflow_directory,
             f"{self.layer_id}_{index}.tif",
         )
         if not input_layer.isValid():
-            log_message(
-                f"Layer failed to load! {input_layer}", tag="Geest", level=Qgis.Info
-            )
+            log_message(f"Layer failed to load! {input_layer}")
             return
         else:
-            log_message(f"Rasterizing {input_layer}", tag="Geest", level=Qgis.Info)
+            log_message(f"Rasterizing {input_layer}")
 
         # Ensure resolution parameters are properly formatted as float values
         x_res = self.cell_size_m  # pixel size in X direction
@@ -490,13 +486,11 @@ class WorkflowBase(ABC):
         #'OUTPUT':'TEMPORARY_OUTPUT'})
 
         processing.run("gdal:rasterize", params)
-        log_message(f"Rasterize Parameter: {params}", tag="Geest", level=Qgis.Info)
+        log_message(f"Rasterize Parameter: {params}")
 
-        log_message(
-            f"Rasterize complete for: {output_path}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Rasterize complete for: {output_path}")
 
-        log_message(f"Created raster: {output_path}", tag="Geest", level=Qgis.Info)
+        log_message(f"Created raster: {output_path}")
         return output_path
 
     def _mask_raster(
@@ -625,7 +619,7 @@ class WorkflowBase(ABC):
 
         # Run the gdal:buildvrt processing algorithm to create the VRT
         processing.run("gdal:buildvirtualraster", params)
-        log_message(f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info)
+        log_message(f"Created VRT: {vrt_filepath}")
 
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}_final VRT")
@@ -640,9 +634,7 @@ class WorkflowBase(ABC):
         shutil.copyfile(source_qml, qml_filepath)
 
         if not vrt_layer.isValid():
-            log_message(
-                "VRT Layer generation failed.", tag="Geest", level=Qgis.Critical
-            )
+            log_message("VRT Layer generation failed.", level=Qgis.Critical)
             return False
 
         return vrt_filepath

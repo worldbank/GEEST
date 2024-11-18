@@ -204,9 +204,7 @@ class RasterReclassificationProcessor:
         vrt_layer = QgsRasterLayer(output_vrt, f"{self.output_prefix}_reclass_output")
         if vrt_layer.isValid():
             # self.context.project().addMapLayer(vrt_layer)
-            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
+            log_message("Added VRT layer to the map.")
         else:
-            log_message(
-                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
-            )
+            log_message("Failed to add VRT layer to the map.", level=Qgis.Critical)
         return output_vrt

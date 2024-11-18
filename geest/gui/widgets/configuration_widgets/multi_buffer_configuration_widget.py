@@ -27,7 +27,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            log_message(f"Attributes: {self.attributes}", tag="Geest", level=Qgis.Info)
+            log_message(f"Attributes: {self.attributes}")
             # Travel Mode group
             self.travel_mode_group = QGroupBox("Travel Mode:")
             self.travel_mode_layout = QHBoxLayout()
@@ -87,12 +87,10 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.increments_input.textChanged.connect(self.validate_increments_input)
 
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def validate_increments_input(self) -> bool:
         """

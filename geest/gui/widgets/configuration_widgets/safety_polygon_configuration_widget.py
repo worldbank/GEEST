@@ -40,7 +40,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.table_widget = QTableWidget()
             self.layout.addWidget(self.table_widget)
             self.table_widget.setColumnCount(2)
-            self.table_widget.setHorizontalHeaderLabels(["Name", "Value"])
+            self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
             self.table_widget.setColumnWidth(1, 80)
             self.table_widget.horizontalHeader().setStretchLastSection(False)
             self.table_widget.horizontalHeader().setSectionResizeMode(
@@ -59,9 +59,9 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.table_widget.setRowCount(len(safety_classes))
 
             def validate_value(value):
-                return 0 <= value <= 6
+                return 0 <= value <= 100
 
-            log_message(f"Classes: {safety_classes}", tag="Geest", level=Qgis.Info)
+            log_message(f"Classes: {safety_classes}")
             # iterate over the dict and populate the table
             for row, (class_name, value) in enumerate(safety_classes.items()):
                 if row >= self.table_widget.rowCount():
@@ -70,13 +70,13 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                 if not isinstance(class_name, str):
                     continue
 
-                if not isinstance(value, (int, float)) or not 0 <= value <= 6:
+                if not isinstance(value, (int, float)) or not 0 <= value <= 100:
                     value = 0
 
                 name_item = QTableWidgetItem(class_name)
                 value_item = QSpinBox()
                 self.table_widget.setItem(row, 0, name_item)
-                value_item.setRange(0, 6)  # Set spinner range
+                value_item.setRange(0, 100)  # Set spinner range
                 value_item.setValue(value)  # Default value
                 self.table_widget.setCellWidget(row, 1, value_item)
 
@@ -87,18 +87,10 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                         value_item.setValue(0)
                     else:
                         value_item.setStyleSheet("color: black;")
+                    self.update_cell_colors()
+                    self.update_data()
 
-                    def on_value_changed(value):
-                        # Color handling for current cell
-                        if value is None or not (0 <= value <= 6):
-                            value_item.setStyleSheet("color: red;")
-                            value_item.setValue(0)
-                        else:
-                            value_item.setStyleSheet("color: black;")
-                        self.update_cell_colors()
-                        self.table_to_dict()
-
-                    value_item.valueChanged.connect(on_value_changed)
+                value_item.valueChanged.connect(on_value_changed)
 
                 # Call update_cell_colors after all rows are created
                 self.update_cell_colors()
@@ -107,12 +99,10 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.layout.addWidget(self.table_widget)
 
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
 
-            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def update_cell_colors(self):
         # Check if all values are zero
@@ -137,17 +127,12 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             spin_widget = self.table_widget.cellWidget(row, 1)
             value = None
             if spin_widget and spin_widget.value():
-                value = str(spin_widget.value())
+                value = spin_widget.value()
             name_item = self.table_widget.item(row, 0)
             class_name = str(name_item.text())
             updated_attributes[class_name] = value
-        log_message("*****************")
-        log_message("")
-        log_message(
-            f"Updated attributes {updated_attributes}", tag="Geest", level=Qgis.Info
-        )
-        log_message("")
-        log_message("*****************")
+
+        log_message(f"Updated attributes {updated_attributes}")
         return updated_attributes
 
     def get_data(self) -> dict:
@@ -159,15 +144,16 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         """
         if not self.isChecked():
             return None
+
         # Serialize the self.table_widget back into the classify_poly_into_classes_unique_values attribute
         updated_attributes = self.table_to_dict()
 
         self.attributes["classify_poly_into_classes_unique_values"] = updated_attributes
-        log_message("------------------------------------")
-        log_message("------------------------------------")
-        log_message(f"Attributes: {self.attributes}", tag="Geest", level=Qgis.Info)
-        log_message("------------------------------------")
-        log_message("------------------------------------")
+        # log_message("------------------------------------")
+        # log_message("------------------------------------")
+        # log_message(f"Attributes: {self.attributes}")
+        # log_message("------------------------------------")
+        # log_message("------------------------------------")
         return self.attributes
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:

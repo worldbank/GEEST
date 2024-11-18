@@ -27,7 +27,7 @@ class SetupPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading setup panel", tag="Geest", level=Qgis.Info)
+        log_message(f"Loading setup panel")
         self.initUI()
 
     def initUI(self):

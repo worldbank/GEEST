@@ -76,9 +76,7 @@ class WorkflowJob(QgsTask):
             return False
 
         try:
-            log_message(
-                f"Running workflow: {self.description()}", tag="Geest", level=Qgis.Info
-            )
+            log_message(f"Running workflow: {self.description()}")
 
             # Emit the 'started' signal before running the workflow
             self.job_started.emit()
@@ -89,7 +87,7 @@ class WorkflowJob(QgsTask):
                 level=Qgis.Info,
             )
             attributes = self._item.attributes()
-            log_message(f"{attributes}", tag="Geest", level=Qgis.Info)
+            log_message(f"{attributes}")
             if result:
                 log_message(
                     f"Workflow {self.description()} completed.",
@@ -106,9 +104,7 @@ class WorkflowJob(QgsTask):
                 return False
 
         except Exception as e:
-            log_message(
-                f"Error during task execution: {e}", tag="Geest", level=Qgis.Critical
-            )
+            log_message(f"Error during task execution: {e}", level=Qgis.Critical)
             import traceback
 
             log_message(

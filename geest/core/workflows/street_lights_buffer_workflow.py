@@ -62,10 +62,8 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
         self.features_layer = QgsVectorLayer(layer_path, "points", "ogr")
         if not self.features_layer.isValid():
-            log_message(
-                "street_lights_point_layer not valid", tag="Geest", level=Qgis.Critical
-            )
-            log_message(f"Layer Source: {layer_path}", tag="Geest", level=Qgis.Critical)
+            log_message("street_lights_point_layer not valid", level=Qgis.Critical)
+            log_message(f"Layer Source: {layer_path}", level=Qgis.Critical)
             error = f"Streetlights point layer is not valid: {layer_path}"
             self.attributes["error"] = error
             raise Exception(error)
@@ -90,9 +88,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
-        log_message(
-            f"{self.workflow_name}  Processing Started", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"{self.workflow_name}  Processing Started")
 
         # Step 1: Buffer the selected features
         buffered_layer = self._buffer_features(

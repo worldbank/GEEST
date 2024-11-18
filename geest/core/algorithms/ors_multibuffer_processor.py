@@ -109,9 +109,7 @@ class ORSMultiBufferProcessor:
         if not self.points_layer.isValid():
             raise QgsProcessingException(f"Failed to load points layer")
 
-        log_message(
-            "ORS Multibuffer Processor Initialized", tag="Geest", level=Qgis.Info
-        )
+        log_message("ORS Multibuffer Processor Initialized")
 
     def process_areas(self, mode="foot-walking", measurement="distance") -> str:
         """
@@ -131,7 +129,7 @@ class ORSMultiBufferProcessor:
         Returns:
             str: The file path to the VRT file containing the combined rasters
         """
-        log_message("ORS  Mulitbuffer Processing Started", tag="Geest", level=Qgis.Info)
+        log_message("ORS  Mulitbuffer Processing Started")
 
         feedback = QgsProcessingFeedback()
         area_iterator = AreaIterator(self.gpkg_path)
@@ -225,7 +223,7 @@ class ORSMultiBufferProcessor:
         Returns:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
-        log_message("ORS Select Features Started", tag="Geest", level=Qgis.Info)
+        log_message("ORS Select Features Started")
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
 
         # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
@@ -275,7 +273,7 @@ class ORSMultiBufferProcessor:
             temp_layer, output_path, "UTF-8", temp_layer.crs(), "ESRI Shapefile"
         )
 
-        log_message("ORS Select Features Ending", tag="Geest", level=Qgis.Info)
+        log_message("ORS Select Features Ending")
 
         return QgsVectorLayer(output_path, output_name, "ogr")
 
@@ -301,9 +299,7 @@ class ORSMultiBufferProcessor:
         :param index: Index of the current area being processed.
         :return: QgsVectorLayer containing the buffers as polygons.
         """
-        log_message(
-            f"Using ORS API key: {self.masked_api_key}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Using ORS API key: {self.masked_api_key}")
         log_message(
             f"Creating buffers for {point_layer.name()} in {output_path}",
             tag="Geest",
@@ -312,9 +308,7 @@ class ORSMultiBufferProcessor:
 
         # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
-        log_message(
-            f"Creating buffers for {len(features)} points", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Creating buffers for {len(features)} points")
         total_features = len(features)
 
         # Process features in subsets to handle large datasets
@@ -621,10 +615,8 @@ class ORSMultiBufferProcessor:
             "native:mergevectorlayers", merge_bands_params
         )
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
-        log_message(
-            f"Multi-buffer layer created at {output_path}", tag="Geest", level=Qgis.Info
-        )
-        log_message(f"Layer written to {output_path}", tag="Geest", level=Qgis.Info)
+        log_message(f"Multi-buffer layer created at {output_path}")
+        log_message(f"Layer written to {output_path}")
         return output_path
 
     def rasterize(
@@ -646,9 +638,7 @@ class ORSMultiBufferProcessor:
         Returns:
             str: The path to the rasterized output.
         """
-        log_message(
-            f"Rasterizing {input_path} to {output_path}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Rasterizing {input_path} to {output_path}")
 
         if not input_path:
             raise ValueError("Input path is required")
@@ -664,11 +654,9 @@ class ORSMultiBufferProcessor:
 
         # Check if the "value" field already exists
         field_names = [field.name() for field in input_layer.fields()]
-        log_message(f"Field names: {field_names}", tag="Geest", level=Qgis.Info)
+        log_message(f"Field names: {field_names}")
         if "value" not in field_names:
-            log_message(
-                "Adding 'value' field to input layer", tag="Geest", level=Qgis.Info
-            )
+            log_message("Adding 'value' field to input layer")
             # Add the burn field to the input layer if it doesn't exist
             input_layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             input_layer.updateFields()
@@ -751,11 +739,9 @@ class ORSMultiBufferProcessor:
         }
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if not verbose_mode:
-            log_message(str(params), tag="Geest", level=Qgis.Info)
+            log_message(str(params))
         result = processing.run("gdal:rasterize", params)
-        log_message(
-            f"Rasterized output saved to {output_path}", tag="Geest", level=Qgis.Info
-        )
+        log_message(f"Rasterized output saved to {output_path}")
         return output_path
 
     def _mask_raster(
@@ -817,7 +803,7 @@ class ORSMultiBufferProcessor:
         }
 
         processing.run("gdal:cliprasterbymasklayer", params)
-        log_message(f"Mask Parameter: {params}", tag="Geest", level=Qgis.Info)
+        log_message(f"Mask Parameter: {params}")
         log_message(
             f"Masked raster saved to {masked_raster_filepath}",
             tag="Geest",
@@ -892,7 +878,7 @@ class ORSMultiBufferProcessor:
 
         # Run the gdal:buildvrt processing algorithm to create the VRT
         results = processing.run("gdal:buildvirtualraster", params)
-        log_message(f"Created VRT: {vrt_filepath}", tag="Geest", level=Qgis.Info)
+        log_message(f"Created VRT: {vrt_filepath}")
         # Add the VRT to the QGIS map
         vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.output_prefix}_combined VRT")
 
@@ -911,9 +897,7 @@ class ORSMultiBufferProcessor:
             #    self.context.takeResultLayer(vrt_layer.id()))
 
             # self.context.project().addMapLayer(vrt_layer)
-            log_message("Added VRT layer to the map.", tag="Geest", level=Qgis.Info)
+            log_message("Added VRT layer to the map.")
         else:
-            log_message(
-                "Failed to add VRT layer to the map.", tag="Geest", level=Qgis.Critical
-            )
+            log_message("Failed to add VRT layer to the map.", level=Qgis.Critical)
         return vrt_filepath
