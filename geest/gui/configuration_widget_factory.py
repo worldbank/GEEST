@@ -36,12 +36,7 @@ class ConfigurationWidgetFactory:
         """
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-
-            log_message("----------------------------", tag="Geest", level=Qgis.Info)
-            log_message(f"Key: {key}", tag="Geest", level=Qgis.Info)
-            log_message(f"Value: {value}", tag="Geest", level=Qgis.Info)
-            log_message("----------------------------", tag="Geest", level=Qgis.Info)
-
+            log_message(f"Key: {key} Value: {value}", tag="Geest", level=Qgis.Info)
         try:
             if key == "indicator_required" and value == 0:
                 return DontUseConfigurationWidget(

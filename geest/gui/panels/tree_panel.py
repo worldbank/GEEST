@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-import re
 from typing import Union, Dict, List
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -31,10 +30,10 @@ from qgis.PyQt.QtCore import (
     QSettings,
     pyqtSignal,
     QModelIndex,
-    QTimer,
-    QPersistentModelIndex,
+    QVariant,
 )
 from qgis.PyQt.QtGui import QMovie
+from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import (
     Qgis,
     QgsRasterLayer,
@@ -375,6 +374,7 @@ class TreePanel(QWidget):
             )
         try:
             json_data = self.model.to_json()
+
             save_path = os.path.join(self.working_directory, "model.json")
             with open(save_path, "w") as f:
                 json.dump(json_data, f, indent=4)
@@ -565,6 +565,7 @@ class TreePanel(QWidget):
         sorted_data = dict(sorted(attributes.items()))
 
         dialog = QDialog()
+        dialog.setWindowState(Qt.WindowMaximized)
         dialog.setWindowTitle("Attributes")
         dialog.resize(600, 400)
 
@@ -576,23 +577,43 @@ class TreePanel(QWidget):
         table.setRowCount(len(sorted_data))
         table.setColumnCount(2)
         table.setHorizontalHeaderLabels(["Key", "Value"])
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.Stretch
+        )  # Only the second column stretches
+
         # Populate the table with the sorted data
         for row, (key, value) in enumerate(sorted_data.items()):
             key_item = QTableWidgetItem(key)
-            value_item = QTableWidgetItem(str(value))
             key_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            value_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-
             table.setItem(row, 0, key_item)
-            table.setItem(row, 1, value_item)
+
+            if isinstance(value, dict):
+                # Create a nested table for dictionary values
+                nested_table = self.create_nested_table(value)
+                table.setCellWidget(row, 1, nested_table)
+                # Adjust row height to fit nested table
+                table.setRowHeight(row, nested_table.height() + 10)  # Add 10px padding
+            else:
+                value_item = QTableWidgetItem(str(value))
+                value_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                table.setItem(row, 1, value_item)
 
         layout.addWidget(table)
 
-        # Add a close button
+        # Add buttons
+        button_layout = QHBoxLayout()
+
+        # Close button
         close_button = QPushButton("Close")
         close_button.clicked.connect(dialog.close)
-        layout.addWidget(close_button)
+        button_layout.addWidget(close_button)
+
+        # Maximize button
+        maximize_button = QPushButton("AutoSize Columns")
+        maximize_button.clicked.connect(lambda: self.maximize_dialog(dialog, table))
+        button_layout.addWidget(maximize_button)
+
+        layout.addLayout(button_layout)
 
         # Enable custom context menu for the table
         table.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -603,6 +624,38 @@ class TreePanel(QWidget):
         dialog.exec_()
 
         log_message("----------------------------", tag="Geest", level=Qgis.Info)
+
+    def create_nested_table(self, nested_data: dict) -> QTableWidget:
+        """Create a QTableWidget to display nested dictionary data."""
+        nested_table = QTableWidget()
+        nested_table.setRowCount(len(nested_data))
+        nested_table.setColumnCount(2)
+        nested_table.setHorizontalHeaderLabels(["Key", "Value"])
+        nested_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        for row, (key, value) in enumerate(nested_data.items()):
+            key_item = QTableWidgetItem(str(key))  # Convert key to string
+            value_item = QTableWidgetItem(str(value))  # Convert value to string
+            key_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            value_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+            nested_table.setItem(row, 0, key_item)
+            nested_table.setItem(row, 1, value_item)
+
+        nested_table.setFixedHeight(
+            len(nested_data) * 25
+        )  # Adjust height based on the number of rows
+        nested_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        nested_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        nested_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        return nested_table
+
+    def maximize_dialog(self, dialog, table):
+        """Maximize the dialog and adjust the table column widths."""
+        dialog.showMaximized()
+        # Adjust the first column to fit its content
+        table.resizeColumnToContents(0)
 
     def show_context_menu(self, table, pos):
         """Show a context menu with a copy option on right-click."""

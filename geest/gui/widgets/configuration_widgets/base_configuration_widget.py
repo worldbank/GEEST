@@ -98,6 +98,9 @@ class BaseConfigurationWidget(QRadioButton):
                 log_message(
                     f"Error in update_data: {e}", tag="Geest", level=Qgis.Critical
                 )
+                import traceback
+
+                log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
 
     def on_toggled(self, checked: bool) -> None:
         """

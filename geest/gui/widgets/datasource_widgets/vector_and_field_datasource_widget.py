@@ -10,6 +10,8 @@ from qgis.core import (
     QgsProject,
     QgsFieldProxyModel,
     QgsVectorLayer,
+    QgsWkbTypes,
+    Qgis,
 )
 from qgis.gui import QgsFieldComboBox
 from qgis.PyQt.QtCore import QSettings
@@ -189,9 +191,31 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 vectorLayer = self.layer_combo.currentLayer()
                 idx = vectorLayer.fields().indexOf(selected_field)
                 values = vectorLayer.uniqueValues(idx)
-                # convert values from a set to a list
-                values = list(values)
-                self.attributes[f"{self.widget_key}_unique_values"] = values
+                values_dict = {}
+
+                #  list the data type of each value
+                for value in values:
+                    log_message(f"{type(value)} value {value}")
+                    if isinstance(value, str):
+                        values_dict[value] = None
+                # Preserve existing values if they exist
+                existing_values = self.attributes.get(
+                    f"{self.widget_key}_unique_values", {}
+                )
+
+                for key in values_dict.keys():
+                    if key not in existing_values:
+                        values_dict[key] = None
+                    else:
+                        values_dict[key] = existing_values[key]
+                log_message(
+                    f"Existing values: {values_dict}", tag="Geest", level=Qgis.Info
+                )
+                log_message(
+                    f"New      values: {values_dict}", tag="Geest", level=Qgis.Info
+                )
+                # will drop any keys in the json item that are not in values_dict
+                self.attributes[f"{self.widget_key}_unique_values"] = values_dict
 
         else:
             self.attributes[f"{self.widget_key}_selected_field"] = None
@@ -237,7 +261,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 layer.crs().authid()
             )  # Coordinate Reference System
             self.attributes[f"{self.widget_key}_layer_wkb_type"] = (
-                layer.wkbType()
+                QgsWkbTypes.displayString(layer.wkbType())
             )  # Geometry type (e.g., Point, Polygon)
             self.attributes[f"{self.widget_key}_layer_id"] = (
                 layer.id()
