@@ -352,7 +352,7 @@ class AcledImpactWorkflow(WorkflowBase):
             if geom in unique_geometries:
                 # If it exists, update only if the new min_value is lower
                 if min_value < unique_geometries[geom].attributes()[0]:
-                    unique_geometries[geom].setAttribute("min_value", min_value)
+                    unique_geometries[geom].setAttribute(0, min_value)
             else:
                 # Add new unique geometry with the min_value attribute
                 new_feature = QgsFeature()

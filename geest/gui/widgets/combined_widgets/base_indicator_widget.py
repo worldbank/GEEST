@@ -1,4 +1,4 @@
-from qgis.PyQt.QtWidgets import QRadioButton, QHBoxLayout, QWidget
+from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QWidget
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import Qgis
 from geest.utilities import log_message
@@ -17,7 +17,7 @@ class BaseIndicatorWidget(QRadioButton):
         self.label_text = humanised_label
         self.attributes = attributes
         self.container: QWidget = QWidget()
-        self.layout: QHBoxLayout = QHBoxLayout(self.container)
+        self.layout: QVBoxLayout = QVBoxLayout(self.container)
         self.layout.addWidget(self)
 
         # Log creation of widget

@@ -28,7 +28,7 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
         Adds the internal widgets required for selecting the CSV firadiole and validating its format.
         This method is called during the widget initialization and sets up the layout for the UI components.
         """
-        log_message("Adding internal widgets for ACLED CSV Layer Widget", "Geest")
+        log_message("Adding internal widgets for ACLED CSV Layer Widget")
         try:
             self.widget_key = "use_csv_to_point_layer"
 

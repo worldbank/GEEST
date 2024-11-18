@@ -7,6 +7,7 @@ from qgis.PyQt.QtWidgets import (
     QToolButton,
     QFileDialog,
     QMessageBox,
+    QSpinBox,
 )
 from qgis.core import Qgis
 from geest.utilities import log_message
@@ -35,6 +36,31 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
             self.main_layout = QVBoxLayout()
             self.widget_key = "use_csv_to_point_layer"
 
+            # impact distance input
+            self.buffer_distance_layout = QHBoxLayout()
+            self.buffer_distance_label = QLabel("Incident Impact Distance (m):")
+            self.buffer_distance_input = QSpinBox()
+            self.buffer_distance_input.setRange(0, 100000)
+            self.buffer_distance_layout.addWidget(self.buffer_distance_label)
+            self.buffer_distance_layout.addWidget(self.buffer_distance_input)
+            # I dont think this is defined in the spreadsheet yet.
+            default_distance = self.attributes.get(
+                "{self.widget_key}_distance_default", 1000
+            )
+            buffer_distance = self.attributes.get(
+                "{self.widget_key}_distance", default_distance
+            )
+            if buffer_distance == 0:
+                buffer_distance = default_distance
+            try:
+                self.buffer_distance_input.setValue(int(buffer_distance))
+            except (ValueError, TypeError):
+                self.buffer_distance_input.setValue(int(default_distance))
+
+            # Add all layouts to the main layout
+            self.layout.addLayout(self.buffer_distance_layout)
+            self.buffer_distance_input.valueChanged.connect(self.update_data)
+
             # CSV File Section
             self._add_csv_file_widgets()
 
@@ -57,6 +83,7 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
         """
         self.csv_file_label = QLabel("Select ACLED CSV File")
         self.main_layout.addWidget(self.csv_file_label)
+        # Buffer distance input
 
         # CSV File Input and Selection Button
         self.csv_file_layout = QHBoxLayout()
@@ -135,7 +162,9 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
         """
         if not self.isChecked():
             return None
-
+        self.attributes[f"{self.widget_key}_distance"] = (
+            self.buffer_distance_input.value()
+        )
         # Collect data for the CSV file
         self.attributes[f"{self.widget_key}_csv_file"] = self.csv_file_line_edit.text()
 
@@ -151,6 +180,8 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
         try:
             self.csv_file_line_edit.setEnabled(enabled)
             self.csv_file_button.setEnabled(enabled)
+            self.buffer_distance_input.setEnabled(enabled)
+            self.buffer_distance_label.setEnabled(enabled)
         except Exception as e:
             log_message(
                 f"Error in set_internal_widgets_enabled: {e}",
