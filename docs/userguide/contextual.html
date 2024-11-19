@@ -1,0 +1,685 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>3.2.1. Contextual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'docs/userguide/contextual';</script>
+    <link rel="canonical" href="https://worldbank.github.io/GEEST/docs/userguide/contextual.html" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3.2.2. Accessibility" href="accessibility.html" />
+    <link rel="prev" title="3.2. Navigation" href="navigation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Nov 19, 2024"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../README.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt=" - Home"/>
+    <script>document.write(`<img src="../../_static/logo.png" class="logo__image only-dark" alt=" - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../README.html">
+                    Welcome to GEEST
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">1. About GEEST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">2. Download GEEST</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../user_guide.html">3. User Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">3.1. Installing GEEST</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="navigation.html">3.2. Navigation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">3.2.1. Contextual</a></li>
+<li class="toctree-l3"><a class="reference internal" href="accessibility.html">3.2.2. Accessibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="placecharacterization.html">3.2.3. Place Characterization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="insights.html">3.2.4. Insights</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="datacollection.html">3.3. Data Collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">3.4. Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html">3.5. FAQ</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../background.html">4. Project Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgements.html">5. Acknowledgements</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../training.html">7. Training</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://datacatalog.worldbank.org/search/collections/genderspatial">Data Gap Analysis</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42">Methodology Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://www.qgis.org/en/site/">QGIS</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://openrouteservice.org/">Open Route Service</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">License &amp; Citation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/worldbank/GEEST" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/worldbank/GEEST/edit/main/docs/userguide/contextual.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/worldbank/GEEST/issues/new?title=Issue%20on%20page%20%2Fdocs/userguide/contextual.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/docs/userguide/contextual.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Contextual</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="contextual">
+<h1><span class="section-number">3.2.1. </span>Contextual<a class="headerlink" href="#contextual" title="Permalink to this heading">#</a></h1>
+<p align="justify"> 
+The Contextual Dimension refers to the laws and policies that shape workplace gender discrimination, financial autonomy, and overall gender empowerment. Although this dimension may vary between countries due to differences in legal frameworks, it remains consistent within a single country, as national policies and regulations are typically applied uniformly across countries.  For more information on data input used from open sources, please refer to the 
+    <a href="https://jayaramhariharan.com/draft-docs/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
+</p>
+<h3>Workplace Discrimination</h3>
+<hr style="height: 3px; background-color: grey; border: none;">
+<p align="justify"> 
+Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.
+This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+</p>
+<h3>Step 1: Accessing the Contextual Dimension</h3>
+<ul>
+    <li>
+        <strong>Locate the Workplace Discrimination Section:</strong>
+        <ul>
+               <span>🔍 Right-Click on Workplace Discrimination.</span><br>
+               <span>⚙️ Select Show Properties.</span>
+        </ul>
+        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+    </li>
+</ul>
+<h3>Step 2: Opening the Show Properties Dialog</h3>
+<ul>
+    <li>
+        <strong>Input the Value for <em>Value</em>:</strong>
+        <ul>
+            <span>  🖊️ Enter the <strong>WBL Workplace Index Score</strong> value.</span><br>
+            <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
+        </ul>
+    </li>
+           <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
+    </li>
+</ul>
+<p>📂 <strong>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder.</strong></p>
+<p align="center">
+ **IMAGE for WD**
+</p>
+<h3>Regulatory Frameworks</h3>
+<hr style="height: 3px; background-color: grey; border: none;">
+<p align="justify"> 
+Regulatory Frameworks pertain to laws and policies that protect women’s employment rights, such as childcare support and parental leave, influencing their workforce participation.
+This indicator is composed by aggregating the Parenthood and Pay Index scores of the WBL 2024, both standardized on a scale from 0 to 5.
+</p>
+<h3>Step 1: Accessing the Contextual Dimension</h3>
+<ul>
+    <li>
+        <strong>Locate the Regulatory Frameworks Section:</strong>
+        <ul>
+               <span>🔍 Right-Click on Regulatory Frameworks.</span><br>
+               <span>⚙️ Select Show Properties.</span>
+        </ul>
+        <img src="your_image_path_here" alt="IMAGE for RF" style="width:100%;"/>
+    </li>
+</ul>
+<h3>Step 2: Opening the Show Properties Dialog</h3>
+<ul>
+    <li>
+        <strong>Input the Value for <em>Value</em>:</strong>
+        <ul>
+            <span>  🖊️ Enter the <strong>WBL Pay and Parenthood Index Scores</strong> value.</span><br>
+            <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
+        </ul>
+    </li>
+           <img src="your_image_path_here" alt="IMAGE for RF" style="width:100%;"/>
+    </li>
+</ul>
+<p>📂 <strong>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder.</strong></p>
+<p align="center">
+ **IMAGE for RF**
+</p>
+<h3>Financial Inclusion</h3>
+<hr style="height: 3px; background-color: grey; border: none;">
+<p align="justify"> 
+Financial Inclusion involves laws concerning women’s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities.
+This indicator comes from the Entrepeneurship rating of the 2024 WBL Index and is standardized on a scale ranging from 0 to 5.
+</p>
+<h3>Step 1: Accessing the Contextual Dimension</h3>
+<ul>
+    <li>
+        <strong>Locate the Financial Inclusion Section:</strong>
+        <ul>
+               <span>🔍 Right-Click on Financial Inclusion.</span><br>
+               <span>⚙️ Select Show Properties.</span>
+        </ul>
+        <img src="your_image_path_here" alt="IMAGE for FI" style="width:100%;"/>
+    </li>
+</ul>
+<h3>Step 2: Opening the Show Properties Dialog</h3>
+<ul>
+    <li>
+        <strong>Input the Value for <em>Value</em>:</strong>
+        <ul>
+            <span>  🖊️ Enter the <strong>WBL Entrepeneurship Index Score</strong> value.</span><br>
+            <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
+        </ul>
+    </li>
+           <img src="your_image_path_here" alt="IMAGE for FI" style="width:100%;"/>
+    </li>
+</ul>
+<p>📂 <strong>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Contextual” folder.</strong></p>
+<p align="center">
+ **IMAGE for FI**
+</p>
+<h3>Aggregate</h3>
+<hr style="height: 3px; background-color: grey; border: none;">
+<h3>Step 1: Weights Set-Up</h3>
+<ul>
+    <li>
+        <strong>Locate the Contextual Dimension Section:</strong>
+        <ul>
+               <span>🔍 Right-Click on Contextual Dimension.</span><br>
+               <span>⚙️ Select Edit Attributes.</span>
+        </ul>
+        <img src="your_image_path_here" alt="IMAGE for Weights" style="width:100%;"/>
+    </li>
+</ul>
+<h3>Step 2: Opening the Edit Attributes Dialog</h3>
+<ul>
+    <li>
+        <strong>Ensure the <em>Weights</em> values are filled in:</strong>
+        <ul>
+            <span>  🖊️ Ensure that all Weight fields are filled with valid numerical entries.</span><br>
+            <span>  ✔️ Press <strong>OK</strong> to confirm your input.</span><br>
+            <p>
+</ul>
+<p align="justify"> 
+    <span style="color: orange; font-size: 50px;">⚠️</span>
+    <strong>If equal weights are not suitable for the specific context of the analysis, the user can adjust the weights as necessary, ensuring that all weights still sum to 100!</strong> The default weights are <strong>34%</strong> for <strong>Workplace Discrimination</strong>, <strong>33%</strong> for <strong>Regulatory Frameworks</strong>, and <strong>33%</strong> for <strong>Financial Inclusion</strong>. If a factor was not calculated—perhaps due to missing data or because it was deemed unimportant—that factor should be assigned a weight of <strong>0%</strong>. Subsequently, the remaining factor weights must be adjusted to ensure they collectively add up to <strong>100%</strong>.
+</p>
+<img src="your_image_path_here" alt="IMAGE for Weights" style="width:100%;"/>
+<h3>Step 3: Aggegate</h3>
+<ul>
+     <li>
+            it will be amended after UIX is finished...
+    </li>
+</ul>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./docs/userguide"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="navigation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">3.2. </span>Navigation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="accessibility.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">3.2.2. </span>Accessibility</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Development Data Group
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Nov 19, 2024.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  <div>
+ Country borders or names do not necessarily reflect the World Bank Group’s official position. All maps are for illustrative purposes and do not imply the expression of any opinion on the part of the World Bank, concerning the legal status of any country or territory or concerning the delimitation of frontiers or boundaries
+</div>
+    <b>All content (unless otherwise specified) is subject to the <a href="https://opensource.org/license/mit/">MIT License.</a></b>
+</div>
+
+</div>
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-# User Guide
+## Navigation
 
 ```{tableofcontents}
 ```

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>3. User Guide</title>
+    <title>1. About GEEST</title>
   
   
   
@@ -59,13 +59,13 @@
     <script src="../_static/design-tabs.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="../_static/sphinx-thebe.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'docs/user_guide';</script>
-    <link rel="canonical" href="https://worldbank.github.io/GEEST/docs/user_guide.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'docs/about';</script>
+    <link rel="canonical" href="https://worldbank.github.io/GEEST/docs/about.html" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="3.1. Installing GEEST" href="userguide/install.html" />
-    <link rel="prev" title="2. Download GEEST" href="download.html" />
+    <link rel="next" title="2. Download GEEST" href="download.html" />
+    <link rel="prev" title="Welcome to GEEST" href="../README.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
     <meta name="docbuild:last-update" content="Nov 19, 2024"/>
@@ -185,9 +185,9 @@
             </li>
         </ul>
         <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="about.html">1. About GEEST</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">1. About GEEST</a></li>
 <li class="toctree-l1"><a class="reference internal" href="download.html">2. Download GEEST</a></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">3. User Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="user_guide.html">3. User Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="userguide/install.html">3.1. Installing GEEST</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="userguide/navigation.html">3.2. Navigation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="userguide/contextual.html">3.2.1. Contextual</a></li>
@@ -291,7 +291,7 @@
       
       
       
-      <li><a href="https://github.com/worldbank/GEEST/edit/main/docs/user_guide.md" target="_blank"
+      <li><a href="https://github.com/worldbank/GEEST/edit/main/docs/about.md" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -308,7 +308,7 @@
       
       
       
-      <li><a href="https://github.com/worldbank/GEEST/issues/new?title=Issue%20on%20page%20%2Fdocs/user_guide.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/worldbank/GEEST/issues/new?title=Issue%20on%20page%20%2Fdocs/about.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -338,7 +338,7 @@
       
       
       
-      <li><a href="../_sources/docs/user_guide.md" target="_blank"
+      <li><a href="../_sources/docs/about.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -409,7 +409,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -420,11 +422,26 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>User Guide</h1>
+    <h1>About GEEST</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-geest">1.1. What is GEEST?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-theory-behind">1.2. The Theory Behind</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-practical-implementation">1.3. The Practical Implementation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-serves-to">1.3.1. GEEST serves to:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-it-matters">1.4. Why It Matters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-involved">1.5. How to Get Involved</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -434,26 +451,53 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="user-guide">
-<h1><span class="section-number">3. </span>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this heading">#</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="userguide/install.html">3.1. Installing GEEST</a></li>
-<li class="toctree-l1"><a class="reference internal" href="userguide/navigation.html">3.2. Navigation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="userguide/contextual.html">3.2.1. Contextual</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/accessibility.html">3.2.2. Accessibility</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/placecharacterization.html">3.2.3. Place Characterization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/insights.html">3.2.4. Insights</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/insights.html#step-1-classify-into-discrete-classes">3.2.5. Step 1: Classify into discrete classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/insights.html#step-2-combine-score-and-population-classifications">3.2.6. Step 2: Combine score and population classifications</a></li>
-<li class="toctree-l2"><a class="reference internal" href="userguide/insights.html#step-3-aggregation">3.2.7. Step 3: Aggregation</a></li>
+  <section class="tex2jax_ignore mathjax_ignore" id="about-geest">
+<h1><span class="section-number">1. </span>About GEEST<a class="headerlink" href="#about-geest" title="Permalink to this heading">#</a></h1>
+<section id="what-is-geest">
+<h2><span class="section-number">1.1. </span>What is GEEST?<a class="headerlink" href="#what-is-geest" title="Permalink to this heading">#</a></h2>
+<p style="text-align: justify;">
+<strong>GEEST is a QGIS plugin</strong>, designed to empower users with robust geospatial tools directly within the QGIS platform, making it accessible and integrable for users worldwide.
+</p>
+<hr class="docutils" />
+</section>
+<section id="the-theory-behind">
+<h2><span class="section-number">1.2. </span>The Theory Behind<a class="headerlink" href="#the-theory-behind" title="Permalink to this heading">#</a></h2>
+<p style="text-align: justify;">
+GEEST was built for the practical implementation of the <a href="https://documents1.worldbank.org/curated/en/099121123091527675/pdf/P1792121dc820d04419928140a279022b42.pdf" target="_blank"><strong>Geospatial Women’s Employment Analytical Framework (GeoWEAF)</strong></a>, developed by the World Bank, which identifies the location-specific factors affecting women's access to jobs. <a href="https://jayaramhariharan.com/draft-docs/docs/background.html#" target="_blank"><strong>This framework</strong></a> categorizes regions based on their level of support for enabling women’s access to employment. It identifies 15 critical, spatially varying factors that influence women’s job prospects, divided into three main dimensions: Contextual, Accessibility, and Place Characterization.
+</p>
+<hr class="docutils" />
+</section>
+<section id="the-practical-implementation">
+<h2><span class="section-number">1.3. </span>The Practical Implementation<a class="headerlink" href="#the-practical-implementation" title="Permalink to this heading">#</a></h2>
+<p style="text-align: justify;">
+One of GEEST's main strengths is its ability to address two critical concerns. First, it can detect regions where conditions are optimal—or at least favorable—for women to gain employment in specific sectors. This helps in targeting investment opportunities aimed at promoting gender equality in the workforce.  
+</p> 
+<p style="text-align: justify;">
+Second, for existing job sites, GEEST highlights which infrastructure investment could be made to enhance women's participation in the workforce. By offering detailed visualizations and analysis for both dimensions and factors, GEEST enables users to identify specific gaps—such as the lack of digital infrastructure, childcare services, or hospitals in a region—that may act as barriers, negatively impacting the enablement scores. Once these barriers are identified, institutions can allocate targeted investments to strengthen these factors, ultimately creating environments that support increased female participation in the workforce.  
+</p> 
+<section id="geest-serves-to">
+<h3><span class="section-number">1.3.1. </span>GEEST serves to:<a class="headerlink" href="#geest-serves-to" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Identify employment and business opportunities</strong> for women across multiple sectors.</p></li>
+<li><p><strong>Guide investment decisions</strong> that promote gender-inclusive infrastructure and reduce barriers.</p></li>
+<li><p><strong>Support policy-making</strong> through geospatial assessments that encourage gender equity across regions.</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="userguide/datacollection.html">3.3. Data Collection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="userguide/troubleshooting.html">3.4. Troubleshooting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="userguide/faq.html">3.5. FAQ</a></li>
-</ul>
-</div>
+<hr class="docutils" />
+</section>
+</section>
+<section id="why-it-matters">
+<h2><span class="section-number">1.4. </span>Why It Matters<a class="headerlink" href="#why-it-matters" title="Permalink to this heading">#</a></h2>
+<p style="text-align: justify;">
+Women continue to face significant challenges in accessing employment and business opportunities in many sectors, limiting both economic growth and gender equality. GEEST seeks to close this gap by equipping stakeholders with the data needed to empower women in various industries, fostering sustainable development and social progress.
+</p>
+<hr class="docutils" />
+</section>
+<section id="how-to-get-involved">
+<h2><span class="section-number">1.5. </span>How to Get Involved<a class="headerlink" href="#how-to-get-involved" title="Permalink to this heading">#</a></h2>
+<p style="text-align: justify;">
+Whether you are a policymaker, researcher, business leader, or advocate for gender equality, GEEST provides the tools and insights you need to make a difference. <strong>Join us</strong> in exploring the tool, contributing to our mission, and driving meaningful change for women around the world.
+</p>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -487,20 +531,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="download.html"
+       href="../README.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">2. </span>Download GEEST</p>
+        <p class="prev-next-title">Welcome to GEEST</p>
       </div>
     </a>
     <a class="right-next"
-       href="userguide/install.html"
+       href="download.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">3.1. </span>Installing GEEST</p>
+        <p class="prev-next-title"><span class="section-number">2. </span>Download GEEST</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -510,6 +554,28 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-geest">1.1. What is GEEST?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-theory-behind">1.2. The Theory Behind</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-practical-implementation">1.3. The Practical Implementation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-serves-to">1.3.1. GEEST serves to:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-it-matters">1.4. Why It Matters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-get-involved">1.5. How to Get Involved</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
