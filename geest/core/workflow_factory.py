@@ -20,6 +20,7 @@ from geest.core.workflows import (
     SafetyRasterWorkflow,
     RasterReclassificationWorkflow,
     StreetLightsBufferWorkflow,
+    ClassifiedPolygonWorkflow,
 )
 
 from .json_tree_item import JsonTreeItem
@@ -79,7 +80,7 @@ class WorkflowFactory:
             elif analysis_mode == "use_polyline_per_cell":
                 return PolylinePerCellWorkflow(item, cell_size_m, feedback, context)
             # TODO fix inconsistent abbreviation below for Poly
-            elif analysis_mode == "use_poly_per_cell":
+            elif analysis_mode == "use_polygon_per_cell":
                 return PolygonPerCellWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "factor_aggregation":
                 return FactorAggregationWorkflow(item, cell_size_m, feedback, context)
@@ -91,7 +92,9 @@ class WorkflowFactory:
                 return AnalysisAggregationWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_csv_to_point_layer":
                 return AcledImpactWorkflow(item, cell_size_m, feedback, context)
-            elif analysis_mode == "use_classify_poly_into_classes":
+            elif analysis_mode == "use_classify_polygon_into_classes":
+                return ClassifiedPolygonWorkflow(item, cell_size_m, feedback, context)
+            elif analysis_mode == "use_classify_safety_polygon_into_classes":
                 return SafetyPolygonWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_nighttime_lights":
                 return SafetyRasterWorkflow(item, cell_size_m, feedback, context)

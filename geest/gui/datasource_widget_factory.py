@@ -51,7 +51,7 @@ class DataSourceWidgetFactory:
                 return VectorDataSourceWidget(
                     widget_key=cleaned_key, attributes=attributes
                 )
-            if widget_key == "use_poly_per_cell" and value == 1:
+            if widget_key == "use_polygon_per_cell" and value == 1:
                 return VectorDataSourceWidget(
                     widget_key=cleaned_key, attributes=attributes
                 )
@@ -69,7 +69,11 @@ class DataSourceWidgetFactory:
                 return AcledCsvDataSourceWidget(
                     widget_key=widget_key, attributes=attributes
                 )
-            if widget_key == "use_classify_poly_into_classes" and value == 1:
+            if widget_key == "use_classify_polygon_into_classes" and value == 1:
+                return VectorAndFieldDataSourceWidget(
+                    widget_key=cleaned_key, attributes=attributes
+                )
+            if widget_key == "use_classify_safety_polygon_into_classes" and value == 1:
                 return VectorAndFieldDataSourceWidget(
                     widget_key=cleaned_key, attributes=attributes
                 )
