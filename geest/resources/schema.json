@@ -107,13 +107,13 @@
                                             "use_add_layers_manually": {
                                                 "type": "integer"
                                             },
-                                            "use_classify_poly_into_classes": {
+                                            "use_classify_polygon_into_classes": {
                                                 "type": "integer"
                                             },
                                             "use_csv_to_point_layer": {
                                                 "type": "integer"
                                             },
-                                            "use_poly_per_cell": {
+                                            "use_polygon_per_cell": {
                                                 "type": "integer"
                                             },
                                             "use_polyline_per_cell": {
@@ -157,9 +157,9 @@
                                             "use_mapilliary_downloader",
                                             "use_other_downloader",
                                             "use_add_layers_manually",
-                                            "use_classify_poly_into_classes",
+                                            "use_classify_polygon_into_classes",
                                             "use_csv_to_point_layer",
-                                            "use_poly_per_cell",
+                                            "use_polygon_per_cell",
                                             "use_polyline_per_cell",
                                             "use_point_per_cell",
                                             "use_nighttime_lights",

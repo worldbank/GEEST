@@ -16,7 +16,7 @@ from geest.utilities import log_message
 
 class SafetyPolygonWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'use_classify_poly_into_classes' workflow.
+    Concrete implementation of a 'use_classify_polygon_into_classes' workflow.
     """
 
     def __init__(
@@ -36,21 +36,23 @@ class SafetyPolygonWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "use_classify_poly_into_classes"
-        layer_path = self.attributes.get("classify_poly_into_classes_shapefile", None)
+        self.workflow_name = "use_classify_safety_polygon_into_classes"
+        layer_path = self.attributes.get(
+            "classify_safety_polygon_into_classes_shapefile", None
+        )
 
         if not layer_path:
             log_message(
-                "Invalid raster found in classify_poly_into_classes_shapefile, trying classify_poly_into_classes_layer_source.",
+                "Invalid layer found in classify_safety_polygon_into_classes_shapefile, trying classify_safety_polygon_into_classes_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get(
-                "classify_poly_into_classes_layer_source", None
+                "classify_safety_polygon_into_classes_layer_source", None
             )
             if not layer_path:
                 log_message(
-                    "No points layer found in classify_poly_into_classes_layer_source.",
+                    "No layer found in classify_safety_polygon_into_classes_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
@@ -59,12 +61,12 @@ class SafetyPolygonWorkflow(WorkflowBase):
         self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
 
         self.selected_field = self.attributes.get(
-            "classify_poly_into_classes_selected_field", ""
+            "classify_safety_polygon_into_classes_selected_field", ""
         )
         # This is a dict with keys being unique values from the selected field
         # and values from the aggregation dialog configuration table
         self.safety_mapping_table = self.attributes.get(
-            "classify_poly_into_classes_unique_values", None
+            "classify_safety_polygon_into_classes_unique_values", None
         )
         if not isinstance(self.safety_mapping_table, dict):
             raise Exception("Safety scoring table not configured.")

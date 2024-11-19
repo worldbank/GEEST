@@ -53,9 +53,10 @@ class SpreadsheetToJsonParser:
                 "Use Mapillary Downloader",
                 "Use Other Downloader",
                 "Use Add Layers Manually",
-                "Use Classify Poly into Classes",
+                "Use Classify Polygon into Classes",
+                "Use Classify Safety Polygon into Classes",
                 "Use CSV to Point Layer",
-                "Use Poly per Cell",
+                "Use Polygon per Cell",
                 "Use Polyline per Cell",
                 "Use Point per Cell",
                 "Use Nighttime Lights",
@@ -242,9 +243,14 @@ class SpreadsheetToJsonParser:
                     if not pd.isna(row["Use Add Layers Manually"])
                     else ""
                 ),
-                "use_classify_poly_into_classes": (
-                    row["Use Classify Poly into Classes"]
-                    if not pd.isna(row["Use Classify Poly into Classes"])
+                "use_classify_polygon_into_classes": (
+                    row["Use Classify Polygon into Classes"]
+                    if not pd.isna(row["Use Classify Polygon into Classes"])
+                    else ""
+                ),
+                "use_classify_safety_polygon_into_classes": (
+                    row["Use Classify Safety Polygon into Classes"]
+                    if not pd.isna(row["Use Classify Safety Polygon into Classes"])
                     else ""
                 ),
                 "use_csv_to_point_layer": (
@@ -252,9 +258,9 @@ class SpreadsheetToJsonParser:
                     if not pd.isna(row["Use CSV to Point Layer"])
                     else ""
                 ),
-                "use_poly_per_cell": (
-                    row["Use Poly per Cell"]
-                    if not pd.isna(row["Use Poly per Cell"])
+                "use_polygon_per_cell": (
+                    row["Use Polygon per Cell"]
+                    if not pd.isna(row["Use Polygon per Cell"])
                     else ""
                 ),
                 "use_polyline_per_cell": (

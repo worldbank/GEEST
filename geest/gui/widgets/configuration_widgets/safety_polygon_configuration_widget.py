@@ -5,8 +5,7 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QSpinBox,
 )
-from qgis.PyQt.QtCore import QVariant
-from qgis.PyQt.QtGui import QBrush, QColor
+from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import Qgis
 from .base_configuration_widget import BaseConfigurationWidget
 from geest.utilities import log_message
@@ -35,9 +34,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         This method is called during the widget initialization and sets up the layout for the UI components.
         """
         try:
-            self.info_label = QLabel("Classify polygons accoring to safety levels")
+            self.info_label = QLabel("Classify polygons according to safety levels")
             self.layout.addWidget(self.info_label)
             self.table_widget = QTableWidget()
+            self.table_widget.setSizePolicy(
+                QSizePolicy.Expanding, QSizePolicy.Expanding
+            )
+            # Stop the label being editable
+            self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
             self.layout.addWidget(self.table_widget)
             self.table_widget.setColumnCount(2)
             self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
@@ -48,7 +52,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             )
 
             safety_classes = self.attributes.get(
-                f"classify_poly_into_classes_unique_values", {}
+                f"classify_safety_polygon_into_classes_unique_values", {}
             )
             if not isinstance(safety_classes, dict):
                 safety_classes = {}
@@ -82,7 +86,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
 
                 def on_value_changed(value):
                     # Color handling for current cell
-                    if value is None or not (0 <= value <= 6):
+                    if value is None or not (0 <= value <= 100):
                         value_item.setStyleSheet("color: red;")
                         value_item.setValue(0)
                     else:
@@ -145,10 +149,12 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         if not self.isChecked():
             return None
 
-        # Serialize the self.table_widget back into the classify_poly_into_classes_unique_values attribute
+        # Serialize the self.table_widget back into the classify_polygon_into_classes_unique_values attribute
         updated_attributes = self.table_to_dict()
 
-        self.attributes["classify_poly_into_classes_unique_values"] = updated_attributes
+        self.attributes["classify_safety_polygon_into_classes_unique_values"] = (
+            updated_attributes
+        )
         # log_message("------------------------------------")
         # log_message("------------------------------------")
         # log_message(f"Attributes: {self.attributes}")

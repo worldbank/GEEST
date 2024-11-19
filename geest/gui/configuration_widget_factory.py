@@ -1,16 +1,17 @@
 from qgis.core import Qgis
 from geest.gui.widgets.configuration_widgets import (
-    BaseConfigurationWidget,
-    DontUseConfigurationWidget,
     AcledCsvConfigurationWidget,
+    BaseConfigurationWidget,
+    ClassifiedPolygonConfigurationWidget,
+    DontUseConfigurationWidget,
+    FeaturePerCellConfigurationWidget,
     IndexScoreConfigurationWidget,
     MultiBufferConfigurationWidget,
-    SingleBufferConfigurationWidget,
-    FeaturePerCellConfigurationWidget,
-    SafetyPolygonConfigurationWidget,
-    StreetLightsConfigurationWidget,
     RasterReclassificationConfigurationWidget,
+    SafetyPolygonConfigurationWidget,
     SafetyRasterConfigurationWidget,
+    SingleBufferConfigurationWidget,
+    StreetLightsConfigurationWidget,
 )
 from geest.core import setting
 from geest.utilities import log_message
@@ -57,7 +58,7 @@ class ConfigurationWidgetFactory:
             # ------------------------------------------------
             # These three all use the same configuration widgets
             # but will have different datasource widgets generated as appropriate
-            if key == "use_poly_per_cell" and value == 1:  # poly = polygon
+            if key == "use_polygon_per_cell" and value == 1:  # poly = polygon
                 return FeaturePerCellConfigurationWidget(
                     analysis_mode=key, attributes=attributes
                 )
@@ -74,7 +75,11 @@ class ConfigurationWidgetFactory:
                     analysis_mode=key, attributes=attributes
                 )
             # ------------------------------------------------
-            if key == "use_classify_poly_into_classes" and value == 1:
+            if key == "use_classify_polygon_into_classes" and value == 1:
+                return ClassifiedPolygonConfigurationWidget(
+                    analysis_mode=key, attributes=attributes
+                )
+            if key == "use_classify_safety_polygon_into_classes" and value == 1:
                 return SafetyPolygonConfigurationWidget(
                     analysis_mode=key, attributes=attributes
                 )

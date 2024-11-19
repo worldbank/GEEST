@@ -13,6 +13,7 @@ from geest.gui.widgets.combined_widgets import (
     SafetyRasterWidget,
     RasterReclassificationWidget,
     StreetLightsWidget,
+    ClassifiedPolygonWidget,
 )
 from geest.core import setting
 from geest.utilities import log_message
@@ -49,7 +50,7 @@ class CombinedWidgetFactory:
                 return MultiBufferDistancesWidget(label_text=key, attributes=attributes)
             if key == "use_single_buffer_point" and value == 1:
                 return SingleBufferDistanceWidget(label_text=key, attributes=attributes)
-            if key == "use_poly_per_cell" and value == 1:
+            if key == "use_polygon_per_cell" and value == 1:
                 return PolygonWidget(label_text=key, attributes=attributes)
             if key == "use_polyline_per_cell" and value == 1:
                 return PolylineWidget(label_text=key, attributes=attributes)
@@ -57,7 +58,9 @@ class CombinedWidgetFactory:
                 return PointLayerWidget(label_text=key, attributes=attributes)
             if key == "use_csv_to_point_layer" and value == 1:
                 return AcledCsvLayerWidget(label_text=key, attributes=attributes)
-            if key == "use_classify_poly_into_classes" and value == 1:
+            if key == "use_classify_polygon_into_classes" and value == 1:
+                return ClassifiedPolygonWidget(label_text=key, attributes=attributes)
+            if key == "use_classify_safety_polygon_into_classes" and value == 1:
                 return SafetyPolygonWidget(label_text=key, attributes=attributes)
             if key == "use_nighttime_lights" and value == 1:
                 return SafetyRasterWidget(label_text=key, attributes=attributes)

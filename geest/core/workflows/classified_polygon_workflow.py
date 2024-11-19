@@ -5,18 +5,18 @@ from qgis.core import (
     QgsGeometry,
     QgsVectorLayer,
     QgsProcessingContext,
+    edit,
+    QgsField,
 )
+from qgis.PyQt.QtCore import QVariant
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.core.algorithms.polygon_per_cell_processor import (
-    assign_reclassification_to_polygons,
-)
 from geest.utilities import log_message
 
 
-class PolygonPerCellWorkflow(WorkflowBase):
+class ClassifiedPolygonWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'use_polygon_per_cell' workflow.
+    Concrete implementation of a 'use_classify_polygon_into_classes' workflow.
     """
 
     def __init__(
@@ -31,33 +31,37 @@ class PolygonPerCellWorkflow(WorkflowBase):
         :param item: Item containing workflow parameters.
         :param cell_size_m: Cell size in meters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        # TODO fix inconsistent abbreviation below for Poly
-        self.workflow_name = "use_polygon_per_cell"
-
-        layer_path = self.attributes.get("polygon_per_cell_shapefile", None)
+        self.workflow_name = "use_classify_polygon_into_classes"
+        layer_path = self.attributes.get(
+            "use_classify_polygon_into_classes_shapefile", None
+        )
 
         if not layer_path:
             log_message(
-                "Invalid raster found in polygon_per_cell_shapefile, trying polygon_per_cell_layer_source.",
+                "Invalid layer found in use_classify_polygon_into_classes_shapefile, trying use_classify_polygon_into_classes_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("polygon_per_cell_layer_source", None)
+            layer_path = self.attributes.get(
+                "use_classify_polygon_into_classes_layer_source", None
+            )
             if not layer_path:
                 log_message(
-                    "No points layer found in polygon_per_cell_layer_source.",
+                    "No points layer found in use_classify_polygon_into_classes_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
                 return False
 
-        self.features_layer = QgsVectorLayer(
-            layer_path, "polygon_per_cell_layer", "ogr"
+        self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
+
+        self.selected_field = self.attributes.get(
+            "classify_polygon_into_classes_selected_field", ""
         )
 
     def _process_features_for_area(
@@ -84,20 +88,62 @@ class PolygonPerCellWorkflow(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        # Step 1: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
-        # Step 2: Assign reclassification values to polygons based on their perimeter
-        polygon_areas = assign_reclassification_to_polygons(area_features)
+        # Step 1: Assign reclassification values based on perceived safety
+        reclassified_layer = self._assign_reclassification_to_safety(area_features)
+
+        # Step 2: Rasterize the data
         raster_output = self._rasterize(
-            polygon_areas,
+            reclassified_layer,
             current_bbox,
             index,
             value_field="value",
-            default_value=0,
+            default_value=255,
         )
         return raster_output
+
+    def _assign_reclassification_to_safety(
+        self, layer: QgsVectorLayer
+    ) -> QgsVectorLayer:
+        """
+        Assign reclassification values to polygons based on thresholds.
+        """
+        with edit(layer):
+            # Remove all other columns except the selected field and the new 'value' field
+            fields_to_keep = {self.selected_field, "value"}
+            fields_to_remove = [
+                field.name()
+                for field in layer.fields()
+                if field.name() not in fields_to_keep
+            ]
+            layer.dataProvider().deleteAttributes(
+                [layer.fields().indexFromName(field) for field in fields_to_remove]
+            )
+            layer.updateFields()
+            if layer.fields().indexFromName("value") == -1:
+                layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+                layer.updateFields()
+
+            for feature in layer.getFeatures():
+                score = feature[self.selected_field]
+                # Scale values between 0 and 5
+                reclass_val = self._scale_value(score, 0, 100, 0, 5)
+                log_message(f"Scaled {score} to: {reclass_val}")
+                feature.setAttribute("value", reclass_val)
+                layer.updateFeature(feature)
+        return layer
+
+    def _scale_value(self, value, min_in, max_in, min_out, max_out):
+        """
+        Scale value from input range (min_in, max_in) to output range (min_out, max_out).
+        """
+        try:
+            result = (value - min_in) / (max_in - min_in) * (
+                max_out - min_out
+            ) + min_out
+            return result
+        except:
+            log_message(f"Invalid value, returning 0: {value}")
+            return 0
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(

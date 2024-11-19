@@ -10,4 +10,7 @@ from .street_lights_configuration_widget import StreetLightsConfigurationWidget
 from .raster_reclassification_configuration_widget import (
     RasterReclassificationConfigurationWidget,
 )
+from .classified_polygon_configuration_widget import (
+    ClassifiedPolygonConfigurationWidget,
+)
 from .safety_raster_configuration_widget import SafetyRasterConfigurationWidget
