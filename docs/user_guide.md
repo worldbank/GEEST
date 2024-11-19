@@ -1,4 +1,4 @@
-# User Guide
+# User Guide **[work in progress]**
 
 ```{tableofcontents}
 ```
