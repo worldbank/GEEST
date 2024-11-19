@@ -75,7 +75,7 @@ class SpreadsheetToJsonParser:
         """
         Helper method to create a lowercase, underscore-separated id from the name.
         """
-        return name.lower().replace(" ", "_")
+        return name.lower().replace(" ", "_").replace("'", "_")
 
     def parse_to_json(self):
         """

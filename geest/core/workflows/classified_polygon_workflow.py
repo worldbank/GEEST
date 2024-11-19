@@ -38,7 +38,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_polygon_into_classes"
         layer_path = self.attributes.get(
-            "use_classify_polygon_into_classes_shapefile", None
+            "classify_polygon_into_classes_shapefile", None
         )
 
         if not layer_path:
@@ -48,11 +48,11 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
                 level=Qgis.Warning,
             )
             layer_path = self.attributes.get(
-                "use_classify_polygon_into_classes_layer_source", None
+                "classify_polygon_into_classes_layer_source", None
             )
             if not layer_path:
                 log_message(
-                    "No points layer found in use_classify_polygon_into_classes_layer_source.",
+                    "No layer found in use_classify_polygon_into_classes_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
