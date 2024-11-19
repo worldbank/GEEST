@@ -56,8 +56,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             )
             self.load_project()  # Automatically load the last used project
         else:
-            self.working_dir = self.previous_project_combo.currentText()
-            self.set_project_directory()
+            self.load_project(self.previous_project_combo.currentText())
 
         # Set tooltip on hover to show the full path
         self.previous_project_combo.setToolTip(self.working_dir)
@@ -130,9 +129,15 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         for project_path in reversed(recent_projects):
             self.add_project_to_combo(project_path)
 
-    def load_project(self):
+    def load_project(self, working_directory=None):
         """Load the project from the working directory."""
-        self.working_dir = self.previous_project_combo.currentData()
+        if not working_directory:
+            self.working_dir = self.previous_project_combo.currentData()
+        else:
+            self.working_dir = working_directory
+        if not self.working_dir:
+            self.switch_to_previous_tab.emit()
+            return
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
             self.settings.setValue(
