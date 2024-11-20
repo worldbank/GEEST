@@ -87,7 +87,13 @@ class SafetyPolygonWidget(BaseIndicatorWidget):
             def validate_value(value):
                 return 0 <= value <= 100
 
-            log_message(f"Classes: {safety_classes}")
+            try:
+                log_message(f"Classes: {safety_classes}")
+            except Exception as e:
+                log_message(
+                    f"Error in logging safety classes: {e}", level=Qgis.Critical
+                )
+                pass
             # iterate over the dict and populate the table
             for row, (class_name, value) in enumerate(safety_classes.items()):
                 if row >= self.table_widget.rowCount():

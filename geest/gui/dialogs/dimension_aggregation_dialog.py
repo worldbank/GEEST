@@ -159,7 +159,7 @@ class DimensionAggregationDialog(QDialog):
         for indicator_guid, line_edit in self.weightings.items():
             try:
                 new_weighting = float(line_edit.text())
-                self.tree_item.updateIndicatorWeighting(indicator_guid, new_weighting)
+                self.tree_item.updateFactorWeighting(indicator_guid, new_weighting)
             except ValueError:
                 log_message(
                     f"Invalid weighting input for GUID: {indicator_guid}",
