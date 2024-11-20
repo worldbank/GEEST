@@ -1167,6 +1167,7 @@ class TreePanel(QWidget):
         self.project_button.setVisible(False)
         self.overall_progress_bar.setValue(0)
         total_items = self.model.rowCount()
+        log_message(f"Total items to process: {total_items}")
         self.overall_progress_bar.setMaximum(total_items)
         self.workflow_progress_bar.setValue(0)
         self.run_next_worflow_queue()

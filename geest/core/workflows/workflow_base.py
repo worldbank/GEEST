@@ -283,6 +283,7 @@ class WorkflowBase(ABC):
                 f.write(f"Failed to process {self.workflow_name}: {e}\n")
                 f.write(traceback.format_exc())
             self.attributes["error_file"] = error_path
+            self.attributes["error"] = f"Failed to process {self.workflow_name}: {e}"
             return False
 
     def _create_workflow_directory(self, *subdirs: str) -> str:

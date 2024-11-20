@@ -188,16 +188,16 @@ class AggregationWorkflowBase(WorkflowBase):
 
             item = self.item.getItemByGuid(guid)
             status = item.getStatus() == "Completed successfully"
-            mode = item.attributes().get("analysis_mode", "do_not_use") == "do_not_use"
+            mode = item.attributes().get("analysis_mode", "Do Not Use") == "Do Not Use"
             id = item.attribute("id").lower()
             if not status and not mode:
                 raise ValueError(
-                    f"{id} is not completed successfully and is not set to 'do_not_use'"
+                    f"{id} is not completed successfully and is not set to 'Do Not Use'"
                 )
 
             if mode:
                 log_message(
-                    f"Skipping {item.attribute('id')} as it is set to 'do_not_use'",
+                    f"Skipping {item.attribute('id')} as it is set to 'Do Not Use'",
                     tag="Geest",
                     level=Qgis.Info,
                 )
