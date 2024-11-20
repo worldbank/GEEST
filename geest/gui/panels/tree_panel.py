@@ -1142,6 +1142,7 @@ class TreePanel(QWidget):
         self.run_only_incomplete = False
         self.items_to_run = 0
         self._count_workflows_to_run()
+        log_message(f"Total items to process: {self.items_to_run}")
         self._clear_workflows()
         self._queue_workflows()
 
@@ -1165,10 +1166,9 @@ class TreePanel(QWidget):
         self.workflow_progress_bar.setVisible(True)
         self.help_button.setVisible(False)
         self.project_button.setVisible(False)
+        self.clear_button.setVisible(False)
         self.overall_progress_bar.setValue(0)
-        total_items = self.model.rowCount()
-        log_message(f"Total items to process: {total_items}")
-        self.overall_progress_bar.setMaximum(total_items)
+        self.overall_progress_bar.setMaximum(self.items_to_run)
         self.workflow_progress_bar.setValue(0)
         self.run_next_worflow_queue()
 
@@ -1180,6 +1180,7 @@ class TreePanel(QWidget):
         if len(self.workflow_queue) == 0:
             self.overall_progress_bar.setVisible(False)
             self.workflow_progress_bar.setVisible(False)
+            self.clear_button.setVisible(True)
             self.help_button.setVisible(True)
             self.project_button.setVisible(True)
             return
