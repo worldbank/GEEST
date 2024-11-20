@@ -19,7 +19,7 @@ from qgis.core import (
     Qgis,
 )
 import processing
-from qgis.PyQt.QtCore import QSettings, pyqtSignal
+from qgis.PyQt.QtCore import QSettings, pyqtSignal, QObject
 from geest.core import JsonTreeItem, setting
 from geest.utilities import resources_path
 from geest.core.algorithms import AreaIterator
@@ -27,7 +27,7 @@ from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 from geest.utilities import log_message
 
 
-class WorkflowBase(ABC):
+class WorkflowBase(QObject):
     """
     Abstract base class for all workflows.
     Every workflow must accept an attributes dictionary and a QgsFeedback object.
@@ -50,6 +50,7 @@ class WorkflowBase(ABC):
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         """
+        super().__init__()
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.cell_size_m = cell_size_m
         self.feedback = feedback
@@ -88,6 +89,7 @@ class WorkflowBase(ABC):
         self.attributes["result"] = "Not Run"
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
+        self.progressChanged.emit(0)
 
     #
     # Every concrete subclass needs to implement these three methods
@@ -244,6 +246,7 @@ class WorkflowBase(ABC):
                     index=index,
                 )
                 output_rasters.append(masked_layer)
+                self.progressChanged.emit(int(progress))
             # Combine all area rasters into a VRT
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
             self.attributes["result_file"] = vrt_filepath

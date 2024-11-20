@@ -1084,6 +1084,7 @@ class TreePanel(QWidget):
 
     def task_progress_updated(self, progress):
         """Slot to be called when the task progress is updated."""
+        log_message(f"Task progress: {progress}")
         self.workflow_progress_bar.setValue(int(progress))
 
     @pyqtSlot(bool)
@@ -1093,7 +1094,7 @@ class TreePanel(QWidget):
         Update the tree item to indicate success or failure.
         """
         self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
-        self.workflow_progress_bar.setValue(100)
+        self.workflow_progress_bar.setValue(0)
         self.save_json_to_working_directory()
 
         self.add_to_map(item)
