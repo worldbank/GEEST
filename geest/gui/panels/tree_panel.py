@@ -236,7 +236,7 @@ class TreePanel(QWidget):
         # Workflows need to be run in batches: first indicators, then factors, then dimensions
         # to prevent race conditions
         self.workflow_queue = []
-        self.queue_manager.processing_completed.connect(self.run_next_worflow_queue)
+        self.queue_manager.processing_completed.connect(self.run_next_workflow_queue)
 
     def on_item_double_clicked(self, index):
         # Action to trigger on double-click
@@ -264,6 +264,26 @@ class TreePanel(QWidget):
         connect directly to the button press).
         """
         self.run_only_incomplete = False
+        # Remove every file in self.working_directory except
+        # mode.json and the study_area folder
+        for filename in os.listdir(self.working_directory):
+            file_path = os.path.join(self.working_directory, filename)
+            if filename != "model.json" and filename != "study_area":
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    log_message(
+                        f"Failed to delete {file_path}. Reason: {e}",
+                        level=Qgis.Critical,
+                    )
+        # Also remove the Geest layer group in the QGIS Layers List
+        root = QgsProject.instance().layerTreeRoot()
+        for child in root.children():
+            if child.name() == "Geest":
+                root.removeChildNode(child)
         self._clear_workflows()
         self.save_json_to_working_directory()
 
@@ -885,32 +905,8 @@ class TreePanel(QWidget):
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
             self._clear_workflows(child_item)
-            if child_item.attribute("result_file", None) and self.run_only_incomplete:
-                # if the item role is indicator, remove its entire folder
-                if child_item.role == "indicator":
-                    result_file = child_item.attribute("result_file")
-                    if result_file:
-                        folder = os.path.dirname(result_file)
-                        # check the folder exists
-                        if os.path.exists(folder):
-                            log_message(f"Removing {folder}")
-                            shutil.rmtree(folder)
-                # if the item rols if factor or dimension, remove the files in it
-                # but not subdirs in case the user elected to keep them
-                else:
-                    result_file = child_item.attribute("result_file")
-                    if result_file:
-                        folder = os.path.dirname(result_file)
-                        # check if the folder exists
-                        if os.path.exists(folder):
-                            for file in os.listdir(folder):
-                                file_path = os.path.join(folder, file)
-                                if os.path.isfile(file_path):
-                                    os.remove(file_path)
-                child_item.clear()  # sets status to not run and blanks file path
-
-            elif not self.run_only_incomplete:
-                child_item.clear()
+            child_item.clear()  # sets status to not run and blanks file path
+        parent_item.clear()  # sets status to not run and blanks file path
 
     def _count_workflows_to_run(self, parent_item=None):
         """
@@ -1171,9 +1167,9 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setValue(0)
         self.overall_progress_bar.setMaximum(self.items_to_run)
         self.workflow_progress_bar.setValue(0)
-        self.run_next_worflow_queue()
+        self.run_next_workflow_queue()
 
-    def run_next_worflow_queue(self):
+    def run_next_workflow_queue(self):
         """
         Run the next group of workflows in the queue.
         If self.workflow_queue is empty, the function will return.

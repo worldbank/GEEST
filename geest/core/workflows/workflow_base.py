@@ -529,12 +529,14 @@ class WorkflowBase(QObject):
             )
             raise QgsProcessingException(f"Raster file not found at {raster_path}")
         # Convert the geometry to a memory layer in the self.tartget_crs
+        log_message(f"Creating mask layer for area from polygon {index}")
         mask_layer = QgsVectorLayer(f"Polygon", "mask", "memory")
         mask_layer.setCrs(self.target_crs)
         feature = QgsFeature()
         feature.setGeometry(area_geometry)
         mask_layer.dataProvider().addFeatures([feature])
         mask_layer.commitChanges()
+        log_message(f"Mask layer created: {mask_layer}")
         # Clip the raster by the mask layer
         params = {
             "INPUT": f"{raster_path}",
@@ -556,6 +558,7 @@ class WorkflowBase(QObject):
             "EXTRA": "",
         }
         processing.run("gdal:cliprasterbymasklayer", params)
+        log_message(f"Masked raster created: {output_path}")
         return output_path
 
     def _combine_rasters_to_vrt(self, rasters: list) -> None:
