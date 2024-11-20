@@ -58,7 +58,7 @@ class WorkflowJob(QgsTask):
     # Dont call this setProgress to avoid recursion
     def updateProgress(self, progress: int):
         """
-        Set the progress of the task.
+        Used by the workflow to set the progress of the task.
         :param progress: The progress value
         """
         self.setProgress(progress)

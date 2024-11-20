@@ -119,7 +119,7 @@ class JsonTreeItem:
         Mark the item as not run, keeping any configurations made
         """
         data = self.attributes()
-        data["result"] = "Not run"
+        data["result"] = "Not Run"
         data["result_file"] = ""
         data["error"] = ""
         data["error_file"] = ""
@@ -217,7 +217,7 @@ class JsonTreeItem:
                 "indicator_required", False
             ):
                 return "Not configured (optional)"
-            if "Not run" in data.get("result", "") and not data.get("result_file", ""):
+            if "Not Run" in data.get("result", "") and not data.get("result_file", ""):
                 return "Configured, not run"
             if not data.get("result", False):
                 return "Configured, not run"
@@ -274,7 +274,10 @@ class JsonTreeItem:
         🚨 Beware of Side Effects! Any changes you make to the dict will be propogated
            back to the tree model.🚨
         """
-        return self.itemData[3]
+        if len(self.itemData) > 3:
+            return self.itemData[3]
+        else:
+            return {}
 
     def attribute(self, key, default=None):
         """Return the value of the attribute with the specified key."""
