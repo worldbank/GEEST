@@ -47,7 +47,7 @@ class IndicatorConfigurationWidget(QWidget):
                 if (
                     key == "indicator_required"
                     and value == 0
-                    and analysis_mode == "do_not_use"
+                    and analysis_mode == "Do Not Use"
                 ):
                     radio_button_widget.setChecked(True)
                 self.button_group.addButton(radio_button_widget)
