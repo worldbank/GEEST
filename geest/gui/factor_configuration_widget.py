@@ -58,19 +58,11 @@ class FactorConfigurationWidget(QWidget):
             attributes.copy()
         )  # guard against the tree changing while we are working with its data
         analysis_mode = attributes.get("analysis_mode", "")
-        log_message(
-            f"Creating radio buttons for analysis mode: {analysis_mode}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+        log_message(f"Creating radio buttons for analysis mode: {analysis_mode}")
         radio_count = 0
         for key, value in attributes.items():
             if key.startswith("use_") or key == "indicator_required":
-                log_message(
-                    f"Creating radio button for key: {key} with value: {value}",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
+                log_message(f"Creating radio button for key: {key} with value: {value}")
                 # We pass a copy of the attributes dictionary to the widget factory
                 # so that we can update the attributes as needed
                 # The widget factory will update the attributes dictionary with new data
@@ -81,11 +73,11 @@ class FactorConfigurationWidget(QWidget):
                     radio_count += 1
                     if key == analysis_mode:
                         radio_button_widget.setChecked(True)
-                    # Special case for "do_not_use" radio button
+                    # Special case for "Do Not Use" radio button
                     if (
                         key == "indicator_required"
                         and value == 0
-                        and analysis_mode == "do_not_use"
+                        and analysis_mode == "Do Not Use"
                     ):
                         radio_button_widget.setChecked(True)
                     self.button_group.addButton(radio_button_widget)

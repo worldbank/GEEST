@@ -43,7 +43,7 @@ class IndicatorConfigurationWidget(QWidget):
             if radio_button_widget:
                 if key == analysis_mode:
                     radio_button_widget.setChecked(True)
-                # Special case for "do_not_use" radio button
+                # Special case for "Do Not Use" radio button
                 if (
                     key == "indicator_required"
                     and value == 0

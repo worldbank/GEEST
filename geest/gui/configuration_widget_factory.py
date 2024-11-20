@@ -41,7 +41,7 @@ class ConfigurationWidgetFactory:
         try:
             if key == "indicator_required" and value == 0:
                 return DontUseConfigurationWidget(
-                    analysis_mode="do_not_use", attributes=attributes
+                    analysis_mode="Do Not Use", attributes=attributes
                 )
             if key == "use_default_index_score" and value == 1:
                 return IndexScoreConfigurationWidget(

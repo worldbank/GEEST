@@ -31,7 +31,7 @@ class DontUseWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "do_not_use"
+        self.workflow_name = "Do Not Use"
         self.attributes["result_file"] = ""
         self.attributes["result"] = ""
         self.attributes["result"] = "Don't Use Completed"

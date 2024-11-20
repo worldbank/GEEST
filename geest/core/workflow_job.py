@@ -48,12 +48,15 @@ class WorkflowJob(QgsTask):
             feedback=self._feedback,
             context=self.context,
         )  # Create the workflow
+        self.setProgress(0)
+        self._workflow.progressChanged.connect(self.updateProgress)
         # TODO this raises an error... need to figure out how to connect this signal
         # self._workflow.progressChanged.connect(self.setProgress)
         # Emit the 'queued' signal upon initialization
         self.job_queued.emit()
 
-    def setProgress(self, progress: int):
+    # Dont call this setProgress to avoid recursion
+    def updateProgress(self, progress: int):
         """
         Set the progress of the task.
         :param progress: The progress value

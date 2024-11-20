@@ -42,7 +42,7 @@ class CombinedWidgetFactory:
         try:
             if key == "indicator_required" and value == 0:
                 return DontUseRadioButton(
-                    label_text="do_not_use", attributes=attributes
+                    label_text="Do Not Use", attributes=attributes
                 )
             if key == "use_default_index_score" and value == 1:
                 return IndexScoreRadioButton(label_text=key, attributes=attributes)

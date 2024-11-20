@@ -43,6 +43,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             (self.attributes.get("default_index_score", 0) / 100) * 5
         )
         self.features_layer = True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
+        self.workflow_name = "default_index_score"
 
     def _process_features_for_area(
         self,
