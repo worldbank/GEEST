@@ -236,7 +236,7 @@ class TreePanel(QWidget):
         # Workflows need to be run in batches: first indicators, then factors, then dimensions
         # to prevent race conditions
         self.workflow_queue = []
-        self.queue_manager.processing_completed.connect(self.run_next_worflow_queue)
+        self.queue_manager.processing_completed.connect(self.run_next_workflow_queue)
 
     def on_item_double_clicked(self, index):
         # Action to trigger on double-click
@@ -1167,9 +1167,9 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setValue(0)
         self.overall_progress_bar.setMaximum(self.items_to_run)
         self.workflow_progress_bar.setValue(0)
-        self.run_next_worflow_queue()
+        self.run_next_workflow_queue()
 
-    def run_next_worflow_queue(self):
+    def run_next_workflow_queue(self):
         """
         Run the next group of workflows in the queue.
         If self.workflow_queue is empty, the function will return.

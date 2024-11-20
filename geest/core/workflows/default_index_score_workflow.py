@@ -83,7 +83,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             default_value=255,
         )
         log_message(f"Raster output: {raster_output}")
-        log_message(f"Worflow completed for area {index}")
+        log_message(f"Workflow completed for area {index}")
         return raster_output
 
     def create_scored_boundary_layer(
