@@ -219,6 +219,8 @@ class JsonTreeItem:
                 return "Not configured (optional)"
             if "Not run" in data.get("result", "") and not data.get("result_file", ""):
                 return "Configured, not run"
+            if not data.get("result", False):
+                return "Configured, not run"
             if "Workflow Completed" not in data.get("result", ""):
                 return "Workflow failed"
             if "Workflow Completed" in data.get("result", "") and not data.get(
