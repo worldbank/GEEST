@@ -58,6 +58,7 @@ class IndicatorConfigurationWidget(QWidget):
         """
         Updates the attributes dictionary with new data from radio buttons.
         """
+        # log_message(f"Updating attributes dictionary with new data: {new_data}")
         # In the ctor of the widget factor we humanise the name
         # now we roll it back to the snake case version so it matches keys
         # in the JSON data model
@@ -66,9 +67,5 @@ class IndicatorConfigurationWidget(QWidget):
         )
         new_data["analysis_mode"] = snake_case_mode
         self.attributes.update(new_data)
+        # log_message(f"Updated attributes dictionary: {self.attributes}")
         self.data_changed.emit()
-        # log_message(
-        #    f"Updated attributes dictionary: {self.attributes}",
-        #    "Geest",
-        #    level=Qgis.Info
-        # )

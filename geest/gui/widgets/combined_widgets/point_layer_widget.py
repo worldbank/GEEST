@@ -66,7 +66,7 @@ class PointLayerWidget(BaseIndicatorWidget):
         self.main_layout.addWidget(self.point_layer_combo)
 
         # Restore previously selected point layer
-        point_layer_id = self.attributes.get(f"{self.widget_key}_point_layer_id", None)
+        point_layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
         if point_layer_id:
             point_layer = QgsProject.instance().mapLayer(point_layer_id)
             if point_layer:
@@ -78,9 +78,9 @@ class PointLayerWidget(BaseIndicatorWidget):
         self.point_shapefile_button = QToolButton()
         self.point_shapefile_button.setText("...")
         self.point_shapefile_button.clicked.connect(self.select_point_shapefile)
-        if self.attributes.get(f"{self.widget_key}_point_shapefile", False):
+        if self.attributes.get(f"{self.widget_key}_shapefile", False):
             self.point_shapefile_line_edit.setText(
-                self.attributes[f"{self.widget_key}_point_shapefile"]
+                self.attributes[f"{self.widget_key}_shapefile"]
             )
         self.point_shapefile_layout.addWidget(self.point_shapefile_line_edit)
         self.point_shapefile_layout.addWidget(self.point_shapefile_button)

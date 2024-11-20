@@ -62,8 +62,10 @@ class BaseIndicatorWidget(QRadioButton):
         Gathers data from internal widgets and emits the data_changed signal.
         """
         if self.isChecked():
+            log_message("Updating data...")
             try:
                 data = self.get_data()
+                # log_message(f"Data: {data}")
                 self.data_changed.emit(data)
             except Exception as e:
                 log_message(f"Error in update_data: {e}", level=Qgis.Critical)
