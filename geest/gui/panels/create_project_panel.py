@@ -70,6 +70,17 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.load_boundary_button.clicked.connect(self.load_boundary)
 
         self.progress_bar.setVisible(False)
+        # If the project CRS is EPGS:4326, disable the checkbox
+        project_crs = QgsProject.instance().crs().authid()
+        log_message(f"Project CRS: {project_crs}")
+        if project_crs == "EPSG:4326" or project_crs == "":
+            log_message(
+                "Project CRS is EPSG:4326 or blank, disabling boundary CRS checkbox"
+            )
+            self.use_boundary_crs.setEnabled(False)
+        else:
+            log_message("Project CRS is not EPSG:4326, enabling boundary CRS checkbox")
+            self.use_boundary_crs.setEnabled(True)
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
