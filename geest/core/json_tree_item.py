@@ -200,19 +200,19 @@ class JsonTreeItem:
             # If so, return "Excluded from analysis"
             if self.isIndicator():
                 # Required flag can be overridden by the factor so we dont check it right now
-                required_by_parent = self.parentItem.attributes().get(
-                    "dimension_weighting", 0.0
+                required_by_parent = float(
+                    self.parentItem.attributes().get("dimension_weighting", 0.0)
                 )
-                required_by_self = data.get("factor_weighting", 0.0)
-                log_message(
-                    f"{data.get('id')} Required by indicator: {required_by_self} and required by parent: {required_by_parent}"
-                )
-                if not int(required_by_parent) or not int(required_by_self):
-                    log_message(f"Excluded from analysis: {data.get('id')}")
+                required_by_self = float(data.get("factor_weighting", 0.0))
+                # log_message(
+                #    f"{data.get('id')} Required by indicator: {required_by_self:.10f} and required by parent: {required_by_parent:.10f}"
+                # )
+                if not required_by_parent or not required_by_self:
+                    # log_message(f"Excluded from analysis: {data.get('id')}")
                     return "Excluded from analysis"
             if self.isFactor():
                 if not data.get("required", False):
-                    if not data.get("dimension_weighting", False):
+                    if not float(data.get("dimension_weighting", 0.0)):
                         return "Excluded from analysis"
             if "Error" in data.get("result", ""):
                 return "Workflow failed"

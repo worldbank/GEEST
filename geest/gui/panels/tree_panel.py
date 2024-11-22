@@ -887,6 +887,8 @@ class TreePanel(QWidget):
         """
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
+            if child_item.getStatus() == "Excluded from analysis":
+                continue
             self.queue_workflow_task(child_item, role)
             # Recursively process children (dimensions, factors)
             self._start_workflows(child_item, role)
@@ -921,9 +923,12 @@ class TreePanel(QWidget):
             child_item = parent_item.child(i)
             self._count_workflows_to_run(child_item)
             is_complete = child_item.getStatus() == "Workflow Completed"
-            if not is_complete:
+            is_disabled = child_item.getStatus() == "Excluded from analysis"
+            if is_disabled:
+                continue
+            elif not is_complete:
                 self.items_to_run += 1
-            if is_complete and not self.run_only_incomplete:
+            elif is_complete and not self.run_only_incomplete:
                 self.items_to_run += 1
 
     def queue_workflow_task(self, item, role):
