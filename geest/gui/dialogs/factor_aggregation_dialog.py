@@ -196,9 +196,12 @@ class FactorAggregationDialog(QDialog):
         current_index = self.stacked_widget.currentIndex()
         self.stacked_widget.setCurrentIndex(1 - current_index)  # Toggle between 0 and 1
 
-    def create_checkbox_widget(self, row: int) -> QWidget:
+    def create_checkbox_widget(self, row: int, weighting_value: float) -> QWidget:
         checkbox = QCheckBox()
-        checkbox.setChecked(True)
+        if weighting_value > 0:
+            checkbox.setChecked(True)
+        else:
+            checkbox.setChecked(False)
         checkbox.stateChanged.connect(
             lambda state, r=row: self.toggle_row_widgets(r, state)
         )
@@ -245,18 +248,18 @@ class FactorAggregationDialog(QDialog):
             self.table.setItem(row, 1, name_item)
 
             # Weighting
-            weighting_value = attributes.get("factor_weighting", 0)
+            weighting_value = float(attributes.get("factor_weighting", 0.0))
             weighting_item = QDoubleSpinBox()
             weighting_item.setRange(0.0, 1.0)
             weighting_item.setDecimals(4)
             weighting_item.setSingleStep(0.01)
-            weighting_item.setValue(float(weighting_value))
+            weighting_item.setValue(weighting_value)
             weighting_item.valueChanged.connect(self.validate_weightings)
             self.table.setCellWidget(row, 2, weighting_item)
             self.weightings[guid] = weighting_item
 
             # Use (Checkbox)
-            checkbox_widget = self.create_checkbox_widget(row)
+            checkbox_widget = self.create_checkbox_widget(row, weighting_value)
             self.table.setCellWidget(row, 3, checkbox_widget)
 
             # GUID
@@ -292,8 +295,10 @@ class FactorAggregationDialog(QDialog):
             row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
         ]
         if not enabled_rows:
-            return
-        equal_weighting = 1.0 / len(enabled_rows)
+            equal_weighting = 0.0
+        else:
+            equal_weighting = 1.0 / len(enabled_rows)
+
         for row in enabled_rows:
             widget = self.table.cellWidget(row, 2)  # Weight column
             widget.setValue(equal_weighting)
@@ -301,6 +306,7 @@ class FactorAggregationDialog(QDialog):
             if row not in enabled_rows:
                 widget = self.table.cellWidget(row, 2)
                 widget.setValue(0)
+        self.validate_weightings()
 
     def is_checkbox_checked(self, row: int) -> bool:
         checkbox = self.get_checkbox_in_row(row)
@@ -316,7 +322,7 @@ class FactorAggregationDialog(QDialog):
                     return checkbox
         return None
 
-    def assignWeightings(self):
+    def saveWeightingsToModel(self):
         """Assign new weightings to the factor's indicators."""
         for indicator_guid, spin_box in self.weightings.items():
             try:
@@ -332,18 +338,9 @@ class FactorAggregationDialog(QDialog):
 
                 log_message(traceback.format_exc(), tag="Geest", level=Qgis.Warning)
 
-    def validate_weightings(self):
-        total_weighting = sum(
-            float(spin_box.value()) for spin_box in self.weightings.values()
-        )
-        valid_sum = abs(total_weighting - 1.0) < 0.001
-        for spin_box in self.weightings.values():
-            spin_box.setStyleSheet("color: black;" if valid_sum else "color: red;")
-        self.button_box.button(QDialogButtonBox.Ok).setEnabled(valid_sum)
-
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
-        self.assignWeightings()
+        self.saveWeightingsToModel()
         if self.editing:
             updated_data = self.factor_data
             updated_data["description"] = self.text_edit_left.toPlainText()
@@ -366,6 +363,14 @@ class FactorAggregationDialog(QDialog):
             )  # Allow slight floating-point tolerance
         except ValueError:
             valid_sum = False
+
+        # In the case that all rows are disabled, the sum is valid
+        enabled_rows = [
+            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
+        ]
+        enabled_rows_count = len(enabled_rows)
+        if enabled_rows_count == 0:
+            valid_sum = True
 
         # Update button state and cell highlighting
         for spin_box in self.weightings.values():
