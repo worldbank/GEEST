@@ -146,7 +146,7 @@ class DimensionAggregationDialog(QDialog):
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
             factor_id = attributes.get("name")
-            dimension_weighting = attributes.get("dimension_weighting", 0)
+            dimension_weighting = float(attributes.get("dimension_weighting", 0.0))
             default_dimension_weighting = attributes.get(
                 "default_dimension_weighting", 0
             )
@@ -160,14 +160,14 @@ class DimensionAggregationDialog(QDialog):
             weighting_item = QDoubleSpinBox(self)
             weighting_item.setRange(0.0, 1.0)
             weighting_item.setDecimals(4)
-            weighting_item.setValue(float(dimension_weighting))
+            weighting_item.setValue(dimension_weighting)
             weighting_item.setSingleStep(0.01)
             weighting_item.valueChanged.connect(self.validate_weightings)
             self.table.setCellWidget(row, 1, weighting_item)
             self.weightings[guid] = weighting_item
 
             # Use checkboxes
-            checkbox_widget = self.create_checkbox_widget(row)
+            checkbox_widget = self.create_checkbox_widget(row, dimension_weighting)
             self.table.setCellWidget(row, 2, checkbox_widget)
             if factor_required == 1:
                 checkbox_widget.setEnabled(False)
@@ -235,12 +235,15 @@ class DimensionAggregationDialog(QDialog):
         self.guid_column_visible = not self.guid_column_visible
         self.table.setColumnHidden(4, not self.guid_column_visible)
 
-    def create_checkbox_widget(self, row: int) -> QWidget:
+    def create_checkbox_widget(self, row: int, dimension_weighting: float) -> QWidget:
         """
         Create a QWidget containing a QCheckBox for a specific row and center it.
         """
         checkbox = QCheckBox()
-        checkbox.setChecked(True)  # Initially checked
+        if dimension_weighting > 0:
+            checkbox.setChecked(True)  # Initially checked
+        else:
+            checkbox.setChecked(False)
         checkbox.stateChanged.connect(
             lambda state, r=row: self.toggle_row_widgets(r, state)
         )
@@ -293,7 +296,12 @@ class DimensionAggregationDialog(QDialog):
             log_message("No enabled rows found, skipping auto-calculation")
             return  # No enabled rows, avoid division by zero
 
-        equal_weighting = 1.0 / len(enabled_rows)  # Divide equally among enabled rows
+        if len(enabled_rows) == 0:
+            equal_weighting = 0.0
+        else:
+            equal_weighting = 1.0 / len(
+                enabled_rows
+            )  # Divide equally among enabled rows
 
         # Set the weighting for each enabled row
         for row in enabled_rows:
@@ -305,6 +313,7 @@ class DimensionAggregationDialog(QDialog):
             log_message(f"Setting zero weighting for row: {row}")
             widget = self.table.cellWidget(row, 1)  # Assuming weight is in column 1
             widget.setValue(0)
+        self.validate_weightings()
 
     def is_checkbox_checked(self, row: int) -> bool:
         """
@@ -333,7 +342,7 @@ class DimensionAggregationDialog(QDialog):
                     return checkbox
         return None
 
-    def assignWeightings(self):
+    def saveWeightingsToModel(self):
         """Assign new weightings to the dimensions's factors."""
         for factor_guid, spin_box in self.weightings.items():
             try:
@@ -353,12 +362,23 @@ class DimensionAggregationDialog(QDialog):
 
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
-        total_weighting = sum(
-            float(spin_box.value() or 0) for spin_box in self.weightings.values()
-        )
-        valid_sum = (
-            abs(total_weighting - 1.0) < 0.001
-        )  # Allow slight floating-point tolerance
+        try:
+            total_weighting = sum(
+                float(spin_box.value() or 0) for spin_box in self.weightings.values()
+            )
+            valid_sum = (
+                abs(total_weighting - 1.0) < 0.001
+            )  # Allow slight floating-point tolerance
+        except ValueError:
+            valid_sum = False
+
+        # In the case that all rows are disabled, the sum is valid
+        enabled_rows = [
+            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
+        ]
+        enabled_rows_count = len(enabled_rows)
+        if enabled_rows_count == 0:
+            valid_sum = True
 
         # Update button state and font color for validation
         for spin_box in self.weightings.values():
@@ -372,7 +392,7 @@ class DimensionAggregationDialog(QDialog):
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
-        self.assignWeightings()  # Assign weightings when changes are accepted
+        self.saveWeightingsToModel()  # Assign weightings when changes are accepted
         if self.editing:
             updated_data = self.dimension_data
             updated_data["description"] = self.text_edit_left.toPlainText()

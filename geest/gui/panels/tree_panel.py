@@ -816,7 +816,7 @@ class TreePanel(QWidget):
             dimension_name, dimension_data, dimension_item, editing=editing, parent=self
         )
         if dialog.exec_():  # If OK was clicked
-            dialog.assignWeightings()
+            dialog.saveWeightingsToModel()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def edit_factor_aggregation(self, factor_item):
@@ -830,7 +830,7 @@ class TreePanel(QWidget):
             factor_name, factor_data, factor_item, editing=editing, parent=self
         )
         if dialog.exec_():  # If OK was clicked
-            dialog.assignWeightings()
+            dialog.saveWeightingsToModel()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def show_layer_properties(self, item):

@@ -214,6 +214,14 @@ class JsonTreeItem:
                 if not data.get("required", False):
                     if not float(data.get("dimension_weighting", 0.0)):
                         return "Excluded from analysis"
+            if self.isDimension():
+                # if the sum of the factor weightings is 0, return "Excluded from analysis"
+                weight_sum = 0
+                for child in self.childItems:
+                    weight_sum += float(child.attribute("factor_weighting", 0.0))
+                if not weight_sum:
+                    return "Excluded from analysis"
+
             if "Error" in data.get("result", ""):
                 return "Workflow failed"
             if "Failed" in data.get("result", ""):
