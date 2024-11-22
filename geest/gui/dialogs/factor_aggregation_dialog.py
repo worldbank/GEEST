@@ -3,7 +3,7 @@ from qgis.PyQt.QtWidgets import (
     QFrame,
     QHeaderView,
     QLabel,
-    QLineEdit,
+    QDoubleSpinBox,
     QPushButton,
     QSpacerItem,
     QSizePolicy,
@@ -15,11 +15,13 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QDialogButtonBox,
     QWidget,
+    QCheckBox,
+    QHBoxLayout,
 )
-from qgis.PyQt.QtGui import QPixmap, QPalette, QColor, QDoubleValidator
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
 from qgis.core import Qgis
-from geest.utilities import resources_path
+from geest.utilities import resources_path, setting
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
 from ..factor_configuration_widget import FactorConfigurationWidget
@@ -38,20 +40,21 @@ class FactorAggregationDialog(QDialog):
         self.tree_item = factor_item  # Reference to the QTreeView item to update
         self.editing = editing
 
-        # Initialize these dictionaries before calling populate_table
+        # Initialize dictionaries
         self.guids = self.tree_item.getFactorIndicatorGuids()
-        self.weightings = {}  # To store the temporary weightings
-        self.data_sources = {}  # To store the temporary data sources
+        self.weightings = {}  # Temporary weightings
+        self.data_sources = {}  # Temporary data sources
+
+        self.weighting_column_visible = len(self.guids) > 1
 
         # Layout setup
         layout = QVBoxLayout(self)
-        self.resize(800, 600)  # Set a wider dialog size
-        layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
+        self.resize(800, 600)
+        layout.setContentsMargins(20, 20, 20, 20)
 
         # Title label
         self.title_label = QLabel(
-            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
-            self,
+            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector"
         )
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
@@ -90,9 +93,7 @@ class FactorAggregationDialog(QDialog):
         configuration_widget = FactorConfigurationWidget(self.tree_item, self.guids)
         page_1_layout.addWidget(configuration_widget)
 
-        self.table = QTableWidget(self)
         configuration_widget.selection_changed.connect(self.populate_table)
-        page_1_layout.addWidget(self.table)
 
         # Add page 1 layout to a container widget and set it in stacked_widget
         page_1_container = QWidget()
@@ -129,19 +130,41 @@ class FactorAggregationDialog(QDialog):
         # Add the stacked widget to the main layout
         layout.addWidget(self.stacked_widget)
 
-        # QDialogButtonBox setup for OK, Cancel, and Switch Page
+        # Table setup
+        self.table = QTableWidget(self)
+        self.table.setRowCount(len(self.guids))
+        self.table.setColumnCount(6)
+        self.table.setHorizontalHeaderLabels(
+            ["Source", "Indicator", "Weight 0-1", "Use", "GUID", ""]
+        )
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
+        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
+        self.table.setColumnWidth(2, 100)  # Weight column
+        self.table.setColumnWidth(3, 50)  # Use column (checkbox)
+        self.table.setColumnWidth(5, 75)  # Reset column
+        # hide weight and reset column if only one indicator
+        self.table.setColumnHidden(2, not self.weighting_column_visible)
+        self.table.setColumnHidden(5, not self.weighting_column_visible)
+
+        layout.addWidget(self.table)
+
+        # Buttons
         self.button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         )
         auto_calculate_button = QPushButton("Balance Weights")
-        if len(self.guids) > 1:
+        toggle_guid_button = QPushButton("Show GUIDs")
+        if self.weighting_column_visible:
             self.button_box.addButton(
                 auto_calculate_button, QDialogButtonBox.ActionRole
             )
-
-        toggle_guid_button = QPushButton("Show GUIDs")
-        self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
-
+        verbose_mode = setting(key="verbose_mode", default=0)
+        if verbose_mode:
+            self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
         if self.editing:
             self.switch_page_button = QPushButton("Edit Description")
             self.button_box.addButton(
@@ -152,9 +175,13 @@ class FactorAggregationDialog(QDialog):
         self.button_box.accepted.connect(self.accept_changes)
         self.button_box.rejected.connect(self.reject)
         auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
+
         toggle_guid_button.clicked.connect(self.toggle_guid_column)
+        self.guid_column_visible = False  # Track GUID column visibility
 
         layout.addWidget(self.button_box)
+        self.populate_table()
+        self.validate_weightings()
 
         # Initial call to update the preview with existing content
         self.update_preview()
@@ -169,60 +196,87 @@ class FactorAggregationDialog(QDialog):
         current_index = self.stacked_widget.currentIndex()
         self.stacked_widget.setCurrentIndex(1 - current_index)  # Toggle between 0 and 1
 
-    def populate_table(self):
-        """Populate the table with data source widgets, indicator names, weightings, and GUIDs."""
-        self.table.clear()
-        self.table.setRowCount(len(self.guids))
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(
-            ["Data Source", "Indicator", "Weight 0-1", "GUID"]
+    def create_checkbox_widget(self, row: int) -> QWidget:
+        checkbox = QCheckBox()
+        checkbox.setChecked(True)
+        checkbox.stateChanged.connect(
+            lambda state, r=row: self.toggle_row_widgets(r, state)
         )
-        self.table.setColumnWidth(2, 80)
-        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
 
-        self.guid_column_visible = False
-        self.table.setColumnHidden(3, not self.guid_column_visible)
-        self.weighting_column_visible = len(self.guids) > 1
-        self.table.setColumnHidden(2, not self.weighting_column_visible)
+        container = QWidget()
+        layout = QHBoxLayout()
+        layout.addWidget(checkbox)
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        container.setLayout(layout)
+        return container
 
+    def toggle_row_widgets(self, row: int, state: int):
+        is_enabled = state == Qt.Checked
+        for col in range(self.table.columnCount()):
+            if col in (3, 5):  # Skip Use (checkbox) and Reset columns
+                continue
+            widget = self.table.cellWidget(row, col)
+            if widget:
+                if isinstance(widget, QDoubleSpinBox) and not is_enabled:
+                    widget.setValue(0)
+                widget.setEnabled(is_enabled)
+        self.validate_weightings()
+
+    def populate_table(self):
+        self.table.setRowCount(len(self.guids))
         for row, guid in enumerate(self.guids):
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
+
+            # Data Source Widget
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 attributes["analysis_mode"], 1, attributes
             )
-            if data_source_widget:
-                data_source_widget.setSizePolicy(
-                    QSizePolicy.Expanding, QSizePolicy.Preferred
-                )
-                data_source_widget.setMinimumWidth(150)
-                data_source_widget.setMinimumHeight(30)
-                data_source_widget.setParent(self.table)
-                self.table.setCellWidget(row, 0, data_source_widget)
-            self.data_sources["indicator_guid"] = data_source_widget
+            default_indicator_factor_weighting = attributes.get(
+                "default_indicator_factor_weighting", 0
+            )
+            self.table.setCellWidget(row, 0, data_source_widget)
+            self.data_sources[guid] = data_source_widget
 
-            name_item = QTableWidgetItem(item.attribute("indicator"))
+            # Indicator Name
+            name_item = QTableWidgetItem(attributes.get("indicator", ""))
             name_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, 1, name_item)
 
-            # Add QLineEdit for weightings with initial validation
-            weighting_value = item.attribute(
-                "factor_weighting", 1.0 if len(self.guids) == 1 else 0.0
-            )
-            weighting_item = QLineEdit(str(weighting_value))
-            weighting_item.setValidator(QDoubleValidator(0.0, 1.0, 4, self))
-            weighting_item.textChanged.connect(
-                self.validate_weightings
-            )  # Connect for real-time validation
+            # Weighting
+            weighting_value = attributes.get("factor_weighting", 0)
+            weighting_item = QDoubleSpinBox()
+            weighting_item.setRange(0.0, 1.0)
+            weighting_item.setDecimals(4)
+            weighting_item.setSingleStep(0.01)
+            weighting_item.setValue(float(weighting_value))
+            weighting_item.valueChanged.connect(self.validate_weightings)
             self.table.setCellWidget(row, 2, weighting_item)
             self.weightings[guid] = weighting_item
 
+            # Use (Checkbox)
+            checkbox_widget = self.create_checkbox_widget(row)
+            self.table.setCellWidget(row, 3, checkbox_widget)
+
+            # GUID
             guid_item = QTableWidgetItem(guid)
             guid_item.setFlags(Qt.ItemIsEnabled)
-            self.table.setItem(row, 3, guid_item)
+            guid_item.setToolTip(str(item.attributes()))
+            self.table.setItem(row, 4, guid_item)
 
+            # Reset Button
+            reset_button = QPushButton("Reset")
+            reset_button.clicked.connect(
+                lambda checked, item=weighting_item, value=default_indicator_factor_weighting: item.setValue(
+                    value
+                )
+            )
+            self.table.setCellWidget(row, 5, reset_button)
+
+        self.table.setColumnHidden(
+            4, not self.guid_column_visible
+        )  # Hide GUID column by default
         self.validate_weightings()  # Initial validation check
         # If we dont have the weightings column, we can enable the OK button
         if not self.weighting_column_visible:
@@ -231,19 +285,42 @@ class FactorAggregationDialog(QDialog):
     def toggle_guid_column(self):
         """Toggle the visibility of the GUID column."""
         self.guid_column_visible = not self.guid_column_visible
-        self.table.setColumnHidden(3, not self.guid_column_visible)
+        self.table.setColumnHidden(4, not self.guid_column_visible)
 
     def auto_calculate_weightings(self):
-        """Calculate and set equal weighting for each indicator."""
-        equal_weighting = 1.0 / len(self.guids)
-        for guid, line_edit in self.weightings.items():
-            line_edit.setText(f"{equal_weighting:.4f}")
+        enabled_rows = [
+            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
+        ]
+        if not enabled_rows:
+            return
+        equal_weighting = 1.0 / len(enabled_rows)
+        for row in enabled_rows:
+            widget = self.table.cellWidget(row, 2)  # Weight column
+            widget.setValue(equal_weighting)
+        for row in range(self.table.rowCount()):
+            if row not in enabled_rows:
+                widget = self.table.cellWidget(row, 2)
+                widget.setValue(0)
+
+    def is_checkbox_checked(self, row: int) -> bool:
+        checkbox = self.get_checkbox_in_row(row)
+        return checkbox.isChecked() if checkbox else False
+
+    def get_checkbox_in_row(self, row: int) -> QCheckBox:
+        container = self.table.cellWidget(row, 3)  # Use (Checkbox) column
+        if container and isinstance(container, QWidget):
+            layout = container.layout()
+            if layout and layout.count() > 0:
+                checkbox = layout.itemAt(0).widget()
+                if isinstance(checkbox, QCheckBox):
+                    return checkbox
+        return None
 
     def assignWeightings(self):
         """Assign new weightings to the factor's indicators."""
-        for indicator_guid, line_edit in self.weightings.items():
+        for indicator_guid, spin_box in self.weightings.items():
             try:
-                new_weighting = float(line_edit.text())
+                new_weighting = spin_box.value()
                 self.tree_item.updateIndicatorWeighting(indicator_guid, new_weighting)
             except ValueError:
                 log_message(
@@ -251,9 +328,22 @@ class FactorAggregationDialog(QDialog):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
+                import traceback
+
+                log_message(traceback.format_exc(), tag="Geest", level=Qgis.Warning)
+
+    def validate_weightings(self):
+        total_weighting = sum(
+            float(spin_box.value()) for spin_box in self.weightings.values()
+        )
+        valid_sum = abs(total_weighting - 1.0) < 0.001
+        for spin_box in self.weightings.values():
+            spin_box.setStyleSheet("color: black;" if valid_sum else "color: red;")
+        self.button_box.button(QDialogButtonBox.Ok).setEnabled(valid_sum)
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
+        self.assignWeightings()
         if self.editing:
             updated_data = self.factor_data
             updated_data["description"] = self.text_edit_left.toPlainText()
@@ -267,21 +357,24 @@ class FactorAggregationDialog(QDialog):
 
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
-        total_weighting = sum(
-            float(line_edit.text() or 0) for line_edit in self.weightings.values()
-        )
-        valid_sum = (
-            abs(total_weighting - 1.0) < 0.001
-        )  # Allow slight floating-point tolerance
+        try:
+            total_weighting = sum(
+                float(spin_box.value() or 0) for spin_box in self.weightings.values()
+            )
+            valid_sum = (
+                abs(total_weighting - 1.0) < 0.001
+            )  # Allow slight floating-point tolerance
+        except ValueError:
+            valid_sum = False
 
         # Update button state and cell highlighting
-        for line_edit in self.weightings.values():
+        for spin_box in self.weightings.values():
             if valid_sum:
-                line_edit.setStyleSheet(
+                spin_box.setStyleSheet(
                     "color: black;"
                 )  # Reset font color to black if valid
             else:
-                line_edit.setStyleSheet(
+                spin_box.setStyleSheet(
                     "color: red;"
                 )  # Set font color to red if invalid
 

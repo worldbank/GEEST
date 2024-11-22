@@ -179,7 +179,7 @@ class JsonTreeModel(QAbstractItemModel):
             "description": factor.get("description", ""),
             "required": factor.get("required", False),
             "default_dimension_weighting": factor.get(
-                "default_analysis_weighting", 0.0
+                "default_dimension_weighting", 0.0
             ),
             "dimension_weighting": factor.get("dimension_weighting", 0.0),
             "analysis_mode": factor.get("factor_aggregation", ""),

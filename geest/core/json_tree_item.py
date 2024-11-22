@@ -165,6 +165,8 @@ class JsonTreeItem:
         status = self.getStatus()
         if self.isAnalysis():
             return None
+        if status == "Excluded from analysis":
+            return QIcon(resources_path("resources", "icons", "excluded.svg"))
         if status == "Completed successfully":
             return QIcon(resources_path("resources", "icons", "completed-success.svg"))
         elif status == "Required and not configured":
@@ -193,6 +195,25 @@ class JsonTreeItem:
             data = self.attributes()
             # log_message(f"Data: {data}")
             status = ""
+
+            # First check if the item weighting is 0, or its parent factor is zero
+            # If so, return "Excluded from analysis"
+            if self.isIndicator():
+                # Required flag can be overridden by the factor so we dont check it right now
+                required_by_parent = self.parentItem.attributes().get(
+                    "dimension_weighting", 0.0
+                )
+                required_by_self = data.get("factor_weighting", 0.0)
+                log_message(
+                    f"{data.get('id')} Required by indicator: {required_by_self} and required by parent: {required_by_parent}"
+                )
+                if not int(required_by_parent) or not int(required_by_self):
+                    log_message(f"Excluded from analysis: {data.get('id')}")
+                    return "Excluded from analysis"
+            if self.isFactor():
+                if not data.get("required", False):
+                    if not data.get("dimension_weighting", False):
+                        return "Excluded from analysis"
             if "Error" in data.get("result", ""):
                 return "Workflow failed"
             if "Failed" in data.get("result", ""):
@@ -343,6 +364,9 @@ class JsonTreeItem:
 
             # If found, update the weighting
             if indicator_item:
+                log_message(
+                    f"Updating weighting for {indicator_guid} to {new_weighting}"
+                )
                 indicator_item.setData(2, f"{new_weighting:.2f}")
                 # weighting references the level above (i.e. factor)
                 indicator_item.attributes()["factor_weighting"] = new_weighting
