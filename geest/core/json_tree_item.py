@@ -124,6 +124,20 @@ class JsonTreeItem:
         data["error"] = ""
         data["error_file"] = ""
 
+    def disable(self):
+        """
+        Mark the item as not configured
+        """
+        data = self.attributes()
+        data["analysis_mode"] = "Do Not Use"
+        data["indicator_required"] = False
+        if self.isDimension():
+            data["analysis_weighting"] = 0.0
+        if self.isFactor():
+            data["dimension_weighting"] = 0.0
+        if self.isIndicator():
+            data["factor_weighting"] = 0.0
+
     def getIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
         if self.isDimension():

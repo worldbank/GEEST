@@ -782,10 +782,13 @@ class JsonTreeView(QTreeView):
             self.model().setData(
                 self.current_editing_index, self.original_value, Qt.EditRole
             )
-            if self.hasCurrentEditor():
-                self.closeEditor(
-                    self.current_editor(), QAbstractItemDelegate.RevertModelCache
-                )
+            try:
+                if self.hasCurrentEditor():
+                    self.closeEditor(
+                        self.current_editor(), QAbstractItemDelegate.RevertModelCache
+                    )
+            except Exception as e:
+                super().keyPressEvent(event)
         else:
             super().keyPressEvent(event)
 

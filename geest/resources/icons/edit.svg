@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="255.99998"
+   height="255.99998"
+   viewBox="0 0 67.733328 67.733329"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="rotate(45, 33.866664, 33.866664)">
+    <!-- Pencil Body -->
+    <path
+       d="M20 30 L35 15 L40 20 L25 35 Z"
+       style="fill:#2C2C2C;stroke:none;" />
+    <!-- Pencil Tip -->
+    <path
+       d="M40 20 L42 18 L45 21 L43 23 Z"
+       style="fill:#595959;stroke:none;" />
+    <!-- Pencil Eraser -->
+    <rect
+       x="22"
+       y="33"
+       width="3"
+       height="10"
+       style="fill:#595959;" />
+  </g>
+</svg>
