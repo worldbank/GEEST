@@ -223,6 +223,8 @@ class FactorAggregationDialog(QDialog):
             if widget:
                 if isinstance(widget, QDoubleSpinBox) and not is_enabled:
                     widget.setValue(0)
+                if isinstance(widget, QDoubleSpinBox) and is_enabled:
+                    widget.setValue(1.0)
                 widget.setEnabled(is_enabled)
         self.validate_weightings()
 

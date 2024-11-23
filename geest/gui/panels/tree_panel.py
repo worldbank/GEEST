@@ -456,8 +456,12 @@ class TreePanel(QWidget):
             lambda: self.show_attributes(item)
         )
         # We disable items by setting their weight to 0
-        disable_action = QAction("Disable", self)
-        disable_action.triggered.connect(lambda: self.disable_item(item))
+        if item.getStatus() == "Excluded from analysis":
+            disable_action = QAction("Enable", self)
+            disable_action.triggered.connect(lambda: self.enable_item(item))
+        else:
+            disable_action = QAction("Disable", self)
+            disable_action.triggered.connect(lambda: self.disable_item(item))
 
         add_to_map_action = QAction("Add to map", self)
         add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
@@ -579,6 +583,10 @@ class TreePanel(QWidget):
     def disable_item(self, item):
         """Disable the item and its children."""
         item.disable()
+
+    def enable_item(self, item):
+        """Enable the item and its children."""
+        item.enable()
 
     def show_attributes(self, item):
         """Show the attributes of the item in a table."""

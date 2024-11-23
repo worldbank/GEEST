@@ -126,17 +126,48 @@ class JsonTreeItem:
 
     def disable(self):
         """
-        Mark the item as not configured
+        Mark the item as disabled, which is essentially just setting its weight to zero.
         """
         data = self.attributes()
         data["analysis_mode"] = "Do Not Use"
-        data["indicator_required"] = False
+
         if self.isDimension():
+            data["required"] = False
             data["analysis_weighting"] = 0.0
         if self.isFactor():
+            data["required"] = False
             data["dimension_weighting"] = 0.0
         if self.isIndicator():
+            data["indicator_required"] = False
             data["factor_weighting"] = 0.0
+
+    def enable(self):
+        """
+        Mark the item as enabled, which is essentially just setting its weight to its default.
+        """
+        data = self.attributes()
+        data["analysis_mode"] = ""
+        if self.isDimension():
+            data["required"] = True
+            data["analysis_weighting"] = data["default_analysis_weighting"]
+        if self.isFactor():
+            data["required"] = True
+            data["dimension_weighting"] = data["default_dimension_weighting"]
+            if self.parent().getStatus() == "Excluded from analysis":
+                self.parent().attributes()[
+                    "analysis_weighting"
+                ] = self.parent().attribute("default_analysis_weighting")
+        if self.isIndicator():
+            data["indicator_required"] = True
+            data["factor_weighting"] = data["default_indicator_factor_weighting"]
+            if self.parent().getStatus() == "Excluded from analysis":
+                self.parent().attributes()[
+                    "dimension_weighting"
+                ] = self.parent().attribute("default_dimension_weighting")
+                if self.parent().parent().getStatus() == "Excluded from analysis":
+                    self.parent().parent().attributes()["analysis_weighting"] = (
+                        self.parent().parent().attribute("default_analysis_weighting")
+                    )
 
     def getIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
@@ -229,7 +260,10 @@ class JsonTreeItem:
                     if not float(data.get("dimension_weighting", 0.0)):
                         return "Excluded from analysis"
             if self.isDimension():
-                # if the sum of the factor weightings is 0, return "Excluded from analysis"
+                # If the analysis weighting is zero, return "Excluded from analysis"
+                if not float(data.get("analysis_weighting", 0.0)):
+                    return "Excluded from analysis"
+                # If the sum of the factor weightings is zero, return "Excluded from analysis"
                 weight_sum = 0
                 for child in self.childItems:
                     weight_sum += float(child.attribute("factor_weighting", 0.0))
