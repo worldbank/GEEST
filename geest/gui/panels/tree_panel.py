@@ -635,6 +635,11 @@ class TreePanel(QWidget):
         maximize_button.clicked.connect(lambda: self.maximize_dialog(dialog, table))
         button_layout.addWidget(maximize_button)
 
+        # Copy button
+        copy_button = QPushButton("Copy to Clipboard")
+        copy_button.clicked.connect(lambda: self.copy_to_clipboard_as_markdown(table))
+        button_layout.addWidget(copy_button)
+
         layout.addLayout(button_layout)
 
         # Enable custom context menu for the table
@@ -646,6 +651,48 @@ class TreePanel(QWidget):
         dialog.exec_()
 
         log_message("----------------------------")
+
+    def copy_to_clipboard_as_markdown(self, table: QTableWidget):
+        """Copy the table content as Markdown to the clipboard."""
+        headers = [
+            table.horizontalHeaderItem(i).text() for i in range(table.columnCount())
+        ]
+        markdown_lines = ["| " + " | ".join(headers) + " |"]
+        markdown_lines.append("| " + " | ".join("---" for _ in headers) + " |")
+
+        for row in range(table.rowCount()):
+            row_data = []
+            for col in range(table.columnCount()):
+                item = table.item(row, col)
+                if item:
+                    row_data.append(item.text())
+                else:
+                    # Handle cell widgets like nested tables
+                    cell_widget = table.cellWidget(row, col)
+                    if isinstance(cell_widget, QTableWidget):
+                        nested_headers = [
+                            cell_widget.horizontalHeaderItem(i).text()
+                            for i in range(cell_widget.columnCount())
+                        ]
+                        nested_data = []
+                        for nested_row in range(cell_widget.rowCount()):
+                            nested_row_data = [
+                                cell_widget.item(nested_row, nested_col).text()
+                                for nested_col in range(cell_widget.columnCount())
+                            ]
+                            nested_data.append(", ".join(nested_row_data))
+                        row_data.append(
+                            f"Nested: {', '.join(nested_headers)} ({'; '.join(nested_data)})"
+                        )
+                    else:
+                        row_data.append("")
+            markdown_lines.append("| " + " | ".join(row_data) + " |")
+
+        # Copy the Markdown content to the clipboard
+        clipboard = QApplication.clipboard()
+        clipboard.setText("\n".join(markdown_lines))
+
+        log_message("Table copied to clipboard as Markdown.")
 
     def create_nested_table(self, nested_data: dict) -> QTableWidget:
         """Create a QTableWidget to display nested dictionary data."""
