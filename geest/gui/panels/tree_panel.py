@@ -49,6 +49,7 @@ from geest.gui.dialogs import (
     IndicatorDetailDialog,
     FactorAggregationDialog,
     DimensionAggregationDialog,
+    AnalysisAggregationDialog,
 )
 from geest.utilities import log_message
 
@@ -284,7 +285,8 @@ class TreePanel(QWidget):
         self.save_json_to_working_directory()
 
     def clear_all_items(self, parent_item=None):
-        if parent_item is None:
+        # Bool test for if it was triggered from a button or menu
+        if parent_item is None or isinstance(parent_item, bool):
             parent_item = self.model.rootItem
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
@@ -478,6 +480,10 @@ class TreePanel(QWidget):
 
         # Update initially
         update_action_text()
+
+        clear_results_action = QAction("Clear Results", self)
+        clear_results_action.triggered.connect(self.clear_all_items)
+
         # Update when menu shows
         menu = QMenu(self)
         menu.aboutToShow.connect(update_action_text)
@@ -492,7 +498,13 @@ class TreePanel(QWidget):
         )
         if item.role == "analysis":
             menu = QMenu(self)
+            edit_analysis_action = QAction("🔘 Edit", self)
+            edit_analysis_action.triggered.connect(
+                lambda: self.edit_analysis_aggregation(item)
+            )  # Connect to method
+            menu.addAction(edit_analysis_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
             menu.addAction(add_to_map_action)
 
@@ -859,6 +871,14 @@ class TreePanel(QWidget):
                     tag="Geest",
                     level=Qgis.Info,
                 )
+
+    def edit_analysis_aggregation(self, analysis_item):
+        """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
+        editing = self.edit_mode and self.edit_toggle.isChecked()
+        dialog = AnalysisAggregationDialog(analysis_item, editing=editing, parent=self)
+        if dialog.exec_():  # If OK was clicked
+            dialog.saveWeightingsToModel()
+            self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def edit_dimension_aggregation(self, dimension_item):
         """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension."""

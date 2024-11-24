@@ -123,6 +123,8 @@ class JsonTreeItem:
         data["result_file"] = ""
         data["error"] = ""
         data["error_file"] = ""
+        data["execution_start_time"] = ""
+        data["execution_end_time"] = ""
 
     def disable(self):
         """
@@ -375,6 +377,14 @@ class JsonTreeItem:
         """Return the list of factors under this dimension."""
         guids = []
         if self.isDimension():
+            guids = [child.guid for i, child in enumerate(self.childItems)]
+        return guids
+        # attributes["analysis_mode"] = "dimension_aggregation"
+
+    def getAnalysisDimensionGuids(self):
+        """Return the list of factors under this dimension."""
+        guids = []
+        if self.isAnalysis():
             guids = [child.guid for i, child in enumerate(self.childItems)]
         return guids
         # attributes["analysis_mode"] = "dimension_aggregation"
