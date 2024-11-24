@@ -79,7 +79,6 @@ class WorkflowFactory:
                 return PointPerCellWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_polyline_per_cell":
                 return PolylinePerCellWorkflow(item, cell_size_m, feedback, context)
-            # TODO fix inconsistent abbreviation below for Poly
             elif analysis_mode == "use_polygon_per_cell":
                 return PolygonPerCellWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "factor_aggregation":

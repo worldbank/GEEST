@@ -64,6 +64,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.create_project_directory_button.clicked.connect(
             self.create_new_project_folder
         )
+        project_crs = QgsProject.instance().crs().authid()
+        if project_crs == "EPSG:4326" or project_crs == "":
+            self.use_boundary_crs.setChecked(False)
+            self.use_boundary_crs.setEnabled(False)
+
         self.next_button.clicked.connect(self.create_project)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 

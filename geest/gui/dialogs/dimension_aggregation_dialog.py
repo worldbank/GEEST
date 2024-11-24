@@ -150,8 +150,6 @@ class DimensionAggregationDialog(QDialog):
             default_dimension_weighting = attributes.get(
                 "default_dimension_weighting", 0
             )
-            factor_required = attributes.get("required", 1)
-
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, 0, name_item)
@@ -169,8 +167,6 @@ class DimensionAggregationDialog(QDialog):
             # Use checkboxes
             checkbox_widget = self.create_checkbox_widget(row, dimension_weighting)
             self.table.setCellWidget(row, 2, checkbox_widget)
-            if factor_required == 1:
-                checkbox_widget.setEnabled(False)
 
             # Reset button
             reset_button = QPushButton("Reset")

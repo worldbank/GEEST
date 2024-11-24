@@ -27,10 +27,8 @@ class SpreadsheetToJsonParser:
         self.dataframe = self.dataframe[
             [
                 "Dimension",
-                "Dimension Required",
                 "Default Dimension Analysis Weighting",
                 "Factor",
-                "Factor Required",
                 "Default Factor Dimension Weighting",
                 "Indicator",
                 "Default Indicator Factor Weighting",
@@ -62,8 +60,7 @@ class SpreadsheetToJsonParser:
                 "Use Nighttime Lights",
                 "Use Environmental Hazards",
                 "Use Street Lights",
-                "Analysis Mode",  # New column
-                "Indicator Required",  # New column
+                "Analysis Mode",
             ]
         ]
 
@@ -81,7 +78,7 @@ class SpreadsheetToJsonParser:
         """
         Parse the dataframe into the hierarchical JSON structure.
         """
-        dimension_map = {}
+        analysis_model = {}
 
         for _, row in self.dataframe.iterrows():
             dimension = row["Dimension"]
@@ -89,17 +86,12 @@ class SpreadsheetToJsonParser:
 
             # Prepare dimension data
             dimension_id = self.create_id(dimension)
-            dimension_required = (
-                row["Dimension Required"]
-                if not pd.isna(row["Dimension Required"])
-                else ""
-            )
             default_dimension_analysis_weighting = (
                 row["Default Dimension Analysis Weighting"]
                 if not pd.isna(row["Default Dimension Analysis Weighting"])
                 else ""
             )
-            if dimension_id not in dimension_map:
+            if dimension_id not in analysis_model:
                 # Hardcoded descriptions for specific dimensions
                 description = ""
                 if dimension_id == "contextual":
@@ -110,23 +102,21 @@ class SpreadsheetToJsonParser:
                     description = "The Place-Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce."
 
             # If the Dimension doesn't exist yet, create it
-            if dimension not in dimension_map:
+            if dimension not in analysis_model:
                 new_dimension = {
                     "id": dimension_id,
                     "name": dimension,
-                    "required": dimension_required,
                     "default_analysis_weighting": default_dimension_analysis_weighting,
+                    # Initialise the weighting to the default value
+                    "analysis_weighting": default_dimension_analysis_weighting,
                     "description": description,
                     "factors": [],
                 }
                 self.result["dimensions"].append(new_dimension)
-                dimension_map[dimension] = new_dimension
+                analysis_model[dimension] = new_dimension
 
             # Prepare factor data
             factor_id = self.create_id(factor)
-            factor_required = (
-                row["Factor Required"] if not pd.isna(row["Factor Required"]) else ""
-            )
             default_factor_dimension_weighting = (
                 row["Default Factor Dimension Weighting"]
                 if not pd.isna(row["Default Factor Dimension Weighting"])
@@ -134,13 +124,14 @@ class SpreadsheetToJsonParser:
             )
 
             # If the Factor doesn't exist in the current dimension, add it
-            factor_map = {f["name"]: f for f in dimension_map[dimension]["factors"]}
+            factor_map = {f["name"]: f for f in analysis_model[dimension]["factors"]}
             if factor not in factor_map:
                 new_factor = {
                     "id": factor_id,
                     "name": factor,
-                    "required": factor_required,
                     "default_dimension_weighting": default_factor_dimension_weighting,
+                    # Initialise the weighting to the default value
+                    "dimension_weighting": default_factor_dimension_weighting,
                     "indicators": [],
                     "description": (
                         row["Factor Description"]
@@ -148,20 +139,23 @@ class SpreadsheetToJsonParser:
                         else ""
                     ),
                 }
-                dimension_map[dimension]["factors"].append(new_factor)
+                analysis_model[dimension]["factors"].append(new_factor)
                 factor_map[factor] = new_factor
 
-            # Add layer data to the current Factor, including new columns
-            layer_data = {
+            # Add indicator data to the current Factor, including new columns
+            default_factor_weighting = (
+                row["Default Indicator Factor Weighting"]
+                if not pd.isna(row["Default Indicator Factor Weighting"])
+                else ""
+            )
+            indicator_data = {
                 # These are all parsed from the spreadsheet
                 "indicator": row["Indicator"] if not pd.isna(row["Indicator"]) else "",
                 "id": row["ID"] if not pd.isna(row["ID"]) else "",
                 "description": "",
-                "default_indicator_factor_weighting": (
-                    row["Default Indicator Factor Weighting"]
-                    if not pd.isna(row["Default Indicator Factor Weighting"])
-                    else ""
-                ),
+                "default_factor_weighting": default_factor_weighting,
+                # Initialise the weighting to the default value
+                "factor_weighting": default_factor_weighting,
                 "default_index_score": (
                     row["Default Index Score"]
                     if not pd.isna(row["Default Index Score"])
@@ -291,14 +285,9 @@ class SpreadsheetToJsonParser:
                 "analysis_mode": (
                     row["Analysis Mode"] if not pd.isna(row["Analysis Mode"]) else ""
                 ),  # New column
-                "indicator_required": (
-                    row["Indicator Required"]
-                    if not pd.isna(row["Indicator Required"])
-                    else ""
-                ),  # New column
             }
 
-            factor_map[factor]["indicators"].append(layer_data)
+            factor_map[factor]["indicators"].append(indicator_data)
 
     def get_json(self):
         """

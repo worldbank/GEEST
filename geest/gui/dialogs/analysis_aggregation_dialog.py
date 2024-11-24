@@ -129,7 +129,6 @@ class AnalysisAggregationDialog(QDialog):
             dimension_id = attributes.get("name")
             analysis_weighting = float(attributes.get("analysis_weighting", 0.0))
             default_analysis_weighting = attributes.get("default_analysis_weighting", 0)
-            dimension_required = attributes.get("required", 1)
 
             name_item = QTableWidgetItem(dimension_id)
             name_item.setFlags(Qt.ItemIsEnabled)
@@ -148,8 +147,6 @@ class AnalysisAggregationDialog(QDialog):
             # Use checkboxes
             checkbox_widget = self.create_checkbox_widget(row, analysis_weighting)
             self.table.setCellWidget(row, 2, checkbox_widget)
-            if dimension_required == 1:
-                checkbox_widget.setEnabled(False)
 
             # Reset button
             reset_button = QPushButton("Reset")
@@ -226,7 +223,7 @@ class AnalysisAggregationDialog(QDialog):
         checkbox.stateChanged.connect(
             lambda state, r=row: self.toggle_row_widgets(r, state)
         )
-
+        checkbox.setEnabled(True)  # Enable by default
         # Create a container widget with a centered layout
         container = QWidget()
         layout = QHBoxLayout()

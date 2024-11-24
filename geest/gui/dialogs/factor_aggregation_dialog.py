@@ -238,9 +238,7 @@ class FactorAggregationDialog(QDialog):
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 attributes["analysis_mode"], 1, attributes
             )
-            default_indicator_factor_weighting = attributes.get(
-                "default_indicator_factor_weighting", 0
-            )
+            default_factor_weighting = attributes.get("default_factor_weighting", 0)
             self.table.setCellWidget(row, 0, data_source_widget)
             self.data_sources[guid] = data_source_widget
 
@@ -273,7 +271,7 @@ class FactorAggregationDialog(QDialog):
             # Reset Button
             reset_button = QPushButton("Reset")
             reset_button.clicked.connect(
-                lambda checked, item=weighting_item, value=default_indicator_factor_weighting: item.setValue(
+                lambda checked, item=weighting_item, value=default_factor_weighting: item.setValue(
                     value
                 )
             )

@@ -18,7 +18,7 @@ graph TB
     D --> D1[indicator: string]
     D --> D2[id: string]
     D --> D3[description: string]
-    D --> D4[default_indicator_factor_weighting: number]
+    D --> D4[default_factor_weighting: number]
     D --> D5[default_index_score: integer]
     D --> D6[index_score: integer]
     D --> D7[use_default_index_score: integer]

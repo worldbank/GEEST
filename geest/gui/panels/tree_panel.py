@@ -243,7 +243,7 @@ class TreePanel(QWidget):
         elif item.role == "factor":
             self.edit_factor_aggregation(item)
         elif item.role == "analysis":
-            self.show_attributes(item)
+            self.edit_analysis_aggregation(item)
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -285,8 +285,7 @@ class TreePanel(QWidget):
         self.save_json_to_working_directory()
 
     def clear_all_items(self, parent_item=None):
-        # Bool test for if it was triggered from a button or menu
-        if parent_item is None or isinstance(parent_item, bool):
+        if parent_item is None:
             parent_item = self.model.rootItem
         for i in range(parent_item.childCount()):
             child_item = parent_item.child(i)
@@ -359,11 +358,7 @@ class TreePanel(QWidget):
             if os.path.exists(master_model_path):
                 try:
                     shutil.copy(master_model_path, model_path)
-                    log_message(
-                        f"Copied master model.json to {model_path}",
-                        "Geest",
-                        level=Qgis.Info,
-                    )
+                    log_message(f"Copied master model.json to {model_path}")
                 except Exception as e:
                     log_message(
                         f"Error copying master model.json: {str(e)}",
@@ -482,7 +477,7 @@ class TreePanel(QWidget):
         update_action_text()
 
         clear_results_action = QAction("Clear Results", self)
-        clear_results_action.triggered.connect(self.clear_all_items)
+        clear_results_action.triggered.connect(self.clear_workflows)
 
         # Update when menu shows
         menu = QMenu(self)
@@ -507,6 +502,9 @@ class TreePanel(QWidget):
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
             menu.addAction(add_to_map_action)
+            add_study_area_layers_action = QAction("Add Study Area to Map", self)
+            add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
+            menu.addAction(add_study_area_layers_action)
 
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
@@ -764,38 +762,67 @@ class TreePanel(QWidget):
             clipboard = QApplication.clipboard()
             clipboard.setText(item.text())
 
-    def add_to_map(self, item):
-        """Add the item to the map."""
-        # TODO refactor use of the term Layer everywhere to Indicator
-        # for now, some spaghetti code to get the layer_uri
+    def add_study_area_to_map(self):
+        """Add the study area layers to the map.
+
+        Note that the area grid layer can be slow to draw!.
+        """
         gpkg_path = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
         )
+        project = QgsProject.instance()
 
-        if item.role == "analysis":
-            layers = [
-                "study_area_bbox",
-                "study_area_bboxes",
-                "study_area_polygons",
-                "study_area_grid",
-            ]
-            for layer_name in layers:
-                gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
-                layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
+        # Check if 'Geest' group exists, otherwise create it
+        root = project.layerTreeRoot()
+        geest_group = root.findGroup("Geest Study Area")
+        if geest_group is None:
+            geest_group = root.insertGroup(
+                0, "Geest Study Area"
+            )  # Insert at the top of the layers panel
 
-                if layer.isValid():
-                    QgsProject.instance().addMapLayer(layer)
-                    log_message(
-                        f"Added '{layer_name}' layer to the map.",
-                        tag="Geest",
-                        level=Qgis.Info,
-                    )
-                else:
-                    log_message(
-                        f"Failed to add '{layer_name}' layer to the map.",
-                        tag="Geest",
-                        level=Qgis.Critical,
-                    )
+        layers = [
+            "study_area_bbox",
+            "study_area_bboxes",
+            "study_area_polygons",
+            "study_area_grid",
+        ]
+        for layer_name in layers:
+            gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
+            layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
+
+            if layer.isValid():
+                QgsProject.instance().addMapLayer(layer)
+                log_message(f"Added '{layer_name}' layer to the map.")
+            else:
+                log_message(
+                    f"Failed to add '{layer_name}' layer to the map.",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+
+            # Check if a layer with the same data source exists in the correct group
+            existing_layer = None
+            for child in geest_group.children():
+                if isinstance(child, QgsLayerTreeGroup):
+                    continue
+                if child.layer().source() == gpkg_layer_path:
+                    existing_layer = child.layer()
+                    break
+
+            # If the layer exists, refresh it instead of removing and re-adding
+            if existing_layer is not None:
+                log_message(f"Refreshing existing layer: {existing_layer.name()}")
+                existing_layer.reload()
+            else:
+                # Add the new layer to the appropriate subgroup
+                QgsProject.instance().addMapLayer(layer, False)
+                layer_tree_layer = geest_group.addLayer(layer)
+                log_message(
+                    f"Added layer: {layer.name()} to group: {geest_group.name()}"
+                )
+
+    def add_to_map(self, item):
+        """Add the item to the map."""
 
         layer_uri = item.attribute(f"result_file")
 
