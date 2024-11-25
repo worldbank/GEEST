@@ -123,6 +123,47 @@ class JsonTreeItem:
         data["result_file"] = ""
         data["error"] = ""
         data["error_file"] = ""
+        data["execution_start_time"] = ""
+        data["execution_end_time"] = ""
+
+    def disable(self):
+        """
+        Mark the item as disabled, which is essentially just setting its weight to zero.
+        """
+        data = self.attributes()
+        data["analysis_mode"] = "Do Not Use"
+
+        if self.isDimension():
+            data["analysis_weighting"] = 0.0
+        if self.isFactor():
+            data["dimension_weighting"] = 0.0
+        if self.isIndicator():
+            data["factor_weighting"] = 0.0
+
+    def enable(self):
+        """
+        Mark the item as enabled, which is essentially just setting its weight to its default.
+        """
+        data = self.attributes()
+        data["analysis_mode"] = ""
+        if self.isDimension():
+            data["analysis_weighting"] = data["default_analysis_weighting"]
+        if self.isFactor():
+            data["dimension_weighting"] = data["default_dimension_weighting"]
+            if self.parent().getStatus() == "Excluded from analysis":
+                self.parent().attributes()[
+                    "analysis_weighting"
+                ] = self.parent().attribute("default_analysis_weighting")
+        if self.isIndicator():
+            data["factor_weighting"] = data["default_factor_weighting"]
+            if self.parent().getStatus() == "Excluded from analysis":
+                self.parent().attributes()[
+                    "dimension_weighting"
+                ] = self.parent().attribute("default_dimension_weighting")
+                if self.parent().parent().getStatus() == "Excluded from analysis":
+                    self.parent().parent().attributes()["analysis_weighting"] = (
+                        self.parent().parent().attribute("default_analysis_weighting")
+                    )
 
     def getIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
@@ -163,8 +204,7 @@ class JsonTreeItem:
     def getStatusIcon(self):
         """Retrieve the appropriate icon for the item based on its role."""
         status = self.getStatus()
-        if self.isAnalysis():
-            return None
+
         if status == "Excluded from analysis":
             return QIcon(resources_path("resources", "icons", "excluded.svg"))
         if status == "Completed successfully":
@@ -199,7 +239,6 @@ class JsonTreeItem:
             # First check if the item weighting is 0, or its parent factor is zero
             # If so, return "Excluded from analysis"
             if self.isIndicator():
-                # Required flag can be overridden by the factor so we dont check it right now
                 required_by_parent = float(
                     self.parentItem.attributes().get("dimension_weighting", 0.0)
                 )
@@ -211,14 +250,29 @@ class JsonTreeItem:
                     # log_message(f"Excluded from analysis: {data.get('id')}")
                     return "Excluded from analysis"
             if self.isFactor():
-                if not data.get("required", False):
-                    if not float(data.get("dimension_weighting", 0.0)):
-                        return "Excluded from analysis"
-            if self.isDimension():
-                # if the sum of the factor weightings is 0, return "Excluded from analysis"
+                if not float(data.get("dimension_weighting", 0.0)):
+                    return "Excluded from analysis"
+                # If the sum of the indicator weightings is zero, return "Excluded from analysis"
                 weight_sum = 0
                 for child in self.childItems:
                     weight_sum += float(child.attribute("factor_weighting", 0.0))
+                if not weight_sum:
+                    return "Excluded from analysis"
+            if self.isDimension():
+                # If the analysis weighting is zero, return "Excluded from analysis"
+                if not float(data.get("analysis_weighting", 0.0)):
+                    return "Excluded from analysis"
+                # If the sum of the factor weightings is zero, return "Excluded from analysis"
+                weight_sum = 0
+                for child in self.childItems:
+                    weight_sum += float(child.attribute("dimension_weighting", 0.0))
+                if not weight_sum:
+                    return "Excluded from analysis"
+            if self.isAnalysis():
+                # If the sum of the dimension weightings is zero, return "Excluded from analysis"
+                weight_sum = 0
+                for child in self.childItems:
+                    weight_sum += float(child.attribute("analysis_weighting", 0.0))
                 if not weight_sum:
                     return "Excluded from analysis"
 
@@ -237,13 +291,17 @@ class JsonTreeItem:
             ):
                 return "Not configured (optional)"
             # Item required and not configured
-            if (data.get("analysis_mode", "") == "") and data.get(
-                "indicator_required", False
+            if (
+                self.isIndicator()
+                and (data.get("analysis_mode", "") == "")
+                and data.get("indicator_required", False)
             ):
                 return "Required and not configured"
             # Item not required but not configured
-            if (data.get("analysis_mode", "") == "") and not data.get(
-                "indicator_required", False
+            if (
+                self.isIndicator()
+                and (data.get("analysis_mode", "") == "")
+                and not data.get("indicator_required", False)
             ):
                 return "Not configured (optional)"
             if "Not Run" in data.get("result", "") and not data.get("result_file", ""):
@@ -331,28 +389,13 @@ class JsonTreeItem:
         return guids
         # attributes["analysis_mode"] = "dimension_aggregation"
 
-    def getAnalysisAttributes(self):
-        """Return the dict of dimensions under this analysis."""
-        attributes = {}
+    def getAnalysisDimensionGuids(self):
+        """Return the list of factors under this dimension."""
+        guids = []
         if self.isAnalysis():
-            attributes["analysis_name"] = self.attribute("analysis_name", "Not Set")
-            attributes["description"] = self.attribute(
-                "analysis_description", "Not Set"
-            )
-            attributes["working_folder"] = self.attribute("working_folder", "Not Set")
-            attributes["cell_size_m"] = self.attribute("cell_size_m", 100)
-
-            attributes["dimensions"] = [
-                {
-                    "dimension_no": i,
-                    "dimension_id": child.attribute("id", ""),
-                    "dimension_name": child.data(0),
-                    "dimension_weighting": child.data(2),
-                    "result_file": child.attribute(f"result_file", ""),
-                }
-                for i, child in enumerate(self.childItems)
-            ]
-        return attributes
+            guids = [child.guid for i, child in enumerate(self.childItems)]
+        return guids
+        # attributes["analysis_mode"] = "dimension_aggregation"
 
     def getItemByGuid(self, guid):
         """Return the item with the specified guid."""
@@ -405,6 +448,29 @@ class JsonTreeItem:
                 # Log if the factor name is not found
                 log_message(
                     f"Factor '{factor_guid}' not found.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+
+        except Exception as e:
+            # Handle any exceptions and log the error
+            log_message(f"Error updating weighting: {e}", level=Qgis.Warning)
+
+    def updateDimensionWeighting(self, dimension_guid, new_weighting):
+        """Update the weighting of a specific dimension by its guid."""
+        try:
+            # Search for the factor by name
+            dimension_item = self.getItemByGuid(dimension_guid)
+            # If found, update the weighting
+            if dimension_item:
+                dimension_item.setData(2, f"{new_weighting:.2f}")
+                # weighting references the level above (i.e. analysis)
+                dimension_item.attributes()["analysis_weighting"] = new_weighting
+
+            else:
+                # Log if the factor name is not found
+                log_message(
+                    f"Factor '{dimension_guid}' not found.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

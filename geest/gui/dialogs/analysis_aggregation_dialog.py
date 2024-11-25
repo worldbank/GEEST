@@ -23,23 +23,17 @@ from qgis.core import Qgis
 from geest.utilities import resources_path, log_message, setting
 
 
-class DimensionAggregationDialog(QDialog):
-    def __init__(
-        self, dimension_name, dimension_data, dimension_item, editing=False, parent=None
-    ):
+class AnalysisAggregationDialog(QDialog):
+    def __init__(self, analysis_item, editing=False, parent=None):
         super().__init__(parent)
-
-        self.setWindowTitle(dimension_name)
-        self.dimension_name = dimension_name
-        self.dimension_data = dimension_data
-        self.tree_item = dimension_item  # Reference to the QTreeView item to update
+        self.analysis_name = analysis_item.attribute("analysis_name")
+        self.analysis_data = analysis_item.attributes()
+        self.tree_item = analysis_item  # Reference to the QTreeView item to update
         self.editing = editing
 
-        self.setWindowTitle(
-            f"Edit Dimension Weightings for Dimension: {self.tree_item.data(0)}"
-        )
-        # Need to be refactored...
-        self.guids = self.tree_item.getDimensionFactorGuids()
+        self.setWindowTitle(f"Edit weightings for analysis: {self.analysis_name}")
+        # Need to be redimensioned...
+        self.guids = self.tree_item.getAnalysisDimensionGuids()
         self.weightings = {}  # To store the temporary weightings
 
         # Layout setup
@@ -55,19 +49,6 @@ class DimensionAggregationDialog(QDialog):
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
 
-        # Get the parent item
-        parent_item = self.tree_item.parent()
-
-        # If both grandparent and parent exist, create the label
-        if parent_item:
-            hierarchy_label = QLabel(
-                f"{parent_item.data(0)} :: {self.tree_item.data(0)}"
-            )
-            hierarchy_label.setStyleSheet(
-                "font-size: 14px; font-weight: bold; color: gray;"
-            )
-            layout.addWidget(hierarchy_label, alignment=Qt.AlignTop)
-
         # Banner label
         self.banner_label = QLabel()
         self.banner_label.setPixmap(
@@ -81,11 +62,11 @@ class DimensionAggregationDialog(QDialog):
         # Splitter for Markdown editor and preview
         splitter = QSplitter(Qt.Horizontal)
         default_text = """
-        In this dialog you can set the weightings for each indicator in the dimension.
+        In this dialog you can set the weightings for each dimension in the analysis.
         """
         self.text_edit_left = QTextEdit()
         self.text_edit_left.setPlainText(
-            self.dimension_data.get("description", default_text)
+            self.analysis_data.get("description", default_text)
         )
         self.text_edit_left.setMinimumHeight(100)
         if self.editing:
@@ -114,14 +95,14 @@ class DimensionAggregationDialog(QDialog):
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(
-            ["Factor", "Weight 0-1", "Use", "", "Guid"]
+            ["dimension", "Weight 0-1", "Use", "", "Guid"]
         )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Adjust column widths
         self.table.horizontalHeader().setSectionResizeMode(
             0, QHeaderView.Stretch
-        )  # Factor column expands
+        )  # dimension column expands
         self.table.horizontalHeader().setSectionResizeMode(
             1, QHeaderView.Fixed
         )  # Weight 0-1 column fixed
@@ -145,12 +126,11 @@ class DimensionAggregationDialog(QDialog):
         for row, guid in enumerate(self.guids):
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
-            factor_id = attributes.get("name")
-            dimension_weighting = float(attributes.get("dimension_weighting", 0.0))
-            default_dimension_weighting = attributes.get(
-                "default_dimension_weighting", 0
-            )
-            name_item = QTableWidgetItem(factor_id)
+            dimension_id = attributes.get("name")
+            analysis_weighting = float(attributes.get("analysis_weighting", 0.0))
+            default_analysis_weighting = attributes.get("default_analysis_weighting", 0)
+
+            name_item = QTableWidgetItem(dimension_id)
             name_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, 0, name_item)
 
@@ -158,21 +138,21 @@ class DimensionAggregationDialog(QDialog):
             weighting_item = QDoubleSpinBox(self)
             weighting_item.setRange(0.0, 1.0)
             weighting_item.setDecimals(4)
-            weighting_item.setValue(dimension_weighting)
+            weighting_item.setValue(analysis_weighting)
             weighting_item.setSingleStep(0.01)
             weighting_item.valueChanged.connect(self.validate_weightings)
             self.table.setCellWidget(row, 1, weighting_item)
             self.weightings[guid] = weighting_item
 
             # Use checkboxes
-            checkbox_widget = self.create_checkbox_widget(row, dimension_weighting)
+            checkbox_widget = self.create_checkbox_widget(row, analysis_weighting)
             self.table.setCellWidget(row, 2, checkbox_widget)
 
             # Reset button
             reset_button = QPushButton("Reset")
             reset_button.clicked.connect(
                 lambda checked, item=weighting_item: item.setValue(
-                    default_dimension_weighting
+                    default_analysis_weighting
                 )
             )
             self.table.setCellWidget(row, 3, reset_button)
@@ -185,7 +165,7 @@ class DimensionAggregationDialog(QDialog):
 
             # disable the table row if the checkbox is unchecked
             # Have to do this last after all widgets are initialized
-            # First check if the factor is required
+            # First check if the dimension is required
             # and disable the checkbox if it is
             for col in range(4):
                 try:
@@ -231,19 +211,19 @@ class DimensionAggregationDialog(QDialog):
         self.guid_column_visible = not self.guid_column_visible
         self.table.setColumnHidden(4, not self.guid_column_visible)
 
-    def create_checkbox_widget(self, row: int, dimension_weighting: float) -> QWidget:
+    def create_checkbox_widget(self, row: int, analysis_weighting: float) -> QWidget:
         """
         Create a QWidget containing a QCheckBox for a specific row and center it.
         """
         checkbox = QCheckBox()
-        if dimension_weighting > 0:
+        if analysis_weighting > 0:
             checkbox.setChecked(True)  # Initially checked
         else:
             checkbox.setChecked(False)
         checkbox.stateChanged.connect(
             lambda state, r=row: self.toggle_row_widgets(r, state)
         )
-
+        checkbox.setEnabled(True)  # Enable by default
         # Create a container widget with a centered layout
         container = QWidget()
         layout = QHBoxLayout()
@@ -339,14 +319,14 @@ class DimensionAggregationDialog(QDialog):
         return None
 
     def saveWeightingsToModel(self):
-        """Assign new weightings to the dimensions's factors."""
-        for factor_guid, spin_box in self.weightings.items():
+        """Assign new weightings to the analysiss's dimensions."""
+        for dimension_guid, spin_box in self.weightings.items():
             try:
                 new_weighting = spin_box.value()
-                self.tree_item.updateFactorWeighting(factor_guid, new_weighting)
+                self.tree_item.updateDimensionWeighting(dimension_guid, new_weighting)
             except ValueError:
                 log_message(
-                    f"Invalid weighting input for GUID: {factor_guid}",
+                    f"Invalid weighting input for GUID: {dimension_guid}",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
@@ -390,7 +370,7 @@ class DimensionAggregationDialog(QDialog):
         """Handle the OK button by applying changes and closing the dialog."""
         self.saveWeightingsToModel()  # Assign weightings when changes are accepted
         if self.editing:
-            updated_data = self.dimension_data
+            updated_data = self.analysis_data
             updated_data["description"] = self.text_edit_left.toPlainText()
             self.dataUpdated.emit(updated_data)
         self.accept()

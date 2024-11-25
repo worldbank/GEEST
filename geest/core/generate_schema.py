@@ -15,7 +15,6 @@ def infer_schema(data):
         return {
             "type": "object",
             "properties": properties,
-            "required": required_keys,
         }
     elif isinstance(data, list):
         if len(data) > 0:

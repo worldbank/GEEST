@@ -53,7 +53,7 @@
                                             "description": {
                                                 "type": "string"
                                             },
-                                            "default_indicator_factor_weighting": {
+                                            "default_factor_weighting": {
                                                 "type": "number"
                                             },
                                             "default_index_score": {
@@ -139,7 +139,7 @@
                                             "indicator",
                                             "id",
                                             "description",
-                                            "default_indicator_factor_weighting",
+                                            "default_factor_weighting",
                                             "default_index_score",
                                             "index_score",
                                             "use_default_index_score",

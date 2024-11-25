@@ -30,8 +30,14 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.id = "geest_analysis"
-        self.aggregation_attributes = self.item.getAnalysisAttributes()
-        self.layers = self.aggregation_attributes.get(f"dimensions", [])
+        self.guids = (
+            self.item.getAnalysisDimensionGuids()
+        )  # get a list of the items to aggregate
+        self.id = (
+            self.item.attribute("analysis_name")
+            .lower()
+            .replace(" ", "_")
+            .replace("'", "")
+        )  # should not be needed any more
         self.weight_key = "dimension_weighting"
         self.workflow_name = "analysis_aggregation"
