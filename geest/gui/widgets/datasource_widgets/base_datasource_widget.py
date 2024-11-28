@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from qgis.PyQt.QtWidgets import QHBoxLayout, QWidget
+from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import Qgis
 from geest.utilities import log_message
 
@@ -8,6 +9,8 @@ class BaseDataSourceWidget(QWidget):
     """
     Abstract base class for data source selectors with internal widgets.
     """
+
+    data_changed = pyqtSignal(dict)
 
     def __init__(self, widget_key: str, attributes: dict) -> None:
         """Constructor
