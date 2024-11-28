@@ -2,6 +2,7 @@ import os
 from qgis.PyQt.QtWidgets import (
     QLabel,
 )
+from qgis.core import Qgis
 from geest.utilities import log_message
 from .base_configuration_widget import BaseConfigurationWidget
 
@@ -14,7 +15,7 @@ class StreetLightsConfigurationWidget(BaseConfigurationWidget):
     def add_internal_widgets(self) -> None:
         try:
             self.info_label = QLabel("Point locations representing street lights")
-            self.layout.addWidget(self.info_label)
+            self.internal_layout.addWidget(self.info_label)
 
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
@@ -49,3 +50,12 @@ class StreetLightsConfigurationWidget(BaseConfigurationWidget):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+
+        Only needed in cases where a) there are internal widgets and b)
+        the attributes may change externally e.g. in the datasource widget.
+        """
+        pass

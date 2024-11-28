@@ -5,7 +5,6 @@ from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLineEdit,
 )
-from qgis.PyQt.QtGui import QColor
 
 from qgis.core import Qgis
 from .base_configuration_widget import BaseConfigurationWidget
@@ -22,12 +21,8 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
         Adds internal widgets specific to self.set_internal_widgets_visible(self.isChecked()) - in this case there are none.
         """
         try:
-            log_message(
-                "Adding internal widgets for MultiBufferConfigurationWidget",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            log_message(f"Attributes: {self.attributes}")
+            log_message("Adding internal widgets for MultiBufferConfigurationWidget")
+            # log_message(f"Attributes: {self.attributes}")
             # Travel Mode group
             self.travel_mode_group = QGroupBox("Travel Mode:")
             self.travel_mode_layout = QHBoxLayout()
@@ -70,9 +65,9 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
                 )
 
             # Add all layouts to the main layout
-            self.layout.addWidget(self.travel_mode_group)
-            self.layout.addWidget(self.measurement_group)
-            self.layout.addLayout(self.travel_increments_layout)
+            self.internal_layout.addWidget(self.travel_mode_group)
+            self.internal_layout.addWidget(self.measurement_group)
+            self.internal_layout.addLayout(self.travel_increments_layout)
 
             # Emit the data_changed signal when any widget is changed
             self.time_radio.toggled.connect(self.update_data)
@@ -194,3 +189,12 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+
+        Only needed in cases where a) there are internal widgets and b)
+        the attributes may change externally e.g. in the datasource widget.
+        """
+        pass

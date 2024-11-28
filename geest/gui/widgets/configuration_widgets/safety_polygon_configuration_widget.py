@@ -35,14 +35,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.info_label = QLabel("Classify polygons according to safety levels")
-            self.layout.addWidget(self.info_label)
+            self.internal_layout.addWidget(self.info_label)
             self.table_widget = QTableWidget()
             self.table_widget.setSizePolicy(
                 QSizePolicy.Expanding, QSizePolicy.Expanding
             )
             # Stop the label being editable
             self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
-            self.layout.addWidget(self.table_widget)
+            self.internal_layout.addWidget(self.table_widget)
             self.table_widget.setColumnCount(2)
             self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
             self.table_widget.setColumnWidth(1, 80)
@@ -100,7 +100,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                 self.update_cell_colors()
 
                 value_item.valueChanged.connect(on_value_changed)
-            self.layout.addWidget(self.table_widget)
+            self.internal_layout.addWidget(self.table_widget)
 
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
@@ -177,3 +177,12 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+
+        Only needed in cases where a) there are internal widgets and b)
+        the attributes may change externally e.g. in the datasource widget.
+        """
+        pass

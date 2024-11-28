@@ -1,11 +1,11 @@
 from abc import abstractmethod
-from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QWidget
+from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QWidget, QSizePolicy
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import Qgis
 from geest.utilities import log_message
 
 
-class BaseConfigurationWidget(QRadioButton):
+class BaseConfigurationWidget(QWidget):
     """
     Abstract base class for radio buttons with internal widgets.
 
@@ -16,7 +16,11 @@ class BaseConfigurationWidget(QRadioButton):
     data_changed = pyqtSignal(dict)
 
     def __init__(
-        self, analysis_mode: str, attributes: dict, humanised_label: str = None
+        self,
+        analysis_mode: str,
+        attributes: dict,
+        humanised_label: str = None,
+        parent: QWidget = None,
     ) -> None:
         """
 
@@ -25,20 +29,36 @@ class BaseConfigurationWidget(QRadioButton):
             attributes (dict): The json tree items attributes for the widget.
             humanised_label (str): Optional custom label for the radio button.
         """
+        super().__init__(parent)
         self.analysis_mode = analysis_mode
         if not humanised_label:
             humanised_label = analysis_mode.replace("_", " ").title()
-        super().__init__(humanised_label)
+
         self.attributes = attributes
-        self.container: QWidget = QWidget()
-        self.layout: QVBoxLayout = QVBoxLayout(self.container)
-        self.layout.addWidget(self)
+        # Main layout
+        self.layout: QVBoxLayout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
+        # Radio button
+        self.radio_button: QRadioButton = QRadioButton(humanised_label, self)
+        self.layout.addWidget(self.radio_button)
+
+        # Internal container for the internal widgets
+        self.internal_container: QWidget = QWidget(self)
+        self.internal_container.setVisible(False)  # Initially hidden
+        self.internal_container.setSizePolicy(
+            QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        )
+        self.internal_layout: QVBoxLayout = QVBoxLayout(self.internal_container)
+        self.internal_layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(self.internal_container)
+
+        # Signal handling
+        self.radio_button.toggled.connect(self.on_toggled)
 
         # Log creation of widget
         log_message(
-            f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'",
-            tag="Geest",
-            level=Qgis.Info,
+            f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'"
         )
 
         try:
@@ -48,11 +68,18 @@ class BaseConfigurationWidget(QRadioButton):
             import traceback
 
             log_message(traceback.format_exc(), level=Qgis.Critical)
-        # Connect toggled signal to enable/disable internal widgets
-        self.toggled.connect(self.on_toggled)
 
-        # Initially disable internal widgets if not checked
-        self.set_internal_widgets_enabled(self.isChecked())
+    def isChecked(self) -> bool:
+        """
+        Return whether the radio button is checked.
+        """
+        return self.radio_button.isChecked()
+
+    def setChecked(self, checked: bool):
+        """
+        Set the radio button's checked state.
+        """
+        self.radio_button.setChecked(checked)
 
     @abstractmethod
     def add_internal_widgets(self) -> None:
@@ -60,13 +87,6 @@ class BaseConfigurationWidget(QRadioButton):
         Add internal widgets; to be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement add_internal_widgets.")
-
-    @abstractmethod
-    def get_container(self) -> QWidget:
-        """
-        Returns the container holding the radio button and its internal widgets.
-        """
-        return self.container
 
     @abstractmethod
     def get_data(self) -> dict:
@@ -77,6 +97,13 @@ class BaseConfigurationWidget(QRadioButton):
         raise NotImplementedError("Subclasses must implement get_data.")
 
     @abstractmethod
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+        To be implemented by subclasses.
+        """
+        raise NotImplementedError("Subclasses must implement update_widgets.")
+
     def update_data(self) -> None:
         """
         Gathers data from internal widgets and emits the data_changed signal.
@@ -91,7 +118,7 @@ class BaseConfigurationWidget(QRadioButton):
                     # to avoid breaking the datasource widget logic.
                     data = self.attributes
                 data["analysis_mode"] = self.analysis_mode
-                # log_message(f"Data changed: {data}")
+                log_message(f"\nData changed:\n\n********\n {data}\n\n********")
                 self.data_changed.emit(data)
             except Exception as e:
                 log_message(f"Error in update_data: {e}", level=Qgis.Critical)
@@ -104,8 +131,10 @@ class BaseConfigurationWidget(QRadioButton):
         Slot for when the radio button is toggled.
         Enables/disables internal widgets based on the radio button state.
         """
-        self.set_internal_widgets_enabled(checked)
-
+        log_message(f"Radio button toggled: {checked}")
+        # self.set_internal_widgets_enabled(checked)
+        self.internal_container.setVisible(checked)
+        self.updateGeometry()
         # Emit data changed only if the radio button is checked
         if checked:
             self.update_data()

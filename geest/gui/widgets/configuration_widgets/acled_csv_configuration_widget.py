@@ -50,7 +50,7 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
                 self.buffer_distance_input.setValue(int(default_distance))
 
             # Add all layouts to the main layout
-            self.layout.addLayout(self.buffer_distance_layout)
+            self.internal_layout.addLayout(self.buffer_distance_layout)
             self.buffer_distance_input.valueChanged.connect(self.update_data)
 
         except Exception as e:
@@ -85,3 +85,12 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+
+        Only needed in cases where a) there are internal widgets and b)
+        the attributes may change externally e.g. in the datasource widget.
+        """
+        pass

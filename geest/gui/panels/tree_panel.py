@@ -932,7 +932,7 @@ class TreePanel(QWidget):
             factor_name, factor_data, factor_item, editing=editing, parent=self
         )
         if dialog.exec_():  # If OK was clicked
-            dialog.saveWeightingsToModel()
+            dialog.save_weightings_to_model()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def show_indicator_properties(self, item):

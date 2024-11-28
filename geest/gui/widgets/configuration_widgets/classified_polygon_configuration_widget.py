@@ -30,7 +30,7 @@ class ClassifiedPolygonConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.info_label = QLabel("Classify polygons accoring to percentage scores")
-            self.layout.addWidget(self.info_label)
+            self.internal_layout.addWidget(self.info_label)
 
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
@@ -66,3 +66,12 @@ class ClassifiedPolygonConfigurationWidget(BaseConfigurationWidget):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+
+        Only needed in cases where a) there are internal widgets and b)
+        the attributes may change externally e.g. in the datasource widget.
+        """
+        pass

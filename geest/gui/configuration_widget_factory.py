@@ -29,7 +29,7 @@ class ConfigurationWidgetFactory:
     """
 
     @staticmethod
-    def create_radio_button(
+    def create_widget(
         key: str, value: int, attributes: dict
     ) -> BaseConfigurationWidget:
         """

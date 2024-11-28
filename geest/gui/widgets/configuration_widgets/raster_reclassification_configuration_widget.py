@@ -1,6 +1,7 @@
 from qgis.PyQt.QtWidgets import (
     QLabel,
 )
+from qgis.core import Qgis
 from .base_configuration_widget import BaseConfigurationWidget
 from geest.utilities import log_message
 
@@ -20,7 +21,7 @@ class RasterReclassificationConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.info_label = QLabel("Classify raster layer")
-            self.layout.addWidget(self.info_label)
+            self.internal_layout.addWidget(self.info_label)
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
@@ -53,3 +54,12 @@ class RasterReclassificationConfigurationWidget(BaseConfigurationWidget):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+
+        Only needed in cases where a) there are internal widgets and b)
+        the attributes may change externally e.g. in the datasource widget.
+        """
+        pass

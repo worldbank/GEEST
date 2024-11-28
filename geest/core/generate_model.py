@@ -41,16 +41,6 @@ class SpreadsheetToJsonParser:
                 "Use Multi Buffer Point",
                 "Default Single Buffer Distance",
                 "Use Single Buffer Point",
-                "Default Pixel",
-                "Use Create Grid",
-                "Use OSM Downloader",
-                "Use Bbox for AOI",
-                "Use Rasterize Layer",
-                "Use WBL Downloader",
-                "Use Humdata Downloader",
-                "Use Mapillary Downloader",
-                "Use Other Downloader",
-                "Use Add Layers Manually",
                 "Use Classify Polygon into Classes",
                 "Use Classify Safety Polygon into Classes",
                 "Use CSV to Point Layer",
@@ -60,7 +50,6 @@ class SpreadsheetToJsonParser:
                 "Use Nighttime Lights",
                 "Use Environmental Hazards",
                 "Use Street Lights",
-                "Analysis Mode",
             ]
         ]
 
@@ -189,54 +178,6 @@ class SpreadsheetToJsonParser:
                     if not pd.isna(row["Use Single Buffer Point"])
                     else ""
                 ),
-                "default_pixel": (
-                    row["Default Pixel"] if not pd.isna(row["Default Pixel"]) else ""
-                ),
-                "use_create_grid": (
-                    row["Use Create Grid"]
-                    if not pd.isna(row["Use Create Grid"])
-                    else ""
-                ),
-                "use_osm_downloader": (
-                    row["Use OSM Downloader"]
-                    if not pd.isna(row["Use OSM Downloader"])
-                    else ""
-                ),
-                "use_bbox_for_aoi": (
-                    row["Use Bbox for AOI"]
-                    if not pd.isna(row["Use Bbox for AOI"])
-                    else ""
-                ),
-                "use_rasterize_layer": (
-                    row["Use Rasterize Layer"]
-                    if not pd.isna(row["Use Rasterize Layer"])
-                    else ""
-                ),
-                "use_wbl_downloader": (
-                    row["Use WBL Downloader"]
-                    if not pd.isna(row["Use WBL Downloader"])
-                    else ""
-                ),
-                "use_humdata_downloader": (
-                    row["Use Humdata Downloader"]
-                    if not pd.isna(row["Use Humdata Downloader"])
-                    else ""
-                ),
-                "use_mapilliary_downloader": (
-                    row["Use Mapillary Downloader"]
-                    if not pd.isna(row["Use Mapillary Downloader"])
-                    else ""
-                ),
-                "use_other_downloader": (
-                    row["Use Other Downloader"]
-                    if not pd.isna(row["Use Other Downloader"])
-                    else ""
-                ),
-                "use_add_layers_manually": (
-                    row["Use Add Layers Manually"]
-                    if not pd.isna(row["Use Add Layers Manually"])
-                    else ""
-                ),
                 "use_classify_polygon_into_classes": (
                     row["Use Classify Polygon into Classes"]
                     if not pd.isna(row["Use Classify Polygon into Classes"])
@@ -282,9 +223,7 @@ class SpreadsheetToJsonParser:
                     if not pd.isna(row["Use Street Lights"])
                     else ""
                 ),
-                "analysis_mode": (
-                    row["Analysis Mode"] if not pd.isna(row["Analysis Mode"]) else ""
-                ),  # New column
+                "analysis_mode": "Do Not Use",
             }
 
             factor_map[factor]["indicators"].append(indicator_data)

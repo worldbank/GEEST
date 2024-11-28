@@ -394,6 +394,72 @@ class JsonTreeItem:
         """Set the attributes of the item."""
         self.itemData[3] = attributes
 
+    def attributesAsMarkdown(self):
+        """Return the attributes as a markdown formatted string."""
+        attributes = self.attributes()
+        if not attributes:
+            return "The dictionary is empty."
+
+        # Extract keys and values
+        headers = ["Key", "Value"]
+        rows = [
+            (str(key), str(value).replace("\n", "  \n"))
+            for key, value in attributes.items()
+        ]
+
+        # Calculate column widths
+        col_widths = [
+            max(len(headers[0]), max(len(row[0]) for row in rows)),
+            max(len(headers[1]), max(len(row[1]) for row in rows)),
+        ]
+
+        # Construct the table
+        table = []
+
+        # Add header
+        header_line = (
+            f"| {headers[0]:<{col_widths[0]}} | {headers[1]:<{col_widths[1]}} |"
+        )
+        table.append(header_line)
+        table.append(f"|{'-' * (col_widths[0] + 2)}|{'-' * (col_widths[1] + 2)}|")
+
+        # Add rows
+        for key, value in rows:
+            row_line = f"| {key:<{col_widths[0]}} | {value:<{col_widths[1]}} |"
+            table.append(row_line)
+
+        return "\n" + "\n".join(table) + "\n"
+
+    def setAnalysisMode(self, mode):
+        """Set the analysis mode of the item."""
+        self.attributes()["analysis_mode"] = mode
+
+    def ensureValidAnalysisMode(self):
+        """Ensure the analysis mode is valid for this item."""
+        if self.isDimension():
+            if self.attribute("analysis_mode", "") == "Do Not Use":
+                self.attributes()["analysis_mode"] = "dimension_aggregation"
+        if self.isFactor():
+            if self.attribute("analysis_mode", "") == "Do Not Use":
+                self.attributes()["analysis_mode"] = "factor_aggregation"
+        if self.isIndicator():
+            if self.attribute("analysis_mode", "") == "Do Not Use":
+                log_message(
+                    f"Analysis mode for {self.attribute('id')} is set to Do Not Use"
+                )
+                log_message(f"Updating it to the first valid analysis mode")
+                # Set the analysis mode to the first matching key below that is not zero
+                # Get a list of all attributes that start with 'use_'
+                for key in self.attributes().keys():
+                    if key.startswith("use_"):
+                        log_message(
+                            f"Current key: {key} has value {self.attribute(key, 0)}"
+                        )
+                        if self.attribute(key, 0) == 1:
+                            log_message(f"Setting analysis mode to {key}")
+                            self.setAnalysisMode(key)
+                            break
+
     def getFactorIndicatorGuids(self):
         """Return the list of indicators under this factor."""
         guids = []
