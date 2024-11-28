@@ -251,7 +251,7 @@ class FactorAggregationDialog(QDialog):
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
             log_message(f"Populating table for GUID: {guid}")
-            log_message(f"Attributes: {attributes}")
+            log_message(f"Attributes: {item.attributesAsMarkdown()}")
             # Data Source Widget
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 attributes["analysis_mode"], 1, attributes

@@ -65,9 +65,9 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
                 )
 
             # Add all layouts to the main layout
-            self.layout.addWidget(self.travel_mode_group)
-            self.layout.addWidget(self.measurement_group)
-            self.layout.addLayout(self.travel_increments_layout)
+            self.internal_layout.addWidget(self.travel_mode_group)
+            self.internal_layout.addWidget(self.measurement_group)
+            self.internal_layout.addLayout(self.travel_increments_layout)
 
             # Emit the data_changed signal when any widget is changed
             self.time_radio.toggled.connect(self.update_data)

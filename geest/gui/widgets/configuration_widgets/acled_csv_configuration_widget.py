@@ -50,7 +50,7 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
                 self.buffer_distance_input.setValue(int(default_distance))
 
             # Add all layouts to the main layout
-            self.layout.addLayout(self.buffer_distance_layout)
+            self.internal_layout.addLayout(self.buffer_distance_layout)
             self.buffer_distance_input.valueChanged.connect(self.update_data)
 
         except Exception as e:

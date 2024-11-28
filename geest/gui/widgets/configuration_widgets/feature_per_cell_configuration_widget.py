@@ -1,6 +1,7 @@
 from qgis.PyQt.QtWidgets import (
     QLabel,
 )
+from qgis.core import Qgis
 from geest.utilities import log_message
 from .base_configuration_widget import BaseConfigurationWidget
 
@@ -34,7 +35,7 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.info_label = QLabel("Count features per cell.")
-            self.layout.addWidget(self.info_label)
+            self.internal_layout.addWidget(self.info_label)
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
