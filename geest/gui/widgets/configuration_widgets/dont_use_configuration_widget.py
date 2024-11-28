@@ -23,3 +23,12 @@ class DontUseConfigurationWidget(BaseConfigurationWidget):
         Enables or disables the internal widgets based on the state of the radio button.
         """
         pass
+
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+
+        Only needed in cases where a) there are internal widgets and b)
+        the attributes may change externally e.g. in the datasource widget.
+        """
+        pass

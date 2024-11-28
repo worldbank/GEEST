@@ -36,9 +36,7 @@ class BaseConfigurationWidget(QRadioButton):
 
         # Log creation of widget
         log_message(
-            f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'",
-            tag="Geest",
-            level=Qgis.Info,
+            f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'"
         )
 
         try:
@@ -62,13 +60,6 @@ class BaseConfigurationWidget(QRadioButton):
         raise NotImplementedError("Subclasses must implement add_internal_widgets.")
 
     @abstractmethod
-    def get_container(self) -> QWidget:
-        """
-        Returns the container holding the radio button and its internal widgets.
-        """
-        return self.container
-
-    @abstractmethod
     def get_data(self) -> dict:
         """
         Method to get data from internal widgets.
@@ -77,6 +68,13 @@ class BaseConfigurationWidget(QRadioButton):
         raise NotImplementedError("Subclasses must implement get_data.")
 
     @abstractmethod
+    def update_widgets(self) -> None:
+        """
+        Updates the internal widgets with the current attributes.
+        To be implemented by subclasses.
+        """
+        raise NotImplementedError("Subclasses must implement update_widgets.")
+
     def update_data(self) -> None:
         """
         Gathers data from internal widgets and emits the data_changed signal.
@@ -91,7 +89,7 @@ class BaseConfigurationWidget(QRadioButton):
                     # to avoid breaking the datasource widget logic.
                     data = self.attributes
                 data["analysis_mode"] = self.analysis_mode
-                # log_message(f"Data changed: {data}")
+                log_message(f"\nData changed:\n\n********\n {data}\n\n********")
                 self.data_changed.emit(data)
             except Exception as e:
                 log_message(f"Error in update_data: {e}", level=Qgis.Critical)
@@ -105,7 +103,6 @@ class BaseConfigurationWidget(QRadioButton):
         Enables/disables internal widgets based on the radio button state.
         """
         self.set_internal_widgets_enabled(checked)
-
         # Emit data changed only if the radio button is checked
         if checked:
             self.update_data()
