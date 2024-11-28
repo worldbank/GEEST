@@ -398,6 +398,32 @@ class JsonTreeItem:
         """Set the analysis mode of the item."""
         self.attributes()["analysis_mode"] = mode
 
+    def ensureValidAnalysisMode(self):
+        """Ensure the analysis mode is valid for this item."""
+        if self.isDimension():
+            if self.attribute("analysis_mode", "") == "Do Not Use":
+                self.attributes()["analysis_mode"] = "dimension_aggregation"
+        if self.isFactor():
+            if self.attribute("analysis_mode", "") == "Do Not Use":
+                self.attributes()["analysis_mode"] = "factor_aggregation"
+        if self.isIndicator():
+            if self.attribute("analysis_mode", "") == "Do Not Use":
+                log_message(
+                    f"Analysis mode for {self.attribute('id')} is set to Do Not Use"
+                )
+                log_message(f"Updating it to the first valid analysis mode")
+                # Set the analysis mode to the first matching key below that is not zero
+                # Get a list of all attributes that start with 'use_'
+                for key in self.attributes().keys():
+                    if key.startswith("use_"):
+                        log_message(
+                            f"Current key: {key} has value {self.attribute(key, 0)}"
+                        )
+                        if self.attribute(key, 0) == 1:
+                            log_message(f"Setting analysis mode to {key}")
+                            self.setAnalysisMode(key)
+                            break
+
     def getFactorIndicatorGuids(self):
         """Return the list of indicators under this factor."""
         guids = []

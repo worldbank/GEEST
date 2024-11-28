@@ -29,6 +29,7 @@ from geest.utilities import log_message
 
 
 class FactorAggregationDialog(QDialog):
+
     def __init__(
         self, factor_name, factor_data, factor_item, editing=False, parent=None
     ):
@@ -42,6 +43,12 @@ class FactorAggregationDialog(QDialog):
 
         # Initialize dictionaries
         self.guids = self.tree_item.getFactorIndicatorGuids()
+        # If the indicators do not have a usable analysis mode set, iterate through them
+        # and set it to the first available usable mode
+        for guid in self.guids:
+            item = self.tree_item.getItemByGuid(guid)
+            item.ensureValidAnalysisMode()
+
         self.weightings = {}  # Temporary weightings
         self.data_sources = {}  # Temporary data sources
 
@@ -90,11 +97,12 @@ class FactorAggregationDialog(QDialog):
 
         # Page 1 (default): Configuration widget and table
         page_1_layout = QVBoxLayout()
-        configuration_widget = FactorConfigurationWidget(self.tree_item, self.guids)
-        page_1_layout.addWidget(configuration_widget)
+        self.configuration_widget = FactorConfigurationWidget(
+            self.tree_item, self.guids
+        )
+        page_1_layout.addWidget(self.configuration_widget)
 
-        configuration_widget.selection_changed.connect(self.populate_table)
-
+        self.configuration_widget.selection_changed.connect(self.populate_table)
         # Add page 1 layout to a container widget and set it in stacked_widget
         page_1_container = QWidget()
         page_1_container.setLayout(page_1_layout)
@@ -196,6 +204,15 @@ class FactorAggregationDialog(QDialog):
         current_index = self.stacked_widget.currentIndex()
         self.stacked_widget.setCurrentIndex(1 - current_index)  # Toggle between 0 and 1
 
+    def refresh_configuration(self):
+        """Refresh the configuration widget and table.
+
+        We call this when any data source widget changes to ensure the data source
+        and the configuration are conistent with each other.
+
+        """
+        self.configuration_widget.refresh_radio_buttons()
+
     def create_checkbox_widget(self, row: int, weighting_value: float) -> QWidget:
         checkbox = QCheckBox()
         if weighting_value > 0:
@@ -233,11 +250,15 @@ class FactorAggregationDialog(QDialog):
         for row, guid in enumerate(self.guids):
             item = self.tree_item.getItemByGuid(guid)
             attributes = item.attributes()
-
+            log_message(f"Populating table for GUID: {guid}")
+            log_message(f"Attributes: {attributes}")
             # Data Source Widget
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 attributes["analysis_mode"], 1, attributes
             )
+            if not data_source_widget:
+                continue
+            data_source_widget.data_changed.connect(self.refresh_configuration)
             default_factor_weighting = attributes.get("default_factor_weighting", 0)
             self.table.setCellWidget(row, 0, data_source_widget)
             self.data_sources[guid] = data_source_widget
@@ -322,7 +343,7 @@ class FactorAggregationDialog(QDialog):
                     return checkbox
         return None
 
-    def saveWeightingsToModel(self):
+    def save_weightings_to_model(self):
         """Assign new weightings to the factor's indicators."""
         for indicator_guid, spin_box in self.weightings.items():
             try:
@@ -340,7 +361,7 @@ class FactorAggregationDialog(QDialog):
 
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
-        self.saveWeightingsToModel()
+        self.save_weightings_to_model()
         if self.editing:
             updated_data = self.factor_data
             updated_data["description"] = self.text_edit_left.toPlainText()
