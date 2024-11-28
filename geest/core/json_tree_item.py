@@ -394,6 +394,10 @@ class JsonTreeItem:
         """Set the attributes of the item."""
         self.itemData[3] = attributes
 
+    def setAnalysisMode(self, mode):
+        """Set the analysis mode of the item."""
+        self.attributes()["analysis_mode"] = mode
+
     def getFactorIndicatorGuids(self):
         """Return the list of indicators under this factor."""
         guids = []
