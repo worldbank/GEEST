@@ -91,7 +91,9 @@ class FactorConfigurationWidget(QWidget):
         """
         Refreshes the radio buttons.
         """
+        log_message("Refreshing radio buttons")
         for key, widget in self.widgets.items():
+            log_message(f"Updating widget for key: {key}")
             widget.update_widgets()
 
     def on_selection_changed(self, button) -> None:

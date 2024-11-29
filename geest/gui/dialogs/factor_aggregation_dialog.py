@@ -211,6 +211,7 @@ class FactorAggregationDialog(QDialog):
         and the configuration are conistent with each other.
 
         """
+        log_message("data_changed signal received, refreshing configuration")
         self.configuration_widget.refresh_radio_buttons()
 
     def create_checkbox_widget(self, row: int, weighting_value: float) -> QWidget:

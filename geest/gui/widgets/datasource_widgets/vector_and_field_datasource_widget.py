@@ -176,43 +176,45 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         """
         Updates the selected field in the attributes dictionary when the field selection changes.
         """
-        if self.field_selection_combo.isEnabled():
-            selected_field = self.field_selection_combo.currentText()
-            self.attributes[f"{self.widget_key}_selected_field"] = selected_field
-
-            # Store the selected field in QSettings
-            self.settings.setValue(f"{self.widget_key}_selected_field", selected_field)
-            if self.attributes.get("id", None) == "Street_Lights":
-                # retrieve the unique values for the selected field
-                vectorLayer = self.layer_combo.currentLayer()
-                idx = vectorLayer.fields().indexOf(selected_field)
-                values = vectorLayer.uniqueValues(idx)
-                values_dict = {}
-
-                #  list the data type of each value
-                for value in values:
-                    # log_message(f"{type(value)} value {value}")
-                    # Dont remove this! It cleans to contents to remove QVariants
-                    # introduced from empty table rows!
-                    if isinstance(value, str):
-                        values_dict[value] = None
-                # Preserve existing values if they exist
-                existing_values = self.attributes.get(
-                    f"{self.widget_key}_unique_values", {}
-                )
-
-                for key in values_dict.keys():
-                    if key not in existing_values:
-                        values_dict[key] = None
-                    else:
-                        values_dict[key] = existing_values[key]
-                log_message(f"Existing values: {values_dict}")
-                log_message(f"New      values: {values_dict}")
-                # will drop any keys in the json item that are not in values_dict
-                self.attributes[f"{self.widget_key}_unique_values"] = values_dict
-
-        else:
+        if not self.field_selection_combo.isEnabled():
             self.attributes[f"{self.widget_key}_selected_field"] = None
+            self.data_changed.emit(self.attributes)
+            return
+
+        selected_field = self.field_selection_combo.currentText()
+        self.attributes[f"{self.widget_key}_selected_field"] = selected_field
+
+        # Store the selected field in QSettings
+        self.settings.setValue(f"{self.widget_key}_selected_field", selected_field)
+        if self.attributes.get("id", None) == "Street_Lights":
+            # retrieve the unique values for the selected field
+            vectorLayer = self.layer_combo.currentLayer()
+            idx = vectorLayer.fields().indexOf(selected_field)
+            values = vectorLayer.uniqueValues(idx)
+            values_dict = {}
+
+            #  list the data type of each value
+            for value in values:
+                # log_message(f"{type(value)} value {value}")
+                # Dont remove this! It cleans to contents to remove QVariants
+                # introduced from empty table rows!
+                if isinstance(value, str):
+                    values_dict[value] = None
+            # Preserve existing values if they exist
+            existing_values = self.attributes.get(
+                f"{self.widget_key}_unique_values", {}
+            )
+
+            for key in values_dict.keys():
+                if key not in existing_values:
+                    values_dict[key] = None
+                else:
+                    values_dict[key] = existing_values[key]
+            log_message(f"Existing values: {values_dict}")
+            log_message(f"New      values: {values_dict}")
+            # will drop any keys in the json item that are not in values_dict
+            self.attributes[f"{self.widget_key}_unique_values"] = values_dict
+        self.data_changed.emit(self.attributes)
 
     def update_field_combo(self) -> None:
         """
@@ -263,3 +265,4 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         self.attributes[f"{self.widget_key}_shapefile"] = (
             self.shapefile_line_edit.text()
         )
+        self.data_changed.emit(self.attributes)
