@@ -188,9 +188,9 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         self.settings.setValue(f"{self.widget_key}_selected_field", selected_field)
         if self.attributes.get("id", None) == "Street_Lights":
             # retrieve the unique values for the selected field
-            vectorLayer = self.layer_combo.currentLayer()
-            idx = vectorLayer.fields().indexOf(selected_field)
-            values = vectorLayer.uniqueValues(idx)
+            vector_layer = self.layer_combo.currentLayer()
+            idx = vector_layer.fields().indexOf(selected_field)
+            values = vector_layer.uniqueValues(idx)
             values_dict = {}
 
             #  list the data type of each value
