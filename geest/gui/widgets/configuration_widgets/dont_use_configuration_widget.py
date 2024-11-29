@@ -24,7 +24,7 @@ class DontUseConfigurationWidget(BaseConfigurationWidget):
         """
         pass
 
-    def update_widgets(self) -> None:
+    def update_widgets(self, attributes: dict) -> None:
         """
         Updates the internal widgets with the current attributes.
 

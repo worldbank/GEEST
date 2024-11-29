@@ -108,8 +108,6 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             # Call update_cell_colors after all rows are created
             self.update_cell_colors()
 
-            value_item.valueChanged.connect(on_value_changed)
-
     def update_cell_colors(self):
         # Check if all values are zero
         all_zeros = True
@@ -180,7 +178,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                 level=Qgis.Critical,
             )
 
-    def update_widgets(self) -> None:
+    def update_widgets(self, attributes: dict) -> None:
         """
         Updates the internal widgets with the current attributes.
 
@@ -188,5 +186,6 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         the attributes may change externally e.g. in the datasource widget.
         """
         log_message("Updating widgets for SafetyPolygonConfigurationWidget")
+        self.attributes = attributes
         self.table_widget.clear()
         self.populate_table()

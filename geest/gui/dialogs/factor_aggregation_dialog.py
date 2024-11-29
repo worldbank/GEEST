@@ -204,7 +204,7 @@ class FactorAggregationDialog(QDialog):
         current_index = self.stacked_widget.currentIndex()
         self.stacked_widget.setCurrentIndex(1 - current_index)  # Toggle between 0 and 1
 
-    def refresh_configuration(self):
+    def refresh_configuration(self, attributes: dict):
         """Refresh the configuration widget and table.
 
         We call this when any data source widget changes to ensure the data source
@@ -212,7 +212,7 @@ class FactorAggregationDialog(QDialog):
 
         """
         log_message("data_changed signal received, refreshing configuration")
-        self.configuration_widget.refresh_radio_buttons()
+        self.configuration_widget.refresh_radio_buttons(attributes)
 
     def create_checkbox_widget(self, row: int, weighting_value: float) -> QWidget:
         checkbox = QCheckBox()

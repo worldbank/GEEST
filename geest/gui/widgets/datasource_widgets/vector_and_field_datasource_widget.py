@@ -210,7 +210,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                     values_dict[key] = None
                 else:
                     values_dict[key] = existing_values[key]
-            log_message(f"Existing values: {values_dict}")
+            log_message(f"Existing values: {existing_values}")
             log_message(f"New      values: {values_dict}")
             # will drop any keys in the json item that are not in values_dict
             self.attributes[f"{self.widget_key}_unique_values"] = values_dict
