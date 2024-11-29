@@ -8,7 +8,7 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
 )
 from qgis.gui import QgsMapLayerComboBox
-from qgis.core import QgsMapLayerProxyModel, QgsProject
+from qgis.core import QgsMapLayerProxyModel, QgsProject, Qgis
 from qgis.PyQt.QtCore import QSettings
 from .base_indicator_widget import BaseIndicatorWidget
 from geest.utilities import log_message
