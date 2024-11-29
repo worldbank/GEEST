@@ -87,12 +87,16 @@ class FactorConfigurationWidget(QWidget):
             default_radio = self.button_group.buttons()[0]
             default_radio.setChecked(True)
 
-    def refresh_radio_buttons(self) -> None:
+    def refresh_radio_buttons(self, attributes: dict) -> None:
         """
         Refreshes the radio buttons.
         """
+        log_message("Refreshing radio buttons")
+        for key, value in attributes.items():
+            log_message(f"Key: {key}, Value: {value}")
         for key, widget in self.widgets.items():
-            widget.update_widgets()
+            log_message(f"Updating widget for key: {key}")
+            widget.update_widgets(attributes)
 
     def on_selection_changed(self, button) -> None:
         """

@@ -233,7 +233,9 @@ class JsonTreeItem:
                 return ""
 
             data = self.attributes()
-            # log_message(f"Data: {data}")
+            analysis_mode = data.get("analysis_mode", "")
+            qgis_layer_source_key = analysis_mode.replace("use_", "") + "layer_spource"
+            qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "shapefile"
             status = ""
 
             # First check if the item weighting is 0, or its parent factor is zero
@@ -301,27 +303,30 @@ class JsonTreeItem:
             if "Failed" in data.get("result", ""):
                 return "Workflow failed"
             # Item required and not configured
-            if "Do Not Use" in data.get("analysis_mode", "") and data.get(
-                "indicator_required", False
-            ):
+            if "Do Not Use" in analysis_mode and data.get("factor_weighting", 0.0) > 0:
                 return "Required and not configured"
             # Item not required but not configured
-            if "Do Not Use" in data.get("analysis_mode", "") and not data.get(
-                "indicator_required", False
-            ):
+            if "Do Not Use" in analysis_mode:
                 return "Not configured (optional)"
             # Item required and not configured
             if (
                 self.isIndicator()
-                and (data.get("analysis_mode", "") == "")
-                and data.get("indicator_required", False)
+                and (analysis_mode == "")
+                and (data.get("factor_weighting", 0.0) > 0)
             ):
                 return "Required and not configured"
             # Item not required but not configured
             if (
                 self.isIndicator()
-                and (data.get("analysis_mode", "") == "")
-                and not data.get("indicator_required", False)
+                and (analysis_mode == "")
+                and (data.get("factor_weighting", 0.0) == 0.0)
+            ):
+                return "Not configured (optional)"
+            if (
+                self.isIndicator()
+                and analysis_mode != "use_default_index_score"
+                and not data.get(qgis_layer_source_key, False)
+                and not data.get(qgis_layer_shapefile_key, False)
             ):
                 return "Not configured (optional)"
             if "Not Run" in data.get("result", "") and not data.get("result_file", ""):

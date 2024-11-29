@@ -97,7 +97,7 @@ class BaseConfigurationWidget(QWidget):
         raise NotImplementedError("Subclasses must implement get_data.")
 
     @abstractmethod
-    def update_widgets(self) -> None:
+    def update_widgets(self, attributes: dict) -> None:
         """
         Updates the internal widgets with the current attributes.
         To be implemented by subclasses.

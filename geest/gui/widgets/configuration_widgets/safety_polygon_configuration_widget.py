@@ -44,62 +44,13 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
             self.internal_layout.addWidget(self.table_widget)
             self.table_widget.setColumnCount(2)
-            self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
             self.table_widget.setColumnWidth(1, 80)
             self.table_widget.horizontalHeader().setStretchLastSection(False)
             self.table_widget.horizontalHeader().setSectionResizeMode(
                 0, self.table_widget.horizontalHeader().Stretch
             )
 
-            safety_classes = self.attributes.get(
-                f"classify_safety_polygon_into_classes_unique_values", {}
-            )
-            if not isinstance(safety_classes, dict):
-                safety_classes = {}
-            # remove any item from the safety_classes where the key is not a string
-            safety_classes = {
-                k: v for k, v in safety_classes.items() if isinstance(k, str)
-            }
-            self.table_widget.setRowCount(len(safety_classes))
-
-            def validate_value(value):
-                return 0 <= value <= 100
-
-            log_message(f"Classes: {safety_classes}")
-            # iterate over the dict and populate the table
-            for row, (class_name, value) in enumerate(safety_classes.items()):
-                if row >= self.table_widget.rowCount():
-                    continue
-
-                if not isinstance(class_name, str):
-                    continue
-
-                if not isinstance(value, (int, float)) or not 0 <= value <= 100:
-                    value = 0
-
-                name_item = QTableWidgetItem(class_name)
-                value_item = QSpinBox()
-                self.table_widget.setItem(row, 0, name_item)
-                value_item.setRange(0, 100)  # Set spinner range
-                value_item.setValue(value)  # Default value
-                self.table_widget.setCellWidget(row, 1, value_item)
-
-                def on_value_changed(value):
-                    # Color handling for current cell
-                    if value is None or not (0 <= value <= 100):
-                        value_item.setStyleSheet("color: red;")
-                        value_item.setValue(0)
-                    else:
-                        value_item.setStyleSheet("color: black;")
-                    self.update_cell_colors()
-                    self.update_data()
-
-                value_item.valueChanged.connect(on_value_changed)
-
-                # Call update_cell_colors after all rows are created
-                self.update_cell_colors()
-
-                value_item.valueChanged.connect(on_value_changed)
+            return self.populate_table()
             self.internal_layout.addWidget(self.table_widget)
 
         except Exception as e:
@@ -107,6 +58,55 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             import traceback
 
             log_message(traceback.format_exc(), level=Qgis.Critical)
+
+    def populate_table(self):
+
+        self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
+        safety_classes = self.attributes.get(
+            f"classify_safety_polygon_into_classes_unique_values", {}
+        )
+        if not isinstance(safety_classes, dict):
+            safety_classes = {}
+            # remove any item from the safety_classes where the key is not a string
+        safety_classes = {k: v for k, v in safety_classes.items() if isinstance(k, str)}
+        self.table_widget.setRowCount(len(safety_classes))
+
+        def validate_value(value):
+            return 0 <= value <= 100
+
+        log_message(f"Classes: {safety_classes}")
+        # iterate over the dict and populate the table
+        for row, (class_name, value) in enumerate(safety_classes.items()):
+            if row >= self.table_widget.rowCount():
+                continue
+
+            if not isinstance(class_name, str):
+                continue
+
+            if not isinstance(value, (int, float)) or not 0 <= value <= 100:
+                value = 0
+
+            name_item = QTableWidgetItem(class_name)
+            value_item = QSpinBox()
+            self.table_widget.setItem(row, 0, name_item)
+            value_item.setRange(0, 100)  # Set spinner range
+            value_item.setValue(value)  # Default value
+            self.table_widget.setCellWidget(row, 1, value_item)
+
+            def on_value_changed(value):
+                # Color handling for current cell
+                if value is None or not (0 <= value <= 100):
+                    value_item.setStyleSheet("color: red;")
+                    value_item.setValue(0)
+                else:
+                    value_item.setStyleSheet("color: black;")
+                self.update_cell_colors()
+                self.update_data()
+
+            value_item.valueChanged.connect(on_value_changed)
+
+            # Call update_cell_colors after all rows are created
+            self.update_cell_colors()
 
     def update_cell_colors(self):
         # Check if all values are zero
@@ -178,11 +178,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                 level=Qgis.Critical,
             )
 
-    def update_widgets(self) -> None:
+    def update_widgets(self, attributes: dict) -> None:
         """
         Updates the internal widgets with the current attributes.
 
         Only needed in cases where a) there are internal widgets and b)
         the attributes may change externally e.g. in the datasource widget.
         """
-        pass
+        log_message("Updating widgets for SafetyPolygonConfigurationWidget")
+        self.attributes = attributes
+        self.table_widget.clear()
+        self.populate_table()
