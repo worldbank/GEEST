@@ -234,8 +234,8 @@ class JsonTreeItem:
 
             data = self.attributes()
             analysis_mode = data.get("analysis_mode", "")
-            qgis_layer_source_key = analysis_mode.replace("use_", "") + "layer_spource"
-            qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "shapefile"
+            qgis_layer_source_key = analysis_mode.replace("use_", "") + "_layer_source"
+            qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
             status = ""
 
             # First check if the item weighting is 0, or its parent factor is zero
