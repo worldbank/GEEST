@@ -15,7 +15,7 @@ from qgis.core import (
 )
 from qgis.gui import QgsFieldComboBox
 from qgis.PyQt.QtCore import QSettings
-from geest.utilities import log_message
+from geest.utilities import log_message, geest_layer_ids
 from .base_datasource_widget import BaseDataSourceWidget
 
 
@@ -42,6 +42,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 filter = QgsMapLayerProxyModel.PolygonLayer
             else:
                 filter = QgsMapLayerProxyModel.PointLayer
+
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setFilters(filter)
             self.layer_combo.setAllowEmptyLayer(True)

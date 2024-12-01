@@ -23,7 +23,7 @@ import logging
 import inspect
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt import uic
-from qgis.core import QgsMessageLog, Qgis
+from qgis.core import QgsMessageLog, Qgis, QgsProject
 from geest.core import setting
 
 
@@ -117,3 +117,42 @@ def log_message(
         logging.critical(full_message)
     else:
         logging.debug(full_message)
+
+
+def geest_layer_ids():
+    """Get a list of the layer ids in the Geest group.
+
+    This is useful for filtering layers in the layer combo boxes.
+
+    e.g.:
+
+    layer_ids = geest_layer_ids()
+    def custom_filter(layer):
+        return layer.id() not in layer_ids
+    map_layer_combo.setFilters(QgsMapLayerProxyModel.CustomLayerFilter)
+    map_layer_combo.proxyModel().setCustomFilterFunction(custom_filter)
+
+    """
+    # Get the layer tree root
+    root = QgsProject.instance().layerTreeRoot()
+
+    # Find the "Geest" group
+    geest_group = root.findGroup("Geest")
+    if not geest_group:
+        # No group named "Geest," no need to filter
+        return
+
+    # Recursively collect IDs of all layers in the "Geest" group
+    def collect_layer_ids(group: QgsLayerTreeGroup) -> set:
+        layer_ids = set()
+        for child in group.children():
+            if isinstance(child, QgsLayerTreeGroup):
+                # Recursively collect from subgroups
+                layer_ids.update(collect_layer_ids(child))
+            elif hasattr(child, "layerId"):  # Check if the child is a layer
+                layer_ids.add(child.layerId())
+        return layer_ids
+
+    geest_layer_ids = collect_layer_ids(geest_group)
+
+    return geest_layer_ids
