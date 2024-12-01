@@ -15,7 +15,7 @@ from qgis.core import (
 )
 from qgis.gui import QgsFieldComboBox
 from qgis.PyQt.QtCore import QSettings
-from geest.utilities import log_message, geest_layer_ids
+from geest.utilities import log_message
 from .base_datasource_widget import BaseDataSourceWidget
 
 
