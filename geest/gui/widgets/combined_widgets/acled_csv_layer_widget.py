@@ -34,7 +34,7 @@ class AcledCsvLayerWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "use_csv_to_point_layer"
+            self.widget_key = "csv_to_point_layer"
 
             # impact distance input
             self.buffer_distance_layout = QHBoxLayout()

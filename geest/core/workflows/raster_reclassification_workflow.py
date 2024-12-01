@@ -45,20 +45,18 @@ class RasterReclassificationWorkflow(WorkflowBase):
         else:
             self.range_boundaries = 0  # default value for range boundaries
 
-        layer_name = self.attributes.get("use_environmental_hazards_raster", None)
+        layer_name = self.attributes.get("environmental_hazards_raster", None)
 
         if not layer_name:
             log_message(
-                "Invalid layer found in use_environmental_hazards_raster, trying use_environmental_hazards_layer_source.",
+                "Invalid layer found in environmental_hazards_raster, trying environmental_hazards_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_name = self.attributes.get(
-                "use_environmental_hazards_layer_source", None
-            )
+            layer_name = self.attributes.get("environmental_hazards_layer_source", None)
             if not layer_name:
                 log_message(
-                    "No layer found in use_environmental_hazards_layer_source.",
+                    "No layer found in environmental_hazards_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )

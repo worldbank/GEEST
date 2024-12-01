@@ -236,6 +236,7 @@ class JsonTreeItem:
             analysis_mode = data.get("analysis_mode", "")
             qgis_layer_source_key = analysis_mode.replace("use_", "") + "_layer_source"
             qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
+            qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
             status = ""
             if "Workflow Completed" in data.get("result", ""):
                 return "Completed successfully"
@@ -331,11 +332,26 @@ class JsonTreeItem:
             ):
                 return "Not configured (optional)"
             if (
+                # Test for algs requiring vector inputs
                 self.isIndicator()
-                and analysis_mode != "use_default_index_score"
+                and analysis_mode
+                not in ["use_default_index_score", "use_environmental_hazards"]
                 and not data.get(qgis_layer_source_key, False)
                 and not data.get(qgis_layer_shapefile_key, False)
             ):
+                return "Not configured (optional)"
+            if (
+                # Test for algs requiring raster inputs
+                self.isIndicator()
+                and analysis_mode not in ["use_default_index_score"]
+                and analysis_mode in ["use_environmental_hazards"]
+                and not data.get(qgis_layer_source_key, False)
+                and not data.get(qgis_layer_raster_key, False)
+            ):
+                # log_message(f"Indicator {data.get('id')} is missing a raster input")
+                # log_message(f"analysis_mode in use_default_index_score, use_environmental_hazards: {analysis_mode in ['use_default_index_score', 'use_environmental_hazards']}")
+                # log_message(f"qgis_layer_source_key: {qgis_layer_source_key}: {data.get(qgis_layer_source_key, False)}")
+                # log_message(f"qgis_layer_raster_key: {qgis_layer_raster_key}: {data.get(qgis_layer_raster_key, False)}")
                 return "Not configured (optional)"
             if "Not Run" in data.get("result", "") and not data.get("result_file", ""):
                 return "Configured, not run"

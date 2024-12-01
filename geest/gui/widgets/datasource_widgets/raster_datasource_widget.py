@@ -8,6 +8,7 @@ from qgis.gui import QgsMapLayerComboBox
 from qgis.core import (
     QgsMapLayerProxyModel,
     QgsProject,
+    Qgis,
 )
 from qgis.PyQt.QtCore import QSettings
 from .base_datasource_widget import BaseDataSourceWidget

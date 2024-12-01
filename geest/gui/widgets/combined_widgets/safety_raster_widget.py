@@ -11,6 +11,7 @@ from qgis.gui import QgsMapLayerComboBox
 from qgis.core import (
     QgsMapLayerProxyModel,
     QgsProject,
+    Qgis,
 )
 from qgis.PyQt.QtCore import QSettings
 from geest.utilities import log_message
@@ -39,7 +40,7 @@ class SafetyRasterWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "use_nighttime_lights"
+            self.widget_key = "nighttime_lights"
             self.settings = QSettings()
 
             # Raster Layer Section
