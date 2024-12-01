@@ -620,7 +620,8 @@ class TreePanel(QWidget):
         table.horizontalHeader().setSectionResizeMode(
             1, QHeaderView.Stretch
         )  # Only the second column stretches
-
+        # Track if "error_file" exists
+        error_file_content = None
         # Populate the table with the sorted data
         for row, (key, value) in enumerate(sorted_data.items()):
             key_item = QTableWidgetItem(key)
@@ -637,6 +638,15 @@ class TreePanel(QWidget):
                 value_item = QTableWidgetItem(str(value))
                 value_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                 table.setItem(row, 1, value_item)
+            # Check if this row contains "error_file"
+            if key == "error_file" and isinstance(value, str):
+                try:
+                    with open(value, "r") as file:
+                        error_file_content = file.read()
+                except (OSError, IOError):
+                    error_file_content = f"Unable to read file: {value}"
+                except Exception as e:
+                    error_file_content = f"Error reading file: {e}"
 
         layout.addWidget(table)
 
@@ -658,6 +668,13 @@ class TreePanel(QWidget):
         copy_button.clicked.connect(lambda: self.copy_to_clipboard_as_markdown(table))
         button_layout.addWidget(copy_button)
 
+        # Show Error File button
+        if error_file_content is not None:
+            show_error_file_button = QPushButton("Show Error File")
+            button_layout.addWidget(show_error_file_button)
+            show_error_file_button.clicked.connect(
+                lambda: self.show_error_file_popup(error_file_content)
+            )
         layout.addLayout(button_layout)
 
         # Enable custom context menu for the table
@@ -668,7 +685,13 @@ class TreePanel(QWidget):
 
         dialog.exec_()
 
-        log_message("----------------------------")
+    def show_error_file_popup(self, error_file_content):
+        """Show a popup message with the contents of the error file."""
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Error File Contents")
+        msg_box.setText(error_file_content)
+        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.exec_()
 
     def copy_to_clipboard_as_markdown(self, table: QTableWidget):
         """Copy the table content as Markdown to the clipboard."""

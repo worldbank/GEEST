@@ -42,6 +42,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 filter = QgsMapLayerProxyModel.PolygonLayer
             else:
                 filter = QgsMapLayerProxyModel.PointLayer
+
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setFilters(filter)
             self.layer_combo.setAllowEmptyLayer(True)

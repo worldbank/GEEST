@@ -24,6 +24,9 @@ class IndicatorConfigurationWidget(QWidget):
             self.create_radio_buttons(attributes)
         except Exception as e:
             log_message(f"Error in create_radio_buttons: {e}", level=Qgis.Critical)
+            import traceback
+
+            log_message(traceback.format_exc(), level=Qgis.Critical)
 
         self.setLayout(self.layout)
 
@@ -31,12 +34,13 @@ class IndicatorConfigurationWidget(QWidget):
         """
         Uses the factory to create radio buttons from attributes dictionary.
         """
-        # make a deep copy of the dictionary in case it changes while we
-        # are using it
-        attributes = attributes.copy()
-        analysis_mode = attributes.get("analysis_mode", "")
 
-        for key, value in attributes.items():
+        analysis_mode = attributes.get("analysis_mode", "")
+        # We iterate over a list to defend against changes to the dictionary
+        # See issue #620. This is a workaround until we can refactor the code
+        # The issue is that the dictionary is being modified while we are iterating over it
+        # by the safety_polygon_configuration_widget.py file I think.
+        for key, value in list(attributes.items()):
             radio_button_widget = CombinedWidgetFactory.create_radio_button(
                 key, value, attributes
             )

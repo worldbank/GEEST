@@ -26,7 +26,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-
+            self.widget_key = "multi_buffer_point"
             # Point Layer Combobox - Filtered to point layers
             self.point_layer_label = QLabel(
                 "Point Layer - shapefile will have preference"
@@ -38,12 +38,12 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.main_layout.addWidget(self.layer_combo)
 
             # Set the selected QgsVectorLayer in QgsMapLayerComboBox
-            layer_id = self.attributes.get("multi_buffer_point_layer_id", None)
+            layer_id = self.attributes.get(f"{self.widget_key}_layer_id", None)
             if layer_id:
                 layer = QgsProject.instance().mapLayer(layer_id)
                 if layer:
                     self.layer_combo.setLayer(layer)
-            layer_id = self.attributes.get("multi_buffer_point_layer_id")
+            layer_id = self.attributes.get(f"{self.widget_key}_layer_id")
             layer = QgsProject.instance().mapLayer(layer_id)
 
             if layer and isinstance(layer, QgsVectorLayer):
@@ -55,9 +55,9 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.shapefile_button = QToolButton()
             self.shapefile_button.setText("...")
             self.shapefile_button.clicked.connect(self.select_shapefile)
-            if self.attributes.get("multi_buffer_point_shapefile", False):
+            if self.attributes.get(f"{self.widget_key}_shapefile", False):
                 self.shapefile_line_edit.setText(
-                    self.attributes["multi_buffer_point_shapefile"]
+                    self.attributes[f"{self.widget_key}_shapefile"]
                 )
             self.shapefile_layout.addWidget(self.shapefile_line_edit)
             self.shapefile_layout.addWidget(self.shapefile_button)
@@ -157,20 +157,20 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
 
         layer = self.layer_combo.currentLayer()
         if not layer:
-            self.attributes["multi_buffer_point_layer"] = None
+            self.attributes[f"{self.widget_key}_layer"] = None
         else:
-            self.attributes["multi_buffer_point_layer_name"] = layer.name()
-            self.attributes["multi_buffer_point_layer_source"] = layer.source()
-            self.attributes["multi_buffer_point_layer_provider_type"] = (
+            self.attributes[f"{self.widget_key}_layer_name"] = layer.name()
+            self.attributes[f"{self.widget_key}_layer_source"] = layer.source()
+            self.attributes[f"{self.widget_key}_layer_provider_type"] = (
                 layer.providerType()
             )
-            self.attributes["multi_buffer_point_layer_crs"] = (
+            self.attributes[f"{self.widget_key}_layer_crs"] = (
                 layer.crs().authid()
             )  # Coordinate Reference System
-            self.attributes["multi_buffer_point_layer_wkb_type"] = (
+            self.attributes[f"{self.widget_key}_layer_wkb_type"] = (
                 layer.wkbType()
             )  # Geometry type (e.g., Point, Polygon)
-            self.attributes["multi_buffer_point_layer_id"] = (
+            self.attributes[f"{self.widget_key}_layer_id"] = (
                 layer.id()
             )  # Unique ID of the layer
 
@@ -185,7 +185,7 @@ class MultiBufferDistancesWidget(BaseIndicatorWidget):
             self.attributes["multi_buffer_travel_units"] = "Time"
 
         self.attributes["multi_buffer_travel_distances"] = self.increments_input.text()
-        self.attributes["multi_buffer_point_shapefile"] = (
+        self.attributes[f"{self.widget_key}_shapefile"] = (
             self.shapefile_line_edit.text()
         )
 

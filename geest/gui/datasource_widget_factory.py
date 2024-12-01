@@ -64,10 +64,12 @@ class DataSourceWidgetFactory:
                     widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_csv_point_per_cell" and value == 1:
-                return CsvDataSourceWidget(widget_key=widget_key, attributes=attributes)
+                return CsvDataSourceWidget(
+                    cleaned_key=widget_key, attributes=attributes
+                )
             if widget_key == "use_csv_to_point_layer" and value == 1:
                 return AcledCsvDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_classify_polygon_into_classes" and value == 1:
                 return VectorAndFieldDataSourceWidget(
@@ -79,15 +81,15 @@ class DataSourceWidgetFactory:
                 )
             if widget_key == "use_nighttime_lights" and value == 1:
                 return RasterDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_environmental_hazards" and value == 1:
                 return RasterDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             if widget_key == "use_street_lights" and value == 1:
                 return VectorDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
+                    widget_key=cleaned_key, attributes=attributes
                 )
             else:
                 log_message(

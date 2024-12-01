@@ -11,6 +11,7 @@ from qgis.gui import QgsMapLayerComboBox
 from qgis.core import (
     QgsMapLayerProxyModel,
     QgsProject,
+    Qgis,
 )
 from qgis.PyQt.QtCore import QSettings
 from .base_indicator_widget import BaseIndicatorWidget
@@ -39,7 +40,7 @@ class RasterReclassificationWidget(BaseIndicatorWidget):
         """
         try:
             self.main_layout = QVBoxLayout()
-            self.widget_key = "use_environmental_hazards"
+            self.widget_key = "environmental_hazards"
             self.settings = QSettings()
 
             # Raster Layer Section

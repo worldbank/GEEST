@@ -1,7 +1,7 @@
 with import <nixpkgs> { };
 let
   # For packages pinned to a specific version
-  pinnedHash = "nixos-24.05";
+  pinnedHash = "nixos-24.11";
   pinnedPkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/${pinnedHash}.tar.gz") { };
   pythonPackages = python3Packages;
 in pkgs.mkShell rec {

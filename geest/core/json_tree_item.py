@@ -236,8 +236,10 @@ class JsonTreeItem:
             analysis_mode = data.get("analysis_mode", "")
             qgis_layer_source_key = analysis_mode.replace("use_", "") + "_layer_source"
             qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
+            qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
             status = ""
-
+            if "Workflow Completed" in data.get("result", ""):
+                return "Completed successfully"
             # First check if the item weighting is 0, or its parent factor is zero
             # If so, return "Excluded from analysis"
             if self.isIndicator():
@@ -269,10 +271,17 @@ class JsonTreeItem:
                     return "Excluded from analysis"
                 # If the sum of the indicator weightings is zero, return "Excluded from analysis"
                 weight_sum = 0
+                unconfigured_child_count = 0
                 for child in self.childItems:
                     weight_sum += float(child.attribute("factor_weighting", 0.0))
+                    if child.getStatus() == "Not configured (optional)":
+                        unconfigured_child_count += 1
+                    if child.getStatus() == "Required and not configured":
+                        unconfigured_child_count += 1
                 if not weight_sum:
                     return "Excluded from analysis"
+                if unconfigured_child_count:
+                    return "Required and not configured"
                 #
                 # Note we avoid infinite recursion by NOT doing the checks below using the getStatus
                 # method of the parent.
@@ -323,11 +332,26 @@ class JsonTreeItem:
             ):
                 return "Not configured (optional)"
             if (
+                # Test for algs requiring vector inputs
                 self.isIndicator()
-                and analysis_mode != "use_default_index_score"
+                and analysis_mode
+                not in ["use_default_index_score", "use_environmental_hazards"]
                 and not data.get(qgis_layer_source_key, False)
                 and not data.get(qgis_layer_shapefile_key, False)
             ):
+                return "Not configured (optional)"
+            if (
+                # Test for algs requiring raster inputs
+                self.isIndicator()
+                and analysis_mode not in ["use_default_index_score"]
+                and analysis_mode in ["use_environmental_hazards"]
+                and not data.get(qgis_layer_source_key, False)
+                and not data.get(qgis_layer_raster_key, False)
+            ):
+                # log_message(f"Indicator {data.get('id')} is missing a raster input")
+                # log_message(f"analysis_mode in use_default_index_score, use_environmental_hazards: {analysis_mode in ['use_default_index_score', 'use_environmental_hazards']}")
+                # log_message(f"qgis_layer_source_key: {qgis_layer_source_key}: {data.get(qgis_layer_source_key, False)}")
+                # log_message(f"qgis_layer_raster_key: {qgis_layer_raster_key}: {data.get(qgis_layer_raster_key, False)}")
                 return "Not configured (optional)"
             if "Not Run" in data.get("result", "") and not data.get("result_file", ""):
                 return "Configured, not run"
@@ -339,8 +363,7 @@ class JsonTreeItem:
                 "result_file", ""
             ):
                 return "Workflow failed"
-            if "Workflow Completed" in data.get("result", ""):
-                return "Completed successfully"
+
             return "WRITE TOOL TIP"
 
         except Exception as e:
