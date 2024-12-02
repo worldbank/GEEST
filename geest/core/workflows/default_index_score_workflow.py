@@ -39,7 +39,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.index_score = int(
+        self.index_score = float(
             (self.attributes.get("default_index_score", 0) / 100) * 5
         )
         self.features_layer = True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed

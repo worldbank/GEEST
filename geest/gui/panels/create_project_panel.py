@@ -53,6 +53,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.banner_label.setPixmap(
             QPixmap(resources_path("resources", "geest-banner.png"))
         )
+        self.folder_status_label.setPixmap(
+            QPixmap(resources_path("resources", "icons", "failed.svg"))
+        )
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
 
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
@@ -109,6 +112,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             )  # Update last used project
             self.project_path_label.setText(directory)
             self.create_project_directory_button.setText("📂 Change Project Folder")
+            self.folder_status_label.setPixmap(
+                QPixmap(resources_path("resources", "icons", "completed-success.svg"))
+            )
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
