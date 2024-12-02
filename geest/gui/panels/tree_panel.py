@@ -46,7 +46,6 @@ from geest.utilities import resources_path
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
 from geest.gui.dialogs import (
-    IndicatorDetailDialog,
     FactorAggregationDialog,
     DimensionAggregationDialog,
     AnalysisAggregationDialog,
@@ -204,25 +203,7 @@ class TreePanel(QWidget):
         self.workflow_progress_bar.setFixedWidth(200)
         button_bar.addWidget(self.workflow_progress_bar)
 
-        # Add Edit Toggle checkbox
-        if self.edit_mode:
-            self.edit_toggle = QCheckBox("Edit")
-            self.edit_toggle.setChecked(False)
-            self.edit_toggle.stateChanged.connect(self.toggle_edit_mode)
-            button_bar.addStretch()
-
-        if self.edit_mode:
-            # Load and Save buttons
-            button_bar.addWidget(self.load_json_button)
-            button_bar.addWidget(self.export_json_button)
-            button_bar.addWidget(self.edit_toggle)  # Add the edit toggle
-
-        # Only allow editing on double-click (initially enabled)
-        editing = self.edit_mode and self.edit_toggle.isChecked()
-        if editing:
-            self.treeView.setEditTriggers(QTreeView.DoubleClicked)
-        else:
-            self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
+        self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
         layout.addLayout(button_bar)
         self.setLayout(layout)
@@ -237,7 +218,7 @@ class TreePanel(QWidget):
         # Action to trigger on double-click
         item = index.internalPointer()
         if item.role == "indicator":
-            self.show_indicator_properties(item)
+            self.show_attributes(item)
         elif item.role == "dimension":
             self.edit_dimension_aggregation(item)
         elif item.role == "factor":
@@ -569,9 +550,7 @@ class TreePanel(QWidget):
             remove_indicator_action = QAction("❌ Remove Indicator", self)
 
             # Connect actions
-            show_properties_action.triggered.connect(
-                lambda: self.show_indicator_properties(item)
-            )
+            show_properties_action.triggered.connect(lambda: self.show_attributes(item))
             remove_indicator_action.triggered.connect(
                 lambda: self.model.remove_item(item)
             )
@@ -957,36 +936,6 @@ class TreePanel(QWidget):
         if dialog.exec_():  # If OK was clicked
             dialog.save_weightings_to_model()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
-
-    def show_indicator_properties(self, item):
-        """Open a dialog showing indicator properties and update the tree upon changes."""
-        editing = self.edit_mode and self.edit_toggle.isChecked()
-        # Create and show the LayerDetailDialog
-        dialog = IndicatorDetailDialog(item, editing=editing, parent=self)
-
-        # Connect the dialog's dataUpdated signal to handle data updates
-        def update_layer_data():
-            # Save the JSON data to the working directory
-            self.save_json_to_working_directory()
-
-        # Connect the signal emitted from the dialog to update the item
-        dialog.dataUpdated.connect(update_layer_data)
-
-        # Show the dialog (exec_ will block until the dialog is closed)
-        dialog.exec_()
-
-    def toggle_edit_mode(self):
-        """Enable or disable edit mode based on the 'Edit' toggle state."""
-        edit_mode = self.edit_toggle.isChecked()
-
-        # Enable or disable the "Add Dimension" button
-        self.add_dimension_button.setVisible(edit_mode)
-
-        # Enable or disable double-click editing in the tree view
-        if edit_mode:
-            self.treeView.setEditTriggers(QTreeView.RightClicked)
-        else:
-            self.treeView.setEditTriggers(QTreeView.NoEditTriggers)
 
     def start_workflows(self, type=None):
         """Start a workflow for each 'layer' node in the tree.
