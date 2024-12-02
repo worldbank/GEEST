@@ -181,6 +181,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     feedback=feedback,
                 )
                 # Hook up the QTask feedback signal to the progress bar
+                self.progress_updated(0)
                 processor.progressChanged.connect(self.progress_updated)
                 processor.taskCompleted.connect(self.on_task_completed)
 

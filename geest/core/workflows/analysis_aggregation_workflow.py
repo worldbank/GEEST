@@ -39,5 +39,6 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
             .replace(" ", "_")
             .replace("'", "")
         )  # should not be needed any more
+        self.layer_id = "wee"
         self.weight_key = "dimension_weighting"
         self.workflow_name = "analysis_aggregation"
