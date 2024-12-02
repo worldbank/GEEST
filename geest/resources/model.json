@@ -47,7 +47,7 @@
                     "dimension_weighting": 0.3333333,
                     "indicators": [
                         {
-                            "indicator": "WBL 2024 Pay+Parenthood Index Score",
+                            "indicator": "Average value of WBL Pay Score and Parenthood Index Score",
                             "id": "Pay_Parenthood_Index",
                             "description": "",
                             "default_factor_weighting": 1.0,
