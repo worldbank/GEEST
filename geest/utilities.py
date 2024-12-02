@@ -21,9 +21,10 @@ __revision__ = "$Format:%H$"
 import os
 import logging
 import inspect
-from qgis.PyQt.QtCore import QUrl
+from qgis.PyQt.QtCore import QUrl, QSettings
 from qgis.PyQt import uic
 from qgis.core import QgsMessageLog, Qgis, QgsProject
+from qgis.PyQt.QtWidgets import QApplication
 from geest.core import setting
 
 
@@ -156,3 +157,42 @@ def geest_layer_ids():
     geest_layer_ids = collect_layer_ids(geest_group)
 
     return geest_layer_ids
+
+
+def is_qgis_dark_theme_active() -> bool:
+    """
+    Determines if QGIS is using the Night Mapping theme or a dark theme.
+
+    Checks:
+    1. QGIS settings for the Night Mapping theme.
+    2. Application palette for dark mode.
+    3. Stylesheet for references to 'nightmapping'.
+
+    Returns:
+        bool: True if Night Mapping theme or a dark theme is active, False otherwise.
+    """
+    # 1. Check QGIS settings for Night Mapping theme
+    settings = QSettings()
+    theme_name = settings.value("UI/Theme", "").lower()
+    if theme_name == "nightmapping":
+        return True
+
+    # 2. Access the application instance
+    app = QApplication.instance()
+    if not app:
+        return False
+
+    # Check the application palette for dark colors
+    palette = app.palette()
+    window_color = palette.color(palette.Window)
+    text_color = palette.color(palette.WindowText)
+    if window_color.lightness() < text_color.lightness():
+        return True
+
+    # 3. Check the stylesheet for 'nightmapping' references
+    stylesheet = app.styleSheet()
+    if "nightmapping" in stylesheet.lower():
+        return True
+
+    # Default to False if none of the conditions are met
+    return False

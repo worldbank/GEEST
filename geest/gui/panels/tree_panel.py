@@ -310,8 +310,9 @@ class TreePanel(QWidget):
                         analysis_data["working_folder"] = self.working_directory
                 # Use the last dir in the working directory path as the analysis name
                 if analysis_data.get("analysis_name", "Not Set"):
-                    analysis_data["analysis_name"] = os.path.basename(
-                        self.working_directory
+                    analysis_name = os.path.basename(self.working_directory)
+                    analysis_data["analysis_name"] = (
+                        f"Women's Economic Empowerment - {analysis_name}"
                     )
                 analysis_item.setData(0, analysis_data.get("analysis_name", "Analysis"))
                 settings = QSettings()

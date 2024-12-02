@@ -21,7 +21,7 @@ from geest.gui.panels import (
     CreateProjectPanel,
 )
 from geest.core import set_setting, setting
-from geest.utilities import resources_path, log_message
+from geest.utilities import resources_path, log_message, is_qgis_dark_theme_active
 
 INTRO_PANEL = 0
 CREDITS_PANEL = 1
@@ -56,9 +56,14 @@ class GeestDock(QDockWidget):
         layout.setSpacing(0)  # Remove spacing between elements
 
         # Load the background image
-        self.background_image = QPixmap(
-            resources_path("resources", "images", "background.png")
-        )
+        if is_qgis_dark_theme_active():
+            self.background_image = QPixmap(
+                resources_path("resources", "images", "background-dark.png")
+            )
+        else:
+            self.background_image = QPixmap(
+                resources_path("resources", "images", "background.png")
+            )
 
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
