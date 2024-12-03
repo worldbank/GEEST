@@ -20,6 +20,7 @@ parts:
       - file: docs/background
       - file: docs/acknowledgements
       - file: docs/training
+      - file: docs/media
   - caption: Additional Resources
     chapters:
       - url: https://datacatalog.worldbank.org/search/collections/genderspatial
