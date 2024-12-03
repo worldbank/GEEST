@@ -20,6 +20,6 @@ We look forward to hearing from you!
     <img src="https://raw.githubusercontent.com/elbeejay/draft-docs/main/docs/images/new%20images/wb-gost.png" alt="WB GOST" width="200" style="margin-right: 100px;"/>
   </a>
   <a href="https://kartoza.com/">
-    <img src="https://raw.githubusercontent.com/elbeejay/draft-docs/main/docs/images/new%20images/Kartoza-removebg-preview.png" alt="Kartoza" width="100"/>
+    <img src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/KartozaLogoVerticalCMYK.png" alt="Kartoza" width="150"/>
   </a>
 </p>
