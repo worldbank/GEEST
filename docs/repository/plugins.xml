@@ -9,12 +9,12 @@
                 <file_name>geest.0.3.6.zip</file_name>
                 <icon>icon.png</icon>
                 <author_name><![CDATA[Kartoza]]></author_name>
-                <download_url>https://github.com/kartoza/GEEST2/releases/download/v0.3.6/geest.0.3.6.zip</download_url>
+                <download_url>https://github.com/worldbank/GEEST/blob/main/Geest%200.3.6/geest.0.3.6.zip</download_url>
                 <update_date>2024-12-03 07:54:13</update_date>
                 <experimental>False</experimental>
                 <deprecated>False</deprecated>
-                <tracker><![CDATA[https://github.com/kartoza/GEEST2/issues]]></tracker>
-                <repository><![CDATA[https://github.com/kartoza/GEEST2]]></repository>
+                <tracker><![CDATA[https://github.com/worldbank/GEEST/issues]]></tracker>
+                <repository><![CDATA[https://github.com/worldbank/GEEST]]></repository>
                 <tags><![CDATA[]]></tags>
                 <server>False</server>
             </pyqgis_plugin>
