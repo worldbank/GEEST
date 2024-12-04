@@ -30,7 +30,7 @@ In the **Repository Details** window:
 
 - **Name**: Enter `GEEST` (or any other name you prefer).
 - **URL**: Paste the following URL:  
-  `https://raw.githubusercontent.com/kartoza/GEEST2/release/docs/repository/plugins.xml`
+  `https://raw.githubusercontent.com/worldbank/GEEST/refs/heads/main/docs/repository/plugins.xml`
 - Ensure the **Enabled** checkbox is checked.
 - Click **OK** to save.
 
