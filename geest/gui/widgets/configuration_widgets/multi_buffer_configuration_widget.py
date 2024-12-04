@@ -28,7 +28,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.travel_mode_layout = QHBoxLayout()
             self.walking_radio = QRadioButton("Walking")
             self.driving_radio = QRadioButton("Driving")
-            if self.attributes.get("multi_buffer_travel_mode", "") == "Walking":
+            if self.attributes.get("multi_buffer_travel_mode", "") != "Driving":
                 self.walking_radio.setChecked(True)
             else:
                 self.driving_radio.setChecked(True)  # Default selection
@@ -40,8 +40,8 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.measurement_group = QGroupBox("Measurement:")
             self.measurement_layout = QHBoxLayout()
             self.distance_radio = QRadioButton("Distance (meters)")
-            self.time_radio = QRadioButton("Time (seconds)")
-            if self.attributes.get("multi_buffer_travel_units", "") == "Distance":
+            self.time_radio = QRadioButton("Time (minutes)")
+            if self.attributes.get("multi_buffer_travel_units", "") != "Time":
                 self.distance_radio.setChecked(True)
             else:
                 self.time_radio.setChecked(True)  # Default selection
@@ -126,10 +126,10 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
                 self.increments_input.setStyleSheet("border: 1px solid red")
                 return False
 
-            # Check for values greater than 3600 if in time mode
-            if self.time_radio.isChecked() and any(value > 3600 for value in values):
+            # Check for values greater than 60 mins (3600s) if in time mode
+            if self.time_radio.isChecked() and any(value > 60 for value in values):
                 tooltip_text = (
-                    "Values greater than 3600 are not allowed for time units."
+                    "Values greater than 60 minutes are not allowed for time units."
                 )
                 self.increments_input.setToolTip(tooltip_text)
                 self.increments_input.setStyleSheet("border: 1px solid red")

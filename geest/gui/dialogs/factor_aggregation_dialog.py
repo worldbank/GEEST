@@ -25,7 +25,7 @@ from geest.utilities import resources_path, setting
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
 from ..factor_configuration_widget import FactorConfigurationWidget
-from geest.utilities import log_message
+from geest.utilities import log_message, is_qgis_dark_theme_active
 
 
 class FactorAggregationDialog(QDialog):
@@ -393,12 +393,15 @@ class FactorAggregationDialog(QDialog):
         enabled_rows_count = len(enabled_rows)
         if enabled_rows_count == 0:
             valid_sum = True
-
+        if is_qgis_dark_theme_active:
+            normal_color = "color: white;"
+        else:
+            normal_color = "color: black;"
         # Update button state and cell highlighting
         for spin_box in self.weightings.values():
             if valid_sum:
                 spin_box.setStyleSheet(
-                    "color: black;"
+                    normal_color
                 )  # Reset font color to black if valid
             else:
                 spin_box.setStyleSheet(

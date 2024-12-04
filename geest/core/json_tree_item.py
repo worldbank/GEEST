@@ -6,7 +6,7 @@ from qgis.PyQt.QtGui import QColor, QFont, QIcon
 from qgis.core import Qgis
 from geest.utilities import resources_path
 from geest.core import setting
-from geest.utilities import log_message
+from geest.utilities import log_message, is_qgis_dark_theme_active
 
 
 class JsonTreeItem:
@@ -14,7 +14,7 @@ class JsonTreeItem:
 
     🚩  TAKE NOTE: 🚩
 
-    This class may NOT inherit from QObject, as it has to remain
+    This class MAY NOT inherit from QObject, as it has to remain
     thread safe and not be tied to the main thread. Items are passed to
     workflow threads and must be able to be manipulated in the background.
 
@@ -32,14 +32,26 @@ class JsonTreeItem:
         else:
             self.guid = str(uuid.uuid4())  # Generate a unique identifier for this item
 
-        # Define icons for each role
-        self.dimension_icon = QIcon(
-            resources_path("resources", "icons", "dimension.svg")
-        )
-        self.factor_icon = QIcon(resources_path("resources", "icons", "factor.svg"))
-        self.indicator_icon = QIcon(
-            resources_path("resources", "icons", "indicator.svg")
-        )
+        if is_qgis_dark_theme_active():
+            # Define icons for each role
+            self.dimension_icon = QIcon(
+                resources_path("resources", "icons", "dimension-light.svg")
+            )
+            self.factor_icon = QIcon(
+                resources_path("resources", "icons", "factor-light.svg")
+            )
+            self.indicator_icon = QIcon(
+                resources_path("resources", "icons", "indicator-light.svg")
+            )
+        else:
+            # Define icons for each role
+            self.dimension_icon = QIcon(
+                resources_path("resources", "icons", "dimension.svg")
+            )
+            self.factor_icon = QIcon(resources_path("resources", "icons", "factor.svg"))
+            self.indicator_icon = QIcon(
+                resources_path("resources", "icons", "indicator.svg")
+            )
 
         # Define fonts for each role
         self.dimension_font = QFont()
