@@ -56,13 +56,13 @@
                                             "default_factor_weighting": {
                                                 "type": "number"
                                             },
-                                            "default_index_score": {
+                                            "index_score": {
                                                 "type": "integer"
                                             },
                                             "index_score": {
                                                 "type": "integer"
                                             },
-                                            "use_default_index_score": {
+                                            "use_index_score": {
                                                 "type": "integer"
                                             },
                                             "default_multi_buffer_distances": {
@@ -140,9 +140,9 @@
                                             "id",
                                             "description",
                                             "default_factor_weighting",
-                                            "default_index_score",
                                             "index_score",
-                                            "use_default_index_score",
+                                            "index_score",
+                                            "use_index_score",
                                             "default_multi_buffer_distances",
                                             "use_multi_buffer_point",
                                             "default_single_buffer_distance",
