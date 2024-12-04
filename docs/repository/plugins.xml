@@ -9,7 +9,7 @@
                 <file_name>geest.0.3.6.zip</file_name>
                 <icon>icon.png</icon>
                 <author_name><![CDATA[Kartoza]]></author_name>
-                <download_url>https://github.com/worldbank/GEEST/blob/main/Geest%200.3.6/geest.0.3.6.zip</download_url>
+                <download_url>https://github.com/worldbank/GEEST/raw/refs/heads/main/Geest%200.3.6/geest.0.3.6.zip</download_url>
                 <update_date>2024-12-03 07:54:13</update_date>
                 <experimental>False</experimental>
                 <deprecated>False</deprecated>
