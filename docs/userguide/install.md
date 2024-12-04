@@ -33,9 +33,10 @@ In the **Repository Details** window:
 - Ensure the **Enabled** checkbox is checked.
 - Click **OK** to save.
 
-<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/repository.jpg" alt="QGIS Repository Settings" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+<a href="https://github.com/worldbank/GEEST/raw/main/docs/images/new%20images/repository.jpg" target="_blank">
+  <img src="https://github.com/worldbank/GEEST/raw/main/docs/images/new%20images/repository.jpg" alt="QGIS Repository Settings" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
+
 
 
 
