@@ -41,9 +41,10 @@ class ORSMultiBufferProcessor:
     stored in the specified output path.
 
     Note: The final polygon results are always in EPSG:4326.
+    Note: Time inputs should be in minutes (whole numbers only) and will be converted to seconds for the API.
 
     Attributes:
-        distance_list (list): A list of buffer distances (in meters or seconds if using time-based buffers).
+        distance_list (list): A list of buffer distances (in meters or minutes if using time-based buffers).
         points_layer (QgsVectorLayer): A point layer containing features to generate isochrones for.
         output_prefix (str): Prefix for naming output files.
         workflow_directory (str): Directory where temporary and output files will be stored.
@@ -425,10 +426,16 @@ class ORSMultiBufferProcessor:
         if not coordinates:
             raise ValueError("No valid coordinates found in the layer")
 
+        # If mode is time we need to multiply the values by 60 to convert to seconds
+        if measurement == "time":
+            distance_list = [value * 60 for value in self.distance_list]
+        else:
+            distance_list = self.distance_list
+
         # Prepare parameters for ORS API
         params = {
             "locations": coordinates,
-            "range": self.distance_list,  # Distances or times in the list
+            "range": distance_list,  # Distances or times in the list
             "range_type": measurement,
         }
 
