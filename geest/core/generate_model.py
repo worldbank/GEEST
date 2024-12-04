@@ -33,10 +33,10 @@ class SpreadsheetToJsonParser:
                 "Indicator",
                 "Default Indicator Factor Weighting",
                 "ID",
+                "Naming convention for outputs",
                 "Factor Description",
-                "Default Index Score",
                 "Index Score",
-                "Use Default Index Score",
+                "Use Index Score",
                 "Default Multi Buffer Distances",
                 "Use Multi Buffer Point",
                 "Default Single Buffer Distance",
@@ -141,21 +141,24 @@ class SpreadsheetToJsonParser:
                 # These are all parsed from the spreadsheet
                 "indicator": row["Indicator"] if not pd.isna(row["Indicator"]) else "",
                 "id": row["ID"] if not pd.isna(row["ID"]) else "",
+                "output_filename": (
+                    row["Naming convention for outputs"]
+                    if not pd.isna(row["Naming convention for outputs"])
+                    else ""
+                ),
                 "description": "",
                 "default_factor_weighting": default_factor_weighting,
                 # Initialise the weighting to the default value
                 "factor_weighting": default_factor_weighting,
-                "default_index_score": (
-                    row["Default Index Score"]
-                    if not pd.isna(row["Default Index Score"])
-                    else ""
+                "index_score": (
+                    row["Index Score"] if not pd.isna(row["Index Score"]) else ""
                 ),
                 "index_score": (
                     row["Index Score"] if not pd.isna(row["Index Score"]) else ""
                 ),
-                "use_default_index_score": (
-                    row["Use Default Index Score"]
-                    if not pd.isna(row["Use Default Index Score"])
+                "use_index_score": (
+                    row["Use Index Score"]
+                    if not pd.isna(row["Use Index Score"])
                     else ""
                 ),
                 "default_multi_buffer_distances": (

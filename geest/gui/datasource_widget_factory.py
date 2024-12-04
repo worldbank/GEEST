@@ -39,7 +39,7 @@ class DataSourceWidgetFactory:
             cleaned_key = widget_key[4:]
             if widget_key == "indicator_required" and value == 0:
                 return None
-            if widget_key == "use_default_index_score" and value == 1:
+            if widget_key == "use_index_score" and value == 1:
                 return FixedValueDataSourceWidget(
                     widget_key=widget_key, attributes=attributes
                 )

@@ -1,5 +1,5 @@
 from .dont_use_workflow import DontUseWorkflow
-from .default_index_score_workflow import DefaultIndexScoreWorkflow
+from .index_score_workflow import DefaultIndexScoreWorkflow
 from .factor_aggregation_workflow import FactorAggregationWorkflow
 from .dimension_aggregation_workflow import DimensionAggregationWorkflow
 from .analysis_aggregation_workflow import AnalysisAggregationWorkflow

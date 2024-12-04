@@ -46,7 +46,7 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
         self.spin_box = QDoubleSpinBox()
         self.spin_box.setRange(0, 100)
         self.spin_box.setSingleStep(1)
-        self.spin_box.setValue(self.attributes.get(f"default_index_score", 0))
+        self.spin_box.setValue(self.attributes.get(f"index_score", 0))
         self.layout.addWidget(self.spin_box)
 
     def update_attributes(self):
@@ -60,4 +60,4 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
         """
         # Collect data for the raster layerfactorlayer_data_weighting
         value = self.spin_box.value()
-        self.attributes["default_index_score"] = value
+        self.attributes["index_score"] = value

@@ -19,7 +19,7 @@ from geest.utilities import log_message
 
 class DefaultIndexScoreWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'use_default_index_score' workflow.
+    Concrete implementation of a 'use_index_score' workflow.
     """
 
     def __init__(
@@ -39,11 +39,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.index_score = float(
-            (self.attributes.get("default_index_score", 0) / 100) * 5
-        )
+        self.index_score = float((self.attributes.get("index_score", 0) / 100) * 5)
         self.features_layer = True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
-        self.workflow_name = "default_index_score"
+        self.workflow_name = "index_score"
 
     def _process_features_for_area(
         self,

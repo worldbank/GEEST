@@ -347,7 +347,7 @@ class JsonTreeItem:
                 # Test for algs requiring vector inputs
                 self.isIndicator()
                 and analysis_mode
-                not in ["use_default_index_score", "use_environmental_hazards"]
+                not in ["use_index_score", "use_environmental_hazards"]
                 and not data.get(qgis_layer_source_key, False)
                 and not data.get(qgis_layer_shapefile_key, False)
             ):
@@ -355,13 +355,13 @@ class JsonTreeItem:
             if (
                 # Test for algs requiring raster inputs
                 self.isIndicator()
-                and analysis_mode not in ["use_default_index_score"]
+                and analysis_mode not in ["use_index_score"]
                 and analysis_mode in ["use_environmental_hazards"]
                 and not data.get(qgis_layer_source_key, False)
                 and not data.get(qgis_layer_raster_key, False)
             ):
                 # log_message(f"Indicator {data.get('id')} is missing a raster input")
-                # log_message(f"analysis_mode in use_default_index_score, use_environmental_hazards: {analysis_mode in ['use_default_index_score', 'use_environmental_hazards']}")
+                # log_message(f"analysis_mode in use_index_score, use_environmental_hazards: {analysis_mode in ['use_index_score', 'use_environmental_hazards']}")
                 # log_message(f"qgis_layer_source_key: {qgis_layer_source_key}: {data.get(qgis_layer_source_key, False)}")
                 # log_message(f"qgis_layer_raster_key: {qgis_layer_raster_key}: {data.get(qgis_layer_raster_key, False)}")
                 return "Not configured (optional)"
