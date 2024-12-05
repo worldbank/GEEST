@@ -25,11 +25,7 @@ class BaseDataSourceWidget(QWidget):
         self.layout: QHBoxLayout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         # Log creation of widget
-        log_message(
-            f"Creating DataSource Configuration Widget {widget_key}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+        log_message(f"Creating DataSource Configuration Widget {widget_key}")
 
         try:
             self.add_internal_widgets()  # implemented in subclasses
