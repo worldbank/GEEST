@@ -134,6 +134,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 # Update the line edit with the selected file path
                 self.shapefile_line_edit.setText(file_path)
                 self.shapefile_line_edit.setVisible(True)
+                self.layer_combo.setCurrentIndex(-1)  # Clear the layer combo selection
                 # Save the directory of the selected file to QSettings
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
@@ -231,6 +232,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         elif self.shapefile_line_edit.text():
             # If shapefile is provided, populate the field combo
             self._populate_field_combo(self.shapefile_line_edit.text())
+            self.layer_combo.setCurrentIndex(-1)  # Clear the layer combo selection
 
         # After the field combo is repopulated, re-select the previously selected field if it exists
         if previous_field and self.field_selection_combo.findText(previous_field) != -1:
