@@ -46,7 +46,9 @@ class GeestDock(QDockWidget):
         """
         super().__init__(parent)
 
-        self.setWindowTitle("Geest")  # Set the title of the dock
+        self.setWindowTitle(
+            "Women's Enablement Environments"
+        )  # Set the title of the dock
         self.json_file: Optional[str] = json_file
 
         # Initialize main widget and layout for the dock
