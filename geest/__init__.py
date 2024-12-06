@@ -194,6 +194,16 @@ class GeestPlugin:
                             "test_runner = unittest.TextTestRunner(verbosity=2)"
                         )
                         shell.runCommand("test_runner.run(test_suite)")
+                        # Unload test modules
+                        shell.runCommand(
+                            f"""
+for module_name in list(sys.modules.keys()):
+    if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
+        del sys.modules[module_name]
+                            """
+                        )
+
+                        log_message("Test modules unloaded")
                         break
 
     def save_geometry(self) -> None:
