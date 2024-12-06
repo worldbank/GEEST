@@ -58,7 +58,7 @@
       </font>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;To get started, we need a project folder. You can either select a &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;previously created&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; project folder, or &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;create a new one&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;. The contents of this folder will be managed by GEEST. It will store the GEEST project file and the working analysis results.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;To get started, we need a project folder. You can either select a &lt;span style=&quot; font-weight:600;&quot;&gt;previously created&lt;/span&gt; project folder, or &lt;span style=&quot; font-weight:600;&quot;&gt;create a new one&lt;/span&gt;. The contents of this folder will be managed by GEEST. It will store the GEEST project file and the working analysis results.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignJustify|Qt::AlignTop</set>
@@ -171,6 +171,19 @@
         <string>◀️</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

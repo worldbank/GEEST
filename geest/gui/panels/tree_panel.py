@@ -473,7 +473,7 @@ class TreePanel(QWidget):
         )
         if item.role == "analysis":
             menu = QMenu(self)
-            edit_analysis_action = QAction("🔘 Edit", self)
+            edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
             edit_analysis_action.triggered.connect(
                 lambda: self.edit_analysis_aggregation(item)
             )  # Connect to method
@@ -489,7 +489,7 @@ class TreePanel(QWidget):
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
             # Context menu for dimensions
-            edit_aggregation_action = QAction("🔘 Edit", self)
+            edit_aggregation_action = QAction("🔘 Edit Weights", self)
             edit_aggregation_action.triggered.connect(
                 lambda: self.edit_dimension_aggregation(item)
             )  # Connect to method
@@ -517,7 +517,7 @@ class TreePanel(QWidget):
         elif item.role == "factor":
             # Context menu for factors
             edit_aggregation_action = QAction(
-                "🔘 Edit", self
+                "🔘 Edit Weights", self
             )  # New action for contextediting aggregation
             add_indicator_action = QAction("Add Indicator", self)
             remove_factor_action = QAction("Remove Factor", self)
@@ -547,7 +547,7 @@ class TreePanel(QWidget):
             # Context menu for layers
             # Editing an indicator will open the attributes dialog
             # of its parent factor...
-            show_properties_action = QAction("🔘 Edit", self)
+            show_properties_action = QAction("🔘 Edit Weights", self)
             remove_indicator_action = QAction("❌ Remove Indicator", self)
 
             # Connect actions
