@@ -76,3 +76,4 @@ app.py
 .shell.nix.swp
 geest.tar.gz
 gitlog.txt
+geest/resources/models/prepare_mask_area.model3
