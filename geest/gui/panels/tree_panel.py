@@ -435,7 +435,6 @@ class TreePanel(QWidget):
         run_item_action.triggered.connect(
             lambda: self.run_item(
                 item,
-                role=item.role,
                 shift_pressed=QApplication.keyboardModifiers() & Qt.ShiftModifier,
             )
         )
@@ -856,9 +855,7 @@ class TreePanel(QWidget):
                     False
                 )  # Collapse the legend for the layer by default
                 log_message(
-                    f"Added layer: {layer.name()} to group: {parent_group.name()}",
-                    tag="Geest",
-                    level=Qgis.Info,
+                    f"Added layer: {layer.name()} to group: {parent_group.name()}"
                 )
 
     def edit_analysis_aggregation(self, analysis_item):
@@ -985,12 +982,16 @@ class TreePanel(QWidget):
         # Hook up the QTask feedback signal to the progress bar
         task.progressChanged.connect(self.task_progress_updated)
 
-    def run_item(self, item, role, shift_pressed):
+    def run_item(self, item, shift_pressed):
         """Run the item and the ones below it.
+
+        If the user holds shift whilst running the item, it will force the
+        recalculation of all workflows under the item, regardless of their status.
 
         Args:
             item (TreeItem): The item to run.
-            role (str): The role of the item.
+            shift_pressed (bool): Whether the shift key is pressed.
+
         """
         self.items_to_run = 0
         if shift_pressed:
@@ -1000,6 +1001,8 @@ class TreePanel(QWidget):
 
         for i in range(item.childCount()):
             child_item = item.child(i)
+            if child_item.childCount() > 0:
+                self.run_item(child_item, shift_pressed)
             # If you change the logic below, dont forget to also
             # change the logic in _count_workflows_to_run
             is_complete = child_item.getStatus() == "Workflow Completed"
@@ -1008,7 +1011,7 @@ class TreePanel(QWidget):
             if is_complete and not self.run_only_incomplete:
                 self.queue_workflow_task(child_item, child_item.role)
 
-        self.queue_workflow_task(item, role)
+        self.queue_workflow_task(item, item.role)
         self._count_workflows_to_run(item)
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
