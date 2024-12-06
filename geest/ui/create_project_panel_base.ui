@@ -121,7 +121,7 @@
       </font>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a layer containing your &lt;span style=&quot; font-weight:600;&quot;&gt;Admin0&lt;/span&gt; areas and the column containing the names of your areas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;Select a layer containing your &lt;span style=&quot; font-weight:600;&quot;&gt;Admin0&lt;/span&gt; areas and the column containing the names of your areas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -174,7 +174,7 @@
       <bool>true</bool>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Set the analysis cell size (m). Smaller sizes require longer processing times, but produce more detailed analysis results. We suggest a value between &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;100m&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; and &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;1000m.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Set the analysis cell size (m). Smaller sizes require longer processing times, but produce more detailed analysis results. We suggest a value between &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;100m&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; and &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;1000m.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
