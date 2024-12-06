@@ -14,6 +14,21 @@ class SpreadsheetToJsonParser:
         self.spreadsheet_path = spreadsheet_path
         self.dataframe = None
         self.result = {"dimensions": []}
+        self.aggregate_output_filenames = {
+            "contextual": "Contextual_score",
+            "women_s travel_patterns": "WTP_output",
+            "accessibility": "Accessibility_score",
+            "active_transport": "AT_output",
+            "place_characterization": "Place_score",
+            "analysis_dimension": "WEE",
+            "level_of_enablement classification": "WEE_score",
+            "relative_population_count": "Population",
+            "combined_level_of_enablement_and_relative_population_count": "WEE_pop_score",
+            "enablement": "WEE_pop_adm_score",
+            "jobs_raster_locations": "AOI_WEE_score",
+            "jobs_point_locations": "POI_WEE_score",
+            "jobs_polygon_locations": "POA_WEE_score",
+        }
 
     def load_spreadsheet(self):
         """
@@ -89,11 +104,15 @@ class SpreadsheetToJsonParser:
                     description = "The Accessibility Dimension evaluates women’s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce."
                 elif dimension_id == "place_characterization":
                     description = "The Place-Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce."
-
+            if dimension_id in self.aggregate_output_filenames:
+                output_filename = self.aggregate_output_filenames[dimension_id]
+            else:
+                output_filename = dimension_id
             # If the Dimension doesn't exist yet, create it
             if dimension not in analysis_model:
                 new_dimension = {
                     "id": dimension_id,
+                    "output_filename": output_filename,
                     "name": dimension,
                     "default_analysis_weighting": default_dimension_analysis_weighting,
                     # Initialise the weighting to the default value
@@ -111,12 +130,17 @@ class SpreadsheetToJsonParser:
                 if not pd.isna(row["Default Factor Dimension Weighting"])
                 else ""
             )
+            if factor_id in self.aggregate_output_filenames:
+                output_filename = self.aggregate_output_filenames[factor_id]
+            else:
+                output_filename = factor_id
 
             # If the Factor doesn't exist in the current dimension, add it
             factor_map = {f["name"]: f for f in analysis_model[dimension]["factors"]}
             if factor not in factor_map:
                 new_factor = {
                     "id": factor_id,
+                    "output_filename": output_filename,
                     "name": factor,
                     "default_dimension_weighting": default_factor_dimension_weighting,
                     # Initialise the weighting to the default value
