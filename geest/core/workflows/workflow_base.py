@@ -90,6 +90,7 @@ class WorkflowBase(QObject):
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
         self.progressChanged.emit(0)
+        self.output_filename = self.attributes.get("output_filename", "")
 
     #
     # Every concrete subclass needs to implement these three methods
@@ -580,11 +581,11 @@ class WorkflowBase(QObject):
             return
         vrt_filepath = os.path.join(
             self.workflow_directory,
-            f"{self.layer_id}_final_combined.vrt",
+            f"{self.output_filename}_combined.vrt",
         )
         qml_filepath = os.path.join(
             self.workflow_directory,
-            f"{self.layer_id}_final_combined.qml",
+            f"{self.output_filename}_combined.qml",
         )
         log_message(
             f"Creating VRT of layers '{vrt_filepath}' layer to the map.",
@@ -633,11 +634,7 @@ class WorkflowBase(QObject):
         # Copy the appropriate QML over too
         role = self.item.role
         source_qml = resources_path("resources", "qml", f"{role}.qml")
-        log_message(
-            f"Copying QML from {source_qml} to {qml_filepath}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+        log_message(f"Copying QML from {source_qml} to {qml_filepath}")
         shutil.copyfile(source_qml, qml_filepath)
 
         if not vrt_layer.isValid():

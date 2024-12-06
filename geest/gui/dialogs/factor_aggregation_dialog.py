@@ -285,11 +285,11 @@ class FactorAggregationDialog(QDialog):
                 weighting_item.valueChanged.connect(self.validate_weightings)
                 self.table.setCellWidget(row, 2, weighting_item)
                 self.weightings[guid] = weighting_item
-                self.table.setCellWidget(row, 3, checkbox_widget)
                 # Use (Checkbox)
                 checkbox_widget = self.create_checkbox_widget(row, weighting_value)
             else:
                 checkbox_widget = self.create_checkbox_widget(row, 1)
+            self.table.setCellWidget(row, 3, checkbox_widget)
 
             # GUID
             guid_item = QTableWidgetItem(guid)
