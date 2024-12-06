@@ -29,16 +29,13 @@ from geest.utilities import (
 
 
 class DimensionAggregationDialog(QDialog):
-    def __init__(
-        self, dimension_name, dimension_data, dimension_item, editing=False, parent=None
-    ):
+    def __init__(self, dimension_name, dimension_data, dimension_item, parent=None):
         super().__init__(parent)
 
         self.setWindowTitle(dimension_name)
         self.dimension_name = dimension_name
         self.dimension_data = dimension_data
         self.tree_item = dimension_item  # Reference to the QTreeView item to update
-        self.editing = editing
 
         self.setWindowTitle(
             f"Edit Dimension Weightings for Dimension: {self.tree_item.data(0)}"
@@ -80,39 +77,13 @@ class DimensionAggregationDialog(QDialog):
         )
         self.banner_label.setScaledContents(True)
         self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         layout.addWidget(self.banner_label)
 
-        # Splitter for Markdown editor and preview
-        splitter = QSplitter(Qt.Horizontal)
-        default_text = """
-        In this dialog you can set the weightings for each indicator in the dimension.
-        """
-        self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(
-            self.dimension_data.get("description", default_text)
-        )
-        self.text_edit_left.setMinimumHeight(100)
-        if self.editing:
-            splitter.addWidget(self.text_edit_left)
-
-        # HTML preview (right side)
-        self.text_edit_right = QTextEdit()
-        self.text_edit_right.setReadOnly(True)
-        self.text_edit_right.setFrameStyle(QFrame.NoFrame)
-        self.text_edit_right.setStyleSheet("background-color: transparent;")
-        splitter.addWidget(self.text_edit_right)
-
-        layout.addWidget(splitter)
-
-        # Connect Markdown editor to preview
-        self.text_edit_left.textChanged.connect(self.update_preview)
-
-        # Expanding spacer
-        expanding_spacer = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
-        layout.addSpacerItem(expanding_spacer)
+        # Description label
+        description_label = QLabel()
+        description_label.setText(self.dimension_data.get("description", ""))
+        description_label.setWordWrap(True)
+        layout.addWidget(description_label)
 
         # Table setup
         self.table = QTableWidget(self)
@@ -225,8 +196,6 @@ class DimensionAggregationDialog(QDialog):
 
         layout.addWidget(self.button_box)
 
-        # Initial preview update
-        self.update_preview()
         # Initial validation check
         self.validate_weightings()
 
@@ -356,11 +325,6 @@ class DimensionAggregationDialog(QDialog):
                     level=Qgis.Warning,
                 )
 
-    def update_preview(self):
-        """Update the right text edit to show a live HTML preview of the Markdown."""
-        markdown_text = self.text_edit_left.toPlainText()
-        self.text_edit_right.setMarkdown(markdown_text)
-
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
         try:
@@ -402,8 +366,4 @@ class DimensionAggregationDialog(QDialog):
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
         self.saveWeightingsToModel()  # Assign weightings when changes are accepted
-        if self.editing:
-            updated_data = self.dimension_data
-            updated_data["description"] = self.text_edit_left.toPlainText()
-            self.dataUpdated.emit(updated_data)
         self.accept()

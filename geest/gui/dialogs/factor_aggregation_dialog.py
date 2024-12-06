@@ -1,17 +1,12 @@
 from qgis.PyQt.QtWidgets import (
     QDialog,
-    QFrame,
     QHeaderView,
     QLabel,
     QDoubleSpinBox,
     QPushButton,
-    QSpacerItem,
     QSizePolicy,
-    QSplitter,
-    QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
-    QTextEdit,
     QVBoxLayout,
     QDialogButtonBox,
     QWidget,
@@ -23,23 +18,19 @@ from qgis.PyQt.QtCore import Qt
 from qgis.core import Qgis
 from geest.utilities import resources_path, setting
 from ..datasource_widget_factory import DataSourceWidgetFactory
-from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
 from ..factor_configuration_widget import FactorConfigurationWidget
 from geest.utilities import log_message, is_qgis_dark_theme_active
 
 
 class FactorAggregationDialog(QDialog):
 
-    def __init__(
-        self, factor_name, factor_data, factor_item, editing=False, parent=None
-    ):
+    def __init__(self, factor_name, factor_data, factor_item, parent=None):
         super().__init__(parent)
 
         self.setWindowTitle(factor_name)
         self.factor_name = factor_name
         self.factor_data = factor_data
         self.tree_item = factor_item  # Reference to the QTreeView item to update
-        self.editing = editing
 
         # Initialize dictionaries
         self.guids = self.tree_item.getFactorIndicatorGuids()
@@ -92,51 +83,13 @@ class FactorAggregationDialog(QDialog):
         description_label.setWordWrap(True)
         layout.addWidget(description_label)
 
-        # Create the QStackedWidget and pages
-        self.stacked_widget = QStackedWidget()
-
-        # Page 1 (default): Configuration widget and table
-        page_1_layout = QVBoxLayout()
+        # Configuration widget and table
         self.configuration_widget = FactorConfigurationWidget(
             self.tree_item, self.guids
         )
-        page_1_layout.addWidget(self.configuration_widget)
 
         self.configuration_widget.selection_changed.connect(self.populate_table)
-        # Add page 1 layout to a container widget and set it in stacked_widget
-        page_1_container = QWidget()
-        page_1_container.setLayout(page_1_layout)
-        self.stacked_widget.addWidget(page_1_container)
-
-        # Page 2: Splitter, text edits, and expanding spacer
-        page_2_layout = QVBoxLayout()
-
-        splitter = QSplitter(Qt.Horizontal)
-        self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(self.factor_data.get("description", ""))
-        self.text_edit_left.setMinimumHeight(100)  # Set at least 5 lines high
-        splitter.addWidget(self.text_edit_left)
-
-        self.text_edit_right = QTextEdit()
-        self.text_edit_right.setReadOnly(True)
-        self.text_edit_right.setFrameStyle(QFrame.NoFrame)
-        self.text_edit_right.setStyleSheet("background-color: transparent;")
-        splitter.addWidget(self.text_edit_right)
-
-        page_2_layout.addWidget(splitter)
-
-        expanding_spacer = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
-        page_2_layout.addSpacerItem(expanding_spacer)
-
-        # Add page 2 layout to a container widget and set it in stacked_widget
-        page_2_container = QWidget()
-        page_2_container.setLayout(page_2_layout)
-        self.stacked_widget.addWidget(page_2_container)
-
-        # Add the stacked widget to the main layout
-        layout.addWidget(self.stacked_widget)
+        layout.addWidget(self.configuration_widget)
 
         # Table setup
         self.table = QTableWidget(self)
@@ -176,12 +129,6 @@ class FactorAggregationDialog(QDialog):
         verbose_mode = setting(key="verbose_mode", default=0)
         if verbose_mode:
             self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
-        if self.editing:
-            self.switch_page_button = QPushButton("Edit Description")
-            self.button_box.addButton(
-                self.switch_page_button, QDialogButtonBox.ActionRole
-            )
-            self.switch_page_button.clicked.connect(self.switch_page)
 
         self.button_box.accepted.connect(self.accept_changes)
         self.button_box.rejected.connect(self.reject)
@@ -193,19 +140,8 @@ class FactorAggregationDialog(QDialog):
         layout.addWidget(self.button_box)
         self.populate_table()
         self.validate_weightings()
-
-        # Initial call to update the preview with existing content
-        self.update_preview()
-
-        # Connect the Markdown editor to update preview
-        self.text_edit_left.textChanged.connect(self.update_preview)
         self.setLayout(layout)
         self.populate_table()  # Populate the table after initializing data_sources and weightings
-
-    def switch_page(self):
-        """Switch to the next page in the stacked widget."""
-        current_index = self.stacked_widget.currentIndex()
-        self.stacked_widget.setCurrentIndex(1 - current_index)  # Toggle between 0 and 1
 
     def refresh_configuration(self, attributes: dict):
         """Refresh the configuration widget and table.
@@ -385,16 +321,7 @@ class FactorAggregationDialog(QDialog):
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
         self.save_weightings_to_model()
-        if self.editing:
-            updated_data = self.factor_data
-            updated_data["description"] = self.text_edit_left.toPlainText()
-            self.dataUpdated.emit(updated_data)
         self.accept()
-
-    def update_preview(self):
-        """Update the right text edit to show a live HTML preview of the Markdown."""
-        markdown_text = self.text_edit_left.toPlainText()
-        self.text_edit_right.setMarkdown(markdown_text)
 
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
