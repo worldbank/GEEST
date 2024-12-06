@@ -5,8 +5,6 @@ from typing import Union, Dict, List
 from qgis.PyQt.QtWidgets import (
     QAction,
     QApplication,
-    QCheckBox,
-    QCheckBox,
     QDialog,
     QFileDialog,
     QHBoxLayout,
@@ -218,11 +216,11 @@ class TreePanel(QWidget):
         # Action to trigger on double-click
         item = index.internalPointer()
         if item.role == "indicator":
-            self.show_attributes(item)
-        elif item.role == "dimension":
-            self.edit_dimension_aggregation(item)
+            self.edit_factor_aggregation(item.parent())
         elif item.role == "factor":
             self.edit_factor_aggregation(item)
+        elif item.role == "dimension":
+            self.edit_dimension_aggregation(item)
         elif item.role == "analysis":
             self.edit_analysis_aggregation(item)
 
@@ -423,7 +421,7 @@ class TreePanel(QWidget):
     def open_context_menu(self, position: QPoint):
         """Handle right-click context menu."""
 
-        editing = self.edit_mode and self.edit_toggle.isChecked()
+        editing = self.edit_mode
 
         index = self.treeView.indexAt(position)
         if not index.isValid():
@@ -547,11 +545,15 @@ class TreePanel(QWidget):
 
         elif item.role == "indicator":
             # Context menu for layers
+            # Editing an indicator will open the attributes dialog
+            # of its parent factor...
             show_properties_action = QAction("🔘 Edit Weights", self)
             remove_indicator_action = QAction("❌ Remove Indicator", self)
 
             # Connect actions
-            show_properties_action.triggered.connect(lambda: self.show_attributes(item))
+            show_properties_action.triggered.connect(
+                lambda: self.edit_factor_aggregation(item.parent())
+            )
             remove_indicator_action.triggered.connect(
                 lambda: self.model.remove_item(item)
             )
@@ -904,7 +906,7 @@ class TreePanel(QWidget):
 
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
-        editing = self.edit_mode and self.edit_toggle.isChecked()
+        editing = self.edit_mode
         dialog = AnalysisAggregationDialog(analysis_item, editing=editing, parent=self)
         if dialog.exec_():  # If OK was clicked
             dialog.saveWeightingsToModel()
@@ -912,7 +914,7 @@ class TreePanel(QWidget):
 
     def edit_dimension_aggregation(self, dimension_item):
         """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension."""
-        editing = self.edit_mode and self.edit_toggle.isChecked()
+        editing = self.edit_mode
         dimension_name = dimension_item.data(0)
         dimension_data = dimension_item.attributes()
         if not dimension_data:
@@ -926,7 +928,7 @@ class TreePanel(QWidget):
 
     def edit_factor_aggregation(self, factor_item):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
-        editing = self.edit_mode and self.edit_toggle.isChecked()
+        editing = self.edit_mode
         factor_name = factor_item.data(0)
         factor_data = factor_item.attributes()
         if not factor_data:

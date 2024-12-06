@@ -65,7 +65,7 @@ class WorkflowFactory:
 
             analysis_mode = attributes.get("analysis_mode", "")
 
-            if analysis_mode == "use_default_index_score":
+            if analysis_mode == "use_index_score":
                 return DefaultIndexScoreWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "Do Not Use":
                 return DontUseWorkflow(item, cell_size_m, feedback, context)

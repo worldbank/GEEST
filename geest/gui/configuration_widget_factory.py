@@ -43,7 +43,7 @@ class ConfigurationWidgetFactory:
                 return DontUseConfigurationWidget(
                     analysis_mode="Do Not Use", attributes=attributes
                 )
-            if key == "use_default_index_score" and value == 1:
+            if key == "use_index_score" and value == 1:
                 return IndexScoreConfigurationWidget(
                     analysis_mode=key, attributes=attributes
                 )

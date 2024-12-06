@@ -20,7 +20,12 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtCore import Qt
 from qgis.core import Qgis
-from geest.utilities import resources_path, log_message, setting
+from geest.utilities import (
+    resources_path,
+    log_message,
+    setting,
+    is_qgis_dark_theme_active,
+)
 
 
 class AnalysisAggregationDialog(QDialog):
@@ -356,12 +361,20 @@ class AnalysisAggregationDialog(QDialog):
         if enabled_rows_count == 0:
             valid_sum = True
 
-        # Update button state and font color for validation
+        if is_qgis_dark_theme_active:
+            normal_color = "color: white;"
+        else:
+            normal_color = "color: black;"
+        # Update button state and cell highlighting
         for spin_box in self.weightings.values():
             if valid_sum:
-                spin_box.setStyleSheet("color: black;")  # Valid sum, black font
+                spin_box.setStyleSheet(
+                    normal_color
+                )  # Reset font color to black if valid
             else:
-                spin_box.setStyleSheet("color: red;")  # Invalid sum, red font
+                spin_box.setStyleSheet(
+                    "color: red;"
+                )  # Set font color to red if invalid
 
         # Enable or disable the OK button based on validation result
         self.button_box.button(QDialogButtonBox.Ok).setEnabled(valid_sum)

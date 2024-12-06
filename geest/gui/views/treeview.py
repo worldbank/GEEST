@@ -143,6 +143,7 @@ class JsonTreeModel(QAbstractItemModel):
         dimension_name = dimension["name"].title()  # Title case for dimensions
         dimension_attributes = {
             "id": dimension.get("id", ""),
+            "output_filename": dimension.get("output_filename", ""),
             "name": dimension.get("name", ""),
             "description": dimension.get("description", ""),
             "default_analysis_weighting": dimension.get(
@@ -186,6 +187,7 @@ class JsonTreeModel(QAbstractItemModel):
         """
         factor_attributes = {
             "id": factor.get("id", ""),
+            "output_filename": factor.get("output_filename", ""),
             "name": factor.get("name", ""),
             "description": factor.get("description", ""),
             "default_dimension_weighting": factor.get(

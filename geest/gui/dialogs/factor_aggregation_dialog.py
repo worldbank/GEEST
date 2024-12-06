@@ -25,7 +25,7 @@ from geest.utilities import resources_path, setting
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..widgets.datasource_widgets.base_datasource_widget import BaseDataSourceWidget
 from ..factor_configuration_widget import FactorConfigurationWidget
-from geest.utilities import log_message
+from geest.utilities import log_message, is_qgis_dark_theme_active
 
 
 class FactorAggregationDialog(QDialog):
@@ -57,7 +57,7 @@ class FactorAggregationDialog(QDialog):
         # Layout setup
         layout = QVBoxLayout(self)
         self.resize(800, 600)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
         # Title label
         self.title_label = QLabel(
@@ -143,7 +143,7 @@ class FactorAggregationDialog(QDialog):
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
-            ["Source", "Indicator", "Weight 0-1", "Use", "GUID", ""]
+            ["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""]
         )
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
@@ -155,8 +155,11 @@ class FactorAggregationDialog(QDialog):
         self.table.setColumnWidth(3, 50)  # Use column (checkbox)
         self.table.setColumnWidth(5, 75)  # Reset column
         # hide weight and reset column if only one indicator
-        self.table.setColumnHidden(2, not self.weighting_column_visible)
-        self.table.setColumnHidden(5, not self.weighting_column_visible)
+        if not self.weighting_column_visible:
+            self.hide_widgets_in_column(2)
+            self.hide_widgets_in_column(5)
+            self.table.setColumnHidden(2, True)
+            self.table.setColumnHidden(5, True)
 
         layout.addWidget(self.table)
 
@@ -257,6 +260,8 @@ class FactorAggregationDialog(QDialog):
             data_source_widget = DataSourceWidgetFactory.create_widget(
                 attributes["analysis_mode"], 1, attributes
             )
+            # Expand the widget to fill the available horizontal space
+            data_source_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             if not data_source_widget:
                 continue
             data_source_widget.data_changed.connect(self.refresh_configuration)
@@ -270,18 +275,20 @@ class FactorAggregationDialog(QDialog):
             self.table.setItem(row, 1, name_item)
 
             # Weighting
-            weighting_value = float(attributes.get("factor_weighting", 0.0))
-            weighting_item = QDoubleSpinBox()
-            weighting_item.setRange(0.0, 1.0)
-            weighting_item.setDecimals(4)
-            weighting_item.setSingleStep(0.01)
-            weighting_item.setValue(weighting_value)
-            weighting_item.valueChanged.connect(self.validate_weightings)
-            self.table.setCellWidget(row, 2, weighting_item)
-            self.weightings[guid] = weighting_item
-
-            # Use (Checkbox)
-            checkbox_widget = self.create_checkbox_widget(row, weighting_value)
+            if self.weighting_column_visible:
+                weighting_value = float(attributes.get("factor_weighting", 0.0))
+                weighting_item = QDoubleSpinBox()
+                weighting_item.setRange(0.0, 1.0)
+                weighting_item.setDecimals(4)
+                weighting_item.setSingleStep(0.01)
+                weighting_item.setValue(weighting_value)
+                weighting_item.valueChanged.connect(self.validate_weightings)
+                self.table.setCellWidget(row, 2, weighting_item)
+                self.weightings[guid] = weighting_item
+                # Use (Checkbox)
+                checkbox_widget = self.create_checkbox_widget(row, weighting_value)
+            else:
+                checkbox_widget = self.create_checkbox_widget(row, 1)
             self.table.setCellWidget(row, 3, checkbox_widget)
 
             # GUID
@@ -291,13 +298,14 @@ class FactorAggregationDialog(QDialog):
             self.table.setItem(row, 4, guid_item)
 
             # Reset Button
-            reset_button = QPushButton("Reset")
-            reset_button.clicked.connect(
-                lambda checked, item=weighting_item, value=default_factor_weighting: item.setValue(
-                    value
+            if self.weighting_column_visible:
+                reset_button = QPushButton("Reset")
+                reset_button.clicked.connect(
+                    lambda checked, item=weighting_item, value=default_factor_weighting: item.setValue(
+                        value
+                    )
                 )
-            )
-            self.table.setCellWidget(row, 5, reset_button)
+                self.table.setCellWidget(row, 5, reset_button)
 
         self.table.setColumnHidden(
             4, not self.guid_column_visible
@@ -311,6 +319,20 @@ class FactorAggregationDialog(QDialog):
         """Toggle the visibility of the GUID column."""
         self.guid_column_visible = not self.guid_column_visible
         self.table.setColumnHidden(4, not self.guid_column_visible)
+
+    def hide_widgets_in_column(self, column: int):
+        """Hide all widgets in the specified column."""
+        for row in range(self.table.rowCount()):
+            widget = self.table.cellWidget(row, column)
+            if widget:
+                widget.setVisible(False)  # Explicitly hide the widget
+
+    def show_widgets_in_column(self, column: int):
+        """Show all widgets in the specified column."""
+        for row in range(self.table.rowCount()):
+            widget = self.table.cellWidget(row, column)
+            if widget:
+                widget.setVisible(True)  # Explicitly show the widget
 
     def auto_calculate_weightings(self):
         enabled_rows = [
@@ -393,12 +415,15 @@ class FactorAggregationDialog(QDialog):
         enabled_rows_count = len(enabled_rows)
         if enabled_rows_count == 0:
             valid_sum = True
-
+        if is_qgis_dark_theme_active:
+            normal_color = "color: white;"
+        else:
+            normal_color = "color: black;"
         # Update button state and cell highlighting
         for spin_box in self.weightings.values():
             if valid_sum:
                 spin_box.setStyleSheet(
-                    "color: black;"
+                    normal_color
                 )  # Reset font color to black if valid
             else:
                 spin_box.setStyleSheet(
