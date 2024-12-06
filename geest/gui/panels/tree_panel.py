@@ -63,7 +63,6 @@ class TreePanel(QWidget):
         self.queue_manager = WorkflowQueueManager(pool_size=1)
         self.json_file = json_file
         self.tree_view_visible = True
-        self.edit_mode = int(setting(key="edit_mode", default=0))
         self.run_only_incomplete = (
             True  # saves time by not running models that have already been run
         )
@@ -131,22 +130,6 @@ class TreePanel(QWidget):
         layout.addWidget(self.treeView)
 
         button_bar = QHBoxLayout()
-        # "Add Dimension" button (initially enabled)
-        if self.edit_mode:
-            self.add_dimension_button = QPushButton("⭐️")
-            self.add_dimension_button.setToolTip("Add Dimension")
-            self.add_dimension_button.clicked.connect(self.add_dimension)
-            button_bar.addWidget(self.add_dimension_button)
-            button_bar.addStretch()
-
-            # Load and Save buttons
-            self.load_json_button = QPushButton("📂")
-            self.load_json_button.setToolTip("Load JSON Model File")
-            self.load_json_button.clicked.connect(self.load_json_from_file)
-
-            self.export_json_button = QPushButton("💾")
-            self.export_json_button.setToolTip("Export JSON Model File")
-            self.export_json_button.clicked.connect(self.export_json_to_file)
 
         # Create the split tool button
         self.prepare_analysis_button = QToolButton()
@@ -377,20 +360,6 @@ class TreePanel(QWidget):
         except Exception as e:
             log_message(f"Error saving JSON: {str(e)}", level=Qgis.Critical)
 
-    def edit(self, index, trigger, event):
-        """
-        Override the edit method to enable editing only on the column that was clicked.
-        """
-        column = index.column()
-
-        # Only allow editing on specific columns (e.g., column 0, 1, etc.)
-        if column == 0:  # Only make the first column editable
-            return super().edit(index, trigger, event)
-        elif column == 2:  # And the third column editable
-            return super().edit(index, trigger, event)
-
-        return False
-
     def load_json(self):
         """Load the JSON data from the file."""
         with open(self.json_file, "r") as f:
@@ -421,8 +390,6 @@ class TreePanel(QWidget):
 
     def open_context_menu(self, position: QPoint):
         """Handle right-click context menu."""
-
-        editing = self.edit_mode
 
         index = self.treeView.indexAt(position)
         if not index.isValid():
@@ -511,10 +478,6 @@ class TreePanel(QWidget):
             menu.addAction(run_item_action)
             menu.addAction(disable_action)
 
-            if editing:
-                menu.addAction(add_factor_action)
-                menu.addAction(remove_dimension_action)
-
         elif item.role == "factor":
             # Context menu for factors
             edit_aggregation_action = QAction(
@@ -540,10 +503,6 @@ class TreePanel(QWidget):
             menu.addAction(run_item_action)
             menu.addAction(disable_action)
 
-            if editing:
-                menu.addAction(add_indicator_action)
-                menu.addAction(remove_factor_action)
-
         elif item.role == "indicator":
             # Context menu for layers
             # Editing an indicator will open the attributes dialog
@@ -566,9 +525,6 @@ class TreePanel(QWidget):
             menu.addAction(add_to_map_action)
             menu.addAction(run_item_action)
             menu.addAction(disable_action)
-
-            if editing:
-                menu.addAction(remove_indicator_action)
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
@@ -907,21 +863,19 @@ class TreePanel(QWidget):
 
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
-        editing = self.edit_mode
-        dialog = AnalysisAggregationDialog(analysis_item, editing=editing, parent=self)
+        dialog = AnalysisAggregationDialog(analysis_item, parent=self)
         if dialog.exec_():  # If OK was clicked
             dialog.saveWeightingsToModel()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def edit_dimension_aggregation(self, dimension_item):
         """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension."""
-        editing = self.edit_mode
         dimension_name = dimension_item.data(0)
         dimension_data = dimension_item.attributes()
         if not dimension_data:
             dimension_data = {}
         dialog = DimensionAggregationDialog(
-            dimension_name, dimension_data, dimension_item, editing=editing, parent=self
+            dimension_name, dimension_data, dimension_item, parent=self
         )
         if dialog.exec_():  # If OK was clicked
             dialog.saveWeightingsToModel()
@@ -929,13 +883,12 @@ class TreePanel(QWidget):
 
     def edit_factor_aggregation(self, factor_item):
         """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
-        editing = self.edit_mode
         factor_name = factor_item.data(0)
         factor_data = factor_item.attributes()
         if not factor_data:
             factor_data = {}
         dialog = FactorAggregationDialog(
-            factor_name, factor_data, factor_item, editing=editing, parent=self
+            factor_name, factor_data, factor_item, parent=self
         )
         if dialog.exec_():  # If OK was clicked
             dialog.save_weightings_to_model()

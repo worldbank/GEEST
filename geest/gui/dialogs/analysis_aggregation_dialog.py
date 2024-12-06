@@ -29,12 +29,11 @@ from geest.utilities import (
 
 
 class AnalysisAggregationDialog(QDialog):
-    def __init__(self, analysis_item, editing=False, parent=None):
+    def __init__(self, analysis_item, parent=None):
         super().__init__(parent)
         self.analysis_name = analysis_item.attribute("analysis_name")
         self.analysis_data = analysis_item.attributes()
         self.tree_item = analysis_item  # Reference to the QTreeView item to update
-        self.editing = editing
 
         self.setWindowTitle(f"Edit weightings for analysis: {self.analysis_name}")
         # Need to be redimensioned...
@@ -74,8 +73,6 @@ class AnalysisAggregationDialog(QDialog):
             self.analysis_data.get("description", default_text)
         )
         self.text_edit_left.setMinimumHeight(100)
-        if self.editing:
-            splitter.addWidget(self.text_edit_left)
 
         # HTML preview (right side)
         self.text_edit_right = QTextEdit()
@@ -382,8 +379,4 @@ class AnalysisAggregationDialog(QDialog):
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
         self.saveWeightingsToModel()  # Assign weightings when changes are accepted
-        if self.editing:
-            updated_data = self.analysis_data
-            updated_data["description"] = self.text_edit_left.toPlainText()
-            self.dataUpdated.emit(updated_data)
         self.accept()
