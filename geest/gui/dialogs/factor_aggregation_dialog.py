@@ -342,7 +342,7 @@ class FactorAggregationDialog(QDialog):
         enabled_rows_count = len(enabled_rows)
         if enabled_rows_count == 0:
             valid_sum = True
-        if is_qgis_dark_theme_active:
+        if is_qgis_dark_theme_active():
             normal_color = "color: white;"
         else:
             normal_color = "color: black;"
