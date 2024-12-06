@@ -53,7 +53,7 @@
    <item row="3" column="0">
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The Gender Enabling Environments Spatial Tool (&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;GEEST&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;), developed by the &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;World Bank&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, evaluates locations based on how supportive they are of women’s employment and business opportunities.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;By incorporating &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;15 spatial factors&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; across three dimensions:&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Contextual&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt; ,&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Accessibility&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;, &lt;br/&gt;and &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Place Characterization&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;,&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;The Gender Enabling Environments Spatial Tool (&lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;GEEST&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;), developed by the &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;World Bank&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;, evaluates locations based on how supportive they are of women’s employment and business opportunities.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;By incorporating &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;15 spatial factors&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; across three dimensions:&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Contextual&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; ,&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Accessibility&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;, &lt;br/&gt;and &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Place Characterization&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;,&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -81,6 +81,19 @@
    </item>
    <item row="5" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item>
       <widget class="QPushButton" name="next_button">
        <property name="sizePolicy">

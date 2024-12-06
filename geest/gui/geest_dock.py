@@ -87,14 +87,15 @@ class GeestDock(QDockWidget):
             credits_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
             credits_layout.addWidget(self.credits_widget)
             self.stacked_widget.addWidget(credits_panel)
+            self.credits_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(INTRO_PANEL)
+            )
             self.credits_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
             )
-            self.credits_widget.switch_to_previous_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
-            )
+
             # Create and add the "ORS" panel (ORSPanel)
             self.ors_widget: OrsPanel = OrsPanel()
             ors_panel: QWidget = QWidget()
@@ -102,15 +103,14 @@ class GeestDock(QDockWidget):
             ors_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
             ors_layout.addWidget(self.ors_widget)
             self.stacked_widget.addWidget(ors_panel)
-            self.ors_widget.switch_to_next_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
-            )
             self.ors_widget.switch_to_previous_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
             )
-
+            self.ors_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
+            )
             # Create and add the "Project" panel (SetupPanel)
             self.setup_widget: SetupPanel = SetupPanel()
             setup_panel: QWidget = QWidget()
@@ -142,14 +142,16 @@ class GeestDock(QDockWidget):
             open_project_layout.addWidget(self.open_project_widget)
             self.stacked_widget.addWidget(open_project_panel)
 
-            self.open_project_widget.switch_to_next_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
-            )
             self.open_project_widget.switch_to_previous_tab.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+
+            self.open_project_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(
@@ -165,14 +167,16 @@ class GeestDock(QDockWidget):
             create_project_layout.addWidget(self.create_project_widget)
             self.stacked_widget.addWidget(create_project_panel)
 
-            self.create_project_widget.switch_to_next_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
-            )
             self.create_project_widget.switch_to_previous_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+
+            self.create_project_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
             self.create_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(
@@ -233,8 +237,6 @@ class GeestDock(QDockWidget):
                 level=Qgis.Critical,
             )
             import traceback
-
-            log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
