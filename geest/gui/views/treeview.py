@@ -32,7 +32,7 @@ class JsonTreeModel(QAbstractItemModel):
     under which Dimensions, Factors, and Indicators are stored. Each tree item has attributes that store custom
     properties such as analysis name, description, and working folder.
 
-    The model allows editing of certain fields (e.g., weighting) and supports serialization back to JSON.
+    The model allows serialization back to JSON.
 
     Attributes:
         rootItem (JsonTreeItem): The root item of the tree model, which holds the "Analysis" item as a child.
@@ -728,12 +728,10 @@ class JsonTreeModel(QAbstractItemModel):
 
 
 class JsonTreeView(QTreeView):
-    """Custom QTreeView to handle editing and reverting on Escape or focus loss."""
+    """Custom QTreeView for Geest."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.current_editing_index = None
-        self.current_editing_index = None
 
     def setModel(self, model: QAbstractItemModel):
         """
@@ -784,48 +782,3 @@ class JsonTreeView(QTreeView):
                 for indicator in factor.childItems:
                     return indicator.is_only_child()
         return True
-
-    def edit(self, index, trigger, event):
-        """Start editing the item at the given index."""
-        self.current_editing_index = index
-        model = self.model()
-        self.original_value = model.data(
-            index, Qt.DisplayRole
-        )  # Store original value before editing
-        return super().edit(index, trigger, event)
-
-    def keyPressEvent(self, event):
-        """Handle Escape key to cancel editing."""
-        if event.key() == Qt.Key_Escape and self.current_editing_index:
-            self.model().setData(
-                self.current_editing_index, self.original_value, Qt.EditRole
-            )
-            try:
-                if self.hasCurrentEditor():
-                    self.closeEditor(
-                        self.current_editor(), QAbstractItemDelegate.RevertModelCache
-                    )
-            except Exception as e:
-                super().keyPressEvent(event)
-        else:
-            super().keyPressEvent(event)
-
-    def commitData(self, editor):
-        """Handle commit data, reverting if needed."""
-        if self.current_editing_index:
-            super().commitData(editor)
-            self.current_editing_index = None
-            self.original_value = None
-
-    def closeEditor(self, editor, hint):
-        """Handle closing the editor and reverting the value on Escape or clicking elsewhere."""
-        if (
-            hint == QAbstractItemDelegate.RevertModelCache
-            and self.current_editing_index
-        ):
-            self.model().setData(
-                self.current_editing_index, self.original_value, Qt.EditRole
-            )
-        self.current_editing_index = None
-        self.original_value = None
-        super().closeEditor(editor, hint)
