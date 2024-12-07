@@ -14,19 +14,21 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
 
     def __init__(
         self,
-        item: dict,
+        item: JsonTreeItem,
         cell_size_m: float,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
         :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context
+            item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
 
         self.guids = (

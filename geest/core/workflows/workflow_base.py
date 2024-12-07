@@ -42,6 +42,7 @@ class WorkflowBase(QObject):
         cell_size_m: 100.0,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
@@ -49,6 +50,7 @@ class WorkflowBase(QObject):
         :param cell_size_m: The cell size in meters for the analysis.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__()
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
@@ -59,7 +61,10 @@ class WorkflowBase(QObject):
         # This is set in the setup panel
         self.settings = QSettings()
         # This is the top level folder for work files
-        self.working_directory = self.settings.value("last_working_directory", "")
+        if working_directory:
+            self.workflow_directory = working_directory
+        else:
+            self.working_directory = self.settings.value("last_working_directory", "")
         if not self.working_directory:
             raise ValueError("Working directory not set.")
         # This is the lower level directory for this workflow
