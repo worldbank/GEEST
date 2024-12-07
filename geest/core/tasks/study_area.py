@@ -700,7 +700,10 @@ class StudyAreaProcessingTask(QgsTask):
         )
         temp_layer_data_provider = temp_layer.dataProvider()
         # get the geometry as a linestring
-        linestring = geom.asMultiPolyline()[0]
+        multiline = geom.convertToType(
+            QgsGeometry.Type.Line, QgsGeometry.MultiComponent
+        )
+
         # select all grid cells that intersect the linestring
         gpkg_layer_path = f"{self.gpkg_path}|layername=study_area_grid"
         gpkg_layer = QgsVectorLayer(gpkg_layer_path, "study_area_grid", "ogr")
