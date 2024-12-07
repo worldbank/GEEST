@@ -107,7 +107,10 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
         gpkg_path = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
         )
-        self.assertTrue(os.path.exists(gpkg_path))
+        self.assertTrue(
+            os.path.exists(gpkg_path),
+            msg=f"GeoPackage not created in {self.working_directory}",
+        )
 
     def test_process_singlepart_geometry(self):
         """Test processing of singlepart geometry."""
@@ -128,7 +131,18 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
         gpkg_path = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
         )
-        self.assertTrue(os.path.exists(gpkg_path))
+        self.assertTrue(
+            os.path.exists(gpkg_path),
+            msg=f"GeoPackage not created in {self.working_directory}",
+        )
+        # Validate mask is a valid file
+        mask_path = os.path.join(
+            self.working_directory, "study_area", "saint_lucia_part0.tif"
+        )
+        self.assertTrue(
+            os.path.exists(mask_path),
+            msg=f"mask saint_lucia_part0.tif not created in {mask_path}",
+        )
 
     def test_grid_aligned_bbox(self):
         """Test grid alignment of bounding boxes."""
@@ -175,12 +189,16 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
         vrt_path = os.path.join(
             self.working_directory, "study_area", "combined_mask.vrt"
         )
-        self.assertTrue(os.path.exists(vrt_path))
+        self.assertTrue(
+            os.path.exists(vrt_path),
+            msg=f"VRT file not created in {self.working_directory}",
+        )
 
     @classmethod
     def tearDownClass(cls):
         """Clean up shared resources."""
-        if os.path.exists(cls.working_directory):
+        cleanup = False
+        if os.path.exists(cls.working_directory) and cleanup:
             for root, dirs, files in os.walk(cls.working_directory, topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
