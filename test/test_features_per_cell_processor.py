@@ -6,6 +6,7 @@ from geest.core.algorithms.features_per_cell_processor import (
     select_grid_cells,
     assign_values_to_grid,
 )
+from utilities_for_testing import prepare_fixtures
 
 
 class TestSpatialProcessing(unittest.TestCase):
@@ -13,6 +14,16 @@ class TestSpatialProcessing(unittest.TestCase):
         """
         Set up mock data for the tests.
         """
+        # Define working directories
+        self.test_data_directory = prepare_fixtures()
+        self.output_directory = os.path.join(self.test_data_directory, "output")
+
+        # Create the output directory if it doesn't exist
+        if not os.path.exists(self.output_directory):
+            os.makedirs(self.output_directory)
+
+        self.output_path = os.path.join(self.output_directory, "test_grid.gpkg")
+
         # Create an in-memory grid layer
         self.grid_layer = QgsVectorLayer(
             "Polygon?crs=EPSG:4326", "Grid Layer", "memory"
@@ -61,9 +72,6 @@ class TestSpatialProcessing(unittest.TestCase):
             feature.setGeometry(feature_points[i])
             feature.setAttributes([f"Feature {i + 1}"])
         features_provider.addFeatures(features)
-
-        # Define output path for the test
-        self.output_path = os.path.join(os.path.dirname(__file__), "test_grid.gpkg")
 
     def test_select_grid_cells(self):
         """

@@ -11,6 +11,7 @@ from qgis.core import (
 from geest.core.algorithms.safety_polygon_processor import (
     SafetyPerCellProcessor,
 )
+from utilities_for_testing import prepare_fixtures
 
 
 class TestSafetyPerCellProcessor(unittest.TestCase):
@@ -23,7 +24,12 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
         # Manually create a QgsProject instance and set it in the context
         self.project = QgsProject.instance()
         self.context.setProject(self.project)
-        self.test_data_directory = os.path.join(os.path.dirname(__file__), "test_data")
+        self.test_data_directory = prepare_fixtures()
+        self.output_directory = os.path.join(self.test_data_directory, "output")
+
+        # Create the output directory if it doesn't exist
+        if not os.path.exists(self.output_directory):
+            os.makedirs(self.output_directory)
 
         # Define paths to test layers
         self.safety_layer_path = os.path.join(
@@ -42,20 +48,13 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
                 f"Failed to load safety layer from {self.safety_layer_path}"
             )
 
-        # Define the workflow directory where output files will be saved
-        self.workflow_directory = os.path.join(os.path.dirname(__file__), "output")
-
-        # Create the output directory if it doesn't exist
-        if not os.path.exists(self.workflow_directory):
-            os.makedirs(self.workflow_directory)
-
         # Initialize the processor with test data
         self.processor = SafetyPerCellProcessor(
             output_prefix="test",
             safety_layer=self.safety_layer,
             safety_field="safety",
             cell_size_m=100.0,
-            workflow_directory=self.workflow_directory,
+            workflow_directory=self.output_directory,
             gpkg_path=self.gpkg_path,
             context=self.context,
         )
@@ -70,11 +69,9 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
 
             # Verify if the output raster and VRT files are created
             output_raster = os.path.join(
-                self.workflow_directory, "test_safety_raster_0.tif"
+                self.output_directory, "test_safety_raster_0.tif"
             )
-            output_vrt = os.path.join(
-                self.workflow_directory, "test_safety_combined.vrt"
-            )
+            output_vrt = os.path.join(self.output_directory, "test_safety_combined.vrt")
 
             self.assertTrue(
                 os.path.exists(output_raster), "Output raster was not created."

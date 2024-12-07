@@ -77,3 +77,4 @@ app.py
 geest.tar.gz
 gitlog.txt
 geest/resources/models/prepare_mask_area.model3
+test/output

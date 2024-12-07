@@ -185,6 +185,7 @@ class GeestPlugin:
                         #    log_message(f'Member: {member}, Type: {type(getattr(widget, member))}')
                         shell = widget.console.shell
                         test_dir = "/home/timlinux/dev/python/GEEST2/test"
+                        shell.runCommand("")
                         shell.runCommand("import unittest")
                         shell.runCommand("test_loader = unittest.TestLoader()")
                         shell.runCommand(
@@ -200,6 +201,7 @@ class GeestPlugin:
 for module_name in list(sys.modules.keys()):
     if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
         del sys.modules[module_name]
+
                             """
                         )
 

@@ -1,9 +1,10 @@
 import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsProcessingContext, QgsProject
+from qgis.core import QgsRasterLayer, QgsProcessingContext, QgsProject
 from geest.core.algorithms.raster_reclassification_processor import (
     RasterReclassificationProcessor,
 )
+from utilities_for_testing import prepare_fixtures
 
 
 class TestRasterReclassificationProcessor(unittest.TestCase):
@@ -17,9 +18,8 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         self.context.setProject(self.project)
 
         # Define working directories
-        self.working_directory = os.path.dirname(__file__)
-        self.test_data_directory = os.path.join(self.working_directory, "test_data")
-        self.output_directory = os.path.join(self.working_directory, "output")
+        self.test_data_directory = prepare_fixtures()
+        self.output_directory = os.path.join(self.test_data_directory, "output")
 
         # Create the output directory if it doesn't exist
         if not os.path.exists(self.output_directory):
