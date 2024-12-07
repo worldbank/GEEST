@@ -31,6 +31,7 @@ from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QApplication,
 )
+
 from qgis.core import Qgis, QgsProject
 
 # Import your plugin components here
@@ -145,12 +146,67 @@ class GeestPlugin:
             self.debug_action.triggered.connect(self.debug)
             self.iface.addToolBarIcon(self.debug_action)
 
+            tests_icon = QIcon(resources_path("resources", "run-tests.svg"))
+            self.tests_action = QAction(
+                tests_icon, "Run Tests", self.iface.mainWindow()
+            )
+            self.tests_action.triggered.connect(self.run_tests)
+            self.iface.addToolBarIcon(self.tests_action)
+
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
             self.debug()
 
         self.options_factory = GeestOptionsFactory()
         self.iface.registerOptionsWidgetFactory(self.options_factory)
+
+    def run_tests(self):
+        """Run unit tests in the python console."""
+
+        main_window = self.iface.mainWindow()
+        action = main_window.findChild(QAction, "mActionShowPythonDialog")
+        action.trigger()
+        log_message("Python console opened")
+        for child in main_window.findChildren(QDockWidget, "PythonConsole"):
+            # log_message('Python console dock widget found')
+            # log_message(f'Child object name: {child.objectName()}')
+            if child.objectName() == "PythonConsole":
+                # log_message('Python console dock widget found')
+                child.show()
+                for widget in child.children():
+
+                    widget_class_name = widget.__class__.__name__
+                    # log_message(f'Widget class: {widget_class_name}')
+
+                    if widget_class_name == "PythonConsole":
+                        log_message("Running tests in the Python console")
+                        widget_members = dir(widget.console)
+                        # for member in widget_members:
+                        #    log_message(f'Member: {member}, Type: {type(getattr(widget, member))}')
+                        shell = widget.console.shell
+                        test_dir = "/home/timlinux/dev/python/GEEST2/test"
+                        shell.runCommand("")
+                        shell.runCommand("import unittest")
+                        shell.runCommand("test_loader = unittest.TestLoader()")
+                        shell.runCommand(
+                            f'test_suite = test_loader.discover(start_dir="{test_dir}", pattern="test_*.py")'
+                        )
+                        shell.runCommand(
+                            "test_runner = unittest.TextTestRunner(verbosity=2)"
+                        )
+                        shell.runCommand("test_runner.run(test_suite)")
+                        # Unload test modules
+                        shell.runCommand(
+                            f"""
+for module_name in list(sys.modules.keys()):
+    if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
+        del sys.modules[module_name]
+
+                            """
+                        )
+
+                        log_message("Test modules unloaded")
+                        break
 
     def save_geometry(self) -> None:
         """
@@ -206,6 +262,11 @@ class GeestPlugin:
             self.iface.removeToolBarIcon(self.debug_action)
             self.debug_action.deleteLater()
             self.debug_action = None
+
+        if self.tests_action:
+            self.iface.removeToolBarIcon(self.tests_action)
+            self.tests_action.deleteLater()
+            self.tests_action = None
 
         # Unregister options widget factory
         if self.options_factory:

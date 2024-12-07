@@ -87,11 +87,7 @@ class RasterReclassificationProcessor:
         # Combine the reclassified rasters into a VRT
         output_vrt = self._combine_rasters_to_vrt(temp_rasters)
 
-        log_message(
-            f"Reclassification complete. VRT file saved to {output_vrt}",
-            "RasterReclassificationProcessor",
-            Qgis.Info,
-        )
+        log_message(f"Reclassification complete. VRT file saved to {output_vrt}")
         return output_vrt
 
     def _reproject_and_clip_raster(
@@ -176,9 +172,7 @@ class RasterReclassificationProcessor:
             "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
         )
         log_message(
-            f"Reclassification for area {index} complete. Saved to {reclassified_raster}",
-            tag="Geest",
-            level=Qgis.Info,
+            f"Reclassification for area {index} complete. Saved to {reclassified_raster}"
         )
 
         return reclassified_raster

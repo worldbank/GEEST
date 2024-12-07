@@ -17,8 +17,10 @@ import logging
 import configparser
 
 LOGGER = logging.getLogger("QGIS")
+IS_LOCAL = os.getenv("RUNNING_ON_LOCAL") == "1"
 
 
+@unittest.skipIf(IS_LOCAL, "Skipping test on local PC")
 class TestInit(unittest.TestCase):
     """Test that the plugin init is usable for QGIS.
 

@@ -4,7 +4,9 @@
 
 import sys
 import logging
-
+import os
+import shutil
+import tempfile
 
 LOGGER = logging.getLogger("QGIS")
 QGIS_APP = None  # Static variable used to hold hand to running QGIS app
@@ -60,3 +62,12 @@ def get_qgis_app():
         IFACE = QgisInterface(CANVAS)
 
     return QGIS_APP, CANVAS, IFACE, PARENT
+
+
+def prepare_fixtures():
+    """Return the path to the test data directory."""
+    # Copy all of the test data to a temporary folder firs
+    temp_dir = tempfile.mkdtemp()
+    test_data_dir = os.path.join(os.path.dirname(__file__), "test_data")
+    shutil.copytree(test_data_dir, os.path.join(temp_dir, "test_data"))
+    return os.path.join(temp_dir, "test_data")
