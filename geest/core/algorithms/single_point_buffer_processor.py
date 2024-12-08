@@ -294,7 +294,7 @@ class SinglePointBufferProcessor:
             "DATA_TYPE": 0,
             "INIT": 1,
             "INVERT": False,
-            "EXTRA": f"-a_srs {self.target_crs.authid()}",
+            "EXTRA": f"-a_srs {self.target_crs.authid()} -at",  # Assign all touched pixels
             "OUTPUT": output_path,
         }
 

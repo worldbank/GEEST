@@ -259,6 +259,7 @@ class PointAndPathsProcessor:
             "INPUT": grid_layer,
             "FIELD": "value",
             "EXTENT": bbox.boundingBox(),
+            "EXTRA": "-at",  # All touched pixels
             "OUTPUT": output_path,
         }
         processing.run("gdal:rasterize", params)

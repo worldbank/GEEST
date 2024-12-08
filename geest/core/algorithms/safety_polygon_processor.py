@@ -201,6 +201,7 @@ class SafetyPerCellProcessor:
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()}",
             "NODATA": 255,
             "DATA_TYPE": 0,
+            "EXTRA": "-at",  # Assign all touched pixels
             "OUTPUT": output_path,
         }
         processing.run("gdal:rasterize", params)

@@ -456,7 +456,7 @@ class WorkflowBase(QObject):
         """
         if not input_layer or not input_layer.isValid():
             return False
-        log_message("--- Rasterizing grid")
+        log_message("--- Rasterizing geometry")
         log_message(f"--- bbox {bbox}")
         log_message(f"--- index {index}")
 
@@ -489,7 +489,7 @@ class WorkflowBase(QObject):
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
             "INIT": default_value,  # will set all cells to this value if not otherwise set
             "INVERT": False,
-            "EXTRA": f"-a_srs {self.target_crs.authid()}",
+            "EXTRA": f"-a_srs {self.target_crs.authid()} -at",  # Assign all touched pixels
             "OUTPUT": output_path,
         }
 
@@ -497,9 +497,7 @@ class WorkflowBase(QObject):
 
         processing.run("gdal:rasterize", params)
         log_message(f"Rasterize Parameter: {params}")
-
         log_message(f"Rasterize complete for: {output_path}")
-
         log_message(f"Created raster: {output_path}")
         return output_path
 

@@ -92,7 +92,7 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
             self.assertEqual(stats.minimumValue, 0, "Minimum value should be >= 0.")
             self.assertEqual(stats.maximumValue, 5, "Maximum value should be <= 5.")
             self.assertEqual(
-                stats.mean, 2.4326080111367063, "Mean value should be > 0."
+                stats.mean, 2.4270806284082056, "Mean value should be > 0."
             )
 
         except QgsProcessingException as e:
