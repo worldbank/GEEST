@@ -718,7 +718,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         if len(candidate_ids) == 0:
             raise Exception(
-                f"No candidate cells on boundary of the geometry for tests with working directory: {self.working_dir}"
+                f"No candidate cells on boundary of the geometry: {self.working_dir}"
             )
 
         # Filter candidates by precise geometry intersection
@@ -778,8 +778,24 @@ class StudyAreaProcessingTask(QgsTask):
             f"Added {feature_count} features to the temp layer for mask creation."
         )
 
+        output = processing.run(
+            "native:dissolve",
+            {
+                "INPUT": temp_layer,
+                "FIELD": [],
+                "SEPARATE_DISJOINT": False,
+                "OUTPUT": "TEMPORARY_OUTPUT",
+            },
+        )["OUTPUT"]
+        # get the first feature from the output layer
+        feature = next(output.getFeatures())
+        # get the geometry
+        clip_geom = feature.geometry()
+
         self.save_to_geopackage(
-            layer_name="study_area_clip_polygons", geom=geom, area_name=normalized_name
+            layer_name="study_area_clip_polygons",
+            geom=clip_geom,
+            area_name=normalized_name,
         )
         log_message(f"Created clip polygon: {normalized_name}")
         return

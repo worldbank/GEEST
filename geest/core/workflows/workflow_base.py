@@ -197,7 +197,7 @@ class WorkflowBase(QObject):
 
         area_iterator = AreaIterator(self.gpkg_path)
         try:
-            for index, (current_area, current_bbox, progress) in enumerate(
+            for index, (current_area, clip_area, current_bbox, progress) in enumerate(
                 area_iterator
             ):
                 feedback.pushInfo(
@@ -245,10 +245,10 @@ class WorkflowBase(QObject):
                         index=index,
                     )
 
-                # Multiply the area by its matching mask layer in study_area folder
+                # clip the area by its matching mask layer in study_area geopackage
                 masked_layer = self._mask_raster(
                     raster_path=raster_output,
-                    area_geometry=current_area,
+                    area_geometry=clip_area,
                     index=index,
                 )
                 output_rasters.append(masked_layer)

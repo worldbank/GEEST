@@ -83,7 +83,9 @@ class SinglePointBufferProcessor:
         feedback = QgsProcessingFeedback()
         area_iterator = AreaIterator(self.gpkg_path)
 
-        for index, (current_area, current_bbox, progress) in enumerate(area_iterator):
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
             feedback.pushInfo(f"Processing area {index} with progress {progress:.2f}%")
 
             # Step 1: Select features that intersect with the current area

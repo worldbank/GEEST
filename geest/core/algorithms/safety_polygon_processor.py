@@ -102,7 +102,9 @@ class SafetyPerCellProcessor:
             self.gpkg_path
         )  # Call the iterator from the other file
 
-        for index, (current_area, current_bbox, progress) in enumerate(area_iterator):
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
             feedback.pushInfo(
                 f"Processing area {index + 1} with progress {progress:.2f}%"
             )
