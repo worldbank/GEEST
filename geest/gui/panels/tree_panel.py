@@ -620,7 +620,22 @@ class TreePanel(QWidget):
         table.customContextMenuRequested.connect(
             lambda pos: self.show_context_menu(table, pos)
         )
-
+        log_message("----------------------")
+        log_message("Showing descendant Dimensions.")
+        log_message("----------------------")
+        for child in item.getDescendantDimensions():
+            log_message(child.data(0))
+        log_message("----------------------")
+        log_message("Showing descendant Factors.")
+        log_message("----------------------")
+        for child in item.getDescendantFactors():
+            log_message(child.data(0))
+        log_message("----------------------")
+        log_message("Descendant Indicators:")
+        log_message("----------------------")
+        for child in item.getDescendantIndicators():
+            log_message(child.data(0))
+        log_message("----------------------")
         dialog.exec_()
 
     def show_error_file_popup(self, error_file_content):
@@ -858,23 +873,23 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {parent_group.name()}"
                 )
 
-            # Ensure the layer and its parent groups are visible
-            current_group = parent_group
-            while current_group is not None:
-                current_group.setExpanded(True)  # Expand the group
-                current_group.setItemVisibilityChecked(
-                    True
-                )  # Ensure the group is visible
-                current_group = current_group.parent()
+                # Ensure the layer and its parent groups are visible
+                current_group = parent_group
+                while current_group is not None:
+                    current_group.setExpanded(True)  # Expand the group
+                    current_group.setItemVisibilityChecked(
+                        True
+                    )  # Ensure the group is visible
+                    current_group = current_group.parent()
 
-            # Set the layer itself to be visible
-            layer_tree_layer.setItemVisibilityChecked(True)
+                # Set the layer itself to be visible
+                layer_tree_layer.setItemVisibilityChecked(True)
 
-            log_message(
-                f"Layer {layer.name()} and its parent groups are now visible.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
+                log_message(
+                    f"Layer {layer.name()} and its parent groups are now visible.",
+                    tag="Geest",
+                    level=Qgis.Info,
+                )
 
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
@@ -1016,21 +1031,29 @@ class TreePanel(QWidget):
             self.run_only_incomplete = False
         else:
             self.run_only_incomplete = True
-
-        for i in range(item.childCount()):
-            child_item = item.child(i)
-            if child_item.childCount() > 0:
-                self.run_item(child_item, shift_pressed)
-            # If you change the logic below, dont forget to also
-            # change the logic in _count_workflows_to_run
-            is_complete = child_item.getStatus() == "Workflow Completed"
+        indicators = item.getDescendantIndicators()
+        factors = item.getDescendantFactors()
+        dimensions = item.getDescendantDimensions()
+        for indicator in indicators:
+            is_complete = indicator.getStatus() == "Workflow Completed"
             if not is_complete:
-                self.queue_workflow_task(child_item, child_item.role)
+                self.queue_workflow_task(indicator, indicator.role)
             if is_complete and not self.run_only_incomplete:
-                self.queue_workflow_task(child_item, child_item.role)
-
+                self.queue_workflow_task(indicator, indicator.role)
+        for factor in factors:
+            is_complete = factor.getStatus() == "Workflow Completed"
+            if not is_complete:
+                self.queue_workflow_task(factor, factor.role)
+            if is_complete and not self.run_only_incomplete:
+                self.queue_workflow_task(factor, factor.role)
+        for dimension in dimensions:
+            is_complete = dimension.getStatus() == "Workflow Completed"
+            if not is_complete:
+                self.queue_workflow_task(dimension, dimension.role)
+            if is_complete and not self.run_only_incomplete:
+                self.queue_workflow_task(dimension, dimension.role)
         self.queue_workflow_task(item, item.role)
-        self._count_workflows_to_run(item)
+        self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:

@@ -500,6 +500,42 @@ class JsonTreeItem:
                             self.setAnalysisMode(key)
                             break
 
+    def getDescendantIndicators(self):
+        """Return the list of indicators under this item.
+
+        Recurses through the tree to find all indicators under this item.
+        """
+        indicators = []
+        if self.isIndicator():
+            indicators.append(self)
+        for child in self.childItems:
+            indicators.extend(child.getDescendantIndicators())
+        return indicators
+
+    def getDescendantFactors(self):
+        """Return the list of factors under this item.
+
+        Recurses through the tree to find all factors under this item.
+        """
+        factors = []
+        if self.isFactor():
+            factors.append(self)
+        for child in self.childItems:
+            factors.extend(child.getDescendantFactors())
+        return factors
+
+    def getDescendantDimensions(self):
+        """Return the list of dimensions under this item.
+
+        Recurses through the tree to find all dimensions under this item.
+        """
+        dimensions = []
+        if self.isDimension():
+            dimensions.append(self)
+        for child in self.childItems:
+            dimensions.extend(child.getDescendantDimensions())
+        return dimensions
+
     def getFactorIndicatorGuids(self):
         """Return the list of indicators under this factor."""
         guids = []
