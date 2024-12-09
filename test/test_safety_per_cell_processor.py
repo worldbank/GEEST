@@ -91,7 +91,7 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
             self.assertIsNotNone(stats, "Failed to compute statistics.")
             self.assertEqual(stats.minimumValue, 0, "Minimum value should be >= 0.")
             self.assertEqual(stats.maximumValue, 5, "Maximum value should be <= 5.")
-            self.assertEqual(
+            self.assertAlmostEqual(
                 stats.mean, 2.4270806284082056, "Mean value should be > 0."
             )
 
