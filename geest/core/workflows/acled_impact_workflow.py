@@ -33,15 +33,17 @@ class AcledImpactWorkflow(WorkflowBase):
         cell_size_m: float,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
         :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context
+            item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.csv_file = self.attributes.get("use_csv_to_point_layer_csv_file", "")
         if not self.csv_file:
@@ -57,6 +59,7 @@ class AcledImpactWorkflow(WorkflowBase):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -79,7 +82,7 @@ class AcledImpactWorkflow(WorkflowBase):
         # Step 2: Assign values based on event_type
         scored_layer = self._assign_scores(buffered_layer)
 
-        # Step 3: Dissolve and remove overlapping areas, keeping areas withe the lowest value
+        # Step 3: Dissolve and remove overlapping areas, keeping areas with the lowest value
         dissolved_layer = self._overlay_analysis(scored_layer)
 
         # Step 4: Rasterize the dissolved layer

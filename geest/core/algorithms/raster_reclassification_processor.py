@@ -63,7 +63,7 @@ class RasterReclassificationProcessor:
         temp_rasters = []
 
         # Iterate over each area from the AreaIterator
-        for index, (current_area, current_bbox, progress) in enumerate(
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
             self.area_iterator
         ):
             feedback.pushInfo(

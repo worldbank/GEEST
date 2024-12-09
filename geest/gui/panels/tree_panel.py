@@ -858,6 +858,24 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {parent_group.name()}"
                 )
 
+            # Ensure the layer and its parent groups are visible
+            current_group = parent_group
+            while current_group is not None:
+                current_group.setExpanded(True)  # Expand the group
+                current_group.setItemVisibilityChecked(
+                    True
+                )  # Ensure the group is visible
+                current_group = current_group.parent()
+
+            # Set the layer itself to be visible
+            layer_tree_layer.setItemVisibilityChecked(True)
+
+            log_message(
+                f"Layer {layer.name()} and its parent groups are now visible.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
         dialog = AnalysisAggregationDialog(analysis_item, parent=self)

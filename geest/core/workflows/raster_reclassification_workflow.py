@@ -27,16 +27,17 @@ class RasterReclassificationWorkflow(WorkflowBase):
         cell_size_m: float,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param item: Item containing workflow parameters.
-        :param cell_size_m: Cell size in meters.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context
+            item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_environmental_hazards"
 
@@ -181,6 +182,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
@@ -196,6 +198,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         :return: Path to the reclassified raster.
         """
         _ = current_area  # Unused in this analysis
+        __ = clip_area  # Unused in this analysis
 
         # Apply the reclassification rules
         reclassified_raster = self._apply_reclassification(
@@ -237,7 +240,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
 
         clip_params = {
             "INPUT": reclass,
-            "MASK": self.areas_layer,
+            "MASK": self.clip_areas_layer,
             "CROP_TO_CUTLINE": True,
             "KEEP_RESOLUTION": True,
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
@@ -260,6 +263,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -269,6 +273,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         Must be implemented by subclasses.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Extended grid matched polygon for the study area.
         :current_bbox: Bounding box of the above area.
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
@@ -280,6 +285,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):
@@ -287,6 +293,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         Executes the actual workflow logic for a single area using an aggregate.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Extended grid matched polygon for the study area.
         :current_bbox: Bounding box of the above area.
         :index: Index of the current area.
 

@@ -102,7 +102,9 @@ class SafetyPerCellProcessor:
             self.gpkg_path
         )  # Call the iterator from the other file
 
-        for index, (current_area, current_bbox, progress) in enumerate(area_iterator):
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
             feedback.pushInfo(
                 f"Processing area {index + 1} with progress {progress:.2f}%"
             )
@@ -201,6 +203,7 @@ class SafetyPerCellProcessor:
             "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()}",
             "NODATA": 255,
             "DATA_TYPE": 0,
+            "EXTRA": "-at",  # Assign all touched pixels
             "OUTPUT": output_path,
         }
         processing.run("gdal:rasterize", params)

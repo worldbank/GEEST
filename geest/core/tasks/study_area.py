@@ -23,6 +23,7 @@ from qgis.core import (
     QgsVectorFileWriter,
     QgsFields,
     QgsCoordinateTransformContext,
+    QgsWkbTypes,
     Qgis,
 )
 from qgis.PyQt.QtCore import QVariant
@@ -316,25 +317,16 @@ class StudyAreaProcessingTask(QgsTask):
         )
         # Process the geometry based on the selected mode
         if self.mode == "vector":
-            log_message(
-                f"Creating vector grid for {normalized_name}.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
+            log_message(f"Creating vector grid for {normalized_name}.")
             self.create_and_save_grid(geom, bbox)
         elif self.mode == "raster":
-            log_message(
-                f"Creating raster mask for {normalized_name}.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            self.create_raster_mask(geom, bbox, normalized_name)
-            log_message(
-                f"Creating vector grid for {normalized_name}.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
+            # Grid must be made first as it is used when creating the clipping vector!
+            log_message(f"Creating vector grid for {normalized_name}.")
             self.create_and_save_grid(geom, bbox)
+            log_message(f"Creating clip polygon for {normalized_name}.")
+            self.create_clip_polygon(geom, bbox, normalized_name)
+            log_message(f"Creating raster mask for {normalized_name}.")
+            self.create_raster_mask(geom, bbox, normalized_name)
 
         self.counter += 1
 
@@ -682,15 +674,143 @@ class StudyAreaProcessingTask(QgsTask):
 
         log_message(f"Grid creation completed. Total features written: {feature_id}.")
 
+    def create_clip_polygon(
+        self, geom: QgsGeometry, aligned_box: QgsRectangle, normalized_name: str
+    ) -> str:
+        """
+        Creates a polygon like the study area geometry, but with each
+        area extended to completely cover the grid cells that intersect with the geometry.
+
+        We do this by combining the area polygon and all the cells that occur along
+        its edge. This is necessary because gdalwarp clip only includes cells that
+        have 50% coverage or more and it has no -at option like gdalrasterize has.
+
+        The cells and the original area polygon are dissolved into a single polygon
+        representing the outer boundary of all the edge cells and the original area polygon.
+
+        :param geom: Geometry to be processed.
+        :param aligned_box: Aligned bounding box for the geometry.
+        :param normalized_name: Name for the output area
+
+        :return: None.
+        """
+        # Create a memory layer to hold the geometry
+        temp_layer = QgsVectorLayer(
+            f"Polygon?crs={self.output_crs.authid()}", "temp_mask_layer", "memory"
+        )
+        temp_layer_data_provider = temp_layer.dataProvider()
+        # get the geometry as a linestring
+        linestring = geom.coerceToType(QgsWkbTypes.LineString)[0]
+        # The linestring and the original polygon geom should have the same bbox
+        if linestring.boundingBox() != geom.boundingBox():
+            raise Exception("Bounding boxes of linestring and polygon do not match.")
+
+        # we are going to select all grid cells that intersect the linestring
+        # so that we can ensure gdal rasterize does not miss any land areas
+        gpkg_layer_path = f"{self.gpkg_path}|layername=study_area_grid"
+        gpkg_layer = QgsVectorLayer(gpkg_layer_path, "study_area_grid", "ogr")
+
+        # Create a spatial index for efficient spatial querying
+        spatial_index = QgsSpatialIndex(gpkg_layer.getFeatures())
+
+        # Get feature IDs of candidates that may intersect with the multiline geometry
+        candidate_ids = spatial_index.intersects(geom.boundingBox())
+
+        if len(candidate_ids) == 0:
+            raise Exception(
+                f"No candidate cells on boundary of the geometry: {self.working_dir}"
+            )
+
+        # Filter candidates by precise geometry intersection
+        intersecting_ids = []
+        for feature_id in candidate_ids:
+            feature = gpkg_layer.getFeature(feature_id)
+            if feature.geometry().intersects(linestring):
+                intersecting_ids.append(feature_id)
+
+        if len(intersecting_ids) == 0:
+            raise Exception("No cells on boundary of the geometry")
+        # Select intersecting features in the layer
+        gpkg_layer.selectByIds(intersecting_ids)
+
+        log_message(
+            f"Selected {len(intersecting_ids)} features that intersect with the multiline geometry."
+        )
+
+        # Define a field to store the area name
+        temp_layer_data_provider.addAttributes(
+            [QgsField(self.field_name, QVariant.String)]
+        )
+        temp_layer.updateFields()
+
+        # Add the geometry to the memory layer
+        temp_feature = QgsFeature()
+        temp_feature.setGeometry(geom)
+        temp_feature.setAttributes(
+            [normalized_name]
+        )  # Setting an arbitrary value for the mask
+
+        # Add the main geometry for this part of the country
+        temp_layer_data_provider.addFeature(temp_feature)
+
+        # Now all the grid cells get added that intersect with the geometry border
+        # since gdal rasterize only includes cells that have 50% coverage or more
+        # by the looks of things.
+        selected_features = gpkg_layer.selectedFeatures()
+        new_features = []
+
+        for feature in selected_features:
+            # Create a new feature for emp_layer
+            new_feature = QgsFeature()
+            new_feature.setGeometry(feature.geometry())
+            new_feature.setAttributes([normalized_name])
+            new_features.append(new_feature)
+
+        # Add the features to temp_layer
+        temp_layer_data_provider.addFeatures(new_features)
+
+        # commit all changes
+        temp_layer.updateExtents()
+        temp_layer.commitChanges()
+        # check how many features we have
+        feature_count = temp_layer.featureCount()
+        log_message(
+            f"Added {feature_count} features to the temp layer for mask creation."
+        )
+
+        output = processing.run(
+            "native:dissolve",
+            {
+                "INPUT": temp_layer,
+                "FIELD": [],
+                "SEPARATE_DISJOINT": False,
+                "OUTPUT": "TEMPORARY_OUTPUT",
+            },
+        )["OUTPUT"]
+        # get the first feature from the output layer
+        feature = next(output.getFeatures())
+        # get the geometry
+        clip_geom = feature.geometry()
+
+        self.save_to_geopackage(
+            layer_name="study_area_clip_polygons",
+            geom=clip_geom,
+            area_name=normalized_name,
+        )
+        log_message(f"Created clip polygon: {normalized_name}")
+        return
+
     def create_raster_mask(
         self, geom: QgsGeometry, aligned_box: QgsRectangle, mask_name: str
-    ) -> None:
+    ) -> str:
         """
         Creates a 1-bit raster mask for a single geometry.
 
         :param geom: Geometry to be rasterized.
         :param aligned_box: Aligned bounding box for the geometry.
         :param mask_name: Name for the output raster file.
+
+        :return: The path to the created raster mask.
         """
         mask_filepath = os.path.join(self.working_dir, "study_area", f"{mask_name}.tif")
 
@@ -699,11 +819,6 @@ class StudyAreaProcessingTask(QgsTask):
             f"Polygon?crs={self.output_crs.authid()}", "temp_mask_layer", "memory"
         )
         temp_layer_data_provider = temp_layer.dataProvider()
-        # get the geometry as a linestring
-        linestring = geom.asMultiPolyline()[0]
-        # select all grid cells that intersect the linestring
-        gpkg_layer_path = f"{self.gpkg_path}|layername=study_area_grid"
-        gpkg_layer = QgsVectorLayer(gpkg_layer_path, "study_area_grid", "ogr")
 
         # Define a field to store the mask value
         temp_layer_data_provider.addAttributes(
@@ -715,7 +830,13 @@ class StudyAreaProcessingTask(QgsTask):
         temp_feature = QgsFeature()
         temp_feature.setGeometry(geom)
         temp_feature.setAttributes(["1"])  # Setting an arbitrary value for the mask
+
+        # Add the main geometry for this part of the country
         temp_layer_data_provider.addFeature(temp_feature)
+
+        # commit all changes
+        temp_layer.updateExtents()
+        temp_layer.commitChanges()
 
         # Ensure resolution parameters are properly formatted as float values
         x_res = self.cell_size_m  # 100m pixel size in X direction
@@ -737,11 +858,12 @@ class StudyAreaProcessingTask(QgsTask):
             "DATA_TYPE": 0,  # byte
             "INIT": None,
             "INVERT": False,
-            "EXTRA": "-co NBITS=1",
+            "EXTRA": "-co NBITS=1 -at",  # -at is for all touched cells
             "OUTPUT": mask_filepath,
         }
         processing.run("gdal:rasterize", params)
         log_message(f"Created raster mask: {mask_filepath}")
+        return mask_filepath
 
     def calculate_utm_zone(self, bbox: QgsRectangle) -> int:
         """

@@ -28,16 +28,17 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         cell_size_m: float,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param item: Item containing workflow parameters.
-        :param cell_size_m: Cell size in meters.
+        :param attributes: Item containing workflow parameters.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context
+            item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.index_score = float((self.attributes.get("index_score", 0) / 100) * 5)
         self.features_layer = True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
@@ -46,6 +47,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -68,7 +70,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
 
         # Create a scored boundary layer filtered by current_area
         scored_layer = self.create_scored_boundary_layer(
-            current_area=current_area,
+            clip_area=clip_area,
             index=index,
         )
 
@@ -85,12 +87,11 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         return raster_output
 
     def create_scored_boundary_layer(
-        self, current_area: QgsGeometry, index: int
+        self, clip_area: QgsGeometry, index: int
     ) -> QgsVectorLayer:
         """
         Create a scored boundary layer, filtering features by the current_area.
 
-        :param current_area: The geometry of the current processing area.
         :param index: The index of the current processing area.
         :return: A vector layer with a 'score' attribute.
         """
@@ -107,7 +108,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         subset_layer.updateFields()
 
         feature = QgsFeature(subset_layer.fields())
-        feature.setGeometry(current_area)
+        feature.setGeometry(clip_area)
         score_field_index = subset_layer.fields().indexFromName("score")
         feature.setAttribute(score_field_index, self.index_score)
         features = [feature]

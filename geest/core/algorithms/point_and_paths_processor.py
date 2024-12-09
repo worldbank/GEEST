@@ -87,7 +87,9 @@ class PointAndPathsProcessor:
         area_iterator = AreaIterator(gpkg_path)
 
         # Iterate over areas and perform the analysis for each
-        for index, (current_area, current_bbox, progress) in enumerate(area_iterator):
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
             feedback.pushInfo(
                 f"Processing area {index+1} with progress {progress:.2f}%"
             )
@@ -259,6 +261,7 @@ class PointAndPathsProcessor:
             "INPUT": grid_layer,
             "FIELD": "value",
             "EXTENT": bbox.boundingBox(),
+            "EXTRA": "-at",  # All touched pixels
             "OUTPUT": output_path,
         }
         processing.run("gdal:rasterize", params)

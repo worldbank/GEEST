@@ -42,6 +42,7 @@ class WorkflowBase(QObject):
         cell_size_m: 100.0,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
@@ -49,6 +50,7 @@ class WorkflowBase(QObject):
         :param cell_size_m: The cell size in meters for the analysis.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__()
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
@@ -59,7 +61,10 @@ class WorkflowBase(QObject):
         # This is set in the setup panel
         self.settings = QSettings()
         # This is the top level folder for work files
-        self.working_directory = self.settings.value("last_working_directory", "")
+        if working_directory:
+            self.workflow_directory = working_directory
+        else:
+            self.working_directory = self.settings.value("last_working_directory", "")
         if not self.working_directory:
             raise ValueError("Working directory not set.")
         # This is the lower level directory for this workflow
@@ -75,6 +80,11 @@ class WorkflowBase(QObject):
         self.areas_layer = QgsVectorLayer(
             f"{self.gpkg_path}|layername=study_area_polygons",
             "study_area_polygons",
+            "ogr",
+        )
+        self.clip_areas_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_clip_polygons",
+            "study_area_clip_polygons",
             "ogr",
         )
         self.grid_layer = QgsVectorLayer(
@@ -100,6 +110,7 @@ class WorkflowBase(QObject):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -109,6 +120,7 @@ class WorkflowBase(QObject):
         Must be implemented by subclasses.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Current area but expanded to coincide with grid cell boundaries.
         :current_bbox: Bounding box of the above area.
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
@@ -192,7 +204,7 @@ class WorkflowBase(QObject):
 
         area_iterator = AreaIterator(self.gpkg_path)
         try:
-            for index, (current_area, current_bbox, progress) in enumerate(
+            for index, (current_area, clip_area, current_bbox, progress) in enumerate(
                 area_iterator
             ):
                 feedback.pushInfo(
@@ -217,6 +229,7 @@ class WorkflowBase(QObject):
                     # Step 2: Process the area features - work happens in concrete class
                     raster_output = self._process_features_for_area(
                         current_area=current_area,
+                        clip_area=clip_area,
                         current_bbox=current_bbox,
                         area_features=area_features,
                         index=index,
@@ -229,6 +242,7 @@ class WorkflowBase(QObject):
                     )
                     raster_output = self._process_raster_for_area(
                         current_area=current_area,
+                        clip_area=clip_area,
                         current_bbox=current_bbox,
                         area_raster=area_raster,
                         index=index,
@@ -240,10 +254,10 @@ class WorkflowBase(QObject):
                         index=index,
                     )
 
-                # Multiply the area by its matching mask layer in study_area folder
+                # clip the area by its matching mask layer in study_area geopackage
                 masked_layer = self._mask_raster(
                     raster_path=raster_output,
-                    area_geometry=current_area,
+                    area_geometry=clip_area,
                     index=index,
                 )
                 output_rasters.append(masked_layer)
@@ -451,7 +465,7 @@ class WorkflowBase(QObject):
         """
         if not input_layer or not input_layer.isValid():
             return False
-        log_message("--- Rasterizing grid")
+        log_message("--- Rasterizing geometry")
         log_message(f"--- bbox {bbox}")
         log_message(f"--- index {index}")
 
@@ -484,7 +498,7 @@ class WorkflowBase(QObject):
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
             "INIT": default_value,  # will set all cells to this value if not otherwise set
             "INVERT": False,
-            "EXTRA": f"-a_srs {self.target_crs.authid()}",
+            "EXTRA": f"-a_srs {self.target_crs.authid()} -at",  # Assign all touched pixels
             "OUTPUT": output_path,
         }
 
@@ -492,9 +506,7 @@ class WorkflowBase(QObject):
 
         processing.run("gdal:rasterize", params)
         log_message(f"Rasterize Parameter: {params}")
-
         log_message(f"Rasterize complete for: {output_path}")
-
         log_message(f"Created raster: {output_path}")
         return output_path
 
