@@ -82,7 +82,12 @@ class TestJsonTreeItem(unittest.TestCase):
         self.assertFalse(item.is_visible())
 
         # Test status
-        self.assertTrue(item.getStatus() == "WRITE TOOL TIP", msg=item.getStatus())
+        expected_status = "WRITE TOOL TIP"
+        status = item.getStatus()
+        self.assertTrue(
+            status == expected_status,
+            msg=f"Expected status of '{status}', got '{expected_status}'",
+        )
 
     def test_json_tree_item_append_child(self):
         """Test appending child items."""
