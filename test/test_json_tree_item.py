@@ -84,8 +84,9 @@ class TestJsonTreeItem(unittest.TestCase):
         # Test status
         expected_status = "WRITE TOOL TIP"
         status = item.getStatus()
-        self.assertTrue(
-            expected_status == status,
+        self.assertIs(
+            expected_status,
+            status,
             msg=f"Expected status of '{status}', got '{expected_status}' {dir(item)}",
         )
 
