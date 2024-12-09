@@ -53,7 +53,7 @@ class AreaIterator:
             f"{gpkg_path}|layername=study_area_polygons", "study_area_polygons", "ogr"
         )
         self.clip_polygon_layer: QgsVectorLayer = QgsVectorLayer(
-            f"{gpkg_path}|layername=study_area_polygons",
+            f"{gpkg_path}|layername=study_area_clip_polygons",
             "study_area_clip_polygons",
             "ogr",
         )
