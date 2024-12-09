@@ -383,7 +383,7 @@ class JsonTreeItem:
             if verbose_mode:
                 log_message(f"Error getting status: {e}", level=Qgis.Warning)
                 log_message(traceback.format_exc(), level=Qgis.Warning)
-                return "WRITE TOOL TIP"
+            return f"Status Failed - {e}"
 
     def getFont(self):
         """Retrieve the appropriate font for the item based on its role."""
