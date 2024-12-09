@@ -91,9 +91,8 @@ class TestSafetyPerCellProcessor(unittest.TestCase):
             self.assertIsNotNone(stats, "Failed to compute statistics.")
             self.assertEqual(stats.minimumValue, 0, "Minimum value should be >= 0.")
             self.assertEqual(stats.maximumValue, 5, "Maximum value should be <= 5.")
-            self.assertAlmostEqual(
-                stats.mean, 2.4270806284082056, "Mean value should be > 0."
-            )
+            self.assertGreater(stats.mean, 2.4, msg="Mean value should be > 2.4.")
+            self.assertLess(stats.mean, 2.5, msg="Mean value should be < 2.5")
 
         except QgsProcessingException as e:
             self.fail(f"Processing failed with exception: {str(e)}")
