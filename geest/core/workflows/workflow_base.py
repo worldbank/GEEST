@@ -105,6 +105,7 @@ class WorkflowBase(QObject):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -114,6 +115,7 @@ class WorkflowBase(QObject):
         Must be implemented by subclasses.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Current area but expanded to coincide with grid cell boundaries.
         :current_bbox: Bounding box of the above area.
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
@@ -222,6 +224,7 @@ class WorkflowBase(QObject):
                     # Step 2: Process the area features - work happens in concrete class
                     raster_output = self._process_features_for_area(
                         current_area=current_area,
+                        clip_area=clip_area,
                         current_bbox=current_bbox,
                         area_features=area_features,
                         index=index,

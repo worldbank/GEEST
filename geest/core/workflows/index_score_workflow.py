@@ -47,6 +47,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -70,6 +71,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Create a scored boundary layer filtered by current_area
         scored_layer = self.create_scored_boundary_layer(
             current_area=current_area,
+            clip_area=clip_area,
             index=index,
         )
 
@@ -86,7 +88,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         return raster_output
 
     def create_scored_boundary_layer(
-        self, current_area: QgsGeometry, index: int
+        self, current_area: QgsGeometry, clip_area: QgsGeometry, index: int
     ) -> QgsVectorLayer:
         """
         Create a scored boundary layer, filtering features by the current_area.
