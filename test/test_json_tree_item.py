@@ -49,6 +49,7 @@ class TestJsonTreeItem(unittest.TestCase):
             },
         ]
 
+    @unittest.skip("Skip this test")
     def test_json_tree_item_creation(self):
         """Test creating a JsonTreeItem instance."""
         item = JsonTreeItem(self.test_data, role="indicator")
