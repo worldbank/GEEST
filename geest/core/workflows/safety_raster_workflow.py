@@ -62,6 +62,7 @@ class SafetyRasterWorkflow(WorkflowBase):
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,

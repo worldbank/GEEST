@@ -68,6 +68,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,

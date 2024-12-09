@@ -82,6 +82,11 @@ class WorkflowBase(QObject):
             "study_area_polygons",
             "ogr",
         )
+        self.clip_areas_layer = QgsVectorLayer(
+            f"{self.gpkg_path}|layername=study_area_clip_polygons",
+            "study_area_clip_polygons",
+            "ogr",
+        )
         self.grid_layer = QgsVectorLayer(
             f"{self.gpkg_path}|layername=study_area_grid", "study_area_grid", "ogr"
         )
@@ -237,6 +242,7 @@ class WorkflowBase(QObject):
                     )
                     raster_output = self._process_raster_for_area(
                         current_area=current_area,
+                        clip_area=clip_area,
                         current_bbox=current_bbox,
                         area_raster=area_raster,
                         index=index,

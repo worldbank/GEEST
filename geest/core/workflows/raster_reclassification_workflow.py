@@ -182,6 +182,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
@@ -197,6 +198,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         :return: Path to the reclassified raster.
         """
         _ = current_area  # Unused in this analysis
+        __ = clip_area  # Unused in this analysis
 
         # Apply the reclassification rules
         reclassified_raster = self._apply_reclassification(
@@ -238,7 +240,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
 
         clip_params = {
             "INPUT": reclass,
-            "MASK": self.areas_layer,
+            "MASK": self.clip_areas_layer,
             "CROP_TO_CUTLINE": True,
             "KEEP_RESOLUTION": True,
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
@@ -261,6 +263,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
@@ -270,6 +273,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         Must be implemented by subclasses.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Extended grid matched polygon for the study area.
         :current_bbox: Bounding box of the above area.
         :area_features: A vector layer of features to analyse that includes only features in the study area.
         :index: Iteration / number of area being processed.
@@ -281,6 +285,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):
@@ -288,6 +293,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         Executes the actual workflow logic for a single area using an aggregate.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Extended grid matched polygon for the study area.
         :current_bbox: Bounding box of the above area.
         :index: Index of the current area.
 

@@ -136,12 +136,13 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_features: QgsVectorLayer,
         index: int,
     ) -> str:
         """
-        Executes the actual workflow logic for a single area.
+        Executes the actual workflow logic for0 a single area.
         Must be implemented by subclasses.
 
         :current_area: Current polygon from our study area.

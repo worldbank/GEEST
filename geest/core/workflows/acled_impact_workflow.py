@@ -82,7 +82,7 @@ class AcledImpactWorkflow(WorkflowBase):
         # Step 2: Assign values based on event_type
         scored_layer = self._assign_scores(buffered_layer)
 
-        # Step 3: Dissolve and remove overlapping areas, keeping areas withe the lowest value
+        # Step 3: Dissolve and remove overlapping areas, keeping areas with the lowest value
         dissolved_layer = self._overlay_analysis(scored_layer)
 
         # Step 4: Rasterize the dissolved layer
