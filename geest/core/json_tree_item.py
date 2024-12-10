@@ -500,38 +500,55 @@ class JsonTreeItem:
                             self.setAnalysisMode(key)
                             break
 
-    def getDescendantIndicators(self):
+    def getDescendantIndicators(self, ignore_completed=False, ignore_disabled=True):
         """Return the list of indicators under this item.
 
         Recurses through the tree to find all indicators under this item.
+
+        :param ignore_completed: If True, only return indicators that are not completed.
+        :param ignore_disabled: If True, only return indicators that are not disabled.
+
         """
         indicators = []
         if self.isIndicator():
-            indicators.append(self)
+            if self.getStatus() != "Completed successfully" or ignore_completed:
+                if self.getStatus() != "Excluded from analysis" or not ignore_disabled:
+                    indicators.append(self)
         for child in self.childItems:
             indicators.extend(child.getDescendantIndicators())
         return indicators
 
-    def getDescendantFactors(self):
+    def getDescendantFactors(self, ignore_completed=False, ignore_disabled=True):
         """Return the list of factors under this item.
 
         Recurses through the tree to find all factors under this item.
+
+        :param ignore_completed: If True, only return factors that are not completed.
+        :param ignore_disabled: If True, only return factors that are not disabled.
         """
         factors = []
         if self.isFactor():
-            factors.append(self)
+            if self.getStatus() != "Completed successfully" or ignore_completed:
+                if self.getStatus() != "Excluded from analysis" or not ignore_disabled:
+                    factors.append(self)
         for child in self.childItems:
             factors.extend(child.getDescendantFactors())
         return factors
 
-    def getDescendantDimensions(self):
+    def getDescendantDimensions(self, ignore_completed=False, ignore_disabled=True):
         """Return the list of dimensions under this item.
 
         Recurses through the tree to find all dimensions under this item.
+
+        :param ignore_completed: If True, only return dimensions that are not completed.
+        :param ignore_disabled: If True, only return dimensions that are not disabled.
+        result_file
         """
         dimensions = []
         if self.isDimension():
-            dimensions.append(self)
+            if self.getStatus() != "Completed successfully" or ignore_completed:
+                if self.getStatus() != "Excluded from analysis" or not ignore_disabled:
+                    dimensions.append(self)
         for child in self.childItems:
             dimensions.extend(child.getDescendantDimensions())
         return dimensions

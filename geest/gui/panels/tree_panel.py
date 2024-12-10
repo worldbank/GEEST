@@ -991,17 +991,13 @@ class TreePanel(QWidget):
         attributes = item.attributes()
         if attributes.get("result_file", None) and self.run_only_incomplete:
             return
-        if role == item.role and role == "indicator":
-            task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "factor":
             attributes["analysis_mode"] = "factor_aggregation"
-            task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "dimension":
             attributes["analysis_mode"] = "dimension_aggregation"
-            task = self.queue_manager.add_workflow(item, cell_size_m)
         if role == item.role and role == "analysis":
             attributes["analysis_mode"] = "analysis_aggregation"
-            task = self.queue_manager.add_workflow(item, cell_size_m)
+        task = self.queue_manager.add_workflow(item, cell_size_m)
         if task is None:
             return
 
@@ -1031,27 +1027,19 @@ class TreePanel(QWidget):
             self.run_only_incomplete = False
         else:
             self.run_only_incomplete = True
-        indicators = item.getDescendantIndicators()
-        factors = item.getDescendantFactors()
-        dimensions = item.getDescendantDimensions()
+        indicators = item.getDescendantIndicators(
+            ignore_completed=self.run_only_incomplete
+        )
+        factors = item.getDescendantFactors(ignore_completed=self.run_only_incomplete)
+        dimensions = item.getDescendantDimensions(
+            ignore_completed=self.run_only_incomplete
+        )
         for indicator in indicators:
-            is_complete = indicator.getStatus() == "Workflow Completed"
-            if not is_complete:
-                self.queue_workflow_task(indicator, indicator.role)
-            if is_complete and not self.run_only_incomplete:
-                self.queue_workflow_task(indicator, indicator.role)
+            self.queue_workflow_task(indicator, indicator.role)
         for factor in factors:
-            is_complete = factor.getStatus() == "Workflow Completed"
-            if not is_complete:
-                self.queue_workflow_task(factor, factor.role)
-            if is_complete and not self.run_only_incomplete:
-                self.queue_workflow_task(factor, factor.role)
+            self.queue_workflow_task(factor, factor.role)
         for dimension in dimensions:
-            is_complete = dimension.getStatus() == "Workflow Completed"
-            if not is_complete:
-                self.queue_workflow_task(dimension, dimension.role)
-            if is_complete and not self.run_only_incomplete:
-                self.queue_workflow_task(dimension, dimension.role)
+            self.queue_workflow_task(dimension, dimension.role)
         self.queue_workflow_task(item, item.role)
         self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
 
