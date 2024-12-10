@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from logging import getLogger
 from typing import Union, Dict, List
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -221,6 +222,28 @@ class TreePanel(QWidget):
 
         :param parent_item: The parent item to process. If none, start from the root.
         """
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setWindowTitle("Clear Workflows")
+        msg_box.setText(
+            f"This action will DELETE all files and folders in the working directory ({self.working_directory}). Do you want to continue?"
+        )
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        open_folder_button = msg_box.addButton("Open Folder", QMessageBox.ActionRole)
+        msg_box.setDefaultButton(QMessageBox.No)
+
+        reply = msg_box.exec_()
+
+        if msg_box.clickedButton() == open_folder_button:
+            if self.working_directory:
+                if os.name == "nt":
+                    os.startfile(self.working_directory)
+                elif os.name == "posix":
+                    os.system(f'xdg-open "{self.working_directory}"')
+                return
+
+        if reply == QMessageBox.No:
+            return
         self.run_only_incomplete = False
         # Remove every file in self.working_directory except
         # mode.json and the study_area folder
@@ -413,6 +436,7 @@ class TreePanel(QWidget):
 
         run_item_action = QAction("Run Item Workflow", self)
 
+        # If shift is pressed, change the text to "Rerun Item Workflow"
         def update_action_text():
             text = (
                 "Rerun Item Workflow"
@@ -452,6 +476,16 @@ class TreePanel(QWidget):
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
+
+            open_log_file_action = QAction("Open Log File", self)
+            open_log_file_action.triggered.connect(self.open_log_file)
+            menu.addAction(open_log_file_action)
+            open_log_file_action.triggered.connect(self.open_log_file)
+            menu.addAction(open_log_file_action)
+
+            open_working_directory_action = QAction("Open Working Directory", self)
+            open_working_directory_action.triggered.connect(self.open_working_directory)
+            menu.addAction(open_working_directory_action)
 
         # Check the role of the item directly from the stored role
         if item.role == "dimension":
@@ -527,6 +561,33 @@ class TreePanel(QWidget):
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+    def open_working_directory(self):
+        """Open the working directory in the file explorer."""
+        if self.working_directory:
+            if os.name == "nt":
+                os.startfile(self.working_directory)
+            elif os.name == "posix":
+                os.system(f'xdg-open "{self.working_directory}"')
+        else:
+            QMessageBox.warning(
+                self, "No Working Directory", "The working directory is not set."
+            )
+
+    def open_log_file(self):
+        """Open the log file in the default text editor."""
+        logger = getLogger()
+        log_file_path = logger.handlers[0].baseFilename
+
+        if os.path.exists(log_file_path):
+            if os.name == "nt":
+                os.startfile(log_file_path)
+            elif os.name == "posix":
+                os.system(f'xdg-open "{log_file_path}"')
+        else:
+            QMessageBox.warning(
+                self, "Log File Not Found", "The log file does not exist."
+            )
 
     def disable_item(self, item):
         """Disable the item and its children."""
