@@ -86,8 +86,24 @@ class JsonTreeItem:
     def child(self, row):
         return self.childItems[row]
 
-    def childCount(self):
-        return len(self.childItems)
+    def childCount(self, recursive=False):
+        """Count the number of children of this item.
+
+        If the recursive flag is set to True, count all descendants.
+
+        Args:
+            recursive (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+        """
+        if not recursive:
+            return len(self.childItems)
+        else:
+            count = len(self.childItems)
+            for child in self.childItems:
+                count += child.childCount(recursive=True)
+            return count
 
     def columnCount(self):
         return len(self.itemData)
@@ -126,10 +142,15 @@ class JsonTreeItem:
     def isAnalysis(self):
         return self.role == "analysis"
 
-    def clear(self):
+    def clear(self, recursive=False):
         """
         Mark the item as not run, keeping any configurations made
+
+        :param recursive: If True, clear all children as well
         """
+        if recursive:
+            for child in self.childItems:
+                child.clear(recursive)
         data = self.attributes()
         data["result"] = "Not Run"
         data["result_file"] = ""
