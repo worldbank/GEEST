@@ -1081,6 +1081,12 @@ class TreePanel(QWidget):
         self.child_movie = QMovie(resources_path("resources", "throbber.gif"))
         self.parent_movie = QMovie(resources_path("resources", "throbber.gif"))
 
+        # If this is an indicator, caclulate height for parent in case the indicator is hidden
+        if item.role == "indicator":
+            parent_item = item.parent()
+            parent_index = self.model.itemIndex(parent_item)
+            row_height = self.treeView.rowHeight(parent_index)
+
         # Scale movies
         self.child_movie.setScaledSize(
             self.child_movie.currentPixmap()
