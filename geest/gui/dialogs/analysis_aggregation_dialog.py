@@ -16,9 +16,10 @@ from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QWidget,
     QHBoxLayout,
+    QSpacerItem,
 )
-from qgis.PyQt.QtGui import QPixmap
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QPixmap, QDesktopServices
+from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.core import Qgis
 from geest.utilities import (
     resources_path,
@@ -47,7 +48,7 @@ class AnalysisAggregationDialog(QDialog):
 
         # Title label
         self.title_label = QLabel(
-            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
+            "The Gender Enabling Environments Spatial Tool",
             self,
         )
         self.title_label.setWordWrap(True)
@@ -179,6 +180,33 @@ class AnalysisAggregationDialog(QDialog):
 
         layout.addWidget(self.table)
 
+        help_layout = QHBoxLayout()
+        help_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
+        self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
+        self.help_icon = self.help_icon.scaledToWidth(20)
+        self.help_label_icon = QLabel()
+        self.help_label_icon.setPixmap(self.help_icon)
+        self.help_label_icon.setScaledContents(True)
+        self.help_label_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.help_label_icon.setMaximumWidth(20)
+        self.help_label_icon.setAlignment(Qt.AlignRight)
+        help_layout.addWidget(self.help_label_icon)
+
+        self.help_label = QLabel(
+            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
+        )
+        self.help_label.setOpenExternalLinks(True)
+        self.help_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.help_label)
+        self.help_label.linkActivated.connect(self.open_link_in_browser)
+        help_layout.addWidget(self.help_label)
+        help_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
+        layout.addLayout(help_layout)
+
         # QDialogButtonBox for OK and Cancel
         self.button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -206,6 +234,10 @@ class AnalysisAggregationDialog(QDialog):
         self.update_preview()
         # Initial validation check
         self.validate_weightings()
+
+    def open_link_in_browser(self, url: str):
+        """Open the given URL in the user's default web browser using QDesktopServices."""
+        QDesktopServices.openUrl(QUrl(url))
 
     def toggle_guid_column(self):
         """Toggle the visibility of the GUID column."""

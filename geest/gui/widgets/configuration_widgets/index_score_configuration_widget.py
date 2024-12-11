@@ -36,7 +36,7 @@ class IndexScoreConfigurationWidget(BaseConfigurationWidget):
         except Exception as e:
             log_message(
                 f"Error in set_internal_widgets_enabled: {e}",
-                "Geest",
+                tag="Geest",
                 level=Qgis.Critical,
             )
 
