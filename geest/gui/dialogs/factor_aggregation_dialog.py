@@ -51,9 +51,7 @@ class FactorAggregationDialog(QDialog):
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
         # Title label
-        self.title_label = QLabel(
-            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector"
-        )
+        self.title_label = QLabel("The Gender Enabling Environments Spatial Tool")
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
 

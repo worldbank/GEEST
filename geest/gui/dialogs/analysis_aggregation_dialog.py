@@ -47,7 +47,7 @@ class AnalysisAggregationDialog(QDialog):
 
         # Title label
         self.title_label = QLabel(
-            "Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector",
+            "The Gender Enabling Environments Spatial Tool",
             self,
         )
         self.title_label.setWordWrap(True)
