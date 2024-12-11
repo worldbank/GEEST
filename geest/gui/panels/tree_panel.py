@@ -985,9 +985,9 @@ class TreePanel(QWidget):
         We process in the order of layers, factors, and dimensions since there
         is a dependency between them. For example, a factor depends on its layers.
         """
-        log_message("############################################")
+        log_message("\n############################################")
         log_message(f"Starting {workflow_type} workflows")
-        log_message("############################################")
+        log_message("############################################\n")
         if workflow_type == "indicators":
             for item in self.model.rootItem.getDescendantIndicators(
                 ignore_completed=self.run_only_incomplete, ignore_disabled=True
@@ -1081,6 +1081,15 @@ class TreePanel(QWidget):
         dimensions = item.getDescendantDimensions(
             ignore_completed=self.run_only_incomplete
         )
+
+        self.overall_progress_bar.setVisible(True)
+        self.workflow_progress_bar.setVisible(True)
+        self.help_button.setVisible(False)
+        self.project_button.setVisible(False)
+        self.overall_progress_bar.setValue(0)
+        self.overall_progress_bar.setMaximum(self.items_to_run)
+        self.workflow_progress_bar.setValue(0)
+
         for indicator in indicators:
             self.queue_workflow_task(indicator, indicator.role)
         for factor in factors:
