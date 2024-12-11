@@ -331,7 +331,7 @@ class TreePanel(QWidget):
         else:
             log_message(
                 f"No model.json found in {new_directory}, using default.",
-                "Geest",
+                tag="Geest",
                 level=Qgis.Warning,
             )
             # copy the default model.json to the working directory
@@ -343,7 +343,7 @@ class TreePanel(QWidget):
                 except Exception as e:
                     log_message(
                         f"Error copying master model.json: {str(e)}",
-                        "Geest",
+                        tag="Geest",
                         level=Qgis.Critical,
                     )
             self.load_json()
@@ -364,7 +364,7 @@ class TreePanel(QWidget):
         if not self.working_directory:
             log_message(
                 "No working directory set, cannot save JSON.",
-                "Geest",
+                tag="Geest",
                 level=Qgis.Warning,
             )
         try:

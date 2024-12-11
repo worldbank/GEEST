@@ -3,6 +3,7 @@ from qgis.PyQt.QtWidgets import (
     QLineEdit,
     QToolButton,
     QFileDialog,
+    QMessageBox,
 )
 from qgis.core import Qgis
 from .base_datasource_widget import BaseDataSourceWidget
@@ -27,7 +28,7 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
         Adds the internal widgets required for selecting the CSV firadiole and validating its format.
         This method is called during the widget initialization and sets up the layout for the UI components.
         """
-        log_message("Adding internal widgets for ACLED CSV Layer Widget", "Geest")
+        log_message("Adding internal widgets for ACLED CSV Layer Widget")
         try:
             self.widget_key = "use_csv_to_point_layer"
 
@@ -100,7 +101,7 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
 
             if missing_columns:
                 error_message = f"Missing columns: {', '.join(missing_columns)}"
-                log_message(error_message, "Geest", Qgis.Critical)
+                log_message(error_message, tag="Geest", level=Qgis.Critical)
                 QMessageBox.critical(self, "Invalid CSV", error_message)
             else:
                 log_message("CSV file validation successful.")

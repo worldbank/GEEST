@@ -156,7 +156,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
 
             vector_layer = QgsVectorLayer(shapefile_path, "layer", "ogr")
             if not vector_layer.isValid():
-                log_message(f"Failed to load shapefile: {shapefile_path}", "Geest")
+                log_message(f"Failed to load shapefile: {shapefile_path}")
                 return
 
             # Set the vector layer on the field selection combo box, which will automatically populate it
