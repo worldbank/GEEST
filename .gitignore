@@ -78,3 +78,9 @@ geest.tar.gz
 gitlog.txt
 geest/resources/models/prepare_mask_area.model3
 test/output
+
+# Ignore files named 'core'
+core
+
+# Don't ignore directories named 'core'
+!core/
