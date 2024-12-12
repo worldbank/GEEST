@@ -25,9 +25,15 @@ class CreditsPanel(FORM_CLASS, QWidget):
         self.initUI()
 
     def initUI(self):
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
+        self.custom_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
         )
+        parent_layout = self.banner_label.parent().layout()
+        parent_layout.replaceWidget(self.banner_label, self.custom_label)
+        self.banner_label.deleteLater()
+        parent_layout.update()
+
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
         self.description.linkActivated.connect(self.open_link_in_browser)

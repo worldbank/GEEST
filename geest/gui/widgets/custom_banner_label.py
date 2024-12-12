@@ -23,7 +23,7 @@ class CustomBannerLabel(QLabel):
         # Draw the title text
         painter.setPen(QColor("white"))
         painter.setFont(QFont("Arial", 16))
-        text_rect = self.rect().adjusted(10, 0, -10, -10)
-        painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignBottom, self.text)
+        text_rect = self.rect().adjusted(10, 0, -10, -5)
+        painter.drawText(text_rect, Qt.AlignCenter | Qt.AlignBottom, self.text)
 
         painter.end()

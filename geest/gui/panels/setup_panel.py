@@ -32,9 +32,15 @@ class SetupPanel(FORM_CLASS, QWidget):
         self.initUI()
 
     def initUI(self):
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
+        self.custom_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
         )
+        parent_layout = self.banner_label.parent().layout()
+        parent_layout.replaceWidget(self.banner_label, self.custom_label)
+        self.banner_label.deleteLater()
+        parent_layout.update()
+
         self.open_existing_project_button.clicked.connect(self.load_project)
         self.create_new_project_button.clicked.connect(self.create_project)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)

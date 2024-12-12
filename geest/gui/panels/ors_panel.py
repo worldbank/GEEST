@@ -30,9 +30,15 @@ class OrsPanel(FORM_CLASS, QWidget):
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
     def initUI(self):
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
+        self.custom_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
         )
+        parent_layout = self.banner_label.parent().layout()
+        parent_layout.replaceWidget(self.banner_label, self.custom_label)
+        self.banner_label.deleteLater()
+        parent_layout.update()
+
         self.status_label.setPixmap(
             QPixmap(resources_path("resources", "images", "ors-not-configured.png"))
         )
