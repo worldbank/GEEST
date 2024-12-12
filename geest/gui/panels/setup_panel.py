@@ -9,6 +9,7 @@ from qgis.PyQt.QtGui import QPixmap
 from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
 from geest.utilities import get_ui_class, resources_path, log_message
 from geest.core import WorkflowQueueManager
+from geest.gui.widgets import CustomBannerLabel
 
 FORM_CLASS = get_ui_class("setup_panel_base.ui")
 

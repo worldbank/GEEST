@@ -8,6 +8,7 @@ from qgis.PyQt.QtGui import QPixmap
 from geest.core.tasks import OrsCheckerTask
 from geest.utilities import get_ui_class, resources_path
 from geest.utilities import log_message
+from geest.gui.widgets import CustomBannerLabel
 
 FORM_CLASS = get_ui_class("intro_panel_base.ui")
 
@@ -24,8 +25,9 @@ class IntroPanel(FORM_CLASS, QWidget):
         self.initUI()
 
     def initUI(self):
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
+        self.banner_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
         )
         self.next_button.clicked.connect(self.on_next_button_clicked)
 

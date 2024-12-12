@@ -27,6 +27,7 @@ from geest.utilities import (
     setting,
     is_qgis_dark_theme_active,
 )
+from geest.gui.widgets import CustomBannerLabel
 
 
 class AnalysisAggregationDialog(QDialog):
@@ -46,47 +47,12 @@ class AnalysisAggregationDialog(QDialog):
         self.resize(800, 600)  # Set a wider dialog size
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
-        # Title label
-        self.title_label = QLabel(
-            "The Gender Enabling Environments Spatial Tool",
-            self,
-        )
-        self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
-
         # Banner label
-        self.banner_label = QLabel()
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
+        self.banner_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
         )
-        self.banner_label.setScaledContents(True)
-        self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         layout.addWidget(self.banner_label)
-
-        # Splitter for Markdown editor and preview
-        splitter = QSplitter(Qt.Horizontal)
-        default_text = """
-        In this dialog you can set the weightings for each dimension in the analysis.
-        """
-        self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(
-            self.analysis_data.get("description", default_text)
-        )
-        self.text_edit_left.setMinimumHeight(100)
-
-        # HTML preview (right side)
-        self.text_edit_right = QTextEdit()
-        self.text_edit_right.setReadOnly(True)
-        self.text_edit_right.setFrameStyle(QFrame.NoFrame)
-        self.text_edit_right.setStyleSheet("background-color: transparent;")
-        splitter.addWidget(self.text_edit_right)
-
-        layout.addWidget(splitter)
-
-        # Connect Markdown editor to preview
-        self.text_edit_left.textChanged.connect(self.update_preview)
-
         # Expanding spacer
         expanding_spacer = QSpacerItem(
             20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
@@ -230,8 +196,6 @@ class AnalysisAggregationDialog(QDialog):
 
         layout.addWidget(self.button_box)
 
-        # Initial preview update
-        self.update_preview()
         # Initial validation check
         self.validate_weightings()
 
@@ -364,11 +328,6 @@ class AnalysisAggregationDialog(QDialog):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-
-    def update_preview(self):
-        """Update the right text edit to show a live HTML preview of the Markdown."""
-        markdown_text = self.text_edit_left.toPlainText()
-        self.text_edit_right.setMarkdown(markdown_text)
 
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""

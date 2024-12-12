@@ -11,7 +11,7 @@ from geest.core.tasks import OrsCheckerTask
 from geest.utilities import get_ui_class, resources_path, log_message
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
-
+from geest.gui.widgets import CustomBannerLabel
 
 FORM_CLASS = get_ui_class("ors_panel_base.ui")
 

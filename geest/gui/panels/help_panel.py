@@ -15,6 +15,7 @@ try:
     web_engine_available = True
 except ImportError:
     web_engine_available = False
+from geest.gui.widgets import CustomBannerLabel
 
 
 class HelpPanel(QWidget):
