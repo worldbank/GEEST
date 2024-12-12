@@ -24,6 +24,7 @@ from geest.utilities import (
     setting,
     is_qgis_dark_theme_active,
 )
+from geest.gui.widgets import CustomBannerLabel
 
 
 class DimensionAggregationDialog(QDialog):
@@ -47,13 +48,11 @@ class DimensionAggregationDialog(QDialog):
         self.resize(800, 600)  # Set a wider dialog size
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
-        # Title label
-        self.title_label = QLabel(
+        self.banner_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
-            self,
+            resources_path("resources", "geest-banner.png"),
         )
-        self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
+        layout.addWidget(self.banner_label)
 
         # Get the parent item
         parent_item = self.tree_item.parent()
@@ -67,15 +66,6 @@ class DimensionAggregationDialog(QDialog):
                 "font-size: 14px; font-weight: bold; color: gray;"
             )
             layout.addWidget(hierarchy_label, alignment=Qt.AlignTop)
-
-        # Banner label
-        self.banner_label = QLabel()
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
-        )
-        self.banner_label.setScaledContents(True)
-        self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        layout.addWidget(self.banner_label)
 
         # Description label
         description_label = QLabel()

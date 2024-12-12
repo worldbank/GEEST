@@ -21,6 +21,7 @@ from geest.utilities import resources_path, setting
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..factor_configuration_widget import FactorConfigurationWidget
 from geest.utilities import log_message, is_qgis_dark_theme_active
+from geest.gui.widgets import CustomBannerLabel
 
 
 class FactorAggregationDialog(QDialog):
@@ -51,11 +52,29 @@ class FactorAggregationDialog(QDialog):
         self.resize(800, 600)
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
+        self.banner_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
+        )
+        layout.addWidget(self.banner_label)
         # Title label
-        self.title_label = QLabel("The Gender Enabling Environments Spatial Tool")
+        self.title_label = QLabel(
+            "The Gender Enabling Environments Spatial Tool", self.banner_label
+        )
         self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
+        self.title_label.setStyleSheet(
+            "color: white; font-size: 16px; background-color: rgba(0, 0, 0, 0.5); padding: 5px;"
+        )
+        self.title_label.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
 
+        # Positioning the title label with a 10px offset from the left and bottom of the banner
+        self.title_label.setGeometry(
+            10, self.banner_label.height() - 30, self.banner_label.width() - 20, 20
+        )
+        self.title_label.setMargin(10)
+
+        # Update layout
+        layout.addWidget(self.banner_label)
         # Hierarchy label
         parent_item = self.tree_item.parent()
         if parent_item:
@@ -66,15 +85,6 @@ class FactorAggregationDialog(QDialog):
                 "font-size: 14px; font-weight: bold; color: gray;"
             )
             layout.addWidget(hierarchy_label, alignment=Qt.AlignTop)
-
-        # Banner label
-        self.banner_label = QLabel()
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
-        )
-        self.banner_label.setScaledContents(True)
-        self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        layout.addWidget(self.banner_label)
 
         # Description label
         description_label = QLabel()

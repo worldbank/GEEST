@@ -1,32 +1,35 @@
 from qgis.PyQt.QtWidgets import (
     QDialog,
     QDialogButtonBox,
-    QFrame,
+    QAbstractScrollArea,
     QHeaderView,
     QLabel,
     QDoubleSpinBox,
     QPushButton,
     QSizePolicy,
     QSpacerItem,
-    QSplitter,
     QTableWidget,
     QTableWidgetItem,
-    QTextEdit,
     QVBoxLayout,
     QCheckBox,
     QWidget,
     QHBoxLayout,
     QSpacerItem,
+    QSizePolicy,
+    QToolButton,
+    QGroupBox,
 )
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
 from qgis.PyQt.QtCore import Qt, QUrl
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsMapLayerProxyModel
 from geest.utilities import (
     resources_path,
     log_message,
     setting,
     is_qgis_dark_theme_active,
 )
+from qgis.gui import QgsMapLayerComboBox
+from geest.gui.widgets import CustomBannerLabel
 
 
 class AnalysisAggregationDialog(QDialog):
@@ -46,59 +49,19 @@ class AnalysisAggregationDialog(QDialog):
         self.resize(800, 600)  # Set a wider dialog size
         layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
 
-        # Title label
-        self.title_label = QLabel(
-            "The Gender Enabling Environments Spatial Tool",
-            self,
-        )
-        self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
-
         # Banner label
-        self.banner_label = QLabel()
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
+        self.banner_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
         )
-        self.banner_label.setScaledContents(True)
-        self.banner_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         layout.addWidget(self.banner_label)
-
-        # Splitter for Markdown editor and preview
-        splitter = QSplitter(Qt.Horizontal)
-        default_text = """
-        In this dialog you can set the weightings for each dimension in the analysis.
-        """
-        self.text_edit_left = QTextEdit()
-        self.text_edit_left.setPlainText(
-            self.analysis_data.get("description", default_text)
-        )
-        self.text_edit_left.setMinimumHeight(100)
-
-        # HTML preview (right side)
-        self.text_edit_right = QTextEdit()
-        self.text_edit_right.setReadOnly(True)
-        self.text_edit_right.setFrameStyle(QFrame.NoFrame)
-        self.text_edit_right.setStyleSheet("background-color: transparent;")
-        splitter.addWidget(self.text_edit_right)
-
-        layout.addWidget(splitter)
-
-        # Connect Markdown editor to preview
-        self.text_edit_left.textChanged.connect(self.update_preview)
-
-        # Expanding spacer
-        expanding_spacer = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
-        layout.addSpacerItem(expanding_spacer)
 
         # Table setup
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(
-            ["dimension", "Weight 0-1", "Use", "", "Guid"]
+            ["Dimension", "Weight 0-1", "Use", "", "Guid"]
         )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
@@ -177,8 +140,91 @@ class AnalysisAggregationDialog(QDialog):
                     # item.setFlags(Qt.ItemIsEnabled)
                 except AttributeError:
                     pass
+        # Set the table widget height to be no taller than its content
+        self.table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.table.resizeColumnsToContents()
+        self.table.resizeRowsToContents()
+        self.table.setMaximumHeight(
+            self.table.verticalHeader().length()
+            + self.table.horizontalHeader().height()
+            + 2
+        )  # Add 2 pixels to prevent scrollbar showing
 
         layout.addWidget(self.table)
+
+        # Aggregation boundaries label
+        self.aggregation_label = QLabel(
+            "Aggregation boundaries (optional): You can generate insights from the WEE analysis by providing subnational boundaries. For each boundary, we will calculate the majority WEE score, majority WEE by Population score (if population data is set below) and majority WEE by Job Distribution score (if configured below)."
+        )
+        self.aggregation_label.setWordWrap(True)
+        layout.addWidget(self.aggregation_label)
+
+        # Map layer combo box for vector polygon layers
+        self.layer_combo = QgsMapLayerComboBox(self)
+        self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        layout.addWidget(self.layer_combo)
+
+        # Tool button with ellipsis
+        self.tool_button = QToolButton(self)
+        self.tool_button.setText("...")
+        layout.addWidget(self.tool_button)
+        # Expanding spacer
+        # Horizontal layout for label, combo box, and tool button
+        aggregation_layout = QHBoxLayout()
+
+        # Add label to the layout
+        aggregation_layout.addWidget(
+            self.aggregation_label, 2
+        )  # Takes 2/3 of the width
+
+        # Create a container widget for combo box and tool button
+        combo_tool_layout = QHBoxLayout()
+        combo_tool_layout.addWidget(self.layer_combo)
+        combo_tool_layout.addWidget(self.tool_button)
+
+        # Add the container widget to the layout
+        combo_tool_widget = QWidget()
+        combo_tool_widget.setLayout(combo_tool_layout)
+        aggregation_layout.addWidget(combo_tool_widget, 1)  # Takes 1/3 of the width
+        # Add the horizontal layout to the main layout
+        layout.addLayout(aggregation_layout)
+
+        # Horizontal layout with two group boxes
+        group_box_layout = QHBoxLayout()
+
+        # Group Box 1
+        group_box_1 = QGroupBox("WEE by Population")
+        group_box_1_layout = QVBoxLayout()
+        group_box_1.setLayout(group_box_1_layout)
+        group_box_layout.addWidget(group_box_1, 1)
+        # Add a label with this message
+        self.population_label = QLabel(
+            "Optional: You can visualize WEE with respect to female population distribution by age group. Please provide a raster dataset below containing (female) population density and it will be combined with the WEE score to calculate the WEE by Population score. If you have set an aggregation layer above, this will be aggregated per subnational boundary to show the majory WEE by Population score per polygon."
+        )
+        self.population_label.setWordWrap(True)
+        self.population_label.setAlignment(Qt.AlignJustify)
+        group_box_1_layout.addWidget(self.population_label)
+
+        # Group Box 2
+        group_box_2 = QGroupBox("WEE by Job Distribution")
+        group_box_2_layout = QVBoxLayout()
+        group_box_2.setLayout(group_box_2_layout)
+        group_box_layout.addWidget(group_box_2, 1)
+
+        self.mask_label = QLabel(
+            "Optional: You can perform a targeted analysis of Women’s Enablement Environments with respect to the location of jobs. Input the location of existing or potential jobs either as a point file, in polygon format or raster format explore how the results relate to existing or planned job opportunities."
+        )
+        self.mask_label.setWordWrap(True)
+        self.mask_label.setAlignment(Qt.AlignJustify)
+        group_box_2_layout.addWidget(self.mask_label)
+
+        # Add the horizontal layout to the main layout
+        layout.addLayout(group_box_layout)
+
+        expanding_spacer = QSpacerItem(
+            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
+        )
+        layout.addSpacerItem(expanding_spacer)
 
         help_layout = QHBoxLayout()
         help_layout.addItem(
@@ -230,8 +276,6 @@ class AnalysisAggregationDialog(QDialog):
 
         layout.addWidget(self.button_box)
 
-        # Initial preview update
-        self.update_preview()
         # Initial validation check
         self.validate_weightings()
 
@@ -364,11 +408,6 @@ class AnalysisAggregationDialog(QDialog):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-
-    def update_preview(self):
-        """Update the right text edit to show a live HTML preview of the Markdown."""
-        markdown_text = self.text_edit_left.toPlainText()
-        self.text_edit_right.setMarkdown(markdown_text)
 
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""

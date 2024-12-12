@@ -10,6 +10,7 @@ from qgis.PyQt.QtGui import QPixmap
 from geest.utilities import get_ui_class, resources_path
 from geest.core import WorkflowQueueManager
 from geest.utilities import log_message
+from geest.gui.widgets import CustomBannerLabel
 
 FORM_CLASS = get_ui_class("open_project_panel_base.ui")
 
@@ -35,9 +36,15 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.initUI()
 
     def initUI(self):
-        self.banner_label.setPixmap(
-            QPixmap(resources_path("resources", "geest-banner.png"))
+        self.custom_label = CustomBannerLabel(
+            "The Gender Enabling Environments Spatial Tool",
+            resources_path("resources", "geest-banner.png"),
         )
+        parent_layout = self.banner_label.parent().layout()
+        parent_layout.replaceWidget(self.banner_label, self.custom_label)
+        self.banner_label.deleteLater()
+        parent_layout.update()
+
         self.dir_button.clicked.connect(self.select_directory)
         self.open_project_button.clicked.connect(self.load_project)
 
