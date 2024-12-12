@@ -178,14 +178,16 @@ class AnalysisAggregationDialog(QDialog):
         )  # Takes 2/3 of the width
 
         # Create a container widget for combo box and tool button
-        combo_tool_layout = QHBoxLayout()
-        combo_tool_layout.addWidget(self.layer_combo)
-        combo_tool_layout.addWidget(self.tool_button)
+        aggregation_combo_layout = QHBoxLayout()
+        aggregation_combo_layout.addWidget(self.layer_combo)
+        aggregation_combo_layout.addWidget(self.tool_button)
 
         # Add the container widget to the layout
-        combo_tool_widget = QWidget()
-        combo_tool_widget.setLayout(combo_tool_layout)
-        aggregation_layout.addWidget(combo_tool_widget, 1)  # Takes 1/3 of the width
+        aggregation_combo_tool = QWidget()
+        aggregation_combo_tool.setLayout(aggregation_combo_layout)
+        aggregation_layout.addWidget(
+            aggregation_combo_tool, 1
+        )  # Takes 1/3 of the width
         # Add the horizontal layout to the main layout
         layout.addLayout(aggregation_layout)
 
@@ -278,6 +280,14 @@ class AnalysisAggregationDialog(QDialog):
 
         # Initial validation check
         self.validate_weightings()
+
+        # Resize the dialog to be almost as large as the main window
+        main_window = (
+            self.parent().window()
+            if self.parent()
+            else self.screen().availableGeometry()
+        )
+        self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""
