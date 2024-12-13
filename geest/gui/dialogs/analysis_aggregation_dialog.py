@@ -206,6 +206,18 @@ class AnalysisAggregationDialog(QDialog):
         self.population_label.setWordWrap(True)
         self.population_label.setAlignment(Qt.AlignJustify)
         group_box_1_layout.addWidget(self.population_label)
+        population_layout = QHBoxLayout()
+        # Make a qgis map layer combo filtered to rasters and a toolbutton with ellipses
+        self.population_combo = QgsMapLayerComboBox()
+        self.population_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        population_layout.addWidget(self.population_combo)
+
+        # Tool button with ellipsis
+        self.population_tool_button = QToolButton(self)
+        self.population_tool_button.setText("...")
+        population_layout.addWidget(self.population_tool_button)
+
+        group_box_1_layout.addLayout(population_layout)
 
         # Group Box 2
         group_box_2 = QGroupBox("WEE by Job Distribution")
