@@ -18,23 +18,31 @@ from qgis.PyQt.QtWidgets import (
     QSizePolicy,
     QToolButton,
     QGroupBox,
+    QRadioButton,
 )
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
-from qgis.PyQt.QtCore import Qt, QUrl
+from qgis.PyQt.QtCore import Qt, QUrl, QSettings
 from qgis.core import Qgis, QgsMapLayerProxyModel
 from geest.utilities import (
     resources_path,
     log_message,
     setting,
     is_qgis_dark_theme_active,
+    get_ui_class,
 )
 from qgis.gui import QgsMapLayerComboBox
 from geest.gui.widgets import CustomBannerLabel
+from geest.core import setting
+
+FORM_CLASS = get_ui_class("analysis_dialog_base.ui")
 
 
-class AnalysisAggregationDialog(QDialog):
+class AnalysisAggregationDialog(FORM_CLASS, QDialog):
     def __init__(self, analysis_item, parent=None):
         super().__init__(parent)
+        # Dynamically load the .ui file
+        self.setupUi(self)
+
         self.analysis_name = analysis_item.attribute("analysis_name")
         self.analysis_data = analysis_item.attributes()
         self.tree_item = analysis_item  # Reference to the QTreeView item to update
@@ -43,18 +51,15 @@ class AnalysisAggregationDialog(QDialog):
         # Need to be redimensioned...
         self.guids = self.tree_item.getAnalysisDimensionGuids()
         self.weightings = {}  # To store the temporary weightings
-
-        # Layout setup
-        layout = QVBoxLayout(self)
-        self.resize(800, 600)  # Set a wider dialog size
-        layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the layout
-
         # Banner label
-        self.banner_label = CustomBannerLabel(
+        self.custom_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
             resources_path("resources", "geest-banner.png"),
         )
-        layout.addWidget(self.banner_label)
+        parent_layout = self.banner_label.parent().layout()
+        parent_layout.replaceWidget(self.banner_label, self.custom_label)
+        self.banner_label.deleteLater()
+        parent_layout.update()
 
         # Table setup
         self.table = QTableWidget(self)
@@ -149,96 +154,10 @@ class AnalysisAggregationDialog(QDialog):
             + self.table.horizontalHeader().height()
             + 2
         )  # Add 2 pixels to prevent scrollbar showing
-
-        layout.addWidget(self.table)
-
-        # Aggregation boundaries label
-        self.aggregation_label = QLabel(
-            "Aggregation boundaries (optional): You can generate insights from the WEE analysis by providing subnational boundaries. For each boundary, we will calculate the majority WEE score, majority WEE by Population score (if population data is set below) and majority WEE by Job Distribution score (if configured below)."
-        )
-        self.aggregation_label.setWordWrap(True)
-        layout.addWidget(self.aggregation_label)
-
-        # Map layer combo box for vector polygon layers
-        self.layer_combo = QgsMapLayerComboBox(self)
-        self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
-        layout.addWidget(self.layer_combo)
-
-        # Tool button with ellipsis
-        self.tool_button = QToolButton(self)
-        self.tool_button.setText("...")
-        layout.addWidget(self.tool_button)
-        # Expanding spacer
-        # Horizontal layout for label, combo box, and tool button
-        aggregation_layout = QHBoxLayout()
-
-        # Add label to the layout
-        aggregation_layout.addWidget(
-            self.aggregation_label, 2
-        )  # Takes 2/3 of the width
-
-        # Create a container widget for combo box and tool button
-        aggregation_combo_layout = QHBoxLayout()
-        aggregation_combo_layout.addWidget(self.layer_combo)
-        aggregation_combo_layout.addWidget(self.tool_button)
-
-        # Add the container widget to the layout
-        aggregation_combo_tool = QWidget()
-        aggregation_combo_tool.setLayout(aggregation_combo_layout)
-        aggregation_layout.addWidget(
-            aggregation_combo_tool, 1
-        )  # Takes 1/3 of the width
-        # Add the horizontal layout to the main layout
-        layout.addLayout(aggregation_layout)
-
-        # Horizontal layout with two group boxes
-        group_box_layout = QHBoxLayout()
-
-        # Group Box 1
-        group_box_1 = QGroupBox("WEE by Population")
-        group_box_1_layout = QVBoxLayout()
-        group_box_1.setLayout(group_box_1_layout)
-        group_box_layout.addWidget(group_box_1, 1)
-        # Add a label with this message
-        self.population_label = QLabel(
-            "Optional: You can visualize WEE with respect to female population distribution by age group. Please provide a raster dataset below containing (female) population density and it will be combined with the WEE score to calculate the WEE by Population score. If you have set an aggregation layer above, this will be aggregated per subnational boundary to show the majory WEE by Population score per polygon."
-        )
-        self.population_label.setWordWrap(True)
-        self.population_label.setAlignment(Qt.AlignJustify)
-        group_box_1_layout.addWidget(self.population_label)
-        population_layout = QHBoxLayout()
-        # Make a qgis map layer combo filtered to rasters and a toolbutton with ellipses
-        self.population_combo = QgsMapLayerComboBox()
-        self.population_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        population_layout.addWidget(self.population_combo)
-
-        # Tool button with ellipsis
-        self.population_tool_button = QToolButton(self)
-        self.population_tool_button.setText("...")
-        population_layout.addWidget(self.population_tool_button)
-
-        group_box_1_layout.addLayout(population_layout)
-
-        # Group Box 2
-        group_box_2 = QGroupBox("WEE by Job Distribution")
-        group_box_2_layout = QVBoxLayout()
-        group_box_2.setLayout(group_box_2_layout)
-        group_box_layout.addWidget(group_box_2, 1)
-
-        self.mask_label = QLabel(
-            "Optional: You can perform a targeted analysis of Women’s Enablement Environments with respect to the location of jobs. Input the location of existing or potential jobs either as a point file, in polygon format or raster format explore how the results relate to existing or planned job opportunities."
-        )
-        self.mask_label.setWordWrap(True)
-        self.mask_label.setAlignment(Qt.AlignJustify)
-        group_box_2_layout.addWidget(self.mask_label)
-
-        # Add the horizontal layout to the main layout
-        layout.addLayout(group_box_layout)
-
-        expanding_spacer = QSpacerItem(
-            20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding
-        )
-        layout.addSpacerItem(expanding_spacer)
+        parent_layout = self.wee_container.parent().layout()
+        parent_layout.replaceWidget(self.wee_container, self.table)
+        self.wee_container.deleteLater()
+        parent_layout.update()
 
         help_layout = QHBoxLayout()
         help_layout.addItem(
@@ -259,18 +178,14 @@ class AnalysisAggregationDialog(QDialog):
         )
         self.help_label.setOpenExternalLinks(True)
         self.help_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.help_label)
+
         self.help_label.linkActivated.connect(self.open_link_in_browser)
         help_layout.addWidget(self.help_label)
         help_layout.addItem(
             QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         )
-        layout.addLayout(help_layout)
+        self.help_widget.setLayout(help_layout)
 
-        # QDialogButtonBox for OK and Cancel
-        self.button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        )
         auto_calculate_button = QPushButton("Balance Weights")
         self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
         self.button_box.accepted.connect(self.accept_changes)
@@ -288,18 +203,23 @@ class AnalysisAggregationDialog(QDialog):
             4, not self.guid_column_visible
         )  # Hide GUID column by default
 
-        layout.addWidget(self.button_box)
-
         # Initial validation check
         self.validate_weightings()
 
-        # Resize the dialog to be almost as large as the main window
-        main_window = (
-            self.parent().window()
-            if self.parent()
-            else self.screen().availableGeometry()
-        )
-        self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
+        # Restore the dialog geometry
+
+        settings = QSettings()
+        geometry = settings.value("AnalysisAggregationDialog/geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+        else:
+            # Resize the dialog to be almost as large as the main window
+            main_window = (
+                self.parent().window()
+                if self.parent()
+                else self.screen().availableGeometry()
+            )
+            self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""
@@ -472,4 +392,8 @@ class AnalysisAggregationDialog(QDialog):
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
         self.saveWeightingsToModel()  # Assign weightings when changes are accepted
+        # Save the dialog geometry
+        settings = QSettings()
+        settings.setValue("AnalysisAggregationDialog/geometry", self.saveGeometry())
+
         self.accept()
