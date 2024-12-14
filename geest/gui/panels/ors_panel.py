@@ -1,9 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget,
 )
-from qgis.core import (
-    Qgis,
-)
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
 from qgis.PyQt.QtWidgets import QMessageBox
