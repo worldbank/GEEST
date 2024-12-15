@@ -2,7 +2,7 @@ import os
 import unittest
 import unittest
 import os
-from qgis.core import QgsProcessingContext, QgsProject
+from qgis.core import QgsProcessingContext, QgsProject, QgsCoordinateReferenceSystem
 from geest.core.algorithms import PopulationRasterProcessingTask
 from utilities_for_testing import prepare_fixtures
 
@@ -41,7 +41,8 @@ class TestPopulationRasterProcessingTask(unittest.TestCase):
             name="Test Population Raster Processing",
             population_raster_path=self.input_raster_path,
             study_area_gpkg_path=self.gpkg_path,
-            output_dir="pop_output",
+            output_dir=self.output_directory,
+            crs=QgsCoordinateReferenceSystem("EPSG:32620"),
             force_clear=True,
         )
 
@@ -49,7 +50,7 @@ class TestPopulationRasterProcessingTask(unittest.TestCase):
         self.assertTrue(result, "Task did not complete successfully.")
 
         # Check that output files exist
-        output_files = os.listdir(os.path.join("test_output", "population"))
+        output_files = os.listdir(os.path.join(self.output_directory, "population"))
         self.assertTrue(
             any(f.startswith("clipped_") for f in output_files),
             "Clipped rasters not created.",

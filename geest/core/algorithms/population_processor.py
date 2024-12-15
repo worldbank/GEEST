@@ -8,6 +8,8 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsRasterLayer,
     QgsRasterDataProvider,
+    QgsVectorLayer,
+    QgsFeature,
 )
 import processing
 from geest.utilities import log_message
@@ -94,10 +96,18 @@ class PopulationRasterProcessingTask(QgsTask):
         ):
             if self.feedback and self.feedback.isCanceled():
                 return
+            # create a temporary layer using the clip geometry
+            clip_layer = QgsVectorLayer("Polygon", "clip", "memory")
+            clip_layer.setCrs(self.crs)
+            clip_layer.startEditing()
+            feature = QgsFeature()
+            feature.setGeometry(clip_area)
+            clip_layer.addFeature(feature)
+            clip_layer.commitChanges()
 
-            mask_name = f"{index}.tif"
-            output_path = os.path.join(self.output_dir, f"clipped_{mask_name}.tif")
-            log_message(f"Processing mask {mask_name}")
+            layer_name = f"{index}.tif"
+            output_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
+            log_message(f"Processing mask {output_path}")
 
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing clipped raster: {output_path}")
@@ -108,7 +118,7 @@ class PopulationRasterProcessingTask(QgsTask):
             params = {
                 "INPUT": self.population_raster_path,
                 "MASK_LAYER": None,  # Using geometry directly
-                "MASK": clip_area,
+                "MASK": clip_layer,
                 "NODATA": -9999,
                 "ALPHA_BAND": False,
                 "CROP_TO_CUTLINE": True,
@@ -121,12 +131,12 @@ class PopulationRasterProcessingTask(QgsTask):
             result = processing.run("gdal:cliprasterbymasklayer", params)
 
             if not result["OUTPUT"]:
-                log_message(f"Failed to clip raster for mask: {mask_name}")
+                log_message(f"Failed to clip raster for mask: {layer_name}")
                 continue
 
-            clipped_layer = QgsRasterLayer(output_path, f"Clipped {mask_name}")
+            clipped_layer = QgsRasterLayer(output_path, f"Clipped {layer_name}")
             if not clipped_layer.isValid():
-                log_message(f"Invalid clipped raster layer for mask: {mask_name}")
+                log_message(f"Invalid clipped raster layer for mask: {layer_name}")
                 continue
 
             self.clipped_rasters.append(output_path)
@@ -138,7 +148,7 @@ class PopulationRasterProcessingTask(QgsTask):
             self.global_max = max(self.global_max, stats.maximumValue)
 
             log_message(
-                f"Processed mask {mask_name}: Min={stats.minimumValue}, Max={stats.maximumValue}"
+                f"Processed mask {layer_name}: Min={stats.minimumValue}, Max={stats.maximumValue}"
             )
 
     def reclassify_population_rasters(self) -> None:
@@ -148,20 +158,17 @@ class PopulationRasterProcessingTask(QgsTask):
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         range_third = (self.global_max - self.global_min) / 3
 
-        for (
-            polygon_geometry,
-            clip_geometry,
-            bbox_geometry,
-            progress_percent,
-        ) in area_iterator:
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
             if self.feedback and self.feedback.isCanceled():
                 return
 
-            mask_name = clip_geometry.asWkt()[:50].replace(
-                " ", "_"
-            )  # Generate a unique identifier for the mask
-            input_path = os.path.join(self.output_dir, f"clipped_{mask_name}.tif")
-            output_path = os.path.join(self.output_dir, f"reclassified_{mask_name}.tif")
+            layer_name = f"{index}.tif"
+            output_path = os.path.join(self.output_dir, f"reclassified_{layer_name}")
+
+            input_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
+            log_message(f"Reclassifying {output_path} from {input_path}")
 
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing reclassified raster: {output_path}")
@@ -182,20 +189,20 @@ class PopulationRasterProcessingTask(QgsTask):
                     self.global_max,
                     3,
                 ],
-                "NO_DATA": -9999,
+                "NO_DATA": 0,
                 "DATA_TYPE": 1,  # Byte
                 "OUTPUT": output_path,
             }
-
+            log_message(f"Reclassifying raster: {input_path}")
             result = processing.run("native:reclassifybytable", params)
 
             if not result["OUTPUT"]:
-                log_message(f"Failed to reclassify raster: {mask_name}")
+                log_message(f"Failed to reclassify raster: {output_path}")
                 continue
 
             self.reclassified_rasters.append(output_path)
 
-            log_message(f"Reclassified raster: {mask_name}")
+            log_message(f"Reclassified raster: {output_path}")
 
     def generate_vrts(self) -> None:
         """
