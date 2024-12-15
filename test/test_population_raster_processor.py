@@ -1,17 +1,47 @@
+import os
 import unittest
-from geest.core.algorithms import Pop
+import unittest
+import os
+from qgis.core import QgsProcessingContext, QgsProject
+from geest.core.algorithms import PopulationRasterProcessingTask
+from utilities_for_testing import prepare_fixtures
 
 
 class TestPopulationRasterProcessingTask(unittest.TestCase):
+    def setUp(self):
+        """
+        Set up the environment for the test, loading the test data layers.
+        """
+        self.context = QgsProcessingContext()
+        # Manually create a QgsProject instance and set it in the context
+        self.project = QgsProject.instance()
+        self.context.setProject(self.project)
+
+        # Define working directories
+        self.test_data_directory = prepare_fixtures()
+        self.output_directory = os.path.join(self.test_data_directory, "output")
+
+        # Create the output directory if it doesn't exist
+        if not os.path.exists(self.output_directory):
+            os.makedirs(self.output_directory)
+
+        # Define paths to test layers
+        self.input_raster_path = os.path.join(
+            self.test_data_directory, "population", "population.tif"
+        )
+        self.gpkg_path = os.path.join(
+            self.test_data_directory, "study_area", "study_area.gpkg"
+        )
+
     def test_population_raster_processing(self):
         """
         Tests the PopulationRasterProcessingTask for expected behavior.
         """
         task = PopulationRasterProcessingTask(
             name="Test Population Raster Processing",
-            population_raster_path="test_population.tif",
-            study_area_gpkg_path="test_study_area.gpkg",
-            output_dir="test_output",
+            population_raster_path=self.input_raster_path,
+            study_area_gpkg_path=self.gpkg_path,
+            output_dir="pop_output",
             force_clear=True,
         )
 

@@ -11,7 +11,7 @@ from qgis.core import (
 )
 import processing
 from geest.utilities import log_message
-from area_iterator import AreaIterator
+from geest.core.algorithms import AreaIterator
 
 
 class PopulationRasterProcessingTask(QgsTask):
@@ -89,20 +89,15 @@ class PopulationRasterProcessingTask(QgsTask):
         Clips the population raster using study area masks and records min and max values.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
-
-        for (
-            polygon_geometry,
-            clip_geometry,
-            bbox_geometry,
-            progress_percent,
-        ) in area_iterator:
-            if self.feedback.isCanceled():
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
+            if self.feedback and self.feedback.isCanceled():
                 return
 
-            mask_name = clip_geometry.asWkt()[:50].replace(
-                " ", "_"
-            )  # Generate a unique identifier for the mask
+            mask_name = f"{index}.tif"
             output_path = os.path.join(self.output_dir, f"clipped_{mask_name}.tif")
+            log_message(f"Processing mask {mask_name}")
 
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing clipped raster: {output_path}")
@@ -113,7 +108,7 @@ class PopulationRasterProcessingTask(QgsTask):
             params = {
                 "INPUT": self.population_raster_path,
                 "MASK_LAYER": None,  # Using geometry directly
-                "MASK": clip_geometry,
+                "MASK": clip_area,
                 "NODATA": -9999,
                 "ALPHA_BAND": False,
                 "CROP_TO_CUTLINE": True,
@@ -159,7 +154,7 @@ class PopulationRasterProcessingTask(QgsTask):
             bbox_geometry,
             progress_percent,
         ) in area_iterator:
-            if self.feedback.isCanceled():
+            if self.feedback and self.feedback.isCanceled():
                 return
 
             mask_name = clip_geometry.asWkt()[:50].replace(

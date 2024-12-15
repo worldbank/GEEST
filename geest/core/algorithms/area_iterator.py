@@ -31,7 +31,11 @@ class AreaIterator:
         gpkg_path = '/path/to/your/geopackage.gpkg'
         area_iterator = AreaIterator(gpkg_path)
 
-        for polygon_geometry, clip_geometry, bbox_geometry, progress_percent in area_iterator:
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
+
+            log_message(f"Polygon ID: {id}")
             log_message(f"Polygon Geometry: {polygon_geometry.asWkt()}")
             log_message(f"Clip Polygon Geometry: {clip_geometry.asWkt()}")
             log_message(f"BBox Geometry: {bbox_geometry.asWkt()}")
