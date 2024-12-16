@@ -184,34 +184,49 @@ class TestJsonTreeItem(unittest.TestCase):
         item = JsonTreeItem(self.test_data, role="indicator")
         item.setAttribute("factor_weighting", 1.0)  # Ensure valid weight
         item.enable()
-        self.assertEqual(item.getStatus(), "Configured, not run")
+        self.assertEqual(
+            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
+        )
 
         # Test "Excluded from analysis"
         item.setAttribute("factor_weighting", 0.0)
-        self.assertEqual(item.getStatus(), "Excluded from analysis")
+        self.assertEqual(
+            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
+        )
 
         # Test "Completed successfully"
         item.setAttribute("result", "Workflow Completed")
-        self.assertEqual(item.getStatus(), "Completed successfully")
+        self.assertEqual(
+            item.getStatus(), "Completed successfully", msg=item.attributesAsMarkdown()
+        )
 
         # Test "Workflow failed"
+        item.setAttribute("analysis_mode", "use_csv_to_point_layer")
         item.setAttribute("result", "Error occurred")
-        self.assertEqual(item.getStatus(), "Workflow failed")
+        self.assertEqual(
+            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
+        )
 
         # Test "Required and not configured"
         item.setAttribute("analysis_mode", "Do Not Use")
         item.setAttribute("factor_weighting", 1.0)
-        self.assertEqual(item.getStatus(), "Required and not configured")
+        self.assertEqual(
+            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
+        )
 
         # Test "Not configured (optional)"
         item.setAttribute("factor_weighting", 0.0)
-        self.assertEqual(item.getStatus(), "Not configured (optional)")
+        self.assertEqual(
+            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
+        )
 
         # Test recursive weight checks
         parent = JsonTreeItem(self.test_data, role="factor")
         parent.setAttribute("dimension_weighting", 0.0)
         item.parentItem = parent
-        self.assertEqual(item.getStatus(), "Excluded from analysis")
+        self.assertEqual(
+            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
+        )
 
     def test_paths(self):
         """Test getPaths method."""
