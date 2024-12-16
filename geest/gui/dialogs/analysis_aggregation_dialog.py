@@ -16,10 +16,11 @@ from qgis.PyQt.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
     QFileDialog,
+    QLineEdit,
 )
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
 from qgis.PyQt.QtCore import Qt, QUrl, QSettings
-from qgis.core import Qgis, QgsMapLayerProxyModel
+from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
 from geest.utilities import (
     resources_path,
     log_message,
@@ -68,38 +69,60 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
 
         # Set up the aggregation layer widgets
         self.aggregation_combo.setAllowEmptyLayer(True)
+        self.aggregation_combo.setCurrentIndex(-1)
         self.aggregation_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
         self.aggregation_combo.currentIndexChanged.connect(self.aggregation_selected)
         self.aggregation_toolbutton.clicked.connect(self.aggregation_toolbutton_clicked)
         self.aggregation_lineedit.textChanged.connect(
             self.aggregation_lineedit_text_changed
         )
+        self.load_combo_from_model(
+            self.aggregation_combo, self.aggregation_lineedit, "aggregation"
+        )
+
         # Set up the population raster widgets
         self.population_combo.setAllowEmptyLayer(True)
+        self.population_combo.setCurrentIndex(-1)
         self.population_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.population_combo.currentIndexChanged.connect(self.population_selected)
         self.population_toolbutton.clicked.connect(self.population_toolbutton_clicked)
         self.population_lineedit.textChanged.connect(
             self.population_lineedit_text_changed
         )
+        self.load_combo_from_model(
+            self.population_combo, self.population_lineedit, "population"
+        )
+
         # Set up the point layer widgets
         self.point_combo.setAllowEmptyLayer(True)
+        self.point_combo.setCurrentIndex(-1)
         self.point_combo.setFilters(QgsMapLayerProxyModel.PointLayer)
         self.point_combo.currentIndexChanged.connect(self.point_selected)
         self.population_toolbutton.clicked.connect(self.point_toolbutton_clicked)
         self.point_lineedit.textChanged.connect(self.point_lineedit_text_changed)
+        self.load_combo_from_model(self.point_combo, self.point_lineedit, "point_mask")
+
         # set up the polygon layer widgets
         self.polygon_combo.setAllowEmptyLayer(True)
+        self.polygon_combo.setCurrentIndex(-1)
         self.polygon_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
         self.polygon_combo.currentIndexChanged.connect(self.polygon_selected)
         self.polygon_toolbutton.clicked.connect(self.polygon_toolbutton_clicked)
         self.polygon_lineedit.textChanged.connect(self.polygon_lineedit_text_changed)
+        self.load_combo_from_model(
+            self.polygon_combo, self.polygon_lineedit, "polygon_mask"
+        )
+
         # Set up the raster layer widgets
         self.raster_combo.setAllowEmptyLayer(True)
+        self.raster_combo.setCurrentIndex(-1)
         self.raster_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.raster_combo.currentIndexChanged.connect(self.raster_selected)
         self.raster_toolbutton.clicked.connect(self.raster_toolbutton_clicked)
         self.raster_lineedit.textChanged.connect(self.raster_lineedit_text_changed)
+        self.load_combo_from_model(
+            self.raster_combo, self.raster_lineedit, "raster_mask"
+        )
 
         help_layout = QHBoxLayout()
         help_layout.addItem(
@@ -533,8 +556,60 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
         self.saveWeightingsToModel()  # Assign weightings when changes are accepted
+        self.save_combo_to_model(
+            self.aggregation_combo, self.aggregation_lineedit, "aggregation"
+        )
+        self.save_combo_to_model(
+            self.population_combo, self.population_lineedit, "population"
+        )
+        self.save_combo_to_model(self.point_combo, self.point_lineedit, "point_mask")
+        self.save_combo_to_model(
+            self.polygon_combo, self.polygon_lineedit, "polygon_mask"
+        )
+        self.save_combo_to_model(self.raster_combo, self.raster_lineedit, "raster_mask")
+
         # Save the dialog geometry
         settings = QSettings()
         settings.setValue("AnalysisAggregationDialog/geometry", self.saveGeometry())
 
         self.accept()
+
+    def save_combo_to_model(
+        self, combo: QgsMapLayerComboBox, lineedit: QLineEdit, prefix: str
+    ):
+        """Save the state of a QgsMapLayerComboBox to the json tree item.
+
+        Args:
+            combo (_type_): _description_
+        """
+        item = self.tree_item
+        layer = combo.currentLayer()
+        if not layer:
+            item.setAttribute(f"{prefix}_layer", None)
+        else:
+            item.setAttribute(f"{prefix}_layer_name", layer.name())
+            item.setAttribute(f"{prefix}_layer_source", layer.source())
+            item.setAttribute(f"{prefix}_layer_provider_type", layer.providerType())
+            item.setAttribute(f"{prefix}_layer_crs", layer.crs().authid())
+            if layer.providerType() != "gdal":
+                item.setAttribute(f"{prefix}_layer_wkb_type", layer.wkbType())
+            item.setAttribute(f"{prefix}_layer_id", layer.id())
+        item.setAttribute(f"{prefix}_shapefile", lineedit.text())
+
+    def load_combo_from_model(
+        self, combo: QgsMapLayerComboBox, lineedit: QLineEdit, prefix: str
+    ):
+        """Load the state of a QgsMapLayerComboBox from the json tree item.
+
+        Args:
+            combo (_type_): _description_
+        """
+        item = self.tree_item
+        layer_id = item.attribute(f"{prefix}_layer_id", None)
+        if layer_id:
+            layer = QgsProject.instance().mapLayer(layer_id)
+            if layer:
+                combo.setLayer(layer)
+        if item.attribute(f"{prefix}_shapefile", False):
+            lineedit.setText(self.attributes[f"{prefix}_shapefile"])
+            lineedit.setVisible(True)
