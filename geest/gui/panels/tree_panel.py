@@ -990,17 +990,17 @@ class TreePanel(QWidget):
         log_message("############################################\n")
         if workflow_type == "indicators":
             for item in self.model.rootItem.getDescendantIndicators(
-                ignore_completed=self.run_only_incomplete, ignore_disabled=True
+                include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "factors":
             for item in self.model.rootItem.getDescendantFactors(
-                ignore_completed=self.run_only_incomplete, ignore_disabled=True
+                include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "dimensions":
             for item in self.model.rootItem.getDescendantDimensions(
-                ignore_completed=self.run_only_incomplete, ignore_disabled=True
+                include_completed=not self.run_only_incomplete, include_disabled=False
             ):
                 self.queue_workflow_task(item, item.role)
         elif workflow_type == "analysis":
@@ -1075,11 +1075,13 @@ class TreePanel(QWidget):
         else:
             self.run_only_incomplete = True
         indicators = item.getDescendantIndicators(
-            ignore_completed=self.run_only_incomplete
+            include_completed=not self.run_only_incomplete, include_disabled=False
         )
-        factors = item.getDescendantFactors(ignore_completed=self.run_only_incomplete)
+        factors = item.getDescendantFactors(
+            include_completed=not self.run_only_incomplete, include_disabled=False
+        )
         dimensions = item.getDescendantDimensions(
-            ignore_completed=self.run_only_incomplete
+            include_completed=not self.run_only_incomplete
         )
 
         self.overall_progress_bar.setVisible(True)

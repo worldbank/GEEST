@@ -174,28 +174,38 @@ class JsonTreeItem:
             data["factor_weighting"] = 0.0
 
     def enable(self):
-        """
-        Mark the item as enabled, which is essentially just setting its weight to its default.
-        """
+        """Enable the item by resetting weights to defaults."""
         data = self.attributes()
         data["analysis_mode"] = ""
         if self.isDimension():
-            data["analysis_weighting"] = data["default_analysis_weighting"]
+            data["analysis_weighting"] = data.get("default_analysis_weighting", 1.0)
         if self.isFactor():
-            data["dimension_weighting"] = data["default_dimension_weighting"]
-            if self.parent().getStatus() == "Excluded from analysis":
-                self.parent().attributes()[
-                    "analysis_weighting"
-                ] = self.parent().attribute("default_analysis_weighting")
+            data["dimension_weighting"] = data.get("default_dimension_weighting", 1.0)
+            if (
+                self.parentItem
+                and self.parentItem.getStatus() == "Excluded from analysis"
+            ):
+                self.parentItem.attributes()["analysis_weighting"] = (
+                    self.parentItem.attribute("default_analysis_weighting")
+                )
         if self.isIndicator():
-            data["factor_weighting"] = data["default_factor_weighting"]
-            if self.parent().getStatus() == "Excluded from analysis":
-                self.parent().attributes()[
-                    "dimension_weighting"
-                ] = self.parent().attribute("default_dimension_weighting")
-                if self.parent().parent().getStatus() == "Excluded from analysis":
-                    self.parent().parent().attributes()["analysis_weighting"] = (
-                        self.parent().parent().attribute("default_analysis_weighting")
+            data["factor_weighting"] = data.get("default_factor_weighting", 1.0)
+            if (
+                self.parentItem
+                and self.parentItem.getStatus() == "Excluded from analysis"
+            ):
+                self.parentItem.attributes()["dimension_weighting"] = (
+                    self.parentItem.attribute("default_dimension_weighting")
+                )
+                if (
+                    self.parentItem.parentItem
+                    and self.parentItem.parentItem.getStatus()
+                    == "Excluded from analysis"
+                ):
+                    self.parentItem.parentItem.attributes()["analysis_weighting"] = (
+                        self.parentItem.parentItem.attribute(
+                            "default_analysis_weighting"
+                        )
                     )
 
     def getIcon(self):
@@ -260,7 +270,7 @@ class JsonTreeItem:
     def getStatus(self):
         """Return the status of the item as single character."""
         try:
-            if not type(self.itemData) == list:
+            if not isinstance(self.itemData, list):
                 return ""
             if len(self.itemData) < 4:
                 return ""
@@ -271,132 +281,132 @@ class JsonTreeItem:
             qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
             qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
             status = ""
+
             if "Workflow Completed" in data.get("result", ""):
                 return "Completed successfully"
+
             # First check if the item weighting is 0, or its parent factor is zero
             # If so, return "Excluded from analysis"
             if self.isIndicator():
-                required_by_parent = float(
-                    self.parentItem.attributes().get("dimension_weighting", 0.0)
+                required_by_parent = (
+                    float(self.parentItem.attributes().get("dimension_weighting", 0.0))
+                    if self.parentItem
+                    else 0.0
                 )
                 required_by_self = float(data.get("factor_weighting", 0.0))
-                # log_message(
-                #    f"{data.get('id')} Required by indicator: {required_by_self:.10f} and required by parent: {required_by_parent:.10f}"
-                # )
                 if not required_by_parent or not required_by_self:
-                    # log_message(f"Excluded from analysis: {data.get('id')}")
                     return "Excluded from analysis"
-                #
-                # Note we avoid infinite recursion by NOT doing the checks below using the getStatus
-                # method of the parent.
-                #
-                # if the parents dimension weighting is zero, return "Excluded from analysis"
-                if not float(self.parentItem.attribute("dimension_weighting", 0.0)):
-                    return "Excluded from analysis"
-                # if the grand parent's analysis weighting is zero, return "Excluded from analysis"
-                if not float(
-                    self.parentItem.parentItem.attribute("analysis_weighting", 0.0)
+
+                # Avoid infinite recursion by NOT using getStatus in the parent checks
+                # If the parent's dimension weighting is zero, return "Excluded from analysis"
+                if self.parentItem and not float(
+                    self.parentItem.attribute("dimension_weighting", 0.0)
                 ):
                     return "Excluded from analysis"
+                # If the grandparent's analysis weighting is zero, return "Excluded from analysis"
+                if (
+                    self.parentItem
+                    and self.parentItem.parentItem
+                    and not float(
+                        self.parentItem.parentItem.attribute("analysis_weighting", 0.0)
+                    )
+                ):
+                    return "Excluded from analysis"
+
             if self.isFactor():
                 # If the dimension weighting is zero, return "Excluded from analysis"
                 if not float(data.get("dimension_weighting", 0.0)):
                     return "Excluded from analysis"
+
                 # If the sum of the indicator weightings is zero, return "Excluded from analysis"
                 weight_sum = 0
                 unconfigured_child_count = 0
                 for child in self.childItems:
                     weight_sum += float(child.attribute("factor_weighting", 0.0))
-                    if child.getStatus() == "Not configured (optional)":
-                        unconfigured_child_count += 1
-                    if child.getStatus() == "Required and not configured":
+                    if child.getStatus() in [
+                        "Not configured (optional)",
+                        "Required and not configured",
+                    ]:
                         unconfigured_child_count += 1
                 if not weight_sum:
                     return "Excluded from analysis"
                 if unconfigured_child_count:
                     return "Required and not configured"
-                #
-                # Note we avoid infinite recursion by NOT doing the checks below using the getStatus
-                # method of the parent.
-                #
-                # if the parent's analysis weighting is zero, return "Excluded from analysis"
-                if not float(self.parentItem.attribute("analysis_weighting", 0.0)):
+
+                # If the parent's analysis weighting is zero, return "Excluded from analysis"
+                if self.parentItem and not float(
+                    self.parentItem.attribute("analysis_weighting", 0.0)
+                ):
                     return "Excluded from analysis"
+
             if self.isDimension():
                 # If the analysis weighting is zero, return "Excluded from analysis"
                 if not float(data.get("analysis_weighting", 0.0)):
                     return "Excluded from analysis"
+
                 # If the sum of the factor weightings is zero, return "Excluded from analysis"
-                weight_sum = 0
-                for child in self.childItems:
-                    weight_sum += float(child.attribute("dimension_weighting", 0.0))
-                if not weight_sum:
-                    return "Excluded from analysis"
-            if self.isAnalysis():
-                # If the sum of the dimension weightings is zero, return "Excluded from analysis"
-                weight_sum = 0
-                for child in self.childItems:
-                    weight_sum += float(child.attribute("analysis_weighting", 0.0))
+                weight_sum = sum(
+                    float(child.attribute("dimension_weighting", 0.0))
+                    for child in self.childItems
+                )
                 if not weight_sum:
                     return "Excluded from analysis"
 
-            if "Error" in data.get("result", ""):
+            if self.isAnalysis():
+                # If the sum of the dimension weightings is zero, return "Excluded from analysis"
+                weight_sum = sum(
+                    float(child.attribute("analysis_weighting", 0.0))
+                    for child in self.childItems
+                )
+                if not weight_sum:
+                    return "Excluded from analysis"
+
+            # Check for workflow errors
+            if "Error" in data.get("result", "") or "Failed" in data.get("result", ""):
                 return "Workflow failed"
-            if "Failed" in data.get("result", ""):
-                return "Workflow failed"
-            # Item required and not configured
+
+            # Check item configuration status
             if "Do Not Use" in analysis_mode and data.get("factor_weighting", 0.0) > 0:
                 return "Required and not configured"
-            # Item not required but not configured
             if "Do Not Use" in analysis_mode:
                 return "Not configured (optional)"
-            # Item required and not configured
             if (
                 self.isIndicator()
-                and (analysis_mode == "")
-                and (data.get("factor_weighting", 0.0) > 0)
+                and analysis_mode == ""
+                and data.get("factor_weighting", 0.0) > 0
             ):
                 return "Required and not configured"
-            # Item not required but not configured
             if (
                 self.isIndicator()
-                and (analysis_mode == "")
-                and (data.get("factor_weighting", 0.0) == 0.0)
+                and analysis_mode == ""
+                and data.get("factor_weighting", 0.0) == 0.0
             ):
                 return "Not configured (optional)"
-            if (
-                # Test for algs requiring vector inputs
-                self.isIndicator()
-                and analysis_mode
-                not in ["use_index_score", "use_environmental_hazards"]
-                and not data.get(qgis_layer_source_key, False)
-                and not data.get(qgis_layer_shapefile_key, False)
-            ):
-                return "Not configured (optional)"
-            if (
-                # Test for algs requiring raster inputs
-                self.isIndicator()
-                and analysis_mode not in ["use_index_score"]
-                and analysis_mode in ["use_environmental_hazards"]
-                and not data.get(qgis_layer_source_key, False)
-                and not data.get(qgis_layer_raster_key, False)
-            ):
-                # log_message(f"Indicator {data.get('id')} is missing a raster input")
-                # log_message(f"analysis_mode in use_index_score, use_environmental_hazards: {analysis_mode in ['use_index_score', 'use_environmental_hazards']}")
-                # log_message(f"qgis_layer_source_key: {qgis_layer_source_key}: {data.get(qgis_layer_source_key, False)}")
-                # log_message(f"qgis_layer_raster_key: {qgis_layer_raster_key}: {data.get(qgis_layer_raster_key, False)}")
-                return "Not configured (optional)"
+
+            # Test for algs requiring vector inputs
+            if self.isIndicator() and analysis_mode not in [
+                "use_index_score",
+                "use_environmental_hazards",
+            ]:
+                if not data.get(qgis_layer_source_key, False) and not data.get(
+                    qgis_layer_shapefile_key, False
+                ):
+                    return "Not configured (optional)"
+
+            # Test for algs requiring raster inputs
+            if self.isIndicator() and analysis_mode in ["use_environmental_hazards"]:
+                if not data.get(qgis_layer_source_key, False) and not data.get(
+                    qgis_layer_raster_key, False
+                ):
+                    return "Not configured (optional)"
+
+            # Check if configured but not run
             if "Not Run" in data.get("result", "") and not data.get("result_file", ""):
                 return "Configured, not run"
             if not data.get("result", False):
                 return "Configured, not run"
-            if "Workflow Completed" not in data.get("result", ""):
-                return "Workflow failed"
-            if "Workflow Completed" in data.get("result", "") and not data.get(
-                "result_file", ""
-            ):
-                return "Workflow failed"
 
+            # Default fallback
             return "WRITE TOOL TIP"
 
         except Exception as e:
@@ -454,6 +464,10 @@ class JsonTreeItem:
     def setAttributes(self, attributes):
         """Set the attributes of the item."""
         self.itemData[3] = attributes
+
+    def setAttribute(self, attribute_name, attribute_value):
+        """Set the attribute of the item."""
+        self.itemData[3][attribute_name] = attribute_value
 
     def attributesAsMarkdown(self):
         """Return the attributes as a markdown formatted string."""
@@ -521,57 +535,62 @@ class JsonTreeItem:
                             self.setAnalysisMode(key)
                             break
 
-    def getDescendantIndicators(self, ignore_completed=False, ignore_disabled=True):
+    def getDescendantIndicators(self, include_completed=True, include_disabled=False):
         """Return the list of indicators under this item.
 
         Recurses through the tree to find all indicators under this item.
 
-        :param ignore_completed: If True, only return indicators that are not completed.
-        :param ignore_disabled: If True, only return indicators that are not disabled.
+        :param include_completed: If True, only return indicators that are completed.
+        :param include_disabled: If True, also return indicators that are disabled.
 
         """
         indicators = []
         if self.isIndicator():
-            if self.getStatus() != "Completed successfully" or ignore_completed:
-                if self.getStatus() != "Excluded from analysis" or not ignore_disabled:
+            if self.getStatus() != "Completed successfully" or include_completed:
+                if self.getStatus() != "Excluded from analysis" or include_disabled:
                     indicators.append(self)
         for child in self.childItems:
             indicators.extend(child.getDescendantIndicators())
         return indicators
 
-    def getDescendantFactors(self, ignore_completed=False, ignore_disabled=True):
+    def getDescendantFactors(self, include_completed=True, include_disabled=False):
         """Return the list of factors under this item.
 
         Recurses through the tree to find all factors under this item.
 
-        :param ignore_completed: If True, only return factors that are not completed.
-        :param ignore_disabled: If True, only return factors that are not disabled.
+        :param include_completed: If True, also return factors that are completed.
+        :param include_disabled: If True, also return factors that are disabled.
         """
         factors = []
         if self.isFactor():
-            if self.getStatus() != "Completed successfully" or ignore_completed:
-                if self.getStatus() != "Excluded from analysis" or not ignore_disabled:
+            if self.getStatus() != "Completed successfully" or include_completed:
+                if self.getStatus() != "Excluded from analysis" or include_disabled:
                     factors.append(self)
         for child in self.childItems:
-            factors.extend(child.getDescendantFactors())
+            factors.extend(
+                child.getDescendantFactors(include_completed, include_disabled)
+            )
         return factors
 
-    def getDescendantDimensions(self, ignore_completed=False, ignore_disabled=True):
+    def getDescendantDimensions(self, include_completed=True, include_disabled=False):
         """Return the list of dimensions under this item.
 
         Recurses through the tree to find all dimensions under this item.
 
-        :param ignore_completed: If True, only return dimensions that are not completed.
-        :param ignore_disabled: If True, only return dimensions that are not disabled.
+        :param include_completed: If True, include dimensions that are completed.
+        :param include_disabled: If True, include dimensions that are disabled.
         result_file
         """
+
         dimensions = []
         if self.isDimension():
-            if self.getStatus() != "Completed successfully" or ignore_completed:
-                if self.getStatus() != "Excluded from analysis" or not ignore_disabled:
+            if self.getStatus() != "Completed successfully" or include_completed:
+                if self.getStatus() != "Excluded from analysis" or include_disabled:
                     dimensions.append(self)
         for child in self.childItems:
-            dimensions.extend(child.getDescendantDimensions())
+            dimensions.extend(
+                child.getDescendantDimensions(include_completed, include_disabled)
+            )
         return dimensions
 
     def getFactorIndicatorGuids(self):

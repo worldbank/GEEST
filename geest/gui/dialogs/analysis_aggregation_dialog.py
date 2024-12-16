@@ -10,15 +10,12 @@ from qgis.PyQt.QtWidgets import (
     QSpacerItem,
     QTableWidget,
     QTableWidgetItem,
-    QVBoxLayout,
     QCheckBox,
     QWidget,
     QHBoxLayout,
     QSpacerItem,
     QSizePolicy,
-    QToolButton,
-    QGroupBox,
-    QRadioButton,
+    QFileDialog,
 )
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
 from qgis.PyQt.QtCore import Qt, QUrl, QSettings
@@ -61,6 +58,116 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         self.banner_label.deleteLater()
         parent_layout.update()
 
+        self.setup_table()
+
+        self.aggregation_lineedit.hide()
+        self.population_lineedit.hide()
+        self.point_lineedit.hide()
+        self.polygon_lineedit.hide()
+        self.raster_lineedit.hide()
+
+        # Set up the aggregation layer widgets
+        self.aggregation_combo.setAllowEmptyLayer(True)
+        self.aggregation_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.aggregation_combo.currentIndexChanged.connect(self.aggregation_selected)
+        self.aggregation_toolbutton.clicked.connect(self.aggregation_toolbutton_clicked)
+        self.aggregation_lineedit.textChanged.connect(
+            self.aggregation_lineedit_text_changed
+        )
+        # Set up the population raster widgets
+        self.population_combo.setAllowEmptyLayer(True)
+        self.population_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.population_combo.currentIndexChanged.connect(self.population_selected)
+        self.population_toolbutton.clicked.connect(self.population_toolbutton_clicked)
+        self.population_lineedit.textChanged.connect(
+            self.population_lineedit_text_changed
+        )
+        # Set up the point layer widgets
+        self.point_combo.setAllowEmptyLayer(True)
+        self.point_combo.setFilters(QgsMapLayerProxyModel.PointLayer)
+        self.point_combo.currentIndexChanged.connect(self.point_selected)
+        self.population_toolbutton.clicked.connect(self.point_toolbutton_clicked)
+        self.point_lineedit.textChanged.connect(self.point_lineedit_text_changed)
+        # set up the polygon layer widgets
+        self.polygon_combo.setAllowEmptyLayer(True)
+        self.polygon_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.polygon_combo.currentIndexChanged.connect(self.polygon_selected)
+        self.polygon_toolbutton.clicked.connect(self.polygon_toolbutton_clicked)
+        self.polygon_lineedit.textChanged.connect(self.polygon_lineedit_text_changed)
+        # Set up the raster layer widgets
+        self.raster_combo.setAllowEmptyLayer(True)
+        self.raster_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.raster_combo.currentIndexChanged.connect(self.raster_selected)
+        self.raster_toolbutton.clicked.connect(self.raster_toolbutton_clicked)
+        self.raster_lineedit.textChanged.connect(self.raster_lineedit_text_changed)
+
+        help_layout = QHBoxLayout()
+        help_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
+        self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
+        self.help_icon = self.help_icon.scaledToWidth(20)
+        self.help_label_icon = QLabel()
+        self.help_label_icon.setPixmap(self.help_icon)
+        self.help_label_icon.setScaledContents(True)
+        self.help_label_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.help_label_icon.setMaximumWidth(20)
+        self.help_label_icon.setAlignment(Qt.AlignRight)
+        help_layout.addWidget(self.help_label_icon)
+
+        self.help_label = QLabel(
+            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
+        )
+        self.help_label.setOpenExternalLinks(True)
+        self.help_label.setAlignment(Qt.AlignCenter)
+
+        self.help_label.linkActivated.connect(self.open_link_in_browser)
+        help_layout.addWidget(self.help_label)
+        help_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
+        self.help_widget.setLayout(help_layout)
+
+        auto_calculate_button = QPushButton("Balance Weights")
+        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+        self.button_box.accepted.connect(self.accept_changes)
+        self.button_box.rejected.connect(self.reject)
+        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
+
+        toggle_guid_button = QPushButton("Show GUIDs")
+        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+        verbose_mode = setting(key="verbose_mode", default=0)
+        if verbose_mode:
+            self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
+        toggle_guid_button.clicked.connect(self.toggle_guid_column)
+        self.guid_column_visible = False  # Track GUID column visibility
+        self.table.setColumnHidden(
+            4, not self.guid_column_visible
+        )  # Hide GUID column by default
+
+        # Initial validation check
+        self.validate_weightings()
+
+        # Restore the dialog geometry
+
+        settings = QSettings()
+        geometry = settings.value("AnalysisAggregationDialog/geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+        else:
+            # Resize the dialog to be almost as large as the main window
+            main_window = (
+                self.parent().window()
+                if self.parent()
+                else self.screen().availableGeometry()
+            )
+            self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
+
+    def setup_table(self):
+        """
+        Set up the QTableWidget to display the analysis dimensions.
+
+        """
         # Table setup
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.guids))
@@ -152,74 +259,108 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         self.table.setMaximumHeight(
             self.table.verticalHeader().length()
             + self.table.horizontalHeader().height()
-            + 2
+            + 4
         )  # Add 2 pixels to prevent scrollbar showing
+        self.table.setFrameStyle(QTableWidget.NoFrame)
         parent_layout = self.wee_container.parent().layout()
         parent_layout.replaceWidget(self.wee_container, self.table)
         self.wee_container.deleteLater()
         parent_layout.update()
 
-        help_layout = QHBoxLayout()
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
-        self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
-        self.help_icon = self.help_icon.scaledToWidth(20)
-        self.help_label_icon = QLabel()
-        self.help_label_icon.setPixmap(self.help_icon)
-        self.help_label_icon.setScaledContents(True)
-        self.help_label_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.help_label_icon.setMaximumWidth(20)
-        self.help_label_icon.setAlignment(Qt.AlignRight)
-        help_layout.addWidget(self.help_label_icon)
+    def aggregation_selected(self):
+        """Handle combo selection change"""
+        self.aggregation_lineedit.hide()
 
-        self.help_label = QLabel(
-            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
-        )
-        self.help_label.setOpenExternalLinks(True)
-        self.help_label.setAlignment(Qt.AlignCenter)
+    def population_selected(self):
+        """Handle combo selection change"""
+        self.population_lineedit.hide()
 
-        self.help_label.linkActivated.connect(self.open_link_in_browser)
-        help_layout.addWidget(self.help_label)
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
-        self.help_widget.setLayout(help_layout)
+    def point_selected(self):
+        """Handle combo selection change"""
+        self.point_lineedit.hide()
 
-        auto_calculate_button = QPushButton("Balance Weights")
-        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
-        self.button_box.accepted.connect(self.accept_changes)
-        self.button_box.rejected.connect(self.reject)
-        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
+    def polygon_selected(self):
+        """Handle combo selection change"""
+        self.polygon_lineedit.hide()
 
-        toggle_guid_button = QPushButton("Show GUIDs")
-        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
-        verbose_mode = setting(key="verbose_mode", default=0)
-        if verbose_mode:
-            self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
-        toggle_guid_button.clicked.connect(self.toggle_guid_column)
-        self.guid_column_visible = False  # Track GUID column visibility
-        self.table.setColumnHidden(
-            4, not self.guid_column_visible
-        )  # Hide GUID column by default
+    def raster_selected(self):
+        """Handle combo selection change"""
+        self.raster_lineedit.hide()
 
-        # Initial validation check
-        self.validate_weightings()
+    def aggregation_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Vector files (*.shp *.gpkg)")
+        if file_dialog.exec_():
+            self.aggregation_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.aggregation_lineedit.setText(file_path)
+            self.aggregation_lineedit.show()
 
-        # Restore the dialog geometry
+    def population_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Raster files (*.tif *.tiff *.asc)")
+        if file_dialog.exec_():
+            self.population_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.population_lineedit.setText(file_path)
+            self.population_lineedit.show()
 
-        settings = QSettings()
-        geometry = settings.value("AnalysisAggregationDialog/geometry")
-        if geometry:
-            self.restoreGeometry(geometry)
-        else:
-            # Resize the dialog to be almost as large as the main window
-            main_window = (
-                self.parent().window()
-                if self.parent()
-                else self.screen().availableGeometry()
-            )
-            self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
+    def point_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Vector files (*.shp *.gpkg)")
+        if file_dialog.exec_():
+            self.point_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.point_lineedit.setText(file_path)
+            self.point_lineedit.show()
+
+    def polygon_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Vector files (*.shp *.gpkg)")
+        if file_dialog.exec_():
+            self.polygon_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.polygon_lineedit.setText(file_path)
+            self.polygon_lineedit.show()
+
+    def raster_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Raster files (*.tif *.tiff *.asc)")
+        if file_dialog.exec_():
+            self.raster_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.raster_lineedit.setText(file_path)
+            self.raster_lineedit.show()
+
+    def aggregation_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.aggregation_combo.setCurrentIndex(0)
+
+    def population_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.population_combo.setCurrentIndex(0)
+
+    def point_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.point_combo.setCurrentIndex(0)
+
+    def polygon_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.polygon_combo.setCurrentIndex(0)
+
+    def raster_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.raster_combo.setCurrentIndex(0)
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""

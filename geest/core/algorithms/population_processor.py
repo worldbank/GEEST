@@ -117,7 +117,7 @@ class PopulationRasterProcessingTask(QgsTask):
             # Clip the population raster using the mask
             params = {
                 "INPUT": self.population_raster_path,
-                "MASK_LAYER": None,  # Using geometry directly
+                "MASK_LAYER": None,
                 "MASK": clip_layer,
                 "NODATA": -9999,
                 "ALPHA_BAND": False,
@@ -190,7 +190,8 @@ class PopulationRasterProcessingTask(QgsTask):
                     3,
                 ],
                 "NO_DATA": 0,
-                "DATA_TYPE": 1,  # Byte
+                "DATA_TYPE": 5,  # Float32
+                # "DATA_TYPE": 1,  # Byte
                 "OUTPUT": output_path,
             }
             log_message(f"Reclassifying raster: {input_path}")
