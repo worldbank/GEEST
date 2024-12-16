@@ -10,15 +10,12 @@ from qgis.PyQt.QtWidgets import (
     QSpacerItem,
     QTableWidget,
     QTableWidgetItem,
-    QVBoxLayout,
     QCheckBox,
     QWidget,
     QHBoxLayout,
     QSpacerItem,
     QSizePolicy,
-    QToolButton,
-    QGroupBox,
-    QRadioButton,
+    QFileDialog,
 )
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
 from qgis.PyQt.QtCore import Qt, QUrl, QSettings
@@ -68,6 +65,41 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         self.point_lineedit.hide()
         self.polygon_lineedit.hide()
         self.raster_lineedit.hide()
+
+        # Set up the aggregation layer widgets
+        self.aggregation_combo.setAllowEmptyLayer(True)
+        self.aggregation_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.aggregation_combo.currentIndexChanged.connect(self.aggregation_selected)
+        self.aggregation_toolbutton.clicked.connect(self.aggregation_toolbutton_clicked)
+        self.aggregation_lineedit.textChanged.connect(
+            self.aggregation_lineedit_text_changed
+        )
+        # Set up the population raster widgets
+        self.population_combo.setAllowEmptyLayer(True)
+        self.population_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.population_combo.currentIndexChanged.connect(self.population_selected)
+        self.population_toolbutton.clicked.connect(self.population_toolbutton_clicked)
+        self.population_lineedit.textChanged.connect(
+            self.population_lineedit_text_changed
+        )
+        # Set up the point layer widgets
+        self.point_combo.setAllowEmptyLayer(True)
+        self.point_combo.setFilters(QgsMapLayerProxyModel.PointLayer)
+        self.point_combo.currentIndexChanged.connect(self.point_selected)
+        self.population_toolbutton.clicked.connect(self.point_toolbutton_clicked)
+        self.point_lineedit.textChanged.connect(self.point_lineedit_text_changed)
+        # set up the polygon layer widgets
+        self.polygon_combo.setAllowEmptyLayer(True)
+        self.polygon_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.polygon_combo.currentIndexChanged.connect(self.polygon_selected)
+        self.polygon_toolbutton.clicked.connect(self.polygon_toolbutton_clicked)
+        self.polygon_lineedit.textChanged.connect(self.polygon_lineedit_text_changed)
+        # Set up the raster layer widgets
+        self.raster_combo.setAllowEmptyLayer(True)
+        self.raster_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.raster_combo.currentIndexChanged.connect(self.raster_selected)
+        self.raster_toolbutton.clicked.connect(self.raster_toolbutton_clicked)
+        self.raster_lineedit.textChanged.connect(self.raster_lineedit_text_changed)
 
         help_layout = QHBoxLayout()
         help_layout.addItem(
@@ -234,6 +266,101 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         parent_layout.replaceWidget(self.wee_container, self.table)
         self.wee_container.deleteLater()
         parent_layout.update()
+
+    def aggregation_selected(self):
+        """Handle combo selection change"""
+        self.aggregation_lineedit.hide()
+
+    def population_selected(self):
+        """Handle combo selection change"""
+        self.population_lineedit.hide()
+
+    def point_selected(self):
+        """Handle combo selection change"""
+        self.point_lineedit.hide()
+
+    def polygon_selected(self):
+        """Handle combo selection change"""
+        self.polygon_lineedit.hide()
+
+    def raster_selected(self):
+        """Handle combo selection change"""
+        self.raster_lineedit.hide()
+
+    def aggregation_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Vector files (*.shp *.gpkg)")
+        if file_dialog.exec_():
+            self.aggregation_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.aggregation_lineedit.setText(file_path)
+            self.aggregation_lineedit.show()
+
+    def population_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Raster files (*.tif *.tiff *.asc)")
+        if file_dialog.exec_():
+            self.population_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.population_lineedit.setText(file_path)
+            self.population_lineedit.show()
+
+    def point_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Vector files (*.shp *.gpkg)")
+        if file_dialog.exec_():
+            self.point_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.point_lineedit.setText(file_path)
+            self.point_lineedit.show()
+
+    def polygon_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Vector files (*.shp *.gpkg)")
+        if file_dialog.exec_():
+            self.polygon_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.polygon_lineedit.setText(file_path)
+            self.polygon_lineedit.show()
+
+    def raster_toolbutton_clicked(self):
+        # Show a file dialog to select a raster file
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Raster files (*.tif *.tiff *.asc)")
+        if file_dialog.exec_():
+            self.raster_combo.setCurrentIndex(0)
+            file_path = file_dialog.selectedFiles()[0]
+            self.raster_lineedit.setText(file_path)
+            self.raster_lineedit.show()
+
+    def aggregation_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.aggregation_combo.setCurrentIndex(0)
+
+    def population_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.population_combo.setCurrentIndex(0)
+
+    def point_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.point_combo.setCurrentIndex(0)
+
+    def polygon_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.polygon_combo.setCurrentIndex(0)
+
+    def raster_lineedit_text_changed(self):
+        """Handle text change in the line edit"""
+        self.raster_combo.setCurrentIndex(0)
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""

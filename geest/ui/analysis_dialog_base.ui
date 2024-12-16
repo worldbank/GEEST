@@ -279,7 +279,7 @@ padding: 4px;</string>
         </layout>
        </item>
        <item row="6" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,1">
+        <layout class="QHBoxLayout" name="mask_layout" stretch="1,1">
          <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
@@ -307,7 +307,7 @@ padding: 4px;</string>
              </widget>
             </item>
             <item row="1" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <layout class="QHBoxLayout" name="point_layout">
               <item>
                <widget class="QgsMapLayerComboBox" name="point_combo"/>
               </item>
@@ -315,7 +315,7 @@ padding: 4px;</string>
                <widget class="QLineEdit" name="point_lineedit"/>
               </item>
               <item>
-               <widget class="QToolButton" name="point_tool_button">
+               <widget class="QToolButton" name="point_toolbutton">
                 <property name="text">
                  <string>...</string>
                 </property>
@@ -362,7 +362,7 @@ padding: 4px;</string>
              </widget>
             </item>
             <item row="3" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <layout class="QHBoxLayout" name="polygon_layout">
               <item>
                <widget class="QgsMapLayerComboBox" name="polygon_combo"/>
               </item>
@@ -370,7 +370,7 @@ padding: 4px;</string>
                <widget class="QLineEdit" name="polygon_lineedit"/>
               </item>
               <item>
-               <widget class="QToolButton" name="polygon_tool_button">
+               <widget class="QToolButton" name="polygon_toolbutton">
                 <property name="text">
                  <string>...</string>
                 </property>
@@ -402,7 +402,7 @@ padding: 4px;</string>
              </widget>
             </item>
             <item row="5" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <layout class="QHBoxLayout" name="raster_layout">
               <item>
                <widget class="QgsMapLayerComboBox" name="raster_combo"/>
               </item>
@@ -410,7 +410,7 @@ padding: 4px;</string>
                <widget class="QLineEdit" name="raster_lineedit"/>
               </item>
               <item>
-               <widget class="QToolButton" name="raster_tool_button">
+               <widget class="QToolButton" name="raster_toolbutton">
                 <property name="text">
                  <string>...</string>
                 </property>
