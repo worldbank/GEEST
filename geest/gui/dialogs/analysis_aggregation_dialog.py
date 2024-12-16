@@ -61,6 +61,81 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         self.banner_label.deleteLater()
         parent_layout.update()
 
+        self.setup_table()
+
+        self.aggregation_lineedit.hide()
+        self.population_lineedit.hide()
+        self.point_lineedit.hide()
+        self.polygon_lineedit.hide()
+        self.raster_lineedit.hide()
+
+        help_layout = QHBoxLayout()
+        help_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
+        self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
+        self.help_icon = self.help_icon.scaledToWidth(20)
+        self.help_label_icon = QLabel()
+        self.help_label_icon.setPixmap(self.help_icon)
+        self.help_label_icon.setScaledContents(True)
+        self.help_label_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.help_label_icon.setMaximumWidth(20)
+        self.help_label_icon.setAlignment(Qt.AlignRight)
+        help_layout.addWidget(self.help_label_icon)
+
+        self.help_label = QLabel(
+            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
+        )
+        self.help_label.setOpenExternalLinks(True)
+        self.help_label.setAlignment(Qt.AlignCenter)
+
+        self.help_label.linkActivated.connect(self.open_link_in_browser)
+        help_layout.addWidget(self.help_label)
+        help_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
+        self.help_widget.setLayout(help_layout)
+
+        auto_calculate_button = QPushButton("Balance Weights")
+        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+        self.button_box.accepted.connect(self.accept_changes)
+        self.button_box.rejected.connect(self.reject)
+        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
+
+        toggle_guid_button = QPushButton("Show GUIDs")
+        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
+        verbose_mode = setting(key="verbose_mode", default=0)
+        if verbose_mode:
+            self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
+        toggle_guid_button.clicked.connect(self.toggle_guid_column)
+        self.guid_column_visible = False  # Track GUID column visibility
+        self.table.setColumnHidden(
+            4, not self.guid_column_visible
+        )  # Hide GUID column by default
+
+        # Initial validation check
+        self.validate_weightings()
+
+        # Restore the dialog geometry
+
+        settings = QSettings()
+        geometry = settings.value("AnalysisAggregationDialog/geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+        else:
+            # Resize the dialog to be almost as large as the main window
+            main_window = (
+                self.parent().window()
+                if self.parent()
+                else self.screen().availableGeometry()
+            )
+            self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
+
+    def setup_table(self):
+        """
+        Set up the QTableWidget to display the analysis dimensions.
+
+        """
         # Table setup
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.guids))
@@ -152,74 +227,13 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         self.table.setMaximumHeight(
             self.table.verticalHeader().length()
             + self.table.horizontalHeader().height()
-            + 2
+            + 4
         )  # Add 2 pixels to prevent scrollbar showing
+        self.table.setFrameStyle(QTableWidget.NoFrame)
         parent_layout = self.wee_container.parent().layout()
         parent_layout.replaceWidget(self.wee_container, self.table)
         self.wee_container.deleteLater()
         parent_layout.update()
-
-        help_layout = QHBoxLayout()
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
-        self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
-        self.help_icon = self.help_icon.scaledToWidth(20)
-        self.help_label_icon = QLabel()
-        self.help_label_icon.setPixmap(self.help_icon)
-        self.help_label_icon.setScaledContents(True)
-        self.help_label_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.help_label_icon.setMaximumWidth(20)
-        self.help_label_icon.setAlignment(Qt.AlignRight)
-        help_layout.addWidget(self.help_label_icon)
-
-        self.help_label = QLabel(
-            "For detailed instructions on how to use this tool, please refer to the <a href='https://worldbank.github.io/GEEST/docs/user_guide.html'>GEEST User Guide</a>."
-        )
-        self.help_label.setOpenExternalLinks(True)
-        self.help_label.setAlignment(Qt.AlignCenter)
-
-        self.help_label.linkActivated.connect(self.open_link_in_browser)
-        help_layout.addWidget(self.help_label)
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
-        self.help_widget.setLayout(help_layout)
-
-        auto_calculate_button = QPushButton("Balance Weights")
-        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
-        self.button_box.accepted.connect(self.accept_changes)
-        self.button_box.rejected.connect(self.reject)
-        auto_calculate_button.clicked.connect(self.auto_calculate_weightings)
-
-        toggle_guid_button = QPushButton("Show GUIDs")
-        self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
-        verbose_mode = setting(key="verbose_mode", default=0)
-        if verbose_mode:
-            self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
-        toggle_guid_button.clicked.connect(self.toggle_guid_column)
-        self.guid_column_visible = False  # Track GUID column visibility
-        self.table.setColumnHidden(
-            4, not self.guid_column_visible
-        )  # Hide GUID column by default
-
-        # Initial validation check
-        self.validate_weightings()
-
-        # Restore the dialog geometry
-
-        settings = QSettings()
-        geometry = settings.value("AnalysisAggregationDialog/geometry")
-        if geometry:
-            self.restoreGeometry(geometry)
-        else:
-            # Resize the dialog to be almost as large as the main window
-            main_window = (
-                self.parent().window()
-                if self.parent()
-                else self.screen().availableGeometry()
-            )
-            self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""
