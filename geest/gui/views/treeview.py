@@ -93,7 +93,37 @@ class JsonTreeModel(QAbstractItemModel):
             "error": analysis_error,
             "error_file": analysis_error_file,
         }
-
+        for prefix in [
+            "aggregation",
+            "population",
+            "point_mask",
+            "polygon_mask",
+            "raster_mask",
+        ]:
+            analysis_attributes[f"{prefix}_layer"] = json_data.get(
+                f"{prefix}_layer", ""
+            )
+            analysis_attributes[f"{prefix}_layer_name"] = json_data.get(
+                f"{prefix}_layer_name", ""
+            )
+            analysis_attributes[f"{prefix}_layer_source"] = json_data.get(
+                f"{prefix}_layer_source", ""
+            )
+            analysis_attributes[f"{prefix}_layer_provider_type"] = json_data.get(
+                f"{prefix}_layer_provider_type", ""
+            )
+            analysis_attributes[f"{prefix}_layer_crs"] = json_data.get(
+                f"{prefix}_layer_crs", ""
+            )
+            analysis_attributes[f"{prefix}_layer_wkb_type"] = json_data.get(
+                f"{prefix}_layer_wkb_type", ""
+            )
+            analysis_attributes[f"{prefix}_layer_id"] = json_data.get(
+                f"{prefix}_layer_id", ""
+            )
+            analysis_attributes[f"{prefix}_shapefile"] = json_data.get(
+                f"{prefix}_shapefile", ""
+            )
         # Create the "Analysis" item
         status = ""
         weighting = ""
