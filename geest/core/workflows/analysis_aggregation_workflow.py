@@ -50,7 +50,8 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
             population_raster_path=self.population_data,
             working_directory=self.working_directory,
             study_area_gpkg_path=self.gpkg_path,
-            crs=self.target_crs,
+            cell_size_m=self.cell_size_m,
+            target_crs=self.target_crs,
             feedback=self.feedback,
         )
         population_processor.run()

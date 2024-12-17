@@ -29,7 +29,8 @@ class PopulationRasterProcessingTask(QgsTask):
         population_raster_path (str): Path to the population raster layer.
         study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
         output_dir (str): Directory to save the output rasters.
-        crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters.
+        cell_size_m (float): Cell size for the output rasters.
+        crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters. Will use the CRS of the clip layer if not provided.
         context (Optional[QgsProcessingContext]): QGIS processing context.
         feedback (Optional[QgsFeedback]): QGIS feedback object.
         force_clear (bool): Flag to force clearing of all outputs before processing.
@@ -40,7 +41,8 @@ class PopulationRasterProcessingTask(QgsTask):
         population_raster_path: str,
         study_area_gpkg_path: str,
         working_directory: str,
-        crs: Optional[QgsCoordinateReferenceSystem] = None,
+        cell_size_m: float,
+        target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         context: Optional[QgsProcessingContext] = None,
         feedback: Optional[QgsFeedback] = None,
         force_clear: bool = False,
@@ -53,21 +55,32 @@ class PopulationRasterProcessingTask(QgsTask):
         if self.force_clear and os.path.exists(self.output_dir):
             for file in os.listdir(self.output_dir):
                 os.remove(os.path.join(self.output_dir, file))
+        self.cell_size_m = cell_size_m
         os.makedirs(self.output_dir, exist_ok=True)
-        self.crs = crs
+        self.target_crs = target_crs
+        if not self.target_crs:
+            layer: QgsVectorLayer = QgsVectorLayer(
+                f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
+                "study_area_clip_polygons",
+                "ogr",
+            )
+            self.target_crs = layer.crs()
+            del layer
         self.context = context
         self.feedback = feedback
         self.global_min = float("inf")
         self.global_max = float("-inf")
         self.clipped_rasters = []
         self.reclassified_rasters = []
+        self.resampled_rasters = []
         log_message(f"---------------------------------------------")
         log_message(f"Population raster processing task initialized")
         log_message(f"---------------------------------------------")
         log_message(f"Population raster path: {self.population_raster_path}")
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
         log_message(f"Output directory: {self.output_dir}")
-        log_message(f"CRS: {self.crs.authid() if self.crs else 'None'}")
+        log_message(f"Cell size: {self.cell_size_m}")
+        log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
         log_message(f"Force clear: {self.force_clear}")
         log_message(f"---------------------------------------------")
 
@@ -76,8 +89,9 @@ class PopulationRasterProcessingTask(QgsTask):
         Executes the task to process population rasters.
         """
         try:
-            self.process_population_rasters()
-            self.reclassify_population_rasters()
+            self.clip_population_rasters()
+            self.resample_population_rasters()
+            self.reclassify_resampled_rasters()
             self.generate_vrts()
             return True
         except Exception as e:
@@ -94,7 +108,7 @@ class PopulationRasterProcessingTask(QgsTask):
         else:
             log_message("Population raster processing failed.")
 
-    def process_population_rasters(self) -> None:
+    def clip_population_rasters(self) -> None:
         """
         Clips the population raster using study area masks and records min and max values.
         """
@@ -106,7 +120,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 return
             # create a temporary layer using the clip geometry
             clip_layer = QgsVectorLayer("Polygon", "clip", "memory")
-            clip_layer.setCrs(self.crs)
+            clip_layer.setCrs(self.target_crs)
             clip_layer.startEditing()
             feature = QgsFeature()
             feature.setGeometry(clip_area)
@@ -149,19 +163,83 @@ class PopulationRasterProcessingTask(QgsTask):
 
             self.clipped_rasters.append(output_path)
 
+            log_message(f"Processed mask {layer_name}")
+
+    def resample_population_rasters(self) -> None:
+        """
+        Resamples the reclassified rasters to the target CRS and resolution.
+
+        Uses the sum method to aggregate values when resampling.
+
+        From gdalwarp docs: sum: compute the weighted sum of all non-NODATA contributing pixels (since GDAL 3.1)
+
+        Note: that the -r sum option is not available in the gdal:warpreproject algorithm in QGIS as provided by the ui
+
+
+        """
+        area_iterator = AreaIterator(self.study_area_gpkg_path)
+
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
+            if self.feedback and self.feedback.isCanceled():
+                return
+
+            layer_name = f"{index}.tif"
+            input_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
+            output_path = os.path.join(self.output_dir, f"resampled_{layer_name}")
+
+            log_message(f"Resampling {output_path} from {input_path}")
+
+            if not self.force_clear and os.path.exists(output_path):
+                log_message(f"Reusing existing resampled raster: {output_path}")
+                self.resampled_rasters.append(output_path)
+                continue
+            bbox = current_bbox.boundingBox()
+            params = {
+                "INPUT": input_path,
+                "SOURCE_CRS": QgsCoordinateReferenceSystem("EPSG:4326"),
+                "TARGET_CRS": self.target_crs,
+                "RESAMPLING": 0,
+                "NODATA": None,
+                "TARGET_RESOLUTION": self.cell_size_m,
+                "OPTIONS": "",
+                "DATA_TYPE": 0,
+                "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+                "MULTITHREADING": False,
+                #'EXTRA':'-r sum', # this should override RESAMPLING: 0 to use the sum method
+                "OUTPUT": output_path,
+            }
+
+            log_message(f"Resampling raster: {input_path}")
+            result = processing.run("gdal:warpreproject", params)
+
+            if not result["OUTPUT"]:
+                log_message(f"Failed to resample raster: {output_path}")
+                continue
+
+            resampled_layer = QgsRasterLayer(output_path, f"Clipped {layer_name}")
+
+            if not resampled_layer.isValid():
+                log_message(f"Invalid resampled raster layer for : {layer_name}")
+                continue
+
+            self.resampled_rasters.append(output_path)
+
             # Calculate min and max values for the clipped raster
-            provider: QgsRasterDataProvider = clipped_layer.dataProvider()
+            provider: QgsRasterDataProvider = resampled_layer.dataProvider()
             stats = provider.bandStatistics(1)
             self.global_min = min(self.global_min, stats.minimumValue)
             self.global_max = max(self.global_max, stats.maximumValue)
 
             log_message(
-                f"Processed mask {layer_name}: Min={stats.minimumValue}, Max={stats.maximumValue}"
+                f"Processed resample {layer_name}: Min={stats.minimumValue}, Max={stats.maximumValue}"
             )
+            log_message(f"Resampled raster: {output_path}")
 
-    def reclassify_population_rasters(self) -> None:
+    def reclassify_resampled_rasters(self) -> None:
         """
-        Reclassifies clipped rasters into three classes based on population values.
+        Reclassifies the resampled rasters into three classes based on population values.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         range_third = (self.global_max - self.global_min) / 3
@@ -173,9 +251,9 @@ class PopulationRasterProcessingTask(QgsTask):
                 return
 
             layer_name = f"{index}.tif"
+            input_path = os.path.join(self.output_dir, f"resampled_{layer_name}")
             output_path = os.path.join(self.output_dir, f"reclassified_{layer_name}")
 
-            input_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
             log_message(f"Reclassifying {output_path} from {input_path}")
 
             if not self.force_clear and os.path.exists(output_path):
@@ -223,6 +301,8 @@ class PopulationRasterProcessingTask(QgsTask):
         """
         clipped_vrt_path = os.path.join(self.output_dir, "clipped_population.vrt")
 
+        resampled_vrt_path = os.path.join(self.output_dir, "resampled_population.vrt")
+
         reclassified_vrt_path = os.path.join(
             self.output_dir, "reclassified_population.vrt"
         )
@@ -240,6 +320,17 @@ class PopulationRasterProcessingTask(QgsTask):
             }
             processing.run("gdal:buildvirtualraster", params)
             log_message(f"Generated VRT for clipped rasters: {clipped_vrt_path}")
+
+        # Generate VRT for resampled rasters
+        if self.resampled_rasters:
+            params = {
+                "INPUT": self.resampled_rasters,
+                "RESOLUTION": 0,  # Use highest resolution among input files
+                "SEPARATE": False,  # Combine into a single band
+                "OUTPUT": resampled_vrt_path,
+            }
+            processing.run("gdal:buildvirtualraster", params)
+            log_message(f"Generated VRT for resampled rasters: {resampled_vrt_path}")
 
         # Generate VRT for reclassified rasters
         if self.reclassified_rasters:
