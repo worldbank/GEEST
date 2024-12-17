@@ -1,5 +1,6 @@
 import os
 import traceback
+import shutil
 from typing import Optional, Tuple
 from qgis.core import (
     QgsTask,
@@ -12,7 +13,7 @@ from qgis.core import (
     QgsFeature,
 )
 import processing
-from geest.utilities import log_message
+from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
 
 
@@ -25,7 +26,6 @@ class PopulationRasterProcessingTask(QgsTask):
     three classes based on population values.
 
     Args:
-        name (str): Name of the task.
         population_raster_path (str): Path to the population raster layer.
         study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
         output_dir (str): Directory to save the output rasters.
@@ -37,19 +37,18 @@ class PopulationRasterProcessingTask(QgsTask):
 
     def __init__(
         self,
-        name: str,
         population_raster_path: str,
         study_area_gpkg_path: str,
-        output_dir: str,
+        working_directory: str,
         crs: Optional[QgsCoordinateReferenceSystem] = None,
         context: Optional[QgsProcessingContext] = None,
         feedback: Optional[QgsFeedback] = None,
         force_clear: bool = False,
     ):
-        super().__init__(name, QgsTask.CanCancel)
+        super().__init__("Population Processor", QgsTask.CanCancel)
         self.population_raster_path = population_raster_path
         self.study_area_gpkg_path = study_area_gpkg_path
-        self.output_dir = os.path.join(output_dir, "population")
+        self.output_dir = os.path.join(working_directory, "population")
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
             for file in os.listdir(self.output_dir):
@@ -62,6 +61,15 @@ class PopulationRasterProcessingTask(QgsTask):
         self.global_max = float("-inf")
         self.clipped_rasters = []
         self.reclassified_rasters = []
+        log_message(f"---------------------------------------------")
+        log_message(f"Population raster processing task initialized")
+        log_message(f"---------------------------------------------")
+        log_message(f"Population raster path: {self.population_raster_path}")
+        log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
+        log_message(f"Output directory: {self.output_dir}")
+        log_message(f"CRS: {self.crs.authid() if self.crs else 'None'}")
+        log_message(f"Force clear: {self.force_clear}")
+        log_message(f"---------------------------------------------")
 
     def run(self) -> bool:
         """
@@ -178,7 +186,7 @@ class PopulationRasterProcessingTask(QgsTask):
             params = {
                 "INPUT_RASTER": input_path,
                 "RASTER_BAND": 1,
-                "TABLE": [
+                "TABLE": [  # ['0','52','1','52','95','2','95','140','3'],
                     self.global_min,
                     self.global_min + range_third,
                     1,
@@ -189,12 +197,16 @@ class PopulationRasterProcessingTask(QgsTask):
                     self.global_max,
                     3,
                 ],
+                "RANGE_BOUNDARIES": 0,
+                "NODATA_FOR_MISSING": True,
                 "NO_DATA": 0,
-                "DATA_TYPE": 5,  # Float32
-                # "DATA_TYPE": 1,  # Byte
+                # "DATA_TYPE": 5,  # Float32
+                "DATA_TYPE": 1,  # Byte
                 "OUTPUT": output_path,
             }
+
             log_message(f"Reclassifying raster: {input_path}")
+            log_message(f"Reclassification table:\n {params['TABLE']}\n")
             result = processing.run("native:reclassifybytable", params)
 
             if not result["OUTPUT"]:
@@ -210,8 +222,12 @@ class PopulationRasterProcessingTask(QgsTask):
         Generates VRT files combining all clipped and reclassified rasters.
         """
         clipped_vrt_path = os.path.join(self.output_dir, "clipped_population.vrt")
+
         reclassified_vrt_path = os.path.join(
             self.output_dir, "reclassified_population.vrt"
+        )
+        reclassified_qml_path = os.path.join(
+            self.output_dir, "reclassified_population.qml"
         )
 
         # Generate VRT for clipped rasters
@@ -237,3 +253,7 @@ class PopulationRasterProcessingTask(QgsTask):
             log_message(
                 f"Generated VRT for reclassified rasters: {reclassified_vrt_path}"
             )
+            source_qml = resources_path("resources", "qml", f"population_3_classes.qml")
+
+            log_message(f"Copying QML from {source_qml} to {reclassified_qml_path}")
+            shutil.copyfile(source_qml, reclassified_qml_path)
