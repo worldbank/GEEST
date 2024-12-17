@@ -2,7 +2,11 @@ import os
 import traceback
 import shutil
 from typing import Optional, Tuple
+import subprocess
+import platform
+
 from qgis.core import (
+    QgsApplication,
     QgsTask,
     QgsProcessingContext,
     QgsFeedback,
@@ -165,18 +169,45 @@ class PopulationRasterProcessingTask(QgsTask):
 
             log_message(f"Processed mask {layer_name}")
 
+    def find_gdalwarp(self) -> str:
+        """
+        Finds the gdalwarp executable using 'which' command on Unix-based systems
+        and QGIS installation path on Windows.
+        """
+        if platform.system() == "Windows":
+            gdal_path = os.path.join(QgsApplication.prefixPath(), "bin", "gdalwarp.exe")
+            if os.path.exists(gdal_path):
+                return gdal_path
+            else:
+                raise FileNotFoundError(
+                    "gdalwarp.exe not found in QGIS installation path."
+                )
+        else:
+            result = subprocess.run(
+                ["which", "gdalwarp"], capture_output=True, text=True
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+            else:
+                raise FileNotFoundError("gdalwarp not found in system path.")
+
     def resample_population_rasters(self) -> None:
         """
         Resamples the reclassified rasters to the target CRS and resolution.
 
-        Uses the sum method to aggregate values when resampling.
+        Uses the sum method to aggregate values when resampling via gdalwarp.
 
         From gdalwarp docs: sum: compute the weighted sum of all non-NODATA contributing pixels (since GDAL 3.1)
 
-        Note: that the -r sum option is not available in the gdal:warpreproject algorithm in QGIS as provided by the ui
-
-
+        Note: gdal:warpreproject does not expose the -r sum option, so this method
+        uses a direct gdalwarp shell call instead.
         """
+        try:
+            gdal_path = self.find_gdalwarp()
+        except FileNotFoundError as e:
+            log_message(f"Error: {str(e)}")
+            return
+
         area_iterator = AreaIterator(self.study_area_gpkg_path)
 
         for index, (current_area, clip_area, current_bbox, progress) in enumerate(
@@ -195,38 +226,56 @@ class PopulationRasterProcessingTask(QgsTask):
                 log_message(f"Reusing existing resampled raster: {output_path}")
                 self.resampled_rasters.append(output_path)
                 continue
+
             bbox = current_bbox.boundingBox()
-            params = {
-                "INPUT": input_path,
-                "SOURCE_CRS": QgsCoordinateReferenceSystem("EPSG:4326"),
-                "TARGET_CRS": self.target_crs,
-                "RESAMPLING": 0,
-                "NODATA": None,
-                "TARGET_RESOLUTION": self.cell_size_m,
-                "OPTIONS": "",
-                "DATA_TYPE": 0,
-                "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
-                "MULTITHREADING": False,
-                #'EXTRA':'-r sum', # this should override RESAMPLING: 0 to use the sum method
-                "OUTPUT": output_path,
-            }
 
-            log_message(f"Resampling raster: {input_path}")
-            result = processing.run("gdal:warpreproject", params)
+            # Define gdalwarp command arguments
+            gdalwarp_cmd = [
+                gdal_path,
+                "-t_srs",
+                self.target_crs.authid(),
+                "-tr",
+                str(self.cell_size_m),
+                str(self.cell_size_m),
+                "-te",
+                str(bbox.xMinimum()),
+                str(bbox.yMinimum()),
+                str(bbox.xMaximum()),
+                str(bbox.yMaximum()),
+                "-r",
+                "sum",
+                "-of",
+                "GTiff",
+                input_path,
+                output_path,
+            ]
 
-            if not result["OUTPUT"]:
-                log_message(f"Failed to resample raster: {output_path}")
+            try:
+                # Run the gdalwarp command
+                log_message(f"Running gdalwarp with command: {' '.join(gdalwarp_cmd)}")
+                subprocess.run(
+                    gdalwarp_cmd,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+
+            except subprocess.CalledProcessError as e:
+                log_message(
+                    f"Failed to resample raster: {output_path}\nError: {e.stderr.decode()}"
+                )
                 continue
 
-            resampled_layer = QgsRasterLayer(output_path, f"Clipped {layer_name}")
+            # Load the resampled raster
+            resampled_layer = QgsRasterLayer(output_path, f"Resampled {layer_name}")
 
             if not resampled_layer.isValid():
-                log_message(f"Invalid resampled raster layer for : {layer_name}")
+                log_message(f"Invalid resampled raster layer for: {layer_name}")
                 continue
 
             self.resampled_rasters.append(output_path)
 
-            # Calculate min and max values for the clipped raster
+            # Calculate min and max values for the resampled raster
             provider: QgsRasterDataProvider = resampled_layer.dataProvider()
             stats = provider.bandStatistics(1)
             self.global_min = min(self.global_min, stats.minimumValue)
