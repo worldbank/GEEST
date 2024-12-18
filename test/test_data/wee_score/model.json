@@ -963,12 +963,12 @@
             "execution_end_time": ""
         }
     ],
-    "result": "Not Run",
-    "result_file": "",
-    "execution_start_time": "",
-    "execution_end_time": "",
+    "result": "analysis_aggregation Workflow Completed",
+    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/_combined.vrt",
+    "execution_start_time": "2024-12-18T23:36:00.070532",
+    "execution_end_time": "2024-12-18T23:36:00.912866",
     "error": "",
-    "error_file": "",
+    "error_file": null,
     "aggregation_layer": null,
     "aggregation_layer_name": "",
     "aggregation_layer_source": "",
