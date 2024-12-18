@@ -5,9 +5,9 @@ from geest.core.algorithms import WEEScoreProcessingTask
 class TestWEEScoreProcessingTask(unittest.TestCase):
     def setUp(self):
         self.task = WEEScoreProcessingTask(
-            geest_raster_path="test_data/geest.tif",
-            pop_raster_path="test_data/pop.tif",
-            study_area_gpkg_path="test_data/study_areas.gpkg",
+            geest_raster_path="test_data/wee_score/wee_masked_0.tif",
+            pop_raster_path="test_data/wee_score/reclassified_0.tif",
+            study_area_gpkg_path="test_data/wee_score/study_area/study_area.gpkg",
             working_directory="/tmp",
             target_crs=None,
             force_clear=True,
