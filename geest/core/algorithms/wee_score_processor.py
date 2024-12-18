@@ -44,8 +44,8 @@ class WEEScoreProcessingTask(QgsTask):
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the aggregation analysis and population raster processing
-        self.population_folder = os.path.join(self.output_dir, "population")
-        self.wee_folder = os.path.join(self.output_dir)
+        self.population_folder = os.path.join(working_directory, "population")
+        self.wee_folder = working_directory
 
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
@@ -78,21 +78,36 @@ class WEEScoreProcessingTask(QgsTask):
             log_message(traceback.format_exc())
             return False
 
-    def validate_rasters(self, geest_raster_path, pop_raster_path) -> None:
+    def validate_rasters(
+        self,
+        geest_raster: QgsRasterLayer,
+        pop_raster: QgsRasterLayer,
+        dimension_check=False,
+    ) -> None:
         """
         Checks if GEEST and POP rasters have the same origin, dimensions, and pixel sizes.
+
+        Raises an exception if the check fails.
+
+        Args:
+            geest_raster_path (QgsRasterLayer): Path to the GEEST raster.
+            pop_raster_path (QgsRasterLayer): Path to the POP raster.
+            dimension_check (bool): Flag to check if the rasters have the same dimensions.
+        returns:
+            None
         """
         log_message("Validating input rasters")
-        log_message(f"GEEST Raster: {geest_raster_path}")
-        log_message(f"POP Raster  : {pop_raster_path}")
-        geest_layer = QgsRasterLayer(geest_raster_path, "GEEST")
-        pop_layer = QgsRasterLayer(pop_raster_path, "POP")
+        log_message(f"GEEST Raster: {geest_raster.source()}")
+        log_message(f"POP Raster  : {pop_raster.source()}")
 
-        if not geest_layer.isValid() or not pop_layer.isValid():
+        if not geest_raster.isValid() or not pop_raster.isValid():
             raise ValueError("One or both input rasters are invalid.")
 
-        geest_provider = geest_layer.dataProvider()
-        pop_provider = pop_layer.dataProvider()
+        if not dimension_check:
+            return
+
+        geest_provider = geest_raster.dataProvider()
+        pop_provider = pop_raster.dataProvider()
 
         geest_extent = geest_provider.extent()
         pop_extent = pop_provider.extent()
@@ -119,7 +134,9 @@ class WEEScoreProcessingTask(QgsTask):
             population_path = os.path.join(
                 self.population_folder, f"reclassified_{index}.tif"
             )
-            self.validate_rasters(wee_path, population_path)
+            wee_layer = QgsRasterLayer(wee_path, "WEE")
+            pop_layer = QgsRasterLayer(population_path, "POP")
+            self.validate_rasters(wee_layer, pop_layer)
 
             output_path = os.path.join(self.output_dir, f"wee_score_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
@@ -132,7 +149,7 @@ class WEEScoreProcessingTask(QgsTask):
             # Raster algebra formula: ((GEEST - 1) * 3) + POP
             params = {
                 "EXPRESSION": f"((A@1 - 1) * 3) + B@1",
-                "LAYERS": [wee_path, population_path],
+                "LAYERS": [wee_layer, pop_layer],
                 "OUTPUT": output_path,
             }
             processing.run("gdal:rastercalculator", params)
