@@ -824,24 +824,30 @@ class TreePanel(QWidget):
             )  # Insert at the top of the layers panel
 
         layers = [
-            "study_area_bbox",
-            "study_area_bboxes",
             "study_area_polygons",
+            "study_area_clip_polygons",
             "study_area_grid",
+            "study_area_bboxes",
+            "study_area_bbox",
         ]
         for layer_name in layers:
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
             layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
 
-            if layer.isValid():
-                QgsProject.instance().addMapLayer(layer)
-                log_message(f"Added '{layer_name}' layer to the map.")
-            else:
+            if not layer.isValid():
                 log_message(
                     f"Failed to add '{layer_name}' layer to the map.",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
+                continue
+
+            source_qml = resources_path("resources", "qml", f"{layer_name}.qml")
+            result = layer.loadNamedStyle(source_qml)
+            if result[0]:  # loadNamedStyle returns (success, error_message)
+                print(f"Successfully applied QML style to layer '{layer_name}'")
+            else:
+                print(f"Failed to apply QML style: {result[1]}")
 
             # Check if a layer with the same data source exists in the correct group
             existing_layer = None
