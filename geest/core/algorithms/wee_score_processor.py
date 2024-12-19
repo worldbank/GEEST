@@ -146,35 +146,21 @@ class WEEScoreProcessingTask(QgsTask):
 
             log_message(f"Calculating WEE SCORE for area {index}")
 
-            # processing.run("gdal:rastercalculator",
-            #    {
-            #     'INPUT_A':'/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/wee.asc',
-            #     'BAND_A':1,
-            #     'INPUT_B':'/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/population/population.asc',
-            #     'BAND_B':1,
-            #     'INPUT_C':None,
-            #     'BAND_C':None,
-            #     'INPUT_D':None,
-            #     'BAND_D':None,
-            #     'INPUT_E':None,
-            #     'BAND_E':None,
-            #     'INPUT_F':None,
-            #     'BAND_F':None,
-            #     'FORMULA':'((A - 1) * 3) + B',
-            #     'NO_DATA':None,
-            #     'EXTENT_OPT':3,
-            #     'PROJWIN':None,
-            #     'RTYPE':0,
-            #     'OPTIONS':'',
-            #     'EXTRA':'',
-            #     'OUTPUT':'TEMPORARY_OUTPUT'})
-
-            # Raster algebra formula: ((GEEST - 1) * 3) + POP
             params = {
-                "EXPRESSION": f"((A@1 - 1) * 3) + B@1",
-                "LAYERS": [wee_layer, pop_layer],
+                "INPUT_A": wee_layer,
+                "BAND_A": 1,
+                "INPUT_B": pop_layer,
+                "BAND_B": 1,
+                "FORMULA": "((A - 1) * 3) + B",
+                "NO_DATA": None,
+                "EXTENT_OPT": 3,
+                "PROJWIN": None,
+                "RTYPE": 0,
+                "OPTIONS": "",
+                "EXTRA": "",
                 "OUTPUT": output_path,
             }
+
             processing.run("gdal:rastercalculator", params)
             self.output_rasters.append(output_path)
 
