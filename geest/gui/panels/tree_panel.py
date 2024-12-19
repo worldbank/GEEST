@@ -478,7 +478,9 @@ class TreePanel(QWidget):
             menu.addAction(add_to_map_action)
             add_wee_by_population = QAction("Add WEE by Pop to Map")
             add_wee_by_population.triggered.connect(
-                lambda: self.add_to_map(item, key="wee_by_population")
+                lambda: self.add_to_map(
+                    item, key="wee_by_population", layer_name="WEE by Population"
+                )
             )
             menu.addAction(add_wee_by_population)
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
@@ -875,13 +877,14 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )
 
-    def add_to_map(self, item, key="result_file"):
+    def add_to_map(self, item, key="result_file", layer_name=None):
         """Add the item to the map."""
 
         layer_uri = item.attribute(f"{key}")
         log_message(f"Adding {layer_uri} for key {key} to map")
         if layer_uri:
-            layer_name = item.data(0)
+            if not layer_name:
+                layer_name = item.data(0)
             layer = QgsRasterLayer(layer_uri, layer_name)
 
             if not layer.isValid():
