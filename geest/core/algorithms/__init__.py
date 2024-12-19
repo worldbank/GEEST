@@ -1,3 +1,3 @@
 from .area_iterator import AreaIterator
 from .population_processor import PopulationRasterProcessingTask
-from .wee_score_processor import WEEScoreProcessingTask
+from .wee_score_processor import WEEByPopulationScoreProcessingTask

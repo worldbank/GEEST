@@ -16,12 +16,12 @@ from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
 
 
-class WEEScoreProcessingTask(QgsTask):
+class WEEByPopulationScoreProcessingTask(QgsTask):
     """
-    A QgsTask subclass for calculating WEE SCORE using raster algebra.
+    A QgsTask subclass for calculating WEE x Population SCORE using raster algebra.
 
     It iterates over study areas, calculates the WEE SCORE using aligned input rasters
-    (GEEST and POP), combines the resulting rasters into a VRT, and applies a QML style.
+    (WEE and POP), combines the resulting rasters into a VRT, and applies a QML style.
 
     Args:
         study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
@@ -70,7 +70,7 @@ class WEEScoreProcessingTask(QgsTask):
         Executes the WEE SCORE calculation task.
         """
         try:
-            self.calculate_wee_score()
+            self.calculate_score()
             self.generate_vrt()
             return True
         except Exception as e:
@@ -121,9 +121,9 @@ class WEEScoreProcessingTask(QgsTask):
 
         log_message("Validation successful: rasters are aligned.")
 
-    def calculate_wee_score(self) -> None:
+    def calculate_score(self) -> None:
         """
-        Calculates WEE SCORE using raster algebra and saves the result for each area.
+        Calculates WEE by POP SCORE using raster algebra and saves the result for each area.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         for index, (_, _, _, _) in enumerate(area_iterator):
@@ -136,15 +136,17 @@ class WEEScoreProcessingTask(QgsTask):
             )
             wee_layer = QgsRasterLayer(wee_path, "WEE")
             pop_layer = QgsRasterLayer(population_path, "POP")
-            self.validate_rasters(wee_layer, pop_layer)
+            self.validate_rasters(wee_layer, pop_layer, dimension_check=False)
 
-            output_path = os.path.join(self.output_dir, f"wee_score_{index}.tif")
+            output_path = os.path.join(
+                self.output_dir, f"wee_by_population_score_{index}.tif"
+            )
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
                 continue
 
-            log_message(f"Calculating WEE SCORE for area {index}")
+            log_message(f"Calculating WEE by POP SCORE for area {index}")
 
             params = {
                 "INPUT_A": wee_layer,
@@ -168,11 +170,11 @@ class WEEScoreProcessingTask(QgsTask):
 
     def generate_vrt(self) -> None:
         """
-        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
+        Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
         """
-        vrt_path = os.path.join(self.output_dir, "wee_score.vrt")
-        qml_path = os.path.join(self.output_dir, "wee_score.qml")
-        source_qml = resources_path("resources", "qml", "wee_score_style.qml")
+        vrt_path = os.path.join(self.output_dir, "wee_by_population_score.vrt")
+        qml_path = os.path.join(self.output_dir, "wee_by_population_score.qml")
+        source_qml = resources_path("resources", "qml", "wee_by_population_score.qml")
 
         params = {
             "INPUT": self.output_rasters,

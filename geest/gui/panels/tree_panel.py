@@ -476,6 +476,11 @@ class TreePanel(QWidget):
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
             menu.addAction(add_to_map_action)
+            add_wee_by_population = QAction("Add WEE by Pop to Map")
+            add_wee_by_population.triggered.connect(
+                lambda: self.add_to_map(item, key="wee_by_population")
+            )
+            menu.addAction(add_wee_by_population)
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
@@ -870,11 +875,11 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )
 
-    def add_to_map(self, item):
+    def add_to_map(self, item, key="result_file"):
         """Add the item to the map."""
 
-        layer_uri = item.attribute(f"result_file")
-
+        layer_uri = item.attribute(f"{key}")
+        log_message(f"Adding {layer_uri} for key {key} to map")
         if layer_uri:
             layer_name = item.data(0)
             layer = QgsRasterLayer(layer_uri, layer_name)
