@@ -59,8 +59,7 @@ class WorkflowFactory:
             attributes = item.attributes()
             log_message(f"Workflow Factory Called")
             log_message(f"-----------------------")
-            for key, value in attributes.items():
-                log_message(f"{key}: {value}")
+            log_message(f"{item.attributesAsMarkdown()}")
             log_message(f"-----------------------")
 
             analysis_mode = attributes.get("analysis_mode", "")

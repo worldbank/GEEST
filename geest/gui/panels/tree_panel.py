@@ -215,6 +215,13 @@ class TreePanel(QWidget):
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
 
+    def clear_item(self):
+        """Clear the outputs for a single item."""
+        index = self.treeView.currentIndex()
+        item = index.internalPointer()
+        item.clear(recursive=False)
+        self.save_json_to_working_directory()
+
     def clear_workflows(self):
         """
         Recursively mark workflows as not done, delete their working directories and their file_paths.
@@ -300,7 +307,7 @@ class TreePanel(QWidget):
                 # If this is a first time use of the analysis project lets set some things up
                 analysis_item = self.model.rootItem.child(0)
                 analysis_data = analysis_item.attributes()
-                log_message(str(analysis_data))
+                log_message(analysis_item.attributesAsMarkdown())
                 if analysis_data.get("working_folder", "Not Set"):
                     analysis_data["working_folder"] = self.working_directory
                 else:
@@ -441,7 +448,8 @@ class TreePanel(QWidget):
 
         # Update initially
         update_action_text()
-
+        clear_item_action = QAction("Clear Item", self)
+        clear_item_action.triggered.connect(self.clear_item)
         clear_results_action = QAction("Clear Results", self)
         clear_results_action.triggered.connect(self.clear_workflows)
 
@@ -464,6 +472,7 @@ class TreePanel(QWidget):
             )  # Connect to method
             menu.addAction(edit_analysis_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
             menu.addAction(add_to_map_action)
@@ -501,6 +510,7 @@ class TreePanel(QWidget):
             menu = QMenu(self)
             menu.addAction(edit_aggregation_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(clear_item_action)
             menu.addAction(add_to_map_action)
             menu.addAction(run_item_action)
             menu.addAction(disable_action)
@@ -526,6 +536,7 @@ class TreePanel(QWidget):
             menu = QMenu(self)
             menu.addAction(edit_aggregation_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(clear_item_action)
             menu.addAction(add_to_map_action)
             menu.addAction(run_item_action)
             menu.addAction(disable_action)
@@ -549,6 +560,7 @@ class TreePanel(QWidget):
             menu = QMenu(self)
             menu.addAction(show_properties_action)
             menu.addAction(show_json_attributes_action)
+            menu.addAction(clear_item_action)
             menu.addAction(add_to_map_action)
             menu.addAction(run_item_action)
             menu.addAction(disable_action)
@@ -812,24 +824,30 @@ class TreePanel(QWidget):
             )  # Insert at the top of the layers panel
 
         layers = [
-            "study_area_bbox",
-            "study_area_bboxes",
             "study_area_polygons",
+            "study_area_clip_polygons",
             "study_area_grid",
+            "study_area_bboxes",
+            "study_area_bbox",
         ]
         for layer_name in layers:
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
             layer = QgsVectorLayer(gpkg_layer_path, layer_name, "ogr")
 
-            if layer.isValid():
-                QgsProject.instance().addMapLayer(layer)
-                log_message(f"Added '{layer_name}' layer to the map.")
-            else:
+            if not layer.isValid():
                 log_message(
                     f"Failed to add '{layer_name}' layer to the map.",
                     tag="Geest",
                     level=Qgis.Critical,
                 )
+                continue
+
+            source_qml = resources_path("resources", "qml", f"{layer_name}.qml")
+            result = layer.loadNamedStyle(source_qml)
+            if result[0]:  # loadNamedStyle returns (success, error_message)
+                print(f"Successfully applied QML style to layer '{layer_name}'")
+            else:
+                print(f"Failed to apply QML style: {result[1]}")
 
             # Check if a layer with the same data source exists in the correct group
             existing_layer = None

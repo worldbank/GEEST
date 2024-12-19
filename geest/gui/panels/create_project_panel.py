@@ -178,7 +178,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             try:
 
                 processor = StudyAreaProcessingTask(
-                    name="Study Area Processing",
                     layer=layer,
                     field_name=field_name,
                     cell_size_m=self.cell_size_spinbox.value(),

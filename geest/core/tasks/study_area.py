@@ -50,7 +50,6 @@ class StudyAreaProcessingTask(QgsTask):
 
     def __init__(
         self,
-        name: str,
         layer: QgsVectorLayer,
         field_name: str,
         cell_size_m: float,
@@ -63,7 +62,6 @@ class StudyAreaProcessingTask(QgsTask):
         """
         Initializes the StudyAreaProcessingTask.
 
-        :param name: The name of the task.
         :param layer: The vector layer containing study area features.
         :param field_name: The name of the field containing area names.
         :param cell_size: The size of the grid cells in meters.
@@ -74,7 +72,7 @@ class StudyAreaProcessingTask(QgsTask):
         :param context: QgsProcessingContext for the task. Default is None.
         :param feedback: QgsFeedback object for task cancelling. Default is None.
         """
-        super().__init__(name, QgsTask.CanCancel)
+        super().__init__("Study Area Preparation", QgsTask.CanCancel)
         self.feedback = feedback
         self.layer: QgsVectorLayer = layer
         self.field_name: str = field_name
@@ -149,8 +147,6 @@ class StudyAreaProcessingTask(QgsTask):
             with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
                 # first the date and time
                 f.write(f"{datetime.datetime.now()}\n")
-                # then the name of the task
-                f.write(f"{self.name}\n")
                 # then the traceback
                 f.write(traceback.format_exc())
             return False

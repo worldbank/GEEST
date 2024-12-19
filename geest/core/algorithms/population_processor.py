@@ -1,7 +1,12 @@
 import os
 import traceback
+import shutil
 from typing import Optional, Tuple
+import subprocess
+import platform
+
 from qgis.core import (
+    QgsApplication,
     QgsTask,
     QgsProcessingContext,
     QgsFeedback,
@@ -12,7 +17,7 @@ from qgis.core import (
     QgsFeature,
 )
 import processing
-from geest.utilities import log_message
+from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
 
 
@@ -25,11 +30,11 @@ class PopulationRasterProcessingTask(QgsTask):
     three classes based on population values.
 
     Args:
-        name (str): Name of the task.
         population_raster_path (str): Path to the population raster layer.
         study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
         output_dir (str): Directory to save the output rasters.
-        crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters.
+        cell_size_m (float): Cell size for the output rasters.
+        crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters. Will use the CRS of the clip layer if not provided.
         context (Optional[QgsProcessingContext]): QGIS processing context.
         feedback (Optional[QgsFeedback]): QGIS feedback object.
         force_clear (bool): Flag to force clearing of all outputs before processing.
@@ -37,39 +42,60 @@ class PopulationRasterProcessingTask(QgsTask):
 
     def __init__(
         self,
-        name: str,
         population_raster_path: str,
         study_area_gpkg_path: str,
-        output_dir: str,
-        crs: Optional[QgsCoordinateReferenceSystem] = None,
+        working_directory: str,
+        cell_size_m: float,
+        target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         context: Optional[QgsProcessingContext] = None,
         feedback: Optional[QgsFeedback] = None,
         force_clear: bool = False,
     ):
-        super().__init__(name, QgsTask.CanCancel)
+        super().__init__("Population Processor", QgsTask.CanCancel)
         self.population_raster_path = population_raster_path
         self.study_area_gpkg_path = study_area_gpkg_path
-        self.output_dir = os.path.join(output_dir, "population")
+        self.output_dir = os.path.join(working_directory, "population")
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
             for file in os.listdir(self.output_dir):
                 os.remove(os.path.join(self.output_dir, file))
+        self.cell_size_m = cell_size_m
         os.makedirs(self.output_dir, exist_ok=True)
-        self.crs = crs
+        self.target_crs = target_crs
+        if not self.target_crs:
+            layer: QgsVectorLayer = QgsVectorLayer(
+                f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
+                "study_area_clip_polygons",
+                "ogr",
+            )
+            self.target_crs = layer.crs()
+            del layer
         self.context = context
         self.feedback = feedback
         self.global_min = float("inf")
         self.global_max = float("-inf")
         self.clipped_rasters = []
         self.reclassified_rasters = []
+        self.resampled_rasters = []
+        log_message(f"---------------------------------------------")
+        log_message(f"Population raster processing task initialized")
+        log_message(f"---------------------------------------------")
+        log_message(f"Population raster path: {self.population_raster_path}")
+        log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
+        log_message(f"Output directory: {self.output_dir}")
+        log_message(f"Cell size: {self.cell_size_m}")
+        log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
+        log_message(f"Force clear: {self.force_clear}")
+        log_message(f"---------------------------------------------")
 
     def run(self) -> bool:
         """
         Executes the task to process population rasters.
         """
         try:
-            self.process_population_rasters()
-            self.reclassify_population_rasters()
+            self.clip_population_rasters()
+            self.resample_population_rasters()
+            self.reclassify_resampled_rasters()
             self.generate_vrts()
             return True
         except Exception as e:
@@ -86,7 +112,7 @@ class PopulationRasterProcessingTask(QgsTask):
         else:
             log_message("Population raster processing failed.")
 
-    def process_population_rasters(self) -> None:
+    def clip_population_rasters(self) -> None:
         """
         Clips the population raster using study area masks and records min and max values.
         """
@@ -98,7 +124,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 return
             # create a temporary layer using the clip geometry
             clip_layer = QgsVectorLayer("Polygon", "clip", "memory")
-            clip_layer.setCrs(self.crs)
+            clip_layer.setCrs(self.target_crs)
             clip_layer.startEditing()
             feature = QgsFeature()
             feature.setGeometry(clip_area)
@@ -141,19 +167,128 @@ class PopulationRasterProcessingTask(QgsTask):
 
             self.clipped_rasters.append(output_path)
 
-            # Calculate min and max values for the clipped raster
-            provider: QgsRasterDataProvider = clipped_layer.dataProvider()
+            log_message(f"Processed mask {layer_name}")
+
+    def find_gdalwarp(self) -> str:
+        """
+        Finds the gdalwarp executable using 'which' command on Unix-based systems
+        and QGIS installation path on Windows.
+        """
+        if platform.system() == "Windows":
+            gdal_path = os.path.join(QgsApplication.prefixPath(), "bin", "gdalwarp.exe")
+            if os.path.exists(gdal_path):
+                return gdal_path
+            else:
+                raise FileNotFoundError(
+                    "gdalwarp.exe not found in QGIS installation path."
+                )
+        else:
+            result = subprocess.run(
+                ["which", "gdalwarp"], capture_output=True, text=True
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+            else:
+                raise FileNotFoundError("gdalwarp not found in system path.")
+
+    def resample_population_rasters(self) -> None:
+        """
+        Resamples the reclassified rasters to the target CRS and resolution.
+
+        Uses the sum method to aggregate values when resampling via gdalwarp.
+
+        From gdalwarp docs: sum: compute the weighted sum of all non-NODATA contributing pixels (since GDAL 3.1)
+
+        Note: gdal:warpreproject does not expose the -r sum option, so this method
+        uses a direct gdalwarp shell call instead.
+        """
+        try:
+            gdal_path = self.find_gdalwarp()
+        except FileNotFoundError as e:
+            log_message(f"Error: {str(e)}")
+            return
+
+        area_iterator = AreaIterator(self.study_area_gpkg_path)
+
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
+            area_iterator
+        ):
+            if self.feedback and self.feedback.isCanceled():
+                return
+
+            layer_name = f"{index}.tif"
+            input_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
+            output_path = os.path.join(self.output_dir, f"resampled_{layer_name}")
+
+            log_message(f"Resampling {output_path} from {input_path}")
+
+            if not self.force_clear and os.path.exists(output_path):
+                log_message(f"Reusing existing resampled raster: {output_path}")
+                self.resampled_rasters.append(output_path)
+                continue
+
+            bbox = current_bbox.boundingBox()
+
+            # Define gdalwarp command arguments
+            gdalwarp_cmd = [
+                gdal_path,
+                "-t_srs",
+                self.target_crs.authid(),
+                "-tr",
+                str(self.cell_size_m),
+                str(self.cell_size_m),
+                "-te",
+                str(bbox.xMinimum()),
+                str(bbox.yMinimum()),
+                str(bbox.xMaximum()),
+                str(bbox.yMaximum()),
+                "-r",
+                "sum",
+                "-of",
+                "GTiff",
+                input_path,
+                output_path,
+            ]
+
+            try:
+                # Run the gdalwarp command
+                log_message(f"Running gdalwarp with command: {' '.join(gdalwarp_cmd)}")
+                subprocess.run(
+                    gdalwarp_cmd,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+
+            except subprocess.CalledProcessError as e:
+                log_message(
+                    f"Failed to resample raster: {output_path}\nError: {e.stderr.decode()}"
+                )
+                continue
+
+            # Load the resampled raster
+            resampled_layer = QgsRasterLayer(output_path, f"Resampled {layer_name}")
+
+            if not resampled_layer.isValid():
+                log_message(f"Invalid resampled raster layer for: {layer_name}")
+                continue
+
+            self.resampled_rasters.append(output_path)
+
+            # Calculate min and max values for the resampled raster
+            provider: QgsRasterDataProvider = resampled_layer.dataProvider()
             stats = provider.bandStatistics(1)
             self.global_min = min(self.global_min, stats.minimumValue)
             self.global_max = max(self.global_max, stats.maximumValue)
 
             log_message(
-                f"Processed mask {layer_name}: Min={stats.minimumValue}, Max={stats.maximumValue}"
+                f"Processed resample {layer_name}: Min={stats.minimumValue}, Max={stats.maximumValue}"
             )
+            log_message(f"Resampled raster: {output_path}")
 
-    def reclassify_population_rasters(self) -> None:
+    def reclassify_resampled_rasters(self) -> None:
         """
-        Reclassifies clipped rasters into three classes based on population values.
+        Reclassifies the resampled rasters into three classes based on population values.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         range_third = (self.global_max - self.global_min) / 3
@@ -165,9 +300,9 @@ class PopulationRasterProcessingTask(QgsTask):
                 return
 
             layer_name = f"{index}.tif"
+            input_path = os.path.join(self.output_dir, f"resampled_{layer_name}")
             output_path = os.path.join(self.output_dir, f"reclassified_{layer_name}")
 
-            input_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
             log_message(f"Reclassifying {output_path} from {input_path}")
 
             if not self.force_clear and os.path.exists(output_path):
@@ -178,7 +313,7 @@ class PopulationRasterProcessingTask(QgsTask):
             params = {
                 "INPUT_RASTER": input_path,
                 "RASTER_BAND": 1,
-                "TABLE": [
+                "TABLE": [  # ['0','52','1','52','95','2','95','140','3'],
                     self.global_min,
                     self.global_min + range_third,
                     1,
@@ -189,12 +324,16 @@ class PopulationRasterProcessingTask(QgsTask):
                     self.global_max,
                     3,
                 ],
+                "RANGE_BOUNDARIES": 0,
+                "NODATA_FOR_MISSING": True,
                 "NO_DATA": 0,
-                "DATA_TYPE": 5,  # Float32
-                # "DATA_TYPE": 1,  # Byte
+                # "DATA_TYPE": 5,  # Float32
+                "DATA_TYPE": 1,  # Byte
                 "OUTPUT": output_path,
             }
+
             log_message(f"Reclassifying raster: {input_path}")
+            log_message(f"Reclassification table:\n {params['TABLE']}\n")
             result = processing.run("native:reclassifybytable", params)
 
             if not result["OUTPUT"]:
@@ -210,8 +349,14 @@ class PopulationRasterProcessingTask(QgsTask):
         Generates VRT files combining all clipped and reclassified rasters.
         """
         clipped_vrt_path = os.path.join(self.output_dir, "clipped_population.vrt")
+
+        resampled_vrt_path = os.path.join(self.output_dir, "resampled_population.vrt")
+
         reclassified_vrt_path = os.path.join(
             self.output_dir, "reclassified_population.vrt"
+        )
+        reclassified_qml_path = os.path.join(
+            self.output_dir, "reclassified_population.qml"
         )
 
         # Generate VRT for clipped rasters
@@ -225,6 +370,17 @@ class PopulationRasterProcessingTask(QgsTask):
             processing.run("gdal:buildvirtualraster", params)
             log_message(f"Generated VRT for clipped rasters: {clipped_vrt_path}")
 
+        # Generate VRT for resampled rasters
+        if self.resampled_rasters:
+            params = {
+                "INPUT": self.resampled_rasters,
+                "RESOLUTION": 0,  # Use highest resolution among input files
+                "SEPARATE": False,  # Combine into a single band
+                "OUTPUT": resampled_vrt_path,
+            }
+            processing.run("gdal:buildvirtualraster", params)
+            log_message(f"Generated VRT for resampled rasters: {resampled_vrt_path}")
+
         # Generate VRT for reclassified rasters
         if self.reclassified_rasters:
             params = {
@@ -237,3 +393,7 @@ class PopulationRasterProcessingTask(QgsTask):
             log_message(
                 f"Generated VRT for reclassified rasters: {reclassified_vrt_path}"
             )
+            source_qml = resources_path("resources", "qml", f"population_3_classes.qml")
+
+            log_message(f"Copying QML from {source_qml} to {reclassified_qml_path}")
+            shutil.copyfile(source_qml, reclassified_qml_path)

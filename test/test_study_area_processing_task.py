@@ -53,7 +53,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
     def test_initialization(self):
         """Test initialization of the task."""
         task = StudyAreaProcessingTask(
-            name="Test Task",
             layer=self.layer,
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
@@ -73,7 +72,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
     def test_calculate_utm_zone(self):
         """Test UTM zone calculation."""
         task = StudyAreaProcessingTask(
-            name="Test Task",
             layer=self.layer,
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
@@ -91,7 +89,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
     def test_process_study_area(self):
         """Test processing of study area features."""
         task = StudyAreaProcessingTask(
-            name="Test Task",
             layer=self.layer,
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
@@ -115,7 +112,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
     def test_process_singlepart_geometry(self):
         """Test processing of singlepart geometry."""
         task = StudyAreaProcessingTask(
-            name="Test Task",
             layer=self.layer,
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
@@ -147,7 +143,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
     def test_grid_aligned_bbox(self):
         """Test grid alignment of bounding boxes."""
         task = StudyAreaProcessingTask(
-            name="Test Task",
             layer=self.layer,
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
@@ -170,7 +165,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
     def test_create_raster_vrt(self):
         """Test creation of a VRT from raster masks."""
         task = StudyAreaProcessingTask(
-            name="Test Task",
             layer=self.layer,
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,

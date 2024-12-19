@@ -2,6 +2,7 @@ import os
 from qgis.core import QgsFeedback, QgsProcessingContext
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
+from geest.core.algorithms import PopulationRasterProcessingTask, WEEScoreProcessingTask
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
 
@@ -43,3 +44,20 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.layer_id = "wee"
         self.weight_key = "dimension_weighting"
         self.workflow_name = "analysis_aggregation"
+        # Prepare the population data if provided
+        self.population_data = self.item.attribute("population_layer_source", None)
+        population_processor = PopulationRasterProcessingTask(
+            population_raster_path=self.population_data,
+            working_directory=self.working_directory,
+            study_area_gpkg_path=self.gpkg_path,
+            cell_size_m=self.cell_size_m,
+            target_crs=self.target_crs,
+            feedback=self.feedback,
+        )
+        population_processor.run()
+        wee_processor = WEEScoreProcessingTask(
+            study_area_gpkg_path=self.gpkg_path,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        wee_processor.run()

@@ -90,7 +90,7 @@ class WorkflowJob(QgsTask):
                 level=Qgis.Info,
             )
             attributes = self._item.attributes()
-            log_message(f"{attributes}")
+            log_message(f"{self._item.attributesAsMarkdown()}")
             if result:
                 log_message(
                     f"Workflow {self.description()} completed.",

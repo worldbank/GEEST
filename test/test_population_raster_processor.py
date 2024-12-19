@@ -38,12 +38,12 @@ class TestPopulationRasterProcessingTask(unittest.TestCase):
         Tests the PopulationRasterProcessingTask for expected behavior.
         """
         task = PopulationRasterProcessingTask(
-            name="Test Population Raster Processing",
             population_raster_path=self.input_raster_path,
             study_area_gpkg_path=self.gpkg_path,
-            output_dir=self.output_directory,
-            crs=QgsCoordinateReferenceSystem("EPSG:32620"),
+            working_directory=self.output_directory,
+            target_crs=QgsCoordinateReferenceSystem("EPSG:32620"),
             force_clear=True,
+            cell_size_m=100,
         )
 
         result = task.run()
