@@ -2,7 +2,10 @@ import os
 from qgis.core import QgsFeedback, QgsProcessingContext
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
-from geest.core.algorithms import PopulationRasterProcessingTask, WEEScoreProcessingTask
+from geest.core.algorithms import (
+    PopulationRasterProcessingTask,
+    WEEByPopulationScoreProcessingTask,
+)
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
 
@@ -55,9 +58,14 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
             feedback=self.feedback,
         )
         population_processor.run()
-        wee_processor = WEEScoreProcessingTask(
+        wee_processor = WEEByPopulationScoreProcessingTask(
             study_area_gpkg_path=self.gpkg_path,
             working_directory=self.working_directory,
             force_clear=False,
         )
         wee_processor.run()
+        # Shamelessly hard coded for now, needs to move to the wee processor class
+        output = os.path.join(
+            self.working_directory, "wee_score", "wee_by_population_score.vrt"
+        )
+        item.setAttribute("wee_by_population", output)

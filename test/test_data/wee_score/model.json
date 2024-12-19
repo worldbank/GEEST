@@ -49,12 +49,11 @@
                     "output_filename": "workplace_discrimination",
                     "description": "Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.",
                     "default_dimension_weighting": 0.333333,
-                    "analysis_mode": "factor_aggregation",
+                    "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
                     "execution_start_time": "2024-12-18T23:25:31.713939",
                     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/workplace_discrimination/workplace_discrimination_combined.vrt",
-                    "execution_end_time": "2024-12-18T23:25:32.528534",
-                    "error_file": null
+                    "execution_end_time": "2024-12-18T23:25:32.528534"
                 },
                 {
                     "name": "Regulatory Frameworks",
@@ -96,12 +95,11 @@
                     "output_filename": "regulatory_frameworks",
                     "description": "Regulatory Frameworks pertain to laws and policies that protect women\u2019s employment rights, such as childcare support and parental leave, influencing their workforce participation",
                     "default_dimension_weighting": 0.3333333,
-                    "analysis_mode": "factor_aggregation",
+                    "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
                     "execution_start_time": "2024-12-18T23:25:32.656651",
                     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/regulatory_frameworks/regulatory_frameworks_combined.vrt",
-                    "execution_end_time": "2024-12-18T23:25:33.511264",
-                    "error_file": null
+                    "execution_end_time": "2024-12-18T23:25:33.511264"
                 },
                 {
                     "name": "Financial Inclusion",
@@ -143,25 +141,23 @@
                     "output_filename": "financial_inclusion",
                     "description": "Financial Inclusion involves laws concerning women\u2019s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities.",
                     "default_dimension_weighting": 0.333333,
-                    "analysis_mode": "factor_aggregation",
+                    "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
                     "execution_start_time": "2024-12-18T23:25:33.683431",
                     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/financial_inclusion/financial_inclusion_combined.vrt",
-                    "execution_end_time": "2024-12-18T23:25:34.529052",
-                    "error_file": null
+                    "execution_end_time": "2024-12-18T23:25:34.529052"
                 }
             ],
-            "analysis_weighting": 1.0,
+            "analysis_weighting": 0.5,
             "description": "The Contextual Dimension refers to the laws and policies that shape workplace gender discrimination, financial autonomy, and overall gender empowerment. Although this dimension may vary between countries due to differences in legal frameworks, it remains consistent within a single country, as national policies and regulations are typically applied uniformly across countries.",
             "id": "contextual",
             "output_filename": "Contextual_score",
             "default_analysis_weighting": 0.333333,
-            "analysis_mode": "dimension_aggregation",
+            "analysis_mode": "",
             "result": "dimension_aggregation Workflow Completed",
             "execution_start_time": "2024-12-18T23:25:35.741929",
             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/Contextual_score_combined.vrt",
-            "execution_end_time": "2024-12-18T23:25:36.623506",
-            "error_file": null
+            "execution_end_time": "2024-12-18T23:25:36.623506"
         },
         {
             "name": "Accessibility",
@@ -177,7 +173,7 @@
                             "output_filename": "WTP_Kindergartens_output",
                             "description": "",
                             "default_factor_weighting": 0.2,
-                            "factor_weighting": 0.2,
+                            "factor_weighting": "0.50",
                             "index_score": 0,
                             "use_index_score": 0,
                             "default_multi_buffer_distances": "400, 800, 1200, 1500, 2000",
@@ -193,8 +189,20 @@
                             "use_nighttime_lights": 0,
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
-                            "analysis_mode": "Do Not Use",
-                            "guid": "ef86b2c4-f4b3-4552-8dc4-a619c54e53d6"
+                            "analysis_mode": "use_multi_buffer_point",
+                            "guid": "ef86b2c4-f4b3-4552-8dc4-a619c54e53d6",
+                            "multi_buffer_point_layer_name": "fake_childcare",
+                            "multi_buffer_point_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/points/fake_childcare.gpkg|layername=fake_childcare",
+                            "multi_buffer_point_layer_provider_type": "ogr",
+                            "multi_buffer_point_layer_crs": "EPSG:32620",
+                            "multi_buffer_point_layer_wkb_type": 1,
+                            "multi_buffer_point_layer_id": "fake_childcare_6a120423_4837_409e_893c_cc06dd1bde8f",
+                            "multi_buffer_point_shapefile": "",
+                            "result": "use_multi_buffer_point Workflow Completed",
+                            "execution_start_time": "2024-12-19T11:03:05.436850",
+                            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/kindergartens_location/WTP_Kindergartens_output_combined.vrt",
+                            "execution_end_time": "2024-12-19T11:03:07.870440",
+                            "error_file": null
                         },
                         {
                             "indicator": "Location of primary schools",
@@ -202,7 +210,7 @@
                             "output_filename": "WTP_Primary_Schools_output",
                             "description": "",
                             "default_factor_weighting": 0.2,
-                            "factor_weighting": 0.2,
+                            "factor_weighting": "0.50",
                             "index_score": 0,
                             "use_index_score": 0,
                             "default_multi_buffer_distances": "400, 800, 1200, 1500, 2000",
@@ -218,8 +226,20 @@
                             "use_nighttime_lights": 0,
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
-                            "analysis_mode": "Do Not Use",
-                            "guid": "7af1017c-c360-4630-a1e5-ac4874473e35"
+                            "analysis_mode": "use_multi_buffer_point",
+                            "guid": "7af1017c-c360-4630-a1e5-ac4874473e35",
+                            "multi_buffer_point_layer_name": "fake_primary_schools",
+                            "multi_buffer_point_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/points/fake_primary_schools.gpkg|layername=fake_primary_schools",
+                            "multi_buffer_point_layer_provider_type": "ogr",
+                            "multi_buffer_point_layer_crs": "EPSG:32620",
+                            "multi_buffer_point_layer_wkb_type": 1,
+                            "multi_buffer_point_layer_id": "fake_primary_schools_1e5dc698_693d_48f5_afbb_f0e542c94e0a",
+                            "multi_buffer_point_shapefile": "",
+                            "result": "use_multi_buffer_point Workflow Completed",
+                            "execution_start_time": "2024-12-19T11:03:08.098036",
+                            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/primary_school_location/WTP_Primary_Schools_output_combined.vrt",
+                            "execution_end_time": "2024-12-19T11:03:10.000410",
+                            "error_file": null
                         },
                         {
                             "indicator": "Location of groceries",
@@ -227,7 +247,7 @@
                             "output_filename": "WTP_Groceries_output",
                             "description": "",
                             "default_factor_weighting": 0.2,
-                            "factor_weighting": 0.2,
+                            "factor_weighting": "0.00",
                             "index_score": 0,
                             "use_index_score": 0,
                             "default_multi_buffer_distances": "400, 800, 1200, 1500, 2000",
@@ -243,7 +263,7 @@
                             "use_nighttime_lights": 0,
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
-                            "analysis_mode": "Do Not Use",
+                            "analysis_mode": "use_multi_buffer_point",
                             "guid": "b0f37ad1-b728-4aa8-8bd6-40e60545a5a7"
                         },
                         {
@@ -252,7 +272,7 @@
                             "output_filename": "WTP_Pharmacies_output",
                             "description": "",
                             "default_factor_weighting": 0.2,
-                            "factor_weighting": 0.2,
+                            "factor_weighting": "0.00",
                             "index_score": 0,
                             "use_index_score": 0,
                             "default_multi_buffer_distances": "400, 800, 1200, 1500, 2000",
@@ -268,7 +288,7 @@
                             "use_nighttime_lights": 0,
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
-                            "analysis_mode": "Do Not Use",
+                            "analysis_mode": "use_multi_buffer_point",
                             "guid": "f96c74f4-492e-484b-b4e7-d72566071911"
                         },
                         {
@@ -277,7 +297,7 @@
                             "output_filename": "WTP_Green_Spaces_output",
                             "description": "",
                             "default_factor_weighting": 0.2,
-                            "factor_weighting": 0.2,
+                            "factor_weighting": "0.00",
                             "index_score": 0,
                             "use_index_score": 0,
                             "default_multi_buffer_distances": "400, 800, 1200, 1500, 2000",
@@ -293,20 +313,20 @@
                             "use_nighttime_lights": 0,
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
-                            "analysis_mode": "Do Not Use",
+                            "analysis_mode": "use_multi_buffer_point",
                             "guid": "6e7df235-9af3-4168-ba97-1004e289d7c7"
                         }
                     ],
-                    "dimension_weighting": 0.2,
+                    "dimension_weighting": 1.0,
                     "id": "women_s_travel_patterns",
                     "output_filename": "women_s_travel_patterns",
                     "description": "Women\u2019s Travel Patterns (WTP) refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial.",
                     "default_dimension_weighting": 0.2,
                     "analysis_mode": "",
-                    "result": "",
-                    "execution_start_time": "",
-                    "result_file": "",
-                    "execution_end_time": ""
+                    "result": "factor_aggregation Workflow Completed",
+                    "execution_start_time": "2024-12-19T11:03:10.163971",
+                    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/women_s_travel_patterns_combined.vrt",
+                    "execution_end_time": "2024-12-19T11:03:11.113707"
                 },
                 {
                     "name": "Access to Public Transport",
@@ -338,7 +358,7 @@
                             "guid": "270bf387-5131-43c9-85f3-75d5c04df854"
                         }
                     ],
-                    "dimension_weighting": 0.2,
+                    "dimension_weighting": 0.0,
                     "id": "access_to_public_transport",
                     "output_filename": "access_to_public_transport",
                     "description": "Access to Public Transport focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.",
@@ -379,7 +399,7 @@
                             "guid": "06ce6151-d70a-4564-bfc9-ca72989555e3"
                         }
                     ],
-                    "dimension_weighting": 0.2,
+                    "dimension_weighting": 0.0,
                     "id": "access_to_health_facilities",
                     "output_filename": "access_to_health_facilities",
                     "description": "Access to Health Facilities evaluates how easily women can reach healthcare services in terms of distance, impacting their well-being and ability to participate in the workforce.",
@@ -420,7 +440,7 @@
                             "guid": "b4e36508-0005-4f1d-864c-c679dde965c1"
                         }
                     ],
-                    "dimension_weighting": 0.2,
+                    "dimension_weighting": 0.0,
                     "id": "access_to_education_and_training_facilities",
                     "output_filename": "access_to_education_and_training_facilities",
                     "description": "Access to Education and Training Facilities assesses the proximity to higher education institutions and training centers, influencing women's ability to gain necessary qualifications.",
@@ -461,7 +481,7 @@
                             "guid": "cc080fdb-b57a-4fb6-9868-0afb610684bd"
                         }
                     ],
-                    "dimension_weighting": 0.2,
+                    "dimension_weighting": 0.0,
                     "id": "access_to_financial_facilities",
                     "output_filename": "access_to_financial_facilities",
                     "description": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for women\u2019s economic empowerment and ability to access credit.",
@@ -473,16 +493,16 @@
                     "execution_end_time": ""
                 }
             ],
-            "analysis_weighting": 0.0,
+            "analysis_weighting": 0.5,
             "description": "The Accessibility Dimension evaluates women\u2019s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce.",
             "id": "accessibility",
             "output_filename": "Accessibility_score",
             "default_analysis_weighting": 0.33333,
             "analysis_mode": "",
-            "result": "",
-            "execution_start_time": "",
-            "result_file": "",
-            "execution_end_time": ""
+            "result": "dimension_aggregation Workflow Completed",
+            "execution_start_time": "2024-12-19T11:03:11.276901",
+            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/Accessibility_score_combined.vrt",
+            "execution_end_time": "2024-12-19T11:03:12.223477"
         },
         {
             "name": "Place Characterization",
@@ -965,25 +985,25 @@
     ],
     "result": "analysis_aggregation Workflow Completed",
     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/_combined.vrt",
-    "execution_start_time": "2024-12-18T23:36:00.070532",
-    "execution_end_time": "2024-12-18T23:36:00.912866",
+    "execution_start_time": "2024-12-19T13:07:59.647020",
+    "execution_end_time": "2024-12-19T13:08:00.475715",
     "error": "",
     "error_file": null,
     "aggregation_layer": null,
-    "aggregation_layer_name": "",
-    "aggregation_layer_source": "",
-    "aggregation_layer_provider_type": "",
+    "aggregation_layer_name": "administrative_boundary",
+    "aggregation_layer_source": "/home/timlinux/dev/python/GEEST2/data/StLucia/saintluciagis.gpkg|layername=administrative_boundary",
+    "aggregation_layer_provider_type": "ogr",
     "aggregation_layer_crs": "",
-    "aggregation_layer_wkb_type": "",
-    "aggregation_layer_id": "",
+    "aggregation_layer_wkb_type": 6,
+    "aggregation_layer_id": "administrative_boundary_7f19d49d_e23e_4737_9d7e_8fc99db4ef72",
     "aggregation_shapefile": "",
     "population_layer": null,
-    "population_layer_name": "population",
-    "population_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/population/population.tif",
+    "population_layer_name": "lca_ppp_2020_UNadj_constrained",
+    "population_layer_source": "/home/timlinux/dev/python/GEEST2/data/StLucia/Population/lca_ppp_2020_UNadj_constrained.tif",
     "population_layer_provider_type": "gdal",
-    "population_layer_crs": "EPSG:32620",
+    "population_layer_crs": "EPSG:4326",
     "population_layer_wkb_type": "",
-    "population_layer_id": "population_c608de24_709a_4ad5_a451_12d344147a79",
+    "population_layer_id": "lca_ppp_2020_UNadj_constrained_ec945779_3222_4975_9f04_3312e7855d64",
     "population_shapefile": "",
     "point_mask_layer": null,
     "point_mask_layer_name": "",
@@ -1009,5 +1029,6 @@
     "raster_mask_layer_wkb_type": "",
     "raster_mask_layer_id": "",
     "raster_mask_shapefile": "",
-    "analysis_mode": "analysis_aggregation"
+    "analysis_mode": "analysis_aggregation",
+    "wee_by_population": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/wee_score/wee_by_population_score.vrt"
 }

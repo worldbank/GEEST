@@ -9,7 +9,7 @@ from geest.core.tasks import (
     StudyAreaProcessingTask,
 )  # Adjust the import path as necessary
 from utilities_for_testing import prepare_fixtures
-from geest.core.algorithms import WEEScoreProcessingTask
+from geest.core.algorithms import WEEByPopulationScoreProcessingTask
 
 
 class TestWEEScoreProcessingTask(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestWEEScoreProcessingTask(unittest.TestCase):
         cls.feedback = QgsFeedback()
 
     def setUp(self):
-        self.task = WEEScoreProcessingTask(
+        self.task = WEEByPopulationScoreProcessingTask(
             # geest_raster_path=f"{self.working_directory}/wee_masked_0.tif",
             # pop_raster_path=f"{self.working_directory}/population/reclassified_0.tif",
             study_area_gpkg_path=f"{self.working_directory}/study_area/study_area.gpkg",
