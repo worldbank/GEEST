@@ -19,7 +19,6 @@ from qgis.core import (
 )
 import processing
 from geest.utilities import log_message, resources_path
-from geest.core.algorithms import AreaIterator
 
 
 class WEEByPopulationScoreProcessingTask(QgsTask):
@@ -80,10 +79,15 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
        In the unlikely event of there being two or more classes with an equal pixel count,
        the highest enablement and population class is assigned.
 
+    See zonalstatisticsfb algorithm for more details on how the majority score is calculated.
+    https://qgis.org/pyqgis/3.34/analysis/QgsZonalStatistics.html#qgis.analysis.QgsZonalStatistics.Majority
+
 
     Args:
-        study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
-        working_directory (str): Directory to save the output rasters.
+        study_area_gpkg_path (str): Path to the study area geopackage. Used to determine the CRS.
+        aggregation_areas (QgsVectorLayer): Vector layer containing the aggregation areas.
+        working_directory (str): Parent directory to save the output agregated data. Outputs will
+            be saved in a subdirectory called "subnational_aggregates".
         target_crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters.
         force_clear (bool): Flag to force clearing of all outputs before processing.
     """
@@ -91,6 +95,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def __init__(
         self,
         study_area_gpkg_path: str,
+        aggregation_areas: QgsVectorLayer,
         working_directory: str,
         target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         force_clear: bool = False,
@@ -98,12 +103,26 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         super().__init__("Subnational Aggregation Processor", QgsTask.CanCancel)
         self.study_area_gpkg_path = study_area_gpkg_path
 
+        self.aggregation_areas = aggregation_areas
+
+        if not aggregation_areas.isValid():
+            raise Exception("Invalid aggregation areas layer.")
+
         self.output_dir = os.path.join(working_directory, "subnational_aggregates")
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the aggregation analysis and population raster processing
         self.population_folder = os.path.join(working_directory, "population")
         self.wee_folder = os.path.join(working_directory, "wee_score")
+
+        if not os.path.exists(self.population_folder):
+            raise Exception(
+                "Population folder not found. Please run population raster processing first."
+            )
+        if not os.path.exists(self.wee_folder):
+            raise Exception(
+                "WEE folder not found. Please run WEE raster processing first."
+            )
 
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
@@ -119,7 +138,6 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             )
             self.target_crs = layer.crs()
             del layer
-        self.output_rasters: List[str] = []
 
         log_message("Initialized WEE Subnational Area Aggregation Processing Task")
 
@@ -128,131 +146,31 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         Executes the WEE Subnational Area Aggregation Processing Task calculation task.
         """
         try:
-            self.calculate_score()
-            self.generate_vrt()
+            self.aggregate()
+            self.apply_qml_style(
+                source_qml=resources_path("qml/wee_by_population_vector_score.qml.qml"),
+                qml_path=os.path.join(
+                    self.output_dir, "wee_by_population_vector_score.qml"
+                ),
+            )
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())
             return False
 
-    def validate_rasters(self, subnational_vector: QgsVectorLayer) -> None:
-        # Inputs
-        raster_path = "path/to/your/raster.tif"  # Replace with your raster file path
-        polygon_layer_path = "path/to/your/polygon_layer.shp"  # Replace with your polygon layer file path
-        output_geopackage = (
-            "path/to/your/study_area.gpkg"  # Replace with your GeoPackage file path
-        )
-        output_layer_name = (
-            "subnational_boundaries"  # Name of the layer in the GeoPackage
-        )
-        output_field_name = (
-            "MostValue"  # Name of the field to store the most prevalent value
-        )
-
-        # Load the raster layer
-        raster_layer = QgsRasterLayer(raster_path, "Raster Layer")
-        if not raster_layer.isValid():
-            raise Exception("Raster layer failed to load.")
-
-        # Load the polygon layer
-        polygon_layer = QgsVectorLayer(polygon_layer_path, "Polygon Layer", "ogr")
-        if not polygon_layer.isValid():
-            raise Exception("Polygon layer failed to load.")
-
-        # Validate and fix geometry errors in the polygon layer
-        fixed_polygons = []
-        for feature in polygon_layer.getFeatures():
-            geom = feature.geometry()
-            if not geom.isGeosValid():
-                geom = geom.makeValid()
-            fixed_polygons.append(QgsFeature(geom))
-
-        # Create a new layer in the GeoPackage for clean boundaries
-        options = QgsVectorFileWriter.SaveVectorOptions()
-        options.driverName = "GPKG"
-        options.layerName = output_layer_name
-        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
-        options.onlySelected = False
-
-        crs = polygon_layer.crs()
-        new_fields = [
-            QgsField(output_field_name, QVariant.Int)
-        ]  # Only the output field
-
-        writer = QgsVectorFileWriter.create(
-            output_geopackage, new_fields, QgsWkbTypes.Polygon, crs, options
-        )
-
-        if writer.hasError() != QgsVectorFileWriter.NoError:
-            raise Exception(f"Error creating output layer: {writer.errorMessage()}")
-
-        # Add fixed polygons to the new layer
-        for feature in fixed_polygons:
-            writer.addFeature(feature)
-
-        # Close the writer to save the layer
-        writer.close()
-
-        # Load the newly created layer
-        cleaned_layer = QgsVectorLayer(
-            f"{output_geopackage}|layername={output_layer_name}",
-            output_layer_name,
-            "ogr",
-        )
-        if not cleaned_layer.isValid():
-            raise Exception("Failed to load cleaned layer from GeoPackage.")
-
-        # Process each polygon
-        cleaned_provider = cleaned_layer.dataProvider()
-        for feature in cleaned_layer.getFeatures():
-            # Get polygon geometry
-            geometry = feature.geometry()
-
-            # Calculate zonal statistics for the raster within the polygon
-            zone_stats = QgsRasterStats()
-            zone_stats.computeStatistics(
-                raster_layer.dataProvider(),
-                QgsRasterStats.Count,
-                extent=geometry.boundingBox(),
-                bands=[1],
-            )
-
-            # Initialize a dictionary to store pixel value counts
-            pixel_value_counts = {}
-
-            # Iterate through each pixel value in the raster statistics
-            for value, count in zone_stats.histogram(1).items():
-                pixel_value_counts[value] = pixel_value_counts.get(value, 0) + count
-
-            # Determine the most prevalent pixel value
-            if pixel_value_counts:
-                most_prevalent_value = max(
-                    pixel_value_counts, key=pixel_value_counts.get
-                )
-            else:
-                most_prevalent_value = None  # No data in this polygon's extent
-
-            # Update the feature with the most prevalent pixel value
-            cleaned_provider.changeAttributeValues(
-                {
-                    feature.id(): {
-                        cleaned_layer.fields().indexFromName(
-                            output_field_name
-                        ): most_prevalent_value
-                    }
-                }
-            )
-
-        # Commit changes to the cleaned layer
-        cleaned_layer.commitChanges()
-
-        # Add layers to the project (optional, for viewing in QGIS)
-        QgsProject.instance().addMapLayer(raster_layer)
-        QgsProject.instance().addMapLayer(cleaned_layer)
-
-        log_message(
-            f"Processing complete. Most prevalent pixel values assigned to polygons. {output_path}"
+    def aggregate(self) -> None:
+        """Iterate through the aggregation vector and calculate the majority WEE SCORE and WEE x Population Score for each valid polygon."""
+        processing.run(
+            "native:zonalstatisticsfb",
+            {
+                "INPUT": "",
+                "INPUT_RASTER": "",
+                "RASTER_BAND": 1,
+                "COLUMN_PREFIX": "_",
+                "STATISTICS": [9],  # Majority
+                "OUTPUT": "TEMPORARY_OUTPUT",
+            },
         )
 
     def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
