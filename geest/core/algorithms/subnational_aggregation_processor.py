@@ -5,14 +5,6 @@ import shutil
 
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
-    QgsRasterLayer,
-    QgsVectorLayer,
-    QgsProject,
-    QgsRasterStats,
-    QgsField,
-    QgsVectorFileWriter,
-    QgsFeature,
-    QgsRasterLayer,
     QgsVectorLayer,
     QgsCoordinateReferenceSystem,
     QgsTask,
@@ -21,7 +13,7 @@ import processing
 from geest.utilities import log_message, resources_path
 
 
-class WEEByPopulationScoreProcessingTask(QgsTask):
+class SubnationalAggregationProcessingTask(QgsTask):
     """
     A QgsTask subclass for calculating WEE x Population SCORE and or WEE score per aggregation area.
 
@@ -85,7 +77,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
 
     Args:
         study_area_gpkg_path (str): Path to the study area geopackage. Used to determine the CRS.
-        aggregation_areas (QgsVectorLayer): Vector layer containing the aggregation areas.
+        aggregation_areas_path (str): Path to vector layer containing the aggregation areas.
         working_directory (str): Parent directory to save the output agregated data. Outputs will
             be saved in a subdirectory called "subnational_aggregates".
         target_crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters.
@@ -95,7 +87,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def __init__(
         self,
         study_area_gpkg_path: str,
-        aggregation_areas: QgsVectorLayer,
+        aggregation_areas_path: str,
         working_directory: str,
         target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         force_clear: bool = False,
@@ -103,12 +95,17 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         super().__init__("Subnational Aggregation Processor", QgsTask.CanCancel)
         self.study_area_gpkg_path = study_area_gpkg_path
 
-        self.aggregation_areas = aggregation_areas
+        self.aggregation_areas_path = aggregation_areas_path
 
-        if not aggregation_areas.isValid():
+        self.aggregation_layer: QgsVectorLayer = QgsVectorLayer(
+            self.aggregation_areas_path,
+            "aggregation_areas",
+            "ogr",
+        )
+        if not self.aggregation_layer.isValid():
             raise Exception("Invalid aggregation areas layer.")
 
-        self.output_dir = os.path.join(working_directory, "subnational_aggregates")
+        self.output_dir = os.path.join(working_directory, "subnational_aggregation")
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the aggregation analysis and population raster processing
@@ -160,18 +157,26 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             return False
 
     def aggregate(self) -> None:
-        """Iterate through the aggregation vector and calculate the majority WEE SCORE and WEE x Population Score for each valid polygon."""
-        processing.run(
-            "native:zonalstatisticsfb",
-            {
-                "INPUT": "",
-                "INPUT_RASTER": "",
-                "RASTER_BAND": 1,
-                "COLUMN_PREFIX": "_",
-                "STATISTICS": [9],  # Majority
-                "OUTPUT": "TEMPORARY_OUTPUT",
-            },
-        )
+        """Fix geometries then use aggregation vector to calculate the majority WEE SCORE and WEE x Population Score for each valid polygon."""
+
+        params = {
+            "INPUT": self.aggregation_layer,
+            "METHOD": 1,  # Structur method
+            "OUTPUT": "TEMPORARY_OUTPUT",
+        }
+        output = processing.run("native:fixgeometries", params)["OUTPUT"]
+
+        params = {
+            "INPUT": output,
+            "INPUT_RASTER": os.path.join(
+                self.wee_folder, "wee_by_population_score.vrt"
+            ),
+            "RASTER_BAND": 1,
+            "COLUMN_PREFIX": "_",
+            "STATISTICS": [9],  # Majority
+            "OUTPUT": os.path.join(self.output_dir, "subnational_aggregation.gpkg"),
+        }
+        processing.run("native:zonalstatisticsfb", params)
 
     def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
 

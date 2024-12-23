@@ -483,6 +483,17 @@ class TreePanel(QWidget):
                 )
             )
             menu.addAction(add_wee_by_population)
+
+            add_wee_by_population_aggregate = QAction("Add WEE Aggregate to Map")
+            add_wee_by_population_aggregate.triggered.connect(
+                lambda: self.add_to_map(
+                    item,
+                    key="subnational_aggregation",
+                    layer_name="Wee by Population Aggregate",
+                )
+            )
+            menu.addAction(add_wee_by_population_aggregate)
+
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
@@ -885,7 +896,13 @@ class TreePanel(QWidget):
         if layer_uri:
             if not layer_name:
                 layer_name = item.data(0)
-            layer = QgsRasterLayer(layer_uri, layer_name)
+
+            if "gpkg" in layer_uri:
+                log_message(f"Adding GeoPackage layer: {layer_name}")
+                layer = QgsVectorLayer(layer_uri, layer_name, "ogr")
+            else:
+                log_message(f"Adding raster layer: {layer_name}")
+                layer = QgsRasterLayer(layer_uri, layer_name)
 
             if not layer.isValid():
                 log_message(

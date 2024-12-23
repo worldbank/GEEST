@@ -5,6 +5,7 @@ from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.core.algorithms import (
     PopulationRasterProcessingTask,
     WEEByPopulationScoreProcessingTask,
+    SubnationalAggregationProcessingTask,
 )
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
@@ -69,3 +70,21 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
             self.working_directory, "wee_score", "wee_by_population_score.vrt"
         )
         item.setAttribute("wee_by_population", output)
+
+        aggregation_layer = self.item.attribute("aggregation_layer_source")
+        subnational_processor = SubnationalAggregationProcessingTask(
+            study_area_gpkg_path=self.gpkg_path,
+            aggregation_areas_path=aggregation_layer,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        subnational_processor.run()
+        # Shamelessly hard coded for now, needs to move to the wee processor class
+        output = os.path.join(
+            self.working_directory,
+            "subnational_aggregation",
+            "subnational_aggregation.gpkg",
+        )
+        item.setAttribute(
+            "subnational_aggregation", f"{output}|layername=subnational_aggregation"
+        )
