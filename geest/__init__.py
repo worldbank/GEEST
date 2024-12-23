@@ -248,9 +248,13 @@ for module_name in list(sys.modules.keys()):
         self.save_geometry()
 
         # Disconnect the project changed signal
-        QgsProject.instance().readProject.disconnect(
-            self.dock_widget.qgis_project_changed
-        )
+        try:
+            # This was giving an error on Carlina's mac
+            QgsProject.instance().readProject.disconnect(
+                self.dock_widget.qgis_project_changed
+            )
+        except:
+            pass
 
         # Remove toolbar icons and clean up
         if self.run_action:

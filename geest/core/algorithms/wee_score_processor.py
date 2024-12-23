@@ -23,6 +23,63 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     It iterates over study areas, calculates the WEE SCORE using aligned input rasters
     (WEE and POP), combines the resulting rasters into a VRT, and applies a QML style.
 
+    It takes as input a WEE Score layer (output as the result of Analysis level aggregation
+    of GEEST workflow). This WEE Score layer has the following classes:
+
+    | Range  | Description               | Color      |
+    |--------|---------------------------|------------|
+    | 0 - 1  | Very Low Enablement       | ![#FF0000](#) `#FF0000` |
+    | 1 - 2  | Low Enablement            | ![#FFA500](#) `#FFA500` |
+    | 2 - 3  | Moderately Enabling       | ![#FFFF00](#) `#FFFF00` |
+    | 3 - 4  | Enabling                  | ![#90EE90](#) `#90EE90` |
+    | 4 - 5  | Highly Enabling           | ![#0000FF](#) `#0000FF` |
+
+    Additionally a population layer containing counts per cell is required. The population
+    data is masked to only include pixels contained within study areas and then reclassified into
+    three classes:
+
+    | Color      | Description         |
+    |------------|---------------------|
+    | ![#FFFF00](#) `#FFFF00` | Low Population      |
+    | ![#FFA500](#) `#FFA500` | Medium Population   |
+    | ![#800000](#) `#800000` | High Population     |
+
+
+    The output WEE x Population Score can be one of 15 classes calculated as
+
+    ((A - 1) * 3) + B
+
+    Where A is WEE Score and B is Population class. The output classes are as follows:
+
+    | Color      | Description                                 |
+    |------------|---------------------------------------------|
+    | ![#FF0000](#) `#FF0000` | Very low enablement, low population       |
+    | ![#FF0000](#) `#FF0000` | Very low enablement, medium population    |
+    | ![#FF0000](#) `#FF0000` | Very low enablement, high population      |
+    | ![#FFA500](#) `#FFA500` | Low enablement, low population            |
+    | ![#FFA500](#) `#FFA500` | Low enablement, medium population         |
+    | ![#FFA500](#) `#FFA500` | Low enablement, high population           |
+    | ![#FFFF00](#) `#FFFF00` | Moderately enabling, low population       |
+    | ![#FFFF00](#) `#FFFF00` | Moderately enabling, medium population    |
+    | ![#FFFF00](#) `#FFFF00` | Moderately enabling, high population      |
+    | ![#90EE90](#) `#90EE90` | Enabling, low population                  |
+    | ![#90EE90](#) `#90EE90` | Enabling, medium population               |
+    | ![#90EE90](#) `#90EE90` | Enabling, high population                 |
+    | ![#0000FF](#) `#0000FF` | Highly enabling, low population           |
+    | ![#0000FF](#) `#0000FF` | Highly enabling, medium population        |
+    | ![#0000FF](#) `#0000FF` | Highly enabling, high population          |
+
+    One sub product is made per study area and then all of the study area outputs are
+    combined as a VRT and assigned a QML with the correct legend colours.
+
+    📒 The population processing phases resamples the population into a grid aligned
+        raster with the same output pixel dimensions as the study area. The resampling
+        process uses the gdalwarp -r sum flag which is not currently available in QGIS
+        processing framework, so we manually call gdalwarp to perform this operation.
+
+        I tried to implement a generic way to discover the location of gdalwarp but this
+        may not work well on all systems.
+
     Args:
         study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
         working_directory (str): Directory to save the output rasters.
