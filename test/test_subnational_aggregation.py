@@ -18,27 +18,32 @@ class TestSubnationalAggregationProcessingTask(unittest.TestCase):
     def setUpClass(cls):
         """Set up shared resources for the test suite."""
 
-        cls.test_data_directory = prepare_fixtures()
-        cls.working_directory = os.path.join(
-            cls.test_data_directory, "subnational_aggregation"
-        )
-
+        cls.working_directory = os.path.join(prepare_fixtures(), "wee_score")
         cls.context = QgsProcessingContext()
         cls.feedback = QgsFeedback()
+        cls.aggregation_areas_path = os.path.join(
+            cls.working_directory, "aggregation", "boundaries.gpkg|layername=boundaries"
+        )
+        cls.study_area_gpkg_path = os.path.join(
+            cls.working_directory, "study_area", "study_area.gpkg"
+        )
 
     def setUp(self):
         self.task = SubnationalAggregationProcessingTask(
             # geest_raster_path=f"{self.working_directory}/wee_masked_0.tif",
             # pop_raster_path=f"{self.working_directory}/population/reclassified_0.tif",
-            study_area_gpkg_path=f"{self.working_directory}/study_area/study_area.gpkg",
-            aggregation_areas_path=f"{self.working_directory}/aggregation/boundaries.gpkg|layername=boundaries",
-            working_directory=f"{self.working_directory}",
+            study_area_gpkg_path=self.study_area_gpkg_path,
+            aggregation_areas_path=self.aggregation_areas_path,
+            working_directory=self.working_directory,
             target_crs=None,
             force_clear=True,
         )
 
     def test_initialization(self):
-        self.assertTrue(self.task.output_dir.endswith("wee_score"))
+        self.assertTrue(
+            self.task.output_dir.endswith("subnational_aggregation"),
+            msg=f"Output directory is {self.task.output_dir}",
+        )
         self.assertEqual(self.task.target_crs.authid(), "EPSG:32620")
 
     def test_run_task(self):
