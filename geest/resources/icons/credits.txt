@@ -16,3 +16,4 @@ Factor and Indicator icons were further modified by Tim Sutton, Oct 2024.
 
 queued.svg - original art by Tim Sutton
 
+run-tests.svg cog icon: https://www.svgrepo.com/svg/348985/cog

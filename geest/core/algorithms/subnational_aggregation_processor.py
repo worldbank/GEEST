@@ -103,7 +103,9 @@ class SubnationalAggregationProcessingTask(QgsTask):
             "ogr",
         )
         if not self.aggregation_layer.isValid():
-            raise Exception("Invalid aggregation areas layer.")
+            raise Exception(
+                f"Invalid aggregation areas layer:\n{self.aggregation_areas_path}"
+            )
 
         self.output_dir = os.path.join(working_directory, "subnational_aggregation")
         os.makedirs(self.output_dir, exist_ok=True)
@@ -114,11 +116,11 @@ class SubnationalAggregationProcessingTask(QgsTask):
 
         if not os.path.exists(self.population_folder):
             raise Exception(
-                "Population folder not found. Please run population raster processing first."
+                f"Population folder not found:\n{self.population_folder}\nPlease run population raster processing first."
             )
         if not os.path.exists(self.wee_folder):
             raise Exception(
-                "WEE folder not found. Please run WEE raster processing first."
+                f"WEE folder not found.\n{self.wee_folder}\nPlease run WEE raster processing first."
             )
 
         self.force_clear = force_clear
@@ -134,6 +136,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
                 "ogr",
             )
             self.target_crs = layer.crs()
+            log_message(
+                f"Target CRS not set. Using CRS from study area clip polygon: {self.target_crs.authid()}"
+            )
+            log_message(f"{self.study_area_gpkg_path}|ayername=study_area_clip_polygon")
             del layer
 
         log_message("Initialized WEE Subnational Area Aggregation Processing Task")
@@ -145,10 +151,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
         try:
             self.aggregate()
             self.apply_qml_style(
-                source_qml=resources_path("qml/wee_by_population_vector_score.qml.qml"),
-                qml_path=os.path.join(
-                    self.output_dir, "wee_by_population_vector_score.qml"
+                source_qml=resources_path(
+                    "resources", "qml", "wee_by_population_vector_score.qml"
                 ),
+                qml_path=os.path.join(self.output_dir, "subnational_aggregation.qml"),
             )
             return True
         except Exception as e:
@@ -180,10 +186,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
 
     def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
 
+        log_message(f"Copying QML style from {source_qml} to {qml_path}")
         # Apply QML Style
         if os.path.exists(source_qml):
             shutil.copy(source_qml, qml_path)
-            log_message(f"Copied QML style from {source_qml} to {qml_path}")
         else:
             log_message("QML style file not found. Skipping QML copy.")
 
