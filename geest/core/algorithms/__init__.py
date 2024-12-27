@@ -2,3 +2,4 @@ from .area_iterator import AreaIterator
 from .population_processor import PopulationRasterProcessingTask
 from .wee_score_processor import WEEByPopulationScoreProcessingTask
 from .subnational_aggregation_processor import SubnationalAggregationProcessingTask
+from .opportunities_polygon_mask import OpportunitiesPolygonMaskProcessingTask

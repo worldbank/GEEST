@@ -1,0 +1,188 @@
+import os
+import traceback
+from typing import Optional, List
+import shutil
+
+from qgis.PyQt.QtCore import QVariant
+from qgis.core import (
+    QgsVectorLayer,
+    QgsCoordinateReferenceSystem,
+    QgsTask,
+)
+import processing
+from geest.utilities import log_message, resources_path
+
+
+class OpportunitiesPolygonMaskProcessingTask(QgsTask):
+    """
+    A QgsTask subclass for masking WEE x Population SCORE or WEE score per polygon opportunities areas.
+
+    It will generate a new raster with all pixels that do not coincide with one of the
+    provided polygons set to no-data. The intent is to focus the analysis to specific areas
+    where job creation initiatives are in place.
+
+    Input can either be a WEE score layer, or a WEE x Population Score layer.
+
+    The WEE Score can be one of 5 classes:
+
+    | Range  | Description               | Color      |
+    |--------|---------------------------|------------|
+    | 0 - 1  | Very Low Enablement       | ![#FF0000](#) `#FF0000` |
+    | 1 - 2  | Low Enablement            | ![#FFA500](#) `#FFA500` |
+    | 2 - 3  | Moderately Enabling       | ![#FFFF00](#) `#FFFF00` |
+    | 3 - 4  | Enabling                  | ![#90EE90](#) `#90EE90` |
+    | 4 - 5  | Highly Enabling           | ![#0000FF](#) `#0000FF` |
+
+    The WEE x Population Score can be one of 15 classes:
+
+    | Color      | Description                                 |
+    |------------|---------------------------------------------|
+    | ![#FF0000](#) `#FF0000` | Very low enablement, low population       |
+    | ![#FF0000](#) `#FF0000` | Very low enablement, medium population    |
+    | ![#FF0000](#) `#FF0000` | Very low enablement, high population      |
+    | ![#FFA500](#) `#FFA500` | Low enablement, low population            |
+    | ![#FFA500](#) `#FFA500` | Low enablement, medium population         |
+    | ![#FFA500](#) `#FFA500` | Low enablement, high population           |
+    | ![#FFFF00](#) `#FFFF00` | Moderately enabling, low population       |
+    | ![#FFFF00](#) `#FFFF00` | Moderately enabling, medium population    |
+    | ![#FFFF00](#) `#FFFF00` | Moderately enabling, high population      |
+    | ![#90EE90](#) `#90EE90` | Enabling, low population                  |
+    | ![#90EE90](#) `#90EE90` | Enabling, medium population               |
+    | ![#90EE90](#) `#90EE90` | Enabling, high population                 |
+    | ![#0000FF](#) `#0000FF` | Highly enabling, low population           |
+    | ![#0000FF](#) `#0000FF` | Highly enabling, medium population        |
+    | ![#0000FF](#) `#0000FF` | Highly enabling, high population          |
+
+    See the wee_score_processor.py module for more details on how this is computed.
+
+    The output will be a new raster with the same extent and resolution as the input raster,
+    but with all pixels outside the provided polygons set to no-data.
+
+    Args:
+        study_area_gpkg_path (str): Path to the study area geopackage. Used to determine the CRS.
+        mask_areas_path (str): Path to vector layer containing the mask polygon areas.
+        working_directory (str): Parent directory to save the output agregated data. Outputs will
+            be saved in a subdirectory called "subnational_aggregates".
+        target_crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters.
+        force_clear (bool): Flag to force clearing of all outputs before processing.
+    """
+
+    def __init__(
+        self,
+        study_area_gpkg_path: str,
+        mask_areas_path: str,
+        working_directory: str,
+        target_crs: Optional[QgsCoordinateReferenceSystem] = None,
+        force_clear: bool = False,
+    ):
+        super().__init__("Opportunities Polygon Mask Processor", QgsTask.CanCancel)
+        self.study_area_gpkg_path = study_area_gpkg_path
+
+        self.mask_areas_path = mask_areas_path
+
+        self.mask_areas_layer: QgsVectorLayer = QgsVectorLayer(
+            self.mask_areas_path,
+            "mask_areas",
+            "ogr",
+        )
+        if not self.mask_areas_layer.isValid():
+            raise Exception(
+                f"Invalid polygon mask areas layer:\n{self.mask_areas_path}"
+            )
+
+        self.output_dir = os.path.join(working_directory, "opportunity_masks")
+        os.makedirs(self.output_dir, exist_ok=True)
+
+        # These folders should already exist from the aggregation analysis and population raster processing
+        self.population_folder = os.path.join(working_directory, "population")
+        self.wee_folder = os.path.join(working_directory, "wee_score")
+
+        if not os.path.exists(self.population_folder):
+            raise Exception(
+                f"Population folder not found:\n{self.population_folder}\nPlease run population raster processing first."
+            )
+        if not os.path.exists(self.wee_folder):
+            raise Exception(
+                f"WEE folder not found.\n{self.wee_folder}\nPlease run WEE raster processing first."
+            )
+
+        self.force_clear = force_clear
+        if self.force_clear and os.path.exists(self.output_dir):
+            for file in os.listdir(self.output_dir):
+                os.remove(os.path.join(self.output_dir, file))
+
+        self.target_crs = target_crs
+        if not self.target_crs:
+            layer: QgsVectorLayer = QgsVectorLayer(
+                f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
+                "study_area_clip_polygons",
+                "ogr",
+            )
+            self.target_crs = layer.crs()
+            log_message(
+                f"Target CRS not set. Using CRS from study area clip polygon: {self.target_crs.authid()}"
+            )
+            log_message(f"{self.study_area_gpkg_path}|ayername=study_area_clip_polygon")
+            del layer
+
+        log_message("Initialized WEE Subnational Area Aggregation Processing Task")
+
+    def run(self) -> bool:
+        """
+        Executes the WEE Subnational Area Aggregation Processing Task calculation task.
+        """
+        try:
+            self.mask()
+            self.apply_qml_style(
+                source_qml=resources_path(
+                    "resources", "qml", "wee_by_population_vector_score.qml"
+                ),
+                qml_path=os.path.join(self.output_dir, "subnational_aggregation.qml"),
+            )
+            return True
+        except Exception as e:
+            log_message(f"Task failed: {e}")
+            log_message(traceback.format_exc())
+            return False
+
+    def mask(self) -> None:
+        """Fix geometries then use mask vector to calculate masked WEE SCORE or WEE x Population Score layer."""
+
+        params = {
+            "INPUT": self.aggregation_layer,
+            "METHOD": 1,  # Structure method
+            "OUTPUT": "TEMPORARY_OUTPUT",
+        }
+        output = processing.run("native:fixgeometries", params)["OUTPUT"]
+
+        params = {
+            "INPUT": output,
+            "INPUT_RASTER": os.path.join(
+                self.wee_folder, "wee_by_population_score.vrt"
+            ),
+            "RASTER_BAND": 1,
+            "COLUMN_PREFIX": "_",
+            "STATISTICS": [9],  # Majority
+            "OUTPUT": os.path.join(self.output_dir, "subnational_aggregation.gpkg"),
+        }
+        processing.run("native:zonalstatisticsfb", params)
+
+    def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
+
+        log_message(f"Copying QML style from {source_qml} to {qml_path}")
+        # Apply QML Style
+        if os.path.exists(source_qml):
+            shutil.copy(source_qml, qml_path)
+        else:
+            log_message("QML style file not found. Skipping QML copy.")
+
+    def finished(self, result: bool) -> None:
+        """
+        Called when the task completes.
+        """
+        if result:
+            log_message(
+                "Opportunities Polygon Mask calculation completed successfully."
+            )
+        else:
+            log_message("Opportunities Polygon Mask calculation failed.")
