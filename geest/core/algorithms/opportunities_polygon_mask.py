@@ -6,6 +6,7 @@ import shutil
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
     QgsVectorLayer,
+    QgsRasterLayer,
     QgsCoordinateReferenceSystem,
     QgsTask,
 )
@@ -94,13 +95,8 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the aggregation analysis and population raster processing
-        self.population_folder = os.path.join(working_directory, "population")
         self.wee_folder = os.path.join(working_directory, "wee_score")
 
-        if not os.path.exists(self.population_folder):
-            raise Exception(
-                f"Population folder not found:\n{self.population_folder}\nPlease run population raster processing first."
-            )
         if not os.path.exists(self.wee_folder):
             raise Exception(
                 f"WEE folder not found.\n{self.wee_folder}\nPlease run WEE raster processing first."
@@ -148,12 +144,66 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
     def mask(self) -> None:
         """Fix geometries then use mask vector to calculate masked WEE SCORE or WEE x Population Score layer."""
 
+        # Load your raster layer
+        wee_path = os.path.join(self.wee_folder, "wee_score.vrt")
+        layer = QgsRasterLayer(wee_path, "WEE Score")
+
+        if not layer.isValid():
+            raise ("The raster layer is invalid!")
+        else:
+            # Get the extent of the raster layer
+            extent = layer.extent()
+
+            # Get the data provider for the raster layer
+            provider = layer.dataProvider()
+
+            # Get the raster's width, height, and size of cells
+            width = provider.xSize()
+            height = provider.ySize()
+
+            cell_width = extent.width() / width
+            cell_height = extent.height() / height
+        log_message(f"Raster layer loaded: {wee_path}")
+        log_message(f"Raster extent: {extent}")
+        log_message(f"Raster cell size: {cell_width} x {cell_height}")
+
         params = {
             "INPUT": self.mask_areas_layer,
             "METHOD": 1,  # Structure method
             "OUTPUT": "TEMPORARY_OUTPUT",
         }
         output = processing.run("native:fixgeometries", params)["OUTPUT"]
+        log_message("Fixed mask layer geometries")
+
+        params = {
+            "INPUT": output,
+            "TARGET_CRS": self.target_crs,
+            "CONVERT_CURVED_GEOMETRIES": False,
+            "OPERATION": self.target_crs,
+            "OUTPUT": "TEMPORARY_OUTPUT",
+        }
+        output = processing.run("native:reprojectlayer", params)["OUTPUT"]
+        log_message(f"Reprojected mask layer to {self.target_crs.authid()}")
+
+        params = {
+            "INPUT": output,
+            "FIELD": "",
+            "BURN": 1,
+            "USE_Z": False,
+            "UNITS": 0,
+            "WIDTH": cell_width,
+            "HEIGHT": cell_height,
+            "EXTENT": extent,
+            "NODATA": 0,
+            "OPTIONS": "",
+            "DATA_TYPE": 0,
+            "INIT": None,
+            "INVERT": False,
+            "EXTRA": "",
+            "OUTPUT": "TEMPORARY_OUTPUT",
+        }
+        output = processing.run("gdal:rasterize", params)["OUTPUT"]
+        log_message(f"Masked WEE Score raster saved to {output}")
 
         params = {
             "INPUT": output,
