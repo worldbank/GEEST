@@ -125,19 +125,19 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
             log_message(f"{self.study_area_gpkg_path}|ayername=study_area_clip_polygon")
             del layer
 
-        log_message("Initialized WEE Subnational Area Aggregation Processing Task")
+        log_message("Initialized WEE Opportunities Polygon Mask Processing Task")
 
     def run(self) -> bool:
         """
-        Executes the WEE Subnational Area Aggregation Processing Task calculation task.
+        Executes the WEE Opportunities Polygon Mask Processing Task calculation task.
         """
         try:
             self.mask()
             self.apply_qml_style(
                 source_qml=resources_path(
-                    "resources", "qml", "wee_by_population_vector_score.qml"
+                    "resources", "qml", "wee_by_population_score.qml"
                 ),
-                qml_path=os.path.join(self.output_dir, "subnational_aggregation.qml"),
+                qml_path=os.path.join(self.output_dir, "wee_by_population_score.qml"),
             )
             return True
         except Exception as e:
@@ -149,7 +149,7 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         """Fix geometries then use mask vector to calculate masked WEE SCORE or WEE x Population Score layer."""
 
         params = {
-            "INPUT": self.aggregation_layer,
+            "INPUT": self.mask_areas_layer,
             "METHOD": 1,  # Structure method
             "OUTPUT": "TEMPORARY_OUTPUT",
         }
@@ -163,7 +163,7 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
             "RASTER_BAND": 1,
             "COLUMN_PREFIX": "_",
             "STATISTICS": [9],  # Majority
-            "OUTPUT": os.path.join(self.output_dir, "subnational_aggregation.gpkg"),
+            "OUTPUT": os.path.join(self.output_dir, "polygon_mask.gpkg"),
         }
         processing.run("native:zonalstatisticsfb", params)
 

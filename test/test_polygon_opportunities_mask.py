@@ -22,7 +22,7 @@ class TestPolygonOpportunitiesMask(unittest.TestCase):
         cls.context = QgsProcessingContext()
         cls.feedback = QgsFeedback()
         cls.mask_areas_path = os.path.join(
-            cls.working_directory, "mask", "mask.gpkg|layername=mask"
+            cls.working_directory, "masks", "polygon_mask.gpkg|layername=polygon_mask"
         )
         cls.study_area_gpkg_path = os.path.join(
             cls.working_directory, "study_area", "study_area.gpkg"
@@ -41,7 +41,7 @@ class TestPolygonOpportunitiesMask(unittest.TestCase):
 
     def test_initialization(self):
         self.assertTrue(
-            self.task.output_dir.endswith("wee_masks"),
+            self.task.output_dir.endswith("opportunity_masks"),
             msg=f"Output directory is {self.task.output_dir}",
         )
         self.assertEqual(self.task.target_crs.authid(), "EPSG:32620")
