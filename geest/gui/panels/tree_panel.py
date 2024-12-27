@@ -888,7 +888,7 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )
 
-    def add_to_map(self, item, key="result_file", layer_name=None):
+    def add_to_map(self, item, key="result_file", layer_name=None, qml_key=None):
         """Add the item to the map."""
 
         layer_uri = item.attribute(f"{key}")
@@ -900,6 +900,10 @@ class TreePanel(QWidget):
             if "gpkg" in layer_uri:
                 log_message(f"Adding GeoPackage layer: {layer_name}")
                 layer = QgsVectorLayer(layer_uri, layer_name, "ogr")
+                if qml_key:
+                    qml_path = item.attribute(qml_key)
+                    if qml_path:
+                        result = layer.loadNamedStyle(qml_path)
             else:
                 log_message(f"Adding raster layer: {layer_name}")
                 layer = QgsRasterLayer(layer_uri, layer_name)

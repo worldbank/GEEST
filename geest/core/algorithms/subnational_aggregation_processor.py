@@ -151,10 +151,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
         try:
             self.aggregate()
             self.apply_qml_style(
-                source_qml=resources_path("qml/wee_by_population_vector_score.qml.qml"),
-                qml_path=os.path.join(
-                    self.output_dir, "wee_by_population_vector_score.qml"
+                source_qml=resources_path(
+                    "resources", "qml", "wee_by_population_vector_score.qml"
                 ),
+                qml_path=os.path.join(self.output_dir, "subnational_aggregation.qml"),
             )
             return True
         except Exception as e:
@@ -186,10 +186,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
 
     def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
 
+        log_message(f"Copying QML style from {source_qml} to {qml_path}")
         # Apply QML Style
         if os.path.exists(source_qml):
             shutil.copy(source_qml, qml_path)
-            log_message(f"Copied QML style from {source_qml} to {qml_path}")
         else:
             log_message("QML style file not found. Skipping QML copy.")
 

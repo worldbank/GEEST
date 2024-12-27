@@ -79,7 +79,7 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
             force_clear=False,
         )
         subnational_processor.run()
-        # Shamelessly hard coded for now, needs to move to the wee processor class
+        # Shamelessly hard coded for now, needs to move to the aggregation processor class
         output = os.path.join(
             self.working_directory,
             "subnational_aggregation",
