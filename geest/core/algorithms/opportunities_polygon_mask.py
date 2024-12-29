@@ -204,18 +204,26 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         }
         output = processing.run("gdal:rasterize", params)["OUTPUT"]
         log_message(f"Masked WEE Score raster saved to {output}")
-
+        opportunities_mask = os.path.join(self.output_dir, "oppotunities_mask.tif")
         params = {
-            "INPUT": output,
-            "INPUT_RASTER": os.path.join(
-                self.wee_folder, "wee_by_population_score.vrt"
-            ),
-            "RASTER_BAND": 1,
-            "COLUMN_PREFIX": "_",
-            "STATISTICS": [9],  # Majority
-            "OUTPUT": os.path.join(self.output_dir, "polygon_mask.gpkg"),
+            "INPUT_A": layer,
+            "BAND_A": 1,
+            "INPUT_B": output,
+            "BAND_B": 1,
+            "FORMULA": "A*B",
+            "NO_DATA": None,
+            "EXTENT_OPT": 3,
+            "PROJWIN": None,
+            "RTYPE": 0,
+            "OPTIONS": "",
+            "EXTRA": "",
+            "OUTPUT": opportunities_mask,
         }
-        processing.run("native:zonalstatisticsfb", params)
+
+        processing.run("gdal:rastercalculator", params)
+        self.output_rasters.append(opportunities_mask)
+
+        log_message(f"WEE SCORE raster saved to {opportunities_mask}")
 
     def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
 

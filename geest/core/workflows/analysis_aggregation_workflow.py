@@ -1,11 +1,11 @@
 import os
 from qgis.core import QgsFeedback, QgsProcessingContext
-from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
 from geest.core.algorithms import (
     PopulationRasterProcessingTask,
     WEEByPopulationScoreProcessingTask,
     SubnationalAggregationProcessingTask,
+    OpportunitiesPolygonMaskProcessingTask,
 )
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
@@ -70,6 +70,17 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
             self.working_directory, "wee_score", "wee_by_population_score.vrt"
         )
         item.setAttribute("wee_by_population", output)
+
+        # Prepare the polygon mask data if provided
+        self.polygon_mask = self.item.attribute("population_layer_source", None)
+        opportunites_mask_processor = OpportunitiesPolygonMaskProcessingTask(
+            self.studyarea_gpkg_path,
+            self.gpkg_path,
+            self.working_directory,
+            self.target_crs,
+            self.feedback,
+        )
+        opportunites_mask_processor.run()
 
         aggregation_layer = self.item.attribute("aggregation_layer_source")
         subnational_processor = SubnationalAggregationProcessingTask(
