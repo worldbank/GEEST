@@ -72,13 +72,13 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         item.setAttribute("wee_by_population", output)
 
         # Prepare the polygon mask data if provided
-        self.polygon_mask = self.item.attribute("population_layer_source", None)
+        self.polygon_mask = self.item.attribute("polygon_mask_layer_source", None)
         opportunites_mask_processor = OpportunitiesPolygonMaskProcessingTask(
-            self.studyarea_gpkg_path,
-            self.gpkg_path,
-            self.working_directory,
-            self.target_crs,
-            self.feedback,
+            study_area_gpkg_path=self.gpkg_path,
+            mask_areas_path=self.polygon_mask,
+            working_directory=self.working_directory,
+            target_crs=self.target_crs,
+            force_clear=False,
         )
         opportunites_mask_processor.run()
 

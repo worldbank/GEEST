@@ -145,17 +145,24 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         """Fix geometries then use mask vector to calculate masked WEE SCORE or WEE x Population Score layer."""
 
         # Load your raster layer
-        wee_path = os.path.join(self.wee_folder, "wee_score.vrt")
-        layer = QgsRasterLayer(wee_path, "WEE Score")
+        wee_path = os.path.join(self.wee_folder, "wee_by_population_score.vrt")
+        wee_layer = QgsRasterLayer(wee_path, "WEE by Population Score")
 
-        if not layer.isValid():
-            raise ("The raster layer is invalid!")
+        if not wee_layer.isValid():
+            log_message(f"The raster layer is invalid!\n{wee_path}\nTrying WEE score")
+            # TODO - will need to fix this when the wee product file name is fixed
+            wee_path = os.path.join(os.pardir(self.wee_folder), "_combined.vrt")
+            wee_layer = QgsRasterLayer(wee_path, "WEE Score")
+            if not wee_layer.isValid():
+                raise Exception(
+                    f"Neither WEE x Population nor WEE Score layers are valid.\n{wee_path}\n"
+                )
         else:
             # Get the extent of the raster layer
-            extent = layer.extent()
+            extent = wee_layer.extent()
 
             # Get the data provider for the raster layer
-            provider = layer.dataProvider()
+            provider = wee_layer.dataProvider()
 
             # Get the raster's width, height, and size of cells
             width = provider.xSize()
@@ -166,49 +173,61 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         log_message(f"Raster layer loaded: {wee_path}")
         log_message(f"Raster extent: {extent}")
         log_message(f"Raster cell size: {cell_width} x {cell_height}")
-
+        fixed_geometries_path = os.path.join(
+            self.output_dir, "fixed_opportunites_polygons.gpkg"
+        )
         params = {
             "INPUT": self.mask_areas_layer,
             "METHOD": 1,  # Structure method
-            "OUTPUT": "TEMPORARY_OUTPUT",
+            "OUTPUT": fixed_geometries_path,
         }
         output = processing.run("native:fixgeometries", params)["OUTPUT"]
         log_message("Fixed mask layer geometries")
 
+        reprojected_fixed_geometries_path = os.path.join(
+            self.output_dir, "reprojected_fixed_opportunites_polygons.gpkg"
+        )
+
         params = {
-            "INPUT": output,
+            "INPUT": fixed_geometries_path,
             "TARGET_CRS": self.target_crs,
             "CONVERT_CURVED_GEOMETRIES": False,
             "OPERATION": self.target_crs,
-            "OUTPUT": "TEMPORARY_OUTPUT",
+            "OUTPUT": reprojected_fixed_geometries_path,
         }
         output = processing.run("native:reprojectlayer", params)["OUTPUT"]
-        log_message(f"Reprojected mask layer to {self.target_crs.authid()}")
+        log_message(
+            f"Reprojected mask layer to {self.target_crs.authid()} and saved as \n{reprojected_fixed_geometries_path}"
+        )
 
+        rasterized_polygons_path = os.path.join(
+            self.output_dir, "rasterized_opportunites_polygons.tif"
+        )
         params = {
-            "INPUT": output,
-            "FIELD": "",
+            "INPUT": reprojected_fixed_geometries_path,
+            "FIELD": None,
             "BURN": 1,
             "USE_Z": False,
-            "UNITS": 0,
+            "UNITS": 1,
             "WIDTH": cell_width,
             "HEIGHT": cell_height,
             "EXTENT": extent,
             "NODATA": 0,
             "OPTIONS": "",
-            "DATA_TYPE": 0,
+            "DATA_TYPE": 0,  # byte
             "INIT": None,
             "INVERT": False,
-            "EXTRA": "",
-            "OUTPUT": "TEMPORARY_OUTPUT",
+            "EXTRA": "-co NBITS=1 -at",  # -at is for all touched cells
+            "OUTPUT": rasterized_polygons_path,
         }
+
         output = processing.run("gdal:rasterize", params)["OUTPUT"]
         log_message(f"Masked WEE Score raster saved to {output}")
         opportunities_mask = os.path.join(self.output_dir, "oppotunities_mask.tif")
         params = {
-            "INPUT_A": layer,
+            "INPUT_A": wee_layer,
             "BAND_A": 1,
-            "INPUT_B": output,
+            "INPUT_B": rasterized_polygons_path,
             "BAND_B": 1,
             "FORMULA": "A*B",
             "NO_DATA": None,
