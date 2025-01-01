@@ -7,6 +7,7 @@ from geest.core.algorithms import (
     SubnationalAggregationProcessingTask,
     OpportunitiesPolygonMaskProcessingTask,
 )
+from opportunities_polygon_mask_workflow import OpportunitiesPolygonMaskWorkflow
 from geest.utilities import resources_path
 from geest.core import JsonTreeItem
 
@@ -72,6 +73,16 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         item.setAttribute("wee_by_population", output)
 
         # Prepare the polygon mask data if provided
+
+        opportunities_mask_workflow = OpportunitiesPolygonMaskWorkflow(
+            self.item,
+            self.cell_size_m,
+            self.feedback,
+            self.context,
+            self.working_directory,
+        )
+        opportunities_mask_workflow.run()
+
         self.polygon_mask = self.item.attribute("polygon_mask_layer_source", None)
         opportunites_mask_processor = OpportunitiesPolygonMaskProcessingTask(
             study_area_gpkg_path=self.gpkg_path,

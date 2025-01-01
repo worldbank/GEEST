@@ -14,3 +14,4 @@ from .safety_raster_workflow import SafetyRasterWorkflow
 from .raster_reclassification_workflow import RasterReclassificationWorkflow
 from .street_lights_buffer_workflow import StreetLightsBufferWorkflow
 from .classified_polygon_workflow import ClassifiedPolygonWorkflow
+from .opportunities_polygon_mask_workflow import OpportunitiesPolygonMaskWorkflow

@@ -510,6 +510,25 @@ class WorkflowBase(QObject):
         log_message(f"Created raster: {output_path}")
         return output_path
 
+    def geometry_to_memory_layer(self, geometry: QgsGeometry, layer_name: str):
+        """
+        Convert a QgsGeometry to a memory layer.
+
+        Args:
+            geometry (QgsGeometry): The polygon geometry to convert.
+            layer_name (str): The name to assign to the memory layer.
+
+        Returns:
+            QgsVectorLayer: The memory layer containing the geometry.
+        """
+        memory_layer = QgsVectorLayer("Polygon", layer_name, "memory")
+        memory_layer.setCrs(self.target_crs)
+        feature = QgsFeature()
+        feature.setGeometry(geometry)
+        memory_layer.dataProvider().addFeatures([feature])
+        memory_layer.commitChanges()
+        return memory_layer
+
     def _mask_raster(
         self, raster_path: str, area_geometry: QgsGeometry, index: int
     ) -> str:
@@ -541,14 +560,9 @@ class WorkflowBase(QObject):
                 level=Qgis.Warning,
             )
             raise QgsProcessingException(f"Raster file not found at {raster_path}")
-        # Convert the geometry to a memory layer in the self.tartget_crs
+        # Convert the geometry to a memory layer in the self.target_crs
         log_message(f"Creating mask layer for area from polygon {index}")
-        mask_layer = QgsVectorLayer(f"Polygon", "mask", "memory")
-        mask_layer.setCrs(self.target_crs)
-        feature = QgsFeature()
-        feature.setGeometry(area_geometry)
-        mask_layer.dataProvider().addFeatures([feature])
-        mask_layer.commitChanges()
+        mask_layer = self.geometry_to_memory_layer(area_geometry, f"mask_layer_{index}")
         log_message(f"Mask layer created: {mask_layer}")
         # Clip the raster by the mask layer
         params = {
