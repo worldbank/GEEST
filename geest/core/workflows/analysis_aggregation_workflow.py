@@ -42,3 +42,7 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.layer_id = "wee"
         self.weight_key = "dimension_weighting"
         self.workflow_name = "analysis_aggregation"
+        # Override the default working directory defined in the base class
+        self.workflow_directory = os.path.join(self.working_directory, "wee_score")
+        if not os.path.exists(self.workflow_directory):
+            os.makedirs(self.workflow_directory, exist_ok=True)

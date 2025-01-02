@@ -1,4 +1,5 @@
 import os
+import shutil
 from qgis.core import (
     QgsRasterLayer,
     Qgis,
@@ -13,7 +14,7 @@ from qgis.PyQt.QtCore import QVariant
 import processing
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
-from geest.utilities import log_message
+from geest.utilities import log_message, resources_path
 
 
 class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
@@ -283,6 +284,31 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
             shutil.copy(source_qml, qml_path)
         else:
             log_message("QML style file not found. Skipping QML copy.")
+
+    def _combine_rasters_to_vrt(self, rasters: list) -> None:
+        """
+        Combine all the rasters into a single VRT file. Overrides the
+        base class method to apply the custom QML style to the VRT.
+
+        Args:
+            rasters: The rasters to combine into a VRT.
+
+        Returns:
+            vrtpath (str): The file path to the VRT file.
+        """
+        vrt_filepath = super()._combine_rasters_to_vrt(rasters)
+        if not vrt_filepath:
+            return False
+
+        qml_filepath = os.path.join(
+            self.workflow_directory,
+            f"{self.output_filename}_combined.qml",
+        )
+        source_qml = resources_path("resources", "qml", f"mask.qml")
+        log_message(f"Copying QML from {source_qml} to {qml_filepath}")
+        shutil.copyfile(source_qml, qml_filepath)
+        log_message(f"Applying QML style to VRT: {qml_filepath}")
+        return vrt_filepath
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
