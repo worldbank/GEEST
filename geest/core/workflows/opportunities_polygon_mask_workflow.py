@@ -102,6 +102,13 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         # And customise which key we will write the result file to (see base class for notes):
         self.result_file_key = "opportunities_mask_result_file"
         self.result_key = "opportunities_mask_result"
+
+        self.mask_mode = self.attributes.get("mask_mode", None)
+        if not self.mask_mode:
+            raise Exception("Mask mode not set in the analysis.")
+
+        # Section below to be removed
+
         # These folders should already exist from the aggregation analysis and population raster processing
         self.wee_by_population_folder = os.path.join(
             working_directory, "wee_by_population_score"

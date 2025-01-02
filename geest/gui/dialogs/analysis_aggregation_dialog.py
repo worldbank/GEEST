@@ -171,6 +171,18 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         # Initial validation check
         self.validate_weightings()
 
+        # Restore the radio button state
+        mask_mode = self.tree_item.attribute("mask_mode", "")
+        if mask_mode == "point":
+            self.point_radio_button.setChecked(True)
+        elif mask_mode == "polygon":
+            self.polygon_radio_button.setChecked(True)
+        elif mask_mode == "raster":
+            self.raster_radio_button.setChecked(True)
+
+        buffer_distance = self.tree_item.attribute("buffer_distance_m", 0)
+        self.buffer_distance_m.setValue(buffer_distance)
+
         # Restore the dialog geometry
 
         settings = QSettings()
@@ -567,7 +579,15 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
             self.polygon_combo, self.polygon_lineedit, "polygon_mask"
         )
         self.save_combo_to_model(self.raster_combo, self.raster_lineedit, "raster_mask")
+        # Save the radio button state
+        if self.point_radio_button.isChecked():
+            self.tree_item.setAttribute("mask_mode", "point")
+        elif self.polygon_radio_button.isChecked():
+            self.tree_item.setAttribute("mask_mode", "polygon")
+        elif self.raster_radio_button.isChecked():
+            self.tree_item.setAttribute("mask_mode", "raster")
 
+        self.tree_item.setAttribute("buffer_distance_m", self.buffer_distance_m.value())
         # Save the dialog geometry
         settings = QSettings()
         settings.setValue("AnalysisAggregationDialog/geometry", self.saveGeometry())
@@ -594,7 +614,10 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
             if layer.providerType() != "gdal":
                 item.setAttribute(f"{prefix}_layer_wkb_type", layer.wkbType())
             item.setAttribute(f"{prefix}_layer_id", layer.id())
-        item.setAttribute(f"{prefix}_shapefile", lineedit.text())
+        if lineedit.objectName() == "raster_lineedit":
+            item.setAttribute(f"{prefix}_raster", lineedit.text())
+        else:
+            item.setAttribute(f"{prefix}_shapefile", lineedit.text())
 
     def load_combo_from_model(
         self, combo: QgsMapLayerComboBox, lineedit: QLineEdit, prefix: str
@@ -612,4 +635,7 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
                 combo.setLayer(layer)
         if item.attribute(f"{prefix}_shapefile", False):
             lineedit.setText(self.attributes[f"{prefix}_shapefile"])
+            lineedit.setVisible(True)
+        if item.attribute(f"{prefix}_raster", False):
+            lineedit.setText(self.attributes[f"{prefix}_raster"])
             lineedit.setVisible(True)

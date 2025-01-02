@@ -81,6 +81,8 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_error = json_data.get("error", "")
         analysis_error_file = json_data.get("error_file", "")
         analysis_output_filename = json_data.get("output_filename", "WEE_Score")
+        mask_mode = json_data.get("mask_mode", "None")
+        buffer_distance_m = json_data.get("buffer_distance_m", 0.0)
         # Store special properties in the attributes dictionary
         analysis_attributes = {
             "analysis_name": analysis_name,
@@ -94,6 +96,8 @@ class JsonTreeModel(QAbstractItemModel):
             "error": analysis_error,
             "error_file": analysis_error_file,
             "output_filename": analysis_output_filename,
+            "mask_mode": mask_mode,
+            "buffer_distance_m": buffer_distance_m,
         }
         for prefix in [
             "aggregation",
@@ -123,9 +127,15 @@ class JsonTreeModel(QAbstractItemModel):
             analysis_attributes[f"{prefix}_layer_id"] = json_data.get(
                 f"{prefix}_layer_id", ""
             )
-            analysis_attributes[f"{prefix}_shapefile"] = json_data.get(
-                f"{prefix}_shapefile", ""
-            )
+            if prefix == "raster_mask":
+                analysis_attributes[f"{prefix}_raster"] = json_data.get(
+                    f"{prefix}_raster", ""
+                )
+            else:
+                analysis_attributes[f"{prefix}_shapefile"] = json_data.get(
+                    f"{prefix}_shapefile", ""
+                )
+
         # Create the "Analysis" item
         status = ""
         weighting = ""
