@@ -41,6 +41,7 @@ from qgis.core import (
 )
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
+from geest.core import JsonTreeItem
 from geest.utilities import resources_path
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
@@ -49,6 +50,14 @@ from geest.gui.dialogs import (
     DimensionAggregationDialog,
     AnalysisAggregationDialog,
 )
+from geest.core.algorithms import (
+    PopulationRasterProcessingTask,
+    WEEByPopulationScoreProcessingTask,
+    SubnationalAggregationProcessingTask,
+    OpportunitiesPolygonMaskProcessingTask,
+)
+from geest.core.workflows import OpportunitiesPolygonMaskWorkflow
+
 from geest.utilities import log_message
 
 
@@ -1069,6 +1078,15 @@ class TreePanel(QWidget):
         count = parent_item.childCount(recursive=True)
         self.items_to_run = count
 
+    def cell_size_m(self):
+        """Get the cell size in meters from the analysis item."""
+        cell_size_m = (
+            self.model.get_analysis_item()
+            .attributes()
+            .get("analysis_cell_size_m", 100.0)
+        )
+        return cell_size_m
+
     def queue_workflow_task(self, item, role):
         """Queue a workflow task based on the role of the item.
 
@@ -1077,11 +1095,6 @@ class TreePanel(QWidget):
         """
         task = None
 
-        cell_size_m = (
-            self.model.get_analysis_item()
-            .attributes()
-            .get("analysis_cell_size_m", 100.0)
-        )
         attributes = item.attributes()
         if attributes.get("result_file", None) and self.run_only_incomplete:
             return
@@ -1091,7 +1104,7 @@ class TreePanel(QWidget):
             attributes["analysis_mode"] = "dimension_aggregation"
         if role == item.role and role == "analysis":
             attributes["analysis_mode"] = "analysis_aggregation"
-        task = self.queue_manager.add_workflow(item, cell_size_m)
+        task = self.queue_manager.add_workflow(item, self.cell_size_m())
         if task is None:
             return
 
@@ -1270,7 +1283,7 @@ class TreePanel(QWidget):
 
         parent_second_column_index = None
         if item.role == "indicator":
-            # Show an animation on its parent too
+            # Stop the animation on its parent too
             parent_index = node_index.parent()
             parent_second_column_index = self.model.index(
                 parent_index.row(), 1, parent_index.parent()
@@ -1286,6 +1299,84 @@ class TreePanel(QWidget):
 
         # Emit dataChanged to refresh the decoration
         self.model.dataChanged.emit(second_column_index, second_column_index)
+
+        if item.role == "analysis":
+            # Run some post processing on the analysis results
+            self.calculate_analysis_insights(item)
+
+    def calculate_analysis_insights(self, item: JsonTreeItem):
+        """Caclulate insights for the analysis.
+
+        Post process the analysis aggregation and store the output in the item.
+
+        Here we compute various other insights from the aggregated data:
+
+        - WEE x Population Score
+        - Opportunities Mask
+        - Subnational Aggregation
+
+        """
+
+        # Prepare the population data if provided
+        population_data = item.attribute("population_layer_source", None)
+
+        population_processor = PopulationRasterProcessingTask(
+            population_raster_path=population_data,
+            working_directory=self.working_directory,
+            study_area_gpkg_path=self.gpkg_path,
+            cell_size_m=self.cell_size_m(),
+            feedback=self.feedback,
+        )
+        population_processor.run()
+        wee_processor = WEEByPopulationScoreProcessingTask(
+            study_area_gpkg_path=self.gpkg_path,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        wee_processor.run()
+        # Shamelessly hard coded for now, needs to move to the wee processor class
+        output = os.path.join(
+            self.working_directory, "wee_score", "wee_by_population_score.vrt"
+        )
+        item.setAttribute("wee_by_population", output)
+
+        # Prepare the polygon mask data if provided
+
+        opportunities_mask_workflow = OpportunitiesPolygonMaskWorkflow(
+            self.item,
+            self.cell_size_m(),
+            self.feedback,
+            self.context,
+            self.working_directory,
+        )
+        opportunities_mask_workflow.run()
+
+        self.polygon_mask = self.item.attribute("polygon_mask_layer_source", None)
+        opportunites_mask_processor = OpportunitiesPolygonMaskProcessingTask(
+            study_area_gpkg_path=self.gpkg_path,
+            mask_areas_path=self.polygon_mask,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        opportunites_mask_processor.run()
+
+        aggregation_layer = self.item.attribute("aggregation_layer_source")
+        subnational_processor = SubnationalAggregationProcessingTask(
+            study_area_gpkg_path=self.gpkg_path,
+            aggregation_areas_path=aggregation_layer,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        subnational_processor.run()
+        # Shamelessly hard coded for now, needs to move to the aggregation processor class
+        output = os.path.join(
+            self.working_directory,
+            "subnational_aggregation",
+            "subnational_aggregation.gpkg",
+        )
+        item.setAttribute(
+            "subnational_aggregation", f"{output}|layername=subnational_aggregation"
+        )
 
     def update_tree_item_status(self, item, status):
         """

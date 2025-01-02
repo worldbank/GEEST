@@ -34,7 +34,6 @@ class PopulationRasterProcessingTask(QgsTask):
         study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
         output_dir (str): Directory to save the output rasters.
         cell_size_m (float): Cell size for the output rasters.
-        crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters. Will use the CRS of the clip layer if not provided.
         context (Optional[QgsProcessingContext]): QGIS processing context.
         feedback (Optional[QgsFeedback]): QGIS feedback object.
         force_clear (bool): Flag to force clearing of all outputs before processing.
@@ -46,7 +45,6 @@ class PopulationRasterProcessingTask(QgsTask):
         study_area_gpkg_path: str,
         working_directory: str,
         cell_size_m: float,
-        target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         context: Optional[QgsProcessingContext] = None,
         feedback: Optional[QgsFeedback] = None,
         force_clear: bool = False,
@@ -61,15 +59,14 @@ class PopulationRasterProcessingTask(QgsTask):
                 os.remove(os.path.join(self.output_dir, file))
         self.cell_size_m = cell_size_m
         os.makedirs(self.output_dir, exist_ok=True)
-        self.target_crs = target_crs
-        if not self.target_crs:
-            layer: QgsVectorLayer = QgsVectorLayer(
-                f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
-                "study_area_clip_polygons",
-                "ogr",
-            )
-            self.target_crs = layer.crs()
-            del layer
+
+        layer: QgsVectorLayer = QgsVectorLayer(
+            f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
+            "study_area_clip_polygons",
+            "ogr",
+        )
+        self.target_crs = layer.crs()
+        del layer
         self.context = context
         self.feedback = feedback
         self.global_min = float("inf")

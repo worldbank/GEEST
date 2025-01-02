@@ -73,7 +73,6 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         study_area_gpkg_path: str,
         mask_areas_path: str,
         working_directory: str,
-        target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         force_clear: bool = False,
     ):
         super().__init__("Opportunities Polygon Mask Processor", QgsTask.CanCancel)
@@ -107,19 +106,17 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
             for file in os.listdir(self.output_dir):
                 os.remove(os.path.join(self.output_dir, file))
 
-        self.target_crs = target_crs
-        if not self.target_crs:
-            layer: QgsVectorLayer = QgsVectorLayer(
-                f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
-                "study_area_clip_polygons",
-                "ogr",
-            )
-            self.target_crs = layer.crs()
-            log_message(
-                f"Target CRS not set. Using CRS from study area clip polygon: {self.target_crs.authid()}"
-            )
-            log_message(f"{self.study_area_gpkg_path}|ayername=study_area_clip_polygon")
-            del layer
+        layer: QgsVectorLayer = QgsVectorLayer(
+            f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
+            "study_area_clip_polygons",
+            "ogr",
+        )
+        self.target_crs = layer.crs()
+        log_message(
+            f"Using CRS from study area clip polygon: {self.target_crs.authid()}"
+        )
+        log_message(f"{self.study_area_gpkg_path}|ayername=study_area_clip_polygon")
+        del layer
 
         log_message("Initialized WEE Opportunities Polygon Mask Processing Task")
 
@@ -150,8 +147,9 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
 
         if not wee_layer.isValid():
             log_message(f"The raster layer is invalid!\n{wee_path}\nTrying WEE score")
-            # TODO - will need to fix this when the wee product file name is fixed
-            wee_path = os.path.join(os.pardir(self.wee_folder), "_combined.vrt")
+            wee_path = os.path.join(
+                os.pardir(self.wee_folder), "WEE_Score_combined.vrt"
+            )
             wee_layer = QgsRasterLayer(wee_path, "WEE Score")
             if not wee_layer.isValid():
                 raise Exception(

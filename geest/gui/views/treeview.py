@@ -80,6 +80,7 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_execution_end_time = json_data.get("execution_end_time", "")
         analysis_error = json_data.get("error", "")
         analysis_error_file = json_data.get("error_file", "")
+        analysis_output_filename = json_data.get("output_filename", "WEE_Score")
         # Store special properties in the attributes dictionary
         analysis_attributes = {
             "analysis_name": analysis_name,
@@ -92,6 +93,7 @@ class JsonTreeModel(QAbstractItemModel):
             "execution_end_time": analysis_execution_end_time,
             "error": analysis_error,
             "error_file": analysis_error_file,
+            "output_filename": analysis_output_filename,
         }
         for prefix in [
             "aggregation",

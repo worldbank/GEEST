@@ -32,9 +32,9 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.guids = (
-            self.item.getDimensionFactorGuids()
-        )  # get a list of the items to aggregate
+
+        # get a list of the items to aggregate
+        self.guids = self.item.getDimensionFactorGuids()
         self.id = (
             self.item.attribute("id").lower().replace(" ", "_")
         )  # should not be needed any more

@@ -21,7 +21,7 @@ class SpreadsheetToJsonParser:
             "active_transport": "AT_output",
             "place_characterization": "Place_score",
             "analysis_dimension": "WEE",
-            "level_of_enablement classification": "WEE_score",
+            "level_of_enablement_classification": "WEE_score",
             "relative_population_count": "Population",
             "combined_level_of_enablement_and_relative_population_count": "WEE_pop_score",
             "enablement": "WEE_pop_adm_score",
