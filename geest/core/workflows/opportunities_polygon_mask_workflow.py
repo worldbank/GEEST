@@ -69,27 +69,40 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
             working_directory=working_directory,
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "opportunities_polygon_mask"
+
+        self.mask_mode = self.attributes.get(
+            "mask_mode", None
+        )  # if set,  will be "point", "polygon" or "raster"
+        if not self.mask_mode:
+            raise Exception("Mask mode not set in the analysis.")
+
         # There are two ways a user can specify the polygon mask layer
         # either as a shapefile path added in a line edit or as a layer source
         # using a QgsMapLayerComboBox. We prioritize the shapefile path, so check that first.
-        layer_source = self.attributes.get("polygon_mask_shapefile", None)
+        layer_source = self.attributes.get(f"{self.mask_mode}_mask_shapefile", None)
         provider_type = "ogr"
         if not layer_source:
             # Fall back to the QgsMapLayerComboBox source
-            layer_source = self.attributes.get("polygon_mask_layer_source", None)
+            layer_source = self.attributes.get(
+                f"{self.mask_mode}_mask_layer_source", None
+            )
             provider_type = self.attributes.get(
-                "polygon_mask_layer_provider_type", "ogr"
+                f"{self.mask_mode}_mask_layer_provider_type", "ogr"
             )
         if not layer_source:
             log_message(
-                "polygon_mask_shapefile not found",
+                f"{self.mask_mode}_mask_shapefile not found",
                 tag="Geest",
                 level=Qgis.Critical,
             )
             return False
-        self.features_layer = QgsVectorLayer(layer_source, "polygons", provider_type)
+        self.features_layer = QgsVectorLayer(
+            layer_source, self.mask_mode, provider_type
+        )
         if not self.features_layer.isValid():
-            log_message("polygon_mask_shapefile not valid", level=Qgis.Critical)
+            log_message(
+                f"{self.mask_mode}_mask_shapefile not valid", level=Qgis.Critical
+            )
             log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
 
@@ -102,10 +115,6 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         # And customise which key we will write the result file to (see base class for notes):
         self.result_file_key = "opportunities_mask_result_file"
         self.result_key = "opportunities_mask_result"
-
-        self.mask_mode = self.attributes.get("mask_mode", None)
-        if not self.mask_mode:
-            raise Exception("Mask mode not set in the analysis.")
 
         # Section below to be removed
 
