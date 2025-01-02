@@ -31,7 +31,7 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
 
     The output raster will have the same extent and cell size as the study area.
 
-    The output raster will have either 5 classes (WEE Score) or 15 classes (WEE x Population Score).
+    The output raster will have either have values of 1 in the mask and 0 outside.
 
     The output raster will be a vrt which is a composite of all the individual area rasters.
 
@@ -40,11 +40,8 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
     Preconditions:
 
     This workflow expects that the user has configured the root analysis node dialog with
-    the population, aggregation and polygon mask settings, and that the WEE Score and WEE x Population
-    scores have been calculated.
+    the polygon mask settings configured.
 
-    WEE x Population Score is optional. If it is not present, only a masked copy of the WEE Score
-    will be generated.
     """
 
     def __init__(
@@ -95,22 +92,27 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
             log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
 
-        self.output_dir = os.path.join(working_directory, "opportunity_masks")
-        os.makedirs(self.output_dir, exist_ok=True)
-
+        # Workflow directory is the subdir under working_directory
+        ## This is usually set in the base class but we override that behaviour for this workflow
+        self.workflow_directory = os.path.join(working_directory, "opportunity_masks")
+        os.makedirs(self.workflow_directory, exist_ok=True)
+        # Again normally auto-set in the base class but we override it here
+        self.output_filename = "Opportunities_Mask"
         # These folders should already exist from the aggregation analysis and population raster processing
-        self.wee_folder = os.path.join(working_directory, "wee_score")
+        self.wee_by_population_folder = os.path.join(
+            working_directory, "wee_by_population_score"
+        )
 
-        if not os.path.exists(self.wee_folder):
+        if not os.path.exists(self.wee_by_population_folder):
             raise Exception(
-                f"WEE folder not found.\n{self.wee_folder}\nPlease run WEE raster processing first."
+                f"WEE folder not found.\n{self.wee_by_population_folder}\nPlease run WEE raster processing first."
             )
 
         # TODO make user configurable
         self.force_clear = False
-        if self.force_clear and os.path.exists(self.output_dir):
-            for file in os.listdir(self.output_dir):
-                os.remove(os.path.join(self.output_dir, file))
+        if self.force_clear and os.path.exists(self.workflow_directory):
+            for file in os.listdir(self.workflow_directory):
+                os.remove(os.path.join(self.workflow_directory, file))
 
         log_message("Initialized WEE Opportunities Polygon Mask Workflow")
 
@@ -162,7 +164,7 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         """
         output_name = f"opportunites_polygons_clipped_{index}"
         clip_layer = self.geometry_to_memory_layer(clip_area, "clip_area")
-        output_path = os.path.join(self.output_dir, f"{output_name}.shp")
+        output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
         params = {"INPUT": layer, "OVERLAY": clip_layer, "OUTPUT": output_path}
         output = processing.run("native:clip", params)["OUTPUT"]
         clipped_layer = QgsVectorLayer(output_path, output_name, "ogr")
@@ -185,8 +187,9 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         """
 
         rasterized_polygons_path = os.path.join(
-            self.output_dir, f"opportunites_mask_{index}.tif"
+            self.workflow_directory, f"opportunites_mask_{index}.tif"
         )
+
         params = {
             "INPUT": clipped_layer,
             "FIELD": None,
@@ -214,25 +217,29 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         """
 
         # Load your raster layer
-        wee_path = os.path.join(self.wee_folder, "wee_by_population_score.vrt")
-        wee_layer = QgsRasterLayer(wee_path, "WEE by Population Score")
+        wee_path = os.path.join(
+            self.wee_by_population_folder, "wee_by_population_score.vrt"
+        )
+        wee_by_population_layer = QgsRasterLayer(wee_path, "WEE by Population Score")
 
-        if not wee_layer.isValid():
+        if not wee_by_population_layer.isValid():
             log_message(f"The raster layer is invalid!\n{wee_path}\nTrying WEE score")
-            wee_path = os.path.join(
-                os.pardir(self.wee_folder), "WEE_Score_combined.vrt"
+            wee_by_population_path = os.path.join(
+                os.pardir(self.wee_by_population_folder), "wee_by_population_score.vrt"
             )
-            wee_layer = QgsRasterLayer(wee_path, "WEE Score")
-            if not wee_layer.isValid():
+            wee_by_population_layer = QgsRasterLayer(
+                wee_path, "WEE By Population Score"
+            )
+            if not wee_by_population_layer.isValid():
                 raise Exception(
                     f"Neither WEE x Population nor WEE Score layers are valid.\n{wee_path}\n"
                 )
         else:
             # Get the extent of the raster layer
-            extent = wee_layer.extent()
+            extent = wee_by_population_layer.extent()
 
             # Get the data provider for the raster layer
-            provider = wee_layer.dataProvider()
+            provider = wee_by_population_layer.dataProvider()
 
             # Get the raster's width, height, and size of cells
             width = provider.xSize()
@@ -245,9 +252,11 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         log_message(f"Raster cell size: {cell_width} x {cell_height}")
 
         log_message(f"Masked WEE Score raster saved to {output}")
-        opportunities_mask = os.path.join(self.output_dir, "oppotunities_mask.tif")
+        opportunities_mask = os.path.join(
+            self.workflow_directory, "oppotunities_mask.tif"
+        )
         params = {
-            "INPUT_A": wee_layer,
+            "INPUT_A": wee_by_population_layer,
             "BAND_A": 1,
             "INPUT_B": rasterized_polygons_path,
             "BAND_B": 1,

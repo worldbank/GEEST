@@ -5,8 +5,6 @@ import shutil
 
 from qgis.core import (
     QgsTask,
-    QgsProcessingContext,
-    QgsFeedback,
     QgsRasterLayer,
     QgsVectorLayer,
     QgsCoordinateReferenceSystem,

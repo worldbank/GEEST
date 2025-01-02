@@ -1345,7 +1345,9 @@ class TreePanel(QWidget):
         wee_processor.run()
         # Shamelessly hard coded for now, needs to move to the wee processor class
         output = os.path.join(
-            self.working_directory, "wee_score", "wee_by_population_score.vrt"
+            self.working_directory,
+            "wee_by_population_score",
+            "wee_by_population_score.vrt",
         )
         item.setAttribute("wee_by_population", output)
 

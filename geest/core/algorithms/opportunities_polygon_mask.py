@@ -94,11 +94,13 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the aggregation analysis and population raster processing
-        self.wee_folder = os.path.join(working_directory, "wee_score")
+        self.wee_by_population_folder = os.path.join(
+            working_directory, "wee_by_population_score"
+        )
 
-        if not os.path.exists(self.wee_folder):
+        if not os.path.exists(self.wee_by_population_folder):
             raise Exception(
-                f"WEE folder not found.\n{self.wee_folder}\nPlease run WEE raster processing first."
+                f"WEE folder not found.\n{self.wee_by_population_folder}\nPlease run WEE raster processing first."
             )
 
         self.force_clear = force_clear
@@ -142,13 +144,15 @@ class OpportunitiesPolygonMaskProcessingTask(QgsTask):
         """Fix geometries then use mask vector to calculate masked WEE SCORE or WEE x Population Score layer."""
 
         # Load your raster layer
-        wee_path = os.path.join(self.wee_folder, "wee_by_population_score.vrt")
+        wee_path = os.path.join(
+            self.wee_by_population_folder, "wee_by_population_score.vrt"
+        )
         wee_layer = QgsRasterLayer(wee_path, "WEE by Population Score")
 
         if not wee_layer.isValid():
             log_message(f"The raster layer is invalid!\n{wee_path}\nTrying WEE score")
             wee_path = os.path.join(
-                os.pardir(self.wee_folder), "WEE_Score_combined.vrt"
+                os.pardir(self.wee_by_population_folder), "WEE_Score_combined.vrt"
             )
             wee_layer = QgsRasterLayer(wee_path, "WEE Score")
             if not wee_layer.isValid():

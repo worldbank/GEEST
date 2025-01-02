@@ -25,9 +25,9 @@ class SpreadsheetToJsonParser:
             "relative_population_count": "Population",
             "combined_level_of_enablement_and_relative_population_count": "WEE_pop_score",
             "enablement": "WEE_pop_adm_score",
-            "jobs_raster_locations": "AOI_WEE_score",
-            "jobs_point_locations": "POI_WEE_score",
-            "jobs_polygon_locations": "POA_WEE_score",
+            "jobs_raster_locations": "AOI_WEE_score",  # Tim propoposes to change to something more generic e.g. Opportunities_WEE_Score
+            "jobs_point_locations": "POI_WEE_score",  # Tim propoposes to change to something more generic e.g. Opportunities_WEE_Score
+            "jobs_polygon_locations": "POA_WEE_score",  # Tim propoposes to change to something more generic e.g. Opportunities_WEE_Score
         }
 
     def load_spreadsheet(self):

@@ -308,7 +308,7 @@ class WorkflowBase(QObject):
             self.attributes["error"] = f"Failed to process {self.workflow_name}: {e}"
             return False
 
-    def _create_workflow_directory(self, *subdirs: str) -> str:
+    def _create_workflow_directory(self) -> str:
         """
         Creates the directory for this workflow if it doesn't already exist.
         It will be in the scheme of working_dir/dimension/factor/indicator
