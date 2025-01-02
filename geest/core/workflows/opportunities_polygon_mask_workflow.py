@@ -1,6 +1,6 @@
 import os
 from qgis.core import (
-    QgsField,
+    QgsRasterLayer,
     Qgis,
     QgsFeedback,
     QgsGeometry,
@@ -95,6 +95,25 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
             log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
 
+        self.output_dir = os.path.join(working_directory, "opportunity_masks")
+        os.makedirs(self.output_dir, exist_ok=True)
+
+        # These folders should already exist from the aggregation analysis and population raster processing
+        self.wee_folder = os.path.join(working_directory, "wee_score")
+
+        if not os.path.exists(self.wee_folder):
+            raise Exception(
+                f"WEE folder not found.\n{self.wee_folder}\nPlease run WEE raster processing first."
+            )
+
+        # TODO make user configurable
+        self.force_clear = False
+        if self.force_clear and os.path.exists(self.output_dir):
+            for file in os.listdir(self.output_dir):
+                os.remove(os.path.join(self.output_dir, file))
+
+        log_message("Initialized WEE Opportunities Polygon Mask Workflow")
+
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
@@ -118,65 +137,143 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         log_message(f"{self.workflow_name}  Processing Started")
 
         # Step 1: clip the selected features to the current area's clip area
-        clipped_layer = self._clip_features(
-            area_features, f"polygon_masks_clipped_{index}", clip_area
-        )
+        log_message(f"Clipping features to the current area's clip area")
+        clipped_layer = self._clip_features(area_features, clip_area, index)
+        log_message(f"Clipped features saved to {clipped_layer.source()}")
+        log_message(f"Generating mask layer")
+        mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
+        log_message(f"Mask layer saved to {mask_layer}")
 
-        # Step 2: Assign values to the buffered polygons
-        scored_layer = self._assign_scores(clipped_layer)
-
-        # Step 3: Rasterize the scored buffer layer
-        raster_output = self._rasterize(scored_layer, current_bbox, index)
-
-        return raster_output
+        return mask_layer
 
     def _clip_features(
-        self, layer: QgsVectorLayer, output_name: str, clip_area: QgsGeometry
+        self, layer: QgsVectorLayer, clip_area: QgsGeometry, index: int
     ) -> QgsVectorLayer:
         """
         Clip the input features by the clip area.
 
         Args:
             layer (QgsVectorLayer): The input feature layer.
-            output_name (str): A name for the output buffered layer.
             clip_area (QgsGeometry): The geometry to clip the features by.
+            index (int): The index of the current area.
 
         Returns:
-            QgsVectorLayer: The buffered features layer.
+            QgsVectorLayer: The mask features layer clipped to the clip area.
         """
+        output_name = f"opportunites_polygons_clipped_{index}"
         clip_layer = self.geometry_to_memory_layer(clip_area, "clip_area")
-        output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
+        output_path = os.path.join(self.output_dir, f"{output_name}.shp")
         params = {"INPUT": layer, "OVERLAY": clip_layer, "OUTPUT": output_path}
         output = processing.run("native:clip", params)["OUTPUT"]
         clipped_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return clipped_layer
 
-    def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
-        """
-        Assign values to buffered polygons based 5 for presence of a polygon.
+    def generate_mask_layer(
+        self, clipped_layer: QgsVectorLayer, current_bbox: QgsGeometry, index: int
+    ) -> None:
+        """Generate the mask layer.
+
+        This will be used to create masked version of WEE Score and WEE x Population Score rasters.
 
         Args:
-            layer QgsVectorLayer: The buffered features layer.
-
+            clipped_layer: The clipped vector mask layer.
+            current_bbox: The bounding box of the current area.
+            index: The index of the current area.
         Returns:
-            QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
+            Path to the mask raster layer generated from the input clipped polygon layer.
+
         """
 
-        log_message(f"Assigning scores to {layer.name()}")
-        # Create a new field in the layer for the scores
-        layer.startEditing()
-        layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
-        layer.updateFields()
+        rasterized_polygons_path = os.path.join(
+            self.output_dir, f"opportunites_mask_{index}.tif"
+        )
+        params = {
+            "INPUT": clipped_layer,
+            "FIELD": None,
+            "BURN": 1,
+            "USE_Z": False,
+            "UNITS": 1,
+            "WIDTH": self.cell_size_m,
+            "HEIGHT": self.cell_size_m,
+            "EXTENT": current_bbox.boundingBox(),
+            "NODATA": 0,
+            "OPTIONS": "",
+            "DATA_TYPE": 0,  # byte
+            "INIT": None,
+            "INVERT": False,
+            "EXTRA": "-co NBITS=1 -at",  # -at is for all touched cells
+            "OUTPUT": rasterized_polygons_path,
+        }
 
-        # Assign scores to the buffered polygons
-        score = 5
-        for feature in layer.getFeatures():
-            feature.setAttribute("value", score)
-            layer.updateFeature(feature)
+        output = processing.run("gdal:rasterize", params)["OUTPUT"]
+        return rasterized_polygons_path
 
-        layer.commitChanges()
+    def process_wee_score(self, mask_path, index):
+        """
+        Apply the work opportunities mask to the WEE Score raster layer.
+        """
 
-        return layer
+        # Load your raster layer
+        wee_path = os.path.join(self.wee_folder, "wee_by_population_score.vrt")
+        wee_layer = QgsRasterLayer(wee_path, "WEE by Population Score")
+
+        if not wee_layer.isValid():
+            log_message(f"The raster layer is invalid!\n{wee_path}\nTrying WEE score")
+            wee_path = os.path.join(
+                os.pardir(self.wee_folder), "WEE_Score_combined.vrt"
+            )
+            wee_layer = QgsRasterLayer(wee_path, "WEE Score")
+            if not wee_layer.isValid():
+                raise Exception(
+                    f"Neither WEE x Population nor WEE Score layers are valid.\n{wee_path}\n"
+                )
+        else:
+            # Get the extent of the raster layer
+            extent = wee_layer.extent()
+
+            # Get the data provider for the raster layer
+            provider = wee_layer.dataProvider()
+
+            # Get the raster's width, height, and size of cells
+            width = provider.xSize()
+            height = provider.ySize()
+
+            cell_width = extent.width() / width
+            cell_height = extent.height() / height
+        log_message(f"Raster layer loaded: {wee_path}")
+        log_message(f"Raster extent: {extent}")
+        log_message(f"Raster cell size: {cell_width} x {cell_height}")
+
+        log_message(f"Masked WEE Score raster saved to {output}")
+        opportunities_mask = os.path.join(self.output_dir, "oppotunities_mask.tif")
+        params = {
+            "INPUT_A": wee_layer,
+            "BAND_A": 1,
+            "INPUT_B": rasterized_polygons_path,
+            "BAND_B": 1,
+            "FORMULA": "A*B",
+            "NO_DATA": None,
+            "EXTENT_OPT": 3,
+            "PROJWIN": None,
+            "RTYPE": 0,
+            "OPTIONS": "",
+            "EXTRA": "",
+            "OUTPUT": opportunities_mask,
+        }
+
+        processing.run("gdal:rastercalculator", params)
+        self.output_rasters.append(opportunities_mask)
+
+        log_message(f"WEE SCORE raster saved to {opportunities_mask}")
+
+    def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
+
+        log_message(f"Copying QML style from {source_qml} to {qml_path}")
+        # Apply QML Style
+        if os.path.exists(source_qml):
+            shutil.copy(source_qml, qml_path)
+        else:
+            log_message("QML style file not found. Skipping QML copy.")
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(

@@ -410,23 +410,36 @@ class WorkflowBase(QObject):
 
     def _check_and_reproject_layer(self):
         """
-        Checks if the features layer has the expected CRS. If not, it reprojects the layer.
+        Checks if the features layer has valid geometries and the expected CRS.
+
+        Geometry errors are fixed using the native:fixgeometries algorithm.
+        If the layer's CRS does not match the target CRS, it is reprojected using the
+        native:reprojectlayer algorithm.
 
         Returns:
             QgsVectorLayer: The input layer, either reprojected or unchanged.
 
         Note: Also updates self.features_layer to point to the reprojected layer.
         """
-        if self.features_layer.crs() != self.target_crs:
+
+        params = {
+            "INPUT": self.features_layer,
+            "METHOD": 1,  # Structure method
+            "OUTPUT": "memory:",  # Reproject in memory,
+        }
+        fixed_features_layer = processing.run("native:fixgeometries", params)["OUTPUT"]
+        log_message("Fixed features layer geometries")
+
+        if fixed_features_layer.crs() != self.target_crs:
             log_message(
-                f"Reprojecting layer from {self.features_layer.crs().authid()} to {self.target_crs.authid()}",
+                f"Reprojecting layer from {fixed_features_layer.crs().authid()} to {self.target_crs.authid()}",
                 tag="Geest",
                 level=Qgis.Info,
             )
             reproject_result = processing.run(
                 "native:reprojectlayer",
                 {
-                    "INPUT": self.features_layer,
+                    "INPUT": fixed_features_layer,
                     "TARGET_CRS": self.target_crs,
                     "OUTPUT": "memory:",  # Reproject in memory
                 },
@@ -436,6 +449,8 @@ class WorkflowBase(QObject):
             if not reprojected_layer.isValid():
                 raise QgsProcessingException("Reprojected layer is invalid.")
             self.features_layer = reprojected_layer
+        else:
+            self.features_layer = fixed_features_layer
         # If CRS matches, return the original layer
         return self.features_layer
 
