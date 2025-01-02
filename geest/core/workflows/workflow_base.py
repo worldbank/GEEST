@@ -62,8 +62,12 @@ class WorkflowBase(QObject):
         self.settings = QSettings()
         # This is the top level folder for work files
         if working_directory:
-            self.workflow_directory = working_directory
+            log_message(f"Working directory set to {working_directory}")
+            self.working_directory = working_directory
         else:
+            log_message(
+                "Working directory not set. Using last working directory from settings."
+            )
             self.working_directory = self.settings.value("last_working_directory", "")
         if not self.working_directory:
             raise ValueError("Working directory not set.")

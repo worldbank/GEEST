@@ -38,6 +38,8 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
     QgsLayerTreeGroup,
+    QgsFeedback,
+    QgsProcessingContext,
 )
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
@@ -1316,20 +1318,27 @@ class TreePanel(QWidget):
         - Subnational Aggregation
 
         """
-
+        log_message("############################################")
+        log_message("Calculating analysis insights")
+        log_message("############################################")
+        log_message(item.attributesAsMarkdown())
         # Prepare the population data if provided
         population_data = item.attribute("population_layer_source", None)
-
+        gpkg_path = os.path.join(
+            self.working_directory, "study_area", "study_area.gpkg"
+        )
+        feedback = QgsFeedback()
+        context = QgsProcessingContext()
         population_processor = PopulationRasterProcessingTask(
             population_raster_path=population_data,
             working_directory=self.working_directory,
-            study_area_gpkg_path=self.gpkg_path,
+            study_area_gpkg_path=gpkg_path,
             cell_size_m=self.cell_size_m(),
-            feedback=self.feedback,
+            feedback=feedback,
         )
         population_processor.run()
         wee_processor = WEEByPopulationScoreProcessingTask(
-            study_area_gpkg_path=self.gpkg_path,
+            study_area_gpkg_path=gpkg_path,
             working_directory=self.working_directory,
             force_clear=False,
         )
@@ -1343,26 +1352,25 @@ class TreePanel(QWidget):
         # Prepare the polygon mask data if provided
 
         opportunities_mask_workflow = OpportunitiesPolygonMaskWorkflow(
-            self.item,
-            self.cell_size_m(),
-            self.feedback,
-            self.context,
-            self.working_directory,
+            item=item,
+            cell_size_m=self.cell_size_m(),
+            feedback=feedback,
+            context=context,
+            working_directory=self.working_directory,
         )
-        opportunities_mask_workflow.run()
+        opportunities_mask_workflow.execute()
 
-        self.polygon_mask = self.item.attribute("polygon_mask_layer_source", None)
+        self.polygon_mask = item.attribute("polygon_mask_layer_source", None)
+
         opportunites_mask_processor = OpportunitiesPolygonMaskProcessingTask(
-            study_area_gpkg_path=self.gpkg_path,
+            study_area_gpkg_path=gpkg_path,
             mask_areas_path=self.polygon_mask,
             working_directory=self.working_directory,
             force_clear=False,
         )
-        opportunites_mask_processor.run()
-
-        aggregation_layer = self.item.attribute("aggregation_layer_source")
+        aggregation_layer = item.attribute("aggregation_layer_source")
         subnational_processor = SubnationalAggregationProcessingTask(
-            study_area_gpkg_path=self.gpkg_path,
+            study_area_gpkg_path=gpkg_path,
             aggregation_areas_path=aggregation_layer,
             working_directory=self.working_directory,
             force_clear=False,
@@ -1377,6 +1385,9 @@ class TreePanel(QWidget):
         item.setAttribute(
             "subnational_aggregation", f"{output}|layername=subnational_aggregation"
         )
+        log_message("############################################")
+        log_message("END")
+        log_message("############################################")
 
     def update_tree_item_status(self, item, status):
         """

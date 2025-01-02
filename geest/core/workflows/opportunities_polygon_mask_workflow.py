@@ -62,8 +62,13 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
+        log_message(f"Working_directory: {working_directory}")
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item=item,
+            cell_size_m=cell_size_m,
+            feedback=feedback,
+            context=context,
+            working_directory=working_directory,
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "opportunities_polygon_mask"
         # There are two ways a user can specify the polygon mask layer
