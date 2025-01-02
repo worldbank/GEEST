@@ -71,7 +71,7 @@ class WorkflowBase(QObject):
             self.working_directory = self.settings.value("last_working_directory", "")
         if not self.working_directory:
             raise ValueError("Working directory not set.")
-        # This is the lower level directory for this workflow
+        # This is the lower level directory for this workflow's outputs
         self.workflow_directory = self._create_workflow_directory()
         self.gpkg_path: str = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
@@ -97,10 +97,18 @@ class WorkflowBase(QObject):
         self.features_layer = None  # set in concrete class if needed
         self.raster_layer = None  # set in concrete class if needed
         self.target_crs = self.bboxes_layer.crs()
+
+        # We softcode the workflow name to be used in the output folder
+        # so that we can use the same tree item for different aggregation workflows
+        # and write their result files to different keys
+        # e.g. for analysis job opportunities mask workflow we can set the result key to "job_opportunities_mask"
+        self.result_file_key = "result_file"
+        # We can also softcode the key to write the result status message to
+        self.result_key = "result"
+
         # Will be populated by the workflow
         self.attributes = self.item.attributes()
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
-        self.attributes["result"] = "Not Run"
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
         self.progressChanged.emit(0)
@@ -188,6 +196,10 @@ class WorkflowBase(QObject):
             True if the workflow completes successfully, False if canceled or failed.
         """
 
+        # Do this here rather than in the ctor in case the result key is changed
+        # in the concrete class
+        self.attributes[self.result_key] = "Not Run"
+
         log_message(f"Executing {self.workflow_name}")
         log_message("----------------------------------")
         verbose_mode = int(setting(key="verbose_mode", default=0))
@@ -268,8 +280,10 @@ class WorkflowBase(QObject):
                 self.progressChanged.emit(int(progress))
             # Combine all area rasters into a VRT
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
-            self.attributes["result_file"] = vrt_filepath
-            self.attributes["result"] = f"{self.workflow_name} Workflow Completed"
+            self.attributes[self.result_file_key] = vrt_filepath
+            self.attributes[self.result_key] = (
+                f"{self.workflow_name} Workflow Completed"
+            )
 
             log_message(
                 f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
@@ -296,8 +310,8 @@ class WorkflowBase(QObject):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            self.attributes["result"] = f"{self.workflow_name} Workflow Error"
-            self.attributes["result_file"] = ""
+            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
+            self.attributes[self.result_file_key] = ""
 
             # Write the traceback to error.txt in the workflow_directory
             error_path = os.path.join(self.workflow_directory, "error.txt")
