@@ -505,6 +505,16 @@ class TreePanel(QWidget):
             )
             menu.addAction(add_wee_by_population_aggregate)
 
+            add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
+            add_job_opportunities_mask.triggered.connect(
+                lambda: self.add_to_map(
+                    item,
+                    key="opportunities_mask_result_file",
+                    layer_name="Opportunities Mask",
+                )
+            )
+            menu.addAction(add_job_opportunities_mask)
+
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
@@ -901,7 +911,7 @@ class TreePanel(QWidget):
 
     def add_to_map(self, item, key="result_file", layer_name=None, qml_key=None):
         """Add the item to the map."""
-
+        log_message(item.attributesAsMarkdown())
         layer_uri = item.attribute(f"{key}")
         log_message(f"Adding {layer_uri} for key {key} to map")
         if layer_uri:
