@@ -145,6 +145,7 @@ class WorkflowBase(QObject):
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
@@ -153,6 +154,7 @@ class WorkflowBase(QObject):
         Executes the actual workflow logic for a single area using a raster.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Polygon to clip the raster to which is aligned to cell edges.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
         :index: Index of the current area.
@@ -165,6 +167,7 @@ class WorkflowBase(QObject):
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):
@@ -204,8 +207,7 @@ class WorkflowBase(QObject):
         log_message("----------------------------------")
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            for item in self.attributes.items():
-                log_message(f"{item[0]}: {item[1]}")
+            log_message(self.item.attributesAsMarkdown())
             log_message("----------------------------------")
 
         self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
@@ -266,6 +268,7 @@ class WorkflowBase(QObject):
                 elif self.aggregation == True:  # we are processing an aggregate
                     raster_output = self._process_aggregate_for_area(
                         current_area=current_area,
+                        clip_area=clip_area,
                         current_bbox=current_bbox,
                         index=index,
                     )

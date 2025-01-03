@@ -133,6 +133,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
@@ -141,6 +142,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         Executes the actual workflow logic for a single area using a raster.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Polygon to clip the raster to which is aligned to cell edges.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
         :index: Index of the current area.
@@ -152,6 +154,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):

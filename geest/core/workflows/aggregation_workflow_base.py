@@ -237,6 +237,7 @@ class AggregationWorkflowBase(WorkflowBase):
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):
@@ -244,6 +245,7 @@ class AggregationWorkflowBase(WorkflowBase):
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
         _ = current_area  # Unused in this analysis
+        _ = clip_area  # Unused in this analysis
         _ = current_bbox  # Unused in this analysis
 
         # Log the execution

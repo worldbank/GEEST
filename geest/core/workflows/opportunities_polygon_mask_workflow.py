@@ -9,6 +9,7 @@ from qgis.core import (
     QgsProcessingContext,
     QgsVectorLayer,
     QgsGeometry,
+    QgsProcessingFeedback,
 )
 from qgis.PyQt.QtCore import QVariant
 import processing
@@ -68,7 +69,6 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
             context=context,
             working_directory=working_directory,
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "opportunities_polygon_mask"
 
         self.mask_mode = self.attributes.get(
             "mask_mode", None
@@ -76,36 +76,66 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         if not self.mask_mode:
             raise Exception("Mask mode not set in the analysis.")
 
-        # There are two ways a user can specify the polygon mask layer
-        # either as a shapefile path added in a line edit or as a layer source
-        # using a QgsMapLayerComboBox. We prioritize the shapefile path, so check that first.
-        layer_source = self.attributes.get(f"{self.mask_mode}_mask_shapefile", None)
-        provider_type = "ogr"
-        if not layer_source:
-            # Fall back to the QgsMapLayerComboBox source
-            layer_source = self.attributes.get(
-                f"{self.mask_mode}_mask_layer_source", None
+        self.workflow_name = f"opportunities_{self.mask_mode}_mask"
+        # In normal workflows this comes from the item, but this workflow is a bit different
+        # so we set it manually.
+        self.layer_id = "Opportunities_Mask"
+        if self.mask_mode == "point":
+            self.buffer_distance_m = self.attributes.get("buffer_distance_m", 1000)
+        if self.mask_mode in ["point", "polygon"]:
+            # There are two ways a user can specify the polygon mask layer
+            # either as a shapefile path added in a line edit or as a layer source
+            # using a QgsMapLayerComboBox. We prioritize the shapefile path, so check that first.
+            layer_source = self.attributes.get(f"{self.mask_mode}_mask_shapefile", None)
+            provider_type = "ogr"
+            if not layer_source:
+                # Fall back to the QgsMapLayerComboBox source
+                layer_source = self.attributes.get(
+                    f"{self.mask_mode}_mask_layer_source", None
+                )
+                provider_type = self.attributes.get(
+                    f"{self.mask_mode}_mask_layer_provider_type", "ogr"
+                )
+            if not layer_source:
+                log_message(
+                    f"{self.mask_mode}_mask_shapefile not found",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+                return False
+            self.features_layer = QgsVectorLayer(
+                layer_source, self.mask_mode, provider_type
             )
-            provider_type = self.attributes.get(
-                f"{self.mask_mode}_mask_layer_provider_type", "ogr"
+            if not self.features_layer.isValid():
+                log_message(
+                    f"{self.mask_mode}_mask_shapefile not valid", level=Qgis.Critical
+                )
+                log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
+                return False
+        elif self.mask_mode == "raster":
+            # The base class has all the logic for clipping the raster layer
+            # we just need to assign it to self.raster_layer
+            # Then the _process_raster_for_area method is where we turn it into a mask
+            log_message("Loading source raster mask layer")
+            # First try the one defined in the line edit
+            self.raster_layer = QgsRasterLayer(
+                self.attributes.get("raster_mask_raster"), "Raster Mask", "ogr"
             )
-        if not layer_source:
-            log_message(
-                f"{self.mask_mode}_mask_shapefile not found",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            return False
-        self.features_layer = QgsVectorLayer(
-            layer_source, self.mask_mode, provider_type
-        )
-        if not self.features_layer.isValid():
-            log_message(
-                f"{self.mask_mode}_mask_shapefile not valid", level=Qgis.Critical
-            )
-            log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
-            return False
-
+            if not self.raster_layer.isValid():
+                # Then fall back to the QgsMapLayerComboBox source
+                self.raster_layer = QgsRasterLayer(
+                    self.attributes.get("raster_mask_layer_source"),
+                    "Raster Mask",
+                    self.attributes.get("raster_mask_layer_provider_type"),
+                )
+            if not self.raster_layer.isValid():
+                log_message(
+                    "No valid raster layer provided for mask", level=Qgis.Critical
+                )
+                log_message(
+                    f"Raster Source: {self.raster_layer.source()}", level=Qgis.Critical
+                )
+                return False
         # Workflow directory is the subdir under working_directory
         ## This is usually set in the base class but we override that behaviour for this workflow
         self.workflow_directory = os.path.join(working_directory, "opportunity_masks")
@@ -156,17 +186,63 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
 
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
-        log_message(f"{self.workflow_name}  Processing Started")
+        log_message(f"{self.workflow_name}  Processing Started for area {index}")
+        log_message(f"Mask mode: {self.mask_mode}")
+        if self.mask_mode == "point":
+            log_message("Buffering job opportunity points")
+            buffered_points_layer = self._buffer_features(area_features, index)
+            log_message(f"Clipping features to the current area's clip area")
+            clipped_layer = self._clip_features(buffered_points_layer, clip_area, index)
+            log_message(f"Clipped features saved to {clipped_layer.source()}")
+            log_message(f"Generating mask layer")
+            mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
+            log_message(f"Mask layer saved to {mask_layer}")
+            return mask_layer
+        elif self.mask_mode == "polygon":
+            # Step 1: clip the selected features to the current area's clip area
+            log_message(f"Clipping features to the current area's clip area")
+            clipped_layer = self._clip_features(area_features, clip_area, index)
+            log_message(f"Clipped features saved to {clipped_layer.source()}")
+            log_message(f"Generating mask layer")
+            mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
+            log_message(f"Mask layer saved to {mask_layer}")
+            return mask_layer
+        else:  # Raster
+            # The raster workflow is handled by the base class
+            # We just need to set the self.raster_layer attribute in the
+            # ctor for it to be initiated.
+            #
+            # Override the implementations in this class's _process_raster_for_area
+            # for the actual processing logic.
+            pass
 
-        # Step 1: clip the selected features to the current area's clip area
-        log_message(f"Clipping features to the current area's clip area")
-        clipped_layer = self._clip_features(area_features, clip_area, index)
-        log_message(f"Clipped features saved to {clipped_layer.source()}")
-        log_message(f"Generating mask layer")
-        mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
-        log_message(f"Mask layer saved to {mask_layer}")
+    def _buffer_features(self, layer: QgsVectorLayer, index: int) -> QgsVectorLayer:
+        """
+        Buffer the input features by the buffer_distance m.
 
-        return mask_layer
+        Args:
+            layer (QgsVectorLayer): The input feature layer.
+            index (int): The index of the current area.
+
+        Returns:
+            QgsVectorLayer: The buffered features layer.
+        """
+        output_name = f"opportunites_points_buffered_{index}"
+
+        output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
+        buffered_layer = processing.run(
+            "native:buffer",
+            {
+                "INPUT": layer,
+                "DISTANCE": self.buffer_distance_m,
+                "SEGMENTS": 15,
+                "DISSOLVE": True,
+                "OUTPUT": output_path,
+            },
+        )["OUTPUT"]
+
+        buffered_layer = QgsVectorLayer(output_path, output_name, "ogr")
+        return buffered_layer
 
     def _clip_features(
         self, layer: QgsVectorLayer, clip_area: QgsGeometry, index: int
@@ -195,7 +271,7 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
     ) -> None:
         """Generate the mask layer.
 
-        This will be used to create masked version of WEE Score and WEE x Population Score rasters.
+        This will be used to create a mask by rasterizing the input polygon layer.
 
         Args:
             clipped_layer: The clipped vector mask layer.
@@ -233,6 +309,10 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
 
     def process_wee_score(self, mask_path, index):
         """
+
+        TODO MOVE TO ITS OWN WORKFLOW, CURRENTLY NOT USED
+
+
         Apply the work opportunities mask to the WEE Score raster layer.
         """
 
@@ -329,10 +409,46 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         log_message(f"Applying QML style to VRT: {qml_filepath}")
         return vrt_filepath
 
+    def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
+        """
+        Reproject and clip the raster to the bounding box of the current area.
+
+        Overloaded version of the same method in the base class because that one
+        fills the raster replacing nodata with 0 which is not what we want for this workflow.
+
+        :param bbox: The bounding box of the current area.
+        :param index: The index of the current area.
+
+        :return: The path to the reprojected and clipped raster.
+        """
+        # Convert the bbox to QgsRectangle
+        bbox = bbox.boundingBox()
+
+        reprojected_raster_path = os.path.join(
+            self.workflow_directory,
+            f"{self.layer_id}_clipped_and_reprojected_{index}.tif",
+        )
+
+        params = {
+            "INPUT": self.raster_layer,
+            "TARGET_CRS": self.target_crs,
+            "RESAMPLING": 0,
+            "TARGET_RESOLUTION": self.cell_size_m,
+            "NODATA": -9999,
+            "OUTPUT": reprojected_raster_path,
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+        }
+
+        aoi = processing.run(
+            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
+        )["OUTPUT"]
+        return reprojected_raster_path
+
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
@@ -340,18 +456,48 @@ class OpportunitiesPolygonMaskWorkflow(WorkflowBase):
         """
         Executes the actual workflow logic for a single area using a raster.
 
+        In this case we will convert it to a mask raster where any non-null pixel
+        is given a value of 1 and all other pixels are set to nodata.
+
+
         :current_area: Current polygon from our study area.
+        :clip_area: Polygon to clip the raster to.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
         :index: Index of the current area.
 
         :return: Path to the reclassified raster.
         """
-        pass
+        log_message(f"{self.workflow_name}  Processing Raster Started for area {index}")
+        opportunities_mask_path = os.path.join(
+            self.workflow_directory, f"opportunities_mask_{index}.tif"
+        )
+        # 📒 NOTE: Explanation for the formula logic:
+        #
+        # (A!=A) identifies NoData cells (since NaN != NaN is True for NoData cells) and sets them to 0.
+        # (A==A) identifies valid cells and sets them to 1.
+        # This ensures that all valid cells are set to 1 and NoData cells remain as NoData.
+        #
+        params = {
+            "INPUT_A": area_raster,
+            "BAND_A": 1,
+            "FORMULA": "(A!=A)*0+(A==A)*1",
+            "NO_DATA": None,
+            "EXTENT_OPT": 0,
+            "PROJWIN": None,
+            "RTYPE": 0,
+            "OPTIONS": "",
+            "EXTRA": "",
+            "OUTPUT": opportunities_mask_path,
+        }
+
+        processing.run("gdal:rastercalculator", params)
+        return opportunities_mask_path
 
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):
