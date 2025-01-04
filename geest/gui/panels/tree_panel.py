@@ -1371,6 +1371,18 @@ class TreePanel(QWidget):
         )
         opportunities_mask_workflow.execute()
 
+        # Now apply the opportunities mask to the WEE Score and WEE Score x Population
+        # leaving us with 4 potential products:
+        # WEE Score Unmasked
+        # WEE Score x Population Unmasked
+        # WEE Score Masked by Job Opportunities
+        # WEE Score x Population masked by Job Opportunities
+
+        # Now prepare the aggregation layers if an aggregation polygon layer is provided
+        # leaving us with 2 potential products:
+        # Subnational Aggregation fpr WEE Score x Population Unmasked
+        # Subnational Aggregation for WEE Score x Population masked by Job Opportunities
+
         aggregation_layer = item.attribute("aggregation_layer_source")
         subnational_processor = SubnationalAggregationProcessingTask(
             study_area_gpkg_path=gpkg_path,
