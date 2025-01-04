@@ -9,20 +9,23 @@ from qgis.core import (
     Qgis,
     QgsProcessingContext,
     QgsProcessingFeedback,
-    QgsFeature,
     QgsGeometry,
     QgsProcessingFeedback,
     QgsProcessingException,
     QgsRasterLayer,
     QgsVectorLayer,
-    QgsWkbTypes,
     Qgis,
 )
 import processing
 from qgis.PyQt.QtCore import QSettings, pyqtSignal, QObject
 from geest.core import JsonTreeItem, setting
 from geest.utilities import resources_path
-from geest.core.algorithms import AreaIterator
+from geest.core.algorithms import (
+    AreaIterator,
+    subset_vector_layer,
+    geometry_to_memory_layer,
+    check_and_reproject_layer,
+)
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 from geest.utilities import log_message
 
@@ -218,7 +221,9 @@ class WorkflowBase(QObject):
         output_rasters = []
 
         if self.features_layer and type(self.features_layer) == QgsVectorLayer:
-            self.features_layer = self._check_and_reproject_layer()
+            self.features_layer = check_and_reproject_layer(
+                self.features_layer, self.target_crs
+            )
 
         area_iterator = AreaIterator(self.gpkg_path)
         try:
@@ -360,30 +365,10 @@ class WorkflowBase(QObject):
             tag="Geest",
             level=Qgis.Info,
         )
-        output_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
-
-        # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
-        geometry_type = self.features_layer.wkbType()
-
-        # Determine geometry type name based on input layer's geometry
-        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
-            geometry_name = "Point"
-        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
-            geometry_name = "LineString"
-        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PolygonGeometry:
-            geometry_name = "Polygon"
-        else:
-            raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
-
-        params = {
-            "INPUT": self.features_layer,
-            "PREDICATE": [0],  # Intersects predicate
-            "GEOMETRY": area_geom,
-            "EXTENT": area_geom.boundingBox(),
-            "OUTPUT": output_path,
-        }
-        result = processing.run("native:extractbyextent", params)
-        return QgsVectorLayer(result["OUTPUT"], output_prefix, "ogr")
+        layer = subset_vector_layer(
+            self.workflow_directory, self.features_layer, area_geom, output_prefix
+        )
+        return layer
 
     def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
         """
@@ -424,52 +409,6 @@ class WorkflowBase(QObject):
         }
         processing.run("native:fillnodata", params)
         return reprojected_raster_path
-
-    def _check_and_reproject_layer(self):
-        """
-        Checks if the features layer has valid geometries and the expected CRS.
-
-        Geometry errors are fixed using the native:fixgeometries algorithm.
-        If the layer's CRS does not match the target CRS, it is reprojected using the
-        native:reprojectlayer algorithm.
-
-        Returns:
-            QgsVectorLayer: The input layer, either reprojected or unchanged.
-
-        Note: Also updates self.features_layer to point to the reprojected layer.
-        """
-
-        params = {
-            "INPUT": self.features_layer,
-            "METHOD": 1,  # Structure method
-            "OUTPUT": "memory:",  # Reproject in memory,
-        }
-        fixed_features_layer = processing.run("native:fixgeometries", params)["OUTPUT"]
-        log_message("Fixed features layer geometries")
-
-        if fixed_features_layer.crs() != self.target_crs:
-            log_message(
-                f"Reprojecting layer from {fixed_features_layer.crs().authid()} to {self.target_crs.authid()}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            reproject_result = processing.run(
-                "native:reprojectlayer",
-                {
-                    "INPUT": fixed_features_layer,
-                    "TARGET_CRS": self.target_crs,
-                    "OUTPUT": "memory:",  # Reproject in memory
-                },
-                feedback=QgsProcessingFeedback(),
-            )
-            reprojected_layer = reproject_result["OUTPUT"]
-            if not reprojected_layer.isValid():
-                raise QgsProcessingException("Reprojected layer is invalid.")
-            self.features_layer = reprojected_layer
-        else:
-            self.features_layer = fixed_features_layer
-        # If CRS matches, return the original layer
-        return self.features_layer
 
     def _rasterize(
         self,
@@ -546,25 +485,6 @@ class WorkflowBase(QObject):
         log_message(f"Created raster: {output_path}")
         return output_path
 
-    def geometry_to_memory_layer(self, geometry: QgsGeometry, layer_name: str):
-        """
-        Convert a QgsGeometry to a memory layer.
-
-        Args:
-            geometry (QgsGeometry): The polygon geometry to convert.
-            layer_name (str): The name to assign to the memory layer.
-
-        Returns:
-            QgsVectorLayer: The memory layer containing the geometry.
-        """
-        memory_layer = QgsVectorLayer("Polygon", layer_name, "memory")
-        memory_layer.setCrs(self.target_crs)
-        feature = QgsFeature()
-        feature.setGeometry(geometry)
-        memory_layer.dataProvider().addFeatures([feature])
-        memory_layer.commitChanges()
-        return memory_layer
-
     def _mask_raster(
         self, raster_path: str, area_geometry: QgsGeometry, index: int
     ) -> str:
@@ -598,7 +518,9 @@ class WorkflowBase(QObject):
             raise QgsProcessingException(f"Raster file not found at {raster_path}")
         # Convert the geometry to a memory layer in the self.target_crs
         log_message(f"Creating mask layer for area from polygon {index}")
-        mask_layer = self.geometry_to_memory_layer(area_geometry, f"mask_layer_{index}")
+        mask_layer = geometry_to_memory_layer(
+            area_geometry, self.target_crs, f"mask_layer_{index}"
+        )
         log_message(f"Mask layer created: {mask_layer}")
         # Clip the raster by the mask layer
         params = {

@@ -1,7 +1,7 @@
 import os
 import traceback
 import shutil
-from typing import Optional, Tuple
+from typing import Optional
 import subprocess
 import platform
 
@@ -10,7 +10,6 @@ from qgis.core import (
     QgsTask,
     QgsProcessingContext,
     QgsFeedback,
-    QgsCoordinateReferenceSystem,
     QgsRasterLayer,
     QgsRasterDataProvider,
     QgsVectorLayer,

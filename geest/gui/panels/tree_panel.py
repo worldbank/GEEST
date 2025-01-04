@@ -56,8 +56,8 @@ from geest.core.algorithms import (
     PopulationRasterProcessingTask,
     WEEByPopulationScoreProcessingTask,
     SubnationalAggregationProcessingTask,
+    OpportunitiesMaskProcessor,
 )
-from geest.core.workflows import OpportunitiesPolygonMaskWorkflow
 
 from geest.utilities import log_message
 
@@ -1362,14 +1362,15 @@ class TreePanel(QWidget):
 
         # Prepare the polygon mask data if provided
 
-        opportunities_mask_workflow = OpportunitiesPolygonMaskWorkflow(
+        opportunities_mask_workflow = OpportunitiesMaskProcessor(
             item=item,
+            study_area_gpkg_path=gpkg_path,
             cell_size_m=self.cell_size_m(),
             feedback=feedback,
             context=context,
             working_directory=self.working_directory,
         )
-        opportunities_mask_workflow.execute()
+        opportunities_mask_workflow.run()
 
         # Now apply the opportunities mask to the WEE Score and WEE Score x Population
         # leaving us with 4 potential products:
