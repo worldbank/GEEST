@@ -56,7 +56,6 @@ from geest.core.algorithms import (
     PopulationRasterProcessingTask,
     WEEByPopulationScoreProcessingTask,
     SubnationalAggregationProcessingTask,
-    OpportunitiesPolygonMaskProcessingTask,
 )
 from geest.core.workflows import OpportunitiesPolygonMaskWorkflow
 
@@ -1372,14 +1371,6 @@ class TreePanel(QWidget):
         )
         opportunities_mask_workflow.execute()
 
-        # self.polygon_mask = item.attribute("polygon_mask_layer_source", None)
-
-        # opportunites_mask_processor = OpportunitiesPolygonMaskProcessingTask(
-        #    study_area_gpkg_path=gpkg_path,
-        #    mask_areas_path=self.polygon_mask,
-        #    working_directory=self.working_directory,
-        #    force_clear=False,
-        # )
         aggregation_layer = item.attribute("aggregation_layer_source")
         subnational_processor = SubnationalAggregationProcessingTask(
             study_area_gpkg_path=gpkg_path,
