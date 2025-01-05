@@ -1,4 +1,5 @@
 import os
+import shutil
 from qgis.core import (
     QgsProcessingException,
     QgsCoordinateReferenceSystem,
@@ -172,3 +173,81 @@ def check_and_reproject_layer(
         features_layer = fixed_features_layer
     # If CRS matches, return the original layer
     return features_layer
+
+
+def combine_rasters_to_vrt(
+    rasters: list,
+    target_crs: QgsCoordinateReferenceSystem,
+    vrt_filepath: str,
+    source_qml: str = None,
+) -> None:
+    """
+    Combine all the rasters into a single VRT file.
+
+    Args:
+        rasters: The rasters to combine into a VRT.
+        target_crs: The CRS to assign to the VRT.
+        vrt_filepath: The full path of the output VRT file to create.
+        source_qml: The source QML file to apply to the VRT.
+
+    Returns:
+        vrtpath (str): The file path to the VRT file.
+    """
+    if not rasters:
+        log_message(
+            "No valid raster layers found to combine into VRT.",
+            tag="Geest",
+            level=Qgis.Warning,
+        )
+        return
+
+    log_message(f"Creating VRT of layers as '{vrt_filepath}'.")
+    checked_rasters = []
+    for raster in rasters:
+        if raster and os.path.exists(raster) and QgsRasterLayer(raster).isValid():
+            checked_rasters.append(raster)
+        else:
+            log_message(
+                f"Skipping invalid or non-existent raster: {raster}",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+
+    if not checked_rasters:
+        log_message(
+            "No valid raster layers found to combine into VRT.",
+            tag="Geest",
+            level=Qgis.Warning,
+        )
+        return
+
+    # Define the VRT parameters
+    params = {
+        "INPUT": checked_rasters,
+        "RESOLUTION": 0,  # Use highest resolution among input files
+        "SEPARATE": False,  # Combine all input rasters as a single band
+        "OUTPUT": vrt_filepath,
+        "PROJ_DIFFERENCE": False,
+        "ADD_ALPHA": False,
+        "ASSIGN_CRS": target_crs,
+        "RESAMPLING": 0,
+        "SRC_NODATA": "255",
+        "EXTRA": "",
+    }
+
+    # Run the gdal:buildvrt processing algorithm to create the VRT
+    processing.run("gdal:buildvirtualraster", params)
+    log_message(f"Created VRT: {vrt_filepath}")
+
+    # Copy the appropriate QML over too
+    destination_qml = os.path.splitext(vrt_filepath)[0] + ".qml"
+    log_message(f"Copying QML from {source_qml} to {destination_qml}")
+    shutil.copyfile(source_qml, destination_qml)
+
+    vrt_layer = QgsRasterLayer(vrt_filepath, "Final VRT")
+    if not vrt_layer.isValid():
+        log_message("VRT Layer generation failed.", level=Qgis.Critical)
+        return False
+    del vrt_layer
+
+    return vrt_filepath

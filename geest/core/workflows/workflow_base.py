@@ -12,7 +12,6 @@ from qgis.core import (
     QgsGeometry,
     QgsProcessingFeedback,
     QgsProcessingException,
-    QgsRasterLayer,
     QgsVectorLayer,
     Qgis,
 )
@@ -25,6 +24,7 @@ from geest.core.algorithms import (
     subset_vector_layer,
     geometry_to_memory_layer,
     check_and_reproject_layer,
+    combine_rasters_to_vrt,
 )
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 from geest.utilities import log_message
@@ -556,73 +556,14 @@ class WorkflowBase(QObject):
         Returns:
             vrtpath (str): The file path to the VRT file.
         """
-        if not rasters:
-            log_message(
-                "No valid raster layers found to combine into VRT.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            return
+
         vrt_filepath = os.path.join(
             self.workflow_directory,
             f"{self.output_filename}_combined.vrt",
         )
-        qml_filepath = os.path.join(
-            self.workflow_directory,
-            f"{self.output_filename}_combined.qml",
-        )
-        log_message(
-            f"Creating VRT of layers '{vrt_filepath}' layer to the map.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        checked_rasters = []
-        for raster in rasters:
-            if raster and os.path.exists(raster) and QgsRasterLayer(raster).isValid():
-                checked_rasters.append(raster)
-            else:
-                log_message(
-                    f"Skipping invalid or non-existent raster: {raster}",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-
-        if not checked_rasters:
-            log_message(
-                "No valid raster layers found to combine into VRT.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            return
-
-        # Define the VRT parameters
-        params = {
-            "INPUT": checked_rasters,
-            "RESOLUTION": 0,  # Use highest resolution among input files
-            "SEPARATE": False,  # Combine all input rasters as a single band
-            "OUTPUT": vrt_filepath,
-            "PROJ_DIFFERENCE": False,
-            "ADD_ALPHA": False,
-            "ASSIGN_CRS": self.target_crs,
-            "RESAMPLING": 0,
-            "SRC_NODATA": "255",
-            "EXTRA": "",
-        }
-
-        # Run the gdal:buildvrt processing algorithm to create the VRT
-        processing.run("gdal:buildvirtualraster", params)
-        log_message(f"Created VRT: {vrt_filepath}")
-
-        # Add the VRT to the QGIS map
-        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}_final VRT")
-        # Copy the appropriate QML over too
         role = self.item.role
         source_qml = resources_path("resources", "qml", f"{role}.qml")
-        log_message(f"Copying QML from {source_qml} to {qml_filepath}")
-        shutil.copyfile(source_qml, qml_filepath)
-
-        if not vrt_layer.isValid():
-            log_message("VRT Layer generation failed.", level=Qgis.Critical)
-            return False
-
+        vrt_filepath = combine_rasters_to_vrt(
+            rasters, self.target_crs, vrt_filepath, source_qml
+        )
         return vrt_filepath

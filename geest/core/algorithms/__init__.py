@@ -9,4 +9,5 @@ from .utilities import (
     subset_vector_layer,
     geometry_to_memory_layer,
     check_and_reproject_layer,
+    combine_rasters_to_vrt,
 )

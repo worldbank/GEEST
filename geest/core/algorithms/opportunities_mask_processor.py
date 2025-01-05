@@ -21,6 +21,7 @@ from .utilities import (
     subset_vector_layer,
     geometry_to_memory_layer,
     check_and_reproject_layer,
+    combine_rasters_to_vrt,
 )
 from .area_iterator import AreaIterator
 
@@ -186,6 +187,8 @@ class OpportunitiesMaskProcessor(QgsTask):
             for file in os.listdir(self.workflow_directory):
                 os.remove(os.path.join(self.workflow_directory, file))
 
+        self.mask_list = []
+
         log_message(f"---------------------------------------------")
         log_message(f"Initialized WEE Opportunities Mask Workflow")
         log_message(f"---------------------------------------------")
@@ -224,7 +227,20 @@ class OpportunitiesMaskProcessor(QgsTask):
                     mask_layer = self._process_features_for_area(
                         current_area, clip_area, current_bbox, vector_layer, index
                     )
+                if mask_layer:
+                    self.mask_list.append(mask_layer)
 
+            vrt_filepath = os.path.join(
+                self.workflow_directory,
+                f"{self.output_filename}_combined.vrt",
+            )
+            source_qml = resources_path("resources", "qml", "mask.qml")
+            vrt_filepath = combine_rasters_to_vrt(
+                self.mask_list, self.target_crs, vrt_filepath, source_qml
+            )
+            combine_rasters_to_vrt(
+                self.mask_list, self.target_crs, vrt_filepath, source_qml=source_qml
+            )
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())
