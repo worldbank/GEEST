@@ -57,6 +57,7 @@ from geest.core.algorithms import (
     WEEByPopulationScoreProcessingTask,
     SubnationalAggregationProcessingTask,
     OpportunitiesMaskProcessor,
+    OpportunitiesByWeeScoreProcessingTask,
 )
 
 from geest.utilities import log_message
@@ -1374,10 +1375,16 @@ class TreePanel(QWidget):
 
         # Now apply the opportunities mask to the WEE Score and WEE Score x Population
         # leaving us with 4 potential products:
-        # WEE Score Unmasked
-        # WEE Score x Population Unmasked
+        # WEE Score Unmasked (already created above)
+        # WEE Score x Population Unmasked (already created above)
         # WEE Score Masked by Job Opportunities
         # WEE Score x Population masked by Job Opportunities
+        mask_processor = OpportunitiesByWeeScoreProcessingTask(
+            study_area_gpkg_path=gpkg_path,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        mask_processor.run()
 
         # Now prepare the aggregation layers if an aggregation polygon layer is provided
         # leaving us with 2 potential products:
