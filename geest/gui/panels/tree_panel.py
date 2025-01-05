@@ -58,6 +58,7 @@ from geest.core.algorithms import (
     SubnationalAggregationProcessingTask,
     OpportunitiesMaskProcessor,
     OpportunitiesByWeeScoreProcessingTask,
+    OpportunitiesByWeeScorePopulationProcessingTask,
 )
 
 from geest.utilities import log_message
@@ -1386,6 +1387,12 @@ class TreePanel(QWidget):
         )
         mask_processor.run()
 
+        mask_processor = OpportunitiesByWeeScorePopulationProcessingTask(
+            study_area_gpkg_path=gpkg_path,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        mask_processor.run()
         # Now prepare the aggregation layers if an aggregation polygon layer is provided
         # leaving us with 2 potential products:
         # Subnational Aggregation fpr WEE Score x Population Unmasked
