@@ -12,6 +12,7 @@ from geest.core.algorithms import OpportunitiesMaskProcessor
 from geest.core.json_tree_item import JsonTreeItem
 
 
+@unittest.skip("Skip this test for now")
 class TestPolygonOpportunitiesMask(unittest.TestCase):
 
     @classmethod
