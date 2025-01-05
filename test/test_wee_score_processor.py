@@ -35,7 +35,10 @@ class TestWEEScoreProcessingTask(unittest.TestCase):
         )
 
     def test_initialization(self):
-        self.assertTrue(self.task.output_dir.endswith("wee_score"))
+        self.assertTrue(
+            self.task.output_dir.endswith("wee_by_population_score"),
+            msg=f"Output directory is {self.task.output_dir}",
+        )
         self.assertEqual(self.task.target_crs.authid(), "EPSG:32620")
 
     def test_run_task(self):

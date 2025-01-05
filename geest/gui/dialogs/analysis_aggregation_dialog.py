@@ -181,7 +181,7 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
             self.raster_radio_button.setChecked(True)
 
         buffer_distance = self.tree_item.attribute("buffer_distance_m", 0)
-        self.buffer_distance_m.setValue(buffer_distance)
+        self.buffer_distance_m.setValue(int(buffer_distance))
 
         # Restore the dialog geometry
 

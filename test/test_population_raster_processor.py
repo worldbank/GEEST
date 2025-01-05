@@ -41,7 +41,6 @@ class TestPopulationRasterProcessingTask(unittest.TestCase):
             population_raster_path=self.input_raster_path,
             study_area_gpkg_path=self.gpkg_path,
             working_directory=self.output_directory,
-            target_crs=QgsCoordinateReferenceSystem("EPSG:32620"),
             force_clear=True,
             cell_size_m=100,
         )
