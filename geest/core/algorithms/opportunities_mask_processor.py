@@ -132,7 +132,7 @@ class OpportunitiesMaskProcessor(QgsTask):
                     tag="Geest",
                     level=Qgis.Critical,
                 )
-                return False
+                raise Exception(f"{self.mask_mode}_mask_shapefile not found")
             self.features_layer = QgsVectorLayer(
                 layer_source, self.mask_mode, provider_type
             )
@@ -141,7 +141,7 @@ class OpportunitiesMaskProcessor(QgsTask):
                     f"{self.mask_mode}_mask_shapefile not valid", level=Qgis.Critical
                 )
                 log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
-                return False
+                raise Exception(f"{self.mask_mode}_mask_shapefile not valid")
 
             # Check the geometries and reproject if necessary
             self.features_layer = check_and_reproject_layer(
@@ -171,7 +171,7 @@ class OpportunitiesMaskProcessor(QgsTask):
                 log_message(
                     f"Raster Source: {self.raster_layer.source()}", level=Qgis.Critical
                 )
-                return False
+                raise Exception("No valid raster layer provided for mask")
         # Workflow directory is the subdir under working_directory
         self.workflow_directory = os.path.join(working_directory, "opportunity_masks")
         os.makedirs(self.workflow_directory, exist_ok=True)

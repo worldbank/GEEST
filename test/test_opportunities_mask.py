@@ -29,9 +29,11 @@ class TestPolygonOpportunitiesMask(unittest.TestCase):
         )
 
     def setUp(self):
-        item = JsonTreeItem(
-            role="analysis",
-            data={
+        self.test_data = [
+            "Test Item",
+            "Configured",
+            1.0,
+            {
                 "name": "polygon_mask",
                 "type": "mask",
                 "path": self.mask_areas_path,
@@ -93,10 +95,14 @@ class TestPolygonOpportunitiesMask(unittest.TestCase):
                 "wee_by_population": "",
                 "working_folder": "",
             },
+        ]
+        self.item = JsonTreeItem(
+            self.test_data,
+            role="analysis",
         )
 
         self.task = OpportunitiesMaskProcessor(
-            item=item,
+            item=self.item,
             study_area_gpkg_path=self.study_area_gpkg_path,
             working_directory=self.working_directory,
             force_clear=True,
