@@ -53,7 +53,7 @@ class AggregationWorkflowBase(WorkflowBase):
         for guid in self.guids:
             item = self.item.getItemByGuid(guid)
             # Only add the weight if there is an output layer
-            if item.attribute("result_file", None):
+            if item.attribute(self.result_file_key, None):
                 weight = item.attribute(self.weight_key, "")
                 try:
                     weight = float(weight)
@@ -165,7 +165,7 @@ class AggregationWorkflowBase(WorkflowBase):
 
         # Write the output path to the attributes
         # That will get passed back to the json model
-        self.attributes["result_file"] = aggregation_output
+        self.attributes[self.result_file_key] = aggregation_output
 
         return aggregation_output
 
@@ -211,7 +211,7 @@ class AggregationWorkflowBase(WorkflowBase):
                     level=Qgis.Info,
                 )
                 continue
-            if not item.attribute("result_file", ""):
+            if not item.attribute(self.result_file_key, ""):
                 log_message(
                     f"Skipping {id} as it has no result file",
                     tag="Geest",
@@ -219,7 +219,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 )
                 raise ValueError(f"{id} has no result file")
 
-            layer_folder = os.path.dirname(item.attribute("result_file", ""))
+            layer_folder = os.path.dirname(item.attribute(self.result_file_key, ""))
             path = os.path.join(
                 self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
             )
@@ -237,6 +237,7 @@ class AggregationWorkflowBase(WorkflowBase):
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):
@@ -244,6 +245,7 @@ class AggregationWorkflowBase(WorkflowBase):
         Executes the workflow, reporting progress through the feedback object and checking for cancellation.
         """
         _ = current_area  # Unused in this analysis
+        _ = clip_area  # Unused in this analysis
         _ = current_bbox  # Unused in this analysis
 
         # Log the execution
@@ -261,7 +263,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            self.attributes["result"] = (
+            self.attributes[self.result_key] = (
                 f"{self.analysis_mode} Aggregation Workflow Failed"
             )
             self.attributes["error"] = error

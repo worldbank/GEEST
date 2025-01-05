@@ -38,10 +38,11 @@
                             "analysis_mode": "use_index_score",
                             "guid": "7ae5a61b-318c-4e6e-acfc-2a7045f03fb9",
                             "result": "index_score Workflow Completed",
-                            "execution_start_time": "2024-12-18T23:25:26.249349",
+                            "execution_start_time": "2025-01-05T09:03:53.170384",
                             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/workplace_discrimination/workplace_index/WD_output_combined.vrt",
-                            "execution_end_time": "2024-12-18T23:25:27.931080",
-                            "error_file": null
+                            "execution_end_time": "2025-01-05T09:03:54.368598",
+                            "error_file": null,
+                            "error": ""
                         }
                     ],
                     "dimension_weighting": 0.333333,
@@ -51,9 +52,9 @@
                     "default_dimension_weighting": 0.333333,
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
-                    "execution_start_time": "2024-12-18T23:25:31.713939",
+                    "execution_start_time": "2025-01-05T09:04:02.116159",
                     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/workplace_discrimination/workplace_discrimination_combined.vrt",
-                    "execution_end_time": "2024-12-18T23:25:32.528534"
+                    "execution_end_time": "2025-01-05T09:04:02.988529"
                 },
                 {
                     "name": "Regulatory Frameworks",
@@ -84,10 +85,11 @@
                             "analysis_mode": "use_index_score",
                             "guid": "853bc6d4-4ca4-4fb8-9511-aaf384d59725",
                             "result": "index_score Workflow Completed",
-                            "execution_start_time": "2024-12-18T23:25:29.139156",
+                            "execution_start_time": "2025-01-05T09:03:54.489646",
                             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/regulatory_frameworks/pay_parenthood_index/RF_output_combined.vrt",
-                            "execution_end_time": "2024-12-18T23:25:30.253193",
-                            "error_file": null
+                            "execution_end_time": "2025-01-05T09:03:55.693147",
+                            "error_file": null,
+                            "error": ""
                         }
                     ],
                     "dimension_weighting": 0.3333333,
@@ -97,9 +99,9 @@
                     "default_dimension_weighting": 0.3333333,
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
-                    "execution_start_time": "2024-12-18T23:25:32.656651",
+                    "execution_start_time": "2025-01-05T09:04:03.124962",
                     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/regulatory_frameworks/regulatory_frameworks_combined.vrt",
-                    "execution_end_time": "2024-12-18T23:25:33.511264"
+                    "execution_end_time": "2025-01-05T09:04:03.975809"
                 },
                 {
                     "name": "Financial Inclusion",
@@ -130,10 +132,11 @@
                             "analysis_mode": "use_index_score",
                             "guid": "81a22788-07d9-4397-b68b-aea1596d8342",
                             "result": "index_score Workflow Completed",
-                            "execution_start_time": "2024-12-18T23:25:30.401850",
+                            "execution_start_time": "2025-01-05T09:03:55.821376",
                             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/financial_inclusion/entrepeneurship_index/FIN_output_combined.vrt",
-                            "execution_end_time": "2024-12-18T23:25:31.579591",
-                            "error_file": null
+                            "execution_end_time": "2025-01-05T09:03:57.039000",
+                            "error_file": null,
+                            "error": ""
                         }
                     ],
                     "dimension_weighting": 0.333333,
@@ -143,9 +146,9 @@
                     "default_dimension_weighting": 0.333333,
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
-                    "execution_start_time": "2024-12-18T23:25:33.683431",
+                    "execution_start_time": "2025-01-05T09:04:04.070192",
                     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/financial_inclusion/financial_inclusion_combined.vrt",
-                    "execution_end_time": "2024-12-18T23:25:34.529052"
+                    "execution_end_time": "2025-01-05T09:04:04.916855"
                 }
             ],
             "analysis_weighting": 0.5,
@@ -155,9 +158,9 @@
             "default_analysis_weighting": 0.333333,
             "analysis_mode": "",
             "result": "dimension_aggregation Workflow Completed",
-            "execution_start_time": "2024-12-18T23:25:35.741929",
+            "execution_start_time": "2025-01-05T09:04:06.254043",
             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/Contextual_score_combined.vrt",
-            "execution_end_time": "2024-12-18T23:25:36.623506"
+            "execution_end_time": "2025-01-05T09:04:07.143303"
         },
         {
             "name": "Accessibility",
@@ -199,10 +202,11 @@
                             "multi_buffer_point_layer_id": "fake_childcare_6a120423_4837_409e_893c_cc06dd1bde8f",
                             "multi_buffer_point_shapefile": "",
                             "result": "use_multi_buffer_point Workflow Completed",
-                            "execution_start_time": "2024-12-19T11:03:05.436850",
+                            "execution_start_time": "2025-01-05T09:03:57.184036",
                             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/kindergartens_location/WTP_Kindergartens_output_combined.vrt",
-                            "execution_end_time": "2024-12-19T11:03:07.870440",
-                            "error_file": null
+                            "execution_end_time": "2025-01-05T09:03:59.495481",
+                            "error_file": null,
+                            "error": ""
                         },
                         {
                             "indicator": "Location of primary schools",
@@ -236,10 +240,11 @@
                             "multi_buffer_point_layer_id": "fake_primary_schools_1e5dc698_693d_48f5_afbb_f0e542c94e0a",
                             "multi_buffer_point_shapefile": "",
                             "result": "use_multi_buffer_point Workflow Completed",
-                            "execution_start_time": "2024-12-19T11:03:08.098036",
+                            "execution_start_time": "2025-01-05T09:03:59.632259",
                             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/primary_school_location/WTP_Primary_Schools_output_combined.vrt",
-                            "execution_end_time": "2024-12-19T11:03:10.000410",
-                            "error_file": null
+                            "execution_end_time": "2025-01-05T09:04:01.533596",
+                            "error_file": null,
+                            "error": ""
                         },
                         {
                             "indicator": "Location of groceries",
@@ -264,7 +269,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "use_multi_buffer_point",
-                            "guid": "b0f37ad1-b728-4aa8-8bd6-40e60545a5a7"
+                            "guid": "b0f37ad1-b728-4aa8-8bd6-40e60545a5a7",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Location of pharmacies",
@@ -289,7 +300,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "use_multi_buffer_point",
-                            "guid": "f96c74f4-492e-484b-b4e7-d72566071911"
+                            "guid": "f96c74f4-492e-484b-b4e7-d72566071911",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Location of green spaces",
@@ -314,7 +331,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "use_multi_buffer_point",
-                            "guid": "6e7df235-9af3-4168-ba97-1004e289d7c7"
+                            "guid": "6e7df235-9af3-4168-ba97-1004e289d7c7",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 1.0,
@@ -324,9 +347,9 @@
                     "default_dimension_weighting": 0.2,
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
-                    "execution_start_time": "2024-12-19T11:03:10.163971",
+                    "execution_start_time": "2025-01-05T09:04:05.056071",
                     "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/women_s_travel_patterns_combined.vrt",
-                    "execution_end_time": "2024-12-19T11:03:11.113707"
+                    "execution_end_time": "2025-01-05T09:04:05.904388"
                 },
                 {
                     "name": "Access to Public Transport",
@@ -355,7 +378,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "270bf387-5131-43c9-85f3-75d5c04df854"
+                            "guid": "270bf387-5131-43c9-85f3-75d5c04df854",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.0,
@@ -364,7 +393,7 @@
                     "description": "Access to Public Transport focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.",
                     "default_dimension_weighting": 0.2,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -396,7 +425,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "06ce6151-d70a-4564-bfc9-ca72989555e3"
+                            "guid": "06ce6151-d70a-4564-bfc9-ca72989555e3",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.0,
@@ -405,7 +440,7 @@
                     "description": "Access to Health Facilities evaluates how easily women can reach healthcare services in terms of distance, impacting their well-being and ability to participate in the workforce.",
                     "default_dimension_weighting": 0.2,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -437,7 +472,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "b4e36508-0005-4f1d-864c-c679dde965c1"
+                            "guid": "b4e36508-0005-4f1d-864c-c679dde965c1",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.0,
@@ -446,7 +487,7 @@
                     "description": "Access to Education and Training Facilities assesses the proximity to higher education institutions and training centers, influencing women's ability to gain necessary qualifications.",
                     "default_dimension_weighting": 0.2,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -478,7 +519,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "cc080fdb-b57a-4fb6-9868-0afb610684bd"
+                            "guid": "cc080fdb-b57a-4fb6-9868-0afb610684bd",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.0,
@@ -487,7 +534,7 @@
                     "description": "Access to Financial Facilities focuses on the proximity of banks and financial institutions, which is essential for women\u2019s economic empowerment and ability to access credit.",
                     "default_dimension_weighting": 0.2,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -500,9 +547,9 @@
             "default_analysis_weighting": 0.33333,
             "analysis_mode": "",
             "result": "dimension_aggregation Workflow Completed",
-            "execution_start_time": "2024-12-19T11:03:11.276901",
+            "execution_start_time": "2025-01-05T09:04:07.277461",
             "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/Accessibility_score_combined.vrt",
-            "execution_end_time": "2024-12-19T11:03:12.223477"
+            "execution_end_time": "2025-01-05T09:04:08.167397"
         },
         {
             "name": "Place Characterization",
@@ -535,7 +582,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "12e98d92-ae96-4f46-a5f1-6563d97a2692"
+                            "guid": "12e98d92-ae96-4f46-a5f1-6563d97a2692",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Location of cycle paths",
@@ -560,7 +613,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "3d3e239b-3fa6-46bb-abdf-b7fb747e8272"
+                            "guid": "3d3e239b-3fa6-46bb-abdf-b7fb747e8272",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Location of footpaths",
@@ -585,7 +644,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "7eeb6b1e-f304-46f8-a3a4-74b25097e4a5"
+                            "guid": "7eeb6b1e-f304-46f8-a3a4-74b25097e4a5",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Block Layout",
@@ -610,7 +675,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "c1dfcfdc-4f30-4d5b-bd9b-21d2f98148c4"
+                            "guid": "c1dfcfdc-4f30-4d5b-bd9b-21d2f98148c4",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.142857142857143,
@@ -619,7 +690,7 @@
                     "description": "Active Transport refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands.",
                     "default_dimension_weighting": 0.142857142857143,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -651,7 +722,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 1,
                             "analysis_mode": "Do Not Use",
-                            "guid": "1ebfa0a0-582f-4456-8c6d-7fd6c10ef46e"
+                            "guid": "1ebfa0a0-582f-4456-8c6d-7fd6c10ef46e",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.142857142857143,
@@ -660,7 +737,7 @@
                     "description": "Safety addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women\u2019s ability to move freely, seek employment, and access essential services.",
                     "default_dimension_weighting": 0.142857142857143,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -692,7 +769,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "4121693a-4454-4aba-8ef0-75e8bbda18ed"
+                            "guid": "4121693a-4454-4aba-8ef0-75e8bbda18ed",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.142857142857143,
@@ -701,7 +784,7 @@
                     "description": "Fragility, Conflict, and Violence (FCV) considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women\u2019s vulnerability and limit their access to employment and essential services.",
                     "default_dimension_weighting": 0.142857142857143,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -733,7 +816,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "0d1d75ea-c532-4383-86ea-0df524a39cc2"
+                            "guid": "0d1d75ea-c532-4383-86ea-0df524a39cc2",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.142857142857143,
@@ -742,7 +831,7 @@
                     "description": "Education refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector.",
                     "default_dimension_weighting": 0.142857142857143,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -774,7 +863,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "1de8776b-224c-4799-8418-83906cc1ab39"
+                            "guid": "1de8776b-224c-4799-8418-83906cc1ab39",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.142857142857143,
@@ -783,7 +878,7 @@
                     "description": "Digital Inclusion assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training band education opportunities, and use financial services.",
                     "default_dimension_weighting": 0.142857142857143,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -815,7 +910,13 @@
                             "use_environmental_hazards": 1,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "4e2a7af0-7b74-4a16-8d1e-7c62bea7719a"
+                            "guid": "4e2a7af0-7b74-4a16-8d1e-7c62bea7719a",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Flood Hazards",
@@ -840,7 +941,13 @@
                             "use_environmental_hazards": 1,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "5d1c9f67-f007-4f6c-97d4-040e24eb081d"
+                            "guid": "5d1c9f67-f007-4f6c-97d4-040e24eb081d",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Landslide",
@@ -865,7 +972,13 @@
                             "use_environmental_hazards": 1,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "7464d39c-484f-4bf6-9cab-83d30ce84125"
+                            "guid": "7464d39c-484f-4bf6-9cab-83d30ce84125",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Tropical Cyclone",
@@ -890,7 +1003,13 @@
                             "use_environmental_hazards": 1,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "41f656c3-9bf7-42c5-9572-139a3e229d7a"
+                            "guid": "41f656c3-9bf7-42c5-9572-139a3e229d7a",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         },
                         {
                             "indicator": "Drought",
@@ -915,7 +1034,13 @@
                             "use_environmental_hazards": 1,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "41adb08b-4bf8-4e5d-8dc3-20d3f5374d78"
+                            "guid": "41adb08b-4bf8-4e5d-8dc3-20d3f5374d78",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.142857142857143,
@@ -924,7 +1049,7 @@
                     "description": "Environmental Hazards relate to the impact of environmental risks, such as floods, droughts, landslides, fires, and extreme weather events, which can disrupt job stability, particularly for women in vulnerable sectors.",
                     "default_dimension_weighting": 0.142857142857143,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -956,7 +1081,13 @@
                             "use_environmental_hazards": 0,
                             "use_street_lights": 0,
                             "analysis_mode": "Do Not Use",
-                            "guid": "31be7faa-7c48-4e77-b9b6-bf8fa562c7ef"
+                            "guid": "31be7faa-7c48-4e77-b9b6-bf8fa562c7ef",
+                            "result": "Not Run",
+                            "result_file": "",
+                            "error": "",
+                            "error_file": "",
+                            "execution_start_time": "",
+                            "execution_end_time": ""
                         }
                     ],
                     "dimension_weighting": 0.142857142857143,
@@ -965,7 +1096,7 @@
                     "description": "Water and Sanitation concerns the availability of clean water and sanitation facilities, affecting women\u2019s time allocation and capacity to engage in employment.",
                     "default_dimension_weighting": 0.142857142857143,
                     "analysis_mode": "",
-                    "result": "",
+                    "result": "Not Run",
                     "execution_start_time": "",
                     "result_file": "",
                     "execution_end_time": ""
@@ -977,41 +1108,46 @@
             "output_filename": "Place_score",
             "default_analysis_weighting": 0.333333,
             "analysis_mode": "",
-            "result": "",
+            "result": "Not Run",
             "execution_start_time": "",
             "result_file": "",
             "execution_end_time": ""
         }
     ],
     "result": "analysis_aggregation Workflow Completed",
-    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/_combined.vrt",
-    "execution_start_time": "2024-12-19T13:07:59.647020",
-    "execution_end_time": "2024-12-19T13:08:00.475715",
+    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/wee_score/WEE_Score_combined.vrt",
+    "execution_start_time": "2025-01-05T09:15:51.664475",
+    "execution_end_time": "2025-01-05T09:15:52.503123",
     "error": "",
     "error_file": null,
+    "output_filename": "WEE_Score",
+    "mask_mode": "point",
+    "buffer_distance_m": 100,
+    "opportunities_mask_result_file": "",
+    "opportunities_mask_result": "",
     "aggregation_layer": null,
-    "aggregation_layer_name": "administrative_boundary",
-    "aggregation_layer_source": "/home/timlinux/dev/python/GEEST2/data/StLucia/saintluciagis.gpkg|layername=administrative_boundary",
+    "aggregation_layer_name": "admin",
+    "aggregation_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/admin0.gpkg|layername=admin",
     "aggregation_layer_provider_type": "ogr",
-    "aggregation_layer_crs": "",
+    "aggregation_layer_crs": "EPSG:32620",
     "aggregation_layer_wkb_type": 6,
-    "aggregation_layer_id": "administrative_boundary_7f19d49d_e23e_4737_9d7e_8fc99db4ef72",
+    "aggregation_layer_id": "admin_2681a7d2_5c5d_4d41_8a0f_74b02334723d",
     "aggregation_shapefile": "",
     "population_layer": null,
-    "population_layer_name": "lca_ppp_2020_UNadj_constrained",
-    "population_layer_source": "/home/timlinux/dev/python/GEEST2/data/StLucia/Population/lca_ppp_2020_UNadj_constrained.tif",
+    "population_layer_name": "reclassified_population",
+    "population_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/population/reclassified_population.vrt",
     "population_layer_provider_type": "gdal",
-    "population_layer_crs": "EPSG:4326",
+    "population_layer_crs": "EPSG:32620",
     "population_layer_wkb_type": "",
-    "population_layer_id": "lca_ppp_2020_UNadj_constrained_ec945779_3222_4975_9f04_3312e7855d64",
+    "population_layer_id": "reclassified_population_bba75c81_028b_4221_b33f_78c8c31e5e46",
     "population_shapefile": "",
     "point_mask_layer": null,
-    "point_mask_layer_name": "",
-    "point_mask_layer_source": "",
-    "point_mask_layer_provider_type": "",
-    "point_mask_layer_crs": "",
-    "point_mask_layer_wkb_type": "",
-    "point_mask_layer_id": "",
+    "point_mask_layer_name": "fake_childcare",
+    "point_mask_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/points/fake_childcare.gpkg|layername=fake_childcare",
+    "point_mask_layer_provider_type": "ogr",
+    "point_mask_layer_crs": "EPSG:32620",
+    "point_mask_layer_wkb_type": 1,
+    "point_mask_layer_id": "fake_childcare_6a120423_4837_409e_893c_cc06dd1bde8f",
     "point_mask_shapefile": "",
     "polygon_mask_layer": null,
     "polygon_mask_layer_name": "",
@@ -1028,7 +1164,6 @@
     "raster_mask_layer_crs": "",
     "raster_mask_layer_wkb_type": "",
     "raster_mask_layer_id": "",
-    "raster_mask_shapefile": "",
-    "analysis_mode": "analysis_aggregation",
-    "wee_by_population": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/wee_score/wee_by_population_score.vrt"
+    "raster_mask_raster": "",
+    "analysis_mode": "analysis_aggregation"
 }

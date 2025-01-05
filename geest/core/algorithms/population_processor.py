@@ -1,7 +1,7 @@
 import os
 import traceback
 import shutil
-from typing import Optional, Tuple
+from typing import Optional
 import subprocess
 import platform
 
@@ -10,7 +10,6 @@ from qgis.core import (
     QgsTask,
     QgsProcessingContext,
     QgsFeedback,
-    QgsCoordinateReferenceSystem,
     QgsRasterLayer,
     QgsRasterDataProvider,
     QgsVectorLayer,
@@ -34,7 +33,6 @@ class PopulationRasterProcessingTask(QgsTask):
         study_area_gpkg_path (str): Path to the GeoPackage containing study area masks.
         output_dir (str): Directory to save the output rasters.
         cell_size_m (float): Cell size for the output rasters.
-        crs (Optional[QgsCoordinateReferenceSystem]): CRS for the output rasters. Will use the CRS of the clip layer if not provided.
         context (Optional[QgsProcessingContext]): QGIS processing context.
         feedback (Optional[QgsFeedback]): QGIS feedback object.
         force_clear (bool): Flag to force clearing of all outputs before processing.
@@ -46,7 +44,6 @@ class PopulationRasterProcessingTask(QgsTask):
         study_area_gpkg_path: str,
         working_directory: str,
         cell_size_m: float,
-        target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         context: Optional[QgsProcessingContext] = None,
         feedback: Optional[QgsFeedback] = None,
         force_clear: bool = False,
@@ -61,15 +58,14 @@ class PopulationRasterProcessingTask(QgsTask):
                 os.remove(os.path.join(self.output_dir, file))
         self.cell_size_m = cell_size_m
         os.makedirs(self.output_dir, exist_ok=True)
-        self.target_crs = target_crs
-        if not self.target_crs:
-            layer: QgsVectorLayer = QgsVectorLayer(
-                f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
-                "study_area_clip_polygons",
-                "ogr",
-            )
-            self.target_crs = layer.crs()
-            del layer
+
+        layer: QgsVectorLayer = QgsVectorLayer(
+            f"{self.study_area_gpkg_path}|layername=study_area_clip_polygons",
+            "study_area_clip_polygons",
+            "ogr",
+        )
+        self.target_crs = layer.crs()
+        del layer
         self.context = context
         self.feedback = feedback
         self.global_min = float("inf")
@@ -132,13 +128,10 @@ class PopulationRasterProcessingTask(QgsTask):
             clip_layer.commitChanges()
 
             layer_name = f"{index}.tif"
-            output_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
-            log_message(f"Processing mask {output_path}")
-
-            if not self.force_clear and os.path.exists(output_path):
-                log_message(f"Reusing existing clipped raster: {output_path}")
-                self.clipped_rasters.append(output_path)
-                continue
+            phase1_output = os.path.join(
+                self.output_dir, f"clipped_phase1_{layer_name}"
+            )
+            log_message(f"Processing mask {phase1_output}")
 
             # Clip the population raster using the mask
             params = {
@@ -151,21 +144,84 @@ class PopulationRasterProcessingTask(QgsTask):
                 "KEEP_RESOLUTION": True,
                 "OPTIONS": "",
                 "DATA_TYPE": 5,  # Float32
-                "OUTPUT": output_path,
+                "OUTPUT": phase1_output,
             }
 
+            if not self.force_clear and os.path.exists(phase1_output):
+                log_message(f"Reusing existing clip phase 1 raster: {phase1_output}")
+            else:
+                result = processing.run("gdal:cliprasterbymasklayer", params)
+                if not result["OUTPUT"]:
+                    log_message(
+                        f"Failed to do phase1 clip raster for mask: {layer_name}"
+                    )
+                    continue
+
+            del clip_layer
+
+            clipped_layer = QgsRasterLayer(
+                phase1_output, f"Phase1 Clipped {layer_name}"
+            )
+            if not clipped_layer.isValid():
+                log_message(f"Invalid clipped raster layer for phase1: {layer_name}")
+                continue
+            del clipped_layer
+
+            log_message("Expanding clip layer to area bbox now ....")
+            # Now we need to expand the raster to the area_bbox so that it alighns
+            # with the clipped products produced by workflows
+            phase2_output = os.path.join(
+                self.output_dir, f"clipped_phase2_{layer_name}"
+            )
+
+            if not self.force_clear and os.path.exists(phase2_output):
+                log_message(f"Reusing existing phase2 clipped raster: {phase2_output}")
+                self.clipped_rasters.append(phase2_output)
+                continue
+
+            clip_layer = QgsVectorLayer("Polygon", "clip", "memory")
+            clip_layer.setCrs(self.target_crs)
+            clip_layer.startEditing()
+            feature = QgsFeature()
+            feature.setGeometry(current_bbox)
+            clip_layer.addFeature(feature)
+            clip_layer.commitChanges()
+
+            params = {
+                "INPUT": phase1_output,
+                "MASK": clip_layer,
+                "SOURCE_CRS": None,
+                "TARGET_CRS": self.target_crs,
+                "TARGET_EXTENT": clip_area.boundingBox(),
+                "NODATA": None,
+                "ALPHA_BAND": False,
+                "CROP_TO_CUTLINE": False,
+                "KEEP_RESOLUTION": False,
+                "SET_RESOLUTION": False,
+                "X_RESOLUTION": self.cell_size_m,
+                "Y_RESOLUTION": self.cell_size_m,
+                "MULTITHREADING": False,
+                "OPTIONS": "",
+                "DATA_TYPE": 0,
+                "EXTRA": "",
+                "OUTPUT": phase2_output,
+            }
             result = processing.run("gdal:cliprasterbymasklayer", params)
+            del clip_layer
 
             if not result["OUTPUT"]:
-                log_message(f"Failed to clip raster for mask: {layer_name}")
+                log_message(f"Failed to do phase2 clip raster for mask: {layer_name}")
                 continue
 
-            clipped_layer = QgsRasterLayer(output_path, f"Clipped {layer_name}")
+            clipped_layer = QgsRasterLayer(
+                phase2_output, f"Phase2 Clipped {layer_name}"
+            )
             if not clipped_layer.isValid():
-                log_message(f"Invalid clipped raster layer for mask: {layer_name}")
+                log_message(f"Invalid clipped raster layer for phase2: {layer_name}")
                 continue
+            del clipped_layer
 
-            self.clipped_rasters.append(output_path)
+            self.clipped_rasters.append(phase2_output)
 
             log_message(f"Processed mask {layer_name}")
 
@@ -217,7 +273,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 return
 
             layer_name = f"{index}.tif"
-            input_path = os.path.join(self.output_dir, f"clipped_{layer_name}")
+            input_path = os.path.join(self.output_dir, f"clipped_phase2_{layer_name}")
             output_path = os.path.join(self.output_dir, f"resampled_{layer_name}")
 
             log_message(f"Resampling {output_path} from {input_path}")

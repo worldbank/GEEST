@@ -63,7 +63,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
     | ![#0000FF](#) `#0000FF` | Highly enabling, medium population        |
     | ![#0000FF](#) `#0000FF` | Highly enabling, high population          |
 
-    See the wee_score_processor.py module for more details on how this is computed.
+    See the wee_by_population_score_processor.py module for more details on how this is computed.
 
     📒 The majority score for each subnational area is calculated by counting the
        number of pixels in each WEE Score and WEE x Population Score class as per the
@@ -112,15 +112,17 @@ class SubnationalAggregationProcessingTask(QgsTask):
 
         # These folders should already exist from the aggregation analysis and population raster processing
         self.population_folder = os.path.join(working_directory, "population")
-        self.wee_folder = os.path.join(working_directory, "wee_score")
+        self.wee_by_population_folder = os.path.join(
+            working_directory, "wee_by_population_score"
+        )
 
         if not os.path.exists(self.population_folder):
             raise Exception(
                 f"Population folder not found:\n{self.population_folder}\nPlease run population raster processing first."
             )
-        if not os.path.exists(self.wee_folder):
+        if not os.path.exists(self.wee_by_population_folder):
             raise Exception(
-                f"WEE folder not found.\n{self.wee_folder}\nPlease run WEE raster processing first."
+                f"WEE folder not found.\n{self.wee_by_population_folder}\nPlease run WEE raster processing first."
             )
 
         self.force_clear = force_clear
@@ -175,7 +177,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
         params = {
             "INPUT": output,
             "INPUT_RASTER": os.path.join(
-                self.wee_folder, "wee_by_population_score.vrt"
+                self.wee_by_population_folder, "wee_by_population_score.vrt"
             ),
             "RASTER_BAND": 1,
             "COLUMN_PREFIX": "_",

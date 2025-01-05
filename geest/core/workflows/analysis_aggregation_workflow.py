@@ -1,13 +1,6 @@
 import os
 from qgis.core import QgsFeedback, QgsProcessingContext
-from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from .aggregation_workflow_base import AggregationWorkflowBase
-from geest.core.algorithms import (
-    PopulationRasterProcessingTask,
-    WEEByPopulationScoreProcessingTask,
-    SubnationalAggregationProcessingTask,
-)
-from geest.utilities import resources_path
 from geest.core import JsonTreeItem
 
 
@@ -15,7 +8,8 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
     """
     Concrete implementation of an 'Analysis Aggregation' workflow.
 
-    It will aggregate the dimensions within an analysis to create a single raster output.
+    It will generate the WEE Score product. Further processing is required to generate the WEE x Population Score.
+    The logic for the latter is implemented in tree_panel.py : calculate_analysis_insights method.
     """
 
     def __init__(
@@ -48,43 +42,7 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         self.layer_id = "wee"
         self.weight_key = "dimension_weighting"
         self.workflow_name = "analysis_aggregation"
-        # Prepare the population data if provided
-        self.population_data = self.item.attribute("population_layer_source", None)
-        population_processor = PopulationRasterProcessingTask(
-            population_raster_path=self.population_data,
-            working_directory=self.working_directory,
-            study_area_gpkg_path=self.gpkg_path,
-            cell_size_m=self.cell_size_m,
-            target_crs=self.target_crs,
-            feedback=self.feedback,
-        )
-        population_processor.run()
-        wee_processor = WEEByPopulationScoreProcessingTask(
-            study_area_gpkg_path=self.gpkg_path,
-            working_directory=self.working_directory,
-            force_clear=False,
-        )
-        wee_processor.run()
-        # Shamelessly hard coded for now, needs to move to the wee processor class
-        output = os.path.join(
-            self.working_directory, "wee_score", "wee_by_population_score.vrt"
-        )
-        item.setAttribute("wee_by_population", output)
-
-        aggregation_layer = self.item.attribute("aggregation_layer_source")
-        subnational_processor = SubnationalAggregationProcessingTask(
-            study_area_gpkg_path=self.gpkg_path,
-            aggregation_areas_path=aggregation_layer,
-            working_directory=self.working_directory,
-            force_clear=False,
-        )
-        subnational_processor.run()
-        # Shamelessly hard coded for now, needs to move to the aggregation processor class
-        output = os.path.join(
-            self.working_directory,
-            "subnational_aggregation",
-            "subnational_aggregation.gpkg",
-        )
-        item.setAttribute(
-            "subnational_aggregation", f"{output}|layername=subnational_aggregation"
-        )
+        # Override the default working directory defined in the base class
+        self.workflow_directory = os.path.join(self.working_directory, "wee_score")
+        if not os.path.exists(self.workflow_directory):
+            os.makedirs(self.workflow_directory, exist_ok=True)

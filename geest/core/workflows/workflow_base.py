@@ -9,20 +9,23 @@ from qgis.core import (
     Qgis,
     QgsProcessingContext,
     QgsProcessingFeedback,
-    QgsFeature,
     QgsGeometry,
     QgsProcessingFeedback,
     QgsProcessingException,
-    QgsRasterLayer,
     QgsVectorLayer,
-    QgsWkbTypes,
     Qgis,
 )
 import processing
 from qgis.PyQt.QtCore import QSettings, pyqtSignal, QObject
 from geest.core import JsonTreeItem, setting
 from geest.utilities import resources_path
-from geest.core.algorithms import AreaIterator
+from geest.core.algorithms import (
+    AreaIterator,
+    subset_vector_layer,
+    geometry_to_memory_layer,
+    check_and_reproject_layer,
+    combine_rasters_to_vrt,
+)
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 from geest.utilities import log_message
 
@@ -62,12 +65,16 @@ class WorkflowBase(QObject):
         self.settings = QSettings()
         # This is the top level folder for work files
         if working_directory:
-            self.workflow_directory = working_directory
+            log_message(f"Working directory set to {working_directory}")
+            self.working_directory = working_directory
         else:
+            log_message(
+                "Working directory not set. Using last working directory from settings."
+            )
             self.working_directory = self.settings.value("last_working_directory", "")
         if not self.working_directory:
             raise ValueError("Working directory not set.")
-        # This is the lower level directory for this workflow
+        # This is the lower level directory for this workflow's outputs
         self.workflow_directory = self._create_workflow_directory()
         self.gpkg_path: str = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
@@ -93,10 +100,18 @@ class WorkflowBase(QObject):
         self.features_layer = None  # set in concrete class if needed
         self.raster_layer = None  # set in concrete class if needed
         self.target_crs = self.bboxes_layer.crs()
+
+        # We softcode the workflow name to be used in the output folder
+        # so that we can use the same tree item for different aggregation workflows
+        # and write their result files to different keys
+        # e.g. for analysis job opportunities mask workflow we can set the result key to "job_opportunities_mask"
+        self.result_file_key = "result_file"
+        # We can also softcode the key to write the result status message to
+        self.result_key = "result"
+
         # Will be populated by the workflow
         self.attributes = self.item.attributes()
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
-        self.attributes["result"] = "Not Run"
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
         self.progressChanged.emit(0)
@@ -133,6 +148,7 @@ class WorkflowBase(QObject):
     def _process_raster_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
@@ -141,6 +157,7 @@ class WorkflowBase(QObject):
         Executes the actual workflow logic for a single area using a raster.
 
         :current_area: Current polygon from our study area.
+        :clip_area: Polygon to clip the raster to which is aligned to cell edges.
         :current_bbox: Bounding box of the above area.
         :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
         :index: Index of the current area.
@@ -153,6 +170,7 @@ class WorkflowBase(QObject):
     def _process_aggregate_for_area(
         self,
         current_area: QgsGeometry,
+        clip_area: QgsGeometry,
         current_bbox: QgsGeometry,
         index: int,
     ):
@@ -184,12 +202,15 @@ class WorkflowBase(QObject):
             True if the workflow completes successfully, False if canceled or failed.
         """
 
+        # Do this here rather than in the ctor in case the result key is changed
+        # in the concrete class
+        self.attributes[self.result_key] = "Not Run"
+
         log_message(f"Executing {self.workflow_name}")
         log_message("----------------------------------")
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
-            for item in self.attributes.items():
-                log_message(f"{item[0]}: {item[1]}")
+            log_message(self.item.attributesAsMarkdown())
             log_message("----------------------------------")
 
         self.attributes["execution_start_time"] = datetime.datetime.now().isoformat()
@@ -200,7 +221,9 @@ class WorkflowBase(QObject):
         output_rasters = []
 
         if self.features_layer and type(self.features_layer) == QgsVectorLayer:
-            self.features_layer = self._check_and_reproject_layer()
+            self.features_layer = check_and_reproject_layer(
+                self.features_layer, self.target_crs
+            )
 
         area_iterator = AreaIterator(self.gpkg_path)
         try:
@@ -250,6 +273,7 @@ class WorkflowBase(QObject):
                 elif self.aggregation == True:  # we are processing an aggregate
                     raster_output = self._process_aggregate_for_area(
                         current_area=current_area,
+                        clip_area=clip_area,
                         current_bbox=current_bbox,
                         index=index,
                     )
@@ -264,8 +288,10 @@ class WorkflowBase(QObject):
                 self.progressChanged.emit(int(progress))
             # Combine all area rasters into a VRT
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
-            self.attributes["result_file"] = vrt_filepath
-            self.attributes["result"] = f"{self.workflow_name} Workflow Completed"
+            self.attributes[self.result_file_key] = vrt_filepath
+            self.attributes[self.result_key] = (
+                f"{self.workflow_name} Workflow Completed"
+            )
 
             log_message(
                 f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
@@ -292,8 +318,8 @@ class WorkflowBase(QObject):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            self.attributes["result"] = f"{self.workflow_name} Workflow Error"
-            self.attributes["result_file"] = ""
+            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
+            self.attributes[self.result_file_key] = ""
 
             # Write the traceback to error.txt in the workflow_directory
             error_path = os.path.join(self.workflow_directory, "error.txt")
@@ -304,7 +330,7 @@ class WorkflowBase(QObject):
             self.attributes["error"] = f"Failed to process {self.workflow_name}: {e}"
             return False
 
-    def _create_workflow_directory(self, *subdirs: str) -> str:
+    def _create_workflow_directory(self) -> str:
         """
         Creates the directory for this workflow if it doesn't already exist.
         It will be in the scheme of working_dir/dimension/factor/indicator
@@ -339,30 +365,10 @@ class WorkflowBase(QObject):
             tag="Geest",
             level=Qgis.Info,
         )
-        output_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
-
-        # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
-        geometry_type = self.features_layer.wkbType()
-
-        # Determine geometry type name based on input layer's geometry
-        if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
-            geometry_name = "Point"
-        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
-            geometry_name = "LineString"
-        elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PolygonGeometry:
-            geometry_name = "Polygon"
-        else:
-            raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
-
-        params = {
-            "INPUT": self.features_layer,
-            "PREDICATE": [0],  # Intersects predicate
-            "GEOMETRY": area_geom,
-            "EXTENT": area_geom.boundingBox(),
-            "OUTPUT": output_path,
-        }
-        result = processing.run("native:extractbyextent", params)
-        return QgsVectorLayer(result["OUTPUT"], output_prefix, "ogr")
+        layer = subset_vector_layer(
+            self.workflow_directory, self.features_layer, area_geom, output_prefix
+        )
+        return layer
 
     def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
         """
@@ -403,37 +409,6 @@ class WorkflowBase(QObject):
         }
         processing.run("native:fillnodata", params)
         return reprojected_raster_path
-
-    def _check_and_reproject_layer(self):
-        """
-        Checks if the features layer has the expected CRS. If not, it reprojects the layer.
-
-        Returns:
-            QgsVectorLayer: The input layer, either reprojected or unchanged.
-
-        Note: Also updates self.features_layer to point to the reprojected layer.
-        """
-        if self.features_layer.crs() != self.target_crs:
-            log_message(
-                f"Reprojecting layer from {self.features_layer.crs().authid()} to {self.target_crs.authid()}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            reproject_result = processing.run(
-                "native:reprojectlayer",
-                {
-                    "INPUT": self.features_layer,
-                    "TARGET_CRS": self.target_crs,
-                    "OUTPUT": "memory:",  # Reproject in memory
-                },
-                feedback=QgsProcessingFeedback(),
-            )
-            reprojected_layer = reproject_result["OUTPUT"]
-            if not reprojected_layer.isValid():
-                raise QgsProcessingException("Reprojected layer is invalid.")
-            self.features_layer = reprojected_layer
-        # If CRS matches, return the original layer
-        return self.features_layer
 
     def _rasterize(
         self,
@@ -541,14 +516,11 @@ class WorkflowBase(QObject):
                 level=Qgis.Warning,
             )
             raise QgsProcessingException(f"Raster file not found at {raster_path}")
-        # Convert the geometry to a memory layer in the self.tartget_crs
+        # Convert the geometry to a memory layer in the self.target_crs
         log_message(f"Creating mask layer for area from polygon {index}")
-        mask_layer = QgsVectorLayer(f"Polygon", "mask", "memory")
-        mask_layer.setCrs(self.target_crs)
-        feature = QgsFeature()
-        feature.setGeometry(area_geometry)
-        mask_layer.dataProvider().addFeatures([feature])
-        mask_layer.commitChanges()
+        mask_layer = geometry_to_memory_layer(
+            area_geometry, self.target_crs, f"mask_layer_{index}"
+        )
         log_message(f"Mask layer created: {mask_layer}")
         # Clip the raster by the mask layer
         params = {
@@ -584,73 +556,14 @@ class WorkflowBase(QObject):
         Returns:
             vrtpath (str): The file path to the VRT file.
         """
-        if not rasters:
-            log_message(
-                "No valid raster layers found to combine into VRT.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            return
+
         vrt_filepath = os.path.join(
             self.workflow_directory,
             f"{self.output_filename}_combined.vrt",
         )
-        qml_filepath = os.path.join(
-            self.workflow_directory,
-            f"{self.output_filename}_combined.qml",
-        )
-        log_message(
-            f"Creating VRT of layers '{vrt_filepath}' layer to the map.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        checked_rasters = []
-        for raster in rasters:
-            if raster and os.path.exists(raster) and QgsRasterLayer(raster).isValid():
-                checked_rasters.append(raster)
-            else:
-                log_message(
-                    f"Skipping invalid or non-existent raster: {raster}",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-
-        if not checked_rasters:
-            log_message(
-                "No valid raster layers found to combine into VRT.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            return
-
-        # Define the VRT parameters
-        params = {
-            "INPUT": checked_rasters,
-            "RESOLUTION": 0,  # Use highest resolution among input files
-            "SEPARATE": False,  # Combine all input rasters as a single band
-            "OUTPUT": vrt_filepath,
-            "PROJ_DIFFERENCE": False,
-            "ADD_ALPHA": False,
-            "ASSIGN_CRS": self.target_crs,
-            "RESAMPLING": 0,
-            "SRC_NODATA": "255",
-            "EXTRA": "",
-        }
-
-        # Run the gdal:buildvrt processing algorithm to create the VRT
-        processing.run("gdal:buildvirtualraster", params)
-        log_message(f"Created VRT: {vrt_filepath}")
-
-        # Add the VRT to the QGIS map
-        vrt_layer = QgsRasterLayer(vrt_filepath, f"{self.layer_id}_final VRT")
-        # Copy the appropriate QML over too
         role = self.item.role
         source_qml = resources_path("resources", "qml", f"{role}.qml")
-        log_message(f"Copying QML from {source_qml} to {qml_filepath}")
-        shutil.copyfile(source_qml, qml_filepath)
-
-        if not vrt_layer.isValid():
-            log_message("VRT Layer generation failed.", level=Qgis.Critical)
-            return False
-
+        vrt_filepath = combine_rasters_to_vrt(
+            rasters, self.target_crs, vrt_filepath, source_qml
+        )
         return vrt_filepath

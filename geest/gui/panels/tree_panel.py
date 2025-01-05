@@ -38,9 +38,12 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
     QgsLayerTreeGroup,
+    QgsFeedback,
+    QgsProcessingContext,
 )
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
+from geest.core import JsonTreeItem
 from geest.utilities import resources_path
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
@@ -49,6 +52,13 @@ from geest.gui.dialogs import (
     DimensionAggregationDialog,
     AnalysisAggregationDialog,
 )
+from geest.core.algorithms import (
+    PopulationRasterProcessingTask,
+    WEEByPopulationScoreProcessingTask,
+    SubnationalAggregationProcessingTask,
+    OpportunitiesMaskProcessor,
+)
+
 from geest.utilities import log_message
 
 
@@ -494,6 +504,16 @@ class TreePanel(QWidget):
             )
             menu.addAction(add_wee_by_population_aggregate)
 
+            add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
+            add_job_opportunities_mask.triggered.connect(
+                lambda: self.add_to_map(
+                    item,
+                    key="opportunities_mask_result_file",
+                    layer_name="Opportunities Mask",
+                )
+            )
+            menu.addAction(add_job_opportunities_mask)
+
             add_study_area_layers_action = QAction("Add Study Area to Map", self)
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
@@ -890,7 +910,7 @@ class TreePanel(QWidget):
 
     def add_to_map(self, item, key="result_file", layer_name=None, qml_key=None):
         """Add the item to the map."""
-
+        log_message(item.attributesAsMarkdown())
         layer_uri = item.attribute(f"{key}")
         log_message(f"Adding {layer_uri} for key {key} to map")
         if layer_uri:
@@ -1069,6 +1089,15 @@ class TreePanel(QWidget):
         count = parent_item.childCount(recursive=True)
         self.items_to_run = count
 
+    def cell_size_m(self):
+        """Get the cell size in meters from the analysis item."""
+        cell_size_m = (
+            self.model.get_analysis_item()
+            .attributes()
+            .get("analysis_cell_size_m", 100.0)
+        )
+        return cell_size_m
+
     def queue_workflow_task(self, item, role):
         """Queue a workflow task based on the role of the item.
 
@@ -1077,11 +1106,6 @@ class TreePanel(QWidget):
         """
         task = None
 
-        cell_size_m = (
-            self.model.get_analysis_item()
-            .attributes()
-            .get("analysis_cell_size_m", 100.0)
-        )
         attributes = item.attributes()
         if attributes.get("result_file", None) and self.run_only_incomplete:
             return
@@ -1091,7 +1115,7 @@ class TreePanel(QWidget):
             attributes["analysis_mode"] = "dimension_aggregation"
         if role == item.role and role == "analysis":
             attributes["analysis_mode"] = "analysis_aggregation"
-        task = self.queue_manager.add_workflow(item, cell_size_m)
+        task = self.queue_manager.add_workflow(item, self.cell_size_m())
         if task is None:
             return
 
@@ -1270,7 +1294,7 @@ class TreePanel(QWidget):
 
         parent_second_column_index = None
         if item.role == "indicator":
-            # Show an animation on its parent too
+            # Stop the animation on its parent too
             parent_index = node_index.parent()
             parent_second_column_index = self.model.index(
                 parent_index.row(), 1, parent_index.parent()
@@ -1286,6 +1310,100 @@ class TreePanel(QWidget):
 
         # Emit dataChanged to refresh the decoration
         self.model.dataChanged.emit(second_column_index, second_column_index)
+
+        if item.role == "analysis":
+            # Run some post processing on the analysis results
+            self.calculate_analysis_insights(item)
+
+    def calculate_analysis_insights(self, item: JsonTreeItem):
+        """Caclulate insights for the analysis.
+
+        Post process the analysis aggregation and store the output in the item.
+
+        Here we compute various other insights from the aggregated data:
+
+        - WEE x Population Score
+        - Opportunities Mask
+        - Subnational Aggregation
+
+        """
+        log_message("############################################")
+        log_message("Calculating analysis insights")
+        log_message("############################################")
+        log_message(item.attributesAsMarkdown())
+        # Prepare the population data if provided
+        population_data = item.attribute("population_layer_source", None)
+        gpkg_path = os.path.join(
+            self.working_directory, "study_area", "study_area.gpkg"
+        )
+        feedback = QgsFeedback()
+        context = QgsProcessingContext()
+        population_processor = PopulationRasterProcessingTask(
+            population_raster_path=population_data,
+            working_directory=self.working_directory,
+            study_area_gpkg_path=gpkg_path,
+            cell_size_m=self.cell_size_m(),
+            feedback=feedback,
+        )
+        population_processor.run()
+        wee_processor = WEEByPopulationScoreProcessingTask(
+            study_area_gpkg_path=gpkg_path,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        wee_processor.run()
+        # Shamelessly hard coded for now, needs to move to the wee processor class
+        output = os.path.join(
+            self.working_directory,
+            "wee_by_population_score",
+            "wee_by_population_score.vrt",
+        )
+        item.setAttribute("wee_by_population", output)
+
+        # Prepare the polygon mask data if provided
+
+        opportunities_mask_workflow = OpportunitiesMaskProcessor(
+            item=item,
+            study_area_gpkg_path=gpkg_path,
+            cell_size_m=self.cell_size_m(),
+            feedback=feedback,
+            context=context,
+            working_directory=self.working_directory,
+        )
+        opportunities_mask_workflow.run()
+
+        # Now apply the opportunities mask to the WEE Score and WEE Score x Population
+        # leaving us with 4 potential products:
+        # WEE Score Unmasked
+        # WEE Score x Population Unmasked
+        # WEE Score Masked by Job Opportunities
+        # WEE Score x Population masked by Job Opportunities
+
+        # Now prepare the aggregation layers if an aggregation polygon layer is provided
+        # leaving us with 2 potential products:
+        # Subnational Aggregation fpr WEE Score x Population Unmasked
+        # Subnational Aggregation for WEE Score x Population masked by Job Opportunities
+
+        aggregation_layer = item.attribute("aggregation_layer_source")
+        subnational_processor = SubnationalAggregationProcessingTask(
+            study_area_gpkg_path=gpkg_path,
+            aggregation_areas_path=aggregation_layer,
+            working_directory=self.working_directory,
+            force_clear=False,
+        )
+        subnational_processor.run()
+        # Shamelessly hard coded for now, needs to move to the aggregation processor class
+        output = os.path.join(
+            self.working_directory,
+            "subnational_aggregation",
+            "subnational_aggregation.gpkg",
+        )
+        item.setAttribute(
+            "subnational_aggregation", f"{output}|layername=subnational_aggregation"
+        )
+        log_message("############################################")
+        log_message("END")
+        log_message("############################################")
 
     def update_tree_item_status(self, item, status):
         """

@@ -5,8 +5,6 @@ import shutil
 
 from qgis.core import (
     QgsTask,
-    QgsProcessingContext,
-    QgsFeedback,
     QgsRasterLayer,
     QgsVectorLayer,
     QgsCoordinateReferenceSystem,
@@ -97,12 +95,12 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         super().__init__("WEE Score Processor", QgsTask.CanCancel)
         self.study_area_gpkg_path = study_area_gpkg_path
 
-        self.output_dir = os.path.join(working_directory, "wee_score")
+        self.output_dir = os.path.join(working_directory, "wee_by_population_score")
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the aggregation analysis and population raster processing
         self.population_folder = os.path.join(working_directory, "population")
-        self.wee_folder = working_directory
+        self.wee_folder = os.path.join(working_directory, "wee_score")
 
         self.force_clear = force_clear
         if self.force_clear and os.path.exists(self.output_dir):
