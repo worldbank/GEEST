@@ -238,9 +238,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             vrt_filepath = combine_rasters_to_vrt(
                 self.mask_list, self.target_crs, vrt_filepath, source_qml
             )
-            combine_rasters_to_vrt(
-                self.mask_list, self.target_crs, vrt_filepath, source_qml=source_qml
-            )
+
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())
@@ -251,9 +249,9 @@ class OpportunitiesMaskProcessor(QgsTask):
         Called when the task completes.
         """
         if result:
-            log_message("Population raster processing completed successfully.")
+            log_message("Opportunities mask processing completed successfully.")
         else:
-            log_message("Population raster processing failed.")
+            log_message("Opportunities mask processing failed.")
 
     def _process_features_for_area(
         self,
@@ -389,40 +387,6 @@ class OpportunitiesMaskProcessor(QgsTask):
 
         output = processing.run("gdal:rasterize", params)["OUTPUT"]
         return rasterized_polygons_path
-
-    def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
-
-        log_message(f"Copying QML style from {source_qml} to {qml_path}")
-        # Apply QML Style
-        if os.path.exists(source_qml):
-            shutil.copy(source_qml, qml_path)
-        else:
-            log_message("QML style file not found. Skipping QML copy.")
-
-    def _combine_rasters_to_vrt(self, rasters: list) -> None:
-        """
-        Combine all the rasters into a single VRT file. Overrides the
-        base class method to apply the custom QML style to the VRT.
-
-        Args:
-            rasters: The rasters to combine into a VRT.
-
-        Returns:
-            vrtpath (str): The file path to the VRT file.
-        """
-        vrt_filepath = super()._combine_rasters_to_vrt(rasters)
-        if not vrt_filepath:
-            return False
-
-        qml_filepath = os.path.join(
-            self.workflow_directory,
-            f"{self.output_filename}_combined.qml",
-        )
-        source_qml = resources_path("resources", "qml", f"mask.qml")
-        log_message(f"Copying QML from {source_qml} to {qml_filepath}")
-        shutil.copyfile(source_qml, qml_filepath)
-        log_message(f"Applying QML style to VRT: {qml_filepath}")
-        return vrt_filepath
 
     def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
         """

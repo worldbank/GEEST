@@ -231,7 +231,7 @@ def combine_rasters_to_vrt(
         "ADD_ALPHA": False,
         "ASSIGN_CRS": target_crs,
         "RESAMPLING": 0,
-        "SRC_NODATA": "255",
+        # "SRC_NODATA": "255",
         "EXTRA": "",
     }
 
