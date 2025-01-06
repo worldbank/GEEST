@@ -496,13 +496,9 @@ class TreePanel(QWidget):
             )
             menu.addAction(add_wee_by_population)
 
-            add_wee_by_population_aggregate = QAction("Add WEE Aggregate to Map")
+            add_wee_by_population_aggregate = QAction("Add WEE Aggregates to Map")
             add_wee_by_population_aggregate.triggered.connect(
-                lambda: self.add_to_map(
-                    item,
-                    key="subnational_aggregation",
-                    layer_name="Wee by Population Aggregate",
-                )
+                lambda: self.add_aggregates_to_map(item)
             )
             menu.addAction(add_wee_by_population_aggregate)
 
@@ -512,6 +508,7 @@ class TreePanel(QWidget):
                     item,
                     key="opportunities_mask_result_file",
                     layer_name="Opportunities Mask",
+                    group="WEE",
                 )
             )
             menu.addAction(add_job_opportunities_mask)
@@ -607,6 +604,33 @@ class TreePanel(QWidget):
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+    def add_aggregates_to_map(self, item):
+        """Add all the aggregate produts to the map"""
+        self.add_to_map(
+            item,
+            key="wee_score_subnational_aggregation",
+            layer_name="WEE Score Aggregate",
+            group="WEE",
+        )
+        self.add_to_map(
+            item,
+            key="wee_by_population_subnational_aggregation",
+            layer_name="WEE by Population Aggregate",
+            group="WEE",
+        )
+        self.add_to_map(
+            item,
+            key="opportunities_by_wee_score_subnational_aggregation",
+            layer_name="WEE Score by Opportunities Aggregate",
+            group="WEE",
+        )
+        self.add_to_map(
+            item,
+            key="opportunities_by_wee_score_by_population_subnational_aggregation",
+            layer_name="WEE Score by Population by Opportunities Aggregate",
+            group="WEE",
+        )
 
     def open_working_directory(self):
         """Open the working directory in the file explorer."""
@@ -910,7 +934,9 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )
 
-    def add_to_map(self, item, key="result_file", layer_name=None, qml_key=None):
+    def add_to_map(
+        self, item, key="result_file", layer_name=None, qml_key=None, group="Geest"
+    ):
         """Add the item to the map."""
         log_message(item.attributesAsMarkdown())
         layer_uri = item.attribute(f"{key}")
@@ -942,10 +968,10 @@ class TreePanel(QWidget):
 
             # Check if 'Geest' group exists, otherwise create it
             root = project.layerTreeRoot()
-            geest_group = root.findGroup("Geest")
+            geest_group = root.findGroup(group)
             if geest_group is None:
                 geest_group = root.insertGroup(
-                    0, "Geest"
+                    0, group
                 )  # Insert at the top of the layers panel
                 geest_group.setIsMutuallyExclusive(
                     True
@@ -1398,23 +1424,14 @@ class TreePanel(QWidget):
         # Subnational Aggregation fpr WEE Score x Population Unmasked
         # Subnational Aggregation for WEE Score x Population masked by Job Opportunities
 
-        aggregation_layer = item.attribute("aggregation_layer_source")
         subnational_processor = SubnationalAggregationProcessingTask(
+            item,
             study_area_gpkg_path=gpkg_path,
-            aggregation_areas_path=aggregation_layer,
             working_directory=self.working_directory,
             force_clear=False,
         )
         subnational_processor.run()
-        # Shamelessly hard coded for now, needs to move to the aggregation processor class
-        output = os.path.join(
-            self.working_directory,
-            "subnational_aggregation",
-            "subnational_aggregation.gpkg",
-        )
-        item.setAttribute(
-            "subnational_aggregation", f"{output}|layername=subnational_aggregation"
-        )
+
         log_message("############################################")
         log_message("END")
         log_message("############################################")
