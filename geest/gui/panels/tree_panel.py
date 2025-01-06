@@ -488,10 +488,21 @@ class TreePanel(QWidget):
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
             menu.addAction(add_to_map_action)
+            add_wee_score = QAction("Add WEE Score to Map")
+            add_wee_score.triggered.connect(
+                lambda: self.add_to_map(
+                    item, key="result_file", layer_name="WEE Score", group="WEE"
+                )
+            )
+            menu.addAction(add_wee_score)
+
             add_wee_by_population = QAction("Add WEE by Pop to Map")
             add_wee_by_population.triggered.connect(
                 lambda: self.add_to_map(
-                    item, key="wee_by_population", layer_name="WEE by Population"
+                    item,
+                    key="wee_by_population",
+                    layer_name="WEE by Population",
+                    group="WEE",
                 )
             )
             menu.addAction(add_wee_by_population)
@@ -501,6 +512,12 @@ class TreePanel(QWidget):
                 lambda: self.add_aggregates_to_map(item)
             )
             menu.addAction(add_wee_by_population_aggregate)
+
+            add_masked_scores = QAction("Add Masked Scores to Map")
+            add_masked_scores.triggered.connect(
+                lambda: self.add_masked_scoores_to_map(item)
+            )
+            menu.addAction(add_masked_scores)
 
             add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
             add_job_opportunities_mask.triggered.connect(
