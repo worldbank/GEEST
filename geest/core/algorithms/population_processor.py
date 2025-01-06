@@ -365,12 +365,11 @@ class PopulationRasterProcessingTask(QgsTask):
                 log_message(f"Reusing existing reclassified raster: {output_path}")
                 self.reclassified_rasters.append(output_path)
                 continue
-
             params = {
                 "INPUT_RASTER": input_path,
                 "RASTER_BAND": 1,
                 "TABLE": [  # ['0','52','1','52','95','2','95','140','3'],
-                    self.global_min,
+                    0,
                     self.global_min + range_third,
                     1,
                     self.global_min + range_third,
@@ -381,10 +380,10 @@ class PopulationRasterProcessingTask(QgsTask):
                     3,
                 ],
                 "RANGE_BOUNDARIES": 0,
-                "NODATA_FOR_MISSING": True,
-                "NO_DATA": 0,
-                # "DATA_TYPE": 5,  # Float32
-                "DATA_TYPE": 1,  # Byte
+                "NODATA_FOR_MISSING": False,
+                "NO_DATA": 255,
+                "DATA_TYPE": 5,  # Float32
+                # "DATA_TYPE": 1,  # Byte
                 "OUTPUT": output_path,
             }
 

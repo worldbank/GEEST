@@ -155,14 +155,14 @@ class OpportunitiesMaskProcessor(QgsTask):
             log_message("Loading source raster mask layer")
             # First try the one defined in the line edit
             self.raster_layer = QgsRasterLayer(
-                self.attributes.get("raster_mask_raster"), "Raster Mask", "ogr"
+                self.item.attribute("raster_mask_raster"), "Raster Mask", "ogr"
             )
             if not self.raster_layer.isValid():
                 # Then fall back to the QgsMapLayerComboBox source
                 self.raster_layer = QgsRasterLayer(
-                    self.attributes.get("raster_mask_layer_source"),
+                    self.item.attribute("raster_mask_layer_source"),
                     "Raster Mask",
-                    self.attributes.get("raster_mask_layer_provider_type"),
+                    self.item.attribute("raster_mask_layer_provider_type"),
                 )
             if not self.raster_layer.isValid():
                 log_message(

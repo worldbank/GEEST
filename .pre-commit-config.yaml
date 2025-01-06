@@ -15,4 +15,4 @@ repos:
         entry: bash -c '[[ -f core && ! -d core ]] && rm core || exit 0'
         language: system
         stages:
-          - commit
+          - pre-commit
