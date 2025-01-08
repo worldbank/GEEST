@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import traceback
 from logging import getLogger
 from typing import Union, Dict, List
 from qgis.PyQt.QtWidgets import (
@@ -1440,14 +1441,17 @@ class TreePanel(QWidget):
         # leaving us with 2 potential products:
         # Subnational Aggregation fpr WEE Score x Population Unmasked
         # Subnational Aggregation for WEE Score x Population masked by Job Opportunities
-
-        subnational_processor = SubnationalAggregationProcessingTask(
-            item,
-            study_area_gpkg_path=gpkg_path,
-            working_directory=self.working_directory,
-            force_clear=False,
-        )
-        subnational_processor.run()
+        try:
+            subnational_processor = SubnationalAggregationProcessingTask(
+                item,
+                study_area_gpkg_path=gpkg_path,
+                working_directory=self.working_directory,
+                force_clear=False,
+            )
+            subnational_processor.run()
+        except Exception as e:
+            log_message(f"Failed to run subnational aggregation: {e}")
+            log_message(traceback.format_exc())
 
         log_message("############################################")
         log_message("END")
