@@ -101,12 +101,7 @@ class WorkflowBase(QObject):
         self.raster_layer = None  # set in concrete class if needed
         self.target_crs = self.bboxes_layer.crs()
 
-        # We softcode the workflow name to be used in the output folder
-        # so that we can use the same tree item for different aggregation workflows
-        # and write their result files to different keys
-        # e.g. for analysis job opportunities mask workflow we can set the result key to "job_opportunities_mask"
         self.result_file_key = "result_file"
-        # We can also softcode the key to write the result status message to
         self.result_key = "result"
 
         # Will be populated by the workflow
