@@ -122,7 +122,10 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         else:
             self.measurement = "time"
 
-        self.subset_size = 5  # Process 5 features at a time - hardcoded for now
+        # How many features to pass with each ORS API call
+        # Managed in the settings panel
+        self.subset_size = setting(key="ors_request_size", default=30)
+
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
         # Create the masked API key for logging
