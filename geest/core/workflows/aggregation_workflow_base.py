@@ -40,33 +40,11 @@ class AggregationWorkflowBase(WorkflowBase):
         self.weight_key = None  # This should be set by the child class
         self.aggregation = True
 
-    def get_weights(self) -> list:
-        """
-        Retrieve default weights based on the number of layers.
-        :return: List of weights for the layers.
-        """
-        if len(self.guids) == 1:
-            return [1.0]
-
-        weights = []
-
-        for guid in self.guids:
-            item = self.item.getItemByGuid(guid)
-            # Only add the weight if there is an output layer
-            if item.attribute(self.result_file_key, None):
-                weight = item.attribute(self.weight_key, "")
-                try:
-                    weight = float(weight)
-                except (ValueError, TypeError):
-                    weight = 1.0  # Default fallback to 1.0 if weight is invalid
-                weights.append(weight)
-        return weights
-
     def aggregate(self, input_files: list, index: int) -> str:
         """
         Perform weighted raster aggregation on the found raster files.
 
-        :param input_files: List of raster file paths to aggregate.
+        :param input_files: dict of raster file paths to aggregate and their weights.
         :param index: The index of the area being processed.
 
         :return: Path to the aggregated raster file.
@@ -81,7 +59,7 @@ class AggregationWorkflowBase(WorkflowBase):
 
         # Load the layers
         raster_layers = [
-            QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files)
+            QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files.keys())
         ]
 
         # Ensure all raster layers are valid and print filenames of invalid layers
@@ -94,12 +72,15 @@ class AggregationWorkflowBase(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            return None
 
         # Create QgsRasterCalculatorEntries for each raster layer
         entries = []
         ref_names = []
+        expression = ""
+        sum_of_weights = 0
         for i, raster_layer in enumerate(raster_layers):
+            if raster_layer.source() in invalid_layers:
+                continue
             log_message(
                 f"Adding raster layer {i+1} to the raster calculator. {raster_layer.source()}",
                 tag="Geest",
@@ -113,23 +94,21 @@ class AggregationWorkflowBase(WorkflowBase):
             entry.bandNumber = 1
             entries.append(entry)
             ref_names.append(f"{ref_name}_{i+1}")
+            # input_files[raster_layer.source() returns the weight for the given layer
+            weight = input_files[raster_layer.source()]
+            if i == 0:
+                expression = f"({weight} * {ref_names[i]}@1)"
+            else:
+                expression += f"+ ({weight} * {ref_names[i]}@1)"
+            sum_of_weights += weight
 
-        # Assign default weights (you can modify this as needed)
-        weights = self.get_weights()
-
+        # I believe these are wrong and should be removed since the total weight
+        # of the aggregate layers should already be 1.0 - Tim
         # Number of raster layers
-        layer_count = len(input_files)
-
-        # Ensure that the sum of weights is calculated
-        sum_weights = sum(weights)
-
-        # Build the calculation expression for weighted average
-        expression = " + ".join(
-            [f"({weights[i]} * {ref_names[i]}@1)" for i in range(layer_count)]
-        )
+        # layer_count = len(input_files) - len(invalid_layers)
 
         # Wrap the weighted sum and divide by the sum of weights
-        expression = f"({expression}) / {layer_count}"
+        # expression = f"({expression}) / {layer_count}"
 
         aggregation_output = os.path.join(
             self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
@@ -169,7 +148,7 @@ class AggregationWorkflowBase(WorkflowBase):
 
         return aggregation_output
 
-    def get_raster_list(self, index) -> list:
+    def get_raster_dict(self, index) -> list:
         """
         Get the list of rasters from the attributes that will be aggregated.
 
@@ -179,9 +158,9 @@ class AggregationWorkflowBase(WorkflowBase):
             index (int): The index of the area being processed.
 
         Returns:
-            list: List of found raster file paths.
+            dict: dict of found raster file paths and their weights.
         """
-        raster_files = []
+        raster_files = {}
         if self.guids is None:
             raise ValueError("No GUIDs provided for aggregation")
 
@@ -223,9 +202,17 @@ class AggregationWorkflowBase(WorkflowBase):
             path = os.path.join(
                 self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
             )
-            if path:
-                raster_files.append(path)
-                log_message(f"Adding raster: {path}")
+            if os.path.exists(path):
+
+                weight = item.attribute(self.weight_key, "")
+                try:
+                    weight = float(weight)
+                except (ValueError, TypeError):
+                    weight = 1.0  # Default fallback to 1.0 if weight is invalid
+
+                raster_files[path] = weight
+
+                log_message(f"Adding raster: {path} with weight: {weight}")
 
         log_message(
             f"Total raster files found: {len(raster_files)}",
@@ -254,9 +241,9 @@ class AggregationWorkflowBase(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        raster_files = self.get_raster_list(index)
+        raster_files = self.get_raster_dict(index)
 
-        if not raster_files or not isinstance(raster_files, list):
+        if not raster_files or not isinstance(raster_files, dict):
             error = f"No valid raster files found in '{self.guids}'. Cannot proceed with aggregation."
             log_message(
                 error,

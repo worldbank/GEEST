@@ -173,48 +173,7 @@ padding: 4px;</string>
         <string notr="true"/>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <widget class="QLabel" name="wee_x_jobs_description">
-          <property name="font">
-           <font>
-            <family>Noto Sans [GOOG]</family>
-            <pointsize>8</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Optional: &lt;/span&gt;You can perform a targeted analysis of Women’s Enablement Environments with respect to the location of jobs. Input the location of existing or potential jobs either as a point file, in polygon format or raster format explore how the results relate to existing or planned job opportunities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0">
-         <layout class="QHBoxLayout" name="input_layout">
-          <item>
-           <widget class="QLabel" name="input_label">
-            <property name="text">
-             <string>Input</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="wee_radio">
-            <property name="text">
-             <string>WEE</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="wee_x_population_radio">
-            <property name="text">
-             <string>WEE x Population</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="2" column="0">
          <widget class="QGroupBox" name="mask_source_group">
           <property name="title">
            <string>Mask Source</string>
@@ -322,6 +281,22 @@ padding: 4px;</string>
             </layout>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="wee_x_jobs_description">
+          <property name="font">
+           <font>
+            <family>Noto Sans [GOOG]</family>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Optional: &lt;/span&gt;You can perform a targeted analysis of Women’s Enablement Environments with respect to the location of jobs. Input the location of existing or potential jobs either as a point file, in polygon format or raster format explore how the results relate to existing or planned job opportunities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
        </layout>

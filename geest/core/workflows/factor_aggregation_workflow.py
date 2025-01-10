@@ -37,5 +37,5 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         self.id = (
             self.item.attribute("id").lower().replace(" ", "_")
         )  # should not be needed any more
-        self.weight_key = "indicator_weighting"
+        self.weight_key = "factor_weighting"
         self.workflow_name = "factor_aggregation"

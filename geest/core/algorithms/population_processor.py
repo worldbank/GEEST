@@ -18,6 +18,7 @@ from qgis.core import (
 import processing
 from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
+from .utilities import geometry_to_memory_layer
 
 
 class PopulationRasterProcessingTask(QgsTask):
@@ -119,14 +120,7 @@ class PopulationRasterProcessingTask(QgsTask):
             if self.feedback and self.feedback.isCanceled():
                 return
             # create a temporary layer using the clip geometry
-            clip_layer = QgsVectorLayer("Polygon", "clip", "memory")
-            clip_layer.setCrs(self.target_crs)
-            clip_layer.startEditing()
-            feature = QgsFeature()
-            feature.setGeometry(clip_area)
-            clip_layer.addFeature(feature)
-            clip_layer.commitChanges()
-
+            clip_layer = geometry_to_memory_layer(clip_area, self.target_crs, "clip")
             layer_name = f"{index}.tif"
             phase1_output = os.path.join(
                 self.output_dir, f"clipped_phase1_{layer_name}"
@@ -178,15 +172,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 log_message(f"Reusing existing phase2 clipped raster: {phase2_output}")
                 self.clipped_rasters.append(phase2_output)
                 continue
-
-            clip_layer = QgsVectorLayer("Polygon", "clip", "memory")
-            clip_layer.setCrs(self.target_crs)
-            clip_layer.startEditing()
-            feature = QgsFeature()
-            feature.setGeometry(current_bbox)
-            clip_layer.addFeature(feature)
-            clip_layer.commitChanges()
-
+            clip_layer = geometry_to_memory_layer(current_bbox, self.target_crs, "clip")
             params = {
                 "INPUT": phase1_output,
                 "MASK": clip_layer,
@@ -202,7 +188,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 "Y_RESOLUTION": self.cell_size_m,
                 "MULTITHREADING": False,
                 "OPTIONS": "",
-                "DATA_TYPE": 0,
+                "DATA_TYPE": 5,  # Float32
                 "EXTRA": "",
                 "OUTPUT": phase2_output,
             }
