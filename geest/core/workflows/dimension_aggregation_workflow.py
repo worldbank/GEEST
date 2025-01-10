@@ -38,5 +38,5 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
         self.id = (
             self.item.attribute("id").lower().replace(" ", "_")
         )  # should not be needed any more
-        self.weight_key = "factor_weighting"
+        self.weight_key = "dimension_weighting"
         self.workflow_name = "dimension_aggregation"

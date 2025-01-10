@@ -40,7 +40,7 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
             .replace("'", "")
         )  # should not be needed any more
         self.layer_id = "wee"
-        self.weight_key = "dimension_weighting"
+        self.weight_key = "analysis_weighting"
         self.workflow_name = "analysis_aggregation"
         # Override the default working directory defined in the base class
         self.workflow_directory = os.path.join(self.working_directory, "wee_score")
