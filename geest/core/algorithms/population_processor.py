@@ -173,17 +173,18 @@ class PopulationRasterProcessingTask(QgsTask):
                 self.clipped_rasters.append(phase2_output)
                 continue
             clip_layer = geometry_to_memory_layer(current_bbox, self.target_crs, "clip")
+            bbox = current_bbox.boundingBox()
             params = {
                 "INPUT": phase1_output,
                 "MASK": clip_layer,
                 "SOURCE_CRS": None,
                 "TARGET_CRS": self.target_crs,
-                "TARGET_EXTENT": clip_area.boundingBox(),
+                "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
                 "NODATA": None,
                 "ALPHA_BAND": False,
                 "CROP_TO_CUTLINE": False,
                 "KEEP_RESOLUTION": False,
-                "SET_RESOLUTION": False,
+                "SET_RESOLUTION": True,
                 "X_RESOLUTION": self.cell_size_m,
                 "Y_RESOLUTION": self.cell_size_m,
                 "MULTITHREADING": False,
@@ -192,6 +193,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 "EXTRA": "",
                 "OUTPUT": phase2_output,
             }
+
             result = processing.run("gdal:cliprasterbymasklayer", params)
             del clip_layer
 
