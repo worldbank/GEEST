@@ -333,7 +333,7 @@ class TreePanel(QWidget):
                         f"Women's Economic Empowerment - {analysis_name}"
                     )
                 # analysis_item.setData(0, analysis_data.get("analysis_name", "Analysis"))
-                analysis_item.setData(0, "Score by Population and Job Distribution")
+                analysis_item.setData(0, "WEE Score")
                 settings = QSettings()
                 # This is the top level folder for work files
                 settings.setValue("last_working_directory", self.working_directory)
