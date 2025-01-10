@@ -148,7 +148,7 @@ class JsonTreeModel(QAbstractItemModel):
         role = "analysis"
         analysis_item = JsonTreeItem(
             [
-                "Score by Population and Job Distribution",
+                "WEE Score",
                 status,
                 weighting,
                 analysis_attributes,
