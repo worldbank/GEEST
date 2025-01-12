@@ -3,6 +3,7 @@ from qgis.PyQt.QtWidgets import (
     QDoubleSpinBox,
 )
 from qgis.PyQt.QtCore import QSettings
+from qgis.core import Qgis
 from .base_datasource_widget import BaseDataSourceWidget
 from geest.utilities import log_message
 
