@@ -124,7 +124,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         # How many features to pass with each ORS API call
         # Managed in the settings panel
-        self.subset_size = setting(key="ors_request_size", default=30)
+        self.subset_size = int(setting(key="ors_request_size", default=5))
 
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
@@ -202,23 +202,14 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
             subset_layer = self._create_subset_layer(subset_features, point_layer)
 
             # Make API calls using ORSClient for the subset
-            try:
-                json = self._fetch_isochrones(subset_layer)
-                layer = self._create_isochrone_layer(json)
-                self.temp_layers.append(layer)
-                log_message(
-                    f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
-
-            except Exception as e:
-                log_message(
-                    f"Error processing subset {i + 1} to {min(i + self.subset_size, total_features)}: {e}",
-                    tag="Geest",
-                    level=Qgis.Critical,
-                )
-                continue
+            json = self._fetch_isochrones(subset_layer)
+            layer = self._create_isochrone_layer(json)
+            self.temp_layers.append(layer)
+            log_message(
+                f"Processed subset {i + 1} to {min(i + self.subset_size, total_features)} of {total_features}",
+                tag="Geest",
+                level=Qgis.Info,
+            )
 
         # Merge all isochrone layers into one final output
         if self.temp_layers:
@@ -287,12 +278,19 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         return subset_layer
 
-    def _fetch_isochrones(self, layer):
+    def _fetch_isochrones(self, layer: QgsVectorLayer) -> dict:
         """
         Fetch isochrones for the given subset of features using ORSClient.
 
-        :param layer: A QgsVectorLayer containing the subset of features.
-        :return: A dict representing the JSON response from the ORS API.
+        Args:
+            layer (QgsVectorLayer): A QgsVectorLayer containing the subset of features.
+
+        Returns:
+            dict: A dict representing the JSON response from the ORS API.
+
+        Raises:
+            ValueError: If no valid coordinates are found in the layer.
+            Any exceptions raised by ORSClient.make_request will propagate.
         """
         # Prepare the coordinates for the API request
         coordinates = []
@@ -313,6 +311,7 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         }
 
         # Make the request to ORS API using ORSClient
+        # Any exceptions will be propogated
         json = self.ors_client.make_request(self.mode, params)
         return json
 
