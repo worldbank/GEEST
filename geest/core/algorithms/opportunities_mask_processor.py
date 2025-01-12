@@ -238,10 +238,12 @@ class OpportunitiesMaskProcessor(QgsTask):
             vrt_filepath = combine_rasters_to_vrt(
                 self.mask_list, self.target_crs, vrt_filepath, source_qml
             )
-
+            self.item.setAttribute(self.result_file_key, vrt_filepath)
+            self.item.setAttribute(self.result_key, "Opportunities Mask Created OK")
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())
+            self.item.setAttribute(self.result_key, str(e))
             return False
 
     def finished(self, result: bool) -> None:

@@ -87,6 +87,33 @@ class JsonTreeModel(QAbstractItemModel):
             "opportunities_mask_result_file", ""
         )
         opportunities_mask_result = json_data.get("opportunities_mask_result", "")
+        wee_by_opportunities_mask_result = json_data.get(
+            "wee_by_opportunities_mask_result", ""
+        )
+        wee_by_opportunities_mask_result_file = json_data.get(
+            "wee_by_opportunities_mask_result_file", ""
+        )
+        wee_by_population = json_data.get("wee_by_population", "")
+        wee_by_population_subnational_aggregation = json_data.get(
+            "wee_by_population_subnational_aggregation", ""
+        )
+        wee_score_subnational_aggregation = json_data.get(
+            "wee_score_subnational_aggregation", ""
+        )
+        opportunities_by_wee_score_by_population_subnational_aggregation = (
+            json_data.get(
+                "opportunities_by_wee_score_by_population_subnational_aggregation", ""
+            )
+        )
+        opportunities_by_wee_score_subnational_aggregation = json_data.get(
+            "opportunities_by_wee_score_subnational_aggregation", ""
+        )
+        wee_by_population_by_opportunities_mask_result_file = json_data.get(
+            "wee_by_population_by_opportunities_mask_result_file", ""
+        )
+        wee_by_population_by_opportunities_mask_result = json_data.get(
+            "wee_by_population_by_opportunities_mask_result", ""
+        )
         # Store special properties in the attributes dictionary
         analysis_attributes = {
             "analysis_name": analysis_name,
@@ -104,6 +131,15 @@ class JsonTreeModel(QAbstractItemModel):
             "buffer_distance_m": buffer_distance_m,
             "opportunities_mask_result_file": opportunities_mask_result_file,
             "opportunities_mask_result": opportunities_mask_result,
+            "wee_by_opportunities_mask_result": wee_by_opportunities_mask_result,
+            "wee_by_opportunities_mask_result_file": wee_by_opportunities_mask_result_file,
+            "wee_by_population": wee_by_population,
+            "wee_by_population_subnational_aggregation": wee_by_population_subnational_aggregation,
+            "wee_score_subnational_aggregation": wee_score_subnational_aggregation,
+            "opportunities_by_wee_score_by_population_subnational_aggregation": opportunities_by_wee_score_by_population_subnational_aggregation,
+            "opportunities_by_wee_score_subnational_aggregation": opportunities_by_wee_score_subnational_aggregation,
+            "wee_by_population_by_opportunities_mask_result_file": wee_by_population_by_opportunities_mask_result_file,
+            "wee_by_population_by_opportunities_mask_result": wee_by_population_by_opportunities_mask_result,
         }
         for prefix in [
             "aggregation",

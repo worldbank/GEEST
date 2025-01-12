@@ -10,6 +10,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 import processing
+from geest.core import JsonTreeItem
 from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
 
@@ -45,12 +46,14 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
 
     def __init__(
         self,
+        item: JsonTreeItem,
         study_area_gpkg_path: str,
         working_directory: str,
         target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         force_clear: bool = False,
     ):
         super().__init__("Opportunities WEE Score Processor", QgsTask.CanCancel)
+        self.item = item
         self.study_area_gpkg_path = study_area_gpkg_path
 
         self.output_dir = os.path.join(working_directory, "opportunities_by_wee_score")
@@ -77,7 +80,8 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             self.target_crs = layer.crs()
             del layer
         self.output_rasters: List[str] = []
-
+        self.result_file_key = "wee_by_opportunities_mask_result_file"
+        self.result_key = "wee_by_opportunities_mask_result"
         log_message("Initialized Opportunities Mask by WEE SCORE Processing Task")
 
     def run(self) -> bool:
@@ -86,11 +90,16 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         """
         try:
             self.calculate_score()
-            self.generate_vrt()
+            vrt_filepath = self.generate_vrt()
+            self.item.setAttribute(self.result_file_key, vrt_filepath)
+            self.item.setAttribute(
+                self.result_key, "WEE Score by Opportunities Mask Created OK"
+            )
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())
+            self.item.setAttribute(self.result_key, f"Task failed: {e}")
             return False
 
     def validate_rasters(
@@ -183,9 +192,12 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
 
             log_message(f"Masked WEE SCORE raster saved to {output_path}")
 
-    def generate_vrt(self) -> None:
+    def generate_vrt(self) -> str:
         """
         Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
+
+        Returns:
+            str: Path to the generated VRT file.
         """
         vrt_path = os.path.join(self.output_dir, "wee_by_opportunities_mask.vrt")
         qml_path = os.path.join(self.output_dir, "wee_by_opportunities_mask.qml")
@@ -207,6 +219,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             log_message(f"Copied QML style from {source_qml} to {qml_path}")
         else:
             log_message("QML style file not found. Skipping QML copy.")
+        return vrt_path
 
     def finished(self, result: bool) -> None:
         """
