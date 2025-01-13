@@ -1,4 +1,5 @@
 import os
+import traceback
 from qgis.core import (
     edit,
     Qgis,
@@ -312,7 +313,35 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         # Make the request to ORS API using ORSClient
         # Any exceptions will be propogated
-        json = self.ors_client.make_request(self.mode, params)
+        try:
+            json = self.ors_client.make_request(self.mode, params)
+        except Exception as e:
+            error_file = os.path.join(self.workflow_directory, "error.txt")
+            if os.path.exists(error_file):
+                os.remove(error_file)
+            # Write the traceback to error.txt in the workflow_directory
+            error_path = os.path.join(self.workflow_directory, "error.txt")
+            with open(error_path, "w") as f:
+                f.write(f"Failed to process {self.workflow_name}: {e}\n")
+                f.write(traceback.format_exc())
+
+            log_message(
+                f"Failed to fetch isochrones layer for {self.workflow_name}: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            log_message(
+                traceback.format_exc(),
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
+            self.attributes[self.result_file_key] = ""
+            self.attributes["error_file"] = error_path
+            self.attributes["error"] = (
+                f"Failed to generate isochrones for {self.workflow_name}: {e}"
+            )
+            return False
         return json
 
     def _create_isochrone_layer(self, isochrone_data):
