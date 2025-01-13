@@ -516,7 +516,7 @@ class TreePanel(QWidget):
 
             add_masked_scores = QAction("Add Masked Scores to Map")
             add_masked_scores.triggered.connect(
-                lambda: self.add_masked_scoores_to_map(item)
+                lambda: self.add_masked_scores_to_map(item)
             )
             menu.addAction(add_masked_scores)
 
@@ -622,6 +622,21 @@ class TreePanel(QWidget):
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+    def add_masked_scores_to_map(self, item):
+        """Add the masked scores to the map."""
+        self.add_to_map(
+            item,
+            key="wee_by_opportunities_mask_result_file",
+            layer_name="Masked WEE Score",
+            group="WEE",
+        )
+        self.add_to_map(
+            item,
+            key="wee_by_population_by_opportunities_mask_result_file",
+            layer_name="Masked WEE by Population Score",
+            group="WEE",
+        )
 
     def add_aggregates_to_map(self, item):
         """Add all the aggregate produts to the map"""
@@ -1425,6 +1440,7 @@ class TreePanel(QWidget):
         # WEE Score Masked by Job Opportunities
         # WEE Score x Population masked by Job Opportunities
         mask_processor = OpportunitiesByWeeScoreProcessingTask(
+            item=item,
             study_area_gpkg_path=gpkg_path,
             working_directory=self.working_directory,
             force_clear=False,
@@ -1432,6 +1448,7 @@ class TreePanel(QWidget):
         mask_processor.run()
 
         mask_processor = OpportunitiesByWeeScorePopulationProcessingTask(
+            item=item,
             study_area_gpkg_path=gpkg_path,
             working_directory=self.working_directory,
             force_clear=False,
@@ -1452,7 +1469,7 @@ class TreePanel(QWidget):
         except Exception as e:
             log_message(f"Failed to run subnational aggregation: {e}")
             log_message(traceback.format_exc())
-
+        self.save_json_to_working_directory()
         log_message("############################################")
         log_message("END")
         log_message("############################################")
