@@ -37,7 +37,7 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
             self.buffer_distance_layout.addWidget(self.buffer_distance_input)
             # I dont think this is defined in the spreadsheet yet.
             default_distance = self.attributes.get(
-                "{self.widget_key}_distance_default", 1000
+                "{self.widget_key}_distance_default", 5000
             )
             buffer_distance = self.attributes.get(
                 "{self.widget_key}_distance", default_distance
