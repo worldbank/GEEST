@@ -141,6 +141,9 @@ def check_and_reproject_layer(
 
     Note: Also updates self.features_layer to point to the reprojected layer.
     """
+    # check if the layer has a valid CRS
+    if not features_layer.crs().isValid():
+        raise QgsProcessingException("Layer has no CRS.")
 
     params = {
         "INPUT": features_layer,

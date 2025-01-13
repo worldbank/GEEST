@@ -215,10 +215,41 @@ class WorkflowBase(QObject):
         feedback = QgsProcessingFeedback()
         output_rasters = []
 
-        if self.features_layer and type(self.features_layer) == QgsVectorLayer:
-            self.features_layer = check_and_reproject_layer(
-                self.features_layer, self.target_crs
+        try:
+            if self.features_layer and type(self.features_layer) == QgsVectorLayer:
+                log_message(
+                    f"Features layer for {self.workflow_name} is {self.features_layer.source()}"
+                )
+                self.features_layer = check_and_reproject_layer(
+                    self.features_layer, self.target_crs
+                )
+        except Exception as e:
+            error_file = os.path.join(self.workflow_directory, "error.txt")
+            if os.path.exists(error_file):
+                os.remove(error_file)
+            # Write the traceback to error.txt in the workflow_directory
+            error_path = os.path.join(self.workflow_directory, "error.txt")
+            with open(error_path, "w") as f:
+                f.write(f"Failed to process {self.workflow_name}: {e}\n")
+                f.write(traceback.format_exc())
+
+            log_message(
+                f"Failed to reproject features layer for {self.workflow_name}: {e}",
+                tag="Geest",
+                level=Qgis.Critical,
             )
+            log_message(
+                traceback.format_exc(),
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
+            self.attributes[self.result_file_key] = ""
+            self.attributes["error_file"] = error_path
+            self.attributes["error"] = (
+                f"Failed to reproject features layer for {self.workflow_name}: {e}"
+            )
+            return False
 
         area_iterator = AreaIterator(self.gpkg_path)
         try:
