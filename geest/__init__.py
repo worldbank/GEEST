@@ -152,6 +152,9 @@ class GeestPlugin:
             )
             self.tests_action.triggered.connect(self.run_tests)
             self.iface.addToolBarIcon(self.tests_action)
+        else:
+            self.tests_action = None
+            self.debug_action = None
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
