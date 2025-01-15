@@ -150,6 +150,8 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
             if file_path:
                 # Update the line edit with the selected file path
+                # ⚠️ Be careful about changing the order of the following lines
+                #   It could cause the clear button to render in the incorrect place
                 self.layer_combo.setVisible(False)
                 self.shapefile_line_edit.setVisible(True)
                 self.shapefile_line_edit.setText(file_path)
