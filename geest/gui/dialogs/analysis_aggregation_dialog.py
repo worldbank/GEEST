@@ -634,8 +634,8 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
             if layer:
                 combo.setLayer(layer)
         if item.attribute(f"{prefix}_shapefile", False):
-            lineedit.setText(self.attributes[f"{prefix}_shapefile"])
+            lineedit.setText(self.item.attribute[f"{prefix}_shapefile"])
             lineedit.setVisible(True)
         if item.attribute(f"{prefix}_raster", False):
-            lineedit.setText(self.attributes[f"{prefix}_raster"])
+            lineedit.setText(self.item.attribute[f"{prefix}_raster"])
             lineedit.setVisible(True)
