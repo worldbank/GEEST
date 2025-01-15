@@ -5,7 +5,7 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
 )
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtCore import QSettings, QEvent, Qt
+from qgis.PyQt.QtCore import QSettings, Qt
 from qgis.gui import QgsMapLayerComboBox
 from .base_datasource_widget import BaseDataSourceWidget
 from qgis.core import QgsMapLayerProxyModel, QgsProject, Qgis
@@ -88,6 +88,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.shapefile_button = QToolButton()
             self.shapefile_button.setText("...")
             self.shapefile_button.clicked.connect(self.select_shapefile)
+
             if self.attributes.get(f"{self.widget_key}_shapefile", False):
                 self.shapefile_line_edit.setText(
                     self.attributes[f"{self.widget_key}_shapefile"]
