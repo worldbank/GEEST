@@ -709,7 +709,10 @@ class TreePanel(QWidget):
         dialog = QDialog()
         dialog.setWindowState(Qt.WindowMaximized)
         dialog.setWindowTitle("Attributes")
-        dialog.resize(600, 400)
+        dialog.resize(
+            int(QApplication.desktop().screenGeometry().width() * 0.9),
+            int(QApplication.desktop().screenGeometry().height() * 0.9),
+        )
 
         layout = QVBoxLayout()
         dialog.setLayout(layout)
@@ -1077,6 +1080,10 @@ class TreePanel(QWidget):
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
         dialog = AnalysisAggregationDialog(analysis_item, parent=self)
+        dialog.resize(
+            int(QApplication.desktop().screenGeometry().width() * 0.9),
+            int(QApplication.desktop().screenGeometry().height() * 0.9),
+        )
         if dialog.exec_():  # If OK was clicked
             dialog.saveWeightingsToModel()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
@@ -1090,6 +1097,10 @@ class TreePanel(QWidget):
         dialog = DimensionAggregationDialog(
             dimension_name, dimension_data, dimension_item, parent=self
         )
+        dialog.resize(
+            int(QApplication.desktop().screenGeometry().width() * 0.9),
+            int(QApplication.desktop().screenGeometry().height() * 0.9),
+        )
         if dialog.exec_():  # If OK was clicked
             dialog.saveWeightingsToModel()
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
@@ -1102,6 +1113,10 @@ class TreePanel(QWidget):
             factor_data = {}
         dialog = FactorAggregationDialog(
             factor_name, factor_data, factor_item, parent=self
+        )
+        dialog.resize(
+            int(QApplication.desktop().screenGeometry().width() * 0.9),
+            int(QApplication.desktop().screenGeometry().height() * 0.9),
         )
         if dialog.exec_():  # If OK was clicked
             dialog.save_weightings_to_model()
