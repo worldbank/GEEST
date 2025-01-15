@@ -203,6 +203,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
         self.shapefile_line_edit.clear()
         self.shapefile_line_edit.setVisible(False)
         self.layer_combo.setVisible(True)
+        self.layer_combo.setFocus()
         self.update_attributes()
 
     def _populate_field_combo(self, shapefile_path: str) -> None:

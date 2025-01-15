@@ -184,6 +184,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         self.raster_line_edit.clear()
         self.raster_line_edit.setVisible(False)
         self.raster_layer_combo.setVisible(True)
+        self.raster_layer_combo.setFocus()
         self.update_attributes()
 
     def update_attributes(self):

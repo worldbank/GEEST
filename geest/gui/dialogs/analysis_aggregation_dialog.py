@@ -184,12 +184,19 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         self.buffer_distance_m.setValue(int(buffer_distance))
 
         # Restore the dialog geometry
+        self.restore_dialog_geometry()
 
+    def restore_dialog_geometry(self):
+        """
+        Restore the dialog geometry from QSettings.
+        """
         settings = QSettings()
         geometry = settings.value("AnalysisAggregationDialog/geometry")
         if geometry:
-            self.restoreGeometry(geometry)
+            log_message("Restoring dialog geometry")
+            self.resize(geometry.width(), geometry.height())
         else:
+            log_message("No saved geometry found, resizing dialog")
             # Resize the dialog to be almost as large as the main window
             main_window = (
                 self.parent().window()
@@ -197,6 +204,14 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
                 else self.screen().availableGeometry()
             )
             self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
+
+    def save_geometry(self):
+        """
+        Save the dialog geometry to QSettings.
+        """
+        log_message("Saving dialog geometry")
+        settings = QSettings()
+        settings.setValue("AnalysisAggregationDialog/geometry", self.geometry())
 
     def setup_table(self):
         """
@@ -589,9 +604,7 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
 
         self.tree_item.setAttribute("buffer_distance_m", self.buffer_distance_m.value())
         # Save the dialog geometry
-        settings = QSettings()
-        settings.setValue("AnalysisAggregationDialog/geometry", self.saveGeometry())
-
+        self.save_geometry()
         self.accept()
 
     def save_combo_to_model(

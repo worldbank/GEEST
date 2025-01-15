@@ -133,7 +133,8 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         )
         sz = self.clear_button.sizeHint()
         self.clear_button.move(
-            self.shapefile_line_edit.width() - sz.width() - frame_width - 5, 6
+            self.shapefile_line_edit.width() - sz.width() - frame_width - 5,
+            self.shapefile_line_edit.height() - sz.height() - frame_width,
         )
 
     def select_shapefile(self):
@@ -171,6 +172,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         self.shapefile_line_edit.clear()
         self.shapefile_line_edit.setVisible(False)
         self.layer_combo.setVisible(True)
+        self.layer_combo.setFocus()
         self.update_attributes()
 
     def update_attributes(self):
