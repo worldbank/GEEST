@@ -4,15 +4,17 @@ from qgis.PyQt.QtWidgets import (
     QToolButton,
     QFileDialog,
 )
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import QSettings, Qt
 from qgis.gui import QgsMapLayerComboBox
 from qgis.core import (
     QgsMapLayerProxyModel,
     QgsProject,
     Qgis,
 )
-from qgis.PyQt.QtCore import QSettings
+
 from .base_datasource_widget import BaseDataSourceWidget
-from geest.utilities import log_message
+from geest.utilities import log_message, resources_path
 
 
 class RasterDataSourceWidget(BaseDataSourceWidget):
@@ -88,15 +90,64 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         # Input for Raster Layer
         self.raster_line_edit = QLineEdit()
         self.raster_line_edit.setVisible(False)  # Hide initially
+
+        # Add clear button inside the line edit
+        self.clear_button = QToolButton(self.raster_line_edit)
+        clear_icon = QIcon(resources_path("resources", "icons", "clear.svg"))
+        self.clear_button.setIcon(clear_icon)
+        self.clear_button.setToolTip("Clear")
+        self.clear_button.setCursor(Qt.ArrowCursor)
+        self.clear_button.setStyleSheet("border: 0px; padding: 0px;")
+        self.clear_button.clicked.connect(self.clear_raster)
+        self.clear_button.setVisible(False)
+
+        self.raster_line_edit.textChanged.connect(
+            lambda text: self.clear_button.setVisible(bool(text))
+        )
+        self.raster_line_edit.textChanged.connect(self.resize_clear_button)
+
+        # File chooser button for Raster Layer
         self.raster_button = QToolButton()
         self.raster_button.setText("...")
         self.raster_button.clicked.connect(self.select_raster)
+
         if self.attributes.get(f"{self.widget_key}_raster", False):
             self.raster_line_edit.setText(self.attributes[f"{self.widget_key}_raster"])
+            self.raster_line_edit.setVisible(True)
+            self.raster_layer_combo.setVisible(False)
+        else:
+            self.raster_layer_combo.setVisible(True)
         self.layout.addWidget(self.raster_line_edit)
+        self.resize_clear_button()
+
         self.layout.addWidget(self.raster_button)
         self.raster_button.setToolTip(
             "Raster chosen from file system will have preference"
+        )
+
+    def resizeEvent(self, event):
+        """
+        Handle resize events for the parent container.
+
+        Args:
+            event: The resize event.
+        """
+        super().resizeEvent(event)
+        self.resize_clear_button()
+
+    def resize_clear_button(self):
+        """Reposition the clear button when the line edit is resized."""
+        log_message("Resizing clear button")
+        # Position the clear button inside the line edit
+        frame_width = self.raster_line_edit.style().pixelMetric(
+            self.raster_line_edit.style().PM_DefaultFrameWidth
+        )
+        self.raster_line_edit.setStyleSheet(
+            f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"
+        )
+        sz = self.clear_button.sizeHint()
+        self.clear_button.move(
+            self.raster_line_edit.width() - sz.width() - frame_width - 5, 6
         )
 
     def select_raster(self) -> None:
@@ -110,14 +161,30 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
                 self, "Select Raster Layer", last_dir, "Rasters (*.vrt *.tif *.asc)"
             )
             if file_path:
-                self.raster_line_edit.setText(file_path)
+                # Update the line edit with the selected file path
+                # ⚠️ Be careful about changing the order of the following lines
+                #   It could cause the clear button to render in the incorrect place
+                self.raster_layer_combo.setVisible(False)
                 self.raster_line_edit.setVisible(True)
+                self.raster_line_edit.setText(file_path)
+                # Trigger resize event explicitly
+                self.resizeEvent(None)
+                # Save the directory of the selected file to QSettings
                 self.settings.setValue(
                     "Geest/lastRasterDir", os.path.dirname(file_path)
                 )
 
         except Exception as e:
             log_message(f"Error selecting raster: {e}", level=Qgis.Critical)
+
+    def clear_raster(self):
+        """
+        Clears the raster line edit and hides it along with the clear button.
+        """
+        self.raster_line_edit.clear()
+        self.raster_line_edit.setVisible(False)
+        self.raster_layer_combo.setVisible(True)
+        self.update_attributes()
 
     def update_attributes(self):
         """
@@ -131,6 +198,8 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
 
         # Collect data for the raster layer
         raster_layer = self.raster_layer_combo.currentLayer()
+        if not raster_layer:
+            self.attributes[f"{self.widget_key}_layer"] = None
         if raster_layer:
             self.attributes[f"{self.widget_key}_layer_name"] = raster_layer.name()
             self.attributes[f"{self.widget_key}_layer_source"] = raster_layer.source()
