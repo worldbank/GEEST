@@ -4,7 +4,10 @@ from qgis.PyQt.QtWidgets import (
     QToolButton,
     QFileDialog,
 )
-from qgis.gui import QgsMapLayerComboBox
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import QSettings, Qt
+
+from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
     QgsMapLayerProxyModel,
     QgsProject,
@@ -13,10 +16,9 @@ from qgis.core import (
     QgsWkbTypes,
     Qgis,
 )
-from qgis.gui import QgsFieldComboBox
-from qgis.PyQt.QtCore import QSettings
-from geest.utilities import log_message
+
 from .base_datasource_widget import BaseDataSourceWidget
+from geest.utilities import log_message, resources_path
 
 
 class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
@@ -70,6 +72,42 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
                 if layer:
                     self.layer_combo.setLayer(layer)
 
+            # For when the user prefers to choose a path to a shapefile
+            self.shapefile_line_edit = QLineEdit()
+            self.shapefile_line_edit.setVisible(False)  # Hide initially
+
+            # Add clear button inside the line edit
+            self.clear_button = QToolButton(self.shapefile_line_edit)
+            clear_icon = QIcon(resources_path("resources", "icons", "clear.svg"))
+            self.clear_button.setIcon(clear_icon)
+            self.clear_button.setToolTip("Clear")
+            self.clear_button.setCursor(Qt.ArrowCursor)
+            self.clear_button.setStyleSheet("border: 0px; padding: 0px;")
+            self.clear_button.clicked.connect(self.clear_shapefile)
+            self.clear_button.setVisible(False)
+
+            self.shapefile_line_edit.textChanged.connect(
+                lambda text: self.clear_button.setVisible(bool(text))
+            )
+            self.shapefile_line_edit.textChanged.connect(self.resize_clear_button)
+
+            # Add a button to select a shapefile
+            self.shapefile_button = QToolButton()
+            self.shapefile_button.setText("...")
+            self.shapefile_button.clicked.connect(self.select_shapefile)
+            if self.attributes.get(f"{self.widget_key}_shapefile", False):
+                self.shapefile_line_edit.setText(
+                    self.attributes[f"{self.widget_key}_shapefile"]
+                )
+                self.shapefile_line_edit.setVisible(True)
+                self.layer_combo.setVisible(False)
+            else:
+                self.layer_combo.setVisible(True)
+
+            self.layout.addWidget(self.shapefile_line_edit)
+            self.resize_clear_button()
+            self.layout.addWidget(self.shapefile_button)
+
             # Adds a dropdown to select a specific field from the selected shapefile.
             field_type = QgsFieldProxyModel.Numeric
             if self.attributes.get("id", None) == "Street_Lights":
@@ -81,21 +119,9 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.field_selection_combo.setEnabled(
                 False
             )  # Disable initially until a layer is selected
+            # self.field_selection_combo.setMinimumWidth(150)  # Set a reasonable minimum width
+            # self.field_selection_combo.setSizeAdjustPolicy(QgsFieldComboBox.AdjustToContents)
             self.layout.addWidget(self.field_selection_combo)
-
-            self.shapefile_line_edit = QLineEdit()
-            self.shapefile_line_edit.setVisible(False)  # Hide initially
-
-            self.shapefile_button = QToolButton()
-            self.shapefile_button.setText("...")
-            self.shapefile_button.clicked.connect(self.select_shapefile)
-            if self.attributes.get(f"{self.widget_key}_shapefile", False):
-                self.shapefile_line_edit.setText(
-                    self.attributes[f"{self.widget_key}_shapefile"]
-                )
-                self.shapefile_line_edit.setVisible(True)
-            self.layout.addWidget(self.shapefile_line_edit)
-            self.layout.addWidget(self.shapefile_button)
 
             # Emit the data_changed signal when any widget is changed
             self.layer_combo.currentIndexChanged.connect(self.update_attributes)
@@ -117,6 +143,31 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
 
             log_message(traceback.format_exc(), level=Qgis.Critical)
 
+    def resizeEvent(self, event):
+        """
+        Handle resize events for the parent container.
+
+        Args:
+            event: The resize event.
+        """
+        super().resizeEvent(event)
+        self.resize_clear_button()
+
+    def resize_clear_button(self):
+        """Reposition the clear button when the line edit is resized."""
+        log_message("Resizing clear button")
+        # Position the clear button inside the line edit
+        frame_width = self.shapefile_line_edit.style().pixelMetric(
+            self.shapefile_line_edit.style().PM_DefaultFrameWidth
+        )
+        self.shapefile_line_edit.setStyleSheet(
+            f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"
+        )
+        sz = self.clear_button.sizeHint()
+        self.clear_button.move(
+            self.shapefile_line_edit.width() - sz.width() - frame_width - 5, 6
+        )
+
     def select_shapefile(self):
         """
         Opens a file dialog to select a shapefile and stores the last directory in QSettings.
@@ -132,14 +183,27 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
 
             if file_path:
                 # Update the line edit with the selected file path
-                self.shapefile_line_edit.setText(file_path)
+                # ⚠️ Be careful about changing the order of the following lines
+                #   It could cause the clear button to render in the incorrect place
+                self.layer_combo.setVisible(False)
                 self.shapefile_line_edit.setVisible(True)
-                self.layer_combo.setCurrentIndex(-1)  # Clear the layer combo selection
+                self.shapefile_line_edit.setText(file_path)
+                # Trigger resize event explicitly
+                self.resizeEvent(None)
                 # Save the directory of the selected file to QSettings
                 settings.setValue("Geest/lastShapefileDir", os.path.dirname(file_path))
 
         except Exception as e:
             log_message(f"Error selecting shapefile: {e}", level=Qgis.Critical)
+
+    def clear_shapefile(self):
+        """
+        Clears the shapefile line edit and hides it along with the clear button.
+        """
+        self.shapefile_line_edit.clear()
+        self.shapefile_line_edit.setVisible(False)
+        self.layer_combo.setVisible(True)
+        self.update_attributes()
 
     def _populate_field_combo(self, shapefile_path: str) -> None:
         """
