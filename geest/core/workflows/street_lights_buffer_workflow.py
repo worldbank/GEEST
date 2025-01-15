@@ -42,7 +42,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_street_lights"
 
-        layer_path = self.attributes.get("use_street_lights_shapefile", None)
+        layer_path = self.attributes.get("street_lights_shapefile", None)
 
         if not layer_path:
             log_message(
@@ -50,22 +50,25 @@ class StreetLightsBufferWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("use_street_lights_layer_source", None)
+            layer_path = self.attributes.get("street_lights_layer_source", None)
             if not layer_path:
                 log_message(
-                    "No points layer found in use_street_lights_layer_source.",
+                    "No points layer found in street_lights_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-                error = f"Streetlights point layer is not set correctly: {self.csv_use_street_lights_layer_sourcefile}"
+                error = f"Streetlights point layer is not set correctly: Shapefile: {self.street_lights_shapefile} "
+                error += f"Shapefile: {self.street_lights_shapefile} "
+                error += f"Layer Source: {self.street_lights_layer_source} "
                 self.attributes["error"] = error
                 raise Exception(error)
 
         self.features_layer = QgsVectorLayer(layer_path, "points", "ogr")
         if not self.features_layer.isValid():
-            log_message("street_lights_point_layer not valid", level=Qgis.Critical)
+            log_message("street lights source file not valid", level=Qgis.Critical)
             log_message(f"Layer Source: {layer_path}", level=Qgis.Critical)
-            error = f"Streetlights point layer is not valid: {layer_path}"
+            error += f"Shapefile: {self.street_lights_shapefile} "
+            error += f"Layer Source: {self.street_lights_layer_source} "
             self.attributes["error"] = error
             raise Exception(error)
 
