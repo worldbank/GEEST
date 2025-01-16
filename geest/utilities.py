@@ -196,3 +196,38 @@ def is_qgis_dark_theme_active() -> bool:
 
     # Default to False if none of the conditions are met
     return False
+
+
+def linear_interpolation(
+    value: float,
+    output_min: float,
+    output_max: float,
+    domain_min: float,
+    domain_max: float,
+) -> float:
+    """
+    Scales a value using linear interpolation.
+
+    Parameters:
+        value (float): The value to scale.
+        output_min (float): The minimum of the output range.
+        output_max (float): The maximum of the output range.
+        domain_min (float): The minimum of the input range.
+        domain_max (float): The maximum of the input range.
+
+    Returns:
+        float: The scaled value.
+    """
+    if domain_min == domain_max:
+        raise ValueError("domain_min and domain_max cannot be the same value.")
+    if value > domain_max:
+        return output_max
+    # Compute the scaled value
+    scale = (value - domain_min) / (domain_max - domain_min)
+    result = output_min + scale * (output_max - output_min)
+    # Clamp the value to the output range
+    if result < output_min:
+        return output_min
+    if result > output_max:
+        return output_max
+    return result

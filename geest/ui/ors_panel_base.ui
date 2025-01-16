@@ -139,10 +139,10 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;This plugin makes use of the &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Open Route Service&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; (ORS) platform for elements of the spatial analysis workflows. In order to use ORS, you need to obtain an &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;API key&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;. There is no charge to get your key. Click on &lt;/span&gt;&lt;a href=&quot;https://openrouteservice.org/dev/#/signup&quot;&gt;&lt;span style=&quot; font-size:16pt; text-decoration: underline; color:#0000ff;&quot;&gt;this link&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; for the API Key sign up page. Once you have your API key, &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;paste&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; it into the box below.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>This plugin makes use of the Open Route Service (ORS) platform for elements of the spatial analysis workflows. In order to use ORS, you need to obtain an API key. There is no charge to get your key. Click on [this link](https://openrouteservice.org/dev/#/signup) for the API Key sign up page. Once you have your API key, paste it into the box below.</string>
          </property>
          <property name="textFormat">
-          <enum>Qt::RichText</enum>
+          <enum>Qt::MarkdownText</enum>
          </property>
          <property name="alignment">
           <set>Qt::AlignJustify|Qt::AlignTop</set>

@@ -4,6 +4,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtGui import QPixmap, QPainter, QColor, QFont
 from qgis.PyQt.QtCore import Qt
+from geest.utilities import log_message
 
 
 class CustomBannerLabel(QLabel):
@@ -22,8 +23,15 @@ class CustomBannerLabel(QLabel):
 
         # Draw the title text
         painter.setPen(QColor("white"))
-        painter.setFont(QFont("Arial", 16))
         text_rect = self.rect().adjusted(10, 0, -10, -5)
+        # Scale the font size to fit the text in the available space
+        font_size = 16
+        threshold = 430
+        log_message(f"Banner Label Width: {self.rect().width()}")
+        if self.rect().width() < threshold:
+            font_size = int(14 * (self.rect().width() / threshold))
+        log_message(f"Font Size: {font_size}")
+        painter.setFont(QFont("Arial", font_size))
         painter.drawText(text_rect, Qt.AlignCenter | Qt.AlignBottom, self.text)
 
         painter.end()
