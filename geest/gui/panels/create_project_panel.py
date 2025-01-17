@@ -18,9 +18,9 @@ from qgis.core import (
 )
 
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
-from qgis.PyQt.QtGui import QPixmap
-from geest.core.tasks import StudyAreaProcessingTask, OrsCheckerTask
-from geest.utilities import get_ui_class, resources_path
+from qgis.PyQt.QtGui import QPixmap, QFont
+from geest.core.tasks import StudyAreaProcessingTask
+from geest.utilities import get_ui_class, resources_path, linear_interpolation
 from geest.core import WorkflowQueueManager
 from geest.utilities import log_message
 from geest.gui.widgets import CustomBannerLabel
@@ -234,3 +234,28 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         # Save back to QSettings
         self.settings.setValue("recent_projects", recent_projects)
+
+    def resizeEvent(self, event):
+        self.set_font_size()
+        super().resizeEvent(event)
+
+    def set_font_size(self):
+        # Scale the font size to fit the text in the available space
+        font_size = 16
+        threshold = 300
+        log_message(f"Description Label Width: {self.description.rect().width()}")
+        # scale the font size linearly from 16 pt to 8 ps as the width of the label decreases
+        # interpolate 16, 8, 300, 200
+        font_size = int(
+            linear_interpolation(self.description.rect().width(), 8, 16, 200, 400)
+        )
+
+        log_message(f"Description Label Font Size: {font_size}")
+        self.description.setFont(QFont("Arial", font_size))
+        self.description2.setFont(QFont("Arial", font_size))
+        self.description3.setFont(QFont("Arial", font_size))
+        self.create_project_directory_button.setFont(QFont("Arial", font_size))
+        self.load_boundary_button.setFont(QFont("Arial", font_size))
+        self.cell_size_spinbox.setFont(QFont("Arial", font_size))
+        self.layer_combo.setFont(QFont("Arial", font_size))
+        self.field_combo.setFont(QFont("Arial", font_size))

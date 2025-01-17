@@ -154,6 +154,9 @@
    </item>
    <item row="3" column="0">
     <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -162,11 +165,23 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>526</width>
-        <height>670</height>
+        <width>542</width>
+        <height>629</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="description">
          <property name="sizePolicy">
@@ -176,34 +191,20 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;This plugin is built with support from the &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Canada Clean Energy and Forest Climate Facility&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; (CCEFCFy), the &lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Geospatial Operational Support Team&lt;/span&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt; (GOST, DECSC) for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector. &lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;This project is open source, you can download the code at &lt;/span&gt;&lt;a href=&quot;https://github.com/worldbank/GEEST&quot;&gt;&lt;span style=&quot; font-size:16pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/worldbank/GEEST.&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>This plugin is built with support from the **Canada Clean Energy and Forest Climate Facility (CCEFCFy)**, the **Geospatial Operational Support Team (GOST, DECSC)** for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector. 
+
+This project is open source, you can download the code at [https://github.com/worldbank/GEEST](https://github.com/worldbank/GEEST).</string>
          </property>
          <property name="textFormat">
-          <enum>Qt::RichText</enum>
+          <enum>Qt::MarkdownText</enum>
          </property>
          <property name="alignment">
-          <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+          <set>Qt::AlignJustify|Qt::AlignTop</set>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
          </property>
         </widget>
-       </item>
-       <item row="1" column="0">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>318</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

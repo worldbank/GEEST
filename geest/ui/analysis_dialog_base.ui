@@ -40,12 +40,12 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1072</width>
-        <height>671</height>
+        <width>1066</width>
+        <height>673</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+       <item row="0" column="0" colspan="2">
         <layout class="QGridLayout" name="wee_layout">
          <item row="0" column="0">
           <widget class="QLabel" name="wee_title">
@@ -98,7 +98,7 @@ padding: 4px;</string>
          </item>
         </layout>
        </item>
-       <item row="1" column="0">
+       <item row="1" column="0" colspan="2">
         <widget class="QLabel" name="aggregation_description">
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation boundaries (optional):&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; You can generate insights from the WEE analysis by providing subnational boundaries. For each boundary, we will calculate the majority WEE score, majority WEE by Population score (if population data is set below) and majority WEE by Job Distribution score (if configured below).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -108,7 +108,7 @@ padding: 4px;</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="2" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QgsMapLayerComboBox" name="aggregation_combo"/>
@@ -125,7 +125,7 @@ padding: 4px;</string>
          </item>
         </layout>
        </item>
-       <item row="3" column="0">
+       <item row="3" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QLabel" name="wee_x_population_title">
@@ -183,7 +183,7 @@ padding: 4px;</string>
          </item>
         </layout>
        </item>
-       <item row="4" column="0">
+       <item row="4" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QLabel" name="wee_x_population_description">
@@ -223,223 +223,174 @@ padding: 4px;</string>
         </layout>
        </item>
        <item row="5" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,1">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <layout class="QHBoxLayout" name="population_layout">
-           <item>
-            <widget class="QgsMapLayerComboBox" name="population_combo">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="population_lineedit"/>
-           </item>
-           <item>
-            <widget class="QToolButton" name="population_toolbutton">
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QgsMapLayerComboBox" name="population_combo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="input_layout">
-           <item>
-            <widget class="QLabel" name="input_label">
-             <property name="text">
-              <string>Input</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="wee_radio">
-             <property name="text">
-              <string>WEE</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="wee_x_population_radio">
-             <property name="text">
-              <string>WEE x Population</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-       <item row="6" column="0">
-        <layout class="QHBoxLayout" name="mask_layout" stretch="1,1">
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
+          <widget class="QLineEdit" name="population_lineedit"/>
          </item>
          <item>
-          <widget class="QGroupBox" name="mask_source_group">
-           <property name="title">
-            <string>Mask Source</string>
+          <widget class="QToolButton" name="population_toolbutton">
+           <property name="text">
+            <string>...</string>
            </property>
-           <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="0">
-             <widget class="QRadioButton" name="point_radio_button">
-              <property name="text">
-               <string>Buffer Point Layer</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <layout class="QHBoxLayout" name="point_layout">
-              <item>
-               <widget class="QgsMapLayerComboBox" name="point_combo"/>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="point_lineedit"/>
-              </item>
-              <item>
-               <widget class="QToolButton" name="point_toolbutton">
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="buffer_distance_m">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="suffix">
-                 <string>m</string>
-                </property>
-                <property name="maximum">
-                 <number>100000</number>
-                </property>
-                <property name="singleStep">
-                 <number>100</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="0">
-             <widget class="QRadioButton" name="polygon_radio_button">
-              <property name="text">
-               <string>Polygon Layer</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <layout class="QHBoxLayout" name="polygon_layout">
-              <item>
-               <widget class="QgsMapLayerComboBox" name="polygon_combo"/>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="polygon_lineedit"/>
-              </item>
-              <item>
-               <widget class="QToolButton" name="polygon_toolbutton">
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>100</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item row="4" column="0">
-             <widget class="QRadioButton" name="raster_radio_button">
-              <property name="text">
-               <string>Raster Layer</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <layout class="QHBoxLayout" name="raster_layout">
-              <item>
-               <widget class="QgsMapLayerComboBox" name="raster_combo"/>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="raster_lineedit"/>
-              </item>
-              <item>
-               <widget class="QToolButton" name="raster_toolbutton">
-                <property name="text">
-                 <string>...</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="raster_spacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>100</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-           </layout>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="7" column="0">
+       <item row="5" column="1">
+        <widget class="QGroupBox" name="mask_source_group">
+         <property name="title">
+          <string>Mask Source</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="point_radio_button">
+            <property name="text">
+             <string>Buffer Point Layer</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="point_layout">
+            <item>
+             <widget class="QgsMapLayerComboBox" name="point_combo"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="point_lineedit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="point_toolbutton">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="buffer_distance_m">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="suffix">
+               <string>m</string>
+              </property>
+              <property name="maximum">
+               <number>100000</number>
+              </property>
+              <property name="singleStep">
+               <number>100</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="polygon_radio_button">
+            <property name="text">
+             <string>Polygon Layer</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <layout class="QHBoxLayout" name="polygon_layout">
+            <item>
+             <widget class="QgsMapLayerComboBox" name="polygon_combo"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="polygon_lineedit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="polygon_toolbutton">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>100</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <widget class="QRadioButton" name="raster_radio_button">
+            <property name="text">
+             <string>Raster Layer</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <layout class="QHBoxLayout" name="raster_layout">
+            <item>
+             <widget class="QgsMapLayerComboBox" name="raster_combo"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="raster_lineedit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="raster_toolbutton">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="raster_spacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>100</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
         <widget class="QWidget" name="help_widget" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
