@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>604</width>
-    <height>884</height>
+    <height>938</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -119,6 +119,9 @@
      </property>
      <property name="text">
       <string/>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -239,8 +242,11 @@
    </item>
    <item row="11" column="0">
     <widget class="QCheckBox" name="use_boundary_crs">
+     <property name="toolTip">
+      <string>Disabled if map units are in degrees</string>
+     </property>
      <property name="text">
-      <string>Use CRS of your boundary layer (disabled if map units are in degrees)</string>
+      <string>Use boundary layer CRS</string>
      </property>
     </widget>
    </item>
@@ -256,8 +262,14 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
-         <height>0</height>
+         <width>80</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>40</height>
         </size>
        </property>
        <property name="font">
@@ -293,8 +305,14 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
-         <height>0</height>
+         <width>80</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>40</height>
         </size>
        </property>
        <property name="font">

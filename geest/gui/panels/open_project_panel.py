@@ -165,14 +165,10 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
 
     def set_font_size(self):
         # Scale the font size to fit the text in the available space
-        font_size = 16
-        threshold = 300
         log_message(f"Label Width: {self.label.rect().width()}")
-        # scale the font size linearly from 16 pt to 8 ps as the width of the label decreases
-        # interpolate 16, 8, 300, 200
+        # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
         font_size = int(
-            linear_interpolation(self.label.rect().width(), 8, 16, 200, 400)
+            linear_interpolation(self.label.rect().width(), 12, 16, 400, 600)
         )
-
         log_message(f"Label Font Size: {font_size}")
         self.label.setFont(QFont("Arial", font_size))
