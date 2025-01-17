@@ -6,8 +6,8 @@ from qgis.core import (
     Qgis,
 )
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
-from qgis.PyQt.QtGui import QPixmap
-from geest.utilities import get_ui_class, resources_path
+from qgis.PyQt.QtGui import QFont
+from geest.utilities import get_ui_class, resources_path, linear_interpolation
 from geest.core import WorkflowQueueManager
 from geest.utilities import log_message
 from geest.gui.widgets import CustomBannerLabel
@@ -158,3 +158,17 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             # QMessageBox.critical(
             #    self, "Error", "Selected project does not contain a model.json file."
             # )
+
+    def resizeEvent(self, event):
+        self.set_font_size()
+        super().resizeEvent(event)
+
+    def set_font_size(self):
+        # Scale the font size to fit the text in the available space
+        log_message(f"Label Width: {self.label.rect().width()}")
+        # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
+        font_size = int(
+            linear_interpolation(self.label.rect().width(), 12, 16, 400, 600)
+        )
+        log_message(f"Label Font Size: {font_size}")
+        self.label.setFont(QFont("Arial", font_size))

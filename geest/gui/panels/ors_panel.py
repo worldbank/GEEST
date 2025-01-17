@@ -2,10 +2,15 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
-from qgis.PyQt.QtGui import QPixmap, QDesktopServices
+from qgis.PyQt.QtGui import QPixmap, QDesktopServices, QFont
 from qgis.PyQt.QtWidgets import QMessageBox
 from geest.core.tasks import OrsCheckerTask
-from geest.utilities import get_ui_class, resources_path, log_message
+from geest.utilities import (
+    get_ui_class,
+    resources_path,
+    log_message,
+    linear_interpolation,
+)
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
 from geest.gui.widgets import CustomBannerLabel
@@ -25,6 +30,7 @@ class OrsPanel(FORM_CLASS, QWidget):
         log_message(f"Loading ORS panel")
         self.initUI()
         self.queue_manager = WorkflowQueueManager(pool_size=1)
+        self.set_font_size()
 
     def initUI(self):
         self.custom_label = CustomBannerLabel(
@@ -83,3 +89,17 @@ class OrsPanel(FORM_CLASS, QWidget):
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
+
+    def resizeEvent(self, event):
+        self.set_font_size()
+        super().resizeEvent(event)
+
+    def set_font_size(self):
+        # Scale the font size to fit the text in the available space
+        log_message(f"Label Width: {self.description.rect().width()}")
+        # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
+        font_size = int(
+            linear_interpolation(self.description.rect().width(), 12, 16, 400, 600)
+        )
+        log_message(f"Label Font Size: {font_size}")
+        self.description.setFont(QFont("Arial", font_size))

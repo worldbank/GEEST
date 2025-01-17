@@ -285,14 +285,24 @@ class GeestDock(QDockWidget):
 
         :param index: The index of the newly selected panel.
         """
-        if index == 0:
+        if index == INTRO_PANEL:
             log_message("Switched to Intro panel")
-        if index == 1:
+            self.intro_widget.set_font_size()
+        elif index == CREDITS_PANEL:
+            log_message("Switched to Credits panel")
+            self.credits_widget.set_font_size()
+        elif index == SETUP_PANEL:
+            log_message("Switched to Setup panel")
+        elif index == ORS_PANEL:
+            self.ors_widget.set_font_size()
             log_message("Switched to ORS panel")
-        elif index == 2:
-            log_message("Switched to Project panel")
-        elif index == 3:
+        elif index == OPEN_PROJECT_PANEL:
+            log_message("Switched to Open Project panel")
+        elif index == CREATE_PROJECT_PANEL:
+            self.create_project_widget.set_font_size()
+            log_message("Switched to Create Project panel")
+        elif index == TREE_PANEL:
             log_message("Switched to Tree panel")
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)
-        elif index == 4:
+        elif index == HELP_PANEL:
             log_message("Switched to Help panel")

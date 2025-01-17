@@ -57,14 +57,17 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="label">
      <property name="font">
       <font>
        <pointsize>16</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose from one of the recent project folders you used, or click the ... button to browse to a specific GEEST project folder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>Choose from one of the recent project folders you used, or click the ... button to browse to a specific GEEST project folder.</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::MarkdownText</enum>
      </property>
      <property name="alignment">
       <set>Qt::AlignJustify|Qt::AlignTop</set>
