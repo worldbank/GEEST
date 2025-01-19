@@ -27,7 +27,7 @@ import re
 import platform
 import subprocess
 
-from qgis.PyQt.QtCore import QUrl, QSettings
+from qgis.PyQt.QtCore import QUrl, QSettings, QRect
 from qgis.PyQt import uic
 from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsLayerTreeGroup
 from qgis.PyQt.QtWidgets import QApplication
@@ -49,7 +49,16 @@ def log_window_geometry(geometry):
     +-----------------------------------------------+
 
     """
-    rect = geometry.rect()
+    try:
+        if type(geometry) == QRect:
+            rect = geometry
+        else:
+            rect = geometry.rect()
+    except AttributeError:
+        log_message("Could not get geometry from dialog", level=Qgis.Warning)
+        log_message(type(geometry), level=Qgis.Warning)
+        return
+
     w = rect.width()
     h = rect.height()
     char_width = 20 - len(str(w))
