@@ -1,6 +1,7 @@
 import os
 import json
 import shutil
+import traceback
 from PyQt5.QtWidgets import (
     QWidget,
     QFileDialog,
@@ -13,7 +14,6 @@ from qgis.core import (
     QgsProject,
     Qgis,
     QgsProject,
-    QgsProcessingContext,
     QgsFeedback,
 )
 
@@ -169,11 +169,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 model["analysis_cell_size_m"] = self.cell_size_spinbox.value()
             with open(model_path, "w") as f:
                 json.dump(model, f)
-
+            self.disable_widgets()
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
-            context = QgsProcessingContext()
-            context.setProject(QgsProject.instance())
             feedback = QgsFeedback()
             try:
 
@@ -183,7 +181,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     cell_size_m=self.cell_size_spinbox.value(),
                     crs=crs,
                     working_dir=self.working_dir,
-                    context=context,
                     feedback=feedback,
                 )
                 # Hook up the QTask feedback signal to the progress bar
@@ -197,10 +194,24 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     self.queue_manager.add_task(processor)
                     self.queue_manager.start_processing()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Error processing study area: {e}")
+                trace = traceback.format_exc()
+                QMessageBox.critical(
+                    self, "Error", f"Error processing study area: {e}\n{trace}"
+                )
+                self.enable_widgets()
                 return
             self.settings.setValue("last_working_directory", self.working_dir)
             self.set_working_directory.emit(self.working_dir)
+
+    def disable_widgets(self):
+        """Disable all widgets in the panel."""
+        for widget in self.findChildren(QWidget):
+            widget.setEnabled(False)
+
+    def enable_widgets(self):
+        """Enable all widgets in the panel."""
+        for widget in self.findChildren(QWidget):
+            widget.setEnabled(True)
 
     def progress_updated(self, progress):
         """Slot to be called when the task progress is updated."""
