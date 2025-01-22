@@ -146,9 +146,11 @@ In this step, you need to select a project folder to begin your work. The plugin
 - **Coordinate System Configuration**:
 
    - <span style="color: red;">If your boundary layer uses a valid **projected CRS** (e.g., UTM or EPSG:3857), select the checkbox **Use Coordinate System of your boundary layer**. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer's CRS.</span>
-   - <span style="color: red;">⚠️ **Note**: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.</span>
-   - <span style="color: red;">💡 **Tip**: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.</span>
 
+---   
+  > - <span style="color: red;">⚠️ **Note**: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.</span> 
+  > - <span style="color: red;">💡 **Tip**: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.</span>
+--- 
 
     
 ---
