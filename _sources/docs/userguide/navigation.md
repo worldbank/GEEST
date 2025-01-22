@@ -86,7 +86,7 @@ In this step, you need to select a project folder to begin your work. The plugin
 
 <p align="center">
  <img 
-    src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/GEEST%20project.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg" 
     alt="Geest Projest" 
     style="width:30%;" 
     title="Click to enlarge" 
@@ -98,7 +98,7 @@ In this step, you need to select a project folder to begin your work. The plugin
    
 <p align="center">
  <img 
-    src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/GEEST%20project%20open.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20open.jpg" 
     alt="Open Geest Projest" 
     style="width:30%;" 
     title="Click to enlarge" 
@@ -110,7 +110,7 @@ In this step, you need to select a project folder to begin your work. The plugin
      
 <p align="center">
  <img 
-    src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/GEEST%20project%20new.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20new.jpg" 
     alt="New Geest Projest" 
     style="width:50%;" 
     title="Click to enlarge" 
