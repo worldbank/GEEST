@@ -37,6 +37,10 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
     onclick="window.open(this.src, '_blank')">
 </p>
 
+- **Welcome to GEEST Page**: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin's capabilities and its relevance to geospatial analysis.
+
+- **About Page**: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.
+
 
 
 
