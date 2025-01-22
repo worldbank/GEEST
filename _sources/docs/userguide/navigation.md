@@ -1,5 +1,7 @@
 ## Navigation
 
+The GEEST plugin interface is intuitive and easy to navigate. In this section the streamlined workflow ensures an efficient transition from setup to core spatial analysis. For detailed instructions on each step, refer to the sections below.
+
 ### Accessing the Plugin
 
 After installing the plugin, its interface should automatically appear:  
