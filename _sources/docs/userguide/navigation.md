@@ -74,7 +74,7 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 2. If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.
 
 ---
-> #### Tips for Setting Up the ORS Key
+> Tips for Setting Up the ORS Key
 > - 💡 **Tip**: Ensure you paste the exact API key without any extra spaces or characters.
 > - ⚠️ **Warning**: Avoid sharing your API key publicly to keep it secure.
 > - 🔄 **If You Encounter Issues**: Double-check your internet connection and ensure your API key is valid.
@@ -185,7 +185,7 @@ Important Notes:
 </p>
 
 ---
-> ### Key Considerations
+> Key Considerations
 > - ⚠️ **Warning**: Double-check your settings and input data before clicking the arrow. Any incorrect configuration could lead to errors during the processing stage.
 > - 💡 **Tip**: Ensure that the analysis cell size and boundary layer are correctly configured to avoid unexpected results.
 ---
