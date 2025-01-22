@@ -85,8 +85,8 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 In this step, you need to select a project folder to begin your work. The plugin provides you with two options:
 
 <p align="center">
- <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg" alt="GEEST Project" style="width:60%;">
-
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg" alt="GEEST Project" style="width:30%;" title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
 
 1. **Option 1: Open an Existing Project**:  
@@ -95,7 +95,7 @@ In this step, you need to select a project folder to begin your work. The plugin
 <p align="center">
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20open.jpg" 
-    alt="Open Geest Projest" 
+    alt="Open Geest Project" 
     style="width:30%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
@@ -107,7 +107,7 @@ In this step, you need to select a project folder to begin your work. The plugin
 <p align="center">
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20new.jpg" 
-    alt="New Geest Projest" 
+    alt="New Geest Project" 
     style="width:50%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
