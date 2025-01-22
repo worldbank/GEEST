@@ -193,15 +193,24 @@ Once you have completed all required inputs on the **GEEST Project Creation** sc
 ---
 
 ### **Overview of Next Steps**
-After pressing the right arrow, you will enter the **Processing Data Interface**, where:
-1. You can view progress bars for analysis steps.
-2. The tool will generate outputs based on the inputs and configuration you’ve provided.
+
+After pressing the right arrow, the plugin will begin processing the input boundary layer by dividing it into a grid based on the specified cell size. During this step, the project folder will automatically populate with the generated outputs, including the study area split into grids, polygons, gridded areas, bounding boxes and other relevant data.
+
+Once this pre-processing step is completed, you will seamlessly transition to the **Processing Data Interface**, where you can proceed with the core analysis workflows:
+
+1. The tool will generate outputs based on the inputs and configuration you’ve provided.
+2. View progress bars for analysis steps.
 3. Results will be saved in the selected project folder for further use.
 
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20data%20processing%20UI.jpg"
+    alt="Geest data processing" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
 This marks the completion of the project setup and transition to the core analysis workflow.
-
-
-
 
 
 
