@@ -94,7 +94,7 @@ In this step, you need to select a project folder to begin your work. The plugin
     onclick="window.open(this.src, '_blank')">
 </p>
 
-Option 1: Open an Existing Project:  
+Option 1: **Open an Existing Project**:  
    Select this option if you already have a project folder created previously. Choosing this will load the project along with all its associated files. Once loaded, press the right arrow button to proceed to the data input and processing interface for further analysis.
    
 <p align="center">
@@ -106,7 +106,7 @@ Option 1: Open an Existing Project:
     onclick="window.open(this.src, '_blank')">
 </p>
 
-Option 2: Create a New Project:  
+Option 2: **Create a New Project**:  
    Choose this option to start a new project. The plugin will guide you through creating a new folder that will store the GEEST project files and working analysis results for spatial processing.
      
 <p align="center">
