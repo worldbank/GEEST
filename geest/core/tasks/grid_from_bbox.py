@@ -1,6 +1,7 @@
 import time
 from osgeo import ogr
 from qgis.core import QgsTask
+from geest.utilities import log_message
 
 
 class GridFromBbox(QgsTask):
@@ -16,10 +17,14 @@ class GridFromBbox(QgsTask):
         self.geom = geom
         self.cell_size = cell_size
         self.feedback = feedback
-
-        self.features_out = []  # store (wkbGeometry, grid_id) or any needed attributes
+        self.run_time = 0.0
+        self.features_out = []  # store geometries here
 
     def run(self):
+        log_message(f"##################################")
+        log_message(f"Processing chunk {self.chunk_id}...")
+        log_message(f"Chunk bbox: {self.bbox_chunk}")
+        log_message(f"##################################")
         start_time = time.time()
         x_start, x_end, y_start, y_end = self.bbox_chunk
 
@@ -32,7 +37,6 @@ class GridFromBbox(QgsTask):
         ogr_geom = self.geom
 
         x = x_start
-        grid_id = 0
         while x < x_end:
             x2 = x + self.cell_size
             if x2 <= x:
@@ -42,8 +46,6 @@ class GridFromBbox(QgsTask):
                 y2 = y + self.cell_size
                 if y2 <= y:
                     break
-
-                grid_id += 1
                 # Create cell polygon in memory
                 ring = ogr.Geometry(ogr.wkbLinearRing)
                 ring.AddPoint(x, y)
@@ -52,22 +54,24 @@ class GridFromBbox(QgsTask):
                 ring.AddPoint(x2, y)
                 ring.AddPoint(x, y)
 
-                cell_poly = ogr.Geometry(ogr.wkbPolygon)
-                cell_poly.AddGeometry(ring)
+                cell_polygon = ogr.Geometry(ogr.wkbPolygon)
+                cell_polygon.AddGeometry(ring)
 
                 # Check intersection
-                if ogr_geom.Intersects(cell_poly):
+                if ogr_geom.Intersects(cell_polygon):
                     # Store geometry + attributes for later
                     # We store WKB or something that can be reconstituted easily
-                    self.features_out.append((cell_poly.ExportToWkb(), grid_id))
-
+                    self.features_out.append(cell_polygon)
                 y = y2
             x = x2
 
         end_time = time.time()
-        self.feedback.pushInfo(
+        self.run_time = end_time - start_time
+        # self.feedback.pushInfo(
+        log_message(
             f"Chunk {self.chunk_id} processed in {end_time - start_time:.2f} s; created {len(self.features_out)} features."
         )
+
         return True
 
     def finished(self, result):

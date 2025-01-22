@@ -13,9 +13,10 @@ from qgis.core import (
     QgsFeedback,
     QgsVectorLayer,
     QgsVectorFileWriter,
+    QgsApplication,
 )
 from geest.utilities import log_message
-from .grid_from_bbox import GridFromBboxTask
+from .grid_from_bbox import GridFromBbox
 
 
 class StudyAreaProcessingTask(QgsTask):
@@ -55,6 +56,7 @@ class StudyAreaProcessingTask(QgsTask):
         :param working_dir: Directory path where outputs will be saved.
         :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
         """
+        super().__init__("Study Area Preparation", QgsTask.CanCancel)
         self.input_vector_path = self.export_qgs_layer_to_shapefile(layer, working_dir)
         self.field_name = field_name
         self.cell_size_m = cell_size_m
@@ -62,8 +64,14 @@ class StudyAreaProcessingTask(QgsTask):
         self.gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
         self.counter = 0
         self.feedback = feedback
-        super().__init__("Study Area Preparation", QgsTask.CanCancel)
-
+        self.metrics = {
+            "Writing chunks": 0.0,
+            "Queuing chunks": 0.0,
+            "Preparing chunks": 0.0,
+        }
+        self.cell_count = 0
+        self.total_cells = 0
+        self.write_lock = False
         # Make sure output directory exists
         self.create_study_area_directory(self.working_dir)
 
@@ -95,7 +103,7 @@ class StudyAreaProcessingTask(QgsTask):
         # (OGR Envelope: (xmin, xmax, ymin, ymax))
         layer_extent = self.source_layer.GetExtent()
         (xmin, xmax, ymin, ymax) = layer_extent
-        self.layer_bbox = (xmin, ymin, xmax, ymax)
+        self.layer_bbox = (xmin, xmax, ymin, ymax)
 
         if crs is None:
             # Attempt to pick a suitable UTM zone
@@ -139,19 +147,20 @@ class StudyAreaProcessingTask(QgsTask):
         Exports a QgsVectorLayer to a Shapefile in output_dir.
         Returns the full path to the .shp (main file).
         """
-
-        # Pick a base filename
         shapefile_path = os.path.join(output_dir, "temp_export.shp")
-
-        # The writeAsVectorFormatV2 or writeAsVectorFormat methods return a tuple
-        # (QgsVectorFileWriter.WriterError, error_message).
-        # In older QGIS versions, it may be different, but the pattern is similar.
+        # Check if the layer has selected features
+        if layer.selectedFeatureCount() == 0:
+            has_selection = False
+        else:
+            has_selection = True
+        # Export the selected features of the layer
         err_code, err_msg = QgsVectorFileWriter.writeAsVectorFormat(
             layer,
             shapefile_path,
             "UTF-8",  # encoding
             layer.crs(),  # CRS to write
             "ESRI Shapefile",  # driver name
+            onlySelected=has_selection,  # Export only selected features
         )
 
         if err_code != QgsVectorFileWriter.NoError:
@@ -518,6 +527,10 @@ class StudyAreaProcessingTask(QgsTask):
         layer.CreateField(field_defn)
         ds = None
 
+    # Helper to update time spent in a named metric block
+    def track_time(self, metric_name, start_time):
+        self.metrics[metric_name] += time.time() - start_time
+
     ##########################################################################
     # Create Vector Grid
     ##########################################################################
@@ -527,6 +540,9 @@ class StudyAreaProcessingTask(QgsTask):
         Writes those cells that intersect 'geom' to layer 'study_area_grid'.
         (In practice, this can be quite large for big extents.)
         """
+        # ----------------------------
+        # Initialize metrics tracking
+        # ----------------------------
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
 
@@ -534,8 +550,6 @@ class StudyAreaProcessingTask(QgsTask):
         layer = ds.GetLayerByName(grid_layer_name)
         if not layer:
             raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
-
-        feat_defn = layer.GetLayerDefn()
 
         xmin, xmax, ymin, ymax = bbox
         cell_size = self.cell_size_m
@@ -548,56 +562,94 @@ class StudyAreaProcessingTask(QgsTask):
         x_range_count = int((xmax - xmin) / cell_size)
         y_range_count = int((ymax - ymin) / cell_size)
         total_cells = x_range_count * y_range_count
-        log_message(f"Total cells to generate: {total_cells}")
+        if total_cells == 0:
+            log_message("No cells to generate.")
+            return
+        log_message(f"Estimated total cells to generate: {total_cells}")
         cell_count = 0
 
         # OGR geometry intersection can be slow for large grids.
         # If this area is huge, consider a more robust approach or indexing.
         # For demonstration, we do a naive approach.
 
-        # We'll union the bounding box of geom with a prepared geometry to check intersection quickly.
-        for i in range(int(x_range_count)):
-            x1 = xmin + i * cell_size
-            x2 = x1 + cell_size
-            if x2 <= x1:
-                continue
-            for j in range(int(y_range_count)):
-                y1 = ymin + j * cell_size
-                y2 = y1 + cell_size
-                if y2 <= y1:
-                    continue
+        self.write_lock = False
 
-                cell_count += 1
-                if cell_count % 20000 == 0:
-                    percent = (cell_count / float(total_cells)) * 100.0
-                    log_message(
-                        f"Grid creation for part {normalized_name}: {cell_count}/{total_cells} ({percent:.2f}%)"
-                    )
+        worker_tasks = []
+        # Get a reference to the global task manager
+        task_manager = QgsApplication.taskManager()
+
+        # Limit concurrency to 8
+        # task_manager.setMaxActiveThreadCount(8)
+        feedback = QgsFeedback()
+
+        # 1. Chunk the bounding box
+        chunk_size = 1000  # adjust to taste
+        bbox_chunks = list(
+            self.chunk_bbox(xmin, xmax, ymin, ymax, cell_size, chunk_size)
+        )
+
+        for idx, chunk in enumerate(bbox_chunks):
+            start_time = time.time()
+            task = GridFromBbox(idx, chunk, geom, cell_size, feedback)
+            # Not running in thread for now, see note below
+            task.run()
+            self.write_grids(layer, task, normalized_name)
+            # This is blocking, but we're in a thread
+            # Crashes QGIS, needs to be refactored to use QgsTask subtasks
+            # task.taskCompleted.connect(write_grids)
+            # worker_tasks.append(task)
+            # log_message(f"Task {idx} created for chunk {chunk}")
+            # log_message(f"{len(worker_tasks)} tasks queued.")
+            # task_manager.addTask(task)
+            self.track_time("Queuing chunks", start_time)
+        ds = None
+        # ----------------------------
+        # Print out metrics summary
+        # ----------------------------
+        log_message("=== Metrics Summary ===")
+        for k, v in self.metrics.items():
+            log_message(f"{k}: {v:.4f} seconds")
+        log_message(f"Grid creation completed for area {normalized_name}.")
+
+    def write_grids(self, layer, task, normalized_name):
+        start_time = time.time()
+        # If write_lock is true, wait for the lock to be released
+        while self.write_lock:
+            log_message("Waiting for write lock...")
+            time.sleep(0.1)
+        log_message("Write lock released.")
+        log_message(f"Writing {len(task.features_out)} features to layer.")
+        self.track_time("Preparing chunks", task.run_time)
+        self.write_lock = True
+        feat_defn = layer.GetLayerDefn()
+        try:
+            # aggregated_features.extend(task.features_out)
+            for geometry in task.features_out:
+                feature = ogr.Feature(feat_defn)
+                feature.SetField("grid_id", self.cell_count)
+                feature.SetField("area_name", normalized_name)
+                feature.SetGeometry(geometry)
+                layer.CreateFeature(feature)
+                feature = None
+
+                self.cell_count += 1
+                if self.cell_count % 20000 == 0:
+                    try:
+                        percent = (self.cell_count / float(self.total_cells)) * 100.0
+                        log_message(
+                            f"Grid creation for part {normalized_name}: {self.cell_count}/{self.total_cells} ({percent:.2f}%)"
+                        )
+                        self.feedback.setProgress(int(percent))
+                    except ZeroDivisionError:
+                        pass
                     # commit changes
                     layer.SyncToDisk()
-                    self.feedback.setProgress(int(percent))
-                # Create the cell polygon
-                ring = ogr.Geometry(ogr.wkbLinearRing)
-                ring.AddPoint(x1, y1)
-                ring.AddPoint(x1, y2)
-                ring.AddPoint(x2, y2)
-                ring.AddPoint(x2, y1)
-                ring.AddPoint(x1, y1)
-                grid_cell_polygon = ogr.Geometry(ogr.wkbPolygon)
-                grid_cell_polygon.AddGeometry(ring)
-
-                # Check if intersects
-                if geom.Intersects(grid_cell_polygon):
-                    feature = ogr.Feature(feat_defn)
-                    feature.SetField("grid_id", cell_count)
-                    # We'll store area_name too
-                    feature.SetField("area_name", normalized_name)
-                    feature.SetGeometry(grid_cell_polygon)
-                    layer.CreateFeature(feature)
-                    feature = None
-
-        ds = None
-        log_message("Grid creation completed.")
+            self.track_time("Writing chunks", start_time)
+            self.write_lock = False
+        except Exception as e:
+            log_message(f"write_grids: {str(e)}")
+            log_message(f"write_grids: {traceback.format_exc()}")
+            self.write_lock = False
 
     def create_grid_layer_if_not_exists(self, layer_name):
         """
@@ -623,137 +675,61 @@ class StudyAreaProcessingTask(QgsTask):
     ##########################################################################
     # Create Clip Polygon
     ##########################################################################
-    def create_and_save_grid(self, normalized_name, geom, bbox):
+    def create_clip_polygon(self, geom, aligned_box, normalized_name):
         """
-        Creates a vector grid covering bbox at self.cell_size_m spacing.
-        Writes those cells that intersect 'geom' to layer 'study_area_grid'.
-        (In practice, this can be quite large for big extents.)
+        Creates a polygon that includes the original geometry plus all grid cells
+        that intersect the boundary of the geometry. Then dissolves them into one polygon.
         """
+        # 1) We load the grid from GPKG
+        grid_ds = ogr.Open(self.gpkg_path, 0)
+        grid_layer = grid_ds.GetLayerByName("study_area_grid")
+        if not grid_layer:
+            raise RuntimeError("Missing study_area_grid layer.")
 
-        # ----------------------------
-        # Initialize metrics tracking
-        # ----------------------------
-        metrics = {
-            "bounding_box_check": 0.0,
-            "ring_creation": 0.0,
-            "polygon_creation": 0.0,
-            "intersection_test": 0.0,
-            "feature_creation": 0.0,
-        }
+        # We'll do a bounding box filter for performance
+        (xmin, ymin, xmax, ymax) = aligned_box
+        grid_layer.SetSpatialFilterRect(xmin, ymin, xmax, ymax)
 
-        # Helper to update time spent in a named metric block
-        def track_time(metric_name, start_time):
-            metrics[metric_name] += time.time() - start_time
+        # 2) We'll gather all grid cells that intersect *the boundary* of geom
+        #    In OGR, we can do:
+        boundary = geom.GetBoundary()  # line geometry for polygon boundary
 
-        grid_layer_name = "study_area_grid"
-        self.create_grid_layer_if_not_exists(grid_layer_name)
+        union_geom = ogr.Geometry(ogr.wkbPolygon)
+        union_geom.Destroy()  # We'll handle it differently—see below.
 
-        ds = ogr.Open(self.gpkg_path, 1)  # read-write
-        layer = ds.GetLayerByName(grid_layer_name)
-        if not layer:
-            raise RuntimeError(f"Could not open {grid_layer_name} for writing.")
+        # For union accumulation, start with a null geometry
+        dissolved_geom = None
 
-        feat_defn = layer.GetLayerDefn()
+        # For clarity, transform boundary to the same SRS if needed (already is).
+        # We'll just do an Intersects check with each cell.
 
-        xmin, xmax, ymin, ymax = bbox
-        cell_size = self.cell_size_m
-
-        log_message(
-            f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}"
-        )
-
-        # Approx count for logging
-        x_range_count = int((xmax - xmin) / cell_size)
-        y_range_count = int((ymax - ymin) / cell_size)
-        total_cells = x_range_count * y_range_count
-        log_message(f"Total cells to generate: {total_cells}")
-        cell_count = 0
-
-        # Get envelope once for bounding box pre-check
-        geom_envelope = (
-            geom.GetEnvelope()
-        )  # (geom_minx, geom_maxx, geom_miny, geom_maxy)
-
-        for i in range(int(x_range_count)):
-            x1 = xmin + i * cell_size
-            x2 = x1 + cell_size
-            if x2 <= x1:
+        grid_layer.ResetReading()
+        count = 0
+        for f in grid_layer:
+            cell_geom = f.GetGeometryRef()
+            if not cell_geom:
                 continue
+            if boundary.Intersects(cell_geom):
+                # We'll union
+                if dissolved_geom is None:
+                    dissolved_geom = cell_geom.Clone()
+                else:
+                    dissolved_geom = dissolved_geom.Union(cell_geom)
+            count += 1
+        grid_layer.ResetReading()
 
-            for j in range(int(y_range_count)):
-                y1 = ymin + j * cell_size
-                y2 = y1 + cell_size
-                if y2 <= y1:
-                    continue
+        # Also union the original geom itself
+        if dissolved_geom is None:
+            # No boundary cells found, fallback
+            dissolved_geom = geom.Clone()
+        else:
+            dissolved_geom = dissolved_geom.Union(geom)
 
-                cell_count += 1
-
-                # Log progress
-                if cell_count % 20000 == 0:
-                    percent = (cell_count / float(total_cells)) * 100.0
-                    log_message(
-                        f"Grid creation for part {normalized_name}: "
-                        f"{cell_count}/{total_cells} ({percent:.2f}%)"
-                    )
-                    # commit changes
-                    layer.SyncToDisk()
-                    self.feedback.setProgress(int(percent))
-
-                # 1. Bounding Box Check
-                start_time_bb_check = time.time()
-                if (
-                    x2 < geom_envelope[0]
-                    or x1 > geom_envelope[1]
-                    or y2 < geom_envelope[2]
-                    or y1 > geom_envelope[3]
-                ):
-                    # If there's no bounding box overlap, skip
-                    track_time("bounding_box_check", start_time_bb_check)
-                    continue
-                track_time("bounding_box_check", start_time_bb_check)
-
-                # 2. Ring Creation
-                start_time_ring = time.time()
-                ring = ogr.Geometry(ogr.wkbLinearRing)
-                ring.AddPoint(x1, y1)
-                ring.AddPoint(x1, y2)
-                ring.AddPoint(x2, y2)
-                ring.AddPoint(x2, y1)
-                ring.AddPoint(x1, y1)
-                track_time("ring_creation", start_time_ring)
-
-                # 3. Polygon Creation
-                start_time_poly = time.time()
-                grid_cell_polygon = ogr.Geometry(ogr.wkbPolygon)
-                grid_cell_polygon.AddGeometry(ring)
-                track_time("polygon_creation", start_time_poly)
-
-                # 4. Intersection Test
-                start_time_int = time.time()
-                intersects = geom.Intersects(grid_cell_polygon)
-                track_time("intersection_test", start_time_int)
-
-                if intersects:
-                    # 5. Feature Creation & Writing
-                    start_time_feat = time.time()
-                    feature = ogr.Feature(feat_defn)
-                    feature.SetField("grid_id", cell_count)
-                    feature.SetField("area_name", normalized_name)
-                    feature.SetGeometry(grid_cell_polygon)
-                    layer.CreateFeature(feature)
-                    feature = None
-                    track_time("feature_creation", start_time_feat)
-
-        # Cleanup
-        ds = None
-        log_message("Grid creation completed.")
-
-        # ----------------------------
-        # Print out metrics summary
-        # ----------------------------
-        log_message("=== Metrics Summary ===")
-        for k, v in metrics.items():
-            log_message(f"{k}: {v:.4f} seconds")
+        # dissolved_geom is now the final clip polygon
+        self.save_geometry_to_geopackage(
+            "study_area_clip_polygons", dissolved_geom, normalized_name
+        )
+        log_message(f"Created clip polygon: {normalized_name}")
 
     ##########################################################################
     # Split the bbox into chunks for parallel processing
