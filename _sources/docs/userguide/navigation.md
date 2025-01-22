@@ -7,7 +7,7 @@ After installing the plugin, its interface should automatically appear:
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page.jpg" 
     alt="Plugin Interface" 
-    style="width:45%;" 
+    style="width:30%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -26,13 +26,13 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page%20next.jpg" 
     alt="First Page Next" 
-    style="width:45%;" 
+    style="width:30%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Second%20page%20next.jpg" 
     alt="Second Page Next" 
-    style="width:45%;" 
+    style="width:30%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -62,7 +62,7 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ORS%20setup.jpg" 
     alt="ORS key" 
-    style="width:45%;" 
+    style="width:30%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -78,6 +78,81 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 > - ⚠️ **Warning**: Avoid sharing your API key publicly to keep it secure.
 > - 🔄 **If You Encounter Issues**: Double-check your internet connection and ensure your API key is valid.
 > - **This step is crucial to unlock the full functionality of the plugin, including advanced spatial analysis workflows.**
+---
+
+### GEEST Project Selection
+
+In this step, you need to select a project folder to begin your work. The plugin provides you with two options:
+
+<p align="center">
+ <img 
+    src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/GEEST%20project.jpg" 
+    alt="Geest Projest" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+1. **Option 1: Open an Existing Project**:  
+   Select this option if you already have a project folder created previously. Choosing this will load the project along with all its associated files. Once loaded, press the right arrow button to proceed to the data input and processing interface for further analysis.
+   
+<p align="center">
+ <img 
+    src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/GEEST%20project%20open.jpg" 
+    alt="Open Geest Projest" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+2. **Option 2: Create a New Project**:  
+   Choose this option to start a new project. The plugin will guide you through creating a new folder that will store the GEEST project files and working analysis results for spatial processing.
+     
+<p align="center">
+ <img 
+    src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/GEEST%20project%20new.jpg" 
+    alt="New Geest Projest" 
+    style="width:50%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+**How to Create a New Folder**
+- Click on **Create or select a project directory** (highlighted in red).
+- Navigate to the desired location on your system where you want to store the project.
+- Create a **new folder** and ensure it is **empty**.
+- Select the newly created folder and confirm your choice.
+
+---
+> **Important Considerations**
+> - ⚠️ **Warning**: Ensure the folder is **empty**. Using a folder with other files may lead to errors or accidental overwrites.
+> - 💡 **Tip**: Use a descriptive name for the folder, incorporating details such as the name of the country or region you want to analyze and a timestamp. The timestamp could reflect either the time of the analysis process or the date of the input datasets. This will help you easily identify the folder for future reference and maintain better organization.
+> - 🔒 **Reminder**: Ensure the folder is stored in a location with adequate storage space for analysis outputs. The contents of the selected folder will be managed by the plugin, ensuring proper organization of project-related files.
+
+---
+
+
+#### **Additional Steps After Creating the Folder**
+
+- **Select a Layer**: Click on the three dots button to choose a layer containing your Admin0 areas (country or region boundaries). The input layer must be in either SHP or GPKG format. Once selected, use the dropdown menu to specify the column that contains the names of the areas. Ensure the column is correctly populated to avoid errors during analysis.
+  
+- **Set the Analysis Cell Size**:
+   - Enter a value between **100m and 1000m**:
+     - Smaller values (e.g., 100m) will provide more detailed results but require longer processing times.
+     - Larger values (e.g., 1000m) will reduce processing time but result in coarser outputs.
+    
+       
+
+- **Coordinate System Configuration**:
+
+   - <span style="color: red;">If your boundary layer uses a valid **projected CRS** (e.g., UTM or EPSG:3857), select the checkbox **Use Coordinate System of your boundary layer**. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer's CRS.</span>
+   - <span style="color: red;">⚠️ **Note**: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.</span>
+   - <span style="color: red;">💡 **Tip**: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.</span>
+
+
+    
+---
+  > - 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
 ---
 
 
