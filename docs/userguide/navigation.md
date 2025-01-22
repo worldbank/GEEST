@@ -74,7 +74,6 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 2. If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.
 
 ---
-
 > #### Tips for Setting Up the ORS Key
 > - 💡 **Tip**: Ensure you paste the exact API key without any extra spaces or characters.
 > - ⚠️ **Warning**: Avoid sharing your API key publicly to keep it secure.
@@ -130,7 +129,6 @@ How to Create a New Folder
 > - ⚠️ **Warning**: Ensure the folder is **empty**. Using a folder with other files may lead to errors or accidental overwrites.
 > - 💡 **Tip**: Use a descriptive name for the folder, incorporating details such as the name of the country or region you want to analyze and a timestamp. The timestamp could reflect either the time of the analysis process or the date of the input datasets. This will help you easily identify the folder for future reference and maintain better organization.
 > - 🔒 **Reminder**: Ensure the folder is stored in a location with adequate storage space for analysis outputs. The contents of the selected folder will be managed by the plugin, ensuring proper organization of project-related files.
-
 ---
 
 
@@ -143,7 +141,7 @@ How to Create a New Folder
      - Smaller values (e.g., 100m) will provide more detailed results but require longer processing times.
      - Larger values (e.g., 1000m) will reduce processing time but result in coarser outputs.
     
- ---
+---
   > - 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
 ---      
 
@@ -187,11 +185,9 @@ Important Notes:
 </p>
 
 ---
-
 > ### Key Considerations
 > - ⚠️ **Warning**: Double-check your settings and input data before clicking the arrow. Any incorrect configuration could lead to errors during the processing stage.
 > - 💡 **Tip**: Ensure that the analysis cell size and boundary layer are correctly configured to avoid unexpected results.
-
 ---
 
 ### Overview of Next Steps
