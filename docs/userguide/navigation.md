@@ -141,7 +141,9 @@ In this step, you need to select a project folder to begin your work. The plugin
      - Smaller values (e.g., 100m) will provide more detailed results but require longer processing times.
      - Larger values (e.g., 1000m) will reduce processing time but result in coarser outputs.
     
-       
+ ---
+  > - 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
+---      
 
 - **Coordinate System Configuration**:
 
@@ -153,9 +155,7 @@ In this step, you need to select a project folder to begin your work. The plugin
 --- 
 
     
----
-  > - 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
----
+
 
 
 
