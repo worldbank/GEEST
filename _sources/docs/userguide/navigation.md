@@ -53,6 +53,7 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 3. Once logged in, generate an API key by following the on-screen instructions.
 
 #### **Step 2: Paste the API Key**
+> **Note**: If you already entered your ORS API key in the **Step 5: Verify the Installation and Configure the Tool** section of the **[Installing GEEST](https://github.com/worldbank/GEEST/blob/main/docs/userguide/install.md)** instructions, you can skip this step.
 1. Copy the API key from the ORS website.
 2. Open the **GEEST ORS Setup** window in the plugin.
 3. Paste the API key into the text box provided (as shown in the screenshot below).
@@ -78,6 +79,20 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 > - 🔄 **If You Encounter Issues**: Double-check your internet connection and ensure your API key is valid.
 > - **This step is crucial to unlock the full functionality of the plugin, including advanced spatial analysis workflows.**
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
