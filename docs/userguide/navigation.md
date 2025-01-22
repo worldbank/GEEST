@@ -155,7 +155,7 @@ In this step, you need to select a project folder to begin your work. The plugin
 --- 
 
     
-### **Proceed to the Processing Data Interface**
+### Proceed to the Processing Data Interface
 
 Once you have completed all required inputs on the **GEEST Project Creation** screen, follow these steps to proceed:
 
@@ -186,13 +186,13 @@ Once you have completed all required inputs on the **GEEST Project Creation** sc
 
 ---
 
-> ### **Key Considerations**
+> ### Key Considerations
 > - ⚠️ **Warning**: Double-check your settings and input data before clicking the arrow. Any incorrect configuration could lead to errors during the processing stage.
 > - 💡 **Tip**: Ensure that the analysis cell size and boundary layer are correctly configured to avoid unexpected results.
 
 ---
 
-### **Overview of Next Steps**
+### Overview of Next Steps
 
 After pressing the right arrow, the plugin will begin processing the input boundary layer by dividing it into a grid based on the specified cell size. During this step, the project folder will automatically populate with the generated outputs, including the study area split into grids, polygons, gridded areas, bounding boxes and other relevant data.
 
