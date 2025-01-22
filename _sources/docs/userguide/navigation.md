@@ -155,8 +155,50 @@ In this step, you need to select a project folder to begin your work. The plugin
 --- 
 
     
+### **Proceed to the Processing Data Interface**
 
+Once you have completed all required inputs on the **GEEST Project Creation** screen, follow these steps to proceed:
 
+---
+
+#### **1. Verify the Project Folder Path**
+- Ensure that the **folder path** displayed at the bottom of the interface is correct. This path indicates where the GEEST plugin will store analysis outputs and working files.
+- **Example Path**:  
+  `C:/Work/GEEST/Analysis/Country/01/15/2025`
+
+**Important Notes**:
+- The folder must be **empty**, containing no other files unrelated to the analysis.
+- Choose a **descriptive name** for the folder, as it will store critical project data.
+
+---
+
+#### **2. Click the Right Arrow Button**
+- Locate the **right arrow button** at the bottom-right corner of the interface (highlighted in red in the image).
+- Clicking this button confirms all settings and transitions to the **Processing Data Interface**, where you can initiate the analysis.
+
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20final.jpg"
+    alt="Geest Project final" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+---
+
+> ### **Key Considerations**
+> - ⚠️ **Warning**: Double-check your settings and input data before clicking the arrow. Any incorrect configuration could lead to errors during the processing stage.
+> - 💡 **Tip**: Ensure that the analysis cell size and boundary layer are correctly configured to avoid unexpected results.
+
+---
+
+### **Overview of Next Steps**
+After pressing the right arrow, you will enter the **Processing Data Interface**, where:
+1. You can view progress bars for analysis steps.
+2. The tool will generate outputs based on the inputs and configuration you’ve provided.
+3. Results will be saved in the selected project folder for further use.
+
+This marks the completion of the project setup and transition to the core analysis workflow.
 
 
 
