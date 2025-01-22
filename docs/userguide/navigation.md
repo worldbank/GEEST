@@ -4,7 +4,8 @@
 
 After installing the plugin, its interface should automatically appear:  
 <p align="center">
-  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page.jpg" alt="Plugin Interface" style="width:45%;">
+  <img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page.jpg" alt="Plugin Interface" style="width:45%;" title="Click to enlarge" onclick="window.open(this.src, '_blank')">
 </p>
 
 If the plugin window does not appear immediately after installation, follow these steps to locate and open it:
