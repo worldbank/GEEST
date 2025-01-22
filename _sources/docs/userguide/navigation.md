@@ -164,7 +164,7 @@ Once you have completed all required inputs on the **GEEST Project Creation** sc
 #### **1. Verify the Project Folder Path**
 - Ensure that the **folder path** displayed at the bottom of the interface is correct. This path indicates where the GEEST plugin will store analysis outputs and working files.
 - **Example Path**:  
-  `C:/Work/GEEST/Analysis/Country/01/15/2025`
+  `C:/Work/GEEST/Analysis/Country/01152025`
 
 **Important Notes**:
 - The folder must be **empty**, containing no other files unrelated to the analysis.
