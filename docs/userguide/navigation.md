@@ -3,7 +3,7 @@
 The GEEST plugin interface is intuitive and easy to navigate. In this section, the streamlined workflow ensures an efficient transition from setup to core spatial analysis. For detailed instructions on each step, refer to the sections below.
 
 ### Accessing the Plugin
-
+---
 After installing the plugin, its interface should automatically appear:  
 <p align="center">
   <img 
@@ -156,7 +156,7 @@ How to Create a New Folder
 
     
 ### Pre-Processing
-
+---
 Once you have completed all required inputs on the **GEEST Project Creation** screen, follow these steps to proceed:
 
 ---
@@ -211,7 +211,7 @@ Once this pre-processing step is completed, you will seamlessly transition to th
 This marks the completion of the project setup and transition to the core analysis workflow.
 
 ### Processing Data Interface
-
+---
 The data processing interface serves as the central hub for managing, configuring, and processing inputs across multiple dimensions and factors within the project. This interface is designed to streamline workflows and provide users with a clear overview of the processing status. Below is a guide to understanding the key components of this interface:
 
 <p align="center">
@@ -238,17 +238,12 @@ Key Elements of the Interface:
 6. **Project Setup Pages**. The Project button opens back the setup pages where users can configure the project folder, and set up parameters for the analysis.
 7. **Help**. Clicking the Help button redirects you to the tool’s GitHub page, where you can find detailed documentation and support resources.
 
+---
+> **Key Considerations**
+> Organize Your Project Folder: Ensure your project folder is empty before starting. This folder will store all generated outputs and analysis-related files. Avoid using a folder that contains unrelated files to prevent errors or accidental overwrites. Using a descriptive name with timestamps can help maintain clarity and avoid confusion when working with multiple projects.
+> Start with Larger Cell Sizes for Testing: If analyzing large regions, begin with a larger cell size for initial testing to ensure faster processing times. You can refine the analysis later with a smaller cell size for greater detail.
+> Backup Your Work: Save your progress frequently and create backups of your project folder to prevent data loss in case of unexpected issues.
+> Monitor Processing Status: Use the Processing Status Widgets to track the progress and troubleshoot any errors. Pay close attention to the red flags, which indicate configuration or workflow issues.
+> Use Help Resources: If you encounter issues or have questions, refer to the Help section within the plugin or visit the tool’s GitHub page for detailed documentation and support.
 
-
-
-
-
-
-
-
-
-
-
-
-```{tableofcontents}
-```
+By keeping these considerations in mind, you can ensure a smooth and efficient workflow while minimizing errors and maximizing the utility of the GEEST plugin.
