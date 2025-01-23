@@ -172,7 +172,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.disable_widgets()
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
-            feedback = QgsFeedback()
+            parent_job_feedback = QgsFeedback()
+            child_job_feedback = QgsFeedback()
             try:
 
                 processor = StudyAreaProcessingTask(
@@ -181,7 +182,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     cell_size_m=self.cell_size_spinbox.value(),
                     crs=crs,
                     working_dir=self.working_dir,
-                    feedback=feedback,
+                    parent_job_feedback=parent_job_feedback,
+                    child_job_feedback=child_job_feedback,
                 )
                 # Hook up the QTask feedback signal to the progress bar
                 self.progress_updated(0)
@@ -216,6 +218,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def progress_updated(self, progress):
         """Slot to be called when the task progress is updated."""
         self.progress_bar.setVisible(True)
+        self.progress_bar.setEnabled(True)
         self.progress_bar.setValue(int(progress))
 
     def on_task_completed(self):

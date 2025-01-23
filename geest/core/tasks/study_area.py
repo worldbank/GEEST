@@ -17,6 +17,7 @@ from qgis.core import (
 )
 from geest.utilities import log_message
 from .grid_from_bbox import GridFromBbox
+from geest.core import setting
 
 
 class StudyAreaProcessingTask(QgsTask):
@@ -46,7 +47,8 @@ class StudyAreaProcessingTask(QgsTask):
         field_name,
         cell_size_m,
         working_dir,
-        feedback: QgsFeedback = None,
+        parent_job_feedback: QgsFeedback = None,
+        child_job_feedback: QgsFeedback = None,
         crs=None,
     ):
         """
@@ -63,10 +65,12 @@ class StudyAreaProcessingTask(QgsTask):
         self.working_dir = working_dir
         self.gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
         self.counter = 0
-        self.feedback = feedback
+        self.parent_job_feedback = parent_job_feedback
+        self.child_job_feedback = child_job_feedback
         self.metrics = {
+            "Creating chunks": 0.0,
             "Writing chunks": 0.0,
-            "Queuing chunks": 0.0,
+            "Complete chunk": 0.0,
             "Preparing chunks": 0.0,
         }
         self.current_geom_actual_cell_count = 0
@@ -93,6 +97,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.source_layer = self.source_ds.GetLayer(0)
         if not self.source_layer:
             raise RuntimeError("Could not retrieve layer from the data source.")
+        self.parts_count = self.count_layer_parts()
 
         # Determine source EPSG (if any) by reading layer's spatial ref
         self.src_spatial_ref = self.source_layer.GetSpatialRef()
@@ -143,6 +148,25 @@ class StudyAreaProcessingTask(QgsTask):
         # Tracking table name
         self.status_table_name = "study_area_creation_status"
 
+    def count_layer_parts(self):
+        """
+        Returns the number of parts in the layer.
+
+        :return: The number of parts in the layer.
+        """
+        self.source_layer.ResetReading()
+        parts_count = 0
+        for feature in self.source_layer:
+            geom = feature.GetGeometryRef()
+            if not geom:
+                continue
+            geometry_type = geom.GetGeometryName()
+            if geometry_type == "MULTIPOLYGON":
+                parts_count += geom.GetGeometryCount()
+            else:
+                return self.source_layer.GetFeatureCount()
+        return parts_count
+
     def export_qgs_layer_to_shapefile(self, layer, output_dir):
         """
         Exports a QgsVectorLayer to a Shapefile in output_dir.
@@ -189,7 +213,6 @@ class StudyAreaProcessingTask(QgsTask):
             invalid_feature_count = 0
             valid_feature_count = 0
             fixed_feature_count = 0
-
             self.source_layer.ResetReading()
             for feature in self.source_layer:
                 geom_ref = feature.GetGeometryRef()
@@ -242,7 +265,8 @@ class StudyAreaProcessingTask(QgsTask):
                     self.process_singlepart_geometry(
                         geom_ref, normalized_name, area_name
                     )
-
+                progress = int((valid_feature_count / self.parts_count) * 100)
+                self.setProgress(progress)
             log_message(
                 f"Processing complete. Valid: {valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
             )
@@ -253,6 +277,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         except Exception as e:
             log_message(f"Error in run(): {str(e)}")
+            log_message(traceback.format_exc())
             with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
                 f.write(f"{datetime.datetime.now()}\n")
                 f.write(traceback.format_exc())
@@ -293,10 +318,20 @@ class StudyAreaProcessingTask(QgsTask):
 
             layer = ds.CreateLayer(self.status_table_name, srs, geom_type=ogr.wkbNone)
             layer.CreateField(ogr.FieldDefn("area_name", ogr.OFTString))
+            layer.CreateField(ogr.FieldDefn("timestamp_start", ogr.OFTDateTime))
+            layer.CreateField(ogr.FieldDefn("timestamp_end", ogr.OFTDateTime))
             layer.CreateField(ogr.FieldDefn("geometry_processed", ogr.OFTInteger))
             layer.CreateField(ogr.FieldDefn("clip_geometry_processed", ogr.OFTInteger))
             layer.CreateField(ogr.FieldDefn("grid_processed", ogr.OFTInteger))
             layer.CreateField(ogr.FieldDefn("mask_processed", ogr.OFTInteger))
+            layer.CreateField(
+                ogr.FieldDefn("grid_creation_duration_secs", ogr.OFTInteger)
+            )
+            layer.CreateField(
+                ogr.FieldDefn("clip_geom_creation_duration_secs", ogr.OFTInteger)
+            )
+            layer.CreateField(ogr.FieldDefn("geom_total_duration_secs", ogr.OFTInteger))
+
             log_message(f"Table '{self.status_table_name}' created in GeoPackage.")
         finally:
             ds = None
@@ -315,10 +350,15 @@ class StudyAreaProcessingTask(QgsTask):
         feat_defn = layer.GetLayerDefn()
         feat = ogr.Feature(feat_defn)
         feat.SetField("area_name", area_name)
+        feat.SetField("timestamp_start", None)
+        feat.SetField("timestamp_end", None)
         feat.SetField("geometry_processed", 0)
         feat.SetField("clip_geometry_processed", 0)
         feat.SetField("grid_processed", 0)
         feat.SetField("mask_processed", 0)
+        feat.SetField("grid_creation_duration_secs", 0)
+        feat.SetField("clip_geom_creation_duration_secs", 0)
+        feat.SetField("geom_total_duration_secs", 0)
         layer.CreateFeature(feat)
         feat = None
         ds = None
@@ -358,6 +398,13 @@ class StudyAreaProcessingTask(QgsTask):
          6) Create clip polygon
          7) Optionally create raster mask
         """
+        # Used to track durations
+        geometry_start_time = time.time()
+        # Also grab the current timestamp and write it to the tracking table
+        now_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        self.set_status_tracking_table_value(
+            normalized_name, "timestamp_start", now_str
+        )
         # Compute aligned bounding box in target CRS
         # (We already have a coordinate transformation if the source has a known SRS)
         geometry_bbox = geom.GetEnvelope()  # (xmin, xmax, ymin, ymax)
@@ -380,21 +427,35 @@ class StudyAreaProcessingTask(QgsTask):
 
         # Create the grid
         log_message(f"Creating vector grid for {normalized_name}.")
+        start_time = time.time()
         self.create_and_save_grid(normalized_name, geom, aligned_bbox)
         self.set_status_tracking_table_value(normalized_name, "grid_processed", 1)
-
+        self.set_status_tracking_table_value(
+            normalized_name, "grid_creation_duration_secs", time.time() - start_time
+        )
         # Create clip polygon
         log_message(f"Creating clip polygon for {normalized_name}.")
+        start_time = time.time()
         self.create_clip_polygon(geom, aligned_bbox, normalized_name)
         self.set_status_tracking_table_value(
             normalized_name, "clip_geometry_processed", 1
         )
-
+        self.set_status_tracking_table_value(
+            normalized_name,
+            "clip_geom_creation_duration_secs",
+            time.time() - start_time,
+        )
         # (Optional) create raster mask
         log_message(f"Creating raster mask for {normalized_name}.")
         self.create_raster_mask(geom, aligned_bbox, normalized_name)
         self.set_status_tracking_table_value(normalized_name, "mask_processed", 1)
-
+        now_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        self.set_status_tracking_table_value(normalized_name, "timestamp_end", now_str)
+        self.set_status_tracking_table_value(
+            normalized_name,
+            "geom_total_duration_secs",
+            time.time() - geometry_start_time,
+        )
         self.counter += 1
 
     def process_multipart_geometry(self, geom, normalized_name, area_name):
@@ -406,7 +467,7 @@ class StudyAreaProcessingTask(QgsTask):
             part_geom = geom.GetGeometryRef(i)
             part_name = f"{normalized_name}_part{i}"
             self.process_singlepart_geometry(part_geom, part_name, area_name)
-            self.feedback.setProgress(int(self.counter / count) * 100)
+            self.parent_job_feedback.setProgress(int(self.counter / count) * 100)
 
     ##########################################################################
     # BBox handling
@@ -586,22 +647,30 @@ class StudyAreaProcessingTask(QgsTask):
         feedback = QgsFeedback()
 
         # 1. Chunk the bounding box
-        chunk_size = 100  # adjust to taste
+        # size is squared so 5 will make a 5x5 cell chunk
+        chunk_size = int(setting(key="chunk_size", default=50))
         bbox_chunks = list(
             self.chunk_bbox(xmin, xmax, ymin, ymax, cell_size, chunk_size)
         )
         # print out all the chunk bboxes
         log_message(f"Chunk count: {len(bbox_chunks)}")
         log_message(f"Chunk size: {chunk_size}")
+        chunk_count = len(bbox_chunks)
         for idx, chunk in enumerate(bbox_chunks):
             log_message(f"Chunk {idx}: {chunk}")
 
         for idx, chunk in enumerate(bbox_chunks):
-            start_time = time.time()
+            start_time = (
+                time.time()
+            )  # used for both create chunk start and total chunk start
             task = GridFromBbox(idx, chunk, geom, cell_size, feedback)
+            self.track_time("Creating chunks", start_time)
             # Not running in thread for now, see note below
             task.run()
-            self.write_grids(layer, task, normalized_name)
+
+            self.write_chunk(layer, task, normalized_name)
+            self.child_job_feedback.setProgress(int((idx / chunk_count) * 100))
+            self.setProgress(int((idx / chunk_count) * 100))
             # This is blocking, but we're in a thread
             # Crashes QGIS, needs to be refactored to use QgsTask subtasks
             # task.taskCompleted.connect(write_grids)
@@ -609,7 +678,7 @@ class StudyAreaProcessingTask(QgsTask):
             # log_message(f"Task {idx} created for chunk {chunk}")
             # log_message(f"{len(worker_tasks)} tasks queued.")
             # task_manager.addTask(task)
-            self.track_time("Queuing chunks", start_time)
+            self.track_time("Complete chunk", start_time)
         ds = None
         # ----------------------------
         # Print out metrics summary
@@ -620,7 +689,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.total_cells += self.current_geom_actual_cell_count
         log_message(f"Grid creation completed for area {normalized_name}.")
 
-    def write_grids(self, layer, task, normalized_name):
+    def write_chunk(self, layer, task, normalized_name):
         start_time = time.time()
         # Write locking is intended for a future version where we might have multiple threads
         # currently I am just using the grid_from_bbox task to generate the geometries in a
@@ -663,7 +732,7 @@ class StudyAreaProcessingTask(QgsTask):
                         log_message(
                             f"Grid creation for part {normalized_name}: {self.current_geom_actual_cell_count}/{self.current_geom_cell_count_estimate} ({percent:.2f}%)"
                         )
-                        self.feedback.setProgress(int(percent))
+                        # self.parent_job_feedback.setProgress(int(percent))
                     except ZeroDivisionError:
                         pass
                     # commit changes

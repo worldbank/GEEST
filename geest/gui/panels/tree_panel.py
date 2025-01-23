@@ -928,6 +928,7 @@ class TreePanel(QWidget):
             "study_area_grid",
             "study_area_bboxes",
             "study_area_bbox",
+            "study_area_creation_status",
         ]
         for layer_name in layers:
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"

@@ -55,7 +55,7 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            feedback=self.feedback,
+            parent_job_feedback=self.feedback,
         )
 
         self.assertEqual(task.layer, self.layer)
@@ -73,7 +73,7 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            feedback=self.feedback,
+            parent_job_feedback=self.feedback,
         )
 
         bbox = self.layer.extent()
@@ -89,7 +89,7 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            feedback=self.feedback,
+            parent_job_feedback=self.feedback,
         )
 
         result = task.process_study_area()
@@ -111,7 +111,7 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            feedback=self.feedback,
+            parent_job_feedback=self.feedback,
         )
 
         feature = next(self.layer.getFeatures())
@@ -141,7 +141,7 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            feedback=self.feedback,
+            parent_job_feedback=self.feedback,
         )
 
         bbox = self.layer.extent()
@@ -162,7 +162,7 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            feedback=self.feedback,
+            parent_job_feedback=self.feedback,
         )
 
         # Generate raster masks
