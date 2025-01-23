@@ -9,7 +9,7 @@ After installing the plugin, its interface should automatically appear:
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page.jpg" 
     alt="Plugin Interface" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -28,13 +28,13 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page%20next.jpg" 
     alt="First Page Next" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Second%20page%20next.jpg" 
     alt="Second Page Next" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -64,7 +64,7 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ORS%20setup.jpg" 
     alt="ORS key" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -89,7 +89,7 @@ In this step, you need to select a project folder to begin your work. The plugin
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg" 
     alt="Geest Project" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -101,7 +101,7 @@ Option 1: **Open an Existing Project**:
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20open.jpg" 
     alt="Open Geest Project" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -113,7 +113,7 @@ Option 2: **Create a New Project**:
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20new.jpg" 
     alt="New Geest Project" 
-    style="width:50%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -179,7 +179,7 @@ Important Notes:
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20final.jpg"
     alt="Geest Project final" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -203,7 +203,7 @@ Once this pre-processing step is completed, you will seamlessly transition to th
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20data%20processing%20UI.jpg"
     alt="Geest data processing" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -217,7 +217,7 @@ The data processing interface serves as the central hub for managing, configurin
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Nav_understand.jpg"
     alt="Geest data processing" 
-    style="width:30%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
