@@ -2,7 +2,6 @@ import os
 import unittest
 from qgis.core import (
     QgsVectorLayer,
-    QgsProcessingContext,
     QgsFeedback,
 )
 from geest.core.tasks import (
@@ -30,7 +29,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
         )
         cls.field_name = "Name"
         cls.cell_size_m = 100
-        cls.context = QgsProcessingContext()
         cls.feedback = QgsFeedback()
 
         # Ensure the working directory exists
@@ -57,7 +55,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            context=self.context,
             feedback=self.feedback,
         )
 
@@ -76,7 +73,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            context=self.context,
             feedback=self.feedback,
         )
 
@@ -93,7 +89,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            context=self.context,
             feedback=self.feedback,
         )
 
@@ -116,7 +111,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            context=self.context,
             feedback=self.feedback,
         )
 
@@ -147,7 +141,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            context=self.context,
             feedback=self.feedback,
         )
 
@@ -169,7 +162,6 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             field_name=self.field_name,
             cell_size_m=self.cell_size_m,
             working_dir=self.working_directory,
-            context=self.context,
             feedback=self.feedback,
         )
 
