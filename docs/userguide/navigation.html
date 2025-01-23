@@ -432,23 +432,26 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-plugin">Accessing the Plugin</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-the-plugin-window">Navigating the Plugin Window</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-ors-key">Setting Up the ORS Key</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-get-your-api-key">Step 1: Get Your API Key</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-paste-the-api-key">Step 2: Paste the API Key</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-key">Step 3: Verify the Key</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#project-setup">Project Setup</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-ors-key">Setting Up the ORS Key</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-get-your-api-key">Step 1: Get Your API Key</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-paste-the-api-key">Step 2: Paste the API Key</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-key">Step 3: Verify the Key</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-project-selection">GEEST Project Selection</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-project-selection">GEEST Project Selection</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#proceed-to-the-processing-data-interface">Proceed to the Processing Data Interface</a><ul class="nav section-nav flex-column">
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processing">Pre-Processing</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-the-project-folder-path">1. Verify the Project Folder Path</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#click-the-right-arrow-button">2. Click the Right Arrow Button</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overview-of-next-steps">3. Overview of Next Steps</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview-of-next-steps">Overview of Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-data-interface">Processing Data Interface</a></li>
 </ul>
             </nav>
         </div>
@@ -481,8 +484,8 @@ Find the plugin’s icon in the QGIS toolbar.</p></li>
 Click on the plugin’s toolbar icon to open its main window.</p></li>
 </ol>
 </section>
-<section id="navigating-the-plugin-window">
-<h2>Navigating the Plugin Window<a class="headerlink" href="#navigating-the-plugin-window" title="Permalink to this heading">#</a></h2>
+<section id="project-setup">
+<h2>Project Setup<a class="headerlink" href="#project-setup" title="Permalink to this heading">#</a></h2>
 <p>Once the plugin window is open, press the right arrow buttons highlighted in red to navigate through the pages:</p>
 <p align="center">
   <img 
@@ -504,13 +507,12 @@ Click on the plugin’s toolbar icon to open its main window.</p></li>
 <li><p><strong>About Page</strong>: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.</p></li>
 </ul>
 </div></blockquote>
-</section>
 <section id="setting-up-the-ors-key">
-<h2>Setting Up the ORS Key<a class="headerlink" href="#setting-up-the-ors-key" title="Permalink to this heading">#</a></h2>
+<h3>Setting Up the ORS Key<a class="headerlink" href="#setting-up-the-ors-key" title="Permalink to this heading">#</a></h3>
 <p>To use the GEEST plugin effectively, you need to configure the <strong>Open Route Service (ORS)</strong> API key, as ORS is the backbone for processing <strong>Accessibility</strong> factors. The ORS platform is used for spatial analysis workflows, and obtaining an API key is a simple and free process. Below are the steps:</p>
 <hr class="docutils" />
 <section id="step-1-get-your-api-key">
-<h3>Step 1: Get Your API Key<a class="headerlink" href="#step-1-get-your-api-key" title="Permalink to this heading">#</a></h3>
+<h4>Step 1: Get Your API Key<a class="headerlink" href="#step-1-get-your-api-key" title="Permalink to this heading">#</a></h4>
 <ol class="arabic simple">
 <li><p>Open your browser and go to the <a class="reference external" href="https://openrouteservice.org/sign-up/">ORS API Key Signup Page</a>.</p></li>
 <li><p>Register for an account or log in if you already have one.</p></li>
@@ -518,7 +520,7 @@ Click on the plugin’s toolbar icon to open its main window.</p></li>
 </ol>
 </section>
 <section id="step-2-paste-the-api-key">
-<h3>Step 2: Paste the API Key<a class="headerlink" href="#step-2-paste-the-api-key" title="Permalink to this heading">#</a></h3>
+<h4>Step 2: Paste the API Key<a class="headerlink" href="#step-2-paste-the-api-key" title="Permalink to this heading">#</a></h4>
 <blockquote>
 <div><p><strong>Note</strong>: If you already entered your ORS API key in <strong>Step 5: Verify the Installation and Configure the Tool</strong> under the <strong><a class="reference external" href="https://github.com/worldbank/GEEST/blob/main/docs/userguide/install.md">Installing GEEST</a></strong> instructions, the key will automatically appear here. In this case, you can skip this step and proceed to the next one.</p>
 </div></blockquote>
@@ -537,7 +539,7 @@ Click on the plugin’s toolbar icon to open its main window.</p></li>
 </p>
 </section>
 <section id="step-3-verify-the-key">
-<h3>Step 3: Verify the Key<a class="headerlink" href="#step-3-verify-the-key" title="Permalink to this heading">#</a></h3>
+<h4>Step 3: Verify the Key<a class="headerlink" href="#step-3-verify-the-key" title="Permalink to this heading">#</a></h4>
 <ol class="arabic simple">
 <li><p>After pasting the API key, click the <strong>Check my key…</strong> button.</p></li>
 <li><p>If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.</p></li>
@@ -556,7 +558,7 @@ Click on the plugin’s toolbar icon to open its main window.</p></li>
 </section>
 <hr class="docutils" />
 <section id="geest-project-selection">
-<h2>GEEST Project Selection<a class="headerlink" href="#geest-project-selection" title="Permalink to this heading">#</a></h2>
+<h3>GEEST Project Selection<a class="headerlink" href="#geest-project-selection" title="Permalink to this heading">#</a></h3>
 <p>In this step, you need to select a project folder to begin your work. The plugin provides you with two options:</p>
 <p align="center">
 <img 
@@ -604,7 +606,7 @@ Choose this option to start a new project. The plugin will guide you through cre
 </div></blockquote>
 <hr class="docutils" />
 <section id="additional-steps-after-creating-the-folder">
-<h3>Additional Steps After Creating the Folder<a class="headerlink" href="#additional-steps-after-creating-the-folder" title="Permalink to this heading">#</a></h3>
+<h4>Additional Steps After Creating the Folder<a class="headerlink" href="#additional-steps-after-creating-the-folder" title="Permalink to this heading">#</a></h4>
 <ul class="simple">
 <li><p><strong>Select a Layer</strong>: Click on the three dots button to choose a layer containing your Admin0 areas (country or region boundaries). The input layer must be in either SHP or GPKG format. Once selected, use the dropdown menu to specify the column that contains the names of the areas. Ensure the column is correctly populated to avoid errors during analysis.</p></li>
 <li><p><strong>Set the Analysis Cell Size</strong>:</p>
@@ -641,9 +643,10 @@ Choose this option to start a new project. The plugin will guide you through cre
 </div></blockquote>
 </section>
 </section>
+</section>
 <hr class="docutils" />
-<section id="proceed-to-the-processing-data-interface">
-<h2>Proceed to the Processing Data Interface<a class="headerlink" href="#proceed-to-the-processing-data-interface" title="Permalink to this heading">#</a></h2>
+<section id="pre-processing">
+<h2>Pre-Processing<a class="headerlink" href="#pre-processing" title="Permalink to this heading">#</a></h2>
 <p>Once you have completed all required inputs on the <strong>GEEST Project Creation</strong> screen, follow these steps to proceed:</p>
 <hr class="docutils" />
 <section id="verify-the-project-folder-path">
@@ -682,10 +685,9 @@ Choose this option to start a new project. The plugin will guide you through cre
 </ul>
 </div></blockquote>
 </section>
-</section>
 <hr class="docutils" />
 <section id="overview-of-next-steps">
-<h2>Overview of Next Steps<a class="headerlink" href="#overview-of-next-steps" title="Permalink to this heading">#</a></h2>
+<h3>3. Overview of Next Steps<a class="headerlink" href="#overview-of-next-steps" title="Permalink to this heading">#</a></h3>
 <p>After pressing the right arrow, the plugin will begin processing the input boundary layer by dividing it into a grid based on the specified cell size. During this step, the project folder will automatically populate with the generated outputs, including the study area split into grids, polygons, gridded areas, bounding boxes and other relevant data.</p>
 <p>Once this pre-processing step is completed, you will seamlessly transition to the <strong>Processing Data Interface</strong>, where you can proceed with the core analysis workflows:</p>
 <ol class="arabic simple">
@@ -701,6 +703,40 @@ Choose this option to start a new project. The plugin will guide you through cre
     onclick="window.open(this.src, '_blank')">
 </p>
 <p>This marks the completion of the project setup and transition to the core analysis workflow.</p>
+</section>
+</section>
+<section id="processing-data-interface">
+<h2>Processing Data Interface<a class="headerlink" href="#processing-data-interface" title="Permalink to this heading">#</a></h2>
+<p>The data processing interface serves as the central hub for managing, configuring, and processing inputs across multiple dimensions and factors within the project. This interface is designed to streamline workflows and provide users with a clear overview of the processing status. Below is a guide to understanding the key components of this interface:</p>
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Nav_understand.jpg"
+    alt="Geest data processing" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>Key Elements of the Interface:</p>
+<ol class="arabic simple">
+<li><p><strong>The Three Dimensions</strong>. The interface organizes the analysis into three primary dimensions: Contextual, Accessibility and Place Characterization.</p></li>
+<li><p><strong>Fifteen Factors</strong>. Each dimension consists of factors, representing the main themes of analysis.</p></li>
+<li><p><strong>Fourteen Subfactors</strong>. Within certain factors, subfactors provide additional granularity.</p></li>
+<li><p><strong>Processing Status Widgets</strong>. Next to each factor or dimension, widgets indicate the processing status:</p>
+<ul class="simple">
+<li><p>4a - <strong>Configured but Not Run</strong>: Inputs are set up but processing has not started.</p></li>
+<li><p>4b - <strong>Required but Not Configured</strong>: Essential inputs are missing and need configuration.</p></li>
+<li><p>4c - <strong>Completed Successfully</strong>: Processing has finished without errors.</p></li>
+<li><p>4d - <strong>Workflow Failed</strong>: The process encountered an error and requires troubleshooting.</p></li>
+</ul>
+</li>
+<li><p><strong>un All/Run Incomplete</strong>:</p>
+<ul class="simple">
+<li><p><strong>Run All</strong>: Executes all workflows, regardless of their configuration or status.</p></li>
+<li><p><strong>Run Incomplete</strong>: Focuses on executing only the workflows that have not been successfully completed. This is useful for resuming interrupted processes without rerunning completed ones</p></li>
+</ul>
+</li>
+<li><p><strong>Project Setup Pages</strong>. The Project button opens back the setup pages where users can configure the project folder, and set up parameters for the analysis.</p></li>
+<li><p><strong>Help</strong>. Clicking the Help button redirects you to the tool’s GitHub page, where you can find detailed documentation and support resources.</p></li>
+</ol>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contextual.html">Contextual</a></li>
@@ -780,23 +816,26 @@ Choose this option to start a new project. The plugin will guide you through cre
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-plugin">Accessing the Plugin</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#navigating-the-plugin-window">Navigating the Plugin Window</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-ors-key">Setting Up the ORS Key</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-get-your-api-key">Step 1: Get Your API Key</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-paste-the-api-key">Step 2: Paste the API Key</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-key">Step 3: Verify the Key</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#project-setup">Project Setup</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-ors-key">Setting Up the ORS Key</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-get-your-api-key">Step 1: Get Your API Key</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-paste-the-api-key">Step 2: Paste the API Key</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-key">Step 3: Verify the Key</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-project-selection">GEEST Project Selection</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-project-selection">GEEST Project Selection</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#proceed-to-the-processing-data-interface">Proceed to the Processing Data Interface</a><ul class="nav section-nav flex-column">
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pre-processing">Pre-Processing</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-the-project-folder-path">1. Verify the Project Folder Path</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#click-the-right-arrow-button">2. Click the Right Arrow Button</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#overview-of-next-steps">3. Overview of Next Steps</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview-of-next-steps">Overview of Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-data-interface">Processing Data Interface</a></li>
 </ul>
   </nav></div>
 

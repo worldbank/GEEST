@@ -20,7 +20,7 @@ After installing the plugin, its interface should automatically appear:
 2. **Open the Plugin**  
    Click on the plugin’s toolbar icon to open its main window.
 
-### Navigating the Plugin Window
+### Project Setup
 
 Once the plugin window is open, press the right arrow buttons highlighted in red to navigate through the pages:
 
@@ -43,18 +43,18 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
 >
 > - **About Page**: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.
 
-### Setting Up the ORS Key
+#### Setting Up the ORS Key
 
 To use the GEEST plugin effectively, you need to configure the **Open Route Service (ORS)** API key, as ORS is the backbone for processing **Accessibility** factors. The ORS platform is used for spatial analysis workflows, and obtaining an API key is a simple and free process. Below are the steps:
 
 ---
 
-#### Step 1: Get Your API Key
+##### Step 1: Get Your API Key
 1. Open your browser and go to the [ORS API Key Signup Page](https://openrouteservice.org/sign-up/).
 2. Register for an account or log in if you already have one.
 3. Once logged in, generate an API key by following the on-screen instructions.
 
-#### Step 2: Paste the API Key
+##### Step 2: Paste the API Key
 > **Note**: If you already entered your ORS API key in **Step 5: Verify the Installation and Configure the Tool** under the **[Installing GEEST](https://github.com/worldbank/GEEST/blob/main/docs/userguide/install.md)** instructions, the key will automatically appear here. In this case, you can skip this step and proceed to the next one.
 1. Copy the API key from the ORS website.
 2. Open the **GEEST ORS Setup** window in the plugin.
@@ -69,7 +69,7 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
     onclick="window.open(this.src, '_blank')">
 </p>
 
-#### Step 3: Verify the Key
+##### Step 3: Verify the Key
 1. After pasting the API key, click the **Check my key...** button.
 2. If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.
 
@@ -81,7 +81,7 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 > - **This step is crucial to unlock the full functionality of the plugin, including advanced spatial analysis workflows.**
 ---
 
-### GEEST Project Selection
+#### GEEST Project Selection
 
 In this step, you need to select a project folder to begin your work. The plugin provides you with two options:
 
@@ -132,7 +132,7 @@ How to Create a New Folder
 ---
 
 
-#### Additional Steps After Creating the Folder
+##### Additional Steps After Creating the Folder
 
 - **Select a Layer**: Click on the three dots button to choose a layer containing your Admin0 areas (country or region boundaries). The input layer must be in either SHP or GPKG format. Once selected, use the dropdown menu to specify the column that contains the names of the areas. Ensure the column is correctly populated to avoid errors during analysis.
   
@@ -155,7 +155,7 @@ How to Create a New Folder
 --- 
 
     
-### Proceed to the Processing Data Interface
+### Pre-Processing
 
 Once you have completed all required inputs on the **GEEST Project Creation** screen, follow these steps to proceed:
 
@@ -190,7 +190,7 @@ Important Notes:
 > - 💡 **Tip**: Ensure that the analysis cell size and boundary layer are correctly configured to avoid unexpected results.
 ---
 
-### Overview of Next Steps
+#### 3. Overview of Next Steps
 
 After pressing the right arrow, the plugin will begin processing the input boundary layer by dividing it into a grid based on the specified cell size. During this step, the project folder will automatically populate with the generated outputs, including the study area split into grids, polygons, gridded areas, bounding boxes and other relevant data.
 
@@ -210,6 +210,33 @@ Once this pre-processing step is completed, you will seamlessly transition to th
 
 This marks the completion of the project setup and transition to the core analysis workflow.
 
+### Processing Data Interface
+
+The data processing interface serves as the central hub for managing, configuring, and processing inputs across multiple dimensions and factors within the project. This interface is designed to streamline workflows and provide users with a clear overview of the processing status. Below is a guide to understanding the key components of this interface:
+
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Nav_understand.jpg"
+    alt="Geest data processing" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+Key Elements of the Interface:
+
+1. **The Three Dimensions**. The interface organizes the analysis into three primary dimensions: Contextual, Accessibility and Place Characterization.
+2. **Fifteen Factors**. Each dimension consists of factors, representing the main themes of analysis.
+3. **Fourteen Subfactors**. Within certain factors, subfactors provide additional granularity.
+4. **Processing Status Widgets**. Next to each factor or dimension, widgets indicate the processing status:
+     - 4a - **Configured but Not Run**: Inputs are set up but processing has not started.
+     - 4b - **Required but Not Configured**: Essential inputs are missing and need configuration.
+     - 4c - **Completed Successfully**: Processing has finished without errors.
+     - 4d - **Workflow Failed**: The process encountered an error and requires troubleshooting.
+5. **un All/Run Incomplete**:
+     - **Run All**: Executes all workflows, regardless of their configuration or status.
+     - **Run Incomplete**: Focuses on executing only the workflows that have not been successfully completed. This is useful for resuming interrupted processes without rerunning completed ones
+6. **Project Setup Pages**. The Project button opens back the setup pages where users can configure the project folder, and set up parameters for the analysis.
+7. **Help**. Clicking the Help button redirects you to the tool’s GitHub page, where you can find detailed documentation and support resources.
 
 
 
