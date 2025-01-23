@@ -158,6 +158,11 @@ If the results do not immediately appear in the Layer Panel after processing the
     onclick="window.open(this.src, '_blank')">
 </p>
 
+### Key Considerations
+---
+- **Input Accuracy**: Ensure all input values are carefully entered and correspond to the correct indices (e.g., Workplace Discrimination, Regulatory Frameworks, Financial Inclusion). Incorrect data will impact the outputs and subsequent analysis.
+
+- **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
 
 
 
