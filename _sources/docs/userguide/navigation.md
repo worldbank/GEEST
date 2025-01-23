@@ -72,6 +72,7 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 ##### Step 3: Verify the Key
 1. After pasting the API key, click the **Check my key...** button.
 2. If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.
+   
 **This step is crucial to unlock the full functionality of the plugin, including advanced spatial analysis workflows.**
 
 ---
