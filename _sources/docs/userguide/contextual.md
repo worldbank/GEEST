@@ -22,7 +22,7 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WD.jpg" 
     alt="Workplace Discrimination" 
-    style="width:45%;" 
+    style="width:50%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -42,7 +42,7 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/RF.jpg" 
     alt="Regulatory Frameworks" 
-    style="width:45%;" 
+    style="width:50%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -62,7 +62,7 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FI.jpg" 
     alt="Finacial Inclusion" 
-    style="width:45%;" 
+    style="width:50%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -82,7 +82,7 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Contextual_Weights.jpg" 
     alt="Contextual Weights" 
-    style="width:45%;" 
+    style="width:50%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
