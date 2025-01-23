@@ -240,10 +240,10 @@ Key Elements of the Interface:
 
 ---
 > **Key Considerations**
-> Organize Your Project Folder: Ensure your project folder is empty before starting. This folder will store all generated outputs and analysis-related files. Avoid using a folder that contains unrelated files to prevent errors or accidental overwrites. Using a descriptive name with timestamps can help maintain clarity and avoid confusion when working with multiple projects.
-> Start with Larger Cell Sizes for Testing: If analyzing large regions, begin with a larger cell size for initial testing to ensure faster processing times. You can refine the analysis later with a smaller cell size for greater detail.
-> Backup Your Work: Save your progress frequently and create backups of your project folder to prevent data loss in case of unexpected issues.
-> Monitor Processing Status: Use the Processing Status Widgets to track the progress and troubleshoot any errors. Pay close attention to the red flags, which indicate configuration or workflow issues.
-> Use Help Resources: If you encounter issues or have questions, refer to the Help section within the plugin or visit the tool’s GitHub page for detailed documentation and support.
-
+> - Organize Your Project Folder: Ensure your project folder is empty before starting. This folder will store all generated outputs and analysis-related files. Avoid using a folder that contains unrelated files to prevent errors or accidental overwrites. Using a descriptive name with timestamps can help maintain clarity and avoid confusion when working with multiple projects.
+> - Start with Larger Cell Sizes for Testing: If analyzing large regions, begin with a larger cell size for initial testing to ensure faster processing times. You can refine the analysis later with a smaller cell size for greater detail.
+> - Backup Your Work: Save your progress frequently and create backups of your project folder to prevent data loss in case of unexpected issues.
+> - Monitor Processing Status: Use the Processing Status Widgets to track the progress and troubleshoot any errors. Pay close attention to the red flags, which indicate configuration or workflow issues.
+> - Use Help Resources: If you encounter issues or have questions, refer to the Help section within the plugin or visit the tool’s GitHub page for detailed documentation and support.
+---
 By keeping these considerations in mind, you can ensure a smooth and efficient workflow while minimizing errors and maximizing the utility of the GEEST plugin.
