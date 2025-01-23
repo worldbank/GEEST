@@ -28,13 +28,13 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page%20next.jpg" 
     alt="First Page Next" 
-    style="width:50%;" 
+    style="width:45%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Second%20page%20next.jpg" 
     alt="Second Page Next" 
-    style="width:50%;" 
+    style="width:45%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
