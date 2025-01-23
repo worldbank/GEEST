@@ -45,7 +45,7 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
 
 ### Setting Up the ORS Key
 
-To use the GEEST plugin effectively, you need to configure the **Open Route Service (ORS)** API key. The ORS platform is used for spatial analysis workflows, and obtaining an API key is a simple and free process. Below are the steps:
+To use the GEEST plugin effectively, you need to configure the **Open Route Service (ORS)** API key, as ORS is the backbone for processing **Accessibility** factors. The ORS platform is used for spatial analysis workflows, and obtaining an API key is a simple and free process. Below are the steps:
 
 ---
 
