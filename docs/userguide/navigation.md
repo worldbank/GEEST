@@ -228,10 +228,12 @@ Key Elements of the Interface:
 2. **Fifteen Factors**. Each dimension consists of factors, representing the main themes of analysis.
 3. **Fourteen Subfactors**. Within certain factors, subfactors provide additional granularity.
 4. **Processing Status Widgets**. Next to each factor or dimension, widgets indicate the processing status:
-     - 4a - **Configured but Not Run**: Inputs are set up but processing has not started.
-     - 4b - **Required but Not Configured**: Essential inputs are missing and need configuration.
-     - 4c - **Completed Successfully**: Processing has finished without errors.
-     - 4d - **Workflow Failed**: The process encountered an error and requires troubleshooting.
+     - 4a - **Configured, not run**: Inputs are set up but processing has not started.
+     - 4b - **Required and not configured**: Essential inputs are missing and need configuration.
+     - 4c - **Completed successfully**: Processing has finished without errors.
+     - 4d - **Workflow failed**: The process encountered an error and requires troubleshooting.
+     - 4e - **Not configured (optional)**: Inputs are optional and have not been configured. These do not impact the analysis unless explicitly included.
+     - 4f - **Excluded from analysis**: This factor or subfactor has been intentionally excluded from the analysis workflow and will not be processed.
 5. **Run All/Run Incomplete**:
      - **Run All**: Executes all workflows, regardless of their configuration or status.
      - **Run Incomplete**: Focuses on executing only the workflows that have not been successfully completed. This is useful for resuming interrupted processes without rerunning completed ones
