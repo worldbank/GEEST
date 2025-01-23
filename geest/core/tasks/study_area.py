@@ -47,8 +47,7 @@ class StudyAreaProcessingTask(QgsTask):
         field_name,
         cell_size_m,
         working_dir,
-        parent_job_feedback: QgsFeedback = None,
-        child_job_feedback: QgsFeedback = None,
+        feedback: QgsFeedback = None,
         crs=None,
     ):
         """
@@ -65,14 +64,14 @@ class StudyAreaProcessingTask(QgsTask):
         self.working_dir = working_dir
         self.gpkg_path = os.path.join(working_dir, "study_area", "study_area.gpkg")
         self.counter = 0
-        self.parent_job_feedback = parent_job_feedback
-        self.child_job_feedback = child_job_feedback
+        self.feedback = feedback
         self.metrics = {
             "Creating chunks": 0.0,
             "Writing chunks": 0.0,
             "Complete chunk": 0.0,
             "Preparing chunks": 0.0,
         }
+        self.valid_feature_count = 0
         self.current_geom_actual_cell_count = 0
         self.current_geom_cell_count_estimate = 0
         self.total_cells = 0
@@ -144,7 +143,6 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(
             f"Transformed layer bbox to target CRS and aligned to grid: {self.transformed_layer_bbox}"
         )
-
         # Tracking table name
         self.status_table_name = "study_area_creation_status"
 
@@ -211,7 +209,7 @@ class StudyAreaProcessingTask(QgsTask):
 
             # 3) Iterate over features
             invalid_feature_count = 0
-            valid_feature_count = 0
+            self.valid_feature_count = 0
             fixed_feature_count = 0
             self.source_layer.ResetReading()
             for feature in self.source_layer:
@@ -250,7 +248,7 @@ class StudyAreaProcessingTask(QgsTask):
                         log_message(f"Geometry fix error: {str(e)}", level="CRITICAL")
                         continue
 
-                valid_feature_count += 1
+                self.valid_feature_count += 1
 
                 # Singlepart vs multipart
                 # OGR geometry can be geometry collection if multipart
@@ -265,10 +263,8 @@ class StudyAreaProcessingTask(QgsTask):
                     self.process_singlepart_geometry(
                         geom_ref, normalized_name, area_name
                     )
-                progress = int((valid_feature_count / self.parts_count) * 100)
-                self.setProgress(progress)
             log_message(
-                f"Processing complete. Valid: {valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
+                f"Processing complete. Valid: {self.valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
             )
             log_message(f"Total cells generated: {self.total_cells}")
 
@@ -324,13 +320,11 @@ class StudyAreaProcessingTask(QgsTask):
             layer.CreateField(ogr.FieldDefn("clip_geometry_processed", ogr.OFTInteger))
             layer.CreateField(ogr.FieldDefn("grid_processed", ogr.OFTInteger))
             layer.CreateField(ogr.FieldDefn("mask_processed", ogr.OFTInteger))
+            layer.CreateField(ogr.FieldDefn("grid_creation_duration_secs", ogr.OFTReal))
             layer.CreateField(
-                ogr.FieldDefn("grid_creation_duration_secs", ogr.OFTInteger)
+                ogr.FieldDefn("clip_geom_creation_duration_secs", ogr.OFTReal)
             )
-            layer.CreateField(
-                ogr.FieldDefn("clip_geom_creation_duration_secs", ogr.OFTInteger)
-            )
-            layer.CreateField(ogr.FieldDefn("geom_total_duration_secs", ogr.OFTInteger))
+            layer.CreateField(ogr.FieldDefn("geom_total_duration_secs", ogr.OFTReal))
 
             log_message(f"Table '{self.status_table_name}' created in GeoPackage.")
         finally:
@@ -356,9 +350,9 @@ class StudyAreaProcessingTask(QgsTask):
         feat.SetField("clip_geometry_processed", 0)
         feat.SetField("grid_processed", 0)
         feat.SetField("mask_processed", 0)
-        feat.SetField("grid_creation_duration_secs", 0)
-        feat.SetField("clip_geom_creation_duration_secs", 0)
-        feat.SetField("geom_total_duration_secs", 0)
+        feat.SetField("grid_creation_duration_secs", 0.0)
+        feat.SetField("clip_geom_creation_duration_secs", 0.0)
+        feat.SetField("geom_total_duration_secs", 0.0)
         layer.CreateFeature(feat)
         feat = None
         ds = None
@@ -457,6 +451,11 @@ class StudyAreaProcessingTask(QgsTask):
             time.time() - geometry_start_time,
         )
         self.counter += 1
+        progress = int((self.counter / self.parts_count) * 100)
+        # We use the progress object to notify of progress in the subtask
+        # And the QgsTask progressChanged signal to track the main task
+        self.setProgress(progress)
+        log_message(f"XXXXXXXXXXXX   Progress: {progress}% XXXXXXXXXXXXXXXXXXXXXXX")
 
     def process_multipart_geometry(self, geom, normalized_name, area_name):
         """
@@ -467,7 +466,6 @@ class StudyAreaProcessingTask(QgsTask):
             part_geom = geom.GetGeometryRef(i)
             part_name = f"{normalized_name}_part{i}"
             self.process_singlepart_geometry(part_geom, part_name, area_name)
-            self.parent_job_feedback.setProgress(int(self.counter / count) * 100)
 
     ##########################################################################
     # BBox handling
@@ -669,8 +667,13 @@ class StudyAreaProcessingTask(QgsTask):
             task.run()
 
             self.write_chunk(layer, task, normalized_name)
-            self.child_job_feedback.setProgress(int((idx / chunk_count) * 100))
-            self.setProgress(int((idx / chunk_count) * 100))
+            # We use the progress object to notify of progress in the subtask
+            # And the QgsTask progressChanged signal to track the main task
+            log_message(
+                f"XXXXXX Chunks Progress: {int((idx / chunk_count) * 100)}% XXXXXX"
+            )
+            self.feedback.setProgress(int((idx / chunk_count) * 100))
+
             # This is blocking, but we're in a thread
             # Crashes QGIS, needs to be refactored to use QgsTask subtasks
             # task.taskCompleted.connect(write_grids)
@@ -706,7 +709,6 @@ class StudyAreaProcessingTask(QgsTask):
         self.write_lock = True
         feat_defn = layer.GetLayerDefn()
         try:
-            # aggregated_features.extend(task.features_out)
             for geometry in task.features_out:
                 feature = ogr.Feature(feat_defn)
                 feature.SetField("grid_id", self.current_geom_actual_cell_count)
@@ -732,7 +734,6 @@ class StudyAreaProcessingTask(QgsTask):
                         log_message(
                             f"Grid creation for part {normalized_name}: {self.current_geom_actual_cell_count}/{self.current_geom_cell_count_estimate} ({percent:.2f}%)"
                         )
-                        # self.parent_job_feedback.setProgress(int(percent))
                     except ZeroDivisionError:
                         pass
                     # commit changes
