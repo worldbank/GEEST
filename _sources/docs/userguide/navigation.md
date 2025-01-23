@@ -232,7 +232,7 @@ Key Elements of the Interface:
      - 4b - **Required but Not Configured**: Essential inputs are missing and need configuration.
      - 4c - **Completed Successfully**: Processing has finished without errors.
      - 4d - **Workflow Failed**: The process encountered an error and requires troubleshooting.
-5. **un All/Run Incomplete**:
+5. **Run All/Run Incomplete**:
      - **Run All**: Executes all workflows, regardless of their configuration or status.
      - **Run Incomplete**: Focuses on executing only the workflows that have not been successfully completed. This is useful for resuming interrupted processes without rerunning completed ones
 6. **Project Setup Pages**. The Project button opens back the setup pages where users can configure the project folder, and set up parameters for the analysis.
