@@ -5,26 +5,85 @@ The Contextual Dimension refers to the laws and policies that shape workplace ge
     <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
 
-<h3>Workplace Discrimination</h3>
-<hr style="height: 3px; background-color: grey; border: none;">
-
+---
 <p align="justify"> 
-Workplace Discrimination involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.
+<strong>Workplace Discrimination</strong> involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.
 This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
 </p>
 
-<h3>Step 1: Accessing the Contextual Dimension</h3>
-<ul>
-    <li>
-        <strong>Locate the Workplace Discrimination Section:</strong>
-        <ul>
-               <span>🔍 Right-Click on Workplace Discrimination.</span><br>
-               <span>⚙️ Select Show Properties.</span>
-        </ul>
-        <img src="your_image_path_here" alt="IMAGE for WD" style="width:100%;"/>
-    </li>
-</ul>
+**Locate the Workplace Discrimination Section**
 
+- 🖱️🖱️ **Double-click** on the **Workplace Discrimination section** to open the pop-up.
+- 📝 In the *Input* field, enter the value from the **WBL2024 Workplace Index Score** and click **OK** to proceed.
+
+     
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WD.jpg" 
+    alt="Workplace Discrimination" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+---
+<p align="justify"> 
+<strong>Regulatory Frameworks</strong> pertain to laws and policies that protect women’s employment rights, such as childcare support and parental leave, influencing their workforce participation. 
+This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+</p>
+
+**Locate the Regulatory Frameworks Section**
+
+- 🖱️🖱️ **Double-click** on the **Regulatory Frameworks section** to open the pop-up.
+- 📝 In the *Input* field, enter the **average** value of the **WBL2024 Pay Score and Parenthood Index Score**, then click **OK** to proceed.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/RF.jpg" 
+    alt="Regulatory Frameworks" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+---
+<p align="justify"> 
+<strong>Finacial Inclusion</strong> involves laws concerning women’s access to financial resources like loans and credit, which is crucial for starting businesses and investing in economic opportunities. 
+This indicator is composed by the Workplace Index score of the WBL 2024, which is then standardized on a scale from 0 to 5.
+</p>
+
+**Locate the Financial Inclusion Section**
+
+- 🖱️🖱️ **Double-click** on the **Financial Inclusion section** to open the pop-up.
+- 📝 In the *Input* field, enter the value from the **WBL2024 Entrepreneurship Index Score**, then click **OK** to proceed.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FI.jpg" 
+    alt="Finacial Inclusion" 
+    style="width:30%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 <h3>Step 2: Opening the Show Properties Dialog</h3>
 <ul>
     <li>
