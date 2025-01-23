@@ -35,19 +35,28 @@ class GridFromBbox(QgsTask):
 
         # We'll assume self.geom is already an ogr.Geometry
         skip_intersection_check = False
-        # If the whole chunk is within the geometry, skip intersection check
-        if self.geom.Contains(
-            ogr.CreateGeometryFromWkt(
-                f"POLYGON(({x_start} {y_start}, {x_end} {y_start}, {x_end} {y_end}, {x_start} {y_end}, {x_start} {y_start}))"
-            )
-        ):
+
+        chunk_bounds = ogr.CreateGeometryFromWkt(
+            f"POLYGON(({x_start} {y_start}, {x_end} {y_start}, "
+            f"{x_end} {y_end}, {x_start} {y_end}, {x_start} {y_start}))"
+        )
+
+        # If chunk bounding box is fully outside of the geometry, skip chunk
+        if not self.geom.Intersects(chunk_bounds):
             log_message(
-                f"Whole chunk is not within the geometry, we will check intersection for each feature..."
+                f"Chunk {self.chunk_id} is completely outside geometry, skipping."
+            )
+            return True
+
+        # If the whole chunk is within the geometry, skip intersection check
+        if self.geom.Contains(chunk_bounds):
+            log_message(
+                f"Whole chunk is within the geometry, we will skip check intersection for each feature..."
             )
             skip_intersection_check = True
         else:
             log_message(
-                f"Whole chunk is within the geometry, skipping intersection check..."
+                f"Whole chunk is NOT within the geometry, we will check intersection for each feature..."
             )
 
         x = x_start

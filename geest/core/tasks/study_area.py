@@ -586,7 +586,7 @@ class StudyAreaProcessingTask(QgsTask):
         feedback = QgsFeedback()
 
         # 1. Chunk the bounding box
-        chunk_size = 10  # adjust to taste
+        chunk_size = 100  # adjust to taste
         bbox_chunks = list(
             self.chunk_bbox(xmin, xmax, ymin, ymax, cell_size, chunk_size)
         )
