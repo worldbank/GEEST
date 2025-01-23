@@ -194,7 +194,10 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         geometry = settings.value("AnalysisAggregationDialog/geometry")
         if geometry:
             log_message("Restoring dialog geometry")
-            self.resize(geometry.width(), geometry.height())
+            try:
+                self.resize(geometry.width(), geometry.height())
+            except AttributeError:
+                pass
         else:
             log_message("No saved geometry found, resizing dialog")
             # Resize the dialog to be almost as large as the main window
