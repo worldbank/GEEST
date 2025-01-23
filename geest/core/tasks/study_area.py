@@ -69,7 +69,8 @@ class StudyAreaProcessingTask(QgsTask):
             "Queuing chunks": 0.0,
             "Preparing chunks": 0.0,
         }
-        self.cell_count = 0
+        self.current_geom_actual_cell_count = 0
+        self.current_geom_cell_count_estimate = 0
         self.total_cells = 0
         self.write_lock = False
         # Make sure output directory exists
@@ -245,6 +246,7 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(
                 f"Processing complete. Valid: {valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
             )
+            log_message(f"Total cells generated: {self.total_cells}")
 
             # 4) Create a VRT of all generated raster masks
             self.create_raster_vrt()
@@ -383,14 +385,14 @@ class StudyAreaProcessingTask(QgsTask):
 
         # Create clip polygon
         log_message(f"Creating clip polygon for {normalized_name}.")
-        # self.create_clip_polygon(geom, aligned_bbox, normalized_name)
+        self.create_clip_polygon(geom, aligned_bbox, normalized_name)
         self.set_status_tracking_table_value(
             normalized_name, "clip_geometry_processed", 1
         )
 
         # (Optional) create raster mask
         log_message(f"Creating raster mask for {normalized_name}.")
-        # self.create_raster_mask(geom, aligned_bbox, normalized_name)
+        self.create_raster_mask(geom, aligned_bbox, normalized_name)
         self.set_status_tracking_table_value(normalized_name, "mask_processed", 1)
 
         self.counter += 1
@@ -561,12 +563,13 @@ class StudyAreaProcessingTask(QgsTask):
         # Approx count for logging
         x_range_count = int((xmax - xmin) / cell_size)
         y_range_count = int((ymax - ymin) / cell_size)
-        total_cells = x_range_count * y_range_count
-        if total_cells == 0:
+        self.current_geom_cell_count_estimate = x_range_count * y_range_count
+        if self.current_geom_cell_count_estimate == 0:
             log_message("No cells to generate.")
             return
-        log_message(f"Estimated total cells to generate: {total_cells}")
-        cell_count = 0
+        log_message(
+            f"Estimated total cells to generate: {self.current_geom_cell_count_estimate}"
+        )
 
         # OGR geometry intersection can be slow for large grids.
         # If this area is huge, consider a more robust approach or indexing.
@@ -574,19 +577,24 @@ class StudyAreaProcessingTask(QgsTask):
 
         self.write_lock = False
 
-        worker_tasks = []
+        # worker_tasks = []
         # Get a reference to the global task manager
-        task_manager = QgsApplication.taskManager()
+        # task_manager = QgsApplication.taskManager()
 
         # Limit concurrency to 8
         # task_manager.setMaxActiveThreadCount(8)
         feedback = QgsFeedback()
 
         # 1. Chunk the bounding box
-        chunk_size = 1000  # adjust to taste
+        chunk_size = 10  # adjust to taste
         bbox_chunks = list(
             self.chunk_bbox(xmin, xmax, ymin, ymax, cell_size, chunk_size)
         )
+        # print out all the chunk bboxes
+        log_message(f"Chunk count: {len(bbox_chunks)}")
+        log_message(f"Chunk size: {chunk_size}")
+        for idx, chunk in enumerate(bbox_chunks):
+            log_message(f"Chunk {idx}: {chunk}")
 
         for idx, chunk in enumerate(bbox_chunks):
             start_time = time.time()
@@ -609,10 +617,16 @@ class StudyAreaProcessingTask(QgsTask):
         log_message("=== Metrics Summary ===")
         for k, v in self.metrics.items():
             log_message(f"{k}: {v:.4f} seconds")
+        self.total_cells += self.current_geom_actual_cell_count
         log_message(f"Grid creation completed for area {normalized_name}.")
 
     def write_grids(self, layer, task, normalized_name):
         start_time = time.time()
+        # Write locking is intended for a future version where we might have multiple threads
+        # currently I am just using the grid_from_bbox task to generate the geometries in a
+        # single thread by calling its run method directly.
+        # The reason for that is that QgsTask subtasks are only called after the parent's
+        # run method is completed, so I can't use them to write the geometries to the layer
         # If write_lock is true, wait for the lock to be released
         while self.write_lock:
             log_message("Waiting for write lock...")
@@ -626,18 +640,28 @@ class StudyAreaProcessingTask(QgsTask):
             # aggregated_features.extend(task.features_out)
             for geometry in task.features_out:
                 feature = ogr.Feature(feat_defn)
-                feature.SetField("grid_id", self.cell_count)
+                feature.SetField("grid_id", self.current_geom_actual_cell_count)
                 feature.SetField("area_name", normalized_name)
                 feature.SetGeometry(geometry)
                 layer.CreateFeature(feature)
                 feature = None
 
-                self.cell_count += 1
-                if self.cell_count % 20000 == 0:
+                self.current_geom_actual_cell_count += 1
+                if self.current_geom_actual_cell_count % 10000 == 0:
                     try:
-                        percent = (self.cell_count / float(self.total_cells)) * 100.0
                         log_message(
-                            f"Grid creation for part {normalized_name}: {self.cell_count}/{self.total_cells} ({percent:.2f}%)"
+                            f"         Cell count: {self.current_geom_actual_cell_count}"
+                        )
+                        log_message(
+                            f"         Total cells: {self.current_geom_cell_count_estimate}"
+                        )
+                        percent = (
+                            self.current_geom_actual_cell_count
+                            / float(self.current_geom_cell_count_estimate)
+                        ) * 100.0
+                        log_message(f"         Percent complete: {percent:.2f}%")
+                        log_message(
+                            f"Grid creation for part {normalized_name}: {self.current_geom_actual_cell_count}/{self.current_geom_cell_count_estimate} ({percent:.2f}%)"
                         )
                         self.feedback.setProgress(int(percent))
                     except ZeroDivisionError:
@@ -746,18 +770,28 @@ class StudyAreaProcessingTask(QgsTask):
         x_range_count = int((xmax - xmin) / cell_size)
         y_range_count = int((ymax - ymin) / cell_size)
 
-        # For simplicity, chunk in the X direction,
-        # but you could easily expand to chunk in Y as well.
         x_blocks = range(0, x_range_count, chunk_size)
+        y_blocks = range(0, y_range_count, chunk_size)
         for x_block_start in x_blocks:
+            log_message(f"Processing chunk {x_block_start} of {x_range_count}")
             x_block_end = min(x_block_start + chunk_size, x_range_count)
 
             # Convert from cell index to real coords
             x_start_coord = xmin + x_block_start * cell_size
             x_end_coord = xmin + x_block_end * cell_size
 
-            # We'll do the entire Y range in one chunk
-            yield (x_start_coord, x_end_coord, ymin, ymax)
+            for y_block_start in y_blocks:
+                log_message(f"Processing chunk {y_block_start} of {y_range_count}")
+                y_block_end = min(y_block_start + chunk_size, y_range_count)
+
+                # Convert from cell index to real coords
+                y_start_coord = ymin + y_block_start * cell_size
+                y_end_coord = ymin + y_block_end * cell_size
+
+                log_message(
+                    f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {ymin}, {ymax}"
+                )
+                yield (x_start_coord, x_end_coord, y_start_coord, y_end_coord)
 
     ##########################################################################
     # Create Raster Mask

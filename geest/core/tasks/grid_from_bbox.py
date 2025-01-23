@@ -34,7 +34,21 @@ class GridFromBbox(QgsTask):
         #  ogr_geom = ogr.CreateGeometryFromWkb(self.geom.asWkb())
 
         # We'll assume self.geom is already an ogr.Geometry
-        ogr_geom = self.geom
+        skip_intersection_check = False
+        # If the whole chunk is within the geometry, skip intersection check
+        if self.geom.Contains(
+            ogr.CreateGeometryFromWkt(
+                f"POLYGON(({x_start} {y_start}, {x_end} {y_start}, {x_end} {y_end}, {x_start} {y_end}, {x_start} {y_start}))"
+            )
+        ):
+            log_message(
+                f"Whole chunk is not within the geometry, we will check intersection for each feature..."
+            )
+            skip_intersection_check = True
+        else:
+            log_message(
+                f"Whole chunk is within the geometry, skipping intersection check..."
+            )
 
         x = x_start
         while x < x_end:
@@ -58,10 +72,12 @@ class GridFromBbox(QgsTask):
                 cell_polygon.AddGeometry(ring)
 
                 # Check intersection
-                if ogr_geom.Intersects(cell_polygon):
-                    # Store geometry + attributes for later
-                    # We store WKB or something that can be reconstituted easily
+                if not skip_intersection_check:
+                    if self.geom.Intersects(cell_polygon):
+                        self.features_out.append(cell_polygon)
+                else:
                     self.features_out.append(cell_polygon)
+
                 y = y2
             x = x2
 
