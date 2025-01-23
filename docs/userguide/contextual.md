@@ -5,6 +5,7 @@ The Contextual Dimension refers to the laws and policies that shape workplace ge
     <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
 
+### Input Contextual factors
 ---
 <p align="justify"> 
 <strong>Workplace Discrimination</strong> involves laws that address gender biases and stereotypes that hinder women's career advancement, especially in male-dominated fields.
@@ -75,7 +76,7 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 
 - 🚫 **Exclude Unused Factors**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 
-- 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
+- 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click **OK** to proceed.
 
 <p align="center">
 <img 
@@ -85,5 +86,22 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
+
+### Process Contextual factors
+
+After entering the values for the factors and adjusting their weights to achieve balance, you can initiate the process workflow:
+
+- 🖱️**Right-click on Contextual**.  
+- ▶️**Select Run Item Workflow** from the context menu.
+
+
+
+
+
+
+
+
+
+
 
 
