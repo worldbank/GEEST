@@ -657,6 +657,7 @@ class StudyAreaProcessingTask(QgsTask):
         for idx, chunk in enumerate(bbox_chunks):
             log_message(f"Chunk {idx}: {chunk}")
 
+        self.feedback.setProgress(0)
         for idx, chunk in enumerate(bbox_chunks):
             start_time = (
                 time.time()
@@ -670,9 +671,9 @@ class StudyAreaProcessingTask(QgsTask):
             # We use the progress object to notify of progress in the subtask
             # And the QgsTask progressChanged signal to track the main task
             log_message(
-                f"XXXXXX Chunks Progress: {int((idx / chunk_count) * 100)}% XXXXXX"
+                f"XXXXXX Chunks Progress: {int((idx + 1 / chunk_count) * 100)}% XXXXXX"
             )
-            self.feedback.setProgress(int((idx / chunk_count) * 100))
+            self.feedback.setProgress(int((idx + 1 / chunk_count) * 100))
 
             # This is blocking, but we're in a thread
             # Crashes QGIS, needs to be refactored to use QgsTask subtasks
