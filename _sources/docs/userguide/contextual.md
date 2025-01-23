@@ -88,7 +88,7 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 </p>
 
 ### Process Contextual factors
-
+---
 After entering the values for the factors and adjusting their weights to achieve balance, you can initiate the process workflow:
 
 - 🖱️**Right-click on Contextual**.  
