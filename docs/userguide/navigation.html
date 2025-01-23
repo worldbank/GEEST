@@ -725,10 +725,12 @@ Choose this option to start a new project. The plugin will guide you through cre
 <li><p><strong>Fourteen Subfactors</strong>. Within certain factors, subfactors provide additional granularity.</p></li>
 <li><p><strong>Processing Status Widgets</strong>. Next to each factor or dimension, widgets indicate the processing status:</p>
 <ul class="simple">
-<li><p>4a - <strong>Configured but Not Run</strong>: Inputs are set up but processing has not started.</p></li>
-<li><p>4b - <strong>Required but Not Configured</strong>: Essential inputs are missing and need configuration.</p></li>
-<li><p>4c - <strong>Completed Successfully</strong>: Processing has finished without errors.</p></li>
-<li><p>4d - <strong>Workflow Failed</strong>: The process encountered an error and requires troubleshooting.</p></li>
+<li><p>4a - <strong>Configured, not run</strong>: Inputs are set up but processing has not started.</p></li>
+<li><p>4b - <strong>Required and not configured</strong>: Essential inputs are missing and need configuration.</p></li>
+<li><p>4c - <strong>Completed successfully</strong>: Processing has finished without errors.</p></li>
+<li><p>4d - <strong>Workflow failed</strong>: The process encountered an error and requires troubleshooting.</p></li>
+<li><p>4e - <strong>Not configured (optional)</strong>: Inputs are optional and have not been configured. These do not impact the analysis unless explicitly included.</p></li>
+<li><p>4f - <strong>Excluded from analysis</strong>: This factor or subfactor has been intentionally excluded from the analysis workflow and will not be processed.</p></li>
 </ul>
 </li>
 <li><p><strong>Run All/Run Incomplete</strong>:</p>
