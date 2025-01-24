@@ -76,7 +76,12 @@ class TestStudyAreaProcessingTask(unittest.TestCase):
             feedback=self.feedback,
         )
 
-        bbox = self.layer.extent()
+        bbox = (
+            self.layer.extent().xMinimum(),
+            self.layer.extent().xMaximum(),
+            self.layer.extent().yMinimum(),
+            self.layer.extent().yMaximum(),
+        )
         utm_zone = task.calculate_utm_zone(bbox)
 
         # Validate the calculated UTM zone (adjust based on test data location)

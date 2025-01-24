@@ -6,14 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1071</width>
-    <height>769</height>
+    <width>1129</width>
+    <height>805</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="banner_label">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>../resources/geest-banner.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
     <widget class="QScrollArea" name="scrollArea">
      <property name="frameShape">
@@ -27,15 +40,12 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1053</width>
-        <height>621</height>
+        <width>1111</width>
+        <height>657</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <property name="horizontalSpacing">
-        <number>18</number>
-       </property>
-       <item row="0" column="0" colspan="2">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
         <layout class="QGridLayout" name="wee_layout">
          <item row="0" column="0">
           <widget class="QLabel" name="wee_title">
@@ -44,12 +54,6 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>30</height>
-            </size>
            </property>
            <property name="styleSheet">
             <string notr="true">background: #1BA1E2;
@@ -94,7 +98,7 @@ padding: 4px;</string>
          </item>
         </layout>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="1" column="0">
         <widget class="QLabel" name="aggregation_description">
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Aggregation boundaries (optional):&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; You can generate insights from the WEE analysis by providing subnational boundaries. For each boundary, we will calculate the majority WEE score, majority WEE by Population score (if population data is set below) and majority WEE by Job Distribution score (if configured below).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -104,7 +108,7 @@ padding: 4px;</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
+       <item row="2" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QgsMapLayerComboBox" name="aggregation_combo"/>
@@ -129,12 +133,6 @@ padding: 4px;</string>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>30</height>
-          </size>
-         </property>
          <property name="styleSheet">
           <string notr="true">background: #1BA1E2;
 color: white;
@@ -154,44 +152,8 @@ padding: 4px;</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="wee_jobs_title">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background: #1BA1E2;
-color: white;
-padding: 4px;</string>
-         </property>
-         <property name="text">
-          <string>WEE by Job Distribution</string>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::PlainText</enum>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="0">
         <widget class="QLabel" name="wee_x_population_description">
-         <property name="frameShape">
-          <enum>QFrame::Box</enum>
-         </property>
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Optional:&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; You can visualize WEE with respect to female population distribution. Please provide a raster dataset below containing (female) population density and it will be combined with the WEE score to calculate the WEE by Population score. If you have set an aggregation layer above, this will be aggregated per subnational boundary to show the majory WEE by Population score per polygon.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -201,36 +163,8 @@ padding: 4px;</string>
          <property name="wordWrap">
           <bool>true</bool>
          </property>
-         <property name="margin">
-          <number>5</number>
-         </property>
          <property name="openExternalLinks">
           <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="wee_x_jobs_description">
-         <property name="font">
-          <font>
-           <family>Noto Sans [GOOG]</family>
-           <pointsize>8</pointsize>
-          </font>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::Box</enum>
-         </property>
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Optional: &lt;/span&gt;You can perform a targeted analysis of Women’s Enablement Environments with respect to the location of jobs. Input the location of existing or potential jobs either as a point file, in polygon format or raster format explore how the results relate to existing or planned job opportunities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignJustify|Qt::AlignTop</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-         <property name="margin">
-          <number>5</number>
          </property>
         </widget>
        </item>
@@ -258,12 +192,58 @@ padding: 4px;</string>
          </item>
         </layout>
        </item>
-       <item row="5" column="1">
+       <item row="6" column="0">
+        <widget class="QLabel" name="wee_jobs_title">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: #1BA1E2;
+color: white;
+padding: 4px;</string>
+         </property>
+         <property name="text">
+          <string>WEE by Job Distribution</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="wee_x_jobs_description">
+         <property name="font">
+          <font>
+           <family>Noto Sans [GOOG]</family>
+           <pointsize>8</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Optional: &lt;/span&gt;You can perform a targeted analysis of Women’s Enablement Environments with respect to the location of jobs. Input the location of existing or potential jobs either as a point file, in polygon format or raster format explore how the results relate to existing or planned job opportunities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignJustify|Qt::AlignTop</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
         <widget class="QGroupBox" name="mask_source_group">
          <property name="title">
           <string>Mask Source</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout">
+         <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
            <widget class="QRadioButton" name="point_radio_button">
             <property name="text">
@@ -406,26 +386,6 @@ padding: 4px;</string>
      </widget>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QDialogButtonBox" name="button_box">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="banner_label">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap>../resources/geest-banner.png</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="QWidget" name="help_widget" native="true">
      <property name="sizePolicy">
@@ -433,6 +393,13 @@ padding: 4px;</string>
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QDialogButtonBox" name="button_box">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
