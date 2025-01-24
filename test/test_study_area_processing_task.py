@@ -27,7 +27,7 @@ class TestStudyAreaProcessor(unittest.TestCase):
         cls.target_spatial_ref = ogr.osr.SpatialReference()
         cls.target_spatial_ref.ImportFromEPSG(4326)  # WGS84
 
-        cls.processor = StudyAreaProcessor(
+        cls.processor = StudyAreaProcessingTask(
             gpkg_path=cls.gpkg_path,
             working_dir=cls.working_dir,
             cell_size_m=cls.cell_size_m,
