@@ -35,7 +35,12 @@ class StudyAreaProcessingTask(QgsTask):
     Any invalid geometries are discarded, and fixed geometries are processed.
 
     Args:
-        QgsTask (_type_): _description_
+        layer (QgsVectorLayer): The input vector layer.
+        field_name (str): The field name in the input layer that holds the study area name.
+        cell_size_m (float): The cell size for grid spacing in meters.
+        working_dir (str): The directory path where outputs will be saved.
+        feedback (QgsFeedback): A feedback object to report progress.
+        crs (Optional[QgsCoordinateReferenceSystem]): The target CRS. If None, a UTM zone will be computed.
 
     Returns:
         _type_: _description_

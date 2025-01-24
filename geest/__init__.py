@@ -87,7 +87,7 @@ class GeestPlugin:
         self.run_action = QAction(icon, "GEEST Settings", self.iface.mainWindow())
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
-
+        self.debug_running = False
         # Create the dock widget
         self.dock_widget = GeestDock(
             parent=self.iface.mainWindow(),
@@ -247,6 +247,8 @@ for module_name in list(sys.modules.keys()):
         Unload the plugin from QGIS.
         Removes all added actions, widgets, and options to ensure a clean unload.
         """
+
+        self.kill_debug()
         # Save geometry before unloading
         self.save_geometry()
 
@@ -286,11 +288,24 @@ for module_name in list(sys.modules.keys()):
             self.dock_widget.deleteLater()
             self.dock_widget = None
 
+    def kill_debug(self):
+        # Note that even though this kills the debugpy process I still
+        # cannot successfully restart the debugger in vscode without restarting QGIS
+        if self.debug_running:
+            import psutil
+            import signal
+
+            """Find the PID of the process listening on the specified port."""
+            for conn in psutil.net_connections(kind="tcp"):
+                if conn.laddr.port == 9000 and conn.status == psutil.CONN_LISTEN:
+                    os.kill(conn.pid, signal.SIGTERM)
+
     def debug(self):
         """
         Enters debug mode.
         Shows a message to attach a debugger to the process.
         """
+        self.kill_debug()
         self.display_information_message_box(
             title="GEEST",
             message="Close this dialog then open VSCode and start your debug client.",
@@ -306,6 +321,8 @@ for module_name in list(sys.modules.keys()):
                 title="GEEST",
                 message="Visual Studio Code debugger is now attached on port 9000",
             )
+            self.debug_action.setEnabled(False)  # prevent user starting it twice
+            self.debug_running = True
 
     def run(self):
         """

@@ -10,5 +10,5 @@ esac
 
 # Running on local used to skip tests that will not work in a local dev env
 nix-shell -p \
-  'qgis.override { extraPythonPackages = (ps: [ ps.pyqtwebengine ps.jsonschema ps.debugpy ps.future ]);}' \
+  'qgis.override { extraPythonPackages = (ps: [ ps.pyqtwebengine ps.jsonschema ps.debugpy ps.future ps.psutil ]);}' \
   --command "GEEST_DEBUG=${DEBUG_MODE} RUNNING_ON_LOCAL=1 qgis --profile GEEST2"
