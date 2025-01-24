@@ -127,7 +127,12 @@ class AreaIterator:
                 return
 
             # Iterate over each polygon feature and calculate progress
-            for index, polygon_feature in enumerate(self.polygon_layer.getFeatures()):
+
+            # Sort polygon features by area in ascending order
+            sorted_features = sorted(
+                self.polygon_layer.getFeatures(), key=lambda f: f.geometry().area()
+            )
+            for index, polygon_feature in enumerate(sorted_features):
                 polygon_id: int = polygon_feature.id()
                 # Request the corresponding bbox feature based on the polygon's ID
                 feature_request: QgsFeatureRequest = QgsFeatureRequest().setFilterFid(

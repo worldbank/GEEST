@@ -21,11 +21,150 @@ __revision__ = "$Format:%H$"
 import os
 import logging
 import inspect
-from qgis.PyQt.QtCore import QUrl, QSettings
+from datetime import datetime
+import tempfile
+import re
+import platform
+import subprocess
+
+from qgis.PyQt.QtCore import QUrl, QSettings, QRect
 from qgis.PyQt import uic
-from qgis.core import QgsMessageLog, Qgis, QgsProject
+from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsLayerTreeGroup
 from qgis.PyQt.QtWidgets import QApplication
+from qgis.core import QgsProject, Qgis
 from geest.core import setting
+
+
+def log_window_geometry(geometry):
+    """
+    Creates an ASCII-art diagram of the dialog's dimensions based on the
+    given geometry (a QRect) and logs it with log_message in QGIS.
+
+    Example output:
+
+    +-------------------- 500 px -------------------+
+    |                                               |
+    |                                               300 px
+    |                                               |
+    +-----------------------------------------------+
+
+    """
+    try:
+        if type(geometry) == QRect:
+            rect = geometry
+        else:
+            rect = geometry.rect()
+    except AttributeError:
+        log_message("Could not get geometry from dialog", level=Qgis.Warning)
+        log_message(type(geometry), level=Qgis.Warning)
+        return
+
+    w = rect.width()
+    h = rect.height()
+    char_width = 20 - len(str(w))
+    top_line = f"\n+{'-'*char_width} {w} px {'-'*20}+"
+    middle_line = f"|{' ' * 47}{h} px"
+    bottom_line = f"+{'-'*47}+\n"
+
+    diagram = (
+        f"{top_line}\n"
+        f"|                                               |\n"
+        f"{middle_line}\n"
+        f"|                                               |\n"
+        f"{bottom_line}"
+    )
+
+    log_message(diagram)
+
+
+def get_free_memory_mb():
+    """
+    Attempt to return the free system memory in MB (approx).
+    Uses only modules from the Python standard library.
+    """
+    system = platform.system()
+
+    # --- Windows ---
+    if system == "Windows":
+        try:
+            import ctypes.wintypes
+
+            class MEMORYSTATUSEX(ctypes.Structure):
+                _fields_ = [
+                    ("dwLength", ctypes.wintypes.DWORD),
+                    ("dwMemoryLoad", ctypes.wintypes.DWORD),
+                    ("ullTotalPhys", ctypes.c_ulonglong),
+                    ("ullAvailPhys", ctypes.c_ulonglong),
+                    ("ullTotalPageFile", ctypes.c_ulonglong),
+                    ("ullAvailPageFile", ctypes.c_ulonglong),
+                    ("ullTotalVirtual", ctypes.c_ulonglong),
+                    ("ullAvailVirtual", ctypes.c_ulonglong),
+                    ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+                ]
+
+            memoryStatus = MEMORYSTATUSEX()
+            memoryStatus.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+            ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(memoryStatus))
+            return memoryStatus.ullAvailPhys / (1024 * 1024)
+        except Exception:
+            pass
+
+    # --- Linux ---
+    elif system == "Linux":
+        # /proc/meminfo is a common place to get memory info on Linux
+        try:
+            with open("/proc/meminfo") as f:
+                meminfo = f.read()
+                match = re.search(r"^MemAvailable:\s+(\d+)\skB", meminfo, re.MULTILINE)
+                if match:
+                    return float(match.group(1)) / 1024.0
+        except Exception:
+            pass
+
+    # --- macOS (Darwin) ---
+    elif system == "Darwin":
+        # One approach is to parse the output of the 'vm_stat' command
+        try:
+            vm_stat = subprocess.check_output(["vm_stat"]).decode("utf-8")
+            page_size = 4096  # Usually 4096 bytes
+            free_pages = 0
+            # Look for "Pages free: <number>"
+            match = re.search(r"Pages free:\s+(\d+).", vm_stat)
+            if match:
+                free_pages = int(match.group(1))
+            return free_pages * page_size / (1024.0 * 1024.0)
+        except Exception:
+            pass
+
+    # If none of the above worked or on an unsupported OS, return 0.0
+    return 0.0
+
+
+def log_layer_count():
+    """
+    Append the number of layers in the project and a timestamp to a text file,
+    along with free system memory (approximate), using only standard library dependencies.
+    """
+    # Count QGIS layers
+    layer_count = len(QgsProject.instance().mapLayers())
+
+    # Gather system free memory (MB)
+    free_memory_mb = get_free_memory_mb()
+
+    # Create a timestamp
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Compose the log entry text
+    log_entry = f"{timestamp} - Layer count: {layer_count} - Free memory: {free_memory_mb:.2f} MB\n"
+
+    # Send to QGIS log (optional)
+    log_message(log_entry, level=Qgis.Info, tag="LayerCount")
+
+    # Also write to a log file in the system temp directory
+    tmp_dir = tempfile.gettempdir()
+    log_file_path = os.path.join(tmp_dir, "layer_count_log.txt")
+    with open(log_file_path, "a") as log_file:
+        log_file.write(log_entry)
 
 
 def resources_path(*args):

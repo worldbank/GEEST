@@ -488,7 +488,6 @@ class TreePanel(QWidget):
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
-            menu.addAction(add_to_map_action)
             add_wee_score = QAction("Add WEE Score to Map")
             add_wee_score.triggered.connect(
                 lambda: self.add_to_map(
@@ -929,6 +928,7 @@ class TreePanel(QWidget):
             "study_area_grid",
             "study_area_bboxes",
             "study_area_bbox",
+            "study_area_creation_status",
         ]
         for layer_name in layers:
             gpkg_layer_path = f"{gpkg_path}|layername={layer_name}"
@@ -1574,3 +1574,13 @@ class TreePanel(QWidget):
         for row in range(row_count):
             child_index = self.treeView.model().index(row, 0, index)
             self.expand_all_nodes(child_index)
+
+    def disable_widgets(self):
+        """Disable all widgets in the panel."""
+        for widget in self.findChildren(QWidget):
+            widget.setEnabled(False)
+
+    def enable_widgets(self):
+        """Enable all widgets in the panel."""
+        for widget in self.findChildren(QWidget):
+            widget.setEnabled(True)

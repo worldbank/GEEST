@@ -27,7 +27,7 @@ from geest.core.algorithms import (
     combine_rasters_to_vrt,
 )
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
-from geest.utilities import log_message
+from geest.utilities import log_message, log_layer_count
 
 
 class WorkflowBase(QObject):
@@ -56,6 +56,8 @@ class WorkflowBase(QObject):
         :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__()
+        log_layer_count()  # For performance tuning, write the number of open layers to a log file
+        # we will log the layer count again at then end of the workflow
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.cell_size_m = cell_size_m
         self.feedback = feedback
@@ -252,6 +254,7 @@ class WorkflowBase(QObject):
             return False
 
         area_iterator = AreaIterator(self.gpkg_path)
+        log_layer_count()  # For performance tuning, write the number of open layers to a log file
         try:
             for index, (current_area, clip_area, current_bbox, progress) in enumerate(
                 area_iterator
@@ -326,6 +329,7 @@ class WorkflowBase(QObject):
             )
             self.attributes["execution_end_time"] = datetime.datetime.now().isoformat()
             self.attributes["error_file"] = None
+            log_layer_count()  # For performance tuning, write the number of open layers to a log file
             return True
 
         except Exception as e:
@@ -354,6 +358,7 @@ class WorkflowBase(QObject):
                 f.write(traceback.format_exc())
             self.attributes["error_file"] = error_path
             self.attributes["error"] = f"Failed to process {self.workflow_name}: {e}"
+            log_layer_count()  # For performance tuning, write the number of open layers to a log file
             return False
 
     def _create_workflow_directory(self) -> str:

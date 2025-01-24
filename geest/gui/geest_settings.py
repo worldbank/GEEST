@@ -59,8 +59,11 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             self.ors_key_line_edit.setText(ors_key)
         else:
             self.ors_key_line_edit.setPlaceholderText("Enter your ORS API key here")
-        ors_request_size = int(setting(key="ors_request_size", default=100))
+        ors_request_size = int(setting(key="ors_request_size", default=5))
         self.ors_request_size.setValue(ors_request_size)
+
+        chunk_size = int(setting(key="chunk_size", default=50))
+        self.chunk_size.setValue(chunk_size)
 
     def apply(self):
         """Process the animation sequence.
@@ -84,6 +87,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
 
         set_setting(key="ors_key", value=self.ors_key_line_edit.text())
         set_setting(key="ors_request_size", value=self.ors_request_size.value())
+        set_setting(key="chunk_size", value=self.chunk_size.value())
 
 
 class GeestOptionsFactory(QgsOptionsWidgetFactory):

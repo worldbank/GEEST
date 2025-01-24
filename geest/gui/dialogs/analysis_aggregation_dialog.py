@@ -19,7 +19,7 @@ from qgis.PyQt.QtWidgets import (
     QLineEdit,
 )
 from qgis.PyQt.QtGui import QPixmap, QDesktopServices
-from qgis.PyQt.QtCore import Qt, QUrl, QSettings
+from qgis.PyQt.QtCore import Qt, QUrl, QSettings, QByteArray
 from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
 from geest.utilities import (
     resources_path,
@@ -27,6 +27,7 @@ from geest.utilities import (
     setting,
     is_qgis_dark_theme_active,
     get_ui_class,
+    log_window_geometry,
 )
 from qgis.gui import QgsMapLayerComboBox
 from geest.gui.widgets import CustomBannerLabel
@@ -191,12 +192,17 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         Restore the dialog geometry from QSettings.
         """
         settings = QSettings()
-        geometry = settings.value("AnalysisAggregationDialog/geometry")
+        # Restore geometry (fall back to empty QByteArray if setting not found)
+        geometry = settings.value("AnalysisAggregationDialog/geometry", QByteArray())
+        log_window_geometry(geometry)
         if geometry:
             log_message("Restoring dialog geometry")
             try:
-                self.resize(geometry.width(), geometry.height())
-            except AttributeError:
+                self.restoreGeometry(geometry)
+            except Exception as e:
+                log_message(
+                    "Restoring geometry failed", tag="Geest", level=Qgis.Warning
+                )
                 pass
         else:
             log_message("No saved geometry found, resizing dialog")
@@ -215,6 +221,12 @@ class AnalysisAggregationDialog(FORM_CLASS, QDialog):
         log_message("Saving dialog geometry")
         settings = QSettings()
         settings.setValue("AnalysisAggregationDialog/geometry", self.geometry())
+
+    def closeEvent(self, event):
+        # Save geometry before closing
+        settings = QSettings()
+        settings.setValue("AnalysisAggregationDialog/geometry", self.saveGeometry())
+        super().closeEvent(event)
 
     def setup_table(self):
         """

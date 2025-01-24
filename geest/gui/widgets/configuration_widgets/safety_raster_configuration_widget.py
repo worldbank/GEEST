@@ -3,6 +3,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from .base_configuration_widget import BaseConfigurationWidget
 from geest.utilities import log_message
+from qgis.core import Qgis
 
 
 class SafetyRasterConfigurationWidget(BaseConfigurationWidget):
