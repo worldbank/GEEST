@@ -1,95 +1,104 @@
 #!/usr/bin/env python
 """
 Test suite for grid_from_bbox.py.
-This test suite uses pytest to validate the functionality of the grid generation utility.
 
-Version Added: 2025-01-24
+Version Changed: 2025-01-24
 """
 
-import pytest
 from grid_from_bbox import create_grid_from_bbox
 from qgis.core import QgsRectangle, QgsCoordinateReferenceSystem
 
 
-@pytest.fixture
-def example_bbox() -> QgsRectangle:
-    """Fixture for a standard bounding box."""
+def example_bbox():
+    """Returns a standard bounding box."""
     return QgsRectangle(0, 0, 100, 100)
 
 
-@pytest.fixture
-def example_crs() -> QgsCoordinateReferenceSystem:
-    """Fixture for the Coordinate Reference System."""
+def example_crs():
+    """Returns the Coordinate Reference System."""
     return QgsCoordinateReferenceSystem("EPSG:4326")
 
 
-@pytest.mark.parametrize(
-    "cell_width, cell_height",
-    [
-        (10, 10),
-        (5, 5),
-        (20, 20),
-    ],
-)
-def test_create_grid_from_bbox_standard(
-    example_bbox, example_crs, cell_width, cell_height
-):
+def test_create_grid_from_bbox_standard():
     """Test grid generation with standard parameters."""
-    grid = create_grid_from_bbox(
-        bbox=example_bbox,
-        cell_width=cell_width,
-        cell_height=cell_height,
-        crs=example_crs,
-    )
+    bbox = example_bbox()
+    crs = example_crs()
 
-    assert grid is not None, "Grid creation failed to return a valid result."
-    assert grid.isValid(), "Generated grid is not valid."
-    assert grid.featureCount() > 0, "Grid should contain at least one feature."
+    for cell_width, cell_height in [(10, 10), (5, 5), (20, 20)]:
+        grid = create_grid_from_bbox(
+            bbox=bbox, cell_width=cell_width, cell_height=cell_height, crs=crs
+        )
+
+        assert grid is not None, "Grid creation failed to return a valid result."
+        assert grid.isValid(), "Generated grid is not valid."
+        assert grid.featureCount() > 0, "Grid should contain at least one feature."
 
 
-def test_create_grid_from_bbox_edge_cases(example_crs):
+def test_create_grid_from_bbox_edge_cases():
     """Test edge cases for bounding boxes."""
+    crs = example_crs()
+
     # Zero-area bbox
     zero_area_bbox = QgsRectangle(10, 10, 10, 10)
     grid = create_grid_from_bbox(
-        bbox=zero_area_bbox, cell_width=5, cell_height=5, crs=example_crs
+        bbox=zero_area_bbox, cell_width=5, cell_height=5, crs=crs
     )
     assert grid.featureCount() == 0, "Grid for zero-area bbox should have no features."
 
     # Inverted bbox
     inverted_bbox = QgsRectangle(100, 100, 0, 0)
-    with pytest.raises(ValueError, match="Invalid bounding box dimensions"):
+    try:
         create_grid_from_bbox(
-            bbox=inverted_bbox, cell_width=10, cell_height=10, crs=example_crs
+            bbox=inverted_bbox, cell_width=10, cell_height=10, crs=crs
         )
+        assert False, "Expected ValueError for inverted bbox, but none was raised."
+    except ValueError as e:
+        assert "Invalid bounding box dimensions" in str(
+            e
+        ), f"Unexpected error message: {e}"
 
 
-def test_invalid_cell_dimensions(example_bbox, example_crs):
+def test_invalid_cell_dimensions():
     """Test invalid cell dimensions."""
-    # Negative cell dimensions
-    with pytest.raises(ValueError, match="Cell dimensions must be positive"):
-        create_grid_from_bbox(
-            bbox=example_bbox, cell_width=-10, cell_height=10, crs=example_crs
-        )
+    bbox = example_bbox()
+    crs = example_crs()
 
-    with pytest.raises(ValueError, match="Cell dimensions must be positive"):
-        create_grid_from_bbox(
-            bbox=example_bbox, cell_width=10, cell_height=-10, crs=example_crs
-        )
+    # Negative cell dimensions
+    try:
+        create_grid_from_bbox(bbox=bbox, cell_width=-10, cell_height=10, crs=crs)
+        assert (
+            False
+        ), "Expected ValueError for negative cell width, but none was raised."
+    except ValueError as e:
+        assert "Cell dimensions must be positive" in str(
+            e
+        ), f"Unexpected error message: {e}"
+
+    try:
+        create_grid_from_bbox(bbox=bbox, cell_width=10, cell_height=-10, crs=crs)
+        assert (
+            False
+        ), "Expected ValueError for negative cell height, but none was raised."
+    except ValueError as e:
+        assert "Cell dimensions must be positive" in str(
+            e
+        ), f"Unexpected error message: {e}"
 
     # Zero cell dimensions
-    with pytest.raises(ValueError, match="Cell dimensions must be positive"):
-        create_grid_from_bbox(
-            bbox=example_bbox, cell_width=0, cell_height=10, crs=example_crs
-        )
+    try:
+        create_grid_from_bbox(bbox=bbox, cell_width=0, cell_height=10, crs=crs)
+        assert False, "Expected ValueError for zero cell width, but none was raised."
+    except ValueError as e:
+        assert "Cell dimensions must be positive" in str(
+            e
+        ), f"Unexpected error message: {e}"
 
 
-def test_large_bbox(example_crs):
+def test_large_bbox():
     """Test handling of a large bounding box."""
+    crs = example_crs()
     large_bbox = QgsRectangle(-180, -90, 180, 90)
-    grid = create_grid_from_bbox(
-        bbox=large_bbox, cell_width=1, cell_height=1, crs=example_crs
-    )
+    grid = create_grid_from_bbox(bbox=large_bbox, cell_width=1, cell_height=1, crs=crs)
 
     assert (
         grid.featureCount() > 10000
@@ -99,10 +108,13 @@ def test_large_bbox(example_crs):
 def test_crs_mismatch():
     """Test behavior when CRS is mismatched or invalid."""
     bbox = QgsRectangle(0, 0, 100, 100)
-    invalid_crs = QgsCoordinateReferenceSystem()
 
-    with pytest.raises(ValueError, match="Invalid CRS provided"):
+    invalid_crs = QgsCoordinateReferenceSystem()
+    try:
         create_grid_from_bbox(bbox=bbox, cell_width=10, cell_height=10, crs=invalid_crs)
+        assert False, "Expected ValueError for invalid CRS, but none was raised."
+    except ValueError as e:
+        assert "Invalid CRS provided" in str(e), f"Unexpected error message: {e}"
 
     mismatched_crs = QgsCoordinateReferenceSystem("EPSG:3857")
     result = create_grid_from_bbox(
@@ -110,3 +122,25 @@ def test_crs_mismatch():
     )
 
     assert result.isValid(), "Grid generation should handle CRS mismatches gracefully."
+
+
+def run_tests():
+    """Runs all tests sequentially."""
+    test_create_grid_from_bbox_standard()
+    print("test_create_grid_from_bbox_standard passed.")
+
+    test_create_grid_from_bbox_edge_cases()
+    print("test_create_grid_from_bbox_edge_cases passed.")
+
+    test_invalid_cell_dimensions()
+    print("test_invalid_cell_dimensions passed.")
+
+    test_large_bbox()
+    print("test_large_bbox passed.")
+
+    test_crs_mismatch()
+    print("test_crs_mismatch passed.")
+
+
+if __name__ == "__main__":
+    run_tests()
