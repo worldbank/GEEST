@@ -8,7 +8,7 @@ versionadded: 2025-01-24
 import os
 import unittest
 from osgeo import ogr, gdal
-from study_area import StudyAreaProcessor
+from geest.core.tasks import StudyAreaProcessingTask
 
 
 class TestStudyAreaProcessor(unittest.TestCase):
