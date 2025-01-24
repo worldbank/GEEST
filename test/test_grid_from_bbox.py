@@ -5,7 +5,7 @@ Test suite for grid_from_bbox.py.
 Version Changed: 2025-01-24
 """
 
-from grid_from_bbox import create_grid_from_bbox
+from geest.core.tasks import GridFromBbox
 from qgis.core import QgsRectangle, QgsCoordinateReferenceSystem
 
 
@@ -25,7 +25,7 @@ def test_create_grid_from_bbox_standard():
     crs = example_crs()
 
     for cell_width, cell_height in [(10, 10), (5, 5), (20, 20)]:
-        grid = create_grid_from_bbox(
+        grid = GridFromBbox(
             bbox=bbox, cell_width=cell_width, cell_height=cell_height, crs=crs
         )
 
