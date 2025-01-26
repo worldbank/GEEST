@@ -32,18 +32,6 @@ This tool evaluates how easily women can access essential services and amenities
 <p align="justify"> 
 <strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces. These are standardized on a scale from 0 to 5.
 
----    
-For **Women’s Travel Patterns**, the tool emphasizes essential services and walking is typically set as the default travel mode, with the following thresholds preloaded based on evidence from the literature:
-
-- **0 to 400 meters:** Score = 5 (high accessibility)
-- **401 to 800 meters:** Score = 4
-- **801 to 1200 meters:** Score = 3
-- **1201 to 1500 meters:** Score = 2
-- **1501 to 2000 meters:** Score = 1
-- **Over 2000 meters:** Score = 0 (no accessibility)
-
-
-
 **Locate Women's Travel Patterns Section**
 
 > - 🖱️🖱️ **Double-click** on the **Women's Travel Patterns section** to open the pop-up.
@@ -96,16 +84,6 @@ The successful completion of the process is indicated by the green checkmark wid
 #### Access to Public Transport
 <strong>Access to Public Transport</strong> focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.
 
----
-
-Walking is typically set as the default travel mode, with the following thresholds preloaded based on evidence from the literature:
-
-- **0 to 250 meters:** Score = 5 (high accessibility)
-- **251 to 500 meters:** Score = 4
-- **501 to 750 meters:** Score = 3
-- **751 to 1000 meters:** Score = 2
-- **1001 to 1250 meters:** Score = 1
-- **Over 1250 meters:** Score = 0 (no accessibility)
 
 
 
@@ -115,42 +93,6 @@ Walking is typically set as the default travel mode, with the following threshol
 
 
 <small><a href="#ref1" id="footnote1"><sup>1</sup> Thresholds
-
-| **Factor**                                | **Distance**               | **Score** |
-|-------------------------------------------|----------------------------|-----------|
-| <small>**Women's Travel Patterns**</small>               | <small>0 to 400 meters</small>            | <small>5</small>         |
-|                                           | <small>401 to 800 meters</small>          | <small>4</small>         |
-|                                           | <small>801 to 1200 meters</small>         | <small>3</small>         |
-|                                           | <small>1201 to 1500 meters</small>        | <small>2</small>         |
-|                                           | <small>1501 to 2000 meters</small>        | <small>1</small>         |
-|                                           | <small>Over 2000 meters</small>           | <small>0</small>         |
-| <small>**Access to Public Transport**</small>            | <small>0 to 250 meters</small>            | <small>5</small>         |
-|                                           | <small>251 to 500 meters</small>          | <small>4</small>         |
-|                                           | <small>501 to 750 meters</small>          | <small>3</small>         |
-|                                           | <small>751 to 1,000 meters</small>        | <small>2</small>         |
-|                                           | <small>1,001 to 1,250 meters</small>      | <small>1</small>         |
-|                                           | <small>Over 1,250 meters</small>          | <small>0</small>         |
-| <small>**Access to Health Facilities**</small>           | <small>0 to 2,000 meters</small>          | <small>5</small>         |
-|                                           | <small>2,001 to 4,000 meters</small>      | <small>4</small>         |
-|                                           | <small>4,001 to 6,000 meters</small>      | <small>3</small>         |
-|                                           | <small>6,001 to 8,000 meters</small>      | <small>2</small>         |
-|                                           | <small>8,001 to 10,000 meters</small>     | <small>1</small>         |
-|                                           | <small>Over 10,000 meters</small>         | <small>0</small>         |
-| <small>**Access to Education and Training Facilities**</small> | <small>0 to 2,000 meters</small>          | <small>5</small>         |
-|                                           | <small>2,001 to 4,000 meters</small>      | <small>4</small>         |
-|                                           | <small>4,001 to 6,000 meters</small>      | <small>3</small>         |
-|                                           | <small>6,001 to 8,000 meters</small>      | <small>2</small>         |
-|                                           | <small>8,001 to 10,000 meters</small>     | <small>1</small>         |
-|                                           | <small>Over 10,000 meters</small>         | <small>0</small>         |
-| <small>**Access to Financial Facilities**</small>        | <small>0 to 400 meters</small>            | <small>5</small>         |
-|                                           | <small>401 to 800 meters</small>          | <small>4</small>         |
-|                                           | <small>801 to 1,200 meters</small>        | <small>3</small>         |
-|                                           | <small>1,201 to 2,000 meters</small>      | <small>2</small>         |
-|                                           | <small>2,001 to 3,000 meters</small>      | <small>1</small>         |
-|                                           | <small>Over 3,000 meters</small>          | <small>0</small>         |
-
-
-
 
 | **Factor**                                | **Distance**               | **Score** |
 |-------------------------------------------|----------------------------|-----------|
