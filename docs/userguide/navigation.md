@@ -276,6 +276,7 @@ The data processing interface serves as the central hub for managing, configurin
   </tr>
 </table>
 
+<br>
 
 **🗂️ Key Considerations**
 
