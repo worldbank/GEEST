@@ -91,40 +91,14 @@ The successful completion of the process is indicated by the green checkmark wid
 
 
 
-
 <small><a href="#ref1" id="footnote1"><sup>1</sup> Thresholds
-
-| **Factor**                                | **Distance**               | **Score** |
-|-------------------------------------------|----------------------------|-----------|
-| **Women's Travel Patterns**               | 0 to 400 meters            | 5         |
-|                                           | 401 to 800 meters          | 4         |
-|                                           | 801 to 1200 meters         | 3         |
-|                                           | 1201 to 1500 meters        | 2         |
-|                                           | 1501 to 2000 meters        | 1         |
-|                                           | Over 2000 meters           | 0         |
-| **Access to Public Transport**            | 0 to 250 meters            | 5         |
-|                                           | 251 to 500 meters          | 4         |
-|                                           | 501 to 750 meters          | 3         |
-|                                           | 751 to 1,000 meters        | 2         |
-|                                           | 1,001 to 1,250 meters      | 1         |
-|                                           | Over 1,250 meters          | 0         |
-| **Access to Health Facilities**           | 0 to 2,000 meters          | 5         |
-|                                           | 2,001 to 4,000 meters      | 4         |
-|                                           | 4,001 to 6,000 meters      | 3         |
-|                                           | 6,001 to 8,000 meters      | 2         |
-|                                           | 8,001 to 10,000 meters     | 1         |
-|                                           | Over 10,000 meters         | 0         |
-| **Access to Education and Training Facilities** | 0 to 2,000 meters          | 5         |
-|                                           | 2,001 to 4,000 meters      | 4         |
-|                                           | 4,001 to 6,000 meters      | 3         |
-|                                           | 6,001 to 8,000 meters      | 2         |
-|                                           | 8,001 to 10,000 meters     | 1         |
-|                                           | Over 10,000 meters         | 0         |
-| **Access to Financial Facilities**        | 0 to 400 meters            | 5         |
-|                                           | 401 to 800 meters          | 4         |
-|                                           | 801 to 1,200 meters        | 3         |
-|                                           | 1,201 to 2,000 meters      | 2         |
-|                                           | 2,001 to 3,000 meters      | 1         |
-|                                           | Over 3,000 meters          | 0         |
+<p align="left">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Thresholds.jpg" 
+    alt="Thresholds" 
+    style="width:25%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
 
 </a></small>  
