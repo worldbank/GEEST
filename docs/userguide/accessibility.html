@@ -192,6 +192,7 @@
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="navigation.html">Navigation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="contextual.html">Contextual</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Accessibility</a></li>
+
 <li class="toctree-l3"><a class="reference internal" href="placecharacterization.html">Place Characterization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="insights.html">Insights</a></li>
 
@@ -431,13 +432,20 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Accessibility</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-accessibility-factors">Input Accessibility factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#womens-travel-patterns-wtp">Women’s Travel Patterns (WTP)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
 </ul>
 </li>
 </ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tip-if-evidence-from-the-local-context-suggests-alternative-thresholds-and-increments-are-more-appropriate-the-user-can-alter-these-increments-if-the-selected-travel-mode-is-driving-the-equivalent-measurement-increments-should-be-in-minutes-and-informed-by-the-local-context-for-example-if-evidence-suggests-the-maximum-time-that-women-spend-driving-is-30-minutes-the-increments-could-be-6-12-18-24-30">💡 <strong>Tip</strong>: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
+</ul>
+</li>
+</ul>
+
             </nav>
         </div>
     </div>
@@ -483,11 +491,15 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 <li><p><strong>1501 to 2000 meters:</strong> Score = 1</p></li>
 <li><p><strong>Over 2000 meters:</strong> Score = 0 (no accessibility)</p></li>
 </ul>
-<blockquote>
-<div><p>💡 <strong>Tip</strong>: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).</p>
-</div></blockquote>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+<section id="tip-if-evidence-from-the-local-context-suggests-alternative-thresholds-and-increments-are-more-appropriate-the-user-can-alter-these-increments-if-the-selected-travel-mode-is-driving-the-equivalent-measurement-increments-should-be-in-minutes-and-informed-by-the-local-context-for-example-if-evidence-suggests-the-maximum-time-that-women-spend-driving-is-30-minutes-the-increments-could-be-6-12-18-24-30">
+<h1>💡 <strong>Tip</strong>: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).<a class="headerlink" href="#tip-if-evidence-from-the-local-context-suggests-alternative-thresholds-and-increments-are-more-appropriate-the-user-can-alter-these-increments-if-the-selected-travel-mode-is-driving-the-equivalent-measurement-increments-should-be-in-minutes-and-informed-by-the-local-context-for-example-if-evidence-suggests-the-maximum-time-that-women-spend-driving-is-30-minutes-the-increments-could-be-6-12-18-24-30" title="Permalink to this heading">#</a></h1>
 <p><strong>Locate Women’s Travel Patterns Section</strong></p>
-<ul class="simple">
+<blockquote>
+<div><ul class="simple">
 <li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Women’s Travel Patterns section</strong> to open the pop-up.</p></li>
 <li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features</strong>) corresponding to the indicators by clicking the three-dot button.</p></li>
 <li><p>🔧 <strong>Optional</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
@@ -496,6 +508,7 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 <li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.</p></li>
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
+</div></blockquote>
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20input.jpg" 
@@ -506,10 +519,12 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 </p>
 <p><strong>Process Women’s Travel Patterns factors</strong></p>
 <p>Back in the Data Processing Interface:</p>
-<ul class="simple">
+<blockquote>
+<div><ul class="simple">
 <li><p>🖱️ <strong>Right-click</strong> on <strong>Women’s Travel Patterns</strong>.</p></li>
 <li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
 </ul>
+</div></blockquote>
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20run.jpg" 
@@ -527,13 +542,11 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-</section>
 <hr class="docutils" />
 <section id="access-to-public-transport">
-<h3>Access to Public Transport<a class="headerlink" href="#access-to-public-transport" title="Permalink to this heading">#</a></h3>
+<h2>Access to Public Transport<a class="headerlink" href="#access-to-public-transport" title="Permalink to this heading">#</a></h2>
 <p><strong>Access to Public Transport</strong> focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.</p>
 <hr class="docutils" />
-</section>
 </section>
 </section>
 
@@ -601,13 +614,20 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Accessibility</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-accessibility-factors">Input Accessibility factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#womens-travel-patterns-wtp">Women’s Travel Patterns (WTP)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
 </ul>
 </li>
 </ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tip-if-evidence-from-the-local-context-suggests-alternative-thresholds-and-increments-are-more-appropriate-the-user-can-alter-these-increments-if-the-selected-travel-mode-is-driving-the-equivalent-measurement-increments-should-be-in-minutes-and-informed-by-the-local-context-for-example-if-evidence-suggests-the-maximum-time-that-women-spend-driving-is-30-minutes-the-increments-could-be-6-12-18-24-30">💡 <strong>Tip</strong>: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
+</ul>
+</li>
+</ul>
+
   </nav></div>
 
 </div></div>

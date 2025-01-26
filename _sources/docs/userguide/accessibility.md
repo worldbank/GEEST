@@ -32,18 +32,19 @@ For **Women’s Travel Patterns**, the tool focuses on essential services such a
 - **1501 to 2000 meters:** Score = 1
 - **Over 2000 meters:** Score = 0 (no accessibility)
 
-> 💡 **Tip**: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).
-
+---
+💡 **Tip**: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).
+---
 
 **Locate Women's Travel Patterns Section**
 
-- 🖱️🖱️ **Double-click** on the **Women's Travel Patterns section** to open the pop-up.
-- 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features**) corresponding to the indicators by clicking the three-dot button.
-- 🔧 **Optional**: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.
-- ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.
-- 🚫 **Exclude Unused Factors**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
-- 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
-- ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
+> - 🖱️🖱️ **Double-click** on the **Women's Travel Patterns section** to open the pop-up.
+> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features**) corresponding to the indicators by clicking the three-dot button.
+> - 🔧 **Optional**: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.
+> - ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.
+> - 🚫 **Exclude Unused Factors**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
+> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
 <img 
@@ -59,8 +60,8 @@ For **Women’s Travel Patterns**, the tool focuses on essential services such a
 
 Back in the Data Processing Interface:
 
-- 🖱️ **Right-click** on **Women's Travel Patterns**.  
-- ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.  
+> - 🖱️ **Right-click** on **Women's Travel Patterns**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.  
 
 
 <p align="center">
