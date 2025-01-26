@@ -71,11 +71,8 @@ This indicator is composed by the Workplace Index score of the WBL 2024, which i
 **Additional Steps Before Processing**: 
 
 > - 🖱️🖱️ **Double-click** on the **Contextual section** to open the pop-up.
-
 > - ⚖️ **Assign Weights**: Ensure the **weights** are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project's objectives and reflect the significance of each factor accurately.
-
 > - 🚫 **Exclude Unused Factors**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
-
 > - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click **OK** to proceed.
 
 <p align="center">
