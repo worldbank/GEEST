@@ -227,7 +227,7 @@ The data processing interface serves as the central hub for managing, configurin
 
 **🖥️ Key Elements of the Interface**
 
-<table>
+<table border="1" style="border-collapse: collapse; width: 100%;">
   <tr>
     <td><strong>1. The Three Dimensions</strong></td>
     <td>The interface organizes the analysis into three primary dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>.</td>
