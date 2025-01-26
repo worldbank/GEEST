@@ -14,11 +14,11 @@ After installing the plugin, its interface should automatically appear:
     onclick="window.open(this.src, '_blank')">
 </p>
 
-1. **Locate the Toolbar Icon**  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Tool%20icon.jpg" alt="Toolbar Icon" style="width:5%;" title="Click to enlarge" onclick="window.open(this.src, '_blank')">  
-   Find the plugin’s icon in the QGIS toolbar.
-
-2. **Open the Plugin**  
-   Click on the plugin’s toolbar icon to open its main window.
+> 1. **Locate the Toolbar Icon**  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Tool%20icon.jpg" alt="Toolbar Icon" style="width:5%;" title="Click to enlarge" onclick="window.open(this.src, '_blank')">  
+>   Find the plugin’s icon in the QGIS toolbar.
+>
+> 2. **Open the Plugin**  
+>   Click on the plugin’s toolbar icon to open its main window.
 
 ### Project Setup
 
@@ -39,10 +39,11 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> - **Welcome to GEEST Page**: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin's capabilities and its relevance to geospatial analysis.
->
-> - **About Page**: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.
+```
+ - **Welcome to GEEST Page**: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin's capabilities and its relevance to geospatial analysis.
 
+ - **About Page**: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.
+```
 #### Setting Up the ORS Key
 
 To use the GEEST plugin effectively, you need to configure the **Open Route Service (ORS)** API key, as ORS is the backbone for processing **Accessibility** factors. The ORS platform is used for spatial analysis workflows, and obtaining an API key is a simple and free process. Below are the steps:
