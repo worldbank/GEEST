@@ -431,11 +431,8 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#women-s-travel-patterns">Women’s Travel Patterns</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-education-and-training-facilities">Access to Education and Training Facilities</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-health-facilities">Access to Health Facilities</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-financial-facilities">Access to Financial Facilities</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-accessibility-factors">Input Accessibility factors</a></li>
 </ul>
             </nav>
         </div>
@@ -449,83 +446,59 @@ document.write(`
                   
   <section id="accessibility">
 <h1>Accessibility<a class="headerlink" href="#accessibility" title="Permalink to this heading">#</a></h1>
-<section id="women-s-travel-patterns">
-<h2>Women’s Travel Patterns<a class="headerlink" href="#women-s-travel-patterns" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WTP.jpg" alt="picture">
+<p align="justify"> 
+The Accessibility Dimension evaluates women’s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select point shapefile input of facilities related to women’s role as caregivers. This includes green spaces, grocery stores, pharmacies, kindergartens and schools.</p></li>
-<li><p>Select the mode of travel (Walking OR Driving).</p></li>
-<li><p>Select the method of measurement (Distance OR Time).</p></li>
-<li><p>Specify travel distance or time increments in meters or time respectively using comma delimitation.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>Each output factor will be stored in the project folder specified in the “Setup” tab, in the “WTP” folder under the “Accessibility” folder and have the following names WTP_Walking_Green_spaces.tif, WTP_Walking_Groceries.tif, WTP_Walking_Pharmacies.tif and WTP_Walking_Kindergartens_and_Schools.tif. The user can rename the output file to preferred filename.</p></li>
-<li><p>Click the “Aggregate” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder. (Project_Folder/Accessibility/WTP.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
+<section id="general-overview">
+<h2>General Overview<a class="headerlink" href="#general-overview" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<p>This tool evaluates how easily women can access essential services and amenities, considering their caregiving roles and daily travel needs. It uses geospatial area analysis with Openrouteservices (ORS) and OpenStreetMap (OSM) data to measure accessibility for several factors, including:</p>
+<ul class="simple">
+<li><p><strong>Women’s Travel Patterns:</strong> Access to everyday services like pharmacies, markets, supermarkets, childcare centers, schools and parks.</p></li>
+<li><p><strong>Access to Public Transport:</strong> Proximity to bus stops, train stations, and other transport facilities.</p></li>
+<li><p><strong>Health Facilities:</strong> Availability of clinics, hospitals, and other healthcare services.</p></li>
+<li><p><strong>Education and Training Facilities:</strong> Distance to colleges, universities and other training centers.</p></li>
+<li><p><strong>Financial Facilities:</strong> Access to banks and financial support institutions.</p></li>
+</ul>
+<p>The process generates zones around these amenities, showing how far women can travel on foot or by car within increasing distances or times. Each zone is assigned a score from 5 (most accessible) to 0 (not accessible), reflecting decreasing accessibility as distance or travel time increases.</p>
 </section>
-<section id="access-to-public-transport">
-<h2>Access to Public Transport<a class="headerlink" href="#access-to-public-transport" title="Permalink to this heading">#</a></h2>
+<section id="input-accessibility-factors">
+<h2>Input Accessibility factors<a class="headerlink" href="#input-accessibility-factors" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<p align="justify"> 
+<strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces. which is then standardized on a scale from 0 to 5.
+<p>For <strong>Women’s Travel Patterns</strong>, the tool focuses on essential services such as markets, supermarkets, childcare centers, primary schools, pharmacies, and parks. Walking is often the default travel mode and the following thresholds are loaded by default based on evidence based on literature:</p>
+<ul class="simple">
+<li><p><strong>0 to 400 meters:</strong> Score = 5 (high accessibility)</p></li>
+<li><p><strong>401 to 800 meters:</strong> Score = 4</p></li>
+<li><p><strong>801 to 1200 meters:</strong> Score = 3</p></li>
+<li><p><strong>1201 to 1500 meters:</strong> Score = 2</p></li>
+<li><p><strong>1501 to 2000 meters:</strong> Score = 1</p></li>
+<li><p><strong>Over 2000 meters:</strong> Score = 0 (no accessibility)</p></li>
+</ul>
+<blockquote>
+<div><p>💡 <strong>Tip</strong>: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).</p>
+</div></blockquote>
+<p><strong>Locate Women’s Travel Patterns Section</strong></p>
+<ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Women’s Travel Patterns section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features</strong>) corresponding to the indicators by clicking the three-dot button.</p></li>
+<li><p>🔧 <strong>Optional</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
+<li><p>⚖️ <strong>Assign Weights</strong>: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.</p></li>
+<li><p>🚫 <strong>Exclude Unused Factors</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/APT.jpg" alt="picture">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20input.jpg" 
+    alt="WTP input" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select point shapefile input for public transport stops, including both land and maritime stops.</p></li>
-<li><p>Select the mode of travel (Walking OR Driving).</p></li>
-<li><p>Select the method of measurement (Distance OR Time).</p></li>
-<li><p>Specify travel distance or time increments in meters or time respectively using comma delimitation.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder set in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/PBT.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="access-to-education-and-training-facilities">
-<h2>Access to Education and Training Facilities<a class="headerlink" href="#access-to-education-and-training-facilities" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ETF.jpg" alt="picture">
-</p>
-<ol class="arabic simple">
-<li><p>Navigate to and select point shapefile input of education and training facilities (colleges, training facilities and universities).</p></li>
-<li><p>Select the mode of travel (Walking OR Driving).</p></li>
-<li><p>Select the method of measurement (Distance OR Time).</p></li>
-<li><p>Specify travel distance or time increments in meters or time respectively using comma delimitation.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/ETF.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="access-to-health-facilities">
-<h2>Access to Health Facilities<a class="headerlink" href="#access-to-health-facilities" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/HEF.jpg" alt="picture">
-</p>
-<ol class="arabic simple">
-<li><p>Navigate to and select point shapefile input of health facilities (hospitals and clinics as the points of interest).</p></li>
-<li><p>Select the mode of travel (Walking OR Driving).</p></li>
-<li><p>Select the method of measurement (Distance OR Time).</p></li>
-<li><p>Specify travel distance or time increments in meters or time respectively using comma delamination.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder (Project_Folder/Accessibility/HEF.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="access-to-financial-facilities">
-<h2>Access to Financial Facilities<a class="headerlink" href="#access-to-financial-facilities" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/FIF.jpg" alt="picture">
-</p>
-<ol class="arabic simple">
-<li><p>Navigate to and select point shapefile input of financial facilities (location of banks and other financial facilities except for ATMs).</p></li>
-<li><p>Select the mode of travel (Walking OR Driving).</p></li>
-<li><p>Select the method of measurement (Distance OR Time).</p></li>
-<li><p>Specify travel distance or time increments in meters or time respectively using comma delimitation.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Accessibility” folder. (Project_Folder/Accessibility/FIF.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
+<p><strong>Process Women’s Travel Patterns factors</strong></p>
+<p>Back in the data processing interface</p>
 </section>
 </section>
 
@@ -593,11 +566,8 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#women-s-travel-patterns">Women’s Travel Patterns</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-education-and-training-facilities">Access to Education and Training Facilities</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-health-facilities">Access to Health Facilities</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-financial-facilities">Access to Financial Facilities</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-accessibility-factors">Input Accessibility factors</a></li>
 </ul>
   </nav></div>
 
