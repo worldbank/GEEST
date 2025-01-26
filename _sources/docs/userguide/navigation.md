@@ -225,23 +225,25 @@ The data processing interface serves as the central hub for managing, configurin
     onclick="window.open(this.src, '_blank')">
 </p>
 
-Key Elements of the Interface:
+**🖥️ Key Elements of the Interface**
 
-1. **The Three Dimensions**. The interface organizes the analysis into three primary dimensions: Contextual, Accessibility and Place Characterization.
-2. **Fifteen Factors**. Each dimension consists of factors, representing the main themes of analysis.
-3. **Fourteen Subfactors**. Within certain factors, subfactors provide additional granularity.
-4. **Processing Status Widgets**. Next to each factor or dimension, widgets indicate the processing status:
-     - 4a - **Configured, not run**: Inputs are set up but processing has not started.
-     - 4b - **Required and not configured**: Essential inputs are missing and need configuration.
-     - 4c - **Completed successfully**: Processing has finished without errors.
-     - 4d - **Workflow failed**: The process encountered an error and requires troubleshooting.
-     - 4e - **Not configured (optional)**: Inputs are optional and have not been configured. These do not impact the analysis unless explicitly included.
-     - 4f - **Excluded from analysis**: This factor or subfactor has been intentionally excluded from the analysis workflow and will not be processed.
-5. **Run All/Run Incomplete**:
-     - **Run All**: Executes all workflows, regardless of their configuration or status.
-     - **Run Incomplete**: Focuses on executing only the workflows that have not been successfully completed. This is useful for resuming interrupted processes without rerunning completed ones
-6. **Project Setup Pages**. The Project button opens back the setup pages where users can configure the project folder, and set up parameters for the analysis.
-7. **Help**. Clicking the Help button redirects you to the tool’s GitHub page, where you can find detailed documentation and support resources.
+| Element                     | Description                                                                              |
+|-----------------------------|------------------------------------------------------------------------------------------|
+| **1. The Three Dimensions**    | The interface organizes the analysis into three primary dimensions: **Contextual**, **Accessibility**, and **Place Characterization**. |
+| **2. Fifteen Factors**         | Each dimension consists of factors representing the main themes of analysis.             |
+| **3. Fourteen Subfactors**     | Certain factors include subfactors for additional granularity.                           |
+| **4. Processing Status Widgets** | Widgets next to each factor or dimension indicate processing status:                    |
+|                             | - **4a Configured, not run:** Inputs are set up but processing has not started.           |
+|                             | - **4b Required and not configured:** Essential inputs are missing and need configuration. |
+|                             | - **4c Completed successfully:** Processing finished without errors.                      |
+|                             | - **4d Workflow failed:** The process encountered an error and requires troubleshooting.  |
+|                             | - **4e Not configured (optional):** Inputs are optional and not configured.               |
+|                             | - **4f Excluded from analysis:** Intentionally excluded factors or subfactors.            |
+| **5. Run All/Run Incomplete**  | - **Run All:** Executes all workflows, regardless of configuration or status.             |
+|                             | - **Run Incomplete:** Focuses only on workflows that are incomplete.                     |
+| **6. Project Setup Pages**     | The **Project** button opens setup pages to configure the project folder and analysis parameters. |
+| **7. Help**                    | Clicking the **Help** button redirects to the tool’s GitHub page for detailed documentation and support resources. |
+
 
 
 **🗂️ Key Considerations**
