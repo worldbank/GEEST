@@ -14,9 +14,9 @@ This tool evaluates how easily women can access essential services and amenities
 - **Education and Training Facilities:** Distance to colleges, universities and other training centers.
 - **Financial Facilities:** Access to banks and financial support institutions.
 
-Travel mode: The user can select walking or driving as a travel mode, and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature.
+**Travel mode**: The user can select walking or driving as a travel mode, and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature.
 
-Measurement: The default measurement for travel is distance in meters, which is most appropriate for walking. These <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are based on evidence from the literature at the factor level and are designed to provide consistency across analyses. If driving is selected as a travel mode, time in minutes is a more appropriate measurement.
+**Measurement**: The default measurement for travel is distance in meters, which is most appropriate for walking. These <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are based on evidence from the literature at the factor level and are designed to provide consistency across analyses. If driving is selected as a travel mode, time in minutes is a more appropriate measurement.
 
 ---
 
@@ -24,7 +24,7 @@ Measurement: The default measurement for travel is distance in meters, which is 
 
 ---
 
-Output: The process generates zones around these amenities, showing how far women can travel on foot or by car within increasing distances or times. Each zone is assigned a score from 5 (high accessibility) to 0 (no accessibility), reflecting decreasing accessibility as distance or travel time increases.
+**Output**: The process generates zones around these amenities, showing how far women can travel on foot or by car within increasing distances or times. Each zone is assigned a score from 5 (high accessibility) to 0 (no accessibility), reflecting decreasing accessibility as distance or travel time increases.
 
 ### Input Accessibility factors
 ---
