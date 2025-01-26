@@ -435,6 +435,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-accessibility-factors">Input Accessibility factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#womens-travel-patterns-wtp">Women’s Travel Patterns (WTP)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-health-facilities">Access to Health Facilities</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-education-and-training-facilities">Access to Education and Training Facilities</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-financial-facilities">Access to Financial Facilities</a></li>
 </ul>
 </li>
 </ul>
@@ -477,15 +480,15 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 <section id="womens-travel-patterns-wtp">
 <h3>Women’s Travel Patterns (WTP)<a class="headerlink" href="#womens-travel-patterns-wtp" title="Permalink to this heading">#</a></h3>
 <p align="justify"> 
-<strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces. These are standardized on a scale from 0 to 5.
+<strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces.
 <p><strong>Locate Women’s Travel Patterns Section</strong></p>
 <blockquote>
 <div><ul class="simple">
 <li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Women’s Travel Patterns section</strong> to open the pop-up.</p></li>
 <li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features</strong>) corresponding to the indicators by clicking the three-dot button.</p></li>
-<li><p>🔧 <strong>Optional</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
+<li><p>🔧 <strong>Travel mode (optional)</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
 <li><p>⚖️ <strong>Assign Weights</strong>: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.</p></li>
-<li><p>🚫 <strong>Exclude Unused Factors</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>🚫 <strong>Exclude Unused Factors (optional)</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
 <li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.</p></li>
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
@@ -527,7 +530,146 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 <hr class="docutils" />
 <section id="access-to-public-transport">
 <h3>Access to Public Transport<a class="headerlink" href="#access-to-public-transport" title="Permalink to this heading">#</a></h3>
-<p><strong>Access to Public Transport</strong> focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.</p>
+<p align="justify"> 
+<strong>Access to Public Transport</strong> focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.
+</p>
+<p><strong>Locate Access to Public Transport Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Access to Public Transport section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefile (<strong>point features</strong>) corresponding to the <strong>Location of public transportation stops, including maritime</strong> by clicking the three-dot button.</p></li>
+<li><p>🔧 <strong>Travel mode (optional)</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
+<li><p>🚫 <strong>Exclude Factor (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/APT.jpg" 
+    alt="APT input" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p><strong>Process Access to Public Transport factor</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Access to Public Transport</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/APT%20run.jpg" 
+    alt="APT run" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The process should be successfully completed and indicated by a green checkmark widget.</p>
+</section>
+<hr class="docutils" />
+<section id="access-to-health-facilities">
+<h3>Access to Health Facilities<a class="headerlink" href="#access-to-health-facilities" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Access to Health Facilities</strong> evaluates how easily women can reach healthcare services in terms of distance, impacting their well-being and ability to participate in the workforce.
+</p>
+<p><strong>Locate Access to Health Facilities Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Access to Health Facilities section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefile (<strong>point features</strong>) corresponding to the <strong>Location of hospitals and clinics</strong> by clicking the three-dot button.</p></li>
+<li><p>🔧 <strong>Travel mode (optional)</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
+<li><p>🚫 <strong>Exclude Factor (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AHF.jpg" 
+    alt="AHF input" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p><strong>Process Access to Health Facilities factor</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Access to Health Facilities</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p>The process should be successfully completed and indicated by a green checkmark widget.</p>
+</section>
+<hr class="docutils" />
+<section id="access-to-education-and-training-facilities">
+<h3>Access to Education and Training Facilities<a class="headerlink" href="#access-to-education-and-training-facilities" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Access to Education and Training Facilities</strong> assesses the proximity to higher education institutions and training centers, influencing women’s ability to gain necessary qualifications.
+</p>
+<p><strong>Locate Access to Education and Training Facilities Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Access to Education and Training Facilities section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefile (<strong>point features</strong>) corresponding to the <strong>Location of universities and technical schools</strong> by clicking the three-dot button.</p></li>
+<li><p>🔧 <strong>Travel mode (optional)</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
+<li><p>🚫 <strong>Exclude Factor (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AET.jpg" 
+    alt="AET input" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p><strong>Process Access to Education and Training Facilities factor</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Access to Education and Training Facilities</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p>The process should be successfully completed and indicated by a green checkmark widget.</p>
+</section>
+<hr class="docutils" />
+<section id="access-to-financial-facilities">
+<h3>Access to Financial Facilities<a class="headerlink" href="#access-to-financial-facilities" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Access to Financial Facilities</strong> focuses on the proximity of banks and financial institutions, which is essential for women’s economic empowerment and ability to access credit.
+</p>
+<p><strong>Locate Access to Financial Facilities Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Access to Financial Facilities section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefile (<strong>point features</strong>) corresponding to the <strong>Location of banks and other financial facilities</strong> by clicking the three-dot button.</p></li>
+<li><p>🔧 <strong>Travel mode (optional)</strong>: Change the travel mode from walking to driving and the measurements from meters to minutes and amend the default thresholds if local context suggests more appropriate increments.</p></li>
+<li><p>🚫 <strong>Exclude Factor (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AFF.jpg" 
+    alt="AFF input" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p><strong>Process Access to Financial Facilities factor</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Access to Financial Facilities</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p>The process should be successfully completed and indicated by a green checkmark widget.</p>
 <p><small><a href="#ref1" id="footnote1"><sup>1</sup> Thresholds</p>
 <p align="left">
 <img 
@@ -610,6 +752,9 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-accessibility-factors">Input Accessibility factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#womens-travel-patterns-wtp">Women’s Travel Patterns (WTP)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-public-transport">Access to Public Transport</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-health-facilities">Access to Health Facilities</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-education-and-training-facilities">Access to Education and Training Facilities</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#access-to-financial-facilities">Access to Financial Facilities</a></li>
 </ul>
 </li>
 </ul>
