@@ -70,7 +70,7 @@ Back in the Data Processing Interface:
     onclick="window.open(this.src, '_blank')">
 </p>
 
-The successful completion of the process is indicated by the green checkmark widgets, as highlighted in red in the image below:
+The successful completion of the process is indicated by the green checkmark widgets:
 
 <p align="center">
 <img 
