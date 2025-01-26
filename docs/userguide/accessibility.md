@@ -118,6 +118,42 @@ Walking is typically set as the default travel mode, with the following threshol
 
 | **Factor**                                | **Distance**               | **Score** |
 |-------------------------------------------|----------------------------|-----------|
+| <small>**Women's Travel Patterns**</small>               | <small>0 to 400 meters</small>            | <small>5</small>         |
+|                                           | <small>401 to 800 meters</small>          | <small>4</small>         |
+|                                           | <small>801 to 1200 meters</small>         | <small>3</small>         |
+|                                           | <small>1201 to 1500 meters</small>        | <small>2</small>         |
+|                                           | <small>1501 to 2000 meters</small>        | <small>1</small>         |
+|                                           | <small>Over 2000 meters</small>           | <small>0</small>         |
+| <small>**Access to Public Transport**</small>            | <small>0 to 250 meters</small>            | <small>5</small>         |
+|                                           | <small>251 to 500 meters</small>          | <small>4</small>         |
+|                                           | <small>501 to 750 meters</small>          | <small>3</small>         |
+|                                           | <small>751 to 1,000 meters</small>        | <small>2</small>         |
+|                                           | <small>1,001 to 1,250 meters</small>      | <small>1</small>         |
+|                                           | <small>Over 1,250 meters</small>          | <small>0</small>         |
+| <small>**Access to Health Facilities**</small>           | <small>0 to 2,000 meters</small>          | <small>5</small>         |
+|                                           | <small>2,001 to 4,000 meters</small>      | <small>4</small>         |
+|                                           | <small>4,001 to 6,000 meters</small>      | <small>3</small>         |
+|                                           | <small>6,001 to 8,000 meters</small>      | <small>2</small>         |
+|                                           | <small>8,001 to 10,000 meters</small>     | <small>1</small>         |
+|                                           | <small>Over 10,000 meters</small>         | <small>0</small>         |
+| <small>**Access to Education and Training Facilities**</small> | <small>0 to 2,000 meters</small>          | <small>5</small>         |
+|                                           | <small>2,001 to 4,000 meters</small>      | <small>4</small>         |
+|                                           | <small>4,001 to 6,000 meters</small>      | <small>3</small>         |
+|                                           | <small>6,001 to 8,000 meters</small>      | <small>2</small>         |
+|                                           | <small>8,001 to 10,000 meters</small>     | <small>1</small>         |
+|                                           | <small>Over 10,000 meters</small>         | <small>0</small>         |
+| <small>**Access to Financial Facilities**</small>        | <small>0 to 400 meters</small>            | <small>5</small>         |
+|                                           | <small>401 to 800 meters</small>          | <small>4</small>         |
+|                                           | <small>801 to 1,200 meters</small>        | <small>3</small>         |
+|                                           | <small>1,201 to 2,000 meters</small>      | <small>2</small>         |
+|                                           | <small>2,001 to 3,000 meters</small>      | <small>1</small>         |
+|                                           | <small>Over 3,000 meters</small>          | <small>0</small>         |
+
+
+
+
+| **Factor**                                | **Distance**               | **Score** |
+|-------------------------------------------|----------------------------|-----------|
 | **Women's Travel Patterns**               | 0 to 400 meters            | 5         |
 |                                           | 401 to 800 meters          | 4         |
 |                                           | 801 to 1200 meters         | 3         |
