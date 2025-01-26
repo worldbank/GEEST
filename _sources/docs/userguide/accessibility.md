@@ -18,9 +18,11 @@ The process generates zones around these amenities, showing how far women can tr
 
 ### Input Accessibility factors
 ---
+#### Women’s Travel Patterns (WTP)
 <p align="justify"> 
 <strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces. which is then standardized on a scale from 0 to 5.
 
+---    
 For **Women’s Travel Patterns**, the tool focuses on essential services such as markets, supermarkets, childcare centers, primary schools, pharmacies, and parks. Walking is often the default travel mode and the following thresholds are loaded by default based on evidence based on literature:
 
 - **0 to 400 meters:** Score = 5 (high accessibility)
@@ -80,6 +82,12 @@ The successful completion of the process is indicated by the green checkmark wid
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
+
+---
+#### Access to Public Transport
+<strong>Access to Public Transport</strong> focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.
+
+---
 
 
 
