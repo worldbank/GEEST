@@ -227,52 +227,52 @@ The data processing interface serves as the central hub for managing, configurin
 
 **🖥️ Key Elements of the Interface**
 
-<table border="1" style="border-collapse: collapse; width: 100%;">
-  <tr>
-    <td><strong>1. The Three Dimensions</strong></td>
-    <td>The interface organizes the analysis into three primary dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>.</td>
+<table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>1. The Three Dimensions</strong></td>
+    <td style="border: 1px solid black;">The interface organizes the analysis into three primary dimensions: <strong>Contextual</strong>, <strong>Accessibility</strong>, and <strong>Place Characterization</strong>.</td>
   </tr>
-  <tr>
-    <td><strong>2. Fifteen Factors</strong></td>
-    <td>Each dimension consists of factors representing the main themes of analysis.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>2. Fifteen Factors</strong></td>
+    <td style="border: 1px solid black;">Each dimension consists of factors representing the main themes of analysis.</td>
   </tr>
-  <tr>
-    <td><strong>3. Fourteen Subfactors</strong></td>
-    <td>Certain factors include subfactors for additional granularity.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>3. Fourteen Subfactors</strong></td>
+    <td style="border: 1px solid black;">Certain factors include subfactors for additional granularity.</td>
   </tr>
-  <tr>
-    <td rowspan="6"><strong>4. Processing Status Widgets</strong></td>
-    <td>- <strong>4a Configured, not run</strong>: Inputs are set up but processing has not started.</td>
+  <tr style="border: 1px solid black;">
+    <td rowspan="6" style="border: 1px solid black;"><strong>4. Processing Status Widgets</strong></td>
+    <td style="border: 1px solid black;">- <strong>4a Configured, not run</strong>: Inputs are set up but processing has not started.</td>
   </tr>
-  <tr>
-    <td>- <strong>4b Required and not configured</strong>: Essential inputs are missing and need configuration.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;">- <strong>4b Required and not configured</strong>: Essential inputs are missing and need configuration.</td>
   </tr>
-  <tr>
-    <td>- <strong>4c Completed successfully</strong>: Processing finished without errors.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;">- <strong>4c Completed successfully</strong>: Processing finished without errors.</td>
   </tr>
-  <tr>
-    <td>- <strong>4d Workflow failed</strong>: The process encountered an error and requires troubleshooting.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;">- <strong>4d Workflow failed</strong>: The process encountered an error and requires troubleshooting.</td>
   </tr>
-  <tr>
-    <td>- <strong>4e Not configured (optional)</strong>: Inputs are optional and not configured.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;">- <strong>4e Not configured (optional)</strong>: Inputs are optional and not configured.</td>
   </tr>
-  <tr>
-    <td>- <strong>4f Excluded from analysis</strong>: Intentionally excluded factors or subfactors.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;">- <strong>4f Excluded from analysis</strong>: Intentionally excluded factors or subfactors.</td>
   </tr>
-  <tr>
-    <td rowspan="2"><strong>5. Run All/Run Incomplete</strong></td>
-    <td>- <strong>Run All</strong>: Executes all workflows, regardless of configuration or status.</td>
+  <tr style="border: 1px solid black;">
+    <td rowspan="2" style="border: 1px solid black;"><strong>5. Run All/Run Incomplete</strong></td>
+    <td style="border: 1px solid black;">- <strong>Run All</strong>: Executes all workflows, regardless of configuration or status.</td>
   </tr>
-  <tr>
-    <td>- <strong>Run Incomplete</strong>: Focuses only on workflows that are incomplete.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;">- <strong>Run Incomplete</strong>: Focuses only on workflows that are incomplete.</td>
   </tr>
-  <tr>
-    <td><strong>6. Project Setup Pages</strong></td>
-    <td>The <strong>Project</strong> button opens setup pages to configure the project folder and analysis parameters.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>6. Project Setup Pages</strong></td>
+    <td style="border: 1px solid black;">The <strong>Project</strong> button opens setup pages to configure the project folder and analysis parameters.</td>
   </tr>
-  <tr>
-    <td><strong>7. Help</strong></td>
-    <td>Clicking the <strong>Help</strong> button redirects to the tool’s GitHub page for detailed documentation and support resources.</td>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>7. Help</strong></td>
+    <td style="border: 1px solid black;">Clicking the <strong>Help</strong> button redirects to the tool’s GitHub page for detailed documentation and support resources.</td>
   </tr>
 </table>
 
