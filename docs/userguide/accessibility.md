@@ -55,4 +55,31 @@ For **Women’s Travel Patterns**, the tool focuses on essential services such a
 
 **Process Women's Travel Patterns factors**
 
-Back in the data processing interface
+Back in the Data Processing Interface:
+
+- 🖱️ **Right-click** on **Women's Travel Patterns**.  
+- ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.  
+
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20run.jpg" 
+    alt="WTP run" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The successful completion of the process is indicated by the green checkmark widgets, as highlighted in red in the image below:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20success.jpg" 
+    alt="WTP success" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+
+
