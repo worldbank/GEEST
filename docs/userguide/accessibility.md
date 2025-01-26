@@ -295,6 +295,12 @@ If the results do not immediately appear in the Layer Panel after processing the
     onclick="window.open(this.src, '_blank')">
 </p>
 
+### Key Considerations
+---
+- **Input Accuracy**: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.
+
+- **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
+
 
 <small><a href="#ref1" id="footnote1"><sup>1</sup> Thresholds
 <p align="left">
