@@ -33,7 +33,9 @@ For **Women’s Travel Patterns**, the tool focuses on essential services such a
 - **Over 2000 meters:** Score = 0 (no accessibility)
 
 ---
+
 💡 **Tip**: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).
+
 ---
 
 **Locate Women's Travel Patterns Section**
