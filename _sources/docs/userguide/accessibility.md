@@ -9,21 +9,31 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 This tool evaluates how easily women can access essential services and amenities, considering their caregiving roles and daily travel needs. It uses geospatial area analysis with Openrouteservices (ORS) and OpenStreetMap (OSM) data to measure accessibility for several factors, including:
 
 - **Women’s Travel Patterns:** Access to everyday services like pharmacies, markets, supermarkets, childcare centers, schools and parks.
-- **Access to Public Transport:** Proximity to bus stops, train stations, and other transport facilities.
-- **Health Facilities:** Availability of clinics, hospitals, and other healthcare services.
+- **Access to Public Transport:** Proximity to bus stops, train stations and other transport facilities.
+- **Health Facilities:** Availability of clinics, hospitals and other healthcare services.
 - **Education and Training Facilities:** Distance to colleges, universities and other training centers.
 - **Financial Facilities:** Access to banks and financial support institutions.
 
-The process generates zones around these amenities, showing how far women can travel on foot or by car within increasing distances or times. Each zone is assigned a score from 5 (most accessible) to 0 (not accessible), reflecting decreasing accessibility as distance or travel time increases.
+Travel mode: The user can select walking or driving as a travel mode, and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature.
+
+Measurement: The default measurement for travel is distance in meters, which is most appropriate for walking. These <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are based on evidence from the literature at the factor level and are designed to provide consistency across analyses. If driving is selected as a travel mode, time in minutes is a more appropriate measurement.
+
+---
+
+💡 **Tip**: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).
+
+---
+
+Output: The process generates zones around these amenities, showing how far women can travel on foot or by car within increasing distances or times. Each zone is assigned a score from 5 (high accessibility) to 0 (no accessibility), reflecting decreasing accessibility as distance or travel time increases.
 
 ### Input Accessibility factors
 ---
 #### Women’s Travel Patterns (WTP)
 <p align="justify"> 
-<strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies, and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces. which is then standardized on a scale from 0 to 5.
+<strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces. These are standardized on a scale from 0 to 5.
 
 ---    
-For **Women’s Travel Patterns**, the tool focuses on essential services such as markets, supermarkets, childcare centers, primary schools, pharmacies, and parks. Walking is often the default travel mode and the following thresholds are loaded by default based on evidence based on literature:
+For **Women’s Travel Patterns**, the tool emphasizes essential services and walking is typically set as the default travel mode, with the following thresholds preloaded based on evidence from the literature:
 
 - **0 to 400 meters:** Score = 5 (high accessibility)
 - **401 to 800 meters:** Score = 4
@@ -32,11 +42,7 @@ For **Women’s Travel Patterns**, the tool focuses on essential services such a
 - **1501 to 2000 meters:** Score = 1
 - **Over 2000 meters:** Score = 0 (no accessibility)
 
----
 
-💡 **Tip**: If evidence from the local context suggests alternative thresholds and increments are more appropriate, the user can alter these increments. If the selected travel mode is driving, the equivalent measurement increments should be in minutes and informed by the local context (for example, if evidence suggests the maximum time that women spend driving is 30 minutes, the increments could be 6, 12, 18, 24, 30).
-
----
 
 **Locate Women's Travel Patterns Section**
 
@@ -92,5 +98,55 @@ The successful completion of the process is indicated by the green checkmark wid
 
 ---
 
+Walking is typically set as the default travel mode, with the following thresholds preloaded based on evidence from the literature:
+
+- **0 to 250 meters:** Score = 5 (high accessibility)
+- **251 to 500 meters:** Score = 4
+- **501 to 750 meters:** Score = 3
+- **751 to 1000 meters:** Score = 2
+- **1001 to 1250 meters:** Score = 1
+- **Over 1250 meters:** Score = 0 (no accessibility)
 
 
+
+
+
+
+
+
+<small><a href="#ref1" id="footnote1"><sup>1</sup> Thresholds
+
+| **Factor**                                | **Distance**               | **Score** |
+|-------------------------------------------|----------------------------|-----------|
+| **Women's Travel Patterns**               | 0 to 400 meters            | 5         |
+|                                           | 401 to 800 meters          | 4         |
+|                                           | 801 to 1200 meters         | 3         |
+|                                           | 1201 to 1500 meters        | 2         |
+|                                           | 1501 to 2000 meters        | 1         |
+|                                           | Over 2000 meters           | 0         |
+| **Access to Public Transport**            | 0 to 250 meters            | 5         |
+|                                           | 251 to 500 meters          | 4         |
+|                                           | 501 to 750 meters          | 3         |
+|                                           | 751 to 1,000 meters        | 2         |
+|                                           | 1,001 to 1,250 meters      | 1         |
+|                                           | Over 1,250 meters          | 0         |
+| **Access to Health Facilities**           | 0 to 2,000 meters          | 5         |
+|                                           | 2,001 to 4,000 meters      | 4         |
+|                                           | 4,001 to 6,000 meters      | 3         |
+|                                           | 6,001 to 8,000 meters      | 2         |
+|                                           | 8,001 to 10,000 meters     | 1         |
+|                                           | Over 10,000 meters         | 0         |
+| **Access to Education and Training Facilities** | 0 to 2,000 meters          | 5         |
+|                                           | 2,001 to 4,000 meters      | 4         |
+|                                           | 4,001 to 6,000 meters      | 3         |
+|                                           | 6,001 to 8,000 meters      | 2         |
+|                                           | 8,001 to 10,000 meters     | 1         |
+|                                           | Over 10,000 meters         | 0         |
+| **Access to Financial Facilities**        | 0 to 400 meters            | 5         |
+|                                           | 401 to 800 meters          | 4         |
+|                                           | 801 to 1,200 meters        | 3         |
+|                                           | 1,201 to 2,000 meters      | 2         |
+|                                           | 2,001 to 3,000 meters      | 1         |
+|                                           | Over 3,000 meters          | 0         |
+
+</a></small>  
