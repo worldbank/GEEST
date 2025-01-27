@@ -72,7 +72,7 @@ The successful completion of the process is indicated by the green checkmark wid
 **Locate Safety Section**
 
 > - 🖱️🖱️ **Double-click** on the **Safety section** to open the pop-up.
-> - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage.
+> - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
 > - 1️⃣ Using **Perceived Safety data** index score as input:
 <p align="center">
 <img 
@@ -116,7 +116,72 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factors (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
+**Process Safety factor**
 
+Back in the Data Processing Interface:
 
+> - 🖱️ **Right-click** on **Safety**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_run.jpg" 
+    alt="Safety run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The successful completion of the process is indicated by the green checkmark widgets.
+
+---
+#### FCV
+
+<p align="justify"> 
+<strong>Fragility, conflict and violence (FCV)</strong> considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women’s vulnerability and limit their access to employment and essential services.
+</p>
+
+**Locate FCV Section**
+
+> - 🖱️🖱️ **Double-click** on the **FCV section** to open the pop-up.
+> - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
+> - 1️⃣ Using **Point features data** as input; select point locations representing data related to fragility, conflict and violence events; a buffer is needed to estimate the spatial impact of these events, the default radius is 5000m but If the impact radius of an event is known, it should be used instead:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCV1.jpg" 
+    alt="FCV points" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - 2️⃣ Using **ACLED data** as input; select ACLED data in CSV format representing fragility, conflict, and violence events; a buffer is required to estimate the spatial impact of these events, with a default radius of 5000m; if the specific impact radius of an event is known, it should be applied instead; a pop-up will appear to validate the CSV format.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCV2.jpg" 
+    alt="FCV csv data" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+**Process FCV factor**
+
+Back in the Data Processing Interface:
+
+> - 🖱️ **Right-click** on **FCV**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCVrun.jpg" 
+    alt="FCV run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The successful completion of the process is indicated by the green checkmark widgets.
 
