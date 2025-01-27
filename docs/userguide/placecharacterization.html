@@ -431,14 +431,12 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">Environmental Hazards</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fragility-conflict-and-violence-fcv">Fragility, conflict, and violence (FCV)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">Water Sanitation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate">Aggregate</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -452,149 +450,135 @@ document.write(`
                   
   <section id="place-characterization">
 <h1>Place Characterization<a class="headerlink" href="#place-characterization" title="Permalink to this heading">#</a></h1>
+<p align="justify"> 
+The Place Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
+</p>
+<section id="general-overview">
+<h2>General Overview<a class="headerlink" href="#general-overview" title="Permalink to this heading">#</a></h2>
+<p>Place Characterization factors refer to the following indicators:</p>
+<ul class="simple">
+<li><p><strong>Active Transport:</strong> identifies areas based on their ability to support safe and efficient active transport for women, such as walking, cycling, and other non-motorized modes of travel, by analyzing features like street crossings, block lengths, footpaths, and cycle paths.</p></li>
+<li><p><strong>Safety:</strong> defines areas perceived as safe based on specific data or, alternatively, on how brightly lit they are, assuming that brightly lit areas are safer than those with no lights.</p></li>
+<li><p><strong>Fragility, conflict and violence (FCV):</strong> assigns scores to by analyzing overlap with ACLED data with buffers representing various types of events.</p></li>
+<li><p><strong>Education:</strong> computes a raster containing a standardized measure of the percentage of women who have attained higher education in the country/region of interest.</p></li>
+<li><p><strong>Digital Inclusion:</strong> assesses the availability and accessibility of digital infrastructure.</p></li>
+<li><p><strong>Environmental Hazards:</strong> characterizes areas based on their vulnerability to natural disasters.</p></li>
+<li><p><strong>Water sanitation:</strong> assesses the availability and accessibility of clean water and sanitation facilities.</p></li>
+</ul>
+<p>For certain factors, <strong>multiple data input options</strong> are available depending on the data’s format and availability.</p>
+</section>
+<section id="input-place-characterization-factors">
+<h2>Input Place Characterization factors<a class="headerlink" href="#input-place-characterization-factors" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
 <section id="active-transport">
-<h2>Active Transport<a class="headerlink" href="#active-transport" title="Permalink to this heading">#</a></h2>
+<h3>Active Transport<a class="headerlink" href="#active-transport" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Active Transport</strong> refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands. This factor is composed by 4 subfactors which provide additional granularity: street crossings | cycly paths | footpaths | block layout.
+<p><strong>Locate Active Transport Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Active Transport section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features for street crossings, lines for cycle paths and footpaths and polygons for block layout</strong>) corresponding to the indicators by clicking the three-dot button.</p></li>
+<li><p>⚖️ <strong>Assign Weights</strong>: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.</p></li>
+<li><p>🚫 <strong>Exclude Unused Factors (optional)</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AT.jpg" alt="picture">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveTr.jpg" 
+    alt="Active Transport input" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select point shapefile for crosswalks, polyline shapefiles for cycle paths and for footpaths and polygon shapefile for block lengths.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>Each output factor will be stored in the project folder specified in the “Setup” tab, in the “AT” folder under the “Place Characterization” folder and have the following names AT_street_crossings.tif, AT_cycle_paths.tif, AT_footway.tif and AT_blocks.tif. The user can rename the output file to preferred filename.</p></li>
-<li><p>Click the “Aggregate” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/Activetransport.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
+<p><strong>Process Active Transport factors</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Active Transport</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveRun.jpg" 
+    alt="Active transport run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The successful completion of the process is indicated by the green checkmark widgets.</p>
 </section>
+<hr class="docutils" />
 <section id="safety">
-<h2>Safety<a class="headerlink" href="#safety" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/SAF.jpg" alt="picture">
+<h3>Safety<a class="headerlink" href="#safety" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select</p></li>
-</ol>
-<ul>
-<li><p><strong>streetlight locations</strong> (point shapefile)</p></li>
-<li><p>or, if unavailable, <strong>VIIRS Nighttime Lights dataset (.tif)</strong> may be used as proxy data for streetlight locations</p></li>
-<li><p>alternatively, <strong>Perceived Safety data (polygon shapefile)</strong> can be used if other data is unavailable; select the field containing the numeric value representing data on women’s perceived safety at the municipal, district, state, or any other required level. The tool would then standardize these scores, percentages, or statistics on a scale from 0 to 5, where 5 indicates the lowest level of violence or the highest level of perceived safety. Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Score</span> <span class="mi">5</span> <span class="p">(</span><span class="n">Safest</span><span class="p">):</span> <span class="mi">0</span> <span class="n">to</span> <span class="mi">1</span> <span class="n">homicide</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
-<span class="n">Score</span> <span class="mi">4</span><span class="p">:</span> <span class="mf">1.1</span> <span class="n">to</span> <span class="mi">3</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
-<span class="n">Score</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">3.1</span> <span class="n">to</span> <span class="mi">6</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
-<span class="n">Score</span> <span class="mi">2</span><span class="p">:</span> <span class="mf">6.1</span> <span class="n">to</span> <span class="mi">10</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
-<span class="n">Score</span> <span class="mi">1</span><span class="p">:</span> <span class="mf">10.1</span> <span class="n">to</span> <span class="mi">15</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
-<span class="n">Score</span> <span class="mi">0</span> <span class="p">(</span><span class="n">Least</span> <span class="n">Safe</span><span class="p">):</span> <span class="n">More</span> <span class="n">than</span> <span class="mi">15</span> <span class="n">homicides</span> <span class="n">per</span> <span class="mi">100</span><span class="p">,</span><span class="mi">000</span> <span class="n">people</span>
-</pre></div>
-</div>
-</li>
+<p><strong>Locate Safety Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Safety section</strong> to open the pop-up.</p></li>
+<li><p>📂 <strong>Flexible Data Input Options</strong>: Multiple data input options are available depending on the data’s availability, format, or geographic coverage.</p></li>
+<li><p>1️⃣ Using <strong>Perceived Safety data</strong> index score as input:</p></li>
 </ul>
-<ol class="arabic simple" start="2">
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder set in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/PlaceCharacterization/SAF.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="digital-inclusion">
-<h2>Digital Inclusion<a class="headerlink" href="#digital-inclusion" title="Permalink to this heading">#</a></h2>
+</div></blockquote>
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/DIG.jpg" alt="picture">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_index.jpg" 
+    alt="Safety index score" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select</p>
-<ul class="simple">
-<li><p>the polygon input shapefile containing a field indicating the percentage of houses with internet access with disaggregated scores at, for example, the municipal or district level; select the field containing the          numeric value representing data on houses with internet access.</p></li>
-<li><p>or a score at the country level as “Internet Access Value”</p></li>
+<blockquote>
+<div><ul class="simple">
+<li><p>2️⃣ Using <strong>Classified Safety data</strong> as input; select the layer and the classification field to be used for processing:</p></li>
 </ul>
-</li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/DIG.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="environmental-hazards">
-<h2>Environmental Hazards<a class="headerlink" href="#environmental-hazards" title="Permalink to this heading">#</a></h2>
+</div></blockquote>
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ENV.jpg" alt="picture">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_classes.jpg" 
+    alt="Safety classes" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
-<ol class="arabic">
-<li><p>Navigate to and select raster hazard event.</p>
-<ul class="simple">
-<li><p><strong>Forest Fire</strong>: Active Fires Density</p></li>
-<li><p><strong>Flood</strong>: Flood Hazard</p></li>
-<li><p><strong>Landslide</strong>: Landslide Susceptibility</p></li>
-<li><p><strong>Tropical Cyclone</strong>: Frequency of Tropical Cyclones</p></li>
-<li><p><strong>Drought</strong>: Global Drought Hazard based on the Standardized Precipitation Evapotranspiration Index (SPEI)</p></li>
+<blockquote>
+<div><ul class="simple">
+<li><p>3️⃣ Using <strong>Nighttime Lights data</strong> as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations:</p></li>
 </ul>
-<p>Users should be able to select between 1 to 5 of these hazards that are most relevant to their specific context. For each selected hazard, the tool will generate raster cells of 100m x 100m and assign a score ranging from 0 to 5, standardized according to the hazard’s scale. A score of 5 represents no hazard, while a score of 0 indicates areas at the highest risk. The final score will be the average of the scores from the selected hazards.</p>
-</li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>Each output factor will be stored in the project folder specified in the “Setup” tab, in the “ENV” folder under the “Place Characterization” folder and have the following names Hazard_Landslide.tif, Hazard_Fires.tif, Hazard_Floods_100_yrp.tif, Hazard_Tropical_Cyclone.tif, and Hazard_Drought.tif. The user can rename the output file to preferred filename.</p></li>
-<li><p>Click the “Aggregate” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/ENV.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="education">
-<h2>Education<a class="headerlink" href="#education" title="Permalink to this heading">#</a></h2>
+</div></blockquote>
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/EDU.jpg" alt="picture">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_NTL.jpg" 
+    alt="Safety NTL" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select</p>
-<ul class="simple">
-<li><p>the polygon input shapefile containing a field indicating the percentage of women who have achieved a post-secondary education with disaggregated scores at, for example, the municipal or district level; select the field containing the numeric value representing the above percentage.</p></li>
-<li><p>or a score at the country level as “percentage of the labor force comprising women with university degrees in specified field” in Education Level Value.</p></li>
+<blockquote>
+<div><ul class="simple">
+<li><p>4️⃣ Using <strong>Street lights data</strong> as input; select point locations representing street lights:</p></li>
 </ul>
-</li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/EDU.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="fragility-conflict-and-violence-fcv">
-<h2>Fragility, conflict, and violence (FCV)<a class="headerlink" href="#fragility-conflict-and-violence-fcv" title="Permalink to this heading">#</a></h2>
+</div></blockquote>
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/FCV.jpg" alt="picture">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_street.jpg" 
+    alt="Safety street lights" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select the csv data for Fragility, conflict and violence (FCV-ACLED data).</p></li>
-<li><p>The default radius of 5km circular buffer can be changed from “Impact Radius in Meters (Optional)” if the impact radius of an event is known.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/FCV.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>🚫 <strong>Exclude Unused Factors (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
 </section>
-<section id="water-sanitation">
-<h2>Water Sanitation<a class="headerlink" href="#water-sanitation" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/WAS.jpg" alt="picture">
-</p>
-<ol class="arabic simple">
-<li><p>Navigate to and select point shapefile for water points, catch basins, water valves and fire hydrants.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/WAS.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
-</section>
-<section id="aggregate">
-<span id="pd-aggregation-tab"></span><h2>Aggregate<a class="headerlink" href="#aggregate" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/AGGPD.jpg" alt="picture">
-</p>
-<ol class="arabic simple">
-<li><p>Load the raster outputs generated in each of the previous factor tabs for the Place Characterization Dimension.
-If a factor was executed in the same work session, the file path will automatically be populated after execution.</p></li>
-<li><p>If factors are missing, adjust the weighting percentage accordingly and ensure it totals to 100%.
-If a factor is missing it needs to be given a weighting of 0%. All factors should have equal weighting within a dimension. The Auto button will automatically adjust the weights to ensure they sum to 100.</p></li>
-<li><p>Enter alternate aggregated raster output file name if desired.</p></li>
-<li><p>Enter an alternate aggregated raster output file name if desired. The standard output file name is Place_score.tif.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>Status text next to the “Execute” button will appear and let you know once processing is complete.</p></li>
-<li><p>The aggregated layer will be loaded to the QGIS and appear in the table of contents.</p></li>
-<li><p>The aggregated output raster file will be stored in the project folder specified in the “Setup” tab, under the “Place Characterization” folder (Project_Folder/Place Characterization/Place_score.tif). The user can rename the output file to preferred filename.</p></li>
-</ol>
 </section>
 </section>
 
@@ -662,14 +646,12 @@ If a factor is missing it needs to be given a weighting of 0%. All factors shoul
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">Environmental Hazards</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fragility-conflict-and-violence-fcv">Fragility, conflict, and violence (FCV)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">Water Sanitation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregate">Aggregate</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
