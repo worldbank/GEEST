@@ -47,7 +47,11 @@ import tempfile
 temp_dir = tempfile.gettempdir()
 # Use a timestamp to ensure unique log file names
 datestamp = datetime.datetime.now().strftime("%Y%m%d")
-log_file_path = os.path.join(temp_dir, f"geest_logfile_{datestamp}.log")
+log_path_env = os.getenv("GEEST_LOG", 0)
+if log_path_env:
+    log_file_path = log_path_env
+else:
+    log_file_path = os.path.join(temp_dir, f"geest_logfile_{datestamp}.log")
 logging.basicConfig(
     filename=log_file_path,
     filemode="a",  # Append mode
@@ -57,7 +61,8 @@ logging.basicConfig(
 date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 log_message(f"Geest2 started at {date}", force=True)
-log_message(f"Logging output to: {log_file_path}")
+log_message(f"Logging output to: {log_file_path}", force=True)
+log_message(f"log_path_env: {log_path_env}", force=True)
 log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 
 

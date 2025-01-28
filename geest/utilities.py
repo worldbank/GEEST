@@ -29,7 +29,7 @@ import subprocess
 
 from qgis.PyQt.QtCore import QUrl, QSettings, QRect
 from qgis.PyQt import uic
-from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsLayerTreeGroup
+from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsLayerTreeGroup, QgsVectorLayer
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsProject, Qgis
 from geest.core import setting
@@ -162,7 +162,7 @@ def log_layer_count():
 
     # Also write to a log file in the system temp directory
     tmp_dir = tempfile.gettempdir()
-    log_file_path = os.path.join(tmp_dir, "layer_count_log.txt")
+    log_file_path = os.path.join(tmp_dir, "geest_layer_count_log.txt")
     with open(log_file_path, "a") as log_file:
         log_file.write(log_entry)
 
@@ -232,7 +232,14 @@ def log_message(
 ) -> None:
     """
     Logs a message to both QgsMessageLog and a text file,
-    including the caller's class or module name and line number."""
+    including the caller's class or module name and line number.
+
+    Args:
+        message (str): The message to log.
+        level (int): The logging level (Qgis.Info, Qgis.Warning, Qgis.Critical).
+        tag (str): The tag for the message.
+        force (bool): If True, log the message even if verbose_mode is off.
+    """
     verbose_mode = setting(key="verbose_mode", default=0)
     if not verbose_mode and not force:
         return
@@ -245,8 +252,9 @@ def log_message(
     # Combine caller information with message
     full_message = f"[{caller_name}:{line_number}] {message}"
 
-    # Log to QGIS Message Log
-    QgsMessageLog.logMessage(full_message, tag=tag, level=level)
+    # Log to QGIS Message Log if it is critical or force is true
+    if level == Qgis.Critical or force:
+        QgsMessageLog.logMessage(full_message, tag=tag, level=level)
 
     # Log to the file with appropriate logging level
     if level == Qgis.Info:
@@ -370,3 +378,29 @@ def linear_interpolation(
     if result > output_max:
         return output_max
     return result
+
+
+def vector_layer_type(layer: QgsVectorLayer) -> str:
+    """
+    Determines if a given QgsVectorLayer is a GeoPackage or a Shapefile.
+
+    Args:
+        layer (QgsVectorLayer): The QGIS vector layer.
+
+    Returns:
+        str: The type of layer ('GPKG', 'SHP', or 'Unknown').
+    """
+    if not layer.isValid():
+        return "Invalid layer"
+
+    # Get the source string and split at the pipe
+    source = layer.source().lower()
+    base_source = source.split("|")[0]  # Ignore anything after the first pipe
+
+    # Check the file extension
+    if base_source.endswith(".gpkg"):
+        return "GPKG"
+    elif base_source.endswith(".shp"):
+        return "SHP"
+    else:
+        return "Unknown"
