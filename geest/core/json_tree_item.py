@@ -263,9 +263,9 @@ class JsonTreeItem:
         elif status == "Workflow failed":
             return QIcon(resources_path("resources", "icons", "failed.svg"))
         elif status == "WRITE TOOL TIP":
-            return QIcon(resources_path("resources", "icons", ".svg"))
+            return QIcon(resources_path("resources", "icons", "unspecified.svg"))
         else:
-            return QIcon(resources_path("resources", "icons", ".svg"))
+            return QIcon(resources_path("resources", "icons", "unspecified.svg"))
 
     def getStatus(self):
         """Return the status of the item as single character."""
