@@ -141,6 +141,10 @@ class TreePanel(QWidget):
             self.on_item_double_clicked
         )  # Will show properties dialogs
 
+        # Show the item on the map if it is already generated and the
+        # user clicks it
+        self.treeView.clicked.connect(self.on_item_clicked)
+
         # Set layout
         layout.addWidget(self.treeView)
 
@@ -221,6 +225,16 @@ class TreePanel(QWidget):
             self.edit_dimension_aggregation(item)
         elif item.role == "analysis":
             self.edit_analysis_aggregation(item)
+
+    def on_item_clicked(self, index: QModelIndex):
+        """
+        Slot that runs whenever an item in the tree is clicked.
+        :param index: QModelIndex of the clicked item.
+        """
+        show_layer_on_click = setting(key="show_layer_on_click", default=False)
+        if show_layer_on_click:
+            item = index.internalPointer()
+            self.add_to_map(item)
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -477,6 +491,11 @@ class TreePanel(QWidget):
                 shift_pressed=QApplication.keyboardModifiers() & Qt.ShiftModifier,
             )
         )
+        open_working_directory_action = QAction("Open Working Directory", self)
+        open_working_directory_action.triggered.connect(
+            lambda: self.open_working_directory(item)
+        )
+
         if item.role == "analysis":
             menu = QMenu(self)
             edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
@@ -539,9 +558,6 @@ class TreePanel(QWidget):
             menu.addAction(open_log_file_action)
             open_log_file_action.triggered.connect(self.open_log_file)
             menu.addAction(open_log_file_action)
-
-            open_working_directory_action = QAction("Open Working Directory", self)
-            open_working_directory_action.triggered.connect(self.open_working_directory)
             menu.addAction(open_working_directory_action)
 
         # Check the role of the item directly from the stored role
@@ -559,7 +575,6 @@ class TreePanel(QWidget):
             remove_dimension_action.triggered.connect(
                 lambda: self.model.remove_item(item)
             )
-
             # Add actions to menu
             menu = QMenu(self)
             menu.addAction(edit_aggregation_action)
@@ -567,6 +582,7 @@ class TreePanel(QWidget):
             menu.addAction(clear_item_action)
             menu.addAction(add_to_map_action)
             menu.addAction(run_item_action)
+            menu.addAction(open_working_directory_action)
             menu.addAction(disable_action)
 
         elif item.role == "factor":
@@ -593,6 +609,7 @@ class TreePanel(QWidget):
             menu.addAction(clear_item_action)
             menu.addAction(add_to_map_action)
             menu.addAction(run_item_action)
+            menu.addAction(open_working_directory_action)
             menu.addAction(disable_action)
 
         elif item.role == "indicator":
@@ -617,6 +634,7 @@ class TreePanel(QWidget):
             menu.addAction(clear_item_action)
             menu.addAction(add_to_map_action)
             menu.addAction(run_item_action)
+            menu.addAction(open_working_directory_action)
             menu.addAction(disable_action)
 
         # Show the menu at the cursor's position
@@ -664,13 +682,48 @@ class TreePanel(QWidget):
             group="WEE",
         )
 
-    def open_working_directory(self):
-        """Open the working directory in the file explorer."""
-        if self.working_directory:
+    def open_working_directory(self, item: JsonTreeItem = None):
+        """Open the working directory in the file explorer.
+
+        If the analysis node is clicked, we open the top level working dir, otherwise
+        we open the subfolder for the item.
+
+        If item is none we assume that the working directory is the top level working directory.
+
+        args:
+            item: The item to open the working directory for.
+        returns:
+            None
+        """
+        log_message("Opening working directory.")
+        if item is None:
+            working_directory = self.working_directory
+        elif item.role == "analysis":
+            working_directory = self.working_directory
+        elif item.role == "dimension":
+            working_directory = os.path.join(
+                self.working_directory, item.data(0).lower()
+            )
+        elif item.role == "factor":
+            working_directory = os.path.join(
+                self.working_directory,
+                item.parent().data(0).lower(),
+                item.data(0).lower().replace(" ", "_").replace("'", "_"),
+            )
+        elif item.role == "indicator":
+            working_directory = os.path.join(
+                self.working_directory,
+                item.parent().parent().data(0).lower(),
+                item.parent().data(0).lower().replace(" ", "_").replace("'", "_"),
+                item.data(0).lower().replace(" ", "_").replace("/", "_"),
+            )
+        log_message(f"Opening working directory: {working_directory}")
+        if working_directory:
             if os.name == "nt":
-                os.startfile(self.working_directory)
+                os.startfile(working_directory)
             elif os.name == "posix":
-                os.system(f'xdg-open "{self.working_directory}"')
+                log_message("Using xdg-open to open the working directory.")
+                os.system(f'xdg-open "{working_directory}"')
         else:
             QMessageBox.warning(
                 self, "No Working Directory", "The working directory is not set."
@@ -1033,11 +1086,13 @@ class TreePanel(QWidget):
 
             # Check if a layer with the same data source exists in the correct group
             existing_layer = None
+            layer_tree_layer = None
             for child in parent_group.children():
                 if isinstance(child, QgsLayerTreeGroup):
                     continue
                 if child.layer().source() == layer_uri:
                     existing_layer = child.layer()
+                    layer_tree_layer = child
                     break
 
             # If the layer exists, refresh it instead of removing and re-adding
@@ -1047,6 +1102,8 @@ class TreePanel(QWidget):
                     tag="Geest",
                     level=Qgis.Info,
                 )
+                # Make the layer visible
+                layer_tree_layer.setItemVisibilityChecked(True)
                 existing_layer.reload()
             else:
                 # Add the new layer to the appropriate subgroup
@@ -1059,23 +1116,23 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {parent_group.name()}"
                 )
 
-                # Ensure the layer and its parent groups are visible
-                current_group = parent_group
-                while current_group is not None:
-                    current_group.setExpanded(True)  # Expand the group
-                    current_group.setItemVisibilityChecked(
-                        True
-                    )  # Ensure the group is visible
-                    current_group = current_group.parent()
+            # Ensure the layer and its parent groups are visible
+            current_group = parent_group
+            while current_group is not None:
+                current_group.setExpanded(True)  # Expand the group
+                current_group.setItemVisibilityChecked(
+                    True
+                )  # Set the group to be visible
+                current_group = current_group.parent()
 
-                # Set the layer itself to be visible
-                layer_tree_layer.setItemVisibilityChecked(True)
+            # Set the layer itself to be visible
+            layer_tree_layer.setItemVisibilityChecked(True)
 
-                log_message(
-                    f"Layer {layer.name()} and its parent groups are now visible.",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
+            log_message(
+                f"Layer {layer.name()} and its parent groups are now visible.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
 
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
