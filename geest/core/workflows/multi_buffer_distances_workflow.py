@@ -126,6 +126,8 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
         # How many features to pass with each ORS API call
         # Managed in the settings panel
         self.subset_size = int(setting(key="ors_request_size", default=5))
+        if self.subset_size > 5:
+            self.subset_size = 5  # Maxiumum of 5 features per request allowed by ORS
 
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
@@ -368,15 +370,15 @@ class MultiBufferDistancesWorkflow(WorkflowBase):
 
         # Parse the features from ORS response
         verbose_mode = int(setting(key="verbose_mode", default=0))
-        if verbose_mode:
-            if isochrone_data and "features" in isochrone_data:
+        if isochrone_data and "features" in isochrone_data:
+            if verbose_mode:
                 log_message(
                     f"Creating isochrone layer with {len(isochrone_data['features'])} features",
                     tag="Geest",
                     level=Qgis.Info,
                 )
-            else:
-                return None
+        else:
+            return None
         features = []
         for feature_data in isochrone_data["features"]:
             geometry = feature_data["geometry"]
