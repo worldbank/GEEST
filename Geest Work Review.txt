@@ -1,0 +1,23 @@
+Geest Work Review:
+------------------
+
++ Last week we focussed on the Contextual Dimension
+* Removed all dependencies for rasterio, pandas, ORS plugin (we will use the API directly rather)
+* Implemented raster based workflow rather than vector one that we had originally planned
+* Implemented study area prep logic that explodes polygons, generates per-feature bboxes and analysis area bbox
+* Implemented the project concept with directory structure for model.json and study_area.gpgp
+* Created the autopackage builder and tested that on Windows
+* Implemented the index score workflow
+* Implemented aggregation workflows
+* Workflows run in threads in hte background so they dont block QGIS UI
+
+
+Timeline for Oct:
+-----------------
+
+Oct 1-4: Week one: complete aggregator workflow logic, improve UX flow
+Oct 7-11: Week two: implement all other analysis types
+Oct 14-18: Week three: Implement analysis dialog (as per old geest)
+Oct 21-25: Week four: Documentation, testing and QA
+Oct 28-31: Week five: Bugfixing and polishing as needed
+

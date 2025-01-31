@@ -1,0 +1,23 @@
+name: Build documentation
+on: workflow_dispatch
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-20.04
+    container:
+      image: qgis/qgis:release-3_16
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fix Python command
+        run: apt-get install python-is-python3
+
+      - name: Install plugin dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Generate plugin repo XML
+        run: python admin.py --verbose generate-plugin-repo-xml
+
+      - name: Update the documentation
+        run: mkdocs gh-deploy --force

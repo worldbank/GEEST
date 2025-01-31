@@ -1,0 +1,86 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# mkdocs documentation
+/site/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+.env.*
+.envrc
+
+# PyInstaller
+*.**`.gitignore` continued:**
+```plaintext
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Pyre type checker
+.pyre/
+
+# VS Code
+.vscode/
+.vscode-extensions/
+
+# Nix
+result/
+nix-result/
+
+# nix
+.direnv/
+
+data
+app.py
+/geest.zip
+.~lock.*
+/.idea/GEEST2-main.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
+
+.shell.nix.swp
+geest.tar.gz
+gitlog.txt
+geest/resources/models/prepare_mask_area.model3
+test/output
+
+# Ignore files named 'core'
+core
+
+# Don't ignore directories named 'core'
+!core/

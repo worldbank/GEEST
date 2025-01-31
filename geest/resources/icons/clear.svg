@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="clear.svg"
+   inkscape:export-filename="clear.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.6325"
+     inkscape:cx="400"
+     inkscape:cy="400"
+     inkscape:window-width="1920"
+     inkscape:window-height="1002"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     fill-rule="evenodd"
+     clip-rule="evenodd"
+     d="m 6.4163196,2.6758893 c -0.2244714,0 -0.4351453,0.1089184 -0.56571,0.2924749 L 0.70585303,10.201287 c -0.51175281,0.719486 -0.53639684,1.679592 -0.0622461,2.424524 l 5.22228213,8.205725 c 0.1200985,0.188673 0.3275854,0.302852 0.5504305,0.302852 H 21.314021 c 1.188788,0 2.152382,-0.968676 2.152382,-2.163732 V 4.8396076 c 0,-1.19499 -0.963594,-2.1637183 -2.152382,-2.1637183 z m 2.1593587,4.1484815 c 0.2560925,-0.2574565 0.6713154,-0.2574565 0.9274607,0 l 4.101342,4.1230352 4.058323,-4.1207543 c 0.254833,-0.2587353 0.67007,-0.2608185 0.927395,-0.00466 0.257457,0.2561513 0.259424,0.6735506 0.0047,0.9322861 l -4.063044,4.1254212 4.152099,4.173863 c 0.256014,0.257496 0.256014,0.674921 0,0.932418 -0.256145,0.257364 -0.671382,0.257364 -0.927527,0 l -4.147246,-4.169248 -4.1038331,4.166874 c -0.254833,0.258683 -0.6699905,0.260793 -0.9273689,0.0046 -0.2573575,-0.256139 -0.2594437,-0.673433 -0.00459,-0.932248 L 12.681712,11.884469 8.5757151,7.7566873 c -0.2560925,-0.2574433 -0.2560925,-0.6748427 0,-0.932286 z"
+     fill="#000000"
+     id="path1"
+     style="stroke-width:1.315" />
+</svg>

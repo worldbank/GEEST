@@ -1,6 +1,0 @@
-## Navigation
-
-```{tableofcontents}
-```
-
-navigating GEEST...

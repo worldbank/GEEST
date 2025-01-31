@@ -1,0 +1,18 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.4.0
+    hooks:
+      - id: black
+        name: black
+        language_version: python3
+        additional_dependencies: []
+        args: [geest]
+
+  - repo: local
+    hooks:
+      - id: remove-core-file
+        name: Remove core file if it exists
+        entry: bash -c '[[ -f core && ! -d core ]] && rm core || exit 0'
+        language: system
+        stages:
+          - pre-commit

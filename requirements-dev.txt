@@ -1,0 +1,55 @@
+attrs==23.2.0
+babel==2.16.0
+black==24.4.0
+certifi==2024.8.30
+charset-normalizer==3.3.2
+click==8.0.4
+colorama==0.4.6
+debugpy==1.8.1
+distlib==0.3.8
+filelock==3.13.4
+ghp-import==2.1.0
+h11 == 0.12.0
+httpcore == 0.13.7
+httpx == 0.20.0
+idna==3.8
+iniconfig==2.0.0
+Jinja2==3.1.4
+jsonschema==4.21.1
+jsonschema-specifications==2023.12.1
+Markdown==3.7
+MarkupSafe==2.1.5
+mergedeep==1.3.4
+mkdocs==1.6.1
+mkdocs-autorefs==1.2.0
+mkdocs-get-deps==0.2.0
+mkdocs-material==9.5.34
+mkdocs-material-extensions==1.3.1
+mkdocstrings==0.26.1
+mypy_extensions==1.0.0
+numpy==1.26.4
+packaging==24.0
+paginate==0.5.7
+pathspec==0.12.1
+platformdirs==4.2.0
+pluggy==1.4.0
+Pygments==2.18.0
+pymdown-extensions==10.9
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.15
+PyQt5_sip==12.15.0
+pytest==8.1.1
+pytest-qt==4.4.0
+python-dateutil==2.9.0.post0
+PyYAML==6.0.2
+pyyaml_env_tag==0.1
+referencing==0.34.0
+regex==2024.7.24
+requests==2.32.3
+rpds-py==0.17.1
+six==1.16.0
+toml == 0.10.2
+typer == 0.4.0
+urllib3==2.2.2
+virtualenv==20.25.3
+watchdog==5.0.2
