@@ -1,0 +1,23 @@
+{
+  "general": {
+    "name" : "Gender Enabling Environments Spatial Tool (GEEST)",
+    "qgisMinimumVersion": 3.0,
+    "qgisMaximumVersion": 3.99,
+    "icon": "icon.png",
+    "experimental": true,
+    "deprecated": false,
+    "homepage": "",
+    "tracker": "https://github.com/worldbank/GEEST/issues",
+    "repository": "https://github.com/worldbank/GEEST",
+    "tags": [],
+    "category": ["plugins"],
+    "hasProcessingProvider": "no",
+    "about": "GEEST was built for the practical implementation of the Geospatial Women’s Employment Analytical Framework (GeoWEAF), developed by the World Bank, which identifies the location-specific factors affecting women's access to jobs. This framework categorizes regions based on their level of support for enabling women’s access to employment. It identifies 15 critical, spatially varying factors that influence women’s job prospects, divided into three main dimensions: Contextual, Accessibility, and Place Characterization.",
+    "author": "Kartoza for/and The World Bank",
+    "email": "info@kartoza.com, gost@worldbank.org",
+    "description": "Gender Enabling Environments Spatial Tool",
+    "version": "0.5.4",
+    "changelog": "",
+    "server": false
+  }
+}
