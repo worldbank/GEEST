@@ -404,3 +404,18 @@ def vector_layer_type(layer: QgsVectorLayer) -> str:
         return "SHP"
     else:
         return "Unknown"
+
+
+def version():
+    """Return the version of the plugin."""
+    metadata_file = os.path.join(os.path.dirname(__file__), "metadata.txt")
+    version = "Unknown"
+    try:
+        with open(metadata_file, "r") as f:
+            for line in f:
+                if line.startswith("version="):
+                    version = line.split("=")[1].strip()
+                    break
+    except FileNotFoundError:
+        log_message("metadata.txt file not found", level=Qgis.Warning)
+    return version

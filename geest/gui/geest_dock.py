@@ -21,7 +21,12 @@ from geest.gui.panels import (
     CreateProjectPanel,
 )
 from geest.core import set_setting, setting
-from geest.utilities import resources_path, log_message, is_qgis_dark_theme_active
+from geest.utilities import (
+    resources_path,
+    log_message,
+    is_qgis_dark_theme_active,
+    version,
+)
 
 INTRO_PANEL = 0
 CREDITS_PANEL = 1
@@ -45,9 +50,11 @@ class GeestDock(QDockWidget):
         :param json_file: Path to a JSON file used for the TreePanel.
         """
         super().__init__(parent)
+        # Get the plugin version from metadata.txt
+        self.plugin_version = version()
 
         self.setWindowTitle(
-            "Women's Enablement Environments"
+            f"Women's Enablement Environments - {self.plugin_version}"
         )  # Set the title of the dock
         self.json_file: Optional[str] = json_file
 
