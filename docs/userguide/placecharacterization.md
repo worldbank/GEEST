@@ -77,6 +77,7 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🖱️🖱️ **Double-click** on the **Safety section** to open the pop-up.
 > - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
 > - 1️⃣ Using **Perceived Safety data** index score as input:
+
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_index.jpg" 
@@ -86,7 +87,7 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> - 2️⃣ Using **Classified Safety data** as input; select the layer and the classification field to be used for processing:
+> - 2️⃣ Using **Classified Safety data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**polygon features**) corresponding to the safety data by clicking the three-dot button and the classification field; this layer will be used for processing:
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_classes.jpg" 
@@ -96,7 +97,7 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations:
+> - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**raster format**) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_NTL.jpg" 
@@ -106,7 +107,7 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> - 4️⃣ Using **Street lights data** as input; select point locations representing street lights:
+> - 4️⃣ Using **Street lights data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point locations**) representing street lights by clicking the three-dot button; this layer will be used for processing:
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_street.jpg" 
@@ -170,6 +171,9 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
+> - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
+
 **Process FCV factor**
 
 Back in the Data Processing Interface:
@@ -187,4 +191,136 @@ Back in the Data Processing Interface:
 </p>
 
 The successful completion of the process is indicated by the green checkmark widgets.
+
+---
+#### Education
+
+<p align="justify"> 
+<strong>Education</strong> refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector.
+</p>
+
+**Locate Education Section**
+
+> - 🖱️🖱️ **Double-click** on the **Education section** to open the pop-up.
+> - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
+> - 1️⃣ Using **Index score** at the national or regional level, based on the proportion of women who have attained higher education as input: 
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_index.jpg" 
+    alt="Education index score" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - 2️⃣ Using **Classify Polygon Into Classes data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**polygon features**) corresponding to the education data by clicking the three-dot button then, select the classification field to be used for processing:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_class.jpg" 
+    alt="Education classified polygons data" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
+
+**Process Education factor**
+
+Back in the Data Processing Interface:
+
+> - 🖱️ **Right-click** on **Education**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_run.jpg" 
+    alt="Education run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The successful completion of the process is indicated by the green checkmark widgets.
+
+---
+#### Digital Inclusion
+
+<p align="justify"> 
+<strong>Digital Inclusion</strong> assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training and education opportunities, and use financial services.
+</p>
+
+**Locate Digital Inclusion Section**
+
+> - 🖱️🖱️ **Double-click** on the **Digital Inclusion section** to open the pop-up.
+> - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
+> - 1️⃣ Using **Index score** at the national or regional level, based on the proportion of available digital infrastructure as input: 
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_index.jpg" 
+    alt="Digital Inclusion index score" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - 2️⃣ Using **Classify Polygon Into Classes data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**polygon features**) corresponding to the digital inclusion data by clicking the three-dot button then, select the classification field to be used for processing:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_class.jpg" 
+    alt="Digital Inclusion classified polygons data" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
+
+**Process Digital Inclusion factor**
+
+Back in the Data Processing Interface:
+
+> - 🖱️ **Right-click** on **Digital Inclusion**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_run.jpg" 
+    alt="Digital Inclusion run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The successful completion of the process is indicated by the green checkmark widgets.
+
+---
+#### Environmental Hazards
+
+<p align="justify"> 
+<strong>Environmental Hazards</strong> relate to the impact of environmental risks, such as floods, droughts, landslides, fires and extreme weather events, which can disrupt job stability, particularly for women in vulnerable sectors.
+</p>
+
+<p align="justify">
+This factor is composed, by default, of five subfactors representing different types of hazards: fires, floods, landslides, tropical cyclones and droughts. These subfactors are aggregated into a single factor, referred to as Environmental Hazards, based on the selected weights assigned to each subfactor.
+
+If data for one or more hazard types is not available, these subfactors can be excluded from the processing. In such cases, the tool will automatically adjust the weights of the remaining subfactors to ensure accurate aggregation.
+
+The thresholds for defining hazard levels are based on a predefined list <span style="color: red;">(**provided in the footnote**)</span>. The processing relies on globally available open data sources integrated into the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.
+</p>
+
+**Locate Environmental Hazards Section**
+
+> - 🖱️🖱️ **Double-click** on the **Environmental Hazards section** to open the pop-up.
+> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**raster features**) corresponding to the indicators by clicking the three-dot button.
+> - ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.
+> - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
+> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
