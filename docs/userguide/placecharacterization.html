@@ -436,6 +436,9 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">Environmental Hazards</a></li>
 </ul>
 </li>
 </ul>
@@ -538,7 +541,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </p>
 <blockquote>
 <div><ul class="simple">
-<li><p>2️⃣ Using <strong>Classified Safety data</strong> as input; select the layer and the classification field to be used for processing:</p></li>
+<li><p>2️⃣ Using <strong>Classified Safety data</strong> as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>polygon features</strong>) corresponding to the safety data by clicking the three-dot button and the classification field; this layer will be used for processing:</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
@@ -551,7 +554,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </p>
 <blockquote>
 <div><ul class="simple">
-<li><p>3️⃣ Using <strong>Nighttime Lights data</strong> as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations:</p></li>
+<li><p>3️⃣ Using <strong>Nighttime Lights data</strong> as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>raster format</strong>) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
@@ -564,7 +567,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </p>
 <blockquote>
 <div><ul class="simple">
-<li><p>4️⃣ Using <strong>Street lights data</strong> as input; select point locations representing street lights:</p></li>
+<li><p>4️⃣ Using <strong>Street lights data</strong> as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point locations</strong>) representing street lights by clicking the three-dot button; this layer will be used for processing:</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
@@ -634,6 +637,12 @@ The Place Characterization Dimension refers to the social, environmental, and in
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🚫 <strong>Exclude Unused Factor (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
 <p><strong>Process FCV factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
@@ -651,6 +660,147 @@ The Place Characterization Dimension refers to the social, environmental, and in
     onclick="window.open(this.src, '_blank')">
 </p>
 <p>The successful completion of the process is indicated by the green checkmark widgets.</p>
+</section>
+<hr class="docutils" />
+<section id="education">
+<h3>Education<a class="headerlink" href="#education" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Education</strong> refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector.
+</p>
+<p><strong>Locate Education Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Education section</strong> to open the pop-up.</p></li>
+<li><p>📂 <strong>Flexible Data Input Options</strong>: Multiple data input options are available depending on the data’s availability, format, or geographic coverage. Select one of the following options:</p></li>
+<li><p>1️⃣ Using <strong>Index score</strong> at the national or regional level, based on the proportion of women who have attained higher education as input:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_index.jpg" 
+    alt="Education index score" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>2️⃣ Using <strong>Classify Polygon Into Classes data</strong> as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>polygon features</strong>) corresponding to the education data by clicking the three-dot button then, select the classification field to be used for processing:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_class.jpg" 
+    alt="Education classified polygons data" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🚫 <strong>Exclude Unused Factor (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Process Education factor</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Education</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_run.jpg" 
+    alt="Education run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The successful completion of the process is indicated by the green checkmark widgets.</p>
+</section>
+<hr class="docutils" />
+<section id="digital-inclusion">
+<h3>Digital Inclusion<a class="headerlink" href="#digital-inclusion" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Digital Inclusion</strong> assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training and education opportunities, and use financial services.
+</p>
+<p><strong>Locate Digital Inclusion Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Digital Inclusion section</strong> to open the pop-up.</p></li>
+<li><p>📂 <strong>Flexible Data Input Options</strong>: Multiple data input options are available depending on the data’s availability, format, or geographic coverage. Select one of the following options:</p></li>
+<li><p>1️⃣ Using <strong>Index score</strong> at the national or regional level, based on the proportion of available digital infrastructure as input:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_index.jpg" 
+    alt="Digital Inclusion index score" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>2️⃣ Using <strong>Classify Polygon Into Classes data</strong> as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>polygon features</strong>) corresponding to the digital inclusion data by clicking the three-dot button then, select the classification field to be used for processing:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_class.jpg" 
+    alt="Digital Inclusion classified polygons data" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🚫 <strong>Exclude Unused Factor (optional)</strong>: If this factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Process Digital Inclusion factor</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Digital Inclusion</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_run.jpg" 
+    alt="Digital Inclusion run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The successful completion of the process is indicated by the green checkmark widgets.</p>
+</section>
+<hr class="docutils" />
+<section id="environmental-hazards">
+<h3>Environmental Hazards<a class="headerlink" href="#environmental-hazards" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Environmental Hazards</strong> relate to the impact of environmental risks, such as floods, droughts, landslides, fires and extreme weather events, which can disrupt job stability, particularly for women in vulnerable sectors.
+</p>
+<p align="justify">
+This factor is composed, by default, of five subfactors representing different types of hazards: fires, floods, landslides, tropical cyclones and droughts. These subfactors are aggregated into a single factor, referred to as Environmental Hazards, based on the selected weights assigned to each subfactor.
+<p>If data for one or more hazard types is not available, these subfactors can be excluded from the processing. In such cases, the tool will automatically adjust the weights of the remaining subfactors to ensure accurate aggregation.</p>
+<p>The thresholds for defining hazard levels are based on a predefined list <span style="color: red;">(<strong>provided in the footnote</strong>)</span>. The processing relies on globally available open data sources integrated into the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.</p>
+</p>
+<p><strong>Locate Environmental Hazards Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Environmental Hazards section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>raster features</strong>) corresponding to the indicators by clicking the three-dot button.</p></li>
+<li><p>⚖️ <strong>Assign Weights</strong>: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.</p></li>
+<li><p>🚫 <strong>Exclude Unused Factors (optional)</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
 </section>
 </section>
 </section>
@@ -724,6 +874,9 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">Environmental Hazards</a></li>
 </ul>
 </li>
 </ul>
