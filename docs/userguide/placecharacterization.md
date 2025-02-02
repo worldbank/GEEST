@@ -469,10 +469,35 @@ If the results do not immediately appear in the Layer Panel after processing the
 
 - **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
   
-
- <small><a id="footnote1" href="#ref1">1</a>: <span style="color: #505050;">**Active transport**</span> factor is calculated based on four factors averaged across the raster cells:
-*Street Crossings scores*: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)
-*Cycle Paths scores*: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)
-*Footpaths scores*: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)
-*Block Sizes scores*: (score 0 = none, score 1 = >1 km, score 2 = 751m-1 km, score 3 = 501m-750m, score 4 = 251m-500m, score 5 = <250m). **Safety** is calculated by generating 20-meter buffers around streetlights. Raster cells where 80-100% of their area intersects with these buffers are assigned a *score of 5*. Cells with 60-79% intersection receive a *score of 4*, 40-59% a *score of 3*, 20-39% a *score of 2*, and 1-19% a *score of 1*. Cells with no overlap are *scored as 0*. Note: Use nighttime light data only if streetlight data is unavailable. **FCV** is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event's impact radius is known, it should be applied instead. Raster cells intersecting with these buffers are scored as follows: Rasters overlapping with buffers for battles and explosions: *score 0*; Rasters overlapping with buffers for explosions and remote violence: *score 1*; Rasters overlapping with buffers for violence against civilians: *score 2*; Rasters overlapping with buffers for protests and riots: *score 4*; Areas with no overlap with any event: *score 5*. **Education** reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a *score of 5* represents areas where all women have a university degree, while a *score of 0* represents areas where no women have a university degree. **Digital Inclusion** reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, such that 5 represents areas where 100% of houses have internet access, and 0 represents areas where no houses have internet access. **Environmental Hazards** reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, such that 5 represents areas where there are no environmental hazards and 0 represents the areas with the highest level of hazard. **Water sanitation** factor is composed by assessing the presence of any of the water and sanitation facilities in a raster cell applying the default 1000m buffer. The scoring for each cell is as follows: Raster cell with no water points: *score 0*; Raster cell with 1 water point: *score 3*; Raster cell with 2 or more water points: *score 5*</a></small>
-</p>
+<small>
+    <a id="footnote1" href="#ref1">1</a>: <span style="color: #505050;"><strong>Active transport</strong></span> factor is calculated based on four factors averaged across the raster cells:
+    <br>
+    <strong>Street Crossings scores</strong>: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)<br>
+    <strong>Cycle Paths scores</strong>: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)<br>
+    <strong>Footpaths scores</strong>: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)<br>
+    <strong>Block Sizes scores</strong>: (score 0 = none, score 1 = >1 km, score 2 = 751m-1 km, score 3 = 501m-750m, score 4 = 251m-500m, score 5 = <250m)<br>
+    <br>
+    <strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights. Raster cells where 80-100% of their area intersects with these buffers are assigned a <em>score of 5</em>. Cells with 60-79% intersection receive a <em>score of 4</em>, 40-59% a <em>score of 3</em>, 20-39% a <em>score of 2</em>, and 1-19% a <em>score of 1</em>. Cells with no overlap are <em>scored as 0</em>. <strong>Note:</strong> Use nighttime light data only if streetlight data is unavailable.
+    <br><br>
+    <strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event's impact radius is known, it should be applied instead. Raster cells intersecting with these buffers are scored as follows:
+    <ul>
+        <li>Rasters overlapping with buffers for battles and explosions: <em>score 0</em></li>
+        <li>Rasters overlapping with buffers for explosions and remote violence: <em>score 1</em></li>
+        <li>Rasters overlapping with buffers for violence against civilians: <em>score 2</em></li>
+        <li>Rasters overlapping with buffers for protests and riots: <em>score 4</em></li>
+        <li>Areas with no overlap with any event: <em>score 5</em></li>
+    </ul>
+    <br>
+    <strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.
+    <br><br>
+    <strong>Digital Inclusion</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas where 100% of households have internet access, and <em>0</em> represents areas where no households have internet access.
+    <br><br>
+    <strong>Environmental Hazards</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas with no environmental hazards and <em>0</em> represents areas with the highest level of hazard.
+    <br><br>
+    <strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:
+    <ul>
+        <li>Raster cell with no water points: <em>score 0</em></li>
+        <li>Raster cell with 1 water point: <em>score 3</em></li>
+        <li>Raster cell with 2 or more water points: <em>score 5</em></li>
+    </ul>
+</small>
