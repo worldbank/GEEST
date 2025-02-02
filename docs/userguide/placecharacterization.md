@@ -470,7 +470,8 @@ If the results do not immediately appear in the Layer Panel after processing the
 - **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
   
 <small>
-    <a id="footnote1" href="#ref1">1</a>: 
+    <a id="footnote1" href="#ref1">1</a>: <span style="color: #505050;"><strong>Default thresholds</strong> </span>
+ <br>
  <span style="color: #505050;">
  <strong>Active transport</strong> factor is calculated based on four factors averaged across the raster cells:
     <br>
