@@ -439,6 +439,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">Environmental Hazards</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">Water sanitation</a></li>
 </ul>
 </li>
 </ul>
@@ -554,7 +555,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </p>
 <blockquote>
 <div><ul class="simple">
-<li><p>3️⃣ Using <strong>Nighttime Lights data</strong> as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>raster format</strong>) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:</p></li>
+<li><p>3️⃣ Using <strong>Nighttime Lights data</strong> as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (<strong>raster data</strong>) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
@@ -613,7 +614,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <div><ul class="simple">
 <li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>FCV section</strong> to open the pop-up.</p></li>
 <li><p>📂 <strong>Flexible Data Input Options</strong>: Multiple data input options are available depending on the data’s availability, format, or geographic coverage. Select one of the following options:</p></li>
-<li><p>1️⃣ Using <strong>Point features data</strong> as input; select point locations representing data related to fragility, conflict and violence events; a buffer is needed to estimate the spatial impact of these events, the default radius is 5000m but If the impact radius of an event is known, it should be used instead:</p></li>
+<li><p>1️⃣ Using <strong>Point features data</strong> as input; select point locations representing data related to fragility, conflict and violence events; a buffer is needed to estimate the spatial impact of these events, the default radius is 5000m but if the impact radius of an event is known, it should be used instead:</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
@@ -794,13 +795,79 @@ This factor is composed, by default, of five subfactors representing different t
 <blockquote>
 <div><ul class="simple">
 <li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Environmental Hazards section</strong> to open the pop-up.</p></li>
-<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>raster features</strong>) corresponding to the indicators by clicking the three-dot button.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the <strong>raster features</strong> corresponding to the indicators by clicking the three-dot button.</p></li>
 <li><p>⚖️ <strong>Assign Weights</strong>: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.</p></li>
 <li><p>🚫 <strong>Exclude Unused Factors (optional)</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
 <li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.</p></li>
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_select.jpg" 
+    alt="Environmental Hazards data input" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p><strong>Process Environmental Hazards factors</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Environmental Hazards</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_run.jpg" 
+    alt="Environmental Hazards run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The successful completion of the process is indicated by the green checkmark widgets.</p>
+</section>
+<hr class="docutils" />
+<section id="water-sanitation">
+<h3>Water sanitation<a class="headerlink" href="#water-sanitation" title="Permalink to this heading">#</a></h3>
+<p align="justify"> 
+<strong>Water sanitation</strong> concerns the availability of clean water and sanitation facilities, affecting women’s time allocation and capacity to engage in employment.
+</p>
+<p><strong>Locate Water sanitation Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Water sanitation section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features</strong>) corresponding to the water and sanitation facilities by clicking the three-dot button; a buffer is needed to estimate the spatial impact of these facilities, the default radius is set to 1000 meters; however, this value can be adjusted based on the user’s considerations.</p></li>
+<li><p>🚫 <strong>Exclude Unused Factor (optional)</strong>: If this specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_select.jpg" 
+    alt="Water sanitation input" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p><strong>Process Water sanitation factor</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Water sanitation</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_run.jpg" 
+    alt="Water run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The successful completion of the process is indicated by the green checkmark widgets.</p>
 </section>
 </section>
 </section>
@@ -877,6 +944,7 @@ This factor is composed, by default, of five subfactors representing different t
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#digital-inclusion">Digital Inclusion</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#environmental-hazards">Environmental Hazards</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">Water sanitation</a></li>
 </ul>
 </li>
 </ul>

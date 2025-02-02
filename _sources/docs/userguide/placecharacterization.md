@@ -97,7 +97,7 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**raster format**) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:
+> - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (**raster data**) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_NTL.jpg" 
@@ -149,7 +149,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 > - 🖱️🖱️ **Double-click** on the **FCV section** to open the pop-up.
 > - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
-> - 1️⃣ Using **Point features data** as input; select point locations representing data related to fragility, conflict and violence events; a buffer is needed to estimate the spatial impact of these events, the default radius is 5000m but If the impact radius of an event is known, it should be used instead:
+> - 1️⃣ Using **Point features data** as input; select point locations representing data related to fragility, conflict and violence events; a buffer is needed to estimate the spatial impact of these events, the default radius is 5000m but if the impact radius of an event is known, it should be used instead:
 
 <p align="center">
 <img 
@@ -318,9 +318,76 @@ The thresholds for defining hazard levels are based on a predefined list <span s
 **Locate Environmental Hazards Section**
 
 > - 🖱️🖱️ **Double-click** on the **Environmental Hazards section** to open the pop-up.
-> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**raster features**) corresponding to the indicators by clicking the three-dot button.
+> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the **raster features** corresponding to the indicators by clicking the three-dot button.
 > - ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.
 > - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_select.jpg" 
+    alt="Environmental Hazards data input" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+**Process Environmental Hazards factors**
+
+Back in the Data Processing Interface:
+
+> - 🖱️ **Right-click** on **Environmental Hazards**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_run.jpg" 
+    alt="Environmental Hazards run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The successful completion of the process is indicated by the green checkmark widgets.
+
+---
+#### Water sanitation
+
+<p align="justify"> 
+<strong>Water sanitation</strong> concerns the availability of clean water and sanitation facilities, affecting women’s time allocation and capacity to engage in employment.
+</p>
+
+**Locate Water sanitation Section**
+
+> - 🖱️🖱️ **Double-click** on the **Water sanitation section** to open the pop-up.
+> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features**) corresponding to the water and sanitation facilities by clicking the three-dot button; a buffer is needed to estimate the spatial impact of these facilities, the default radius is set to 1000 meters; however, this value can be adjusted based on the user's considerations.
+> - 🚫 **Exclude Unused Factor (optional)**: If this specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_select.jpg" 
+    alt="Water sanitation input" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+**Process Water sanitation factor**
+
+Back in the Data Processing Interface:
+
+> - 🖱️ **Right-click** on **Water sanitation**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_run.jpg" 
+    alt="Water run" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The successful completion of the process is indicated by the green checkmark widgets.
