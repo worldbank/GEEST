@@ -391,3 +391,82 @@ Back in the Data Processing Interface:
 </p>
 
 The successful completion of the process is indicated by the green checkmark widgets.
+
+---
+**Additional Steps Before Processing**: 
+
+> - 🖱️🖱️ **Double-click** on the **Place Characterization section** to open the pop-up.
+> - ⚖️ **Assign Weights**: Ensure the **weights** are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project's objectives and reflect the significance of each factor accurately.
+> - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click **OK** to proceed.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_weights.jpg" 
+    alt="Place Characterization Weights" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+### Process Place Characterization factors
+---
+After configuring the factors and adjusting their weights to achieve balance, you can initiate the process workflow:
+
+> - 🖱️**Right-click on Place Characterization**.  
+> - ▶️**Select Run Item Workflow** from the context menu.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_run.jpg" 
+    alt="Place Characterization Run" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+The process should be successfully completed and indicated by a green checkmark widget.
+
+### Visualizing the Outputs 
+---
+After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
+
+The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).
+
+<span style="color: red;">[Not working - Need to be amended]</span>
+
+The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
+
+If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting **Add to map** from the context menu:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_add.jpg" 
+    alt="Place Characterization Add to map" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> 💡 **Tip**: If the input needs to be changed for any reason (e.g., incorrect initial input), you can clear the results and reprocess them as follows:
+> - 🖱️ **Right-click** on the factor/dimension and select **Clear Item**.  
+> - 🖱️ **Right-click again** on the same cleared factor/dimension, and while holding the **SHIFT** key on your keyboard, select **Run Item Workflow**.
+> This process ensures that the tool reassesses the input datasets and outputs the corrected scores.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_rerun.jpg" 
+    alt="Place Characterization Clear and rerun" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+### Key Considerations
+---
+- **Input Accuracy**: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.
+
+- **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
+
+
+https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/PC_rerun.jpg

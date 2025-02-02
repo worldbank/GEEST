@@ -442,6 +442,9 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">Water sanitation</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-place-characterization-factors">Process Place Characterization factors</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualizing-the-outputs">Visualizing the Outputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-considerations">Key Considerations</a></li>
 </ul>
             </nav>
         </div>
@@ -868,7 +871,87 @@ This factor is composed, by default, of five subfactors representing different t
     onclick="window.open(this.src, '_blank')">
 </p>
 <p>The successful completion of the process is indicated by the green checkmark widgets.</p>
+<hr class="docutils" />
+<p><strong>Additional Steps Before Processing</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Place Characterization section</strong> to open the pop-up.</p></li>
+<li><p>⚖️ <strong>Assign Weights</strong>: Ensure the <strong>weights</strong> are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project’s objectives and reflect the significance of each factor accurately.</p></li>
+<li><p>🚫 <strong>Exclude Unused Factors (optional)</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click <strong>OK</strong> to proceed.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_weights.jpg" 
+    alt="Place Characterization Weights" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
 </section>
+</section>
+<section id="process-place-characterization-factors">
+<h2>Process Place Characterization factors<a class="headerlink" href="#process-place-characterization-factors" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<p>After configuring the factors and adjusting their weights to achieve balance, you can initiate the process workflow:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️<strong>Right-click on Place Characterization</strong>.</p></li>
+<li><p>▶️<strong>Select Run Item Workflow</strong> from the context menu.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_run.jpg" 
+    alt="Place Characterization Run" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The process should be successfully completed and indicated by a green checkmark widget.</p>
+</section>
+<section id="visualizing-the-outputs">
+<h2>Visualizing the Outputs<a class="headerlink" href="#visualizing-the-outputs" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<p>After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.</p>
+<p>The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).</p>
+<p><span style="color: red;">[Not working - Need to be amended]</span></p>
+<p>The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.</p>
+<p>If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting <strong>Add to map</strong> from the context menu:</p>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_add.jpg" 
+    alt="Place Characterization Add to map" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><p>💡 <strong>Tip</strong>: If the input needs to be changed for any reason (e.g., incorrect initial input), you can clear the results and reprocess them as follows:</p>
+<ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on the factor/dimension and select <strong>Clear Item</strong>.</p></li>
+<li><p>🖱️ <strong>Right-click again</strong> on the same cleared factor/dimension, and while holding the <strong>SHIFT</strong> key on your keyboard, select <strong>Run Item Workflow</strong>.
+This process ensures that the tool reassesses the input datasets and outputs the corrected scores.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_rerun.jpg" 
+    alt="Place Characterization Clear and rerun" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+</section>
+<section id="key-considerations">
+<h2>Key Considerations<a class="headerlink" href="#key-considerations" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<ul class="simple">
+<li><p><strong>Input Accuracy</strong>: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.</p></li>
+<li><p><strong>Weight Adjustment</strong>: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/PC_rerun.jpg">https://github.com/worldbank/GEEST/blob/main/docs/images/new images/PC_rerun.jpg</a></p>
 </section>
 </section>
 
@@ -947,6 +1030,9 @@ This factor is composed, by default, of five subfactors representing different t
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#water-sanitation">Water sanitation</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-place-characterization-factors">Process Place Characterization factors</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualizing-the-outputs">Visualizing the Outputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-considerations">Key Considerations</a></li>
 </ul>
   </nav></div>
 
