@@ -468,8 +468,9 @@ If the results do not immediately appear in the Layer Panel after processing the
 - **Input Accuracy**: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.
 
 - **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
+  
 
- <small><a id="footnote1" href="#ref1">1</a>: **Active transport** factor is calculated based on four factors averaged across the raster cells:
+ <small><a id="footnote1" href="#ref1">1</a>: <span style="color: #505050;">**Active transport**</span> factor is calculated based on four factors averaged across the raster cells:
 *Street Crossings scores*: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)
 *Cycle Paths scores*: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)
 *Footpaths scores*: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)
