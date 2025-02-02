@@ -956,10 +956,10 @@ This process ensures that the tool reassesses the input datasets and outputs the
  <span style="color: #505050;">
  <strong>Active transport</strong> factor is calculated based on four factors averaged across the raster cells:
     <br>
-    <strong>Street Crossings scores</strong>: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)<br>
-    <strong>Cycle Paths scores</strong>: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)<br>
-    <strong>Footpaths scores</strong>: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)<br>
-    <strong>Block Sizes scores</strong>: (score 0 = none, score 1 = >1 km, score 2 = 751m-1 km, score 3 = 501m-750m, score 4 = 251m-500m, score 5 = <250m)<br>
+    <em>Street Crossings scores</em>: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)<br>
+    <em>Cycle Paths scores</em>: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)<br>
+    <em>Footpaths scores</em>: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)<br>
+    <em>Block Sizes scores</em>: (score 0 = none, score 1 = >1 km, score 2 = 751m-1 km, score 3 = 501m-750m, score 4 = 251m-500m, score 5 = <250m)<br>
     <br>
     <strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights. Raster cells where 80-100% of their area intersects with these buffers are assigned a <em>score of 5</em>. Cells with 60-79% intersection receive a <em>score of 4</em>, 40-59% a <em>score of 3</em>, 20-39% a <em>score of 2</em>, and 1-19% a <em>score of 1</em>. Cells with no overlap are <em>scored as 0</em>. <strong>Note:</strong> Use nighttime light data only if streetlight data is unavailable.
     <br><br>
