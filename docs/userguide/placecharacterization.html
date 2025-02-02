@@ -473,8 +473,8 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li><p><strong>Environmental Hazards:</strong> characterizes areas based on their vulnerability to natural disasters.</p></li>
 <li><p><strong>Water sanitation:</strong> assesses the availability and accessibility of clean water and sanitation facilities.</p></li>
 </ul>
-<p><a href="#footnote1" id="ref1">thresholds<sup>1</sup></a>
-<span style="color: red;">[amend thresholds as footnote]</span></p>
+<p>The default <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are listed in the footnote:</p>
+<p><span style="color: red;">[amend thresholds as footnote]</span></p>
 <p>For certain factors, <strong>multiple data input options</strong> are available depending on the data’s format and availability.</p>
 </section>
 <section id="input-place-characterization-factors">
@@ -951,7 +951,12 @@ This process ensures that the tool reassesses the input datasets and outputs the
 <li><p><strong>Input Accuracy</strong>: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.</p></li>
 <li><p><strong>Weight Adjustment</strong>: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.</p></li>
 </ul>
-<p><a class="reference external" href="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/PC_rerun.jpg">https://github.com/worldbank/GEEST/blob/main/docs/images/new images/PC_rerun.jpg</a></p>
+<p><small><a id="footnote1" href="#ref1">1</a>: <strong>Active transport</strong> factor is calculated based on four factors averaged across the raster cells:
+<em>Street Crossings scores</em>: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)
+<em>Cycle Paths scores</em>: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)
+<em>Footpaths scores</em>: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)
+<em>Block Sizes scores</em>: (score 0 = none, score 1 = &gt;1 km, score 2 = 751m-1 km, score 3 = 501m-750m, score 4 = 251m-500m, score 5 = &lt;250m).</a></small></p>
+</p>
 </section>
 </section>
 

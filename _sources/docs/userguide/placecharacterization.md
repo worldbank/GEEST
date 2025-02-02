@@ -16,7 +16,8 @@ Place Characterization factors refer to the following indicators:
 - **Environmental Hazards:** characterizes areas based on their vulnerability to natural disasters.
 - **Water sanitation:** assesses the availability and accessibility of clean water and sanitation facilities.
 
- <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> 
+The default <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are listed in the footnote:
+
  <span style="color: red;">[amend thresholds as footnote]</span>
 
 For certain factors, **multiple data input options** are available depending on the data's format and availability.
@@ -468,5 +469,9 @@ If the results do not immediately appear in the Layer Panel after processing the
 
 - **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
 
-
-https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/PC_rerun.jpg
+ <small><a id="footnote1" href="#ref1">1</a>: **Active transport** factor is calculated based on four factors averaged across the raster cells:
+*Street Crossings scores*: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)
+*Cycle Paths scores*: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)
+*Footpaths scores*: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)
+*Block Sizes scores*: (score 0 = none, score 1 = >1 km, score 2 = 751m-1 km, score 3 = 501m-750m, score 4 = 251m-500m, score 5 = <250m).</a></small>
+</p>
