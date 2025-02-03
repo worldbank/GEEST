@@ -16,9 +16,7 @@ Place Characterization factors refer to the following indicators:
 - **Environmental Hazards:** characterizes areas based on their vulnerability to natural disasters.
 - **Water sanitation:** assesses the availability and accessibility of clean water and sanitation facilities.
 
-The default <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are listed in the footnote:
-
- <span style="color: red;">[amend thresholds as footnote]</span>
+The default <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are listed in the footnote.
 
 For certain factors, **multiple data input options** are available depending on the data's format and availability.
 
