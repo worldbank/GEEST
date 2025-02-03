@@ -311,7 +311,7 @@ This factor is composed, by default, of five subfactors representing different t
 
 If data for one or more hazard types is not available, these subfactors can be excluded from the processing. In such cases, the tool will automatically adjust the weights of the remaining subfactors to ensure accurate aggregation.
 
-The thresholds for defining hazard levels are based on a predefined list <span style="color: red;">(**provided in the footnote**)</span>. The processing relies on globally available open data sources integrated into the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.
+The thresholds for defining hazard levels are based on a predefined scoring list (**provided in the footnote**). The input data relies on globally available open data sources and is reclassified for use within the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.
 </p>
 
 **Locate Environmental Hazards Section**
