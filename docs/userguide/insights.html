@@ -194,9 +194,6 @@
 <li class="toctree-l3"><a class="reference internal" href="accessibility.html">Accessibility</a></li>
 <li class="toctree-l3"><a class="reference internal" href="placecharacterization.html">Place Characterization</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Insights</a></li>
-
-
-
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="datacollection.html">Data Collection</a></li>
@@ -431,19 +428,15 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Insights</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">Enablement</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-all-3-dimensions-wee-score">Processing all 3 dimensions (WEE Score)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-steps-after-defining-the-wee-score">Optional Steps After Defining the WEE Score</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregation-boundaries-optional">1. Aggregation Boundaries (Optional)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wee-by-population-optional">2. WEE by Population (Optional)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wee-by-job-distribution-optional">3. WEE by Job Distribution (Optional)</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">Step 1: Classify into discrete classes</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">Step 2: Combine score and population classifications</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">Step 3: Aggregation</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">RE Zone Raster Locations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">RE Point Locations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualizing-the-outputs">Visualizing the Outputs</a></li>
 </ul>
-</li>
-</ul>
-
             </nav>
         </div>
     </div>
@@ -456,72 +449,192 @@ document.write(`
                   
   <section id="insights">
 <h1>Insights<a class="headerlink" href="#insights" title="Permalink to this heading">#</a></h1>
-<section id="enablement">
-<h2>Enablement<a class="headerlink" href="#enablement" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/ENA.jpg" alt="picture">
+<p align="justify"> 
+The final aggregation of all three dimensions is carried out by applying weights to each dimension, ensuring a balanced and comprehensive representation. This tab provides users with deeper insights by identifying regions where conditions are optimal—or at least favorable—for women to secure employment in specific sectors or to enhance existing job sites. The outputs from this tab assign a combined classification score to the input raster and extract aggregated polygons or administrative units intersecting these regions. Additionally, GEEST highlights key infrastructure investments that could boost women's participation in the workforce. Population data can also be incorporated into the analysis to provide more nuanced insights that account for both population levels and enablement. This process integrates proximity data, classification scores, population data and weighted dimensions to support informed decision-making.
 </p>
-</section>
-</section>
-<section id="step-1-classify-into-discrete-classes">
-<h1>Step 1: Classify into discrete classes<a class="headerlink" href="#step-1-classify-into-discrete-classes" title="Permalink to this heading">#</a></h1>
-<p>1.1 Navigate to and select the enablement score input raster file. This can be the final aggregate score (WEE.tif), a dimension aggregate score, or even a single factor output layer.</p>
-<p>1.2 Click the “Classify” button under the “Enablement Score Input layer” field to run the algorithm.</p>
-<p>1.3 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/1) Level of Enablement Classification” folder. (Project_Folder/Insights/1) Level of Enablement Classification/WEE_score.tif). The user can rename the output file to the preferred filename.</p>
-<p>1.4 Navigate to and select the population input raster file.</p>
-<ul class="simple">
-<li><p>E.g., Input File: Population/Female_population_35_39.tif (Any of the age ranges can be used as input).</p></li>
-</ul>
-<p>1.5 Click the “Classify” button under the “Population Input layer” field to run the algorithm.</p>
-<p>1.6 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/2) Relative Population Count Classification” folder. (Project_Folder/Insights/2) Relative Population Count Classification/Population.tif). The user can rename the output file to the preferred filename.</p>
-</section>
-<section id="step-2-combine-score-and-population-classifications">
-<h1>Step 2: Combine score and population classifications<a class="headerlink" href="#step-2-combine-score-and-population-classifications" title="Permalink to this heading">#</a></h1>
-<p>2.1 Navigate to and select the “Level of Enablement” output raster file produced in step 1.2 (WEE_score.tif). This file path will be automatically populated if step 1.2 was executed in the same work session.</p>
-<p>2.2 Navigate to and select the “Relative Population Count” output raster file produced in step 1.5 (Population.tif). This file path will be automatically populated if step 1.5 was executed in the same work session.</p>
-<p>2.3 Click the “Combine Classification” button to run the algorithm combining the “Level of Enablement” and “Relative Population Count” raster layers.</p>
-<p>2.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification” folder. (Project_Folder/Insights/3) Combined Level of Enablement &amp; Relative Population Count Classification/WEE_pop_score.tif). The user can rename the output file to the preferred filename.</p>
-</section>
-<section id="step-3-aggregation">
-<h1>Step 3: Aggregation<a class="headerlink" href="#step-3-aggregation" title="Permalink to this heading">#</a></h1>
-<p>3.1 Navigate to and select the “Combine Classification” output raster file produced in step 2.3. This file path will be automatically populated if step 2.3 was executed in the same work session.</p>
-<p>3.2 Navigate to and select the aggregation input shapefile. This can be any polygon layer representing boundaries of interest for aggregation (e.g., municipal boundary layer).</p>
-<ul class="simple">
-<li><p>E.G., Input File: AdminBoundaries/Admin2.shp (Any admin level can be used as input)</p></li>
-</ul>
-<p>3.3 Click the “Execute” button to run the algorithm.</p>
-<p>3.4 The output raster file will be stored in the project folder specified in the “Setup” tab, under the “Insights/4) Aggregation” folder. (Project_Folder/Insights/4) Aggregation/WEE_pop_adm_score.shp). The user can rename the output file to the preferred filename.</p>
-<section id="re-zone-raster-locations">
-<h2>RE Zone Raster Locations<a class="headerlink" href="#re-zone-raster-locations" title="Permalink to this heading">#</a></h2>
-<p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/REzone.jpg" alt="picture">
+<section id="processing-all-3-dimensions-wee-score">
+<h2>Processing all 3 dimensions (WEE Score)<a class="headerlink" href="#processing-all-3-dimensions-wee-score" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<p align="justify">
+Before accessing the full insights tab, it is necessary to aggregate all the factors processed in the previous steps. This is achieved by assigning weights to each dimension, resulting in the WEE (Women’s Enablement Environments) output. The output is categorized into five classes: highly enabling, enabling, moderately enabling, low enablement and very low enablement.
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select the combined classification input file produced in step 2.3 of the “Enablement” tab (WEE_pop_score.tif). This file path will be automatically populated if step 2.3 of the “Enablement” tab was executed in the same work session.</p></li>
-<li><p>Navigate to and select the aggregated combined classification input file produced in step 3.3 of the “Enablement” tab (WEE_pop_adm_score.shp). This file path will be automatically populated if step 3.3 of the “Enablement” tab was executed in the same work session.</p></li>
-<li><p>Navigate to and select the potential RE zones input raster file. (Zones in the region that have no RE potential need to be represented with “no data” or “inf” values in the raster file).</p>
-<ul class="simple">
-<li><p>E.G. Input File: RE/WBG_REZoning_DOM_score_wind.tif</p></li>
-<li><p>E.G. Input File: RE/WBG_REZoning_DOM_score_solar.tif</p></li>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>WEE Score section</strong> to open the pop-up.</p></li>
+<li><p>⚖️ <strong>Assign Weights</strong>: Ensure the <strong>weights</strong> are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project’s objectives and reflect the significance of each factor accurately.</p></li>
+<li><p>🚫 <strong>Exclude Unused Dimensions (optional)</strong>: If a specific dimension is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>🔄 <strong>Readjust Weights</strong>: After excluding any dimensions, make sure to <strong>Balance Weights</strong> of the remaining ones. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click <strong>OK</strong> to proceed.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WEE_score.jpg" 
+    alt="WEE Weights" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>After configuring the dimensions and adjusting their weights to achieve balance, you can initiate the process workflow:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️<strong>Right-click on WEE Score</strong>.</p></li>
+<li><p>▶️<strong>Select Run Item Workflow</strong> from the context menu.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Wee_run.jpg" 
+    alt="Wee Run" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p>The process should be successfully completed and indicated by a green checkmark widget.</p>
+</section>
+<section id="optional-steps-after-defining-the-wee-score">
+<h2>Optional Steps After Defining the WEE Score<a class="headerlink" href="#optional-steps-after-defining-the-wee-score" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<p align="justify">
+WEE can be visualized in relation to female population distribution by providing a raster dataset containing female population density and/or by job distribution by providing job locations. These datasets are combined with the WEE score to calculate the WEE by Population score and/or WEE by Job Distribution score. If an administrative layer is defined, results are aggregated by subnational boundaries to display the predominant WEE outputs for each region.
+</p>
+<section id="aggregation-boundaries-optional">
+<h3>1. Aggregation Boundaries (Optional)<a class="headerlink" href="#aggregation-boundaries-optional" title="Permalink to this heading">#</a></h3>
+<p>This step allows aggregating the WEE analysis results by subnational boundaries (e.g., districts, provinces).</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🛠️ <strong>What to do</strong>: Select or upload a layer containing subnational boundaries (e.g., administrative polygons).</p></li>
+<li><p>📊 <strong>What can be done</strong>: Calculate the majority WEE score for each boundary. If population data is available, calculate the majority WEE by Population score for each boundary. If job distribution data is configured (see Step 3), calculate the majority WEE by Job Distribution score for each boundary.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="wee-by-population-optional">
+<h3>2. WEE by Population (Optional)<a class="headerlink" href="#wee-by-population-optional" title="Permalink to this heading">#</a></h3>
+<p>This step combines female population data with the WEE score to provide insights into population-weighted WEE results.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🛠️ <strong>What to do</strong>: Upload or select a raster dataset containing female population density.</p></li>
+<li><p>📊 <strong>What can be done</strong>: Combine the population data with WEE scores to calculate the WEE by Population score. If an aggregation layer has been defined (in Step 1), the results will be summarized per subnational boundary to show the predominant WEE by Population score. The final output is a comprehensive dataset consisting of 15 classes, representing a combination of 5 levels of enablement and 3 population density categories: low, medium and high.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="wee-by-job-distribution-optional">
+<h3>3. WEE by Job Distribution (Optional)<a class="headerlink" href="#wee-by-job-distribution-optional" title="Permalink to this heading">#</a></h3>
+<p>This step enables targeted analysis based on job locations, identifying areas where WEE intersects with job opportunities.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🛠️ <strong>What to do</strong>: Upload or select job location data, either as:</p>
+<ul>
+<li><p>Point Layer: Locations of individual jobs (e.g., existing or planned job sites).</p></li>
+<li><p>Polygon Layer: Job regions (e.g., industrial zones or employment clusters).</p></li>
+<li><p>Raster Layer: Job density data in raster format.</p></li>
 </ul>
 </li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>The 2 output files will be stored in the project folder specified in the “Setup” tab, under Raster Locations/AOI_WEE_score.tif &amp; Project_Folder/Insights/5) RE Zone Raster Locations/AOI_WEE_score.shp). The user can rename the output file to the preferred filename.</p></li>
-</ol>
-</section>
-<section id="re-point-locations">
-<h2>RE Point Locations<a class="headerlink" href="#re-point-locations" title="Permalink to this heading">#</a></h2>
+<li><p>Specify a buffer distance for point data to analyze the surrounding area.</p></li>
+<li><p>The Mask Source section allows limiting the analysis to specific areas based on:</p>
+<ul>
+<li><p>Buffer Point Layer: Creates a buffer around points (e.g., job sites or facilities).</p></li>
+<li><p>Polygon Layer: Limits analysis to selected polygons (e.g., administrative regions or zones).</p></li>
+<li><p>Raster Layer: Uses raster data to define areas for focused analysis.</p></li>
+</ul>
+</li>
+<li><p>📊 <strong>What can be done</strong>: Explore how WEE scores relate to existing or planned job opportunities. Identify areas with high WEE potential that align with job locations. Can restrict the analysis to areas of specific interest, such as around job sites, within administrative boundaries, or in high-density regions.</p></li>
+</ul>
+</div></blockquote>
 <p align="center">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/pictures/REpoint.jpg" alt="picture">
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WEE_insights.jpg"
+    alt="WEE insights" 
+    style="width:65%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
 </p>
-<ol class="arabic simple">
-<li><p>Navigate to and select the combined classification input file produced in step 2.3 of the “Enablement” tab (WEE_pop_score.tif). This file path will be automatically populated if step 2.3 of the “Enablement” tab was executed in the same work session.</p></li>
-<li><p>Navigate to and select the aggregated combined classification input file produced in step 3.3 of the “Enablement” tab (WEE_pop_adm_score.shp). This file path will be automatically populated if step 3.3 of the “Enablement” tab was executed in the same work session.</p></li>
-<li><p>Navigate to and select the RE point locations input shapefile of interest. (These could be existing RE job locations or other points of interest)</p></li>
-<li><p>Set radial buffer distance in meters.</p></li>
-<li><p>Click the “Execute” button to run the algorithm.</p></li>
-<li><p>The 2 output shapefiles will be stored in the project folder specified in the “Setup” tab, Locations/POI_WEE_score.shp &amp; Project_Folder/Insights/6) RE Point Locations/POI_WEE_score.shp). The user can rename the output file to preferred filename.</p></li>
-</ol>
+<p>After configuring the optional features you can initiate the process workflow:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️<strong>Right-click on WEE Score</strong>.</p></li>
+<li><p>▶️<strong>Select Run Item Workflow</strong> from the context menu.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Wee_run.jpg" 
+    alt="Wee Run" 
+    style="width:75%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+</section>
+</section>
+<section id="visualizing-the-outputs">
+<h2>Visualizing the Outputs<a class="headerlink" href="#visualizing-the-outputs" title="Permalink to this heading">#</a></h2>
+<hr class="docutils" />
+<p>After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.</p>
+<p>The outputs consist of all WEE score outputs (aggreagated at administrative level, by population or by job distribution). All scores are assessed on a scale from 0 to 15, categorized as follows: 14 - 15: Highly enabling, high population | 13 - 14: Highly enabling, medium population | 12 - 13: Highly enabling, low population | 11 - 12: Enabling, high population | 10 - 11: Enabling, medium population | 9 - 10: Enabling, low population | 8 - 9: Moderately enabling, high population | 7 - 8: Moderately enabling, medium population | 6 - 7: Moderately enabling, low population | 5 - 6: Low enablement, high population | 4 - 5: Low enablement, medium population | 3 - 4: Low enablement, low population | 2 - 3: Very low enablement, high population | 1 - 2: Very low enablement, medium population | 0 - 1: Very low enablement, low population.</p>
+<p><span style="color: red;">[Not working - Need to be amended]</span></p>
+<p>The outputs are stored within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.</p>
+<p>If the results do not immediately appear in the Layer Panel after processing the WEE Scores, you can resolve this by either adding them manually from the folder path or by right-clicking on the WEE Score and selecting <strong>Add to map</strong> from the context menu.</p>
+<p><strong>🖥️ Key Features of WEE Score</strong></p>
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WEE_features.jpg"
+    alt="WEE Score features" 
+    style="width:65%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>1. Edit Weights and Settings</strong></td>
+    <td style="border: 1px solid black;">Allows users to modify weights and settings for the analysis.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>2. Show Attributes</strong></td>
+    <td style="border: 1px solid black;">Displays detailed attribute data for the items in the analysis.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>3. Clear Item</strong></td>
+    <td style="border: 1px solid black;">Removes the selected item from the analysis.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>4. Clear Results</strong></td>
+    <td style="border: 1px solid black;">Clears all previously generated results.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>5. Run Item Workflow</strong></td>
+    <td style="border: 1px solid black;">Executes the workflow.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>6. Add WEE Score to Map</strong></td>
+    <td style="border: 1px solid black;">Adds the Women’s Enablement Environment (WEE) score to the map display.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>7. Add WEE by Population to Map</strong></td>
+    <td style="border: 1px solid black;">Displays WEE scores combined with population data on the map.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>8. Add WEE Aggregates to Map</strong></td>
+    <td style="border: 1px solid black;">Visualizes aggregated WEE scores on the map.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>9. Add Masked Scores to Map</strong></td>
+    <td style="border: 1px solid black;">Adds scores that are filtered or masked to the map display.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>10. Add Job Opportunities Mask to Map</strong></td>
+    <td style="border: 1px solid black;">Overlays a mask of job opportunities on the map.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>11. Add Study Area to Map</strong></td>
+    <td style="border: 1px solid black;">Displays the study area boundaries on the map.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>12. Open Log File</strong></td>
+    <td style="border: 1px solid black;">Opens the log file to review detailed workflow processes or errors.</td>
+  </tr>
+  <tr style="border: 1px solid black;">
+    <td style="border: 1px solid black;"><strong>13. Open Working Directory</strong></td>
+    <td style="border: 1px solid black;">Opens the directory containing the project files.</td>
+  </tr>
+</table>
+<br>
 </section>
 </section>
 
@@ -589,19 +702,15 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Insights</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enablement">Enablement</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-all-3-dimensions-wee-score">Processing all 3 dimensions (WEE Score)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-steps-after-defining-the-wee-score">Optional Steps After Defining the WEE Score</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregation-boundaries-optional">1. Aggregation Boundaries (Optional)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wee-by-population-optional">2. WEE by Population (Optional)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wee-by-job-distribution-optional">3. WEE by Job Distribution (Optional)</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-classify-into-discrete-classes">Step 1: Classify into discrete classes</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-combine-score-and-population-classifications">Step 2: Combine score and population classifications</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-aggregation">Step 3: Aggregation</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-zone-raster-locations">RE Zone Raster Locations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#re-point-locations">RE Point Locations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualizing-the-outputs">Visualizing the Outputs</a></li>
 </ul>
-</li>
-</ul>
-
   </nav></div>
 
 </div></div>
