@@ -53,13 +53,13 @@ Follow the steps below to install the GEEST QGIS plugin using the custom reposit
 >   - **Note:** To obtain an ORS API key, visit the [OpenRouteService website](https://openrouteservice.org/). This API key is essential for enabling routing services within the GEEST tool.
 > - 3. **Optional**: **The default settings are recommended** but you can adjust other settings as needed, such as **Study Area Preparation Options**, **Analysis
 Options** and **User Interface Options**, to enhance performance and debugging:
->   - Chunk Size: Specifies how the study area is divided into smaller sections (chunks) for processing. For example, a chunk size of 10 means the area will be processed in chunks of 10x10 cells. Larger chunk sizes can speed up processing but require more memory, while smaller chunks are slower but less memory-intensive.
->   - Assign 0 to cells by default: When enabled, cells without data are assigned a value of 0 during analysis. If unchecked, such cells are treated as "no data," meaning they are excluded from calculations. This option ensures clarity in areas where no data is present.
->   - Show layer when clicking an item in the Geest tree: Automatically displays the associated layer in the map view when an item is selected in the Geest tree. This feature improves usability by providing visual feedback for selected layers.
->   - Advanced Options:
->     - Concurrent Tasks: Controls the number of threads (tasks) that can run simultaneously during analysis. A value of 1 means tasks are executed sequentially (one at a time). Higher values (e.g., matching the number of CPU cores) can speed up processing but may require a more powerful machine.
->     - Enable Developer Mode: Intended for developers to debug the plugin using a remote debugger. Important Note: Should only be enabled if a remote debugger is set up. Enabling this without proper setup can block QGIS startup. When active, it creates a debug log tab for tracking issues.
->     - Verbose Logging Mode: Adds detailed log messages during processing, which are helpful for diagnosing issues. This option is useful when troubleshooting but can slow down performance due to the extra logging.
+>   - *Chunk Size*: Specifies how the study area is divided into smaller sections (chunks) for processing. For example, a chunk size of 10 means the area will be processed in chunks of 10x10 cells. Larger chunk sizes can speed up processing but require more memory, while smaller chunks are slower but less memory-intensive.
+>   - *Assign 0 to cells by default*: When enabled, cells without data are assigned a value of 0 during analysis. If unchecked, such cells are treated as "no data," meaning they are excluded from calculations. This option ensures clarity in areas where no data is present.
+>   - *Show layer when clicking an item in the Geest tree*: Automatically displays the associated layer in the map view when an item is selected in the Geest tree. This feature improves usability by providing visual feedback for selected layers.
+>   - *Advanced Options*:
+>     - *Concurrent Tasks*: Controls the number of threads (tasks) that can run simultaneously during analysis. A value of 1 means tasks are executed sequentially (one at a time). Higher values (e.g., matching the number of CPU cores) can speed up processing but may require a more powerful machine.
+>     - *Enable Developer Mode*: Intended for developers to debug the plugin using a remote debugger. **Important Note**: Should only be enabled if a remote debugger is set up. Enabling this without proper setup can block QGIS startup. When active, it creates a debug log tab for tracking issues.
+>     - *Verbose Logging Mode*: Adds detailed log messages during processing, which are helpful for diagnosing issues. This option is useful when troubleshooting but can slow down performance due to the extra logging.
 
 
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
