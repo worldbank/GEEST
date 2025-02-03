@@ -53,7 +53,7 @@ Follow the steps below to install the GEEST QGIS plugin using the custom reposit
    [![GEEST Toolbar Icons](https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg)](https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/icons.jpg "Click to enlarge")
 
 > - 2. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.
-> - **Note:** To obtain an ORS API key, visit the [OpenRouteService website](https://openrouteservice.org/). This API key is essential for enabling routing services within the GEEST tool.
+>   - **Note:** To obtain an ORS API key, visit the [OpenRouteService website](https://openrouteservice.org/). This API key is essential for enabling routing services within the GEEST tool.
 > - 3. **Optional**: **The default settings are recommended** but you can adjust other settings as needed, such as **Study Area Preparation Options**, **Analysis
 Options** and **User Interface Options**, to enhance performance and debugging:
 >   - Chunk Size: Specifies how the study area is divided into smaller sections (chunks) for processing. For example, a chunk size of 10 means the area will be processed in chunks of 10x10 cells. Larger chunk sizes can speed up processing but require more memory, while smaller chunks are slower but less memory-intensive.
