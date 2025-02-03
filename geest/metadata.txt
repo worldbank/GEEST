@@ -1,0 +1,12 @@
+[general]
+name=GEEST2
+description=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
+about=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
+version=2.0
+qgisMinimumVersion=3.6
+author=Tim Sutton
+email=tim@kartoza.com
+repository=https://github.com/kartoza/geest2
+tracker=https://github.com/kartoza/geest2/issues
+homepage=https://kartoza.github.io/geest2/
+license=GPLv2
