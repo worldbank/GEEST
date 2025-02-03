@@ -140,20 +140,25 @@ How to Create a New Folder
 >   
 > - **Set the Analysis Cell Size**:
 >   - Enter a value between **100m and 1000m**:
->     - Smaller values (e.g., 100m) will provide more detailed results but require longer processing times.
->     - Larger values (e.g., 1000m) will reduce processing time but result in coarser outputs.
-    
+>     - Smaller values (e.g., 100m) will provide **more detailed results but require longer processing times**. 
+>     - Larger values (e.g., 1000m) will **reduce processing time but result in coarser outputs**.
+>     - **Note:** The tool processes the study area by iterating through each polygon and generating a grid cell raster based on the selected cell size (ranging from **100m to 1000m**). For each polygon, the following steps are performed:
+>       - The tool uses the raster bounding box associated with the polygon to generate the grid.
+>       - Areas marked as marine (C) pixels are excluded by assigning them a "NoData" value.
+>       - Land cells are assigned appropriate values to create a complete raster mask for the study area.
+>       - The resulting raster layers are stored in a dedicated directory, with files named according to the polygon’s name and part number (for multipart polygons).
+>      - Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.
 ---
    - 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
 ---      
 
 - **Coordinate System Configuration**:
 
-   - <span style="color: red;">If your boundary layer uses a valid **projected CRS** (e.g., UTM or EPSG:3857), select the checkbox **Use Coordinate System of your boundary layer**. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer's CRS.</span>
+   - If your boundary layer uses a valid **projected CRS** (e.g., UTM or EPSG:3857), select the checkbox **Use Coordinate System of your boundary layer**. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer's CRS.
 
 ---   
-   - <span style="color: red;">⚠️ **Note**: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.</span> 
-   - <span style="color: red;">💡 **Tip**: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.</span>
+   - ⚠️ **Note**: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.
+   - 💡 **Tip**: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.
 --- 
 
     
@@ -284,7 +289,6 @@ The data processing interface serves as the central hub for managing, configurin
 |-----------------------------|------------------------------------------------------------------------------------------|
 | 📁 **Organize Your Folder** | Ensure your project folder is empty before starting to avoid accidental overwrites.       |
 | 🕒 **Start with Large Cells**| Begin with larger cell sizes for initial testing and refine later for greater detail.     |
-| 💾 **Backup Your Work**     | Save progress frequently and create backups to prevent data loss.                        |
 | 🖥️ **Monitor Progress**    | Use status widgets to track progress and troubleshoot errors promptly.                   |
 | 📖 **Use Help Resources**   | Refer to the Help section or GitHub documentation for additional support.                |
 
