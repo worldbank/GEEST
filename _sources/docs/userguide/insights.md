@@ -67,8 +67,8 @@ This step enables targeted analysis based on job locations, identifying areas wh
 >   - Point Layer: Locations of individual jobs (e.g., existing or planned job sites).
 >   - Polygon Layer: Job regions (e.g., industrial zones or employment clusters).
 >   - Raster Layer: Job density data in raster format.
-> - Specify a buffer distance for point data to analyze the surrounding area.
-> - The Mask Source section allows limiting the analysis to specific areas based on:
+>   - Specify a buffer distance for point data to analyze the surrounding area.
+>   - The Mask Source section allows limiting the analysis to specific areas based on:
 >   - Buffer Point Layer: Creates a buffer around points (e.g., job sites or facilities).
 >   - Polygon Layer: Limits analysis to selected polygons (e.g., administrative regions or zones).
 >   - Raster Layer: Uses raster data to define areas for focused analysis.
