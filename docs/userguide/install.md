@@ -4,19 +4,18 @@ Follow the steps below to install the GEEST QGIS plugin using the custom reposit
 
 ### Step 1: Open the Plugin Manager in QGIS
 
-1. Launch QGIS.
-2. Go to **Plugins** > **Manage and Install Plugins…**.
+> - 1. Launch QGIS.
+> - 2. Go to **Plugins** > **Manage and Install Plugins…**.
 
-<a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins.JPG" target="_blank">
-  <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins.JPG" alt="QGIS Plugin Setup" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+<a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins.JPG" target="_blank">
+  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins.JPG" alt="QGIS Plugin Setup" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
-
 
 ### Step 2: Add a New Plugin Repository
 
-1. In the **Plugin Manager** window, select the **Settings** tab.
-2. Ensure the **Show also Experimental Plugins** option is checked.
-3. Under **Plugin Repositories**, click on **Add…**.
+> - 1. In the **Plugin Manager** window, select the **Settings** tab.
+> - 2. Ensure the **Show also Experimental Plugins** option is checked.
+> - 3. Under **Plugin Repositories**, click on **Add…**.
 
 <a href="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins%20settings.jpg" target="_blank">
   <img src="https://github.com/elbeejay/draft-docs/raw/main/docs/images/new%20images/plugins%20settings.jpg" alt="QGIS Plugin Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
