@@ -619,8 +619,17 @@ Choose this option to start a new project. The plugin will guide you through cre
 <ul>
 <li><p>Enter a value between <strong>100m and 1000m</strong>:</p>
 <ul>
-<li><p>Smaller values (e.g., 100m) will provide more detailed results but require longer processing times.</p></li>
-<li><p>Larger values (e.g., 1000m) will reduce processing time but result in coarser outputs.</p></li>
+<li><p>Smaller values (e.g., 100m) will provide <strong>more detailed results but require longer processing times</strong>.</p></li>
+<li><p>Larger values (e.g., 1000m) will <strong>reduce processing time but result in coarser outputs</strong>.</p></li>
+<li><p><strong>Note:</strong> The tool processes the study area by iterating through each polygon and generating a grid cell raster based on the selected cell size (ranging from <strong>100m to 1000m</strong>). For each polygon, the following steps are performed:</p>
+<ul>
+<li><p>The tool uses the raster bounding box associated with the polygon to generate the grid.</p></li>
+<li><p>Areas marked as marine (C) pixels are excluded by assigning them a “NoData” value.</p></li>
+<li><p>Land cells are assigned appropriate values to create a complete raster mask for the study area.</p></li>
+<li><p>The resulting raster layers are stored in a dedicated directory, with files named according to the polygon’s name and part number (for multipart polygons).</p></li>
+</ul>
+</li>
+<li><p>Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.</p></li>
 </ul>
 </li>
 </ul>
@@ -635,14 +644,14 @@ Choose this option to start a new project. The plugin will guide you through cre
 <ul class="simple">
 <li><p><strong>Coordinate System Configuration</strong>:</p>
 <ul>
-<li><p><span style="color: red;">If your boundary layer uses a valid <strong>projected CRS</strong> (e.g., UTM or EPSG:3857), select the checkbox <strong>Use Coordinate System of your boundary layer</strong>. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer’s CRS.</span></p></li>
+<li><p>If your boundary layer uses a valid <strong>projected CRS</strong> (e.g., UTM or EPSG:3857), select the checkbox <strong>Use Coordinate System of your boundary layer</strong>. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer’s CRS.</p></li>
 </ul>
 </li>
 </ul>
 <hr class="docutils" />
 <ul class="simple">
-<li><p><span style="color: red;">⚠️ <strong>Note</strong>: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.</span></p></li>
-<li><p><span style="color: red;">💡 <strong>Tip</strong>: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.</span></p></li>
+<li><p>⚠️ <strong>Note</strong>: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.</p></li>
+<li><p>💡 <strong>Tip</strong>: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.</p></li>
 </ul>
 </section>
 </section>
@@ -787,13 +796,10 @@ Choose this option to start a new project. The plugin will guide you through cre
 <tr class="row-odd"><td><p>🕒 <strong>Start with Large Cells</strong></p></td>
 <td><p>Begin with larger cell sizes for initial testing and refine later for greater detail.</p></td>
 </tr>
-<tr class="row-even"><td><p>💾 <strong>Backup Your Work</strong></p></td>
-<td><p>Save progress frequently and create backups to prevent data loss.</p></td>
-</tr>
-<tr class="row-odd"><td><p>🖥️ <strong>Monitor Progress</strong></p></td>
+<tr class="row-even"><td><p>🖥️ <strong>Monitor Progress</strong></p></td>
 <td><p>Use status widgets to track progress and troubleshoot errors promptly.</p></td>
 </tr>
-<tr class="row-even"><td><p>📖 <strong>Use Help Resources</strong></p></td>
+<tr class="row-odd"><td><p>📖 <strong>Use Help Resources</strong></p></td>
 <td><p>Refer to the Help section or GitHub documentation for additional support.</p></td>
 </tr>
 </tbody>
