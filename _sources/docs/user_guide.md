@@ -1,4 +1,4 @@
-# User Guide **[work in progress]**
+# User Guide
 
 Welcome to the **GEEST User Manual**! This guide will walk you through the essential features and functionalities of GEEST, ensuring a seamless user experience. Below is an overview of the key sections included in the manual:
 
