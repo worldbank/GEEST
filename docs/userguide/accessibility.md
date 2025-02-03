@@ -304,12 +304,19 @@ If the results do not immediately appear in the Layer Panel after processing the
 
 <small><a href="#ref1" id="footnote1"><sup>1</sup> Thresholds
 <p align="left">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Thresholds.jpg" 
-    alt="Thresholds" 
-    style="width:25%;" 
-    title="Click to enlarge" 
-    onclick="window.open(this.src, '_blank')">
-</p>
+<small>
+    <span style="color: #505050;">
+<strong>Women's Travel Patterns</strong> factor is scored based on the distance to facilities: 0 to 400 meters: <em>score 5</em> | 401 to 800 meters: <em>score 4</em> | 801 to 1,200 meters: <em>score 3</em> | 1,201 to 1,500 meters: <em>score 2</em> | 1,501 to 2,000 meters: <em>score 1</em> | Over 2,000 meters: <em>score 0</em>
+<br>
+<strong>Access to Public Transport</strong> factor is scored based on proximity: 0 to 250 meters: <em>score 5</em> | 251 to 500 meters: <em>score 4</em> | 501 to 750 meters: <em>score 3</em> | 751 to 1,000 meters: <em>score 2</em> | 1,001 to 1,250 meters: <em>score 1</em> | Over 1,250 meters: <em>score 0</em>
+<br>
+<strong>Access to Health Facilities</strong> factor is scored as follows: 0 to 2,000 meters: <em>score 5</em> | 2,001 to 4,000 meters: <em>score 4</em> | 4,001 to 6,000 meters: <em>score 3</em> | 6,001 to 8,000 meters: <em>score 2</em> | 8,001 to 10,000 meters: <em>score 1</em> | Over 10,000 meters: <em>score 0</em>
+<br>
+<strong>Access to Education and Training Facilities</strong> factor scoring: 0 to 2,000 meters: <em>score 5</em> | 2,001 to 4,000 meters: <em>score 4</em> | 4,001 to 6,000 meters: <em>score 3</em> | 6,001 to 8,000 meters: <em>score 2</em> | 8,001 to 10,000 meters: <em>score 1</em> | Over 10,000 meters: <em>score 0</em>
+<br>
+<strong>Access to Financial Facilities</strong> factor scoring: 0 to 400 meters: <em>score 5</em> | 401 to 800 meters: <em>score 4</em> | 801 to 1,200 meters: <em>score 3</em> | 1,201 to 2,000 meters: <em>score 2</em> | 2,001 to 3,000 meters: <em>score 1</em> | Over 3,000 meters: <em>score 0</em>
+    </span>
+</small>
+
 
 </a></small>  
