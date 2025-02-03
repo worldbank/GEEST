@@ -304,12 +304,54 @@ If the results do not immediately appear in the Layer Panel after processing the
 
 <small><a href="#ref1" id="footnote1"><sup>1</sup> Thresholds
 <p align="left">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Thresholds.jpg" 
-    alt="Thresholds" 
-    style="width:25%;" 
-    title="Click to enlarge" 
-    onclick="window.open(this.src, '_blank')">
-</p>
+<small>
+    <span style="color: #505050;">
+        <em>Women's Travel Patterns</em> factor is scored based on the distance to facilities:
+        <br>
+        0 to 400 meters: <em>score 5</em><br>
+        401 to 800 meters: <em>score 4</em><br>
+        801 to 1,200 meters: <em>score 3</em><br>
+        1,201 to 1,500 meters: <em>score 2</em><br>
+        1,501 to 2,000 meters: <em>score 1</em><br>
+        Over 2,000 meters: <em>score 0</em>
+        <br><br>
+        <em>Access to Public Transport</em> factor is scored based on proximity:
+        <br>
+        0 to 250 meters: <em>score 5</em><br>
+        251 to 500 meters: <em>score 4</em><br>
+        501 to 750 meters: <em>score 3</em><br>
+        751 to 1,000 meters: <em>score 2</em><br>
+        1,001 to 1,250 meters: <em>score 1</em><br>
+        Over 1,250 meters: <em>score 0</em>
+        <br><br>
+        <em>Access to Health Facilities</em> factor is scored as follows:
+        <br>
+        0 to 2,000 meters: <em>score 5</em><br>
+        2,001 to 4,000 meters: <em>score 4</em><br>
+        4,001 to 6,000 meters: <em>score 3</em><br>
+        6,001 to 8,000 meters: <em>score 2</em><br>
+        8,001 to 10,000 meters: <em>score 1</em><br>
+        Over 10,000 meters: <em>score 0</em>
+        <br><br>
+        <em>Access to Education and Training Facilities</em> factor scoring:
+        <br>
+        0 to 2,000 meters: <em>score 5</em><br>
+        2,001 to 4,000 meters: <em>score 4</em><br>
+        4,001 to 6,000 meters: <em>score 3</em><br>
+        6,001 to 8,000 meters: <em>score 2</em><br>
+        8,001 to 10,000 meters: <em>score 1</em><br>
+        Over 10,000 meters: <em>score 0</em>
+        <br><br>
+        <em>Access to Financial Facilities</em> factor scoring:
+        <br>
+        0 to 400 meters: <em>score 5</em><br>
+        401 to 800 meters: <em>score 4</em><br>
+        801 to 1,200 meters: <em>score 3</em><br>
+        1,201 to 2,000 meters: <em>score 2</em><br>
+        2,001 to 3,000 meters: <em>score 1</em><br>
+        Over 3,000 meters: <em>score 0</em>
+    </span>
+</small>
+
 
 </a></small>  
