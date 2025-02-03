@@ -9,7 +9,7 @@ Step-by-step instructions to help you download, install and configure GEEST on y
 
 ## [Navigation](https://worldbank.github.io/GEEST/docs/userguide/navigation.html)
 Learn how to navigate the plugin efficiently. This section includes:
-- **[Setup the project](https://worldbank.github.io/GEEST/docs/userguide/navigation.html#project-setup)**: Provides a step-by-step guide to help you initialize and configure your project within GEEST.
+- **[Setup the project](https://worldbank.github.io/GEEST/docs/userguide/navigation.html#project-setup)**: A step-by-step guide to help you initialize and configure your project within GEEST.
 - **[Contextual](https://worldbank.github.io/GEEST/docs/userguide/contextual.html)**: Working under Contextual Dimension.
 - **[Accessibility](https://worldbank.github.io/GEEST/docs/userguide/accessibility.html)**: Processing the Accessibility factors.
 - **[Place Characterization](https://worldbank.github.io/GEEST/docs/userguide/placecharacterization.html)**: Processing the Place Characterization factors.
