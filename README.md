@@ -6,5 +6,8 @@
  By using this tool, you can identify key areas for intervention, make data-driven decisions, and ultimately work toward creating more equitable job opportunities for women across different regions.
 
 <p align="center">
-  <img src="https://github.com/elbeejay/draft-docs/blob/main/framework.png?raw=true" height=600 alt="GEEST Framework" style="border-radius:10px;">
+  <img src="https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/framework.png?raw=true" height=600 alt="GEEST Framework" style="border-radius:10px;">
 </p>
+https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/framework.png
+
+https://github.com/elbeejay/draft-docs/blob/main/framework.png
