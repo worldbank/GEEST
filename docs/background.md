@@ -98,7 +98,7 @@ When the enablement scores are combined with data on the distribution of women o
 
 > <p align="justify"><strong>Note</strong>: For detailed information and guidance on the data collected and utilized, please refer to the <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html">Data Collection</a> section.</p>
 
-https://github.com/worldbank/GEEST/blob/main/docs/images/new%20images/3D%20Score%20map.png
+
 ### 4. Gender Spatial Data Gap Assessment
 
 ---
