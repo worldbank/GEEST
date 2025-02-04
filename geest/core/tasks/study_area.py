@@ -13,7 +13,7 @@ from qgis.core import (
     QgsFeedback,
     QgsVectorLayer,
     QgsVectorFileWriter,
-    QgsApplication,
+    QgsProject,
 )
 from geest.utilities import log_message
 from .grid_from_bbox import GridFromBbox
@@ -175,24 +175,28 @@ class StudyAreaProcessingTask(QgsTask):
         Exports a QgsVectorLayer to a Shapefile in output_dir.
         Returns the full path to the .shp (main file).
         """
-        shapefile_path = os.path.join(output_dir, "temp_export.shp")
-        # Check if the layer has selected features
-        if layer.selectedFeatureCount() == 0:
-            has_selection = False
+        shapefile_path = os.path.join(output_dir, "boundaries.shp")
+        # Get the project's transform context (required for file writing)
+        transform_context = QgsProject.instance().transformContext()
+        options = QgsVectorFileWriter.SaveVectorOptions()
+        options.driverName = "ESRI Shapefile"
+        options.fileEncoding = "UTF-8"
+
+        if layer.selectedFeatureCount() > 0:
+            options.actionOnExistingFile = (
+                QgsVectorFileWriter.CreateOrOverwriteFile
+            )  # or OverwriteExistingFile
         else:
-            has_selection = True
-        # Export the selected features of the layer
-        err_code, err_msg = QgsVectorFileWriter.writeAsVectorFormat(
-            layer,
-            shapefile_path,
-            "UTF-8",  # encoding
-            layer.crs(),  # CRS to write
-            "ESRI Shapefile",  # driver name
-            onlySelected=has_selection,  # Export only selected features
+            options.actionOnExistingFile = (
+                QgsVectorFileWriter.CreateOrOverwriteFile
+            )  # or OverwriteExistingFile
+
+        err = QgsVectorFileWriter.writeAsVectorFormatV3(
+            layer, shapefile_path, transform_context, options
         )
 
-        if err_code != QgsVectorFileWriter.NoError:
-            raise RuntimeError(f"Failed to export layer to Shapefile: {err_msg}")
+        if err[0] != QgsVectorFileWriter.NoError:
+            raise RuntimeError(f"Failed to export layer to Shapefile: {err[1]}")
 
         return shapefile_path
 
@@ -213,6 +217,7 @@ class StudyAreaProcessingTask(QgsTask):
             self.create_status_tracking_table()
 
             # 3) Iterate over features
+            self.setProgress(1)  # Trigger the UI to update with a small value
             invalid_feature_count = 0
             self.valid_feature_count = 0
             fixed_feature_count = 0
@@ -268,6 +273,7 @@ class StudyAreaProcessingTask(QgsTask):
                     self.process_singlepart_geometry(
                         geom_ref, normalized_name, area_name
                     )
+            self.setProgress(100)  # Trigger the UI to update with completion value
             log_message(
                 f"Processing complete. Valid: {self.valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
             )
@@ -397,13 +403,15 @@ class StudyAreaProcessingTask(QgsTask):
          6) Create clip polygon
          7) Optionally create raster mask
         """
-        # Used to track durations
         geometry_start_time = time.time()
-        # Also grab the current timestamp and write it to the tracking table
-        now_str = datetime.datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+        now = datetime.datetime.now()  # Get current datetime
+        now_str = now.strftime("%Y-%m-%d %H:%M:%S")  # Format the datetime object
+
         self.set_status_tracking_table_value(
             normalized_name, "timestamp_start", now_str
         )
+
         # Compute aligned bounding box in target CRS
         # (We already have a coordinate transformation if the source has a known SRS)
         geometry_bbox = geom.GetEnvelope()  # (xmin, xmax, ymin, ymax)
@@ -675,10 +683,9 @@ class StudyAreaProcessingTask(QgsTask):
             self.write_chunk(layer, task, normalized_name)
             # We use the progress object to notify of progress in the subtask
             # And the QgsTask progressChanged signal to track the main task
-            log_message(
-                f"XXXXXX Chunks Progress: {int((idx + 1 / chunk_count) * 100)}% XXXXXX"
-            )
-            self.feedback.setProgress(int((idx + 1 / chunk_count) * 100))
+            current_progress = int(idx + 1 / (chunk_count * chunk_size))
+            log_message(f"XXXXXX Chunks Progress: {current_progress}% XXXXXX")
+            self.feedback.setProgress(current_progress)
 
             # This is blocking, but we're in a thread
             # Crashes QGIS, needs to be refactored to use QgsTask subtasks
