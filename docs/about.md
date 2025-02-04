@@ -12,7 +12,7 @@
 
 
 <p style="text-align: justify;">
-GEEST was built for the practical implementation of the <a href="https://documents1.worldbank.org/curated/en/099121123091527675/pdf/P1792121dc820d04419928140a279022b42.pdf" target="_blank"><strong>Geospatial Women’s Employment Analytical Framework (GeoWEAF)</strong></a>, developed by the World Bank, which identifies the location-specific factors affecting women's access to jobs. <a href="https://jayaramhariharan.com/draft-docs/docs/background.html#" target="_blank"><strong>This framework</strong></a> categorizes regions based on their level of support for enabling women’s access to employment. It identifies 15 critical, spatially varying factors that influence women’s job prospects, divided into three main dimensions: Contextual, Accessibility, and Place Characterization.
+GEEST was built for the practical implementation of the <a href="https://documents1.worldbank.org/curated/en/099121123091527675/pdf/P1792121dc820d04419928140a279022b42.pdf" target="_blank"><strong>Geospatial Women’s Employment Analytical Framework (GeoWEAF)</strong></a>, developed by the World Bank, which identifies the location-specific factors affecting women's access to jobs. <a href="https://worldbank.github.io/GEEST/docs/background.html#" target="_blank"><strong>This framework</strong></a> categorizes regions based on their level of support for enabling women’s access to employment. It identifies 15 critical, spatially varying factors that influence women’s job prospects, divided into three main dimensions: Contextual, Accessibility, and Place Characterization.
 </p>
 
 ---
