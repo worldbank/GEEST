@@ -196,6 +196,7 @@ class TestJsonTreeItem(unittest.TestCase):
 
         # Test "Completed successfully"
         item.setAttribute("result", "Workflow Completed")
+        item.setAttribute("result_file", "test_file.tif")
         self.assertEqual(
             item.getStatus(), "Completed successfully", msg=item.attributesAsMarkdown()
         )
