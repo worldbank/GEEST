@@ -36,7 +36,6 @@ env/
 venv/
 ENV/
 .env.*
-.envrc
 
 # PyInstaller
 *.**`.gitignore` continued:**
