@@ -456,7 +456,7 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(f"Creating raster mask for {normalized_name}.")
         self.create_raster_mask(geom, aligned_bbox, normalized_name)
         self.set_status_tracking_table_value(normalized_name, "mask_processed", 1)
-        now_str = datetime.datetime.strftime("%Y-%m-%d %H:%M:%S")
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.set_status_tracking_table_value(normalized_name, "timestamp_end", now_str)
         self.set_status_tracking_table_value(
             normalized_name,
