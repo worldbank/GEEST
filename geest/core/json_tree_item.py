@@ -274,7 +274,6 @@ class JsonTreeItem:
                 return ""
             if len(self.itemData) < 4:
                 return ""
-
             data = self.attributes()
             analysis_mode = data.get("analysis_mode", "")
             qgis_layer_source_key = analysis_mode.replace("use_", "") + "_layer_source"
@@ -282,7 +281,9 @@ class JsonTreeItem:
             qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
             status = ""
 
-            if "Workflow Completed" in data.get("result", ""):
+            if "Workflow Completed" in data.get("result", "") and data.get(
+                "result_file", ""
+            ):
                 return "Completed successfully"
 
             # First check if the item weighting is 0, or its parent factor is zero
@@ -338,6 +339,19 @@ class JsonTreeItem:
                     self.parentItem.attribute("analysis_weighting", 0.0)
                 ):
                     return "Excluded from analysis"
+
+                # If any child indicator has a status of "Workflow failed", return "Workflow failed"
+                for child in self.childItems:
+                    child_status = child.getStatus()
+                    log_message(f"Child status: {child_status}")
+                    if child_status == "Workflow failed":
+                        return "Workflow failed"
+                    if child_status == "Required and not configured":
+                        return "Required and not configured"
+                    if child_status == "Error":
+                        return "Workflow failed"
+                    if child_status.contains("Failed"):
+                        return "Workflow failed"
 
             if self.isDimension():
                 # If the analysis weighting is zero, return "Excluded from analysis"
