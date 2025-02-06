@@ -52,34 +52,35 @@ This tool evaluates how easily women can access essential services and amenities
 </p>
 
 <strong>Default</strong> Women's Travel Patterns thresholds:
-<table style="width:50%; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
+
+<table style="width:auto; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
   <tr style="border:1px solid black;">
-    <th style="border:1px solid black; width:200px;">Distance to Facilities (meters)</th>
-    <th style="border:1px solid black;">Score</th>
+    <th style="border:1px solid black; width:250px;">Distance to Facilities (meters)</th>
+    <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
   </tr>
   <tr style="border:1px solid black;">
     <td style="border:1px solid black;">0 - 400</td>
-    <td style="border:1px solid black;">5</td>
+    <td style="border:1px solid black; text-align:center;">5</td>
   </tr>
   <tr style="border:1px solid black;">
     <td style="border:1px solid black;">401 - 800</td>
-    <td style="border:1px solid black;">4</td>
+    <td style="border:1px solid black; text-align:center;">4</td>
   </tr>
   <tr style="border:1px solid black;">
     <td style="border:1px solid black;">801 - 1,200</td>
-    <td style="border:1px solid black;">3</td>
+    <td style="border:1px solid black; text-align:center;">3</td>
   </tr>
   <tr style="border:1px solid black;">
     <td style="border:1px solid black;">1,201 - 1,500</td>
-    <td style="border:1px solid black;">2</td>
+    <td style="border:1px solid black; text-align:center;">2</td>
   </tr>
   <tr style="border:1px solid black;">
     <td style="border:1px solid black;">1,501 - 2,000</td>
-    <td style="border:1px solid black;">1</td>
+    <td style="border:1px solid black; text-align:center;">1</td>
   </tr>
   <tr style="border:1px solid black;">
     <td style="border:1px solid black;">Over 2,000</td>
-    <td style="border:1px solid black;">0</td>
+    <td style="border:1px solid black; text-align:center;">0</td>
   </tr>
 </table>
 
