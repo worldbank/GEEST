@@ -129,13 +129,13 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factors (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-<strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights.
+<strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights using the default thresholds:
 
 | Factor   | Score 0                | Score 1                 | Score 2                 | Score 3                 | Score 4                 | Score 5                 |
 |----------|------------------------|-------------------------|-------------------------|-------------------------|-------------------------|-------------------------|
 | **Safety** | No overlap            | 1-19% intersection      | 20-39% intersection     | 40-59% intersection     | 60-79% intersection     | 80-100% intersection    |
 
-Note:</strong> Use nighttime light data only if streetlight data is unavailable.
+<strong>Note:</strong> Use nighttime light data only if streetlight data is unavailable.
 
 **Process Safety factor**
 
