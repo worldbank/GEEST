@@ -252,6 +252,8 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
+<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.
+
 **Process Education factor**
 
 Back in the Data Processing Interface:
@@ -306,6 +308,8 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
+<strong>Digital Inclusion</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas where 100% of households have internet access, and <em>0</em> represents areas where no households have internet access.
+
 **Process Digital Inclusion factor**
 
 Back in the Data Processing Interface:
@@ -357,6 +361,17 @@ The thresholds for defining hazard levels are based on a predefined scoring list
     onclick="window.open(this.src, '_blank')">
 </p>
 
+<strong>Environmental Hazards</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas with no environmental hazards and <em>0</em> represents areas with the highest level of hazard.
+
+| Factor                                   | Class 0            | Class 1              | Class 2              | Class 3              | Class 4              | Class 5              |
+|------------------------------------------|--------------------|----------------------|----------------------|----------------------|----------------------|----------------------|
+| **Number of Fires per km²**              | >8                 | 5–8                  | 2–5                  | 1–2                  | 0–1                  | 0 or No Data         |
+| **Floods Data**                          | 720–900 cm         | 540–720 cm           | 360–540 cm           | 180–360 cm           | <180 cm              | No Data or 0         |
+| **Landslide Data**                       | Severe             | High-Moderate2 (4)   | Moderate (3)         | Low-Moderate1 (2)    | Slight (1)           | No Data or 0         |
+| **Tropical Cyclone Frequency (100 Years)** | >100 events        | 75–100 events        | 50–75 events         | 25–50 events         | <25 events           | No Data or 0         |
+| **Drought Data**                         | 4–5                | 3–4                  | 2–3                  | 1–2                  | 0–1                  | No Data or 0         |
+
+
 **Process Environmental Hazards factors**
 
 Back in the Data Processing Interface:
@@ -397,6 +412,12 @@ The successful completion of the process is indicated by the green checkmark wid
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
+
+<strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:
+
+| Factor                  | Score 0                   | Score 1 | Score 2 | Score 3                     | Score 4 | Score 5                        |
+|-------------------------|---------------------------|---------|---------|-----------------------------|---------|--------------------------------|
+| **Water Sanitation**    | No water points           | N/A     | N/A     | 1 water point               | N/A     | 2 or more water points         |
 
 **Process Water sanitation factor**
 
