@@ -470,7 +470,6 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li><p><strong>Environmental Hazards:</strong> characterizes areas based on their vulnerability to natural disasters.</p></li>
 <li><p><strong>Water sanitation:</strong> assesses the availability and accessibility of clean water and sanitation facilities.</p></li>
 </ul>
-<p>The default <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are listed in the footnote.</p>
 <p>For certain factors, <strong>multiple data input options</strong> are available depending on the data’s format and availability.</p>
 </section>
 <section id="input-place-characterization-factors">
@@ -1125,52 +1124,6 @@ This process ensures that the tool reassesses the input datasets and outputs the
 <li><p><strong>Input Accuracy</strong>: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.</p></li>
 <li><p><strong>Weight Adjustment</strong>: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.</p></li>
 </ul>
-<small>
-    <a id="footnote1" href="#ref1">1</a>: <span style="color: #505050;"><strong>Default thresholds</strong> </span>
- <br>
- <span style="color: #505050;">
- <strong>Active transport</strong> factor is calculated based on four factors averaged across the raster cells:
-    <br>
-    <em>Street Crossings scores</em>: (score 0 = none, score 3 = 1 crossing, score 5 = 2+ crossings)<br>
-    <em>Cycle Paths scores</em>: (score 0 = none, score 3 = 1 cycle path, score 5 = 2+ paths)<br>
-    <em>Footpaths scores</em>: (score 0 = none, score 3 = 1 path, score 5 = 2+ paths)<br>
-    <em>Block Sizes scores</em>: (score 0 = none, score 1 = >1 km, score 2 = 751m-1 km, score 3 = 501m-750m, score 4 = 251m-500m, score 5 = <250m)<br>
-    <br>
-    <strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights. Raster cells where 80-100% of their area intersects with these buffers are assigned a <em>score of 5</em>. Cells with 60-79% intersection receive a <em>score of 4</em>, 40-59% a <em>score of 3</em>, 20-39% a <em>score of 2</em>, and 1-19% a <em>score of 1</em>. Cells with no overlap are <em>scored as 0</em>. <strong>Note:</strong> Use nighttime light data only if streetlight data is unavailable.
-    <br><br>
-    <strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event's impact radius is known, it should be applied instead. Raster cells intersecting with these buffers are scored as follows:
-    <ul>
-        <li>Rasters overlapping with buffers for battles and explosions: <em>score 0</em></li>
-        <li>Rasters overlapping with buffers for explosions and remote violence: <em>score 1</em></li>
-        <li>Rasters overlapping with buffers for violence against civilians: <em>score 2</em></li>
-        <li>Rasters overlapping with buffers for protests and riots: <em>score 4</em></li>
-        <li>Areas with no overlap with any event: <em>score 5</em></li>
-    </ul>
-    <br>
-    <strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.
-    <br><br>
-    <strong>Digital Inclusion</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas where 100% of households have internet access, and <em>0</em> represents areas where no households have internet access.
-    <br><br>
-    <strong>Environmental Hazards</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas with no environmental hazards and <em>0</em> represents areas with the highest level of hazard.
-<br><br>
-<em>Number of Fires per km²</em> is classified into GEEST classes as follows: 0 or No Data: <em>class 5</em> | 0 to 1: <em>class 4</em> | 1 to 2: <em>class 3</em> | 2 to 5: <em>class 2</em> | 5 to 8: <em>class 1</em> | Greater than 8: <em>class 0</em>
-<br>
-<em>Floods data</em> is classified into GEEST classes as follows: No Data or 0: <em>class 5</em> | Less than 180 cm: <em>class 4</em> | 180–360 cm: <em>class 3</em> | 360–540 cm: <em>class 2</em> | 540–720 cm: <em>class 1</em> | 720–900 cm: <em>class 0</em>
-<br>
-<em>Landslide data</em> is classified into GEEST classes as follows: No Data or 0: <em>class 5</em> | Slight (1): <em>class 4</em> | Low Moderate1 (2): <em>class 3</em> | Moderate (3): <em>class 2</em> | High-Moderate2 (4): <em>class 1</em> | Severe (5): <em>class 0</em>
-<br>
-<em>Tropical Cyclone frequency per 100 years</em> is classified into GEEST classes as follows: No Data or 0: <em>class 5</em> | Less than 25 events: <em>class 4</em> | 25–50 events: <em>class 3</em> | 50–75 events: <em>class 2</em> | 75–100 events: <em>class 1</em> | More than 100 events: <em>class 0</em>
-<br>     
-<em>Drought data</em> is classified into GEEST classes as follows: No Data or 0: <em>class 5</em> | 0–1: <em>class 4</em> | 1–2: <em>class 3</em> | 2–3: <em>class 2</em> | 3–4: <em>class 1</em> | 4–5: <em>class 0</em>
-    <br><br>
-    <strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:
-    <ul>
-        <li>Raster cell with no water points: <em>score 0</em></li>
-        <li>Raster cell with 1 water point: <em>score 3</em></li>
-        <li>Raster cell with 2 or more water points: <em>score 5</em></li>
-    </ul>
-     </span>
-</small>
 </section>
 </section>
 
