@@ -16,7 +16,7 @@ This tool evaluates how easily women can access essential services and amenities
 
 **Travel mode**: The user can select walking or driving as a travel mode, and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature.
 
-**Measurement**: The default measurement for travel is distance in meters, which is most appropriate for walking. These <a href="#footnote1" id="ref1">thresholds<sup>1</sup></a> are based on evidence from the literature at the factor level and are designed to provide consistency across analyses. If driving is selected as a travel mode, time in minutes is a more appropriate measurement.
+**Measurement**: The default measurement for travel is distance in meters, which is most appropriate for walking. These thresholds are based on evidence from the literature at the factor level and are designed to provide consistency across analyses. If driving is selected as a travel mode, time in minutes is a more appropriate measurement.
 
 ---
 
