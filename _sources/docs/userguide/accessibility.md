@@ -51,15 +51,38 @@ This tool evaluates how easily women can access essential services and amenities
     onclick="window.open(this.src, '_blank')">
 </p>
 
-<strong>Women's Travel Patterns</strong> factor is scored based on the default distance to facilities:
-| Distance (m) | Score |
-|--------------|-------|
-| 0 - 400      | 5     |
-| 401 - 800    | 4     |
-| 801 - 1,200  | 3     |
-| 1,201 - 1,500| 2     |
-| 1,501 - 2,000| 1     |
-| Over 2,000   | 0     |
+<strong>Default</strong> Women's Travel Patterns thresholds:
+<table style="width:50%; margin:auto; border-collapse:collapse;">
+  <tr>
+    <th>Distance to Facilities (meters)</th>
+    <th>Score</th>
+  </tr>
+  <tr>
+    <td>0 - 400</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>401 - 800</td>
+    <td>4</td>
+  </tr>
+  <tr>
+    <td>801 - 1,200</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td>1,201 - 1,500</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td>1,501 - 2,000</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>Over 2,000</td>
+    <td>0</td>
+  </tr>
+</table>
+
 
 **Process Women's Travel Patterns factors**
 
