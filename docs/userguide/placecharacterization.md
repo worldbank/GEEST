@@ -193,7 +193,7 @@ The successful completion of the process is indicated by the green checkmark wid
 
 | Factor   | Score 0              | Score 1                   | Score 2                         | Score 3             | Score 4                     | Score 5                      |
 |----------|----------------------|---------------------------|---------------------------------|---------------------|-----------------------------|------------------------------|
-| **FCV**  | Overlaps with buffers for battles and explosions | Overlaps with buffers for explosions and remote violence | Overlaps with buffers for violence against civilians | N/A            | Overlaps with buffers for protests and riots | No overlap with any event   |
+| **FCV**  | battles and explosions | explosions and remote violence | violence against civilians | N/A            | protests and riots | No overlap with any event   |
 
 
 **Process FCV factor**
