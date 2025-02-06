@@ -428,7 +428,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-all-3-dimensions-wee-score">Processing all 3 dimensions (WEE Score)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-the-womens-enablement-environments-indicator-wee">Computing the Women’s Enablement Environments Indicator (WEE)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-steps-after-defining-the-wee-score">Optional Steps After Defining the WEE Score</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregation-boundaries-optional">1. Aggregation Boundaries (Optional)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wee-by-population-optional">2. WEE by Population (Optional)</a></li>
@@ -450,10 +450,10 @@ document.write(`
   <section id="insights">
 <h1>Insights<a class="headerlink" href="#insights" title="Permalink to this heading">#</a></h1>
 <p align="justify"> 
-The final aggregation of all three dimensions is carried out by applying weights to each dimension, ensuring a balanced and comprehensive representation. This tab provides users with deeper insights by identifying regions where conditions are optimal—or at least favorable—for women to secure employment in specific sectors or to enhance existing job sites. The outputs from this tab assign a combined classification score to the input raster and extract aggregated polygons or administrative units intersecting these regions. Additionally, GEEST highlights key infrastructure investments that could boost women's participation in the workforce. Population data can also be incorporated into the analysis to provide more nuanced insights that account for both population levels and enablement. This process integrates proximity data, classification scores, population data and weighted dimensions to support informed decision-making.
+The final aggregation of all three dimensions is carried out by applying weights to each dimension, ensuring a balanced and comprehensive representation. This tab provides users with deeper insights by identifying regions where conditions are optimal—or at least favorable—for women to access job opportunities in a specific sector. The outputs from this tab assign a combined classification score to the input raster, aggregate results at desired adminstrative level and extract aggregated polygons or administrative units intersecting these regions. Additionally, GEEST highlights key infrastructure investments that could boost women's participation in the workforce. Population data can also be incorporated into the analysis to provide more nuanced insights that account for both population levels and enablement. This process integrates proximity data, classification scores, population data and weighted dimensions to support informed decision-making.
 </p>
-<section id="processing-all-3-dimensions-wee-score">
-<h2>Processing all 3 dimensions (WEE Score)<a class="headerlink" href="#processing-all-3-dimensions-wee-score" title="Permalink to this heading">#</a></h2>
+<section id="computing-the-womens-enablement-environments-indicator-wee">
+<h2>Computing the Women’s Enablement Environments Indicator (WEE)<a class="headerlink" href="#computing-the-womens-enablement-environments-indicator-wee" title="Permalink to this heading">#</a></h2>
 <hr class="docutils" />
 <p align="justify">
 Before accessing the full insights tab, it is necessary to aggregate all the factors processed in the previous steps. This is achieved by assigning weights to each dimension, resulting in the WEE (Women’s Enablement Environments) output. The output is categorized into five classes: highly enabling, enabling, moderately enabling, low enablement and very low enablement.
@@ -567,11 +567,10 @@ WEE can be visualized in relation to female population distribution by providing
 <p align="justify"> 
 After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 <p>The outputs consist of all WEE score outputs (aggreagated at administrative level, by population or by job distribution). All scores are assessed on a scale from 0 to 15, categorized as follows: 14 - 15: Highly enabling, high population | 13 - 14: Highly enabling, medium population | 12 - 13: Highly enabling, low population | 11 - 12: Enabling, high population | 10 - 11: Enabling, medium population | 9 - 10: Enabling, low population | 8 - 9: Moderately enabling, high population | 7 - 8: Moderately enabling, medium population | 6 - 7: Moderately enabling, low population | 5 - 6: Low enablement, high population | 4 - 5: Low enablement, medium population | 3 - 4: Low enablement, low population | 2 - 3: Very low enablement, high population | 1 - 2: Very low enablement, medium population | 0 - 1: Very low enablement, low population.</p>
-<p><span style="color: red;">[Not working - Need to be amended]</span></p>
 <p>The outputs are stored within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.</p>
 <p>If the results do not immediately appear in the Layer Panel after processing the WEE Scores, you can resolve this by either adding them manually from the folder path or by right-clicking on the WEE Score and selecting <strong>Add to map</strong> from the context menu.</p>
 </p>
-<p><strong>🖥️ Key Features of WEE Score</strong></p>
+<p><strong>🖥️ Key attributes of WEE Score tab</strong></p>
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WEE_features.jpg"
     alt="WEE Score features" 
@@ -701,7 +700,7 @@ After completing the process, the outputs are automatically added to the Layer P
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-all-3-dimensions-wee-score">Processing all 3 dimensions (WEE Score)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-the-womens-enablement-environments-indicator-wee">Computing the Women’s Enablement Environments Indicator (WEE)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-steps-after-defining-the-wee-score">Optional Steps After Defining the WEE Score</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#aggregation-boundaries-optional">1. Aggregation Boundaries (Optional)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wee-by-population-optional">2. WEE by Population (Optional)</a></li>
