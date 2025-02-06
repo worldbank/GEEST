@@ -52,36 +52,38 @@ This tool evaluates how easily women can access essential services and amenities
 </p>
 
 <strong>Default</strong> Women's Travel Patterns thresholds:
-<table style="width:50%; margin:auto; border-collapse:collapse;">
-  <tr>
-    <th>Distance to Facilities (meters)</th>
-    <th>Score</th>
+
+<table style="width:50%; border:1px solid black; border-collapse:collapse; text-align:left;">
+  <tr style="border:1px solid black;">
+    <th style="border:1px solid black;">Distance to Facilities (meters)</th>
+    <th style="border:1px solid black;">Score</th>
   </tr>
-  <tr>
-    <td>0 - 400</td>
-    <td>5</td>
+  <tr style="border:1px solid black;">
+    <td style="border:1px solid black;">0 - 400</td>
+    <td style="border:1px solid black;">5</td>
   </tr>
-  <tr>
-    <td>401 - 800</td>
-    <td>4</td>
+  <tr style="border:1px solid black;">
+    <td style="border:1px solid black;">401 - 800</td>
+    <td style="border:1px solid black;">4</td>
   </tr>
-  <tr>
-    <td>801 - 1,200</td>
-    <td>3</td>
+  <tr style="border:1px solid black;">
+    <td style="border:1px solid black;">801 - 1,200</td>
+    <td style="border:1px solid black;">3</td>
   </tr>
-  <tr>
-    <td>1,201 - 1,500</td>
-    <td>2</td>
+  <tr style="border:1px solid black;">
+    <td style="border:1px solid black;">1,201 - 1,500</td>
+    <td style="border:1px solid black;">2</td>
   </tr>
-  <tr>
-    <td>1,501 - 2,000</td>
-    <td>1</td>
+  <tr style="border:1px solid black;">
+    <td style="border:1px solid black;">1,501 - 2,000</td>
+    <td style="border:1px solid black;">1</td>
   </tr>
-  <tr>
-    <td>Over 2,000</td>
-    <td>0</td>
+  <tr style="border:1px solid black;">
+    <td style="border:1px solid black;">Over 2,000</td>
+    <td style="border:1px solid black;">0</td>
   </tr>
 </table>
+
 
 
 **Process Women's Travel Patterns factors**
@@ -338,7 +340,7 @@ If the results do not immediately appear in the Layer Panel after processing the
 <p align="left">
 <small>
     <span style="color: #505050;">
-<strong>Women's Travel Patterns</strong> factor is scored based on the distance to facilities: 0 to 400 meters: <em>score 5</em> | 401 to 800 meters: <em>score 4</em> | 801 to 1,200 meters: <em>score 3</em> | 1,201 to 1,500 meters: <em>score 2</em> | 1,501 to 2,000 meters: <em>score 1</em> | Over 2,000 meters: <em>score 0</em>
+
 <br>
 <strong>Access to Public Transport</strong> factor is scored based on proximity: 0 to 250 meters: <em>score 5</em> | 251 to 500 meters: <em>score 4</em> | 501 to 750 meters: <em>score 3</em> | 751 to 1,000 meters: <em>score 2</em> | 1,001 to 1,250 meters: <em>score 1</em> | Over 1,250 meters: <em>score 0</em>
 <br>
