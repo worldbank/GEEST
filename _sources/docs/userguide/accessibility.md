@@ -52,10 +52,9 @@ This tool evaluates how easily women can access essential services and amenities
 </p>
 
 <strong>Default</strong> Women's Travel Patterns thresholds:
-
 <table style="width:50%; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
   <tr style="border:1px solid black;">
-    <th style="border:1px solid black;">Distance to Facilities (meters)</th>
+    <th style="border:1px solid black; width:200px;">Distance to Facilities (meters)</th>
     <th style="border:1px solid black;">Score</th>
   </tr>
   <tr style="border:1px solid black;">
