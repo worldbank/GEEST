@@ -46,6 +46,16 @@ For certain factors, **multiple data input options** are available depending on 
     onclick="window.open(this.src, '_blank')">
 </p>
 
+<strong>Active transport</strong> factor is calculated based on four subfactors averaged across the raster cells:
+
+| Subfactor               | Score 0          | Score 1               | Score 2                 | Score 3                 | Score 4                 | Score 5                 |
+|----------------------|------------------|-----------------------|-------------------------|-------------------------|-------------------------|-------------------------|
+| **Street Crossings** | None             | N/A                   | N/A                     | 1 crossing              | N/A                     | 2+ crossings           |
+| **Cycle Paths**      | None             | N/A                   | N/A                     | 1 cycle path            | N/A                     | 2+ paths               |
+| **Footpaths**        | None             | N/A                   | N/A                     | 1 path                  | N/A                     | 2+ paths               |
+| **Block Sizes**      | None             | >1 km                 | 751m - 1 km             | 501m - 750m             | 251m - 500m             | <250m                  |
+
+
 **Process Active Transport factors**
 
 Back in the Data Processing Interface:
@@ -96,7 +106,7 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (**raster data**) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:
+> - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for presence of area illumination at night time; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (**raster data**) corresponding to NTL by clicking the three-dot button; this layer will be used for processing:
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_NTL.jpg" 
@@ -159,7 +169,7 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> - 2️⃣ Using **ACLED data** as input; select ACLED data in CSV format representing fragility, conflict, and violence events; a buffer is required to estimate the spatial impact of these events, with a default radius of 5000m; if the specific impact radius of an event is known, it should be applied instead; a pop-up will appear to validate the CSV format.
+> - 2️⃣ Using **ACLED data** as input; select ACLED data in CSV format representing fragility, conflict, and violence events; this indicator is structured by assigning scores to rasters based on their overlap with buffers indicating different types of events. Using point locations of FCV events, generate circular buffers with a default radius of 5 km to estimate the spatial impact of these events. If the impact radius of an event is known, it should be used instead; a pop-up will appear to validate the CSV format.
 
 <p align="center">
 <img 
@@ -311,7 +321,7 @@ This factor is composed, by default, of five subfactors representing different t
 
 If data for one or more hazard types is not available, these subfactors can be excluded from the processing. In such cases, the tool will automatically adjust the weights of the remaining subfactors to ensure accurate aggregation.
 
-The thresholds for defining hazard levels are based on a predefined scoring list (**provided in the footnote**). The input data relies on globally available open data sources and is reclassified for use within the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.
+The thresholds for defining hazard levels are based on a predefined scoring list. The input data relies on globally available open data sources and is reclassified for use within the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.
 </p>
 
 **Locate Environmental Hazards Section**
@@ -431,8 +441,6 @@ The process should be successfully completed and indicated by a green checkmark 
 After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
 The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).
-
-<span style="color: red;">[Not working - Need to be amended]</span>
 
 The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
 

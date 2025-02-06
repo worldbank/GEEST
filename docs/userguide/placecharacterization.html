@@ -499,6 +499,54 @@ The Place Characterization Dimension refers to the social, environmental, and in
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
+<p><strong>Active transport</strong> factor is calculated based on four subfactors averaged across the raster cells:</p>
+<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Subfactor</p></th>
+<th class="head"><p>Score 0</p></th>
+<th class="head"><p>Score 1</p></th>
+<th class="head"><p>Score 2</p></th>
+<th class="head"><p>Score 3</p></th>
+<th class="head"><p>Score 4</p></th>
+<th class="head"><p>Score 5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Street Crossings</strong></p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>1 crossing</p></td>
+<td><p>N/A</p></td>
+<td><p>2+ crossings</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Cycle Paths</strong></p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>1 cycle path</p></td>
+<td><p>N/A</p></td>
+<td><p>2+ paths</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Footpaths</strong></p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>1 path</p></td>
+<td><p>N/A</p></td>
+<td><p>2+ paths</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Block Sizes</strong></p></td>
+<td><p>None</p></td>
+<td><p>&gt;1 km</p></td>
+<td><p>751m - 1 km</p></td>
+<td><p>501m - 750m</p></td>
+<td><p>251m - 500m</p></td>
+<td><p>&lt;250m</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p><strong>Process Active Transport factors</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
@@ -554,7 +602,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </p>
 <blockquote>
 <div><ul class="simple">
-<li><p>3️⃣ Using <strong>Nighttime Lights data</strong> as input; VIIRS Nighttime Lights raster may be used as proxy data for streetlight locations; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (<strong>raster data</strong>) corresponding to the streetlights data by clicking the three-dot button; this layer will be used for processing:</p></li>
+<li><p>3️⃣ Using <strong>Nighttime Lights data</strong> as input; VIIRS Nighttime Lights raster may be used as proxy data for presence of area illumination at night time; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (<strong>raster data</strong>) corresponding to NTL by clicking the three-dot button; this layer will be used for processing:</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
@@ -626,7 +674,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 </p>
 <blockquote>
 <div><ul class="simple">
-<li><p>2️⃣ Using <strong>ACLED data</strong> as input; select ACLED data in CSV format representing fragility, conflict, and violence events; a buffer is required to estimate the spatial impact of these events, with a default radius of 5000m; if the specific impact radius of an event is known, it should be applied instead; a pop-up will appear to validate the CSV format.</p></li>
+<li><p>2️⃣ Using <strong>ACLED data</strong> as input; select ACLED data in CSV format representing fragility, conflict, and violence events; this indicator is structured by assigning scores to rasters based on their overlap with buffers indicating different types of events. Using point locations of FCV events, generate circular buffers with a default radius of 5 km to estimate the spatial impact of these events. If the impact radius of an event is known, it should be used instead; a pop-up will appear to validate the CSV format.</p></li>
 </ul>
 </div></blockquote>
 <p align="center">
@@ -788,7 +836,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <p align="justify">
 This factor is composed, by default, of five subfactors representing different types of hazards: fires, floods, landslides, tropical cyclones and droughts. These subfactors are aggregated into a single factor, referred to as Environmental Hazards, based on the selected weights assigned to each subfactor.
 <p>If data for one or more hazard types is not available, these subfactors can be excluded from the processing. In such cases, the tool will automatically adjust the weights of the remaining subfactors to ensure accurate aggregation.</p>
-<p>The thresholds for defining hazard levels are based on a predefined scoring list (<strong>provided in the footnote</strong>). The input data relies on globally available open data sources and is reclassified for use within the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.</p>
+<p>The thresholds for defining hazard levels are based on a predefined scoring list. The input data relies on globally available open data sources and is reclassified for use within the tool. However, if more precise and localized data is available, users are encouraged to incorporate it into the processing. In doing so, users should align the data with the thresholds provided to maintain consistency and reliability.</p>
 </p>
 <p><strong>Locate Environmental Hazards Section</strong></p>
 <blockquote>
@@ -912,7 +960,6 @@ This factor is composed, by default, of five subfactors representing different t
 <hr class="docutils" />
 <p>After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.</p>
 <p>The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).</p>
-<p><span style="color: red;">[Not working - Need to be amended]</span></p>
 <p>The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.</p>
 <p>If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting <strong>Add to map</strong> from the context menu:</p>
 <p align="center">
