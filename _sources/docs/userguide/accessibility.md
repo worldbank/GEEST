@@ -1,5 +1,5 @@
 ## Accessibility
-Test
+
 <p align="justify"> 
 The Accessibility Dimension evaluates women’s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
@@ -52,16 +52,14 @@ This tool evaluates how easily women can access essential services and amenities
 </p>
 
 <strong>Women's Travel Patterns</strong> factor is scored based on the default distance to facilities:
-<small>
-| Distance to Facilities (meters) | Score |
-|---------------------------------|-------|
-| 0 - 400                         | 5     |
-| 401 - 800                       | 4     |
-| 801 - 1,200                     | 3     |
-| 1,201 - 1,500                   | 2     |
-| 1,501 - 2,000                   | 1     |
-| Over 2,000                      | 0     |
-</small>  
+| Distance (m) | Score |
+|--------------|-------|
+| 0 - 400      | 5     |
+| 401 - 800    | 4     |
+| 801 - 1,200  | 3     |
+| 1,201 - 1,500| 2     |
+| 1,501 - 2,000| 1     |
+| Over 2,000   | 0     |
 
 **Process Women's Travel Patterns factors**
 
