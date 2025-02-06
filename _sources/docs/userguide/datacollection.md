@@ -4,6 +4,250 @@ This page provides guidance on finding and collecting relevant data for the GEES
 
 ## Data Sources for Saint Lucia
 
+**NEW:**
+
+<table style="border-collapse: collapse; width: 100%; font-size: small;">
+  <tr>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>DIMENSION</b></th>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>FACTOR</b></th>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>LAYER</b></th>
+    <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>DATA SOURCE/QUERY</b></th>
+  </tr>
+  
+  <!-- Contextual Section with Merged DIMENSION Cell -->
+
+  <tr>
+    <td rowspan="3" style="border: 1px solid black; padding: 1px; text-align: center; ">📝CONTEXTUAL</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🏢Workplace Discrimination</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">WBL 2024 Workplace Index Score</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://wbl.worldbank.org/en/wbl" target="_blank">
+        WBL 2024 index score
+    </a>
+</td>
+
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">⚖️Regulatory Frameworks</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">WBL 2024 Pay+Parenthood Index Score</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://wbl.worldbank.org/en/wbl" target="_blank">
+        WBL 2024 index score for Pay and Parenthood 
+    </a>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">💵Financial Inclusion</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">WBL 2024 Entrepreneurship Index Score</td>
+ <td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://wbl.worldbank.org/en/wbl" target="_blank">
+        WBL 2024 index score for Entrepreneurship
+    </a>
+  </tr>
+  
+  <!-- Accessibility Section with Merged DIMENSION Cell -->
+  <tr>
+    <td rowspan="9" style="border: 1px solid black; padding: 1px; text-align: center; ">🚶ACCESSIBILITY</td>
+    <td rowspan="5" style="border: 1px solid black; padding: 1px; text-align: left; ">🚶‍♀️Women's Travel Patterns</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">👶Location of kindergartens/childcare</td>
+ <td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://data.humdata.org/dataset" target="_blank">
+        Humdata
+    </a>
+    or
+       [out:xml][timeout:25];{{geocodeArea:**country name**}}->.area_0;(node["amenity"="kindergarten"](area.area_0);way["amenity"="kindergarten"](area.area_0);relation["amenity"="kindergarten"](area.area_0););(._;>;);out body; in
+   <a href="https://www.openstreetmap.org/" target="_blank">
+      OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🏫Location of primary schools</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://data.humdata.org/dataset" target="_blank">
+        Humdata
+    </a>
+   or
+    [out:xml][timeout:25];{{geocodeArea:**country name**}}->.area_0;(node["amenity"="school"](area.area_0);way["amenity"="school"](area.area_0);relation["amenity"="school"](area.area_0););(._;>;);out body; in
+  <a href="https://www.openstreetmap.org/" target="_blank">
+        OSM
+    </a>
+</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🛒Location of groceries</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    [out:xml][timeout:25];{{geocodeArea:**country name**}}->.area_0;(node["shop"="greengrocer"](area.area_0);way["shop"="greengrocer"](area.area_0);relation["shop"="greengrocer"](area.area_0););(._;>;);out body; in
+  <a href="https://www.openstreetmap.org/" target="_blank">
+        OSM
+    </a>
+</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">💊Location of pharmacies</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    [out:xml][timeout:25];{{geocodeArea:**country name**}}->.area_0;(node["amenity"="pharmacy"](area.area_0);way["amenity"="pharmacy"](area.area_0);relation["amenity"="pharmacy"](area.area_0););(._;>;);out body;
+  <a href="https://www.openstreetmap.org/" target="_blank">
+        OSM
+    </a>
+</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🌳Location of green spaces</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    [out:xml][timeout:25];{{geocodeArea:**country name**}}->.area_0;(node["leisure"="park"](area.area_0);node["boundary"="national_park"](area.area_0);way["leisure"="park"](area.area_0);way["boundary"="national_park"](area.area_0);relation["leisure"="park"](area.area_0);relation["boundary"="national_park"](area.area_0););(._;>;);out body; in
+  <a href="https://www.openstreetmap.org/" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🚌Access to Public Transport</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Location of public transportation stops, including maritime</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    [out:xml][timeout:25];{{geocodeArea:**country name**}}->.area_0;(node["public_transport"="stop_position"](area.area_0);node["public_transport"="platform"](area.area_0);node["public_transport"="station"](area.area_0);node["public_transport"="stop_area"](area.area_0);node["highway"="bus_stop"](area.area_0);node["highway"="platform"](area.area_0);way["public_transport"="stop_position"](area.area_0);way["public_transport"="platform"](area.area_0);way["public_transport"="station"](area.area_0);way["public_transport"="stop_area"](area.area_0);way["highway"="bus_stop"](area.area_0);way["highway"="platform"](area.area_0);relation["public_transport"="stop_position"](area.area_0);relation["public_transport"="platform"](area.area_0);relation["public_transport"="station"](area.area_0);relation["public_transport"="stop_area"](area.area_0);relation["highway"="bus_stop"](area.area_0);relation["highway"="platform"](area.area_0);node["amenity"="ferry_terminal"](area.area_0);way["amenity"="ferry_terminal"](area.area_0);relation["amenity"="ferry_terminal"](area.area_0););(._;>;);out body; in 
+  <a href="https://www.openstreetmap.org/" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🏥Access to Health Facilities</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Location of hospitals and clinics</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://data.humdata.org/dataset/hotosm_lca_health_facilities" target="_blank">
+        Humdata
+    </a>
+    or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22dentist%22](area.area_0);node[%22amenity%22=%22doctors%22](area.area_0);node[%22amenity%22=%22hospital%22](area.area_0);node[%22amenity%22=%22clinic%22](area.area_0);way[%22amenity%22=%22dentist%22](area.area_0);way[%22amenity%22=%22doctors%22](area.area_0);way[%22amenity%22=%22hospital%22](area.area_0);way[%22amenity%22=%22clinic%22](area.area_0);relation[%22amenity%22=%22dentist%22](area.area_0);relation[%22amenity%22=%22doctors%22](area.area_0);relation[%22amenity%22=%22hospital%22](area.area_0);relation[%22amenity%22=%22clinic%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🎓Access to Education and Training Facilities</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Location of universities and technical schools</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://data.humdata.org/dataset/hotosm-saint-lucia-schools" target="_blank">
+        Humdata
+    </a>
+    or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22university%22](area.area_0);way[%22amenity%22=%22university%22](area.area_0);relation[%22amenity%22=%22university%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🏦Access to Financial Facilities</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Location of Banks and other financial facilities</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22amenity%22=%22bank%22](area.area_0);node[%22office%22=%22financial%22](area.area_0);way[%22amenity%22=%22bank%22](area.area_0);way[%22office%22=%22financial%22](area.area_0);relation[%22amenity%22=%22bank%22](area.area_0);relation[%22office%22=%22financial%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  
+  <!-- Place Characterization Section with Merged DIMENSION Cell -->
+  <tr>
+    <td rowspan="10" style="border: 1px solid black; padding: 1px; text-align: center; ">🌍PLACE CHARACTERIZATION</td>
+    <td rowspan="4" style="border: 1px solid black; padding: 1px; text-align: left; ">🚴Active Transport</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🚸Location of street crossings</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://www.mapillary.com/developer/api-documentation/points" target="_blank">
+        Mapillary
+    </a>
+   or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22highway%22=%22crossing%22](area.area_0);node[%22railway%22=%22crossing%22](area.area_0);way[%22highway%22=%22crossing%22](area.area_0);way[%22railway%22=%22crossing%22](area.area_0);relation[%22highway%22=%22crossing%22](area.area_0);relation[%22railway%22=%22crossing%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🚴‍♀️Location of cycle paths</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22highway%22=%22cycleway%22](area.area_0);node[%22highway%22=%22track%22](area.area_0);node[%22cycleway%22=%22track%22](area.area_0);node[%22cycleway%22=%22lane%22](area.area_0);node[%22cycleway%22=%22share_busway%22](area.area_0);node[%22cycleway%22=%22shared_lane%22](area.area_0);way[%22highway%22=%22cycleway%22](area.area_0);way[%22highway%22=%22track%22](area.area_0);way[%22cycleway%22=%22track%22](area.area_0);way[%22cycleway%22=%22lane%22](area.area_0);way[%22cycleway%22=%22share_busway%22](area.area_0);way[%22cycleway%22=%22shared_lane%22](area.area_0);relation[%22highway%22=%22cycleway%22](area.area_0);relation[%22highway%22=%22track%22](area.area_0);relation[%22cycleway%22=%22track%22](area.area_0);relation[%22cycleway%22=%22lane%22](area.area_0);relation[%22cycleway%22=%22share_busway%22](area.area_0);relation[%22cycleway%22=%22shared_lane%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">👣Location of footpaths</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22highway%22=%22footway%22](area.area_0);way[%22highway%22=%22footway%22](area.area_0);relation[%22highway%22=%22footway%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🏘️Block Layout</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22landuse%22=%22residential%22](area.area_0);node[%22landuse%22=%22commercial%22](area.area_0);node[%22landuse%22=%22industrial%22](area.area_0);node[%22boundary%22=%22administrative%22](area.area_0);way[%22landuse%22=%22residential%22](area.area_0);way[%22landuse%22=%22commercial%22](area.area_0);way[%22landuse%22=%22industrial%22](area.area_0);way[%22boundary%22=%22administrative%22](area.area_0);relation[%22landuse%22=%22residential%22](area.area_0);relation[%22landuse%22=%22commercial%22](area.area_0);relation[%22landuse%22=%22industrial%22](area.area_0);relation[%22boundary%22=%22administrative%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🛡️Safety</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Street lights/Nighttime lights</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://www.mapillary.com/developer/api-documentation/points" target="_blank">
+        Mapillary
+    </a>
+   or
+    <a href="https://eogdata.mines.edu/products/vnl/" target="_blank">
+        NTL
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">⚠️FCV</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">ACLED data</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="mailto:civanescu@worldbank.org">
+      mail for ACLED data
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">📚Education</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Percentage of the labor force comprising women with university degrees</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://data.worldbank.org/indicator/SL.TLF.ADVN.FE.ZS?locations=LC" target="_blank">
+        WB data
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">💻Digital Inclusion</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Individuals using the Internet (% of population)</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://data.worldbank.org/indicator/IT.NET.USER.ZS?locations=LC" target="_blank">
+        WB data
+    </a>
+</td>
+</tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🌋Environmental Hazards</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Global Natural Hazards Data</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; "><a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fires_density_total&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">Fires</a> | <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fl_hazard_100_yrp&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">Flood</a> | <a href="https://gpm.nasa.gov/sites/default/files/downloads/global-landslide-susceptibility-map-2-27-23.tif" target="_blank">Landslides</a> | <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=cy_frequency&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">Tropical Cyclones</a> | <a href="https://data.humdata.org/dataset/30b85665-4c3d-4dc3-b543-3a567a3dea37/resource/6744572e-d5d1-4033-9d64-c87dc565586a/download/global-drought-spei-1.5-return-period-100-years.tif" target="_blank">Drought</a>
+    </td> 
+ </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">💧Water Sanitation</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Water points</td>
+<td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <a href="https://www.mapillary.com/developer/api-documentation/points" target="_blank">
+        Mapillary
+    </a>
+    or
+    <a href="https://overpass-turbo.eu/?Q=[out:xml][timeout:25];{{geocodeArea:Saint%20Lucia}}->.area_0;(node[%22emergency%22=%22fire_hydrant%22](area.area_0);node[%22emergency%22=%22water_tank%22](area.area_0);node[%22amenity%22=%22drinking_water%22](area.area_0);node[%22amenity%22=%22water_point%22](area.area_0);way[%22emergency%22=%22fire_hydrant%22](area.area_0);way[%22emergency%22=%22water_tank%22](area.area_0);way[%22amenity%22=%22drinking_water%22](area.area_0);way[%22amenity%22=%22water_point%22](area.area_0);relation[%22emergency%22=%22fire_hydrant%22](area.area_0);relation[%22emergency%22=%22water_tank%22](area.area_0);relation[%22amenity%22=%22drinking_water%22](area.area_0);relation[%22amenity%22=%22water_point%22](area.area_0););(._;>;);out%20body;" target="_blank">
+        OSM
+    </a>
+</td>
+</tr>
+</table>
+
+**OLD:**
+
 <table style="border-collapse: collapse; width: 100%; font-size: small;">
   <tr>
     <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>DIMENSION</b></th>
