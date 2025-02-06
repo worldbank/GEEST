@@ -197,7 +197,7 @@ def build(
     icon_path = copy_icon(output_directory)
     if icon_path is None:
         _log("Could not copy icon", context=context)
-    compile_resources(context, output_directory)
+    # compile_resources(context, output_directory)
     add_requirements_file(context, output_directory)
     generate_metadata(context, output_directory)
     return output_directory
