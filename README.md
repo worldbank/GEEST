@@ -1,5 +1,5 @@
 # Welcome to GEEST
-1
+
 <p align="justify">
  Developed by the World Bank, <strong>GEEST (The Gender Enabling Environments Spatial Tool)</strong> is a powerful and user-friendly open-source spatial mapping tool that enables a comprehensive analysis of how various spatial factors influence women's employment and business opportunities in any geographic area of interest. 
  
