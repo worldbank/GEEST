@@ -499,7 +499,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><strong>Active transport</strong> factor is calculated based on four subfactors averaged across the raster cells:</p>
+<p><strong>Active transport</strong> factor is calculated based on the four subfactors averaged across the raster cells:</p>
 <div class="pst-scrollable-table-container"><table class="colwidths-auto table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Subfactor</p></th>
@@ -632,6 +632,31 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
+<p><strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights.</p>
+<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Factor</p></th>
+<th class="head"><p>Score 0</p></th>
+<th class="head"><p>Score 1</p></th>
+<th class="head"><p>Score 2</p></th>
+<th class="head"><p>Score 3</p></th>
+<th class="head"><p>Score 4</p></th>
+<th class="head"><p>Score 5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Safety</strong></p></td>
+<td><p>No overlap</p></td>
+<td><p>1-19% intersection</p></td>
+<td><p>20-39% intersection</p></td>
+<td><p>40-59% intersection</p></td>
+<td><p>60-79% intersection</p></td>
+<td><p>80-100% intersection</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note:</strong> Use nighttime light data only if streetlight data is unavailable.</p>
 <p><strong>Process Safety factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
