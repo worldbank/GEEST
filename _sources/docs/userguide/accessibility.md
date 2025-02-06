@@ -51,6 +51,17 @@ This tool evaluates how easily women can access essential services and amenities
     onclick="window.open(this.src, '_blank')">
 </p>
 
+<strong>Women's Travel Patterns</strong> factor is scored based on the default distance to facilities:
+<small>
+| Distance to Facilities (meters) | Score |
+|---------------------------------|-------|
+| 0 - 400                         | 5     |
+| 401 - 800                       | 4     |
+| 801 - 1,200                     | 3     |
+| 1,201 - 1,500                   | 2     |
+| 1,501 - 2,000                   | 1     |
+| Over 2,000                      | 0     |
+</small>  
 
 **Process Women's Travel Patterns factors**
 
