@@ -716,6 +716,30 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
+<p><strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event’s impact radius is known, it should be applied instead. Raster cells intersecting with these default buffers are scored as follows:</p>
+<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Factor</p></th>
+<th class="head"><p>Score 0</p></th>
+<th class="head"><p>Score 1</p></th>
+<th class="head"><p>Score 2</p></th>
+<th class="head"><p>Score 3</p></th>
+<th class="head"><p>Score 4</p></th>
+<th class="head"><p>Score 5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>FCV</strong></p></td>
+<td><p>Overlaps with buffers for battles and explosions</p></td>
+<td><p>Overlaps with buffers for explosions and remote violence</p></td>
+<td><p>Overlaps with buffers for violence against civilians</p></td>
+<td><p>N/A</p></td>
+<td><p>Overlaps with buffers for protests and riots</p></td>
+<td><p>No overlap with any event</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p><strong>Process FCV factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>

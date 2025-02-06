@@ -191,6 +191,13 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
+<strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event's impact radius is known, it should be applied instead. Raster cells intersecting with these default buffers are scored as follows:
+
+| Factor   | Score 0              | Score 1                     | Score 2                         | Score 3 | Score 4                     | Score 5                      |
+|----------|----------------------|-----------------------------|---------------------------------|---------|-----------------------------|------------------------------|
+| **FCV**  | Overlaps with buffers for battles and explosions | Overlaps with buffers for explosions and remote violence | Overlaps with buffers for violence against civilians | N/A     | Overlaps with buffers for protests and riots | No overlap with any event   |
+
+
 **Process FCV factor**
 
 Back in the Data Processing Interface:
