@@ -1,6 +1,6 @@
 # Installing GEEST
 
-Follow the steps below to install the GEEST QGIS plugin using the custom repository.
+Follow the steps below to install the GEEST QGIS plugin.
 
 ### Step 1: Open the Plugin Manager in QGIS
 
