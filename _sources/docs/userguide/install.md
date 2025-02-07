@@ -11,42 +11,26 @@ Follow the steps below to install the GEEST QGIS plugin using the custom reposit
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins.JPG" alt="QGIS Plugin Setup" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 
-### Step 2: Add a New Plugin Repository
+### Step 2: Check *Show also Experimental Plugins*
 
 > - 1. In the **Plugin Manager** window, select the **Settings** tab.
 > - 2. Ensure the **Show also Experimental Plugins** option is checked.
-> - 3. Under **Plugin Repositories**, click on **Add…**.
 
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins%20settings.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins%20settings.jpg" alt="QGIS Plugin Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 
-
-### Step 3: Enter Repository Details
-
-> - In the **Repository Details** window:
->   - **Name**: Enter `GEEST` (or any other name you prefer).
->   - **URL**: Paste the following URL:  
->   - <span style="color: red;">`https://raw.githubusercontent.com/worldbank/GEEST/refs/heads/main/docs/repository/plugins.xml`</span>
->   - Ensure the **Enabled** checkbox is checked.
->   - Click **OK** to save.
-
-<a href="https://github.com/worldbank/GEEST/raw/main/docs/images/new%20images/repository.jpg" target="_blank">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/images/new%20images/repository.jpg" alt="QGIS Repository Settings" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
-</a>
-
-
-### Step 4: Install the Plugin
+### Step 3: Install the Plugin
 
 > - 1. Return to the **All** tab in the Plugin Manager.
-> - 2. Search for `GEEST` (or the plugin name).
-> - 3. Select the plugin and click **Install Plugin**.
+> - 2. Search for `GEEST`.
+> - 3. Select the plugin and click **Install Experimental Plugin**.
 
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/install.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/install.jpg" alt="QGIS Plugin Installation" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 
-### Step 5: Verify the Installation and Configure the Tool
+### Step 4: Verify the Installation and Configure the Tool
 
 > - 1. After installation, check the QGIS toolbar for the new **GEEST** icon *Show/Hide GEEST Panel*. [![GEEST Toolbar Icons](https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg)](https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg "Click to enlarge")
 > - 2. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.

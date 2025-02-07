@@ -429,10 +429,9 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-open-the-plugin-manager-in-qgis">Step 1: Open the Plugin Manager in QGIS</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-add-a-new-plugin-repository">Step 2: Add a New Plugin Repository</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-enter-repository-details">Step 3: Enter Repository Details</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-install-the-plugin">Step 4: Install the Plugin</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-verify-the-installation-and-configure-the-tool">Step 5: Verify the Installation and Configure the Tool</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-check-show-also-experimental-plugins">Step 2: Check <em>Show also Experimental Plugins</em></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-install-the-plugin">Step 3: Install the Plugin</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-verify-the-installation-and-configure-the-tool">Step 4: Verify the Installation and Configure the Tool</a></li>
 </ul>
             </nav>
         </div>
@@ -465,8 +464,8 @@ document.write(`
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins.JPG" alt="QGIS Plugin Setup" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 </section>
-<section id="step-2-add-a-new-plugin-repository">
-<h2>Step 2: Add a New Plugin Repository<a class="headerlink" href="#step-2-add-a-new-plugin-repository" title="Permalink to this heading">#</a></h2>
+<section id="step-2-check-show-also-experimental-plugins">
+<h2>Step 2: Check <em>Show also Experimental Plugins</em><a class="headerlink" href="#step-2-check-show-also-experimental-plugins" title="Permalink to this heading">#</a></h2>
 <blockquote>
 <div><ul class="simple">
 <li><ol class="arabic simple">
@@ -477,37 +476,14 @@ document.write(`
 <li><p>Ensure the <strong>Show also Experimental Plugins</strong> option is checked.</p></li>
 </ol>
 </li>
-<li><ol class="arabic simple" start="3">
-<li><p>Under <strong>Plugin Repositories</strong>, click on <strong>Add…</strong>.</p></li>
-</ol>
-</li>
 </ul>
 </div></blockquote>
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins%20settings.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins%20settings.jpg" alt="QGIS Plugin Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 </section>
-<section id="step-3-enter-repository-details">
-<h2>Step 3: Enter Repository Details<a class="headerlink" href="#step-3-enter-repository-details" title="Permalink to this heading">#</a></h2>
-<blockquote>
-<div><ul class="simple">
-<li><p>In the <strong>Repository Details</strong> window:</p>
-<ul>
-<li><p><strong>Name</strong>: Enter <code class="docutils literal notranslate"><span class="pre">GEEST</span></code> (or any other name you prefer).</p></li>
-<li><p><strong>URL</strong>: Paste the following URL:</p></li>
-<li><p><span style="color: red;"><code class="docutils literal notranslate"><span class="pre">https://raw.githubusercontent.com/worldbank/GEEST/refs/heads/main/docs/repository/plugins.xml</span></code></span></p></li>
-<li><p>Ensure the <strong>Enabled</strong> checkbox is checked.</p></li>
-<li><p>Click <strong>OK</strong> to save.</p></li>
-</ul>
-</li>
-</ul>
-</div></blockquote>
-<a href="https://github.com/worldbank/GEEST/raw/main/docs/images/new%20images/repository.jpg" target="_blank">
-  <img src="https://github.com/worldbank/GEEST/raw/main/docs/images/new%20images/repository.jpg" alt="QGIS Repository Settings" width="400" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
-</a>
-</section>
-<section id="step-4-install-the-plugin">
-<h2>Step 4: Install the Plugin<a class="headerlink" href="#step-4-install-the-plugin" title="Permalink to this heading">#</a></h2>
+<section id="step-3-install-the-plugin">
+<h2>Step 3: Install the Plugin<a class="headerlink" href="#step-3-install-the-plugin" title="Permalink to this heading">#</a></h2>
 <blockquote>
 <div><ul class="simple">
 <li><ol class="arabic simple">
@@ -515,11 +491,11 @@ document.write(`
 </ol>
 </li>
 <li><ol class="arabic simple" start="2">
-<li><p>Search for <code class="docutils literal notranslate"><span class="pre">GEEST</span></code> (or the plugin name).</p></li>
+<li><p>Search for <code class="docutils literal notranslate"><span class="pre">GEEST</span></code>.</p></li>
 </ol>
 </li>
 <li><ol class="arabic simple" start="3">
-<li><p>Select the plugin and click <strong>Install Plugin</strong>.</p></li>
+<li><p>Select the plugin and click <strong>Install Experimental Plugin</strong>.</p></li>
 </ol>
 </li>
 </ul>
@@ -528,8 +504,8 @@ document.write(`
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/install.jpg" alt="QGIS Plugin Installation" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 </section>
-<section id="step-5-verify-the-installation-and-configure-the-tool">
-<h2>Step 5: Verify the Installation and Configure the Tool<a class="headerlink" href="#step-5-verify-the-installation-and-configure-the-tool" title="Permalink to this heading">#</a></h2>
+<section id="step-4-verify-the-installation-and-configure-the-tool">
+<h2>Step 4: Verify the Installation and Configure the Tool<a class="headerlink" href="#step-4-verify-the-installation-and-configure-the-tool" title="Permalink to this heading">#</a></h2>
 <blockquote>
 <div><ul>
 <li><ol class="arabic simple">
@@ -633,10 +609,9 @@ Options</strong> and <strong>User Interface Options</strong>, to enhance perform
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-open-the-plugin-manager-in-qgis">Step 1: Open the Plugin Manager in QGIS</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-add-a-new-plugin-repository">Step 2: Add a New Plugin Repository</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-enter-repository-details">Step 3: Enter Repository Details</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-install-the-plugin">Step 4: Install the Plugin</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-verify-the-installation-and-configure-the-tool">Step 5: Verify the Installation and Configure the Tool</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-check-show-also-experimental-plugins">Step 2: Check <em>Show also Experimental Plugins</em></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-install-the-plugin">Step 3: Install the Plugin</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-verify-the-installation-and-configure-the-tool">Step 4: Verify the Installation and Configure the Tool</a></li>
 </ul>
   </nav></div>
 
