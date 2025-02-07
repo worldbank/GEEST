@@ -260,9 +260,91 @@ While the above table showcases data specific to Saint Lucia, similar data can b
 8. **Mapillary**: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
 </p>
 
-**Instructions for Data Collection**:
+### Instructions for Data Collection:
 - **Query the Source**: Use the query instructions provided in the table to filter and collect specific data.
 - **Check Availability for Each Country**: Not all indicators may be available for every country; adapt based on what is accessible.
 - **Document Sources and Methods**: Record each source, method, and any specific details relevant to your data collection process.
 
+#### Contextual factors
 
+To access the data for inputting into the tool, visit the provided <a href="https://wbl.worldbank.org/en/wbl" target="_blank">World Bank WBL</a> page and follow the next steps:
+
+> - Select a region from the dropdown list:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL.jpg" 
+    alt="WBL" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - After selecting the country, the new webpage that opens provides the necessary information for input into the plugin. The data includes:
+>   - WBL Index Score for the Workplace Discrimination factor.
+>   - Pay and Parenthood scores for the Regulatory Frameworks factor.
+>   - Entrepreneurship score for the Financial Inclusion factor.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL_data.jpg" 
+    alt="WBL" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+#### Accessibility factors
+---
+**1. Using Humdata source**
+
+> - Visit the <a href="https://data.humdata.org/dataset" target="_blank">Humdata</a> webpage and search for the required factor to retrieve the necessary data for the tool as in the following example:
+> - Search for "health facilities for Saint Lucia" in the search bar and click on the most relevant link to access the dataset:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_search.jpg" 
+    alt="Humdata" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - In the newly opened webpage, scroll down until you reach the **Data and Resources** section and locate the dataset corresponding to shapefile point data and click on the Download button next to it:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_download.jpg" 
+    alt="Humdata download" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+**2. Using OSM source**
+
+> - Click on the links in the table provided above as in the following example:
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_link.jpg" 
+    alt="OSM link" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - In the newly opened webpage, change the country selection to match your region.
+> - Click on the **Run** button to load the available datasets, which will be displayed within the right map extent.
+> - Click on the **Export** button.
+> - In the new pop-up, under the **Data** section, click on the **download** button next to the **GeoJSON** format and save the dataset locally to your machine.
+> - Open QGIS, add the downloaded data and export it as a shapefile format for further processing.
+
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_query.jpg" 
+    alt="OSM query" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
