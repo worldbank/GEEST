@@ -74,7 +74,7 @@ class TreePanel(QWidget):
 
         # Initialize the QueueManager
         self.working_directory = None
-        pool_size = int(setting(key="render_thread_pool_size", default=1))
+        pool_size = int(setting(key="concurrent_tasks", default=1))
         self.queue_manager = WorkflowQueueManager(pool_size=pool_size)
         self.json_file = json_file
         self.tree_view_visible = True
