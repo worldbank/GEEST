@@ -429,7 +429,14 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-sources-for-saint-lucia">Data Sources for Saint Lucia</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#potential-data-sources-for-other-countries">Potential Data Sources for Other Countries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#potential-data-sources-for-other-countries">Potential Data Sources for Other Countries</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#instructions-for-data-collection">Instructions for Data Collection:</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#contextual-factors">Contextual factors</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#accessibility-factors">Accessibility factors</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -690,12 +697,113 @@ While the above table showcases data specific to Saint Lucia, similar data can b
 <li><p><strong>Mapillary</strong>: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.</p></li>
 </ol>
 </p>
-<p><strong>Instructions for Data Collection</strong>:</p>
+<section id="instructions-for-data-collection">
+<h3>Instructions for Data Collection:<a class="headerlink" href="#instructions-for-data-collection" title="Permalink to this heading">#</a></h3>
 <ul class="simple">
 <li><p><strong>Query the Source</strong>: Use the query instructions provided in the table to filter and collect specific data.</p></li>
 <li><p><strong>Check Availability for Each Country</strong>: Not all indicators may be available for every country; adapt based on what is accessible.</p></li>
 <li><p><strong>Document Sources and Methods</strong>: Record each source, method, and any specific details relevant to your data collection process.</p></li>
 </ul>
+<section id="contextual-factors">
+<h4>Contextual factors<a class="headerlink" href="#contextual-factors" title="Permalink to this heading">#</a></h4>
+<p>To access the data for inputting into the tool, visit the provided <a href="https://wbl.worldbank.org/en/wbl" target="_blank">World Bank WBL</a> page and follow the next steps:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Select a region from the dropdown list:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL.jpg" 
+    alt="WBL" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>After selecting the country, the new webpage that opens provides the necessary information for input into the plugin. The data includes:</p>
+<ul>
+<li><p>WBL Index Score for the Workplace Discrimination factor.</p></li>
+<li><p>Pay and Parenthood scores for the Regulatory Frameworks factor.</p></li>
+<li><p>Entrepreneurship score for the Financial Inclusion factor.</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL_data.jpg" 
+    alt="WBL" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+</section>
+<section id="accessibility-factors">
+<h4>Accessibility factors<a class="headerlink" href="#accessibility-factors" title="Permalink to this heading">#</a></h4>
+<hr class="docutils" />
+<p><strong>1. Using Humdata source</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Visit the <a href="https://data.humdata.org/dataset" target="_blank">Humdata</a> webpage and search for the required factor to retrieve the necessary data for the tool as in the following example:</p></li>
+<li><p>Search for “health facilities for Saint Lucia” in the search bar and click on the most relevant link to access the dataset:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_search.jpg" 
+    alt="Humdata" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>In the newly opened webpage, scroll down until you reach the <strong>Data and Resources</strong> section and locate the dataset corresponding to shapefile point data and click on the Download button next to it:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_download.jpg" 
+    alt="Humdata download" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<p><strong>2. Using OSM source</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Click on the links in the table provided above as in the following example:</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_link.jpg" 
+    alt="OSM link" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>In the newly opened webpage, change the country selection to match your region.</p></li>
+<li><p>Click on the <strong>Run</strong> button to load the available datasets, which will be displayed within the right map extent.</p></li>
+<li><p>Click on the <strong>Export</strong> button.</p></li>
+<li><p>In the new pop-up, under the <strong>Data</strong> section, click on the <strong>download</strong> button next to the <strong>GeoJSON</strong> format and save the dataset locally to your machine.</p></li>
+<li><p>Open QGIS, add the downloaded data and export it as a shapefile format for further processing.</p></li>
+</ul>
+</div></blockquote>
+<p align="center">
+<img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_query.jpg" 
+    alt="OSM query" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+</section>
+</section>
 </section>
 </section>
 
@@ -764,7 +872,14 @@ While the above table showcases data specific to Saint Lucia, similar data can b
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-sources-for-saint-lucia">Data Sources for Saint Lucia</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#potential-data-sources-for-other-countries">Potential Data Sources for Other Countries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#potential-data-sources-for-other-countries">Potential Data Sources for Other Countries</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#instructions-for-data-collection">Instructions for Data Collection:</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#contextual-factors">Contextual factors</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#accessibility-factors">Accessibility factors</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
