@@ -17,6 +17,7 @@ from qgis.core import (
 )
 from geest.utilities import log_message
 from .grid_from_bbox import GridFromBbox
+from .grid_chunker import GridChunker
 from geest.core import setting
 
 
@@ -627,6 +628,20 @@ class StudyAreaProcessingTask(QgsTask):
 
         xmin, xmax, ymin, ymax = bbox
         cell_size = self.cell_size_m
+        # size is squared so 5 will make a 5x5 cell chunk
+        chunk_size = int(setting(key="chunk_size", default=50))
+
+        chunker = GridChunker(
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+            cell_size,
+            chunk_size=chunk_size,
+            epsg=self.epsg_code,
+        )
+        chunker.set_geometry(geom.ExportToWkb())
+        chunker.write_chunks_to_gpkg(self.gpkg_path)
 
         log_message(
             f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}"
@@ -658,24 +673,25 @@ class StudyAreaProcessingTask(QgsTask):
         feedback = QgsFeedback()
 
         # 1. Chunk the bounding box
-        # size is squared so 5 will make a 5x5 cell chunk
-        chunk_size = int(setting(key="chunk_size", default=50))
-        bbox_chunks = list(
-            self.chunk_bbox(xmin, xmax, ymin, ymax, cell_size, chunk_size)
-        )
+
         # print out all the chunk bboxes
-        log_message(f"Chunk count: {len(bbox_chunks)}")
+        chunk_count = chunker.total_chunks()
+        log_message(f"Chunk count: {chunk_count}")
         log_message(f"Chunk size: {chunk_size}")
-        chunk_count = len(bbox_chunks)
-        for idx, chunk in enumerate(bbox_chunks):
-            log_message(f"Chunk {idx}: {chunk}")
 
         self.feedback.setProgress(0)
-        for idx, chunk in enumerate(bbox_chunks):
+        for chunk in chunker.chunks():
             start_time = (
                 time.time()
             )  # used for both create chunk start and total chunk start
-            task = GridFromBbox(idx, chunk, geom, cell_size, feedback)
+            index = chunk["index"]
+            task = GridFromBbox(
+                index,
+                (chunk["x_start"], chunk["x_end"], chunk["y_start"], chunk["y_end"]),
+                geom,
+                cell_size,
+                feedback,
+            )
             self.track_time("Creating chunks", start_time)
             # Not running in thread for now, see note below
             task.run()
@@ -683,15 +699,18 @@ class StudyAreaProcessingTask(QgsTask):
             self.write_chunk(layer, task, normalized_name)
             # We use the progress object to notify of progress in the subtask
             # And the QgsTask progressChanged signal to track the main task
-            current_progress = int(idx + 1 / (chunk_count * chunk_size))
-            log_message(f"XXXXXX Chunks Progress: {current_progress}% XXXXXX")
-            self.feedback.setProgress(current_progress)
+            try:
+                current_progress = int(index + 1 / (chunk_count * chunk_size))
+                log_message(f"XXXXXX Chunks Progress: {current_progress}% XXXXXX")
+                self.feedback.setProgress(current_progress)
+            except ZeroDivisionError:
+                pass
 
             # This is blocking, but we're in a thread
             # Crashes QGIS, needs to be refactored to use QgsTask subtasks
             # task.taskCompleted.connect(write_grids)
             # worker_tasks.append(task)
-            # log_message(f"Task {idx} created for chunk {chunk}")
+            # log_message(f"Task {index} created for chunk {chunk}")
             # log_message(f"{len(worker_tasks)} tasks queued.")
             # task_manager.addTask(task)
             self.track_time("Complete chunk", start_time)

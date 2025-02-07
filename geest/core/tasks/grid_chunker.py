@@ -1,3 +1,4 @@
+import os
 from osgeo import ogr, osr
 from geest.utilities import log_message
 
@@ -15,6 +16,7 @@ class GridChunker:
         ymax (float): Maximum y-coordinate of the grid.
         cell_size (float): Size of each cell in the grid.
         chunk_size (int): Number of cells in each chunk.
+        epsg (int): The EPSG code of the grid.
 
     Methods:
         log_message(message):
@@ -43,6 +45,7 @@ class GridChunker:
         ymax: float,
         cell_size: float,
         chunk_size: int,
+        epsg: int,
     ):
         """
         Initializes the GridChunker with the given grid boundaries, cell size, and chunk size.
@@ -54,6 +57,7 @@ class GridChunker:
             ymax (float): Maximum y-coordinate of the grid.
             cell_size (float): Size of each cell in the grid.
             chunk_size (int): Number of cells in each chunk.
+            epsg (int): The EPSG code of the grid.
         """
         self.xmin = xmin
         self.xmax = xmax
@@ -67,7 +71,9 @@ class GridChunker:
 
         self.x_range_count = int((xmax - xmin) / cell_size)
         self.y_range_count = int((ymax - ymin) / cell_size)
+        self.epsg = epsg
         self.geometry = None
+        self.layer_name = "chunks"
 
     def set_geometry(self, wkb_geometry):
         """
@@ -102,6 +108,36 @@ class GridChunker:
         if not self.geometry.Intersects(self.geometry):
             raise ValueError("The geometry must be in the same projection as the grid.")
 
+    def create_layer_if_not_exists(self, gpkg_path):
+        """
+        Create a GPKG layer if it does not exist.
+        """
+
+        if not os.path.exists(gpkg_path):
+            # Create new GPKG
+            driver = ogr.GetDriverByName("GPKG")
+            driver.CreateDataSource(self.gpkg_path)
+
+        data_source = ogr.Open(gpkg_path, 1)
+        layer = data_source.GetLayerByName(self.layer_name)
+        if layer is not None:
+            data_source = None
+            return  # Already exists
+        # Create the spatial reference, WGS84
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(self.epsg)
+        # Create it
+        layer = data_source.CreateLayer(self.layer_name, srs, geom_type=ogr.wkbPolygon)
+        # Add fields
+        field_index = ogr.FieldDefn("index", ogr.OFTInteger)
+        layer.CreateField(field_index)
+        # Add a field to label the chunks as "inside" or "edge"
+        field_type = ogr.FieldDefn("type", ogr.OFTString)
+        layer.CreateField(field_type)
+        layer.SyncToDisk()
+
+        data_source = None
+
     def write_chunks_to_gpkg(self, gpkg_path):
         """
         Writes the chunk polygon boundaries to a GeoPackage using the GDAL OGR API.
@@ -113,25 +149,13 @@ class GridChunker:
         Args:
             gpkg_path (str): The file path to the GeoPackage.
         """
-
-        # Create the data source
-        driver = ogr.GetDriverByName("GPKG")
-        data_source = driver.CreateDataSource(gpkg_path)
-
-        # Create the spatial reference, WGS84
-        srs = osr.SpatialReference()
-        srs.ImportFromEPSG(4326)
-
-        # Create the layer
-        layer = data_source.CreateLayer("chunks", srs, ogr.wkbPolygon)
-
-        # Add fields
-        field_index = ogr.FieldDefn("index", ogr.OFTInteger)
-        layer.CreateField(field_index)
-        # Add a field to label the chunks as "inside" or "edge"
-        field_type = ogr.FieldDefn("type", ogr.OFTString)
-        layer.CreateField(field_type)
-
+        self.create_layer_if_not_exists(gpkg_path=gpkg_path)
+        data_source = ogr.Open(gpkg_path, 1)
+        layer = data_source.GetLayerByName(self.layer_name)
+        if not layer:
+            raise RuntimeError(
+                f"Could not open target layer {self.layer_name} in {gpkg_path}"
+            )
         # Create the feature and set values
         for chunk in self.chunks():
             feature = ogr.Feature(layer.GetLayerDefn())
@@ -160,8 +184,7 @@ class GridChunker:
                     feature.SetField("type", "edge")
                     layer.SetFeature(feature)
             else:
-                layer.CreateFeature(feature)
-                layer.SetFeature(feature)
+                pass
             feature = None
 
         # Close the data source
@@ -212,3 +235,16 @@ class GridChunker:
             int: The total number of cells in a chunk.
         """
         return self.chunk_size * self.chunk_size
+
+    def total_chunks(self):
+        """
+        Returns the total number of chunks.
+
+        Returns:
+            int: The total number of chunks.
+        """
+        count = int(self.x_range_count / self.chunk_size) * int(
+            self.y_range_count / self.chunk_size
+        )
+        log_message(f"Total chunks: {count}")
+        return count
