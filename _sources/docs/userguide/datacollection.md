@@ -294,7 +294,7 @@ To access the data for inputting into the tool, visit the provided <a href="http
     onclick="window.open(this.src, '_blank')">
 </p>
 
-#### Accessibility factors
+#### Accessibility and Place Characterization factors
 ---
 **1. Using Humdata source**
 
