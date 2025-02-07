@@ -4,7 +4,9 @@ from geest.utilities import log_message
 
 class GridChunker:
     """
-    A class to divide a grid into chunks and process each chunk.
+    A class to divide a bbox into chunks and process each chunk.
+
+
 
     Attributes:
         xmin (float): Minimum x-coordinate of the grid.
@@ -33,7 +35,15 @@ class GridChunker:
         print(f"Total cells in each chunk: {total_cells}")
     """
 
-    def __init__(self, xmin, xmax, ymin, ymax, cell_size, chunk_size):
+    def __init__(
+        self,
+        xmin: float,
+        xmax: float,
+        ymin: float,
+        ymax: float,
+        cell_size: float,
+        chunk_size: int,
+    ):
         """
         Initializes the GridChunker with the given grid boundaries, cell size, and chunk size.
 
@@ -49,15 +59,56 @@ class GridChunker:
         self.xmax = xmax
         self.ymin = ymin
         self.ymax = ymax
-        self.cell_size = cell_size
-        self.chunk_size = chunk_size
+        self.cell_size = cell_size  # size in map units of each cell (typically meters)
+        self.chunk_size = (
+            chunk_size  # number of cells in each chunk in both x and y directions
+        )
+        # e.g. chunk size of 5 would mean 5x5 cells in each chunk
 
         self.x_range_count = int((xmax - xmin) / cell_size)
         self.y_range_count = int((ymax - ymin) / cell_size)
+        self.geometry = None
+
+    def set_geometry(self, wkb_geometry):
+        """
+        Sets the geometry for the grid chunker.
+
+        Args:
+            wkb_geometry (bytes): The geometry in WKB format.
+        """
+        if wkb_geometry is None:
+            self.geometry = None
+            return
+
+        self.geometry = ogr.CreateGeometryFromWkb(wkb_geometry)
+
+        # If the geometry is a 3d geometry, convert it to 2d
+        if self.geometry.GetCoordinateDimension() == 3:
+            self.geometry.FlattenTo2D()
+
+        # Check the geom is a single part and if not, raise an error
+        if self.geometry.GetGeometryCount() > 1:
+            raise ValueError("The geometry must be a single part.")
+
+        # Check the geom is a polygon and if not, raise an error
+        if self.geometry.GetGeometryType() != ogr.wkbPolygon:
+            # Get the geomtery type name from the geometry type
+            geom_type_name = ogr.GeometryTypeToName(self.geometry.GetGeometryType())
+            raise ValueError(
+                f"The geometry must be a polygon. Received a geometry of type {geom_type_name}"
+            )
+
+        # check the geom is in the same projection as the grid by seeing if they intersect
+        if not self.geometry.Intersects(self.geometry):
+            raise ValueError("The geometry must be in the same projection as the grid.")
 
     def write_chunks_to_gpkg(self, gpkg_path):
         """
         Writes the chunk polygon boundaries to a GeoPackage using the GDAL OGR API.
+
+        If self.geometry is not none, chunks that do not intersect with the geom
+        will be excluded. Additionally, chunks will be labelled as "inside" or "edge"
+        so that the user can easily filter out chunks that are completely inside the geometry.
 
         Args:
             gpkg_path (str): The file path to the GeoPackage.
@@ -77,6 +128,9 @@ class GridChunker:
         # Add fields
         field_index = ogr.FieldDefn("index", ogr.OFTInteger)
         layer.CreateField(field_index)
+        # Add a field to label the chunks as "inside" or "edge"
+        field_type = ogr.FieldDefn("type", ogr.OFTString)
+        layer.CreateField(field_type)
 
         # Create the feature and set values
         for chunk in self.chunks():
@@ -95,7 +149,19 @@ class GridChunker:
             polygon.AddGeometry(ring)
 
             feature.SetGeometry(polygon)
-            layer.CreateFeature(feature)
+
+            # if the geometry is not none and the polygon intersects with it, add it to the layer
+            if self.geometry is not None and self.geometry.Intersects(polygon):
+                layer.CreateFeature(feature)
+                if self.geometry.Contains(polygon):
+                    feature.SetField("type", "inside")
+                    layer.SetFeature(feature)
+                else:
+                    feature.SetField("type", "edge")
+                    layer.SetFeature(feature)
+            else:
+                layer.CreateFeature(feature)
+                layer.SetFeature(feature)
             feature = None
 
         # Close the data source
