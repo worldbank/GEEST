@@ -323,7 +323,7 @@ To access the data for inputting into the tool, visit the provided <a href="http
 
 **2. Using OSM source**
 
-> - Click on the links in the table provided above as in the following example:
+> - Click on the links in the table provided above as in the following example (pharmacies):
 
 <p align="center">
 <img 
