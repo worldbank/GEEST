@@ -74,6 +74,7 @@ class GridChunker:
         self.epsg = epsg
         self.geometry = None
         self.layer_name = "chunks"
+        self.gpkg_path = None  # Initialize gpkg_path
 
     def set_geometry(self, wkb_geometry):
         """
