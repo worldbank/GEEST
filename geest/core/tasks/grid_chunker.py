@@ -7,13 +7,12 @@ class GridChunker:
     """
     A class to divide a bbox into chunks and process each chunk.
 
-
-
     Attributes:
         xmin (float): Minimum x-coordinate of the grid.
         xmax (float): Maximum x-coordinate of the grid.
         ymin (float): Minimum y-coordinate of the grid.
         ymax (float): Maximum y-coordinate of the grid.
+        geom (ogr.Geometry): The geometry to check for intersections. (e.g. an island or land area)
         cell_size (float): Size of each cell in the grid.
         chunk_size (int): Number of cells in each chunk.
         epsg (int): The EPSG code of the grid.
@@ -27,6 +26,18 @@ class GridChunker:
 
         total_cells_in_chunk():
             Returns the total number of cells in a chunk.
+
+        total_chunks():
+            Returns the total number of chunks.
+
+        set_geometry(wkb_geometry):
+            Sets the geometry for the grid chunker.
+
+        create_layer_if_not_exists(gpkg_path):
+            Create a GPKG layer if it does not exist.
+
+        write_chunks_to_gpkg(gpkg_path):
+            Writes the chunk polygon boundaries to a GeoPackage.
 
     Example:
         grid_chunker = GridChunker(0, 100, 0, 100, 10, 5)
@@ -46,6 +57,7 @@ class GridChunker:
         cell_size: float,
         chunk_size: int,
         epsg: int,
+        geometry: bytes = None,
     ):
         """
         Initializes the GridChunker with the given grid boundaries, cell size, and chunk size.
@@ -58,6 +70,7 @@ class GridChunker:
             cell_size (float): Size of each cell in the grid.
             chunk_size (int): Number of cells in each chunk.
             epsg (int): The EPSG code of the grid.
+            geometry (bytes): The geometry in WKB format.
         """
         self.xmin = xmin
         self.xmax = xmax
@@ -72,7 +85,7 @@ class GridChunker:
         self.x_range_count = int((xmax - xmin) / cell_size)
         self.y_range_count = int((ymax - ymin) / cell_size)
         self.epsg = epsg
-        self.geometry = None
+        self.set_geometry(geometry)
         self.layer_name = "chunks"
         self.gpkg_path = None  # Initialize gpkg_path
 
@@ -158,36 +171,17 @@ class GridChunker:
                 f"Could not open target layer {self.layer_name} in {gpkg_path}"
             )
         # Create the feature and set values
+        layer.StartTransaction()
+
         for chunk in self.chunks():
             feature = ogr.Feature(layer.GetLayerDefn())
             feature.SetField("index", chunk["index"])
-
-            # Create polygon from bounding box coordinates
-            ring = ogr.Geometry(ogr.wkbLinearRing)
-            ring.AddPoint(chunk["x_start"], chunk["y_start"])
-            ring.AddPoint(chunk["x_end"], chunk["y_start"])
-            ring.AddPoint(chunk["x_end"], chunk["y_end"])
-            ring.AddPoint(chunk["x_start"], chunk["y_end"])
-            ring.AddPoint(chunk["x_start"], chunk["y_start"])
-
-            polygon = ogr.Geometry(ogr.wkbPolygon)
-            polygon.AddGeometry(ring)
-
+            polygon = chunk["geometry"]
             feature.SetGeometry(polygon)
-
-            # if the geometry is not none and the polygon intersects with it, add it to the layer
-            if self.geometry is not None and self.geometry.Intersects(polygon):
-                layer.CreateFeature(feature)
-                if self.geometry.Contains(polygon):
-                    feature.SetField("type", "inside")
-                    layer.SetFeature(feature)
-                else:
-                    feature.SetField("type", "edge")
-                    layer.SetFeature(feature)
-            else:
-                pass
+            feature.SetField("type", chunk["type"])
+            layer.CreateFeature(feature)
             feature = None
-
+        layer.CommitTransaction()
         # Close the data source
         data_source = None
 
@@ -203,21 +197,42 @@ class GridChunker:
         index = 0
 
         for x_block_start in x_blocks:
-            log_message(f"Processing chunk {x_block_start} of {self.x_range_count}")
+            log_message(f"Processing chunk (x) {x_block_start} of {self.x_range_count}")
             x_block_end = min(x_block_start + self.chunk_size, self.x_range_count)
 
             x_start_coord = self.xmin + x_block_start * self.cell_size
             x_end_coord = self.xmin + x_block_end * self.cell_size
 
             for y_block_start in y_blocks:
-                log_message(f"Processing chunk {y_block_start} of {self.y_range_count}")
+                log_message(
+                    f"Processing chunk (y) {y_block_start} of {self.y_range_count}"
+                )
                 y_block_end = min(y_block_start + self.chunk_size, self.y_range_count)
 
                 y_start_coord = self.ymin + y_block_start * self.cell_size
                 y_end_coord = self.ymin + y_block_end * self.cell_size
 
+                # Create polygon from bounding box coordinates
+                ring = ogr.Geometry(ogr.wkbLinearRing)
+                ring.AddPoint(x_start_coord, y_start_coord)
+                ring.AddPoint(x_end_coord, y_start_coord)
+                ring.AddPoint(x_end_coord, y_end_coord)
+                ring.AddPoint(x_start_coord, y_end_coord)
+                ring.AddPoint(x_start_coord, y_start_coord)
+
+                polygon = ogr.Geometry(ogr.wkbPolygon)
+                polygon.AddGeometry(ring)
+                chunk_position = None
+                # if the geometry is not none and the polygon intersects with it, add it to the layer
+                if self.geometry is not None and self.geometry.Intersects(polygon):
+                    if self.geometry.Contains(polygon):
+                        chunk_position = "inside"
+                    else:
+                        chunk_position = "edge"
+                else:
+                    chunk_position = "undefined"
                 log_message(
-                    f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {y_start_coord}, {y_end_coord}"
+                    f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {y_start_coord}, {y_end_coord}, {chunk_position}"
                 )
                 yield {
                     "index": index,
@@ -225,6 +240,8 @@ class GridChunker:
                     "x_end": x_end_coord,
                     "y_start": y_start_coord,
                     "y_end": y_end_coord,
+                    "geometry": polygon,
+                    "type": chunk_position,
                 }
                 index += 1
 

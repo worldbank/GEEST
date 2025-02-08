@@ -660,23 +660,12 @@ class StudyAreaProcessingTask(QgsTask):
             cell_size,
             chunk_size=chunk_size,
             epsg=self.epsg_code,
+            geometry=geom.ExportToWkb(),
         )
-        chunker.set_geometry(geom.ExportToWkb())
         chunker.write_chunks_to_gpkg(self.gpkg_path)
 
         log_message(
             f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}"
-        )
-
-        # Approx count for logging
-        x_range_count = int((xmax - xmin) / cell_size)
-        y_range_count = int((ymax - ymin) / cell_size)
-        self.current_geom_cell_count_estimate = x_range_count * y_range_count
-        if self.current_geom_cell_count_estimate == 0:
-            log_message("No cells to generate.")
-            return
-        log_message(
-            f"Estimated total cells to generate: {self.current_geom_cell_count_estimate}"
         )
 
         # OGR geometry intersection can be slow for large grids.
@@ -701,28 +690,43 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(f"Chunk size: {chunk_size}")
 
         self.feedback.setProgress(0)
+        counter = (
+            1  # We cant use the chunk index as it includes chunks outside the geometry
+        )
         for chunk in chunker.chunks():
             start_time = (
                 time.time()
             )  # used for both create chunk start and total chunk start
             index = chunk["index"]
-            task = GridFromBbox(
-                index,
-                (chunk["x_start"], chunk["x_end"], chunk["y_start"], chunk["y_end"]),
-                geom,
-                cell_size,
-                feedback,
-            )
-            self.track_time("Creating chunks", start_time)
-            # Not running in thread for now, see note below
-            task.run()
+            relationship = chunk["type"]  # inside, edge or undefined
+            if relationship != "undefined":
+                task = GridFromBbox(
+                    index,
+                    (
+                        chunk["x_start"],
+                        chunk["x_end"],
+                        chunk["y_start"],
+                        chunk["y_end"],
+                    ),
+                    geom,
+                    cell_size,
+                    feedback,
+                )
+                self.track_time("Creating chunks", start_time)
+                # Not running in thread for now, see note below
+                task.run()
 
-            self.write_chunk(layer, task, normalized_name)
-            # We use the progress object to notify of progress in the subtask
-            # And the QgsTask progressChanged signal to track the main task
+                self.write_chunk(layer, task, normalized_name)
+                # We use the progress object to notify of progress in the subtask
+                # And the QgsTask progressChanged signal to track the main task
+            else:
+                log_message(f"Chunk {index} is outside the geometry.")
+                continue
             try:
-                current_progress = int(index + 1 / (chunk_count * chunk_size))
-                log_message(f"XXXXXX Chunks Progress: {current_progress}% XXXXXX")
+                current_progress = int((counter / chunk_count) * 100)
+                log_message(
+                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"
+                )
                 self.feedback.setProgress(current_progress)
             except ZeroDivisionError:
                 pass
@@ -735,6 +739,7 @@ class StudyAreaProcessingTask(QgsTask):
             # log_message(f"{len(worker_tasks)} tasks queued.")
             # task_manager.addTask(task)
             self.track_time("Complete chunk", start_time)
+            counter += 1
         ds = None
         # ----------------------------
         # Print out metrics summary
@@ -770,27 +775,12 @@ class StudyAreaProcessingTask(QgsTask):
                 feature.SetGeometry(geometry)
                 layer.CreateFeature(feature)
                 feature = None
-
                 self.current_geom_actual_cell_count += 1
-                if self.current_geom_actual_cell_count % 10000 == 0:
-
-                    try:
-                        log_message(
-                            f"         Cell count: {self.current_geom_actual_cell_count}"
-                        )
-                        log_message(
-                            f"         Total cells: {self.current_geom_cell_count_estimate}"
-                        )
-                        percent = (
-                            self.current_geom_actual_cell_count
-                            / float(self.current_geom_cell_count_estimate)
-                        ) * 100.0
-                        log_message(f"         Percent complete: {percent:.2f}%")
-                        log_message(
-                            f"Grid creation for part {normalized_name}: {self.current_geom_actual_cell_count}/{self.current_geom_cell_count_estimate} ({percent:.2f}%)"
-                        )
-                    except ZeroDivisionError:
-                        pass
+                if self.current_geom_actual_cell_count % 20000 == 0:
+                    log_message(
+                        f"         Cell count: {self.current_geom_actual_cell_count}"
+                    )
+                    log_message(f"         Grid creation for part {normalized_name}")
                     # commit changes
                     layer.CommitTransaction()
                     layer.StartTransaction()
