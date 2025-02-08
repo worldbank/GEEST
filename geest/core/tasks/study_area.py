@@ -80,6 +80,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.valid_feature_count = 0
         self.current_geom_actual_cell_count = 0
         self.current_geom_cell_count_estimate = 0
+        self.error_count = 0
         self.total_cells = 0
         self.write_lock = False
         # Make sure output directory exists
@@ -278,6 +279,9 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(
                 f"Processing complete. Valid: {self.valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
             )
+            log_message(
+                f"Areas that could not be processed due to errors: {self.error_count}"
+            )
             log_message(f"Total cells generated: {self.total_cells}")
 
             # 4) Create a VRT of all generated raster masks
@@ -413,6 +417,20 @@ class StudyAreaProcessingTask(QgsTask):
             normalized_name, "timestamp_start", now_str
         )
 
+        #  Check we have a single part geom
+        geom_type = ogr.GT_Flatten(geom.GetGeometryType())
+        if geom_type != ogr.wkbPolygon:
+            log_message(
+                f"Skipping non-polygon geometry type {geom_type} for {normalized_name}."
+            )
+            return
+        # check it has only one part
+        if geom.GetGeometryCount() > 1:
+            log_message(
+                f"Skipping multi-part geometry for {normalized_name}.",
+                level="WARNING",
+            )
+            return
         # Compute aligned bounding box in target CRS
         # (We already have a coordinate transformation if the source has a known SRS)
         geometry_bbox = geom.GetEnvelope()  # (xmin, xmax, ymin, ymax)
@@ -479,7 +497,10 @@ class StudyAreaProcessingTask(QgsTask):
         for i in range(count):
             part_geom = geom.GetGeometryRef(i)
             part_name = f"{normalized_name}_part{i}"
-            self.process_singlepart_geometry(part_geom, part_name, area_name)
+            try:
+                self.process_singlepart_geometry(part_geom, part_name, area_name)
+            except:
+                self.error_count += 1
 
     ##########################################################################
     # BBox handling
