@@ -734,12 +734,13 @@ class StudyAreaProcessingTask(QgsTask):
         # If write_lock is true, wait for the lock to be released
         while self.write_lock:
             log_message("Waiting for write lock...")
-            time.sleep(0.1)
+            time.sleep(0.001)
         log_message("Write lock released.")
         log_message(f"Writing {len(task.features_out)} features to layer.")
         self.track_time("Preparing chunks", task.run_time)
         self.write_lock = True
         feat_defn = layer.GetLayerDefn()
+        layer.StartTransaction()
         try:
             for geometry in task.features_out:
                 feature = ogr.Feature(feat_defn)
@@ -751,6 +752,7 @@ class StudyAreaProcessingTask(QgsTask):
 
                 self.current_geom_actual_cell_count += 1
                 if self.current_geom_actual_cell_count % 10000 == 0:
+
                     try:
                         log_message(
                             f"         Cell count: {self.current_geom_actual_cell_count}"
@@ -769,10 +771,13 @@ class StudyAreaProcessingTask(QgsTask):
                     except ZeroDivisionError:
                         pass
                     # commit changes
-                    layer.SyncToDisk()
+                    layer.CommitTransaction()
+                    layer.StartTransaction()
+            layer.CommitTransaction()  # Final commit
             self.track_time("Writing chunks", start_time)
             self.write_lock = False
         except Exception as e:
+            layer.RollbackTransaction()  # Rollback on error
             log_message(f"write_grids: {str(e)}")
             log_message(f"write_grids: {traceback.format_exc()}")
             self.write_lock = False
