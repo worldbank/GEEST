@@ -11,8 +11,9 @@ from qgis.core import (
     QgsLayoutItemMap,
     QgsLayoutSize,
     QgsLayoutItemPage,
+    QgsLayoutMeasurement,
 )
-from qgis.PyQt.QtGui import QFont
+from qgis.PyQt.QtGui import QFont, QColor
 from geest.utilities import log_message
 
 
@@ -187,11 +188,10 @@ class StudyAreaReport:
 
         # Compute and add summary statistics for each layer on separate pages
         for page_number, (layer_name, layer) in enumerate(self.layers.items()):
-
             # Add a new page for each layer
             page = QgsLayoutItemPage(self.layout)
+            page.setPageSize("A4", QgsLayoutItemPage.Portrait)
             self.layout.pageCollection().addPage(page)
-
             # Compute statistics for the current layer
             try:
                 stats = self.compute_statistics(layer)
@@ -225,6 +225,10 @@ class StudyAreaReport:
             map_item.setExtent(layer.extent())
             map_item.refresh()
             self.layout.addLayoutItem(map_item)
+            # Add a black frame around the map item
+            map_item.setFrameEnabled(True)
+            map_item.setFrameStrokeColor(QColor(0, 0, 0))
+            map_item.setFrameStrokeWidth(QgsLayoutMeasurement(0.5))
 
     def export_pdf(self, output_path):
         """
