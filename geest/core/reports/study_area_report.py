@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from qgis.core import (
     QgsProject,
     QgsVectorLayer,
@@ -6,9 +8,12 @@ from qgis.core import (
     QgsLayoutPoint,
     QgsUnitTypes,
     QgsLayoutExporter,
-    QgsStatisticalSummary,
+    QgsLayoutItemMap,
+    QgsLayoutSize,
+    QgsProviderRegistry,
 )
 from qgis.PyQt.QtGui import QFont
+from geest.utilities import log_message
 
 
 class StudyAreaReport:
@@ -19,35 +24,92 @@ class StudyAreaReport:
     and creates a QGIS layout (report) that is then exported to PDF.
     """
 
-    def __init__(self, layer_input, report_name="Study Area Creation Report"):
+    def __init__(self, gpkg_path: str, report_name="Study Area Creation Report"):
         """
         Initialize the report.
 
         Parameters:
-            layer_input (str or QgsVectorLayer): Either a file path to the GeoPackage (from which the
-                layer "study_area_creation_status" will be loaded) or an existing QgsVectorLayer.
+            layer_input (str): A file path to the GeoPackage (from which the
+                layer "study_area_creation_status" and other layers will be loaded).
             report_name (str): The title to use for the report.
 
         Raises:
             ValueError: If the layer cannot be loaded from the given file path.
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
-        if isinstance(layer_input, str):
-            uri = f"{layer_input}|layername=study_area_creation_status"
-            self.layer = QgsVectorLayer(uri, "study_area_creation_status", "ogr")
-            if not self.layer.isValid():
-                raise ValueError("Failed to load layer from the given file path.")
-        elif isinstance(layer_input, QgsVectorLayer):
-            self.layer = layer_input
-        else:
-            raise TypeError(
-                "layer_input must be a file path (str) or a QgsVectorLayer instance."
-            )
+
+        uri = f"{gpkg_path}|layername=study_area_creation_status"
+        self.gpkg_path = gpkg_path
+        layer = QgsVectorLayer(uri, "study_area_creation_status", "ogr")
+        if not layer.isValid():
+            raise ValueError("Failed to load layer from the given file path.")
 
         self.report_name = report_name
         self.layout = None  # Will hold the QgsLayout for the report
+        self.layers = self.load_layers_from_gpkg()
 
-    def compute_statistics(self, field_name="geom_total_duration_secs"):
+    def __del__(self):
+        """
+        Destructor to clean up layers from the QGIS project.
+        """
+        for layer_name, layer in self.layers.items():
+            if layer:
+                del layer
+                log_message(f"Layer '{layer_name}' deleted.")
+
+    def load_layers_from_gpkg(self):
+        """
+        Load all vector layers from the specified GeoPackage.
+
+        Returns:
+            dict: A dictionary mapping layer names to QgsVectorLayer objects.
+        """
+        layers = {}
+        # Create a temporary layer to access the data provider
+        temp_layer = QgsVectorLayer(self.gpkg_path, "temp", "ogr")
+        if not temp_layer.isValid():
+            log_message(f"Failed to load GeoPackage: {self.gpkg_path}")
+            return layers
+
+        # Retrieve subLayers information
+        sub_layers = temp_layer.dataProvider().subLayers()
+        for sub_layer in sub_layers:
+            # sub_layer is a string in the format "layer_id!!::!!layer_name"
+            log_message(f"Loading layer: {sub_layer}")
+            parts = sub_layer.split("!!::!!")
+            layer_id = parts[0]
+            layer_name = parts[1]
+            uri = f"{self.gpkg_path}|layername={layer_name}"
+            layer = QgsVectorLayer(uri, layer_name, "ogr")
+            if layer.isValid():
+                layers[layer_name] = layer
+            else:
+                log_message(f"Failed to load layer: {layer_name}")
+        return layers
+
+    def compute_statistics(self, layer):
+        """
+        Compute summary statistics for a given vector layer.
+
+        Parameters:
+            layer (QgsVectorLayer): The vector layer to analyze.
+
+        Returns:
+            dict: A dictionary containing summary statistics.
+        """
+        area_counts = defaultdict(int)
+        total_count = 0
+
+        for feature in layer.getFeatures():
+            area_name = feature[self.area_field_name]
+            area_counts[area_name] += 1
+            total_count += 1
+
+        return {"area_counts": dict(area_counts), "total_count": total_count}
+
+    def compute_study_area_creation_statistics(
+        self, field_name="geom_total_duration_secs"
+    ):
         """
         Compute statistical summary for a given field in the layer.
 
@@ -58,7 +120,9 @@ class StudyAreaReport:
             dict: A dictionary containing 'count', 'min', 'max', 'mean', 'sum', and 'std_dev'.
         """
         values = []
-        for feat in self.layer.getFeatures():
+        uri = f"{self.gpkg_path}|layername=study_area_creation_status"
+        layer = QgsVectorLayer(uri, "study_area_creation_status", "ogr")
+        for feat in layer.getFeatures():
             val = feat[field_name]
             if val is not None:
                 values.append(val)
@@ -103,7 +167,7 @@ class StudyAreaReport:
         self.layout.addLayoutItem(title)
 
         # Compute statistics and add a summary label
-        stats = self.compute_statistics()
+        stats = self.compute_study_area_creation_statistics()
         summary_text = (
             f"Total parts: {stats['count']}\n"
             f"Minimum processing time: {stats['min']:.3f} sec\n"
@@ -120,6 +184,16 @@ class StudyAreaReport:
             QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters)
         )
         self.layout.addLayoutItem(summary_label)
+
+        # Add a map item capturing the current map canvas
+        map_item = QgsLayoutItemMap(self.layout)
+        # Position the map item (e.g., at 20 mm, 70 mm) and give it a size (e.g., 150x100 mm)
+        map_item.attemptMove(QgsLayoutPoint(20, 70, QgsUnitTypes.LayoutMillimeters))
+        map_item.attemptResize(QgsLayoutSize(150, 100, QgsUnitTypes.LayoutMillimeters))
+        # Set the map extent to the current map canvas extent
+        # map_item.setExtent(canvas.extent())
+        map_item.refresh()
+        self.layout.addLayoutItem(map_item)
 
     def export_pdf(self, output_path):
         """

@@ -654,9 +654,7 @@ class TreePanel(QWidget):
         gpkg_path = os.path.join(
             self.working_directory, "study_area", "study_area.gpkg"
         )
-        report = StudyAreaReport(
-            layer_input=gpkg_path, report_name="Study Area Summary"
-        )
+        report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
         report.create_layout()
         report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
         # open the pdf using the system PDF viewer
