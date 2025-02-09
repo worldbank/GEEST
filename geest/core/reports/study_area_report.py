@@ -21,6 +21,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtGui import QFont, QColor
+from qgis.PyQt.QtCore import Qt
 from geest.utilities import log_message, resources_path
 
 
@@ -58,6 +59,40 @@ class StudyAreaReport:
         self.template_path = resources_path(
             "resources", "qpt", f"study_area_report_template.qpt"
         )
+        self.page_descriptions = {}
+        self.page_descriptions[
+            "study_area_bbox"
+        ] = """
+        The study area bounding box (bbox) is the outer extent of the entire study area.
+        The bounding box width and height is guaranteed to be a factor of the
+        analysis dimension. All other data products are then aligned to this bbox.
+        """
+        self.page_descriptions[
+            "study_area_bboxes"
+        ] = """
+        The study area bboxes are a set of smaller bounding boxes that surround each 
+        polygon in the study area. They are grid aligned such that the origin and
+        furthest corners are guaranteed to be a factor of the analysis dimension
+        apart.
+        """
+        self.page_descriptions[
+            "study_area_polygons"
+        ] = """
+        The study area polygons are the single part form of all polygons in the 
+        study area. Any invalid geometries will have been discarded.
+        """
+        self.page_descriptions[
+            "study_area_grid"
+        ] = """
+        The study area grid is a set of polygon squares that each have the 
+        x and y dimension of the analysis cell size. They are guaranteed to
+        be aligned to the study area bbox and bboxes layers. The grid is used
+        to create a version of the study_area_polygons that have been expanded
+        out so that the edges align exactly to the grid.
+
+        The grid is also used to perform certain types of spatial analysis such as
+        the Active Transport layer analyses.
+        """
 
     def __del__(self):
         """
@@ -191,20 +226,6 @@ class StudyAreaReport:
                 f"Failed to load the template into the layout from '{self.template_path}'."
             )
 
-        # self.layout.setTitle(self.report_name)
-        page = QgsLayoutItemPage(self.layout)
-        page.setPageSize("A4", QgsLayoutItemPage.Portrait)
-        self.layout.pageCollection().addPage(page)
-        # Add a title label
-        title = QgsLayoutItemLabel(self.layout)
-        title.setText(self.report_name)
-        title.setFont(QFont("Arial", 20))
-        title.adjustSizeToText()
-        title.attemptMove(
-            QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters), page=1
-        )
-        self.layout.addLayoutItem(title)
-
         # Compute statistics and add a summary label
         stats = self.compute_study_area_creation_statistics()
         summary_text = (
@@ -220,7 +241,7 @@ class StudyAreaReport:
         summary_label.setFont(QFont("Arial", 12))
         summary_label.adjustSizeToText()
         summary_label.attemptMove(
-            QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters), page=1
+            QgsLayoutPoint(80, 200, QgsUnitTypes.LayoutMillimeters), page=0
         )
         self.layout.addLayoutItem(summary_label)
 
@@ -231,6 +252,18 @@ class StudyAreaReport:
             page = QgsLayoutItemPage(self.layout)
             page.setPageSize("A4", QgsLayoutItemPage.Portrait)
             self.layout.pageCollection().addPage(page)
+            # Add a title label
+            title = QgsLayoutItemLabel(self.layout)
+            # Put title in title case
+            title_text = layer_name.replace("_", " ").title()
+            title.setText(title_text)
+            title.setFont(QFont("Arial", 20))
+            title.setFixedSize(QgsLayoutSize(200, 40, QgsUnitTypes.LayoutMillimeters))
+            title.attemptMove(
+                QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters),
+                page=current_page,
+            )
+            self.layout.addLayoutItem(title)
             # Compute statistics for the current layer
             try:
                 stats = self.compute_statistics(layer)
@@ -242,6 +275,26 @@ class StudyAreaReport:
             except Exception as e:
                 log_message(f"Error computing statistics for layer '{layer_name}': {e}")
                 continue
+
+            description_text = self.page_descriptions.get(layer_name, "")
+            # Add description label to the current page
+            description_label = QgsLayoutItemLabel(self.layout)
+            description_label.setText(description_text)
+            description_label.setFont(QFont("Arial", 12))
+            description_label.adjustSizeToText()
+            description_label.setMode(QgsLayoutItemLabel.ModeHtml)
+
+            # Position the label on the current page
+            description_label.attemptMove(
+                QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters),
+                page=current_page,
+            )
+            description_label.setFixedSize(
+                QgsLayoutSize(80, 40, QgsUnitTypes.LayoutMillimeters)
+            )
+            description_label.setHAlign(Qt.AlignJustify)
+            self.layout.addLayoutItem(description_label)
+
             # Add summary label to the current page
             summary_label = QgsLayoutItemLabel(self.layout)
             summary_label.setText(summary_text)
@@ -249,7 +302,7 @@ class StudyAreaReport:
             summary_label.adjustSizeToText()
             # Position the label on the current page
             summary_label.attemptMove(
-                QgsLayoutPoint(100, 40, QgsUnitTypes.LayoutMillimeters),
+                QgsLayoutPoint(120, 60, QgsUnitTypes.LayoutMillimeters),
                 page=current_page,
             )
             self.layout.addLayoutItem(summary_label)
@@ -297,7 +350,7 @@ class StudyAreaReport:
         footer_label.setText(footer_text)
         footer_label.setFont(QFont("Arial", 8))
         footer_label.setFixedSize(
-            QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters)
+            QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters)
         )
         # Use html mode
         footer_label.setMode(QgsLayoutItemLabel.ModeHtml)
@@ -305,21 +358,23 @@ class StudyAreaReport:
         footer_label.attemptMove(
             QgsLayoutPoint(20, 270, QgsUnitTypes.LayoutMillimeters), page=page_number
         )
+        footer_label.setHAlign(Qt.AlignJustify)
         self.layout.addLayoutItem(footer_label)
 
-        # Add summary label to the current page
+        # Add credits label to the current page
         credits_label = QgsLayoutItemLabel(self.layout)
         credits_label.setText(credits_text)
         credits_label.setFont(QFont("Arial", 8))
         credits_label.setFixedSize(
-            QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters)
+            QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters)
         )
         # Use html mode
         credits_label.setMode(QgsLayoutItemLabel.ModeHtml)
         # Position the label on the current page
         credits_label.attemptMove(
-            QgsLayoutPoint(20, 280, QgsUnitTypes.LayoutMillimeters), page=page_number
+            QgsLayoutPoint(20, 288, QgsUnitTypes.LayoutMillimeters), page=page_number
         )
+        credits_label.setHAlign(Qt.AlignCenter)
         self.layout.addLayoutItem(credits_label)
 
     def export_pdf(self, output_path):
