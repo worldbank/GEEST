@@ -12,9 +12,16 @@ from qgis.core import (
     QgsLayoutSize,
     QgsLayoutItemPage,
     QgsLayoutMeasurement,
+    QgsPrintLayout,
+    QgsLayoutItemLabel,
+    QgsLayoutItemMap,
+    QgsReadWriteContext,
+    QgsLayoutExporter,
+    QgsVectorLayer,
 )
+from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtGui import QFont, QColor
-from geest.utilities import log_message
+from geest.utilities import log_message, resources_path
 
 
 class StudyAreaReport:
@@ -48,6 +55,9 @@ class StudyAreaReport:
         self.report_name = report_name
         self.layout = None  # Will hold the QgsLayout for the report
         self.layers = self.load_layers_from_gpkg()
+        self.template_path = resources_path(
+            "resources", "qpt", f"study_area_report_template.qpt"
+        )
 
     def __del__(self):
         """
@@ -157,14 +167,42 @@ class StudyAreaReport:
         project = QgsProject.instance()
         self.layout = QgsLayout(project)
         self.layout.initializeDefaults()
-        # self.layout.setTitle(self.report_name)
 
+        self.layout.initializeDefaults()
+
+        # Load the QPT template
+        try:
+            with open(self.template_path, "r") as template_file:
+                template_content = template_file.read()
+        except IOError:
+            raise FileNotFoundError(
+                f"Template file '{self.template_path}' not found or cannot be read."
+            )
+
+        document = QDomDocument()
+        if not document.setContent(template_content):
+            raise ValueError(
+                f"Failed to parse the template content from '{self.template_path}'."
+            )
+
+        context = QgsReadWriteContext()
+        if not self.layout.loadFromTemplate(document, context):
+            raise ValueError(
+                f"Failed to load the template into the layout from '{self.template_path}'."
+            )
+
+        # self.layout.setTitle(self.report_name)
+        page = QgsLayoutItemPage(self.layout)
+        page.setPageSize("A4", QgsLayoutItemPage.Portrait)
+        self.layout.pageCollection().addPage(page)
         # Add a title label
         title = QgsLayoutItemLabel(self.layout)
         title.setText(self.report_name)
         title.setFont(QFont("Arial", 20))
         title.adjustSizeToText()
-        title.attemptMove(QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters))
+        title.attemptMove(
+            QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters), page=1
+        )
         self.layout.addLayoutItem(title)
 
         # Compute statistics and add a summary label
@@ -182,11 +220,12 @@ class StudyAreaReport:
         summary_label.setFont(QFont("Arial", 12))
         summary_label.adjustSizeToText()
         summary_label.attemptMove(
-            QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters)
+            QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters), page=1
         )
         self.layout.addLayoutItem(summary_label)
 
         # Compute and add summary statistics for each layer on separate pages
+        current_page = 1
         for page_number, (layer_name, layer) in enumerate(self.layers.items()):
             # Add a new page for each layer
             page = QgsLayoutItemPage(self.layout)
@@ -196,8 +235,9 @@ class StudyAreaReport:
             try:
                 stats = self.compute_statistics(layer)
                 summary_text = f"Layer: {layer_name}\n"
-                for area_name, count in stats["area_counts"].items():
-                    summary_text += f"{area_name}: {count} features\n"
+                # feature_count = 0
+                # for area_name, count in stats["area_counts"].items():
+                #    feature_count += count
                 summary_text += f"Total count: {stats['total_count']} features"
             except Exception as e:
                 log_message(f"Error computing statistics for layer '{layer_name}': {e}")
@@ -209,7 +249,8 @@ class StudyAreaReport:
             summary_label.adjustSizeToText()
             # Position the label on the current page
             summary_label.attemptMove(
-                QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters), page=page_number
+                QgsLayoutPoint(100, 40, QgsUnitTypes.LayoutMillimeters),
+                page=current_page,
             )
             self.layout.addLayoutItem(summary_label)
 
@@ -217,10 +258,12 @@ class StudyAreaReport:
             map_item = QgsLayoutItemMap(self.layout)
             map_item.setLayers([layer])
             map_item.attemptMove(
-                QgsLayoutPoint(20, 70, QgsUnitTypes.LayoutMillimeters), page=page_number
+                QgsLayoutPoint(20, 110, QgsUnitTypes.LayoutMillimeters),
+                page=current_page,
             )
             map_item.attemptResize(
-                QgsLayoutSize(150, 100, QgsUnitTypes.LayoutMillimeters)
+                # 170mm width x 100mm height
+                QgsLayoutSize(170, 100, QgsUnitTypes.LayoutMillimeters)
             )
             map_item.setExtent(layer.extent())
             map_item.refresh()
@@ -229,6 +272,55 @@ class StudyAreaReport:
             map_item.setFrameEnabled(True)
             map_item.setFrameStrokeColor(QColor(0, 0, 0))
             map_item.setFrameStrokeWidth(QgsLayoutMeasurement(0.5))
+            # Add the page footer
+            self.add_header_and_footer(page_number=current_page)
+            current_page += 1
+
+    def add_header_and_footer(self, page_number):
+        """_summary_
+
+        Args:
+            page_number (_type_): _description_
+        """
+        footer_text = """
+         <p>This plugin is built with support from the <strong>Canada Clean Energy and 
+         Forest Climate Facility (CCEFCF)</strong>, the <strong>Geospatial Operational 
+         Support Team (GOST, DECSC)</strong> for the project Geospatial Assessment of 
+         Women Employment and Business Opportunities in the Renewable Energy Sector. 
+         This project is open source; you can download the code at 
+         <a href="https://github.com/worldbank/GEEST">https://github.com/worldbank/GEEST</a>.</p>
+"""
+        credits_text = """Developed by <a href="https://kartoza.com">Kartoza</a> for and 
+        with The World Bank."""
+        # Add summary label to the current page
+        footer_label = QgsLayoutItemLabel(self.layout)
+        footer_label.setText(footer_text)
+        footer_label.setFont(QFont("Arial", 8))
+        footer_label.setFixedSize(
+            QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters)
+        )
+        # Use html mode
+        footer_label.setMode(QgsLayoutItemLabel.ModeHtml)
+        # Position the label on the current page
+        footer_label.attemptMove(
+            QgsLayoutPoint(20, 270, QgsUnitTypes.LayoutMillimeters), page=page_number
+        )
+        self.layout.addLayoutItem(footer_label)
+
+        # Add summary label to the current page
+        credits_label = QgsLayoutItemLabel(self.layout)
+        credits_label.setText(credits_text)
+        credits_label.setFont(QFont("Arial", 8))
+        credits_label.setFixedSize(
+            QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters)
+        )
+        # Use html mode
+        credits_label.setMode(QgsLayoutItemLabel.ModeHtml)
+        # Position the label on the current page
+        credits_label.attemptMove(
+            QgsLayoutPoint(20, 280, QgsUnitTypes.LayoutMillimeters), page=page_number
+        )
+        self.layout.addLayoutItem(credits_label)
 
     def export_pdf(self, output_path):
         """
