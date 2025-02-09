@@ -25,6 +25,8 @@ from geest.utilities import get_ui_class, resources_path, linear_interpolation
 from geest.core import WorkflowQueueManager
 from geest.utilities import log_message
 from geest.gui.widgets import CustomBannerLabel
+from geest.core.reports.study_area_report import StudyAreaReport
+import platform
 
 
 FORM_CLASS = get_ui_class("create_project_panel_base.ui")
@@ -255,7 +257,30 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         )
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
+        gpkg_path = os.path.join(self.working_dir, "study_area", "study_area.gpkg")
+        report = StudyAreaReport(
+            layer_input=gpkg_path, report_name="Study Area Summary"
+        )
+        report.create_layout()
+        report.export_pdf(os.path.join(self.working_dir, "study_area_report.pdf"))
+        # open the pdf using the system PDF viewer
+        # Windows
+        if os.name == "nt":  # Windows
+            os.system(
+                f'start "{os.path.join(self.working_dir, "study_area_report.pdf")}"'
+            )
+        else:  # macOS and Linux
+            system = platform.system().lower()
+            if system == "darwin":  # macOS
+                os.system(
+                    f'open "{os.path.join(self.working_dir, "study_area_report.pdf")}"'
+                )
+            else:  # Linux
+                os.system(
+                    f'xdg-open "{os.path.join(self.working_dir, "study_area_report.pdf")}"'
+                )
         self.enable_widgets()
+
         self.switch_to_next_tab.emit()
 
     def update_recent_projects(self, directory):
