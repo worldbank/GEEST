@@ -10,7 +10,7 @@ from qgis.core import (
     QgsLayoutExporter,
     QgsLayoutItemMap,
     QgsLayoutSize,
-    QgsProviderRegistry,
+    QgsLayoutItemPage,
 )
 from qgis.PyQt.QtGui import QFont
 from geest.utilities import log_message
@@ -101,7 +101,7 @@ class StudyAreaReport:
         total_count = 0
 
         for feature in layer.getFeatures():
-            area_name = feature[self.area_field_name]
+            area_name = feature["area_name"]
             area_counts[area_name] += 1
             total_count += 1
 
@@ -185,15 +185,46 @@ class StudyAreaReport:
         )
         self.layout.addLayoutItem(summary_label)
 
-        # Add a map item capturing the current map canvas
-        map_item = QgsLayoutItemMap(self.layout)
-        # Position the map item (e.g., at 20 mm, 70 mm) and give it a size (e.g., 150x100 mm)
-        map_item.attemptMove(QgsLayoutPoint(20, 70, QgsUnitTypes.LayoutMillimeters))
-        map_item.attemptResize(QgsLayoutSize(150, 100, QgsUnitTypes.LayoutMillimeters))
-        # Set the map extent to the current map canvas extent
-        # map_item.setExtent(canvas.extent())
-        map_item.refresh()
-        self.layout.addLayoutItem(map_item)
+        # Compute and add summary statistics for each layer on separate pages
+        for page_number, (layer_name, layer) in enumerate(self.layers.items()):
+
+            # Add a new page for each layer
+            page = QgsLayoutItemPage(self.layout)
+            self.layout.pageCollection().addPage(page)
+
+            # Compute statistics for the current layer
+            try:
+                stats = self.compute_statistics(layer)
+                summary_text = f"Layer: {layer_name}\n"
+                for area_name, count in stats["area_counts"].items():
+                    summary_text += f"{area_name}: {count} features\n"
+                summary_text += f"Total count: {stats['total_count']} features"
+            except Exception as e:
+                log_message(f"Error computing statistics for layer '{layer_name}': {e}")
+                continue
+            # Add summary label to the current page
+            summary_label = QgsLayoutItemLabel(self.layout)
+            summary_label.setText(summary_text)
+            summary_label.setFont(QFont("Arial", 12))
+            summary_label.adjustSizeToText()
+            # Position the label on the current page
+            summary_label.attemptMove(
+                QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters), page=page_number
+            )
+            self.layout.addLayoutItem(summary_label)
+
+            # Add a map item for the current layer
+            map_item = QgsLayoutItemMap(self.layout)
+            map_item.setLayers([layer])
+            map_item.attemptMove(
+                QgsLayoutPoint(20, 70, QgsUnitTypes.LayoutMillimeters), page=page_number
+            )
+            map_item.attemptResize(
+                QgsLayoutSize(150, 100, QgsUnitTypes.LayoutMillimeters)
+            )
+            map_item.setExtent(layer.extent())
+            map_item.refresh()
+            self.layout.addLayoutItem(map_item)
 
     def export_pdf(self, output_path):
         """
