@@ -7,7 +7,7 @@ The <strong>Geographic Considerations in Evaluating Women's Employment Opportuni
 </p>
 
 <p align="justify">
-Participants will engage with <strong>animated videos, quizzes, and interactive content</strong> to learn about the <strong>innovative analytical framework</strong> developed by the World Bank Group (WBG), which assesses the supportiveness of environments for women's job access.
+Participants will engage with <strong>animated videos, quizzes and interactive content</strong> to learn about the <strong>innovative analytical framework</strong> developed by the World Bank Group (WBG), which assesses the supportiveness of environments for women's job access.
 </p>
 
 <p align="justify">
