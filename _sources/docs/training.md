@@ -3,15 +3,15 @@
 ## 🌍 Upcoming Course (March 2025)
 
 <p align="justify">  
-The **"Geographic Considerations in Evaluating Women's Employment Opportunities"** course equips participants with a comprehensive understanding of how **geographic factors** impact women's access to **employment and business opportunities**. This course explores the **intersection of geography and gender**, highlighting how environmental characteristics can either **enable or hinder women's empowerment**.  
+The <strong>Geographic Considerations in Evaluating Women's Employment Opportunities</strong> course equips participants with a comprehensive understanding of how <strong>geographic factors</strong> impact women's access to <strong>employment and business opportunities</strong>. This course explores the <strong>intersection of geography and gender</strong>, highlighting how environmental characteristics can either <strong>enable or hinder women's empowerment</strong>.  
 </p>
 
 <p align="justify">
-Participants will engage with **animated videos, quizzes, and interactive content** to learn about the **innovative analytical framework** developed by the World Bank Group (WBG), which assesses the supportiveness of environments for women's job access.
+Participants will engage with <strong>animated videos, quizzes, and interactive content</strong> to learn about the <strong>innovative analytical framework</strong> developed by the World Bank Group (WBG), which assesses the supportiveness of environments for women's job access.
 </p>
 
 <p align="justify">
-Additionally, the course introduces the **Gender Enabling Environments Spatial Tool (GEEST)**, a **cutting-edge tool** designed to apply this framework in real-world scenarios. Key modules cover the framework's three main dimensions: Contextual, Accessibility, and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts. 
+Additionally, the course introduces the <strong>Gender Enabling Environments Spatial Tool (GEEST)</strong>, a <strong>cutting-edge tool</strong> designed to apply this framework in real-world scenarios. Key modules cover the framework's three main dimensions: Contextual, Accessibility, and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts. 
 </p>
 
 📢 **The course is open to everyone** and is available on the **[WBG Institute](https://wbginstitute.learnworlds.com/home)**. Stay tuned for updates!
@@ -20,7 +20,9 @@ Additionally, the course introduces the **Gender Enabling Environments Spatial T
 
 ## 🎓 Course Overview
 
-This virtual course provides insights into how **geographic factors** influence women's access to **employment and business opportunities**. Using the **Geospatial Women's Employment Analytical Framework (GeoWEAF)**, the course explores how **location-specific characteristics** can either **enable or hinder women's empowerment**.
+<p align="justify">
+This virtual course provides insights into how <strong>geographic factors</strong> influence women's access to <strong>employment and business opportunities</strong>. Using the <strong>Geospatial Women's Employment Analytical Framework (GeoWEAF)</strong>, the course explores how <strong>location-specific characteristics</strong> can either <strong>enable or hinder women's empowerment</strong>.
+</p>
 
 ### 🎯 What You Will Learn
 - 📍 How **infrastructure, frameworks and accessibility** impact women's employment and business opportunities.  
