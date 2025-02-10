@@ -11,7 +11,7 @@ Participants will engage with <strong>animated videos, quizzes and interactive c
 </p>
 
 <p align="justify">
-Additionally, the course introduces the <strong>Gender Enabling Environments Spatial Tool (GEEST)</strong>, a <strong>cutting-edge tool</strong> designed to apply this framework in real-world scenarios. Key modules cover the framework's three main dimensions: Contextual, Accessibility, and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts. 
+Additionally, the course introduces the <strong>Gender Enabling Environments Spatial Tool (GEEST)</strong>, a <strong>cutting-edge tool</strong> designed to apply this framework in real-world scenarios. Key modules cover the framework's three main dimensions: Contextual, Accessibility and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts. 
 </p>
 
 📢 **The course is open to everyone** and is available on the **[WBG Institute](https://wbginstitute.learnworlds.com/home)**. Stay tuned for updates!
