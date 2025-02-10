@@ -24,6 +24,12 @@ Additionally, the course introduces the <strong>Gender Enabling Environments Spa
 This virtual course provides insights into how <strong>geographic factors</strong> influence women's access to <strong>employment and business opportunities</strong>. Using the <strong>Geospatial Women's Employment Analytical Framework (GeoWEAF)</strong>, the course explores how <strong>location-specific characteristics</strong> can either <strong>enable or hinder women's empowerment</strong>.
 </p>
 
+### 👥 Who Should Enroll?
+
+<p align="justify">
+This course is ideal for urban planners, policymakers, gender specialists, researchers, students and social development professionals seeking to understand how geography and the environment influence women's access to employment. Whether you're shaping cities, developing gender-focused policies, conducting research or simply exploring the intersection of gender and geography, this course offers valuable insights and practical skills to address location-specific barriers to women's economic empowerment.
+</p>
+
 ### 🎯 What You Will Learn
 - 📍 How **infrastructure, frameworks and accessibility** impact women's employment and business opportunities.  
 - 🌍 The **GeoWEAF framework** and its role in analyzing employment opportunities.  
