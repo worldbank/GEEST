@@ -1,6 +1,6 @@
 # Training
 
-## 🌍 Upcoming Course (March 2025)
+## 🌍 Upcoming Course (April 2025)
 
 <p align="justify">  
 The <strong>Geographic Considerations in Evaluating Women's Employment Opportunities</strong> course equips participants with a comprehensive understanding of how <strong>geographic factors</strong> impact women's access to <strong>employment and business opportunities</strong>. This course explores the <strong>intersection of geography and gender</strong>, highlighting how environmental characteristics can either <strong>enable or hinder women's empowerment</strong>.  
@@ -14,7 +14,7 @@ Participants will engage with <strong>animated videos, quizzes and interactive c
 Additionally, the course introduces the <strong>Gender Enabling Environments Spatial Tool (GEEST)</strong>, a <strong>cutting-edge tool</strong> designed to apply this framework in real-world scenarios. Key modules cover the framework's three main dimensions: Contextual, Accessibility and Place-Characterization, culminating in a final exam to evaluate participants' understanding and application of these concepts. 
 </p>
 
-📢 **The course is open to everyone** and is available on the **[WBG Institute](https://wbginstitute.learnworlds.com/home)**. Stay tuned for updates!
+📢 **The course is open to everyone** and is available for enrollment on the **[WBG Institute](https://wbginstitute.learnworlds.com/home)**. Stay tuned for updates!
 
 ---
 
