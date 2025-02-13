@@ -6,7 +6,6 @@ parts:
     numbered: false
     chapters:
       - file: docs/about
-      - file: docs/download
       - file: docs/user_guide
         sections:
         - file: docs/userguide/install
