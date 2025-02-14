@@ -1,6 +1,6 @@
 from functools import partial
 from qgis.core import QgsApplication
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt.QtCore import QObject, pyqtSignal
 from typing import List, Optional
 from .workflow_job import WorkflowJob
 
