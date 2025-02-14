@@ -36,7 +36,7 @@ from qgis.core import Qgis, QgsProject
 
 # Import your plugin components here
 from .core import setting  # , JSONValidator
-from .utilities import resources_path, log_message
+from .utilities import resources_path, log_message, version
 from .gui import GeestOptionsFactory, GeestDock
 import datetime
 import logging
@@ -61,6 +61,8 @@ logging.basicConfig(
 date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 log_message(f"Geest2 started at {date}", force=True)
+version = version()
+log_message(f"Geest Version: {version}")
 log_message(f"Logging output to: {log_file_path}", force=True)
 log_message(f"log_path_env: {log_path_env}", force=True)
 log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
