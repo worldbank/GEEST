@@ -18,6 +18,9 @@ from qgis.core import (
     QgsReadWriteContext,
     QgsLayoutExporter,
     QgsVectorLayer,
+    QgsLayoutItemMapGrid,
+    QgsUnitTypes,
+    QgsCoordinateReferenceSystem,
 )
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtGui import QFont, QColor
@@ -92,6 +95,26 @@ class StudyAreaReport:
 
         The grid is also used to perform certain types of spatial analysis such as
         the Active Transport layer analyses.
+        """
+        self.page_descriptions[
+            "chunks"
+        ] = """
+        The chunks are the result of splitting the study area grid into smaller
+        chunks that are used to process the study area more efficiently. Each chunk
+        is labelled as to whether it is inside, on the edge of, or outside the
+        geometry of a study area polygon. Grid cells in chunks that are 'inside' can be processed
+        more efficiently as we can skip the intersection test with the study area polygons.
+        """
+        self.page_descriptions[
+            "study_area_clip_polygons"
+        ] = """
+        The study area clip polygons are the original polygon areas but expanded so that the edges
+        of the polygon exactly coincide with the edges of the grid. This will ensure that all analysis
+        results are coherant with the grid."""
+        self.page_descriptions[
+            "study_area_creation_status"
+        ] = """
+        The study area creation status is a record of the time taken to process each part of the study area.
         """
 
     def __del__(self):
@@ -266,15 +289,14 @@ class StudyAreaReport:
             self.layout.addLayoutItem(title)
             # Compute statistics for the current layer
             try:
-                stats = self.compute_statistics(layer)
                 summary_text = f"Layer: {layer_name}\n"
+                stats = self.compute_statistics(layer)
                 # feature_count = 0
                 # for area_name, count in stats["area_counts"].items():
                 #    feature_count += count
                 summary_text += f"Total count: {stats['total_count']} features"
             except Exception as e:
                 log_message(f"Error computing statistics for layer '{layer_name}': {e}")
-                continue
 
             description_text = self.page_descriptions.get(layer_name, "")
             # Add description label to the current page
@@ -326,6 +348,38 @@ class StudyAreaReport:
             # the map item, the extent will be expanded to fit the map item
             # Calculate the aspect ratio of the map item
             map_aspect_ratio = map_width_mm / map_height_mm
+            # ---------------------------
+            # Set up a grid over the map
+            # ---------------------------
+            # Create a new map grid for the map item
+            grid = QgsLayoutItemMapGrid("Grid 1", map_item)
+            grid.setEnabled(True)
+            grid.setCrs(QgsCoordinateReferenceSystem("EPSG:4326"))
+
+            # Specify that the grid is a graticule (i.e. based on geographic coordinates)
+            # grid.setGridType(QgsLayoutItemMapGrid.Graticule)
+
+            # Define a grid interval of 1 degree.
+            grid.setIntervalX(1)
+            grid.setIntervalY(1)
+
+            grid.setAnnotationDirection(
+                QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Bottom
+            )
+            grid.setAnnotationDirection(
+                QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Top
+            )
+
+            # (Optional) Enable and configure annotations for the grid lines
+            grid.setAnnotationEnabled(True)
+            # Example format: degrees and minutes (you can customize this format as needed)
+            # grid.setAnnotationFormat("dd° mm'")
+
+            # Add the grid to the map item. The map_item.grids() returns a list;
+            # append our configured grid to it.
+            map_item.grids().addGrid(grid)
+
+            # If needed, refresh or update your layout to see the grid applied.
 
             # Get the current extent of the layer
             layer_extent = layer.extent()
@@ -413,7 +467,7 @@ class StudyAreaReport:
 
     def export_pdf(self, output_path):
         """
-        Export the current layout as a PDF file.
+        Export the current layout as a PDF file in raster mode.
 
         Parameters:
             output_path (str): The full file path (including filename) for the output PDF.
@@ -424,6 +478,7 @@ class StudyAreaReport:
         if self.layout is None:
             self.create_layout()
         export_settings = QgsLayoutExporter.PdfExportSettings()
+        export_settings.rasterizeWholeImage = True
         exporter = QgsLayoutExporter(self.layout)
         result = exporter.exportToPdf(output_path, export_settings)
         return result == QgsLayoutExporter.Success

@@ -142,7 +142,9 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>This plugin makes use of the Open Route Service (ORS) platform for elements of the spatial analysis workflows. In order to use ORS, you need to obtain an API key. There is no charge to get your key. Click on [this link](https://openrouteservice.org/dev/#/signup) for the API Key sign up page. Once you have your API key, paste it into the box below.</string>
+          <string>This plugin makes use of the Open Route Service (ORS) platform for elements of the spatial analysis workflows. In order to use ORS, you need to obtain an API key. There is no charge to get your key. Click on [this link](https://openrouteservice.org/dev/#/signup) for the API Key sign up page. Once you have your API key, paste it into the box below.
+
+Please note that you can write to ORS for a collaborator key if you experience issues with ORS timeouts during the analysis (there is no charge for this).</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
