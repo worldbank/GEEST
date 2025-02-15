@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 import traceback
-from PyQt.QtWidgets import (
+from PyQt5.QtWidgets import (
     QWidget,
     QFileDialog,
     QMessageBox,

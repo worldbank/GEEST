@@ -10,7 +10,7 @@ See the LICENSE file in the project root for more information.
 """
 
 from qgis.core import QgsTask, QgsMessageLog, Qgis
-from PyQt.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal
 import os
 
 

@@ -1,4 +1,4 @@
-from PyQt.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import Qgis, QgsTask, QgsProcessingContext, QgsProject
 from .workflow_queue import WorkflowQueue
 from .workflow_job import WorkflowJob

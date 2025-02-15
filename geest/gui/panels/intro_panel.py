@@ -1,4 +1,4 @@
-from PyQt.QtWidgets import (
+from PyQt5.QtWidgets import (
     QWidget,
 )
 from qgis.core import Qgis

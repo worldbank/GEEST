@@ -1,8 +1,8 @@
-from PyQt.QtWidgets import (
+from PyQt5.QtWidgets import (
     QWidget,
 )
 from qgis.PyQt.QtCore import pyqtSignal
-from PyQt.QtGui import QFont
+from PyQt5.QtGui import QFont
 from geest.utilities import (
     get_ui_class,
     resources_path,

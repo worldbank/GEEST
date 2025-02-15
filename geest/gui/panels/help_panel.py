@@ -7,10 +7,10 @@ from qgis.PyQt.QtWidgets import (
     QSizePolicy,
 )
 from qgis.PyQt.QtCore import QUrl, Qt, pyqtSignal
-from PyQt.QtGui import QDesktopServices
+from PyQt5.QtGui import QDesktopServices
 
 try:
-    from PyQt.QtWebEngineWidgets import QWebEngineView
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
 
     web_engine_available = True
 except ImportError:

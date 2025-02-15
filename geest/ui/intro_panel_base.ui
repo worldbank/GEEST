@@ -78,7 +78,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Welcome to GEEST&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Welcome to GEEST22&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -93,6 +93,9 @@
    </item>
    <item row="3" column="0">
     <widget class="QScrollArea" name="scrollArea">
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
+     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -105,7 +108,7 @@
         <x>0</x>
         <y>0</y>
         <width>556</width>
-        <height>655</height>
+        <height>664</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
@@ -123,6 +126,9 @@
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="intro_label">
+         <property name="styleSheet">
+          <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
+         </property>
          <property name="text">
           <string>The Gender Enabling Environments Spatial Tool (GEEST), developed by the **World Bank**, evaluates locations based on how supportive they are of women’s employment and business opportunities. 
 

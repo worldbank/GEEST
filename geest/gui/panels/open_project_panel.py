@@ -1,7 +1,7 @@
 import os
-from PyQt.QtWidgets import QWidget, QFileDialog, QMessageBox, QComboBox
-from PyQt.QtCore import Qt
-from PyQt.QtGui import QFontMetrics
+from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox, QComboBox
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFontMetrics
 from qgis.core import (
     Qgis,
 )
