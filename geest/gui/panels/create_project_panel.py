@@ -322,7 +322,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def add_bboxes_to_map(self):
         """Add the study area layers to the map.
 
-        If it is already there we will just refrehs it.
+        If it is already there we will just refresh it.
 
         This provides the user with visual feedback as each geometry gets processed.
 
