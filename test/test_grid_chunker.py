@@ -7,7 +7,7 @@ import os
 class TestGridChunker(unittest.TestCase):
 
     def setUp(self):
-        self.grid_chunker = GridChunker(0, 100, 0, 100, 10, 5)
+        self.grid_chunker = GridChunker(0, 100, 0, 100, 10, 5, 3857)
 
     def tearDown(self):
         self.grid_chunker = None

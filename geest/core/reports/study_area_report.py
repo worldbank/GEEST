@@ -138,6 +138,7 @@ class StudyAreaReport:
         temp_layer = QgsVectorLayer(self.gpkg_path, "temp", "ogr")
         if not temp_layer.isValid():
             log_message(f"Failed to load GeoPackage: {self.gpkg_path}")
+            self.layers = []
             return layers
 
         # Retrieve subLayers information
@@ -154,6 +155,7 @@ class StudyAreaReport:
                 layers[layer_name] = layer
             else:
                 log_message(f"Failed to load layer: {layer_name}")
+        self.layers = layers  # For cleanup in dtor
         return layers
 
     def compute_statistics(self, layer):
