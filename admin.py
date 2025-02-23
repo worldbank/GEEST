@@ -79,12 +79,22 @@ def install(context: typer.Context, build_src: bool = True):
         build(context, clean=True) if build_src else LOCAL_ROOT_DIR / "build" / SRC_NAME
     )
 
-    root_directory = (
-        Path.home() / f".local/share/QGIS/QGIS3/profiles/"
-        f"{context.obj['qgis_profile']}"
-    )
+    # For windows root dir in in AppData
+    if os.name == "nt":
+        print("User profile:")
+        print(os.environ["USERPROFILE"])
+        plugin_path = os.path.join(
+            
+            "AppData", "Roaming", "QGIS", "QGIS3", "profiles", "default",
+        )
+        root_directory = os.environ["USERPROFILE"] + "\\" + plugin_path
+    else:
+        root_directory = (
+            Path.home() / f".local/share/QGIS/QGIS3/profiles/"
+            f"{context.obj['qgis_profile']}"
+        )
 
-    base_target_directory = root_directory / "python/plugins" / SRC_NAME
+    base_target_directory = os.path.join(root_directory, "python/plugins", SRC_NAME)
     _log(f"Copying built plugin to {base_target_directory}...", context=context)
     shutil.copytree(built_directory, base_target_directory)
     _log(

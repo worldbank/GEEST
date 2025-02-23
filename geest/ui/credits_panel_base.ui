@@ -154,6 +154,9 @@
    </item>
    <item row="3" column="0">
     <widget class="QScrollArea" name="scrollArea">
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
+     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -166,8 +169,11 @@
         <x>0</x>
         <y>0</y>
         <width>542</width>
-        <height>629</height>
+        <height>643</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
@@ -189,6 +195,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="text">
           <string>This plugin is built with support from the **Canada Clean Energy and Forest Climate Facility (CCEFCFy)**, the **Geospatial Operational Support Team (GOST, DECSC)** for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector. 

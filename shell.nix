@@ -24,6 +24,8 @@ in pkgs.mkShell rec {
     python3Packages.httpx
     python3Packages.toml
     python3Packages.typer
+    # For autocompletion in vscode
+    python3Packages.pyqt5-stubs
 
     # This executes some shell code to initialize a venv in $venvDir before
     # dropping into the shell
@@ -48,6 +50,7 @@ in pkgs.mkShell rec {
     pinnedPkgs.qt5.qtlocation
     pinnedPkgs.qt5.qtquickcontrols2
     pinnedPkgs.vscode
+    pinnedPkgs.jq
     # Would be nice if this worked, we could replace the same logic in the QGIS start script
     #qgis.override { extraPythonPackages = ps: [ ps.numpy ps.future ps.geopandas ps.rasterio ];}
     pinnedPkgs.gum # UX for TUIs

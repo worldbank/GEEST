@@ -34,7 +34,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         # of CPU cores you have would be a good conservative approach
         # You could probably run 100 or more on a decently specced machine
         self.spin_thread_pool_size.setValue(
-            int(setting(key="render_thread_pool_size", default=1))
+            int(setting(key="concurrent_tasks", default=1))
         )
 
         # This is intended for developers to attach to the plugin using a
@@ -77,7 +77,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         .. note:: This is called on OK click.
         """
         set_setting(
-            key="render_thread_pool_size",
+            key="concurrent_tasks",
             value=self.spin_thread_pool_size.value(),
         )
 
