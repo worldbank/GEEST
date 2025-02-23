@@ -12,7 +12,7 @@ from qgis.core import (
     QgsVectorLayer,
     QgsWkbTypes,
 )
-import processing
+from qgis import processing
 from qgis.PyQt.QtCore import QVariant
 from typing import List
 from geest.utilities import log_message

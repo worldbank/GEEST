@@ -16,7 +16,7 @@ from qgis.core import (
 )
 
 from qgis.PyQt.QtCore import QVariant
-import processing
+from qgis import processing
 from geest.core.ors_client import ORSClient
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem, setting

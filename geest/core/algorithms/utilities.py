@@ -11,7 +11,7 @@ from qgis.core import (
     Qgis,
     QgsProcessingFeedback,
 )
-import processing
+from qgis import processing
 from geest.utilities import log_message
 
 

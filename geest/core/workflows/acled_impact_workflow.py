@@ -18,7 +18,7 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
-import processing
+from qgis import processing
 from geest.utilities import log_message
 
 

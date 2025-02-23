@@ -1,9 +1,16 @@
+# 🚩 Note: Be sure to clean out .venv if you switch out the version of python
+#    Also make sure that the python version used by QGIS is the same
+#    as the version that you set up below.
+
 with import <nixpkgs> { };
 let
   # For packages pinned to a specific version
   pinnedHash = "nixos-24.11";
   pinnedPkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/${pinnedHash}.tar.gz") { };
-  pythonPackages = python3Packages;
+  # Be sure that the version of python used in QGIS
+  # is coherent with the version of python specified below
+  pythonVersion = pinnedPkgs.python311;
+  pythonPackages = pythonVersion.pkgs;
 in pkgs.mkShell rec {
   name = "impurePythonEnv";
   venvDir = "./.venv";
@@ -17,6 +24,7 @@ in pkgs.mkShell rec {
     python3Packages.pytest
     python3Packages.pytest-qt
     python3Packages.black
+    python3Packages.click # needed by black
     python3Packages.jsonschema
     python3Packages.pandas
     python3Packages.odfpy
@@ -81,6 +89,9 @@ in pkgs.mkShell rec {
     echo ""
     echo "./vscode.sh"
     echo "-----------------------"
+    pre-commit clean
+    pre-commit install --install-hooks
+    pre-commit run --all-files
   '';
 
   # Now we can execute any commands within the virtual environment.

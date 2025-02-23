@@ -31,7 +31,6 @@ from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QApplication,
 )
-
 from qgis.core import Qgis, QgsProject
 
 # Import your plugin components here

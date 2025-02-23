@@ -84,8 +84,12 @@ def install(context: typer.Context, build_src: bool = True):
         print("User profile:")
         print(os.environ["USERPROFILE"])
         plugin_path = os.path.join(
-            
-            "AppData", "Roaming", "QGIS", "QGIS3", "profiles", "default",
+            "AppData",
+            "Roaming",
+            "QGIS",
+            "QGIS3",
+            "profiles",
+            "default",
         )
         root_directory = os.environ["USERPROFILE"] + "\\" + plugin_path
     else:

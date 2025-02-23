@@ -15,7 +15,8 @@ QGIS_PREFIX=$(dirname "$(dirname "$QGIS_BIN")")
 
 # Construct the correct QGIS Python path
 QGIS_PYTHON_PATH="$QGIS_PREFIX/share/qgis/python"
-
+# Needed for qgis processing module import
+PROCESSING_PATH="$QGIS_PREFIX/share/qgis/python/qgis"
 # Check if the Python directory exists
 if [[ ! -d "$QGIS_PYTHON_PATH" ]]; then
     echo "Error: QGIS Python path not found at $QGIS_PYTHON_PATH"

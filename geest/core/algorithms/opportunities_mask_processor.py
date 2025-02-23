@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsTask,
 )
-import processing
+from qgis import processing
 from geest.core import JsonTreeItem
 from geest.utilities import log_message, resources_path
 from .utilities import (
