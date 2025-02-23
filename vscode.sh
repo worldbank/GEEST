@@ -25,9 +25,12 @@ fi
 # Create .env file for VSCode
 ENV_FILE=".env"
 
+QTPOSITIONING="/nix/store/nb3gkbi161fna9fxh9g3bdgzxzpq34gf-python3.11-pyqt5-5.15.10/lib/python3.11/site-packages"
+
+
 echo "Creating VSCode .env file..."
 cat <<EOF > "$ENV_FILE"
-PYTHONPATH=$QGIS_PYTHON_PATH
+PYTHONPATH=$QGIS_PYTHON_PATH:$QTPOSITIONING
 QGIS_PREFIX_PATH=$QGIS_PREFIX
 PYQT5_PATH="$QGIS_PREFIX/share/qgis/python/PyQt"
 QT_QPA_PLATFORM=offscreen
