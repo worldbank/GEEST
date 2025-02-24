@@ -17,6 +17,7 @@ QGIS_PREFIX=$(dirname "$(dirname "$QGIS_BIN")")
 QGIS_PYTHON_PATH="$QGIS_PREFIX/share/qgis/python"
 # Needed for qgis processing module import
 PROCESSING_PATH="$QGIS_PREFIX/share/qgis/python/qgis"
+
 # Check if the Python directory exists
 if [[ ! -d "$QGIS_PYTHON_PATH" ]]; then
     echo "Error: QGIS Python path not found at $QGIS_PYTHON_PATH"
@@ -27,7 +28,6 @@ fi
 ENV_FILE=".env"
 
 QTPOSITIONING="/nix/store/nb3gkbi161fna9fxh9g3bdgzxzpq34gf-python3.11-pyqt5-5.15.10/lib/python3.11/site-packages"
-
 
 echo "Creating VSCode .env file..."
 cat <<EOF > "$ENV_FILE"
@@ -62,7 +62,8 @@ jq --arg pyenv "\${workspaceFolder}/.env" \
    --arg prefixpath "$QGIS_PREFIX" \
    '.["python.envFile"] = $pyenv |
     .["python.analysis.extraPaths"] += [$qgispath] |
-    .["terminal.integrated.env.linux"].PYTHONPATH = $qgispath' \
+    .["terminal.integrated.env.linux"].PYTHONPATH = $qgispath |
+    .["git.enableCommitSigning"] = true' \
    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
 
 echo "✅ VSCode settings.json updated successfully!"
@@ -97,4 +98,3 @@ code --user-data-dir='.vscode' \
 code --user-data-dir='.vscode' \
 --profile='geest' \
 --extensions-dir='.vscode-extensions' .
-
