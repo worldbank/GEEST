@@ -10,7 +10,7 @@ from qgis.core import (
     QgsGeometry,
 )
 from qgis.PyQt.QtCore import QVariant
-import processing
+from qgis import processing
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.utilities import log_message

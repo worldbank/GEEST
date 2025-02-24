@@ -8,7 +8,7 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
-import processing
+from qgis import processing
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import (

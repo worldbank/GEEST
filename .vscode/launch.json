@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "QGIS Plugin Debug",
+            "type": "python",
+            "request": "launch",
+            "program": "/usr/bin/qgis", // Replace with the actual QGIS executable path
+            "args": ["--project", "${workspaceFolder}/GEEST.qgs"], // Optional QGIS project
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/geest"
+            }
+        },
+        {
+            "name": "Python: Remote Attach 9000",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 9000
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/geest", // Local path on your machine
+                    "remoteRoot": "${env:HOME}/.local/share/QGIS/QGIS3/profiles/GEEST2/python/plugins/geest" // Uses $HOME instead of hardcoding username
+                }
+            ]
+        }               
+    ]
+}

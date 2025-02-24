@@ -1,0 +1,14 @@
+{
+  "python.testing.pytestArgs": [
+    "test"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.analysis.extraPaths": [
+    "/nix/store/1lzzg2pl8h9ji0ks8nd2viyxgif9can7-qgis-3.38.3/share/qgis/python",
+  ],
+  "terminal.integrated.env.linux": {
+    "PYTHONPATH": "/nix/store/1lzzg2pl8h9ji0ks8nd2viyxgif9can7-qgis-3.38.3/share/qgis/python"
+  }
+}

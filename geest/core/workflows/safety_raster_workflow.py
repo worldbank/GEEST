@@ -9,7 +9,7 @@ from qgis.core import (
     QgsRasterLayer,
     QgsVectorLayer,
 )
-import processing  # QGIS processing toolbox
+from qgis import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.utilities import log_message

@@ -15,7 +15,7 @@ from qgis.core import (
     QgsVectorLayer,
     Qgis,
 )
-import processing
+from qgis import processing
 from qgis.PyQt.QtCore import QSettings, pyqtSignal, QObject
 from geest.core import JsonTreeItem, setting
 from geest.utilities import resources_path

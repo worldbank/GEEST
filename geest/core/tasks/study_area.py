@@ -17,6 +17,7 @@ from qgis.core import (
 )
 from geest.utilities import log_message
 from .grid_from_bbox import GridFromBbox
+from .grid_chunker import GridChunker
 from geest.core import setting
 
 
@@ -79,6 +80,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.valid_feature_count = 0
         self.current_geom_actual_cell_count = 0
         self.current_geom_cell_count_estimate = 0
+        self.error_count = 0
         self.total_cells = 0
         self.write_lock = False
         # Make sure output directory exists
@@ -277,6 +279,9 @@ class StudyAreaProcessingTask(QgsTask):
             log_message(
                 f"Processing complete. Valid: {self.valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
             )
+            log_message(
+                f"Areas that could not be processed due to errors: {self.error_count}"
+            )
             log_message(f"Total cells generated: {self.total_cells}")
 
             # 4) Create a VRT of all generated raster masks
@@ -412,6 +417,20 @@ class StudyAreaProcessingTask(QgsTask):
             normalized_name, "timestamp_start", now_str
         )
 
+        #  Check we have a single part geom
+        geom_type = ogr.GT_Flatten(geom.GetGeometryType())
+        if geom_type != ogr.wkbPolygon:
+            log_message(
+                f"Skipping non-polygon geometry type {geom_type} for {normalized_name}."
+            )
+            return
+        # check it has only one part
+        if geom.GetGeometryCount() > 1:
+            log_message(
+                f"Skipping multi-part geometry for {normalized_name}.",
+                level="WARNING",
+            )
+            return
         # Compute aligned bounding box in target CRS
         # (We already have a coordinate transformation if the source has a known SRS)
         geometry_bbox = geom.GetEnvelope()  # (xmin, xmax, ymin, ymax)
@@ -478,7 +497,10 @@ class StudyAreaProcessingTask(QgsTask):
         for i in range(count):
             part_geom = geom.GetGeometryRef(i)
             part_name = f"{normalized_name}_part{i}"
-            self.process_singlepart_geometry(part_geom, part_name, area_name)
+            try:
+                self.process_singlepart_geometry(part_geom, part_name, area_name)
+            except:
+                self.error_count += 1
 
     ##########################################################################
     # BBox handling
@@ -627,20 +649,23 @@ class StudyAreaProcessingTask(QgsTask):
 
         xmin, xmax, ymin, ymax = bbox
         cell_size = self.cell_size_m
+        # size is squared so 5 will make a 5x5 cell chunk
+        chunk_size = int(setting(key="chunk_size", default=50))
+
+        chunker = GridChunker(
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+            cell_size,
+            chunk_size=chunk_size,
+            epsg=self.epsg_code,
+            geometry=geom.ExportToWkb(),
+        )
+        chunker.write_chunks_to_gpkg(self.gpkg_path)
 
         log_message(
             f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}"
-        )
-
-        # Approx count for logging
-        x_range_count = int((xmax - xmin) / cell_size)
-        y_range_count = int((ymax - ymin) / cell_size)
-        self.current_geom_cell_count_estimate = x_range_count * y_range_count
-        if self.current_geom_cell_count_estimate == 0:
-            log_message("No cells to generate.")
-            return
-        log_message(
-            f"Estimated total cells to generate: {self.current_geom_cell_count_estimate}"
         )
 
         # OGR geometry intersection can be slow for large grids.
@@ -658,43 +683,63 @@ class StudyAreaProcessingTask(QgsTask):
         feedback = QgsFeedback()
 
         # 1. Chunk the bounding box
-        # size is squared so 5 will make a 5x5 cell chunk
-        chunk_size = int(setting(key="chunk_size", default=50))
-        bbox_chunks = list(
-            self.chunk_bbox(xmin, xmax, ymin, ymax, cell_size, chunk_size)
-        )
+
         # print out all the chunk bboxes
-        log_message(f"Chunk count: {len(bbox_chunks)}")
+        chunk_count = chunker.total_chunks()
+        log_message(f"Chunk count: {chunk_count}")
         log_message(f"Chunk size: {chunk_size}")
-        chunk_count = len(bbox_chunks)
-        for idx, chunk in enumerate(bbox_chunks):
-            log_message(f"Chunk {idx}: {chunk}")
 
         self.feedback.setProgress(0)
-        for idx, chunk in enumerate(bbox_chunks):
+        counter = (
+            1  # We cant use the chunk index as it includes chunks outside the geometry
+        )
+        for chunk in chunker.chunks():
             start_time = (
                 time.time()
             )  # used for both create chunk start and total chunk start
-            task = GridFromBbox(idx, chunk, geom, cell_size, feedback)
-            self.track_time("Creating chunks", start_time)
-            # Not running in thread for now, see note below
-            task.run()
+            index = chunk["index"]
+            relationship = chunk["type"]  # inside, edge or undefined
+            if relationship != "undefined":
+                task = GridFromBbox(
+                    index,
+                    (
+                        chunk["x_start"],
+                        chunk["x_end"],
+                        chunk["y_start"],
+                        chunk["y_end"],
+                    ),
+                    geom,
+                    cell_size,
+                    feedback,
+                )
+                self.track_time("Creating chunks", start_time)
+                # Not running in thread for now, see note below
+                task.run()
 
-            self.write_chunk(layer, task, normalized_name)
-            # We use the progress object to notify of progress in the subtask
-            # And the QgsTask progressChanged signal to track the main task
-            current_progress = int(idx + 1 / (chunk_count * chunk_size))
-            log_message(f"XXXXXX Chunks Progress: {current_progress}% XXXXXX")
-            self.feedback.setProgress(current_progress)
+                self.write_chunk(layer, task, normalized_name)
+                # We use the progress object to notify of progress in the subtask
+                # And the QgsTask progressChanged signal to track the main task
+            else:
+                log_message(f"Chunk {index} is outside the geometry.")
+                continue
+            try:
+                current_progress = int((counter / chunk_count) * 100)
+                log_message(
+                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"
+                )
+                self.feedback.setProgress(current_progress)
+            except ZeroDivisionError:
+                pass
 
             # This is blocking, but we're in a thread
             # Crashes QGIS, needs to be refactored to use QgsTask subtasks
             # task.taskCompleted.connect(write_grids)
             # worker_tasks.append(task)
-            # log_message(f"Task {idx} created for chunk {chunk}")
+            # log_message(f"Task {index} created for chunk {chunk}")
             # log_message(f"{len(worker_tasks)} tasks queued.")
             # task_manager.addTask(task)
             self.track_time("Complete chunk", start_time)
+            counter += 1
         ds = None
         # ----------------------------
         # Print out metrics summary
@@ -715,12 +760,13 @@ class StudyAreaProcessingTask(QgsTask):
         # If write_lock is true, wait for the lock to be released
         while self.write_lock:
             log_message("Waiting for write lock...")
-            time.sleep(0.1)
+            time.sleep(0.001)
         log_message("Write lock released.")
         log_message(f"Writing {len(task.features_out)} features to layer.")
         self.track_time("Preparing chunks", task.run_time)
         self.write_lock = True
         feat_defn = layer.GetLayerDefn()
+        layer.StartTransaction()
         try:
             for geometry in task.features_out:
                 feature = ogr.Feature(feat_defn)
@@ -729,31 +775,20 @@ class StudyAreaProcessingTask(QgsTask):
                 feature.SetGeometry(geometry)
                 layer.CreateFeature(feature)
                 feature = None
-
                 self.current_geom_actual_cell_count += 1
-                if self.current_geom_actual_cell_count % 10000 == 0:
-                    try:
-                        log_message(
-                            f"         Cell count: {self.current_geom_actual_cell_count}"
-                        )
-                        log_message(
-                            f"         Total cells: {self.current_geom_cell_count_estimate}"
-                        )
-                        percent = (
-                            self.current_geom_actual_cell_count
-                            / float(self.current_geom_cell_count_estimate)
-                        ) * 100.0
-                        log_message(f"         Percent complete: {percent:.2f}%")
-                        log_message(
-                            f"Grid creation for part {normalized_name}: {self.current_geom_actual_cell_count}/{self.current_geom_cell_count_estimate} ({percent:.2f}%)"
-                        )
-                    except ZeroDivisionError:
-                        pass
+                if self.current_geom_actual_cell_count % 20000 == 0:
+                    log_message(
+                        f"         Cell count: {self.current_geom_actual_cell_count}"
+                    )
+                    log_message(f"         Grid creation for part {normalized_name}")
                     # commit changes
-                    layer.SyncToDisk()
+                    layer.CommitTransaction()
+                    layer.StartTransaction()
+            layer.CommitTransaction()  # Final commit
             self.track_time("Writing chunks", start_time)
             self.write_lock = False
         except Exception as e:
+            layer.RollbackTransaction()  # Rollback on error
             log_message(f"write_grids: {str(e)}")
             log_message(f"write_grids: {traceback.format_exc()}")
             self.write_lock = False

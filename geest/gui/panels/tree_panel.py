@@ -4,6 +4,8 @@ import shutil
 import traceback
 from logging import getLogger
 from typing import Union, Dict, List
+import platform
+
 from qgis.PyQt.QtWidgets import (
     QAction,
     QApplication,
@@ -61,6 +63,7 @@ from geest.core.algorithms import (
     OpportunitiesByWeeScoreProcessingTask,
     OpportunitiesByWeeScorePopulationProcessingTask,
 )
+from geest.core.reports.study_area_report import StudyAreaReport
 
 from geest.utilities import log_message
 
@@ -74,7 +77,7 @@ class TreePanel(QWidget):
 
         # Initialize the QueueManager
         self.working_directory = None
-        pool_size = int(setting(key="render_thread_pool_size", default=1))
+        pool_size = int(setting(key="concurrent_tasks", default=1))
         self.queue_manager = WorkflowQueueManager(pool_size=pool_size)
         self.json_file = json_file
         self.tree_view_visible = True
@@ -553,6 +556,12 @@ class TreePanel(QWidget):
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
 
+            add_study_area_report_action = QAction("Show Study Area Report", self)
+            add_study_area_report_action.triggered.connect(
+                self.generate_study_area_report
+            )
+            menu.addAction(add_study_area_report_action)
+
             open_log_file_action = QAction("Open Log File", self)
             open_log_file_action.triggered.connect(self.open_log_file)
             menu.addAction(open_log_file_action)
@@ -639,6 +648,29 @@ class TreePanel(QWidget):
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+    def generate_study_area_report(self):
+        """Add a report showing population information for the study area."""
+        gpkg_path = os.path.join(
+            self.working_directory, "study_area", "study_area.gpkg"
+        )
+        report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
+        report.create_layout()
+        report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
+        # open the pdf using the system PDF viewer
+        # Windows
+        if os.name == "nt":  # Windows
+            os.startfile(os.path.join(self.working_directory, "study_area_report.pdf"))
+        else:  # macOS and Linux
+            system = platform.system().lower()
+            if system == "darwin":  # macOS
+                os.system(
+                    f'open "{os.path.join(self.working_directory, "study_area_report.pdf")}"'
+                )
+            else:  # Linux
+                os.system(
+                    f'xdg-open "{os.path.join(self.working_directory, "study_area_report.pdf")}"'
+                )
 
     def add_masked_scores_to_map(self, item):
         """Add the masked scores to the map."""

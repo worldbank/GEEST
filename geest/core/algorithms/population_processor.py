@@ -15,7 +15,7 @@ from qgis.core import (
     QgsVectorLayer,
     QgsFeature,
 )
-import processing
+from qgis import processing
 from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
 from .utilities import geometry_to_memory_layer

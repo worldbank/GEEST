@@ -9,7 +9,7 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
-import processing  # QGIS processing toolbox
+from qgis import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
