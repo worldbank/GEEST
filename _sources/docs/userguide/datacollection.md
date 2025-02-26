@@ -203,7 +203,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">📚Education</td>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">Percentage of the labor force comprising women with university degrees</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
-    <a href="https://data.worldbank.org/indicator/SL.TLF.ADVN.FE.ZS" target="_blank">
+    <a href="https://genderdata.worldbank.org/en/indicator/sl-tlf-zs?education=Advanced">
         WB data
     </a>
 </td>
@@ -212,7 +212,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">💻Digital Inclusion</td>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">Individuals using the Internet (% of population)</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
-    <a href="https://data.worldbank.org/indicator/IT.NET.USER.ZS" target="_blank">
+    <a href="https://genderdata.worldbank.org/en/indicator/it-net-user-zs">
         WB data
     </a>
 </td>
