@@ -24,7 +24,7 @@ For a comprehensive understanding of the Analytical Framework and the associated
 </a>
 
 
-### 2. Gender Enabling Environments Tool (GEEST)
+### 2. Gender Enabling Environments Spatial Tool (GEEST)
 
 ---
 
