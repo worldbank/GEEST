@@ -24,7 +24,7 @@ For a comprehensive understanding of the GeoWEAF and the associated methodology 
 </a>
 
 
-### 2. Gender Enabling Environments Spatial Tool (GEEST)
+### 2. The Gender Enabling Environments Spatial Tool (GEEST)
 
 ---
 
