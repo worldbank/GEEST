@@ -218,11 +218,24 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </td>
 </tr>
   <tr>
-    <td style="border: 1px solid black; padding: 1px; text-align: left; ">🌋Environmental Hazards</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Global Natural Hazards Data</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: left; "><a href="https://firms.modaps.eosdis.nasa.gov/active_fire/" target="_blank">Fires</a> | <a href="https://app.mapx.org/?project=MX-5Z8-45E-K4I-SKH-75H&language=en&theme=color_light#4bf1789a-0cb9-49ef-b91f-a033f982d3d7" target="_blank">Flood</a> | <a href="https://gpm.nasa.gov/landslides/projects.html" target="_blank">Landslides</a> | <a href="https://develop.unepgrid.ch/en/datasetproxy/MX-E69IN-F14ZL-8UCLQ" target="_blank">Tropical Cyclones</a> | <a href="https://spei.csic.es/spei_database/#map_name=spei06#map_position=1475" target="_blank">Drought</a>
-    </td> 
- </tr>
+  <td style="border: 1px solid black; padding: 1px; text-align: left;">🌋Environmental Hazards</td>
+  <td style="border: 1px solid black; padding: 1px; text-align: left;">Global Natural Hazards Data</td>
+  <td style="border: 1px solid black; padding: 1px; text-align: left;">
+    <strong>General Data Source:</strong> <br>
+    <a href="https://firms.modaps.eosdis.nasa.gov/active_fire/" target="_blank">Fires</a> | 
+    <a href="https://app.mapx.org/?project=MX-5Z8-45E-K4I-SKH-75H&language=en&theme=color_light#4bf1789a-0cb9-49ef-b91f-a033f982d3d7" target="_blank">Flood</a> | 
+    <a href="https://gpm.nasa.gov/landslides/projects.html" target="_blank">Landslides</a> | 
+    <a href="https://develop.unepgrid.ch/en/datasetproxy/MX-E69IN-F14ZL-8UCLQ" target="_blank">Tropical Cyclones</a> | 
+    <a href="https://spei.csic.es/spei_database/#map_name=spei06#map_position=1475" target="_blank">Drought</a>
+    <br><br>
+    <strong>Direct Download Link:</strong> <br>
+    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fires_density_total&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🔥 Fires Download</a> | 
+    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fl_hazard_100_yrp&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🌊 Flood Download</a> | 
+    <a href="https://gpm.nasa.gov/sites/default/files/downloads/global-landslide-susceptibility-map-2-27-23.tif" target="_blank">⛰️ Landslides Download</a> | 
+    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=cy_frequency&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🌀 Tropical Cyclones Download</a> | 
+    <a href="https://data.humdata.org/dataset/30b85665-4c3d-4dc3-b543-3a567a3dea37/resource/6744572e-d5d1-4033-9d64-c87dc565586a/download/global-drought-spei-1.5-return-period-100-years.tif" target="_blank">🌵 Drought Download</a>
+  </td>
+</tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">💧Water Sanitation</td>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">Water points</td>
