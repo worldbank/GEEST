@@ -247,6 +247,8 @@ class GeestDock(QDockWidget):
             )
             import traceback
 
+            log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+
     def paintEvent(self, event):
         with QPainter(self) as painter:
             # Calculate the scaling and cropping offsets

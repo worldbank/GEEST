@@ -50,7 +50,7 @@ class JsonTreeModel(QAbstractItemModel):
         super().__init__(parent)
         guid = str(uuid.uuid4())
         self.rootItem = JsonTreeItem(
-            ["GEEST2", "Status", "Weight"], role="root", guid=guid
+            ["GEEST", "Status", "Weight"], role="root", guid=guid
         )
         self.original_value = None  # To store the original value before editing
         self.loadJsonData(json_data)
@@ -66,7 +66,7 @@ class JsonTreeModel(QAbstractItemModel):
             json_data (dict): The JSON data representing the analysis and its hierarchical structure.
         """
         self.beginResetModel()
-        self.rootItem = JsonTreeItem(["GEEST2", "Status", "Weight"], "root")
+        self.rootItem = JsonTreeItem(["GEEST", "Status", "Weight"], "root")
 
         # Create the 'Analysis' parent item
         analysis_name = json_data.get("analysis_name", "Analysis")

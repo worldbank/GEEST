@@ -74,6 +74,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # Link the map layer combo box with the field combo box
         self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
         self.field_combo.setLayer(self.layer_combo.currentLayer())
+
+        self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
+        self.load_road_layer_button.clicked.connect(self.load_road_layer)
+
         self.create_project_directory_button.clicked.connect(
             self.create_new_project_folder
         )
@@ -92,6 +96,23 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
+
+    def load_road_layer(self):
+        """Load a road network layer from a file."""
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Shapefile (*.shp);;GeoPackage (*.gpkg)")
+        if file_dialog.exec_():
+            file_path = file_dialog.selectedFiles()[0]
+            layer = QgsVectorLayer(file_path, "Road Network", "ogr")
+            if not layer.isValid():
+                QMessageBox.critical(
+                    self, "Error", "Could not load the road network layer."
+                )
+                return
+            # Load the layer in QGIS
+            QgsProject.instance().addMapLayer(layer)
+            self.road_layer_combo.setLayer(layer)
 
     def load_boundary(self):
         """Load a boundary layer from a file."""
@@ -318,6 +339,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.cell_size_spinbox.setFont(QFont("Arial", font_size))
         self.layer_combo.setFont(QFont("Arial", font_size))
         self.field_combo.setFont(QFont("Arial", font_size))
+        self.road_layer_combo.setFont(QFont("Arial", font_size))
+        self.download_road_layer_button.setFont(QFont("Arial", font_size))
 
     def add_bboxes_to_map(self):
         """Add the study area layers to the map.
