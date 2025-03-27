@@ -1,105 +1,116 @@
+from qgis.core import (
+    QgsRectangle,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsProject,
+)
+from qgis.gui import QgsMapCanvas
 from .osm_data_downloader_base import OSMDataDownloaderBase
+from geest.utilities import log_message
 
 
 class OSMRoadsDownloader(OSMDataDownloaderBase):
-    def __init__(self):
+    def __init__(
+        self,
+        extents: QgsRectangle,
+        output_path: str = None,
+        canvas: QgsMapCanvas = None,
+    ):
         """
-        Initialize the OSMDataDownloader class.
+        Initialize the OSMRoadsDownloader class.
 
         Args:
-            base_url (str): The base URL for the Overpass API.
-            api_key (str): The API key for authentication.
-            bounding_box (Dict[str, float]): A dictionary containing the bounding box coordinates
-                                             with keys 'S', 'E', 'N', 'W'.
+            extents: A QgsRectangle object containing the bounding box coordinates for the query.
         """
-        super().__init__()
-        # set the output type to line
-        self.set_output_type("line")
-        # Define the bounding box coordinates
-        S, E, N, W = (
-            40.7128,
-            -74.0060,
-            40.7308,
-            -73.9352,
-        )  # Example coordinates for New York City
+        if canvas is not None:
+            extent = canvas.extent()
+            source_crs = canvas.mapSettings().destinationCrs()
+            dest_crs = QgsCoordinateReferenceSystem("EPSG:4326")
+            transform = QgsCoordinateTransform(
+                source_crs, dest_crs, QgsProject.instance()
+            )
+            extents = transform.transform(extent)
 
-        osm_query = """
-Data:data=[out:xml][timeout:25];
+        super().__init__(extents=extents, output_path=output_path)
+        # set the output type to line
+        self._set_output_type("line")
+        osm_query = """[out:xml][timeout:25];
 (
-node["highway"="motorway"]({S},{E},{N},{W});
-node["highway"="motorway_link"]({S},{E},{N},{W});
-node["highway"="trunk"]({S},{E},{N},{W});
-node["highway"="trunk_link"]({S},{E},{N},{W});
-node["highway"="primary"]({S},{E},{N},{W});
-node["highway"="primary_link"]({S},{E},{N},{W});
-node["highway"="secondary"]({S},{E},{N},{W});
-node["highway"="secondary_link"]({S},{E},{N},{W});
-node["highway"="tertiary"]({S},{E},{N},{W});
-node["highway"="tertiary_link"]({S},{E},{N},{W});
-node["highway"="unclassified"]({S},{E},{N},{W});
-node["highway"="residential"]({S},{E},{N},{W});
-node["bicycle_road"="yes"]({S},{E},{N},{W});
-node["bicycle"="designated"]({S},{E},{N},{W});
-node["highway"="living_street"]({S},{E},{N},{W});
-node["highway"="pedestrian"]({S},{E},{N},{W});
-node["highway"="service"]({S},{E},{N},{W});
-node["service"="parking_aisle"]({S},{E},{N},{W});
-node["highway"="escape"]({S},{E},{N},{W});
-node["highway"="road"]({S},{E},{N},{W});
-node["highway"="construction"]({S},{E},{N},{W});
-node["junction"="roundabout"]({S},{E},{N},{W});
-node["junction"="circular"]({S},{E},{N},{W});
-way["highway"="motorway"]({S},{E},{N},{W});
-way["highway"="motorway_link"]({S},{E},{N},{W});
-way["highway"="trunk"]({S},{E},{N},{W});
-way["highway"="trunk_link"]({S},{E},{N},{W});
-way["highway"="primary"]({S},{E},{N},{W});
-way["highway"="primary_link"]({S},{E},{N},{W});
-way["highway"="secondary"]({S},{E},{N},{W});
-way["highway"="secondary_link"]({S},{E},{N},{W});
-way["highway"="tertiary"]({S},{E},{N},{W});
-way["highway"="tertiary_link"]({S},{E},{N},{W});
-way["highway"="unclassified"]({S},{E},{N},{W});
-way["highway"="residential"]({S},{E},{N},{W});
-way["bicycle_road"="yes"]({S},{E},{N},{W});
-way["bicycle"="designated"]({S},{E},{N},{W});
-way["highway"="living_street"]({S},{E},{N},{W});
-way["highway"="pedestrian"]({S},{E},{N},{W});
-way["highway"="service"]({S},{E},{N},{W});
-way["service"="parking_aisle"]({S},{E},{N},{W});
-way["highway"="escape"]({S},{E},{N},{W});
-way["highway"="road"]({S},{E},{N},{W});
-way["highway"="construction"]({S},{E},{N},{W});
-way["junction"="roundabout"]({S},{E},{N},{W});
-way["junction"="circular"]({S},{E},{N},{W});
-relation["highway"="motorway"]({S},{E},{N},{W});
-relation["highway"="motorway_link"]({S},{E},{N},{W});
-relation["highway"="trunk"]({S},{E},{N},{W});
-relation["highway"="trunk_link"]({S},{E},{N},{W});
-relation["highway"="primary"]({S},{E},{N},{W});
-relation["highway"="primary_link"]({S},{E},{N},{W});
-relation["highway"="secondary"]({S},{E},{N},{W});
-relation["highway"="secondary_link"]({S},{E},{N},{W});
-relation["highway"="tertiary"]({S},{E},{N},{W});
-relation["highway"="tertiary_link"]({S},{E},{N},{W});
-relation["highway"="unclassified"]({S},{E},{N},{W});
-relation["highway"="residential"]({S},{E},{N},{W});
-relation["bicycle_road"="yes"]({S},{E},{N},{W});
-relation["bicycle"="designated"]({S},{E},{N},{W});
-relation["highway"="living_street"]({S},{E},{N},{W});
-relation["highway"="pedestrian"]({S},{E},{N},{W});
-relation["highway"="service"]({S},{E},{N},{W});
-relation["service"="parking_aisle"]({S},{E},{N},{W});
-relation["highway"="escape"]({S},{E},{N},{W});
-relation["highway"="road"]({S},{E},{N},{W});
-relation["highway"="construction"]({S},{E},{N},{W});
-relation["junction"="roundabout"]({S},{E},{N},{W});
-relation["junction"="circular"]({S},{E},{N},{W});
+node["highway"="motorway"]({{bbox}});
+node["highway"="motorway_link"]({{bbox}});
+node["highway"="trunk"]({{bbox}});
+node["highway"="trunk_link"]({{bbox}});
+node["highway"="primary"]({{bbox}});
+node["highway"="primary_link"]({{bbox}});
+node["highway"="secondary"]({{bbox}});
+node["highway"="secondary_link"]({{bbox}});
+node["highway"="tertiary"]({{bbox}});
+node["highway"="tertiary_link"]({{bbox}});
+node["highway"="unclassified"]({{bbox}});
+node["highway"="residential"]({{bbox}});
+node["bicycle_road"="yes"]({{bbox}});
+node["bicycle"="designated"]({{bbox}});
+node["highway"="living_street"]({{bbox}});
+node["highway"="pedestrian"]({{bbox}});
+node["highway"="service"]({{bbox}});
+node["service"="parking_aisle"]({{bbox}});
+node["highway"="escape"]({{bbox}});
+node["highway"="road"]({{bbox}});
+node["highway"="construction"]({{bbox}});
+node["junction"="roundabout"]({{bbox}});
+node["junction"="circular"]({{bbox}});
+way["highway"="motorway"]({{bbox}});
+way["highway"="motorway_link"]({{bbox}});
+way["highway"="trunk"]({{bbox}});
+way["highway"="trunk_link"]({{bbox}});
+way["highway"="primary"]({{bbox}});
+way["highway"="primary_link"]({{bbox}});
+way["highway"="secondary"]({{bbox}});
+way["highway"="secondary_link"]({{bbox}});
+way["highway"="tertiary"]({{bbox}});
+way["highway"="tertiary_link"]({{bbox}});
+way["highway"="unclassified"]({{bbox}});
+way["highway"="residential"]({{bbox}});
+way["bicycle_road"="yes"]({{bbox}});
+way["bicycle"="designated"]({{bbox}});
+way["highway"="living_street"]({{bbox}});
+way["highway"="pedestrian"]({{bbox}});
+way["highway"="service"]({{bbox}});
+way["service"="parking_aisle"]({{bbox}});
+way["highway"="escape"]({{bbox}});
+way["highway"="road"]({{bbox}});
+way["highway"="construction"]({{bbox}});
+way["junction"="roundabout"]({{bbox}});
+way["junction"="circular"]({{bbox}});
+relation["highway"="motorway"]({{bbox}});
+relation["highway"="motorway_link"]({{bbox}});
+relation["highway"="trunk"]({{bbox}});
+relation["highway"="trunk_link"]({{bbox}});
+relation["highway"="primary"]({{bbox}});
+relation["highway"="primary_link"]({{bbox}});
+relation["highway"="secondary"]({{bbox}});
+relation["highway"="secondary_link"]({{bbox}});
+relation["highway"="tertiary"]({{bbox}});
+relation["highway"="tertiary_link"]({{bbox}});
+relation["highway"="unclassified"]({{bbox}});
+relation["highway"="residential"]({{bbox}});
+relation["bicycle_road"="yes"]({{bbox}});
+relation["bicycle"="designated"]({{bbox}});
+relation["highway"="living_street"]({{bbox}});
+relation["highway"="pedestrian"]({{bbox}});
+relation["highway"="service"]({{bbox}});
+relation["service"="parking_aisle"]({{bbox}});
+relation["highway"="escape"]({{bbox}});
+relation["highway"="road"]({{bbox}});
+relation["highway"="construction"]({{bbox}});
+relation["junction"="roundabout"]({{bbox}});
+relation["junction"="circular"]({{bbox}});
 );
 (._;>;);
-outbody;
-"""
-        # Format the query with the bounding box
-        self.set_extents(S=S, E=E, N=N, W=W)
-        self.set_output_path("osm_roads.gpkg")
-        self.set_osm_query(self.formatted_query)
+out geom;"""
+        # outbody;""" ### Dont move the quotes to the next line !!!!
+        ### if you do the query_prepare will think the format is not in oql format
+
+        self.set_osm_query(osm_query)
+        self.submit_query()
+        log_message("OSMRoadsDownloader Initialized")

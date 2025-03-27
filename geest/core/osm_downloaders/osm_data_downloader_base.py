@@ -1,68 +1,71 @@
-import json
-from typing import Dict
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 
 from qgis.core import (
     QgsVectorLayer,
     QgsFeature,
+    QgsRectangle,
     QgsGeometry,
     QgsField,
     QgsVectorFileWriter,
     QgsPointXY,
     QgsNetworkAccessManager,
 )
-from qgis.PyQt.QtCore import QVariant, QUrl
+from qgis.PyQt.QtCore import QVariant, QUrl, QByteArray
 from qgis.PyQt.QtNetwork import QNetworkRequest
 
 from geest.core import setting
 from geest.utilities import log_message
+from .query_preparation import QueryPreparation
 
 
 class OSMDataDownloaderBase(ABC):
-    def __init__(self):
+    def __init__(self, extents: QgsRectangle, output_path: str = None):
         """
         Initialize the OSMDataDownloaderBase class.
 
         Args:
-            base_url (str): The base URL for the Overpass API.
-            api_key (str): The API key for authentication.
+            QgsRectangle: A QgsRectangle object containing the bounding box coordinates.
         """
-        self.base_url = "https://overpass-api.de/api/interpreter"
+        self.base_url = (
+            "https://overpass-api.de/api/interpreter?info=QgisQuickOSMPlugin"
+        )
         self.network_manager = QgsNetworkAccessManager()
-        self.formatted_query = None
-        self.extents = None
-        self.output_path = None
+        self.osm_query = None  # The raw Overpass API query
+        self.formatted_query = None  # The Overpass API query with bbox substituted
         self.output_type = None  # Possible values: 'point', 'line', 'polygon'
-
-    def set_extents(self, south: float, east: float, north: float, west: float) -> None:
-        """Set the bounding box extents (S, E, N, W).
-
-        Args:
-            south (float): Southern latitude of the bounding box.
-            east (float): Eastern longitude of the bounding box.
-            north (float): Northern latitude of the bounding box.
-            west (float): Western longitude of the bounding box.
-        """
-        self.extents = {"south": south, "east": east, "north": north, "west": west}
+        # These are required
+        self.extents = extents  # The bounding box extents (S, E, N, W)
+        self.output_path = output_path  # The output path for the GeoPackage
+        if self.extents is None:
+            raise ValueError("Bounding box extents not set.")
+        if self.output_path is None:
+            raise ValueError("Output path not set.")
 
     def set_osm_query(self, query: str) -> None:
         """Set the Overpass API query.
 
-        Args:
-            query (str): The Overpass API query string.
-        """
-        self.formatted_query = query
-
-    def set_output_path(self, output_file_name: str) -> None:
-        """Set the output path for the gpkg.
+        Setting the query will also set the formatted query with the bounding box
+        coordinates substituted.
 
         Args:
-            output_file_name (str): The name of the output gpkg.
-        """
-        self.output_path = output_file_name
+            query (str): The Overpass API query string. Use string
+                formatting to substitute the bounding box coordinates.
+                e.g. "node["highway"="motorway"]({S},{E},{N},{W});"
 
-    def set_output_type(self, output_type: str) -> None:
+        """
+        if self.extents is None:
+            raise ValueError("Bounding box extents not set.")
+        if query is None:
+            raise ValueError("OSM query not provided.")
+        self.osm_query = query
+        self.osm_query = self.osm_query.replace("\n", "%0A")
+        preparer = QueryPreparation(self.osm_query, self.extents)
+        final_query = preparer.prepare_query()
+        self.formatted_query = final_query
+        log_message("OSM Query Set")
+
+    def _set_output_type(self, output_type: str) -> None:
         """Set the output type for the data.
 
         Args:
@@ -74,51 +77,42 @@ class OSMDataDownloaderBase(ABC):
             )
         self.output_type = output_type
 
-    def make_request(self, endpoint: str, params: dict) -> dict:
-        """Make a request to the Overpass API."""
-        url = QUrl(f"{self.base_url}/{endpoint}")
-        request = QNetworkRequest(QUrl(url))
-        data = json.dumps(params).encode("utf-8")
-        verbose_mode = int(setting(key="verbose_mode", default=0))
-        if verbose_mode:
-            log_message(f"Request parameters: {params}")
+    def submit_query(self) -> None:
+        """Download OSM data using the Overpass API and save it as a shapefile."""
+        request = QNetworkRequest()
+        request.setUrl(QUrl(self.base_url))
 
-        reply = self.network_manager.blockingPost(request, data)
+        if self.formatted_query is None:
+            raise ValueError(
+                "OSM query not set. Please set the query before submitting."
+            )
+        if self.output_path is None:
+            raise ValueError(
+                "Output path not set. Please set the output path before submitting."
+            )
 
-        status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        # Send the request and connect the finished signal
+        response = self.network_manager.blockingPost(
+            request, QByteArray(f"data={self.formatted_query}".encode())
+        )
+
+        # Check HTTP status code
+        status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         if status_code is None:
             raise RuntimeError("No status code received. Network issue?")
 
         if status_code == 404:
-            raise RuntimeError(f"Error 404: Endpoint {endpoint} not found.")
+            raise RuntimeError(f"Error 404: Endpoint {self.base_url} not found.")
         elif status_code == 401:
             raise ValueError("Invalid API token. Please check your credentials.")
         elif status_code == 429:
             raise RuntimeError("API quota exceeded. Please try again later.")
         elif status_code >= 400:
-            raise RuntimeError(f"HTTP Error {status_code}: {reply.content()}")
+            # Generic error handling for other client/server errors
+            raise RuntimeError(f"HTTP Error {status_code}: {response.content()}")
 
-        try:
-            response_data = reply.content()
-            response_string = str(response_data)[2:-1]
-            response_json = json.loads(response_string)
-        except json.JSONDecodeError as e:
-            raise RuntimeError(f"Failed to parse JSON response: {e}")
-
-        if verbose_mode:
-            log_message(f"Response JSON: {response_json}")
-
-    def submit_query(self) -> None:
-        """Download OSM data using the Overpass API and save it as a shapefile."""
-        request = QNetworkRequest()
-        request.setUrl(QUrl(self.base_url))
-        request.setMethod(QNetworkRequest.PostMethod)
-        request.setHeader("Content-Type", "application/x-www-form-urlencoded")
-        request.setBody(self.formatted_query.encode("utf-8"))
-
-        response = request.blockingRequest()
-        if response.isSuccessful():
-            response_data = response.body().data().decode("utf-8")
+        if status_code == 200:
+            response_data = response.content().data().decode("utf-8")
             if self.output_type == "point":
                 self.process_point_response(response_data)
             elif self.output_type == "line":

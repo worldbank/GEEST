@@ -1,0 +1,116 @@
+{
+  "Bytes Received": 10784944,
+  "Bytes Total": 10784944,
+  "Cache (control)": "Always load from network, do not check cache",
+  "Cache (save)": "Result cannot be stored in cache",
+  "Content": {
+    "Data": "data=[out:xml] [timeout:25];%0A(%0A    node[\"highway\"=\"motorway\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"motorway_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"trunk\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"trunk_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"primary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"primary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"secondary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"secondary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"tertiary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"tertiary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"unclassified\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"residential\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"bicycle_road\"=\"yes\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"bicycle\"=\"designated\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"living_street\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"pedestrian\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"service\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"service\"=\"parking_aisle\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"escape\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"road\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"highway\"=\"construction\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"junction\"=\"roundabout\"]( 35.35041,8.27514,35.58113,9.25958);%0A    node[\"junction\"=\"circular\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"motorway\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"motorway_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"trunk\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"trunk_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"primary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"primary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"secondary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"secondary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"tertiary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"tertiary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"unclassified\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"residential\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"bicycle_road\"=\"yes\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"bicycle\"=\"designated\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"living_street\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"pedestrian\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"service\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"service\"=\"parking_aisle\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"escape\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"road\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"highway\"=\"construction\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"junction\"=\"roundabout\"]( 35.35041,8.27514,35.58113,9.25958);%0A    way[\"junction\"=\"circular\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"motorway\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"motorway_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"trunk\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"trunk_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"primary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"primary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"secondary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"secondary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"tertiary\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"tertiary_link\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"unclassified\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"residential\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"bicycle_road\"=\"yes\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"bicycle\"=\"designated\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"living_street\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"pedestrian\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"service\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"service\"=\"parking_aisle\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"escape\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"road\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"highway\"=\"construction\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"junction\"=\"roundabout\"]( 35.35041,8.27514,35.58113,9.25958);%0A    relation[\"junction\"=\"circular\"]( 35.35041,8.27514,35.58113,9.25958);%0A);%0A(._;>;);%0Aout body;"
+  },
+  "Headers": {
+    "User-Agent": "Mozilla/5.0 QGIS/33803/NixOS 24.11 (Vicuna)"
+  },
+  "ID": "src/core/network/qgsfiledownloader.cpp:59 (startDownload)",
+  "Initiator": "QgsFileDownloader",
+  "Operation": "POST",
+  "Query": {
+    "info": "QgisQuickOSMPlugin"
+  },
+  "Replies": 14,
+  "Reply": {
+    "Cache (result)": "Read from network",
+    "Headers": {
+      "Connection": "Keep-Alive",
+      "Content-Encoding": "gzip",
+      "Content-Type": "application/osm3s+xml",
+      "Date": "Wed, 26 Mar 2025 08:01:38 GMT",
+      "Keep-Alive": "timeout=5, max=100",
+      "Server": "Apache/2.4.62 (Debian)",
+      "Transfer-Encoding": "chunked",
+      "Vary": "Accept-Encoding"
+    },
+    "Status": "200"
+  },
+  "Thread": "0x00000000364b1580",
+  "Total time (ms)": 3706,
+  "URL": "https://overpass-api.de/api/interpreter?info=QgisQuickOSMPlugin"
+}
+
+
+Data: data=[out:xml] [timeout:25];%0A(%0A    node["highway"="motorway"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="motorway_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="trunk"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="trunk_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="primary"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="primary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="secondary"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="secondary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="tertiary"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="tertiary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="unclassified"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="residential"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["bicycle_road"="yes"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["bicycle"="designated"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="living_street"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="pedestrian"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="service"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["service"="parking_aisle"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="escape"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="road"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["highway"="construction"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["junction"="roundabout"]( 35.35041,8.40171,35.58113,9.13301);%0A    node["junction"="circular"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="motorway"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="motorway_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="trunk"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="trunk_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="primary"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="primary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="secondary"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="secondary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="tertiary"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="tertiary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="unclassified"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="residential"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["bicycle_road"="yes"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["bicycle"="designated"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="living_street"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="pedestrian"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="service"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["service"="parking_aisle"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="escape"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="road"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["highway"="construction"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["junction"="roundabout"]( 35.35041,8.40171,35.58113,9.13301);%0A    way["junction"="circular"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="motorway"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="motorway_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="trunk"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="trunk_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="primary"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="primary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="secondary"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="secondary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="tertiary"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="tertiary_link"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="unclassified"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="residential"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["bicycle_road"="yes"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["bicycle"="designated"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="living_street"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="pedestrian"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="service"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["service"="parking_aisle"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="escape"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="road"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["highway"="construction"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["junction"="roundabout"]( 35.35041,8.40171,35.58113,9.13301);%0A    relation["junction"="circular"]( 35.35041,8.40171,35.58113,9.13301);%0A);%0A(._;>;);%0Aout body;
+
+
+
+data=[out:xml][timeout:25];
+(
+node[\"highway\"=\"motorway\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"motorway_link\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"trunk\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"trunk_link\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"primary\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"primary_link\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"secondary\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"secondary_link\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"tertiary\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"tertiary_link\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"unclassified\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"residential\"](35.35041,8.27514,35.58113,9.25958);
+node[\"bicycle_road\"=\"yes\"](35.35041,8.27514,35.58113,9.25958);
+node[\"bicycle\"=\"designated\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"living_street\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"pedestrian\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"service\"](35.35041,8.27514,35.58113,9.25958);
+node[\"service\"=\"parking_aisle\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"escape\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"road\"](35.35041,8.27514,35.58113,9.25958);
+node[\"highway\"=\"construction\"](35.35041,8.27514,35.58113,9.25958);
+node[\"junction\"=\"roundabout\"](35.35041,8.27514,35.58113,9.25958);
+node[\"junction\"=\"circular\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"motorway\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"motorway_link\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"trunk\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"trunk_link\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"primary\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"primary_link\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"secondary\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"secondary_link\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"tertiary\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"tertiary_link\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"unclassified\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"residential\"](35.35041,8.27514,35.58113,9.25958);
+way[\"bicycle_road\"=\"yes\"](35.35041,8.27514,35.58113,9.25958);
+way[\"bicycle\"=\"designated\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"living_street\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"pedestrian\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"service\"](35.35041,8.27514,35.58113,9.25958);
+way[\"service\"=\"parking_aisle\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"escape\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"road\"](35.35041,8.27514,35.58113,9.25958);
+way[\"highway\"=\"construction\"](35.35041,8.27514,35.58113,9.25958);
+way[\"junction\"=\"roundabout\"](35.35041,8.27514,35.58113,9.25958);
+way[\"junction\"=\"circular\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"motorway\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"motorway_link\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"trunk\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"trunk_link\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"primary\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"primary_link\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"secondary\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"secondary_link\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"tertiary\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"tertiary_link\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"unclassified\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"residential\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"bicycle_road\"=\"yes\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"bicycle\"=\"designated\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"living_street\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"pedestrian\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"service\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"service\"=\"parking_aisle\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"escape\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"road\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"highway\"=\"construction\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"junction\"=\"roundabout\"](35.35041,8.27514,35.58113,9.25958);
+relation[\"junction\"=\"circular\"](35.35041,8.27514,35.58113,9.25958);
+);
+(._;>;);
+outbody;
