@@ -1,7 +1,8 @@
 import unittest
-from qgis.core import QgsVectorLayer, QgsField, QgsFeature
+from qgis.core import QgsVectorLayer, QgsField, QgsFeature, QgsVectorLayerExporter
 from qgis.PyQt.QtCore import QVariant
 from geest.core.reports.study_area_report import StudyAreaReport
+import tempfile
 
 # ================================
 # Test Suite for StudyAreaReport
@@ -22,6 +23,8 @@ class TestStudyAreaReport(unittest.TestCase):
         Set up a memory layer with sample data for testing.
         """
         # Create a memory vector layer
+        cls.temp_dir = tempfile.TemporaryDirectory()
+        gpkg_path = f"{cls.temp_dir.name}/test_layer.gpkg"
         cls.layer = QgsVectorLayer("Point?crs=EPSG:4326", "test_layer", "memory")
         provider = cls.layer.dataProvider()
         provider.addAttributes([QgsField("geom_total_duration_secs", QVariant.Double)])
@@ -36,6 +39,17 @@ class TestStudyAreaReport(unittest.TestCase):
             # Geometry is not used in the statistics so we leave it empty (None)
             features.append(feat)
         provider.addFeatures(features)
+
+        # Write the memory layer to a GeoPackage
+        QgsVectorLayerExporter.exportLayer(
+            cls.layer, gpkg_path, "GPKG", cls.layer.crs(), False
+        )
+
+        # Load the layer from the GeoPackage
+        cls.layer = QgsVectorLayer(
+            f"{gpkg_path}|layername=test_layer", "test_layer", "ogr"
+        )
+
         cls.layer.updateExtents()
 
         # Instantiate the report using the memory layer

@@ -130,7 +130,7 @@ class GridChunker:
         if not os.path.exists(gpkg_path):
             # Create new GPKG
             driver = ogr.GetDriverByName("GPKG")
-            driver.CreateDataSource(self.gpkg_path)
+            driver.CreateDataSource(gpkg_path)
 
         data_source = ogr.Open(gpkg_path, 1)
         layer = data_source.GetLayerByName(self.layer_name)

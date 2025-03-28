@@ -14,7 +14,6 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         self,
         extents: QgsRectangle,
         output_path: str = None,
-        canvas: QgsMapCanvas = None,
     ):
         """
         Initialize the OSMRoadsDownloader class.
@@ -22,15 +21,6 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         Args:
             extents: A QgsRectangle object containing the bounding box coordinates for the query.
         """
-        if canvas is not None:
-            extent = canvas.extent()
-            source_crs = canvas.mapSettings().destinationCrs()
-            dest_crs = QgsCoordinateReferenceSystem("EPSG:4326")
-            transform = QgsCoordinateTransform(
-                source_crs, dest_crs, QgsProject.instance()
-            )
-            extents = transform.transform(extent)
-
         super().__init__(extents=extents, output_path=output_path)
         # set the output type to line
         self._set_output_type("line")
