@@ -23,7 +23,7 @@ from geest.core import JsonTreeItem, setting
 from geest.utilities import log_message
 
 
-class MultiBufferDistancesWorkflow(WorkflowBase):
+class MultiBufferDistancesORSWorkflow(WorkflowBase):
     """
     Concrete implementation of a 'multi_buffer_distances' workflow.
 
