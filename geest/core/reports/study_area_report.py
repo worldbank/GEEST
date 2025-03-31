@@ -49,6 +49,8 @@ class StudyAreaReport:
             ValueError: If the layer cannot be loaded from the given file path.
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
+        self.layout = None  # Will hold the QgsLayout for the report
+        self.layers = None  # Will hold the loaded layers from the GeoPackage
 
         uri = f"{gpkg_path}|layername=study_area_creation_status"
         self.gpkg_path = gpkg_path
@@ -57,8 +59,7 @@ class StudyAreaReport:
             raise ValueError("Failed to load layer from the given file path.")
 
         self.report_name = report_name
-        self.layout = None  # Will hold the QgsLayout for the report
-        self.layers = self.load_layers_from_gpkg()
+        self.load_layers_from_gpkg()
         self.template_path = resources_path(
             "resources", "qpt", f"study_area_report_template.qpt"
         )
@@ -121,6 +122,8 @@ class StudyAreaReport:
         """
         Destructor to clean up layers from the QGIS project.
         """
+        if self.layers is None:
+            return
         for layer_name, layer in self.layers.items():
             if layer:
                 del layer
