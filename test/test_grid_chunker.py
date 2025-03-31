@@ -17,12 +17,43 @@ class TestGridChunker(unittest.TestCase):
         chunks = list(self.grid_chunker.chunks())
         self.assertEqual(len(chunks), 4)
         expected_chunks = [
-            {"index": 0, "x_start": 0, "x_end": 50, "y_start": 0, "y_end": 50},
-            {"index": 1, "x_start": 0, "x_end": 50, "y_start": 50, "y_end": 100},
-            {"index": 2, "x_start": 50, "x_end": 100, "y_start": 0, "y_end": 50},
-            {"index": 3, "x_start": 50, "x_end": 100, "y_start": 50, "y_end": 100},
+            {
+                "index": 0,
+                "x_start": 0,
+                "x_end": 50,
+                "y_start": 0,
+                "y_end": 50,
+                "type": "undefined",
+            },
+            {
+                "index": 1,
+                "x_start": 0,
+                "x_end": 50,
+                "y_start": 50,
+                "y_end": 100,
+                "type": "undefined",
+            },
+            {
+                "index": 2,
+                "x_start": 50,
+                "x_end": 100,
+                "y_start": 0,
+                "y_end": 50,
+                "type": "undefined",
+            },
+            {
+                "index": 3,
+                "x_start": 50,
+                "x_end": 100,
+                "y_start": 50,
+                "y_end": 100,
+                "type": "undefined",
+            },
         ]
         for chunk, expected_chunk in zip(chunks, expected_chunks):
+            # check the x and y start and end values for each chunk
+            # by removing the geometry
+            del chunk["geometry"]
             self.assertEqual(chunk, expected_chunk)
 
     def test_total_cells_in_chunk(self):

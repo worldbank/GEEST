@@ -1,7 +1,7 @@
 {
     "analysis_name": "Women's Economic Empowerment - wee_score",
     "description": "No Description",
-    "working_folder": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score",
+    "working_folder": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score",
     "analysis_cell_size_m": 1000,
     "guid": "a4e162fd-8f5c-49de-abb4-cc37e10b70f7",
     "dimensions": [
@@ -39,7 +39,7 @@
                             "guid": "7ae5a61b-318c-4e6e-acfc-2a7045f03fb9",
                             "result": "index_score Workflow Completed",
                             "execution_start_time": "2025-01-05T09:03:53.170384",
-                            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/workplace_discrimination/workplace_index/WD_output_combined.vrt",
+                            "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/contextual/workplace_discrimination/workplace_index/WD_output_combined.vrt",
                             "execution_end_time": "2025-01-05T09:03:54.368598",
                             "error_file": null,
                             "error": ""
@@ -53,7 +53,7 @@
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
                     "execution_start_time": "2025-01-05T09:04:02.116159",
-                    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/workplace_discrimination/workplace_discrimination_combined.vrt",
+                    "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/contextual/workplace_discrimination/workplace_discrimination_combined.vrt",
                     "execution_end_time": "2025-01-05T09:04:02.988529"
                 },
                 {
@@ -86,7 +86,7 @@
                             "guid": "853bc6d4-4ca4-4fb8-9511-aaf384d59725",
                             "result": "index_score Workflow Completed",
                             "execution_start_time": "2025-01-05T09:03:54.489646",
-                            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/regulatory_frameworks/pay_parenthood_index/RF_output_combined.vrt",
+                            "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/contextual/regulatory_frameworks/pay_parenthood_index/RF_output_combined.vrt",
                             "execution_end_time": "2025-01-05T09:03:55.693147",
                             "error_file": null,
                             "error": ""
@@ -100,7 +100,7 @@
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
                     "execution_start_time": "2025-01-05T09:04:03.124962",
-                    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/regulatory_frameworks/regulatory_frameworks_combined.vrt",
+                    "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/contextual/regulatory_frameworks/regulatory_frameworks_combined.vrt",
                     "execution_end_time": "2025-01-05T09:04:03.975809"
                 },
                 {
@@ -133,7 +133,7 @@
                             "guid": "81a22788-07d9-4397-b68b-aea1596d8342",
                             "result": "index_score Workflow Completed",
                             "execution_start_time": "2025-01-05T09:03:55.821376",
-                            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/financial_inclusion/entrepeneurship_index/FIN_output_combined.vrt",
+                            "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/contextual/financial_inclusion/entrepeneurship_index/FIN_output_combined.vrt",
                             "execution_end_time": "2025-01-05T09:03:57.039000",
                             "error_file": null,
                             "error": ""
@@ -147,7 +147,7 @@
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
                     "execution_start_time": "2025-01-05T09:04:04.070192",
-                    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/financial_inclusion/financial_inclusion_combined.vrt",
+                    "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/contextual/financial_inclusion/financial_inclusion_combined.vrt",
                     "execution_end_time": "2025-01-05T09:04:04.916855"
                 }
             ],
@@ -159,7 +159,7 @@
             "analysis_mode": "",
             "result": "dimension_aggregation Workflow Completed",
             "execution_start_time": "2025-01-05T09:04:06.254043",
-            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/contextual/Contextual_score_combined.vrt",
+            "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/contextual/Contextual_score_combined.vrt",
             "execution_end_time": "2025-01-05T09:04:07.143303"
         },
         {
@@ -195,7 +195,7 @@
                             "analysis_mode": "use_multi_buffer_point",
                             "guid": "ef86b2c4-f4b3-4552-8dc4-a619c54e53d6",
                             "multi_buffer_point_layer_name": "fake_childcare",
-                            "multi_buffer_point_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/points/fake_childcare.gpkg|layername=fake_childcare",
+                            "multi_buffer_point_layer_source": "/home/timlinux/dev/python/GEEST/test/test_data/points/fake_childcare.gpkg|layername=fake_childcare",
                             "multi_buffer_point_layer_provider_type": "ogr",
                             "multi_buffer_point_layer_crs": "EPSG:32620",
                             "multi_buffer_point_layer_wkb_type": 1,
@@ -203,7 +203,7 @@
                             "multi_buffer_point_shapefile": "",
                             "result": "use_multi_buffer_point Workflow Completed",
                             "execution_start_time": "2025-01-05T09:03:57.184036",
-                            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/kindergartens_location/WTP_Kindergartens_output_combined.vrt",
+                            "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/accessibility/women_s_travel_patterns/kindergartens_location/WTP_Kindergartens_output_combined.vrt",
                             "execution_end_time": "2025-01-05T09:03:59.495481",
                             "error_file": null,
                             "error": ""
@@ -233,7 +233,7 @@
                             "analysis_mode": "use_multi_buffer_point",
                             "guid": "7af1017c-c360-4630-a1e5-ac4874473e35",
                             "multi_buffer_point_layer_name": "fake_primary_schools",
-                            "multi_buffer_point_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/points/fake_primary_schools.gpkg|layername=fake_primary_schools",
+                            "multi_buffer_point_layer_source": "/home/timlinux/dev/python/GEEST/test/test_data/points/fake_primary_schools.gpkg|layername=fake_primary_schools",
                             "multi_buffer_point_layer_provider_type": "ogr",
                             "multi_buffer_point_layer_crs": "EPSG:32620",
                             "multi_buffer_point_layer_wkb_type": 1,
@@ -241,7 +241,7 @@
                             "multi_buffer_point_shapefile": "",
                             "result": "use_multi_buffer_point Workflow Completed",
                             "execution_start_time": "2025-01-05T09:03:59.632259",
-                            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/primary_school_location/WTP_Primary_Schools_output_combined.vrt",
+                            "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/accessibility/women_s_travel_patterns/primary_school_location/WTP_Primary_Schools_output_combined.vrt",
                             "execution_end_time": "2025-01-05T09:04:01.533596",
                             "error_file": null,
                             "error": ""
@@ -348,7 +348,7 @@
                     "analysis_mode": "",
                     "result": "factor_aggregation Workflow Completed",
                     "execution_start_time": "2025-01-05T09:04:05.056071",
-                    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/women_s_travel_patterns/women_s_travel_patterns_combined.vrt",
+                    "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/accessibility/women_s_travel_patterns/women_s_travel_patterns_combined.vrt",
                     "execution_end_time": "2025-01-05T09:04:05.904388"
                 },
                 {
@@ -548,7 +548,7 @@
             "analysis_mode": "",
             "result": "dimension_aggregation Workflow Completed",
             "execution_start_time": "2025-01-05T09:04:07.277461",
-            "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/accessibility/Accessibility_score_combined.vrt",
+            "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/accessibility/Accessibility_score_combined.vrt",
             "execution_end_time": "2025-01-05T09:04:08.167397"
         },
         {
@@ -1115,7 +1115,7 @@
         }
     ],
     "result": "analysis_aggregation Workflow Completed",
-    "result_file": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/wee_score/WEE_Score_combined.vrt",
+    "result_file": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/wee_score/WEE_Score_combined.vrt",
     "execution_start_time": "2025-01-05T09:15:51.664475",
     "execution_end_time": "2025-01-05T09:15:52.503123",
     "error": "",
@@ -1127,7 +1127,7 @@
     "opportunities_mask_result": "",
     "aggregation_layer": null,
     "aggregation_layer_name": "admin",
-    "aggregation_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/admin0.gpkg|layername=admin",
+    "aggregation_layer_source": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/admin0.gpkg|layername=admin",
     "aggregation_layer_provider_type": "ogr",
     "aggregation_layer_crs": "EPSG:32620",
     "aggregation_layer_wkb_type": 6,
@@ -1135,7 +1135,7 @@
     "aggregation_shapefile": "",
     "population_layer": null,
     "population_layer_name": "reclassified_population",
-    "population_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/wee_score/population/reclassified_population.vrt",
+    "population_layer_source": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score/population/reclassified_population.vrt",
     "population_layer_provider_type": "gdal",
     "population_layer_crs": "EPSG:32620",
     "population_layer_wkb_type": "",
@@ -1143,7 +1143,7 @@
     "population_shapefile": "",
     "point_mask_layer": null,
     "point_mask_layer_name": "fake_childcare",
-    "point_mask_layer_source": "/home/timlinux/dev/python/GEEST2/test/test_data/points/fake_childcare.gpkg|layername=fake_childcare",
+    "point_mask_layer_source": "/home/timlinux/dev/python/GEEST/test/test_data/points/fake_childcare.gpkg|layername=fake_childcare",
     "point_mask_layer_provider_type": "ogr",
     "point_mask_layer_crs": "EPSG:32620",
     "point_mask_layer_wkb_type": 1,

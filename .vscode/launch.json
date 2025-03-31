@@ -3,9 +3,10 @@
     "configurations": [
         {
             "name": "QGIS Plugin Debug",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "program": "/usr/bin/qgis", // Replace with the actual QGIS executable path
+            "program": "${env:QGIS_EXECUTABLE}", // Set the QGIS executable path from an environment variable
+            //"program": "/usr/bin/qgis", // Replace with the actual QGIS executable path
             "args": ["--project", "${workspaceFolder}/GEEST.qgs"], // Optional QGIS project
             "console": "integratedTerminal",
             "env": {
@@ -14,7 +15,7 @@
         },
         {
             "name": "Python: Remote Attach 9000",
-            "type": "python",
+            "type": "debugpy",
             "request": "attach",
             "connect": {
                 "host": "localhost",
