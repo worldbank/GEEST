@@ -16,7 +16,6 @@ from geest.gui.panels import (
     SetupPanel,
     TreePanel,
     HelpPanel,
-    OrsPanel,
     OpenProjectPanel,
     CreateProjectPanel,
 )
@@ -30,12 +29,11 @@ from geest.utilities import (
 
 INTRO_PANEL = 0
 CREDITS_PANEL = 1
-ORS_PANEL = 2
-SETUP_PANEL = 3
-OPEN_PROJECT_PANEL = 4
-CREATE_PROJECT_PANEL = 5
-TREE_PANEL = 6
-HELP_PANEL = 7
+SETUP_PANEL = 2
+OPEN_PROJECT_PANEL = 3
+CREATE_PROJECT_PANEL = 4
+TREE_PANEL = 5
+HELP_PANEL = 6
 
 
 class GeestDock(QDockWidget):
@@ -78,6 +76,7 @@ class GeestDock(QDockWidget):
         self.stacked_widget: QStackedWidget = QStackedWidget()
 
         try:
+            # INTRO_PANEL = 0
             # Create and add the "Intro" panel (IntroPanel)
             self.intro_widget: IntroPanel = IntroPanel()
             intro_panel: QWidget = QWidget()
@@ -89,6 +88,7 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
             )
+            # CREDITS_PANEL = 1
             # Create and add the "Credits" panel (CreditsPanel)
             self.credits_widget: CreditsPanel = CreditsPanel()
             credits_panel: QWidget = QWidget()
@@ -102,24 +102,9 @@ class GeestDock(QDockWidget):
             )
             self.credits_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
-            )
-
-            # Create and add the "ORS" panel (ORSPanel)
-            self.ors_widget: OrsPanel = OrsPanel()
-            ors_panel: QWidget = QWidget()
-            ors_layout: QVBoxLayout = QVBoxLayout(ors_panel)
-            ors_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
-            ors_layout.addWidget(self.ors_widget)
-            self.stacked_widget.addWidget(ors_panel)
-            self.ors_widget.switch_to_previous_tab.connect(
-                # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
-            )
-            self.ors_widget.switch_to_next_tab.connect(
-                # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+            # SETUP_PANEL = 2
             # Create and add the "Project" panel (SetupPanel)
             self.setup_widget: SetupPanel = SetupPanel()
             setup_panel: QWidget = QWidget()
@@ -140,9 +125,9 @@ class GeestDock(QDockWidget):
 
             self.setup_widget.switch_to_previous_tab.connect(
                 # Switch to the previous tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(ORS_PANEL)
+                lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
             )
-
+            # OPEN_PROJECT_PANEL = 3
             # Create and add the "Open Project" panel
             self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
             open_project_panel: QWidget = QWidget()
@@ -167,7 +152,7 @@ class GeestDock(QDockWidget):
                     self.open_project_widget.working_dir
                 )
             )
-
+            # CREATE_PROJECT_PANEL = 4
             # Create and add the "Create Project" panel
             self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
             create_project_panel: QWidget = QWidget()
@@ -192,7 +177,7 @@ class GeestDock(QDockWidget):
                     self.create_project_widget.working_dir
                 )
             )
-
+            # TREE_PANEL = 5
             # Create and add the "Tree" panel (TreePanel)
             self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
             tree_panel: QWidget = QWidget()
@@ -208,6 +193,8 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+
+            # HELP_PANEL = 6
             # Create and add the "Help" panel (HelpPanel)
             help_widget: HelpPanel = HelpPanel()
             help_panel: QWidget = QWidget()
@@ -302,9 +289,6 @@ class GeestDock(QDockWidget):
             self.credits_widget.set_font_size()
         elif index == SETUP_PANEL:
             log_message("Switched to Setup panel")
-        elif index == ORS_PANEL:
-            self.ors_widget.set_font_size()
-            log_message("Switched to ORS panel")
         elif index == OPEN_PROJECT_PANEL:
             log_message("Switched to Open Project panel")
         elif index == CREATE_PROJECT_PANEL:
