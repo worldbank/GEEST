@@ -271,7 +271,7 @@ class SpreadsheetToJsonParser:
 
 
 if __name__ == "__main__":
-    parser = SpreadsheetToJsonParser("geest/resources/geest2.ods")
+    parser = SpreadsheetToJsonParser("geest/resources/geest.ods")
     parser.load_spreadsheet()
     parser.parse_to_json()
     json_data = parser.get_json()

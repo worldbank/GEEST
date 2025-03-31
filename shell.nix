@@ -43,6 +43,7 @@ in pkgs.mkShell rec {
     # add them to PYTHONPATH and thus make them accessible from within the venv.
     pythonPackages.debugpy
     pythonPackages.numpy
+    pythonPackages.gdal
     pythonPackages.pip
     pythonPackages.pyqtwebengine
     pinnedPkgs.vim

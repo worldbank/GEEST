@@ -46,6 +46,7 @@ class OrsPanel(FORM_CLASS, QWidget):
             QPixmap(resources_path("resources", "images", "ors-not-configured.png"))
         )
         self.next_button.clicked.connect(self.on_next_button_clicked)
+        self.next_button.setEnabled(False)
         # Connect the rich text label's linkActivated signal to open URLs in browser
         self.description.linkActivated.connect(self.open_link_in_browser)
         self.check_key_button.clicked.connect(self.check_ors_key)
@@ -75,10 +76,13 @@ class OrsPanel(FORM_CLASS, QWidget):
             self.status_label.setPixmap(
                 QPixmap(resources_path("resources", "images", "ors-ok.png"))
             )
+            self.next_button.setEnabled(True)
+
         else:
             self.status_label.setPixmap(
                 QPixmap(resources_path("resources", "images", "ors-error.png"))
             )
+            self.next_button.setEnabled(False)
 
     def open_link_in_browser(self, url: str):
         """Open the given URL in the user's default web browser using QDesktopServices."""

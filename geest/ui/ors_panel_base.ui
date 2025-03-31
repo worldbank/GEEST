@@ -132,35 +132,57 @@
         <x>0</x>
         <y>0</y>
         <width>612</width>
-        <height>664</height>
+        <height>655</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="description">
+       <item row="5" column="0">
+        <widget class="QPushButton" name="check_key_button">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(246, 245, 244);</string>
+         </property>
+         <property name="text">
+          <string>Check my key ...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLineEdit" name="ors_key_line_edit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="text">
-          <string>This plugin makes use of the Open Route Service (ORS) platform for elements of the spatial analysis workflows. In order to use ORS, you need to obtain an API key. There is no charge to get your key. Click on [this link](https://openrouteservice.org/dev/#/signup) for the API Key sign up page. Once you have your API key, paste it into the box below.
-
-Please note that you can write to ORS for a collaborator key if you experience issues with ORS timeouts during the analysis (there is no charge for this).</string>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
          </property>
-         <property name="textFormat">
-          <enum>Qt::MarkdownText</enum>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignJustify|Qt::AlignTop</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
+         <property name="placeholderText">
+          <string>Enter your Open Route Service API key here...</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="0" column="0">
+        <widget class="QRadioButton" name="radioButton">
+         <property name="text">
+          <string>Use native QGIS routing options for accessibility analysis</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <spacer name="horizontalSpacer">
@@ -215,33 +237,34 @@ Please note that you can write to ORS for a collaborator key if you experience i
          </item>
         </layout>
        </item>
-       <item row="3" column="0">
-        <widget class="QPushButton" name="check_key_button">
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Check my key ...</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0">
-        <widget class="QLineEdit" name="ors_key_line_edit">
+        <widget class="QLabel" name="description">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
+         <property name="text">
+          <string>This plugin makes use of the Open Route Service (ORS) platform for elements of the spatial analysis workflows. In order to use ORS, you need to obtain an API key. There is no charge to get your key. Click on [this link](https://openrouteservice.org/dev/#/signup) for the API Key sign up page. Once you have your API key, paste it into the box below.
+
+Please note that you can write to ORS for a collaborator key if you experience issues with ORS timeouts during the analysis (there is no charge for this).</string>
          </property>
-         <property name="placeholderText">
-          <string>Enter your Open Route Service API key here...</string>
+         <property name="textFormat">
+          <enum>Qt::MarkdownText</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignJustify|Qt::AlignTop</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QRadioButton" name="radioButton_2">
+         <property name="text">
+          <string>Use the Open Route Service for accessibility analysis</string>
          </property>
         </widget>
        </item>
@@ -252,5 +275,86 @@ Please note that you can write to ORS for a collaborator key if you experience i
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>radioButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>check_key_button</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>190</x>
+     <y>198</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>227</x>
+     <y>750</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>check_key_button</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>164</x>
+     <y>198</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>178</x>
+     <y>754</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ors_key_line_edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>360</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>454</x>
+     <y>716</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ors_key_line_edit</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>368</x>
+     <y>198</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>511</x>
+     <y>716</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>next_button</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>334</x>
+     <y>151</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>805</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -1,7 +1,7 @@
 {
     "analysis_name": "Zanzibar",
     "description": "No Description",
-    "working_folder": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Zanzibar",
+    "working_folder": "/home/timlinux/dev/python/GEEST/data/GeestWorkingDirectory/Zanzibar",
     "dimensions": [
         {
             "name": "Contextual",
@@ -40,7 +40,7 @@
                             "Factor Weighting": "29.00",
                             "Result": "Not Run",
                             "Execution Start Time": "2024-10-11T08:24:42.350584",
-                            "Indicator Result File": "/home/timlinux/dev/python/GEEST2/data/GeestWorkingDirectory/Zanzibar/contextual/workplace_discrimination/wbl_2024_workplace_index_score.vrt",
+                            "Indicator Result File": "/home/timlinux/dev/python/GEEST/data/GeestWorkingDirectory/Zanzibar/contextual/workplace_discrimination/wbl_2024_workplace_index_score.vrt",
                             "Indicator Result": "Use Default Index Score Workflow Completed",
                             "XXXXXXXXXXXXXXXXXXXXXXXX": "XXXXXXXX",
                             "Execution End Time": "2024-10-11T08:24:43.434573"

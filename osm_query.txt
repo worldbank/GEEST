@@ -1,0 +1,134 @@
+from qgis.core import QgsNetworkRequest, QgsVectorLayer, QgsFeature, QgsGeometry, QgsField, QgsFields, QgsVectorFileWriter, QgsPointXY
+from qgis.PyQt.QtCore import QVariant
+
+# Define the bounding box coordinates
+S, E, N, W = 40.7128, -74.0060, 40.7308, -73.9352  # Example coordinates for New York City
+
+# Format the query with the bounding box
+formatted_query = osm_query.format(S=S, E=E, N=N, W=W)
+
+# Create a network request
+url = "https://overpass-api.de/api/interpreter"
+request = QgsNetworkRequest()
+request.setUrl(url)
+request.setMethod(QgsNetworkRequest.PostMethod)
+request.setHeader("Content-Type", "application/x-www-form-urlencoded")
+request.setBody(formatted_query.encode("utf-8"))
+
+# Execute the request
+response = request.blockingRequest()
+if response.isSuccessful():
+    print("Response received:")
+    response_data = response.body().data().decode("utf-8")
+    
+    # Parse the response data (assuming XML format)
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(response_data)
+    
+    # Create a memory layer to store the line features
+    layer = QgsVectorLayer("LineString?crs=EPSG:4326", "OSM Line Data", "memory")
+    provider = layer.dataProvider()
+    provider.addAttributes([QgsField("id", QVariant.String)])
+    layer.updateFields()
+    
+    # Extract ways from the response and add them as features
+    for way in root.findall(".//way"):
+        way_id = way.get("id")
+        coords = []
+        for nd in way.findall("nd"):
+            ref = nd.get("ref")
+            node = root.find(f".//node[@id='{ref}']")
+            if node is not None:
+                lat = float(node.get("lat"))
+                lon = float(node.get("lon"))
+                coords.append(QgsPointXY(lon, lat))
+        
+        if coords:
+            feature = QgsFeature()
+            feature.setGeometry(QgsGeometry.fromPolylineXY(coords))
+            feature.setAttributes([way_id])
+            provider.addFeature(feature)
+    
+    # Write the layer to a shapefile
+    output_path = "/home/timlinux/dev/python/GEEST/osm_line_data.shp"
+    QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "UTF-8", layer.crs(), "ESRI Shapefile")
+    print(f"Shapefile written to: {output_path}")
+else:
+    print(f"Request failed with error: {response.errorMessage()}")
+
+osm_query = """
+Data:data=[out:xml][timeout:25];
+(
+node["highway"="motorway"]({S},{E},{N},{W});
+node["highway"="motorway_link"]({S},{E},{N},{W});
+node["highway"="trunk"]({S},{E},{N},{W});
+node["highway"="trunk_link"]({S},{E},{N},{W});
+node["highway"="primary"]({S},{E},{N},{W});
+node["highway"="primary_link"]({S},{E},{N},{W});
+node["highway"="secondary"]({S},{E},{N},{W});
+node["highway"="secondary_link"]({S},{E},{N},{W});
+node["highway"="tertiary"]({S},{E},{N},{W});
+node["highway"="tertiary_link"]({S},{E},{N},{W});
+node["highway"="unclassified"]({S},{E},{N},{W});
+node["highway"="residential"]({S},{E},{N},{W});
+node["bicycle_road"="yes"]({S},{E},{N},{W});
+node["bicycle"="designated"]({S},{E},{N},{W});
+node["highway"="living_street"]({S},{E},{N},{W});
+node["highway"="pedestrian"]({S},{E},{N},{W});
+node["highway"="service"]({S},{E},{N},{W});
+node["service"="parking_aisle"]({S},{E},{N},{W});
+node["highway"="escape"]({S},{E},{N},{W});
+node["highway"="road"]({S},{E},{N},{W});
+node["highway"="construction"]({S},{E},{N},{W});
+node["junction"="roundabout"]({S},{E},{N},{W});
+node["junction"="circular"]({S},{E},{N},{W});
+way["highway"="motorway"]({S},{E},{N},{W});
+way["highway"="motorway_link"]({S},{E},{N},{W});
+way["highway"="trunk"]({S},{E},{N},{W});
+way["highway"="trunk_link"]({S},{E},{N},{W});
+way["highway"="primary"]({S},{E},{N},{W});
+way["highway"="primary_link"]({S},{E},{N},{W});
+way["highway"="secondary"]({S},{E},{N},{W});
+way["highway"="secondary_link"]({S},{E},{N},{W});
+way["highway"="tertiary"]({S},{E},{N},{W});
+way["highway"="tertiary_link"]({S},{E},{N},{W});
+way["highway"="unclassified"]({S},{E},{N},{W});
+way["highway"="residential"]({S},{E},{N},{W});
+way["bicycle_road"="yes"]({S},{E},{N},{W});
+way["bicycle"="designated"]({S},{E},{N},{W});
+way["highway"="living_street"]({S},{E},{N},{W});
+way["highway"="pedestrian"]({S},{E},{N},{W});
+way["highway"="service"]({S},{E},{N},{W});
+way["service"="parking_aisle"]({S},{E},{N},{W});
+way["highway"="escape"]({S},{E},{N},{W});
+way["highway"="road"]({S},{E},{N},{W});
+way["highway"="construction"]({S},{E},{N},{W});
+way["junction"="roundabout"]({S},{E},{N},{W});
+way["junction"="circular"]({S},{E},{N},{W});
+relation["highway"="motorway"]({S},{E},{N},{W});
+relation["highway"="motorway_link"]({S},{E},{N},{W});
+relation["highway"="trunk"]({S},{E},{N},{W});
+relation["highway"="trunk_link"]({S},{E},{N},{W});
+relation["highway"="primary"]({S},{E},{N},{W});
+relation["highway"="primary_link"]({S},{E},{N},{W});
+relation["highway"="secondary"]({S},{E},{N},{W});
+relation["highway"="secondary_link"]({S},{E},{N},{W});
+relation["highway"="tertiary"]({S},{E},{N},{W});
+relation["highway"="tertiary_link"]({S},{E},{N},{W});
+relation["highway"="unclassified"]({S},{E},{N},{W});
+relation["highway"="residential"]({S},{E},{N},{W});
+relation["bicycle_road"="yes"]({S},{E},{N},{W});
+relation["bicycle"="designated"]({S},{E},{N},{W});
+relation["highway"="living_street"]({S},{E},{N},{W});
+relation["highway"="pedestrian"]({S},{E},{N},{W});
+relation["highway"="service"]({S},{E},{N},{W});
+relation["service"="parking_aisle"]({S},{E},{N},{W});
+relation["highway"="escape"]({S},{E},{N},{W});
+relation["highway"="road"]({S},{E},{N},{W});
+relation["highway"="construction"]({S},{E},{N},{W});
+relation["junction"="roundabout"]({S},{E},{N},{W});
+relation["junction"="circular"]({S},{E},{N},{W});
+);
+(._;>;);
+outbody;
+"""

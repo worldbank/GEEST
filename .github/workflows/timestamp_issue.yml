@@ -1,0 +1,40 @@
+name: Add End Date to Closed Issues
+
+on:
+  issues:
+    types:
+      - closed
+
+jobs:
+  add-end-date:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add End Date to Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const issueNumber = issue.number;
+            const repo = context.repo;
+
+            // Get the current date in YYYY-MM-DD format
+            const endDate = new Date().toISOString().split('T')[0];
+
+            // Add a comment to the issue
+            await github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: issueNumber,
+              body: `✅ Issue closed on **${endDate}**`
+            });
+
+            // Append the end date to the issue body
+            const updatedBody = issue.body + `\n\n**End Date:** ${endDate}`;
+            await github.rest.issues.update({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: issueNumber,
+              body: updatedBody
+            });

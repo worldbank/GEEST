@@ -1,6 +1,6 @@
 # coding=utf-8
 
-"""Init for Geest2."""
+"""Init for Geest."""
 
 __copyright__ = "Copyright 2024, Tim Sutton"
 __license__ = "GPL version 3"
@@ -59,7 +59,7 @@ logging.basicConfig(
 )
 date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
-log_message(f"Geest2 started at {date}", force=True)
+log_message(f"Geest started at {date}", force=True)
 version = version()
 log_message(f"Geest Version: {version}")
 log_message(f"Logging output to: {log_file_path}", force=True)
@@ -193,7 +193,7 @@ class GeestPlugin:
                         # for member in widget_members:
                         #    log_message(f'Member: {member}, Type: {type(getattr(widget, member))}')
                         shell = widget.console.shell
-                        test_dir = "/home/timlinux/dev/python/GEEST2/test"
+                        test_dir = "/home/timlinux/dev/python/GEEST/test"
                         shell.runCommand("")
                         shell.runCommand("import unittest")
                         shell.runCommand("test_loader = unittest.TestLoader()")
