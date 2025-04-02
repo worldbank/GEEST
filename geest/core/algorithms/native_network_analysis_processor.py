@@ -1,7 +1,6 @@
 import os
 import traceback
 from typing import Optional, List
-import shutil
 
 from qgis.core import (
     QgsTask,
@@ -9,6 +8,7 @@ from qgis.core import (
     QgsVectorLayer,
     QgsCoordinateReferenceSystem,
 )
+from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsPointXY
 from qgis import processing
 from geest.utilities import log_message, resources_path
 
@@ -24,6 +24,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
     Args:
         network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
         feature: The feature to use as the origin for the network analysis.
+        crs: The coordinate reference system to use for the analysis.
         mode: Travel time or travel distance ("time" or "distance").
         value: The time (in seconds) or distance (in meters) value to use for the analysis.
         working_directory: The directory to save the output files.
@@ -34,6 +35,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         self,
         network_layer_path: str,
         feature: QgsFeature,
+        crs: QgsCoordinateReferenceSystem,
         mode: str,
         value: float,
         working_directory: str,
@@ -44,6 +46,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
 
         self.network_layer_path = network_layer_path
         self.feature = feature
+        self.crs = crs
 
         self.mode = mode
         if self.mode not in ["time", "distance"]:
@@ -51,7 +54,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         self.value = value
         if self.value <= 0:
             raise ValueError("Value must be greater than 0.")
-
+        self.service_area = None  # Will hold the calculated service area feature
         log_message("Initialized Native Network Analysis Processing Task")
 
     def run(self) -> bool:
@@ -60,8 +63,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         """
         try:
             self.calculate_network()
-            vrt_path = self.generate_vrt()
-
+            # self.service_area should be set after the calculation
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
@@ -81,26 +83,65 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         output_path = os.path.join(
             self.working_directory, f"network_{self.feature.id()}.gpkg"
         )
+        # Create a memory layer with a single point feature
+        point_layer = QgsVectorLayer(
+            f"Point?crs=EPSG:{self.crs.authid}&field=id:integer",
+            "start_point",
+            "memory",
+        )
+        provider = point_layer.dataProvider()
+        provider.addFeature(self.feature)
+        point_layer.updateExtents()
 
-        params = {
-            "INPUT_A": mask_layer,
-            "BAND_A": 1,
-            "INPUT_B": wee_score_by_population_layer,
-            "BAND_B": 1,
-            "FORMULA": "A * B",
-            "NO_DATA": None,
-            "EXTENT_OPT": 3,
-            "PROJWIN": None,
-            "RTYPE": 0,
-            "OPTIONS": "",
-            "EXTRA": "",
-            "OUTPUT": output_path,
-        }
+        result1 = processing.run(
+            "native:serviceareafromlayer",
+            {
+                "INPUT": self.network_layer_path,  # Use parameterized road layer input
+                "STRATEGY": 0,
+                "DIRECTION_FIELD": "",
+                "VALUE_FORWARD": "",
+                "VALUE_BACKWARD": "",
+                "VALUE_BOTH": "",
+                "DEFAULT_DIRECTION": 2,
+                "SPEED_FIELD": "",
+                "DEFAULT_SPEED": 50,
+                "TOLERANCE": 0,
+                "START_POINTS": point_layer,  # Use the created memory layer as input
+                "TRAVEL_COST2": self.value,
+                "INCLUDE_BOUNDS": False,
+                "POINT_TOLERANCE": None,
+                "OUTPUT_LINES": None,
+                "OUTPUT": "TEMPORARY_OUTPUT",
+            },
+        )
 
-        processing.run("gdal:rastercalculator", params)
-        self.output_rasters.append(output_path)
+        result2 = processing.run(
+            "native:multiparttosingleparts",
+            {
+                "INPUT": result1["OUTPUT"],  # Pass output from service area step
+                "OUTPUT": "TEMPORARY_OUTPUT",
+            },
+        )
 
-        log_message(f"Masked WEE SCORE raster saved to {output_path}")
+        result3 = processing.run(
+            "native:concavehull",
+            {
+                "INPUT": result2["OUTPUT"],  # Pass output from multipart step
+                "ALPHA": 0.3,
+                "HOLES": False,
+                "NO_MULTIGEOMETRY": False,
+                "OUTPUT": "TEMPORARY_OUTPUT",
+            },
+        )
+
+        # There should only be one feature in the concave hull layer
+        concave_hull_layer = result3["OUTPUT"]
+        if concave_hull_layer.featureCount() != 1:
+            raise ValueError("Concave hull layer should have only one feature.")
+        # return the feature
+        self.service_area = concave_hull_layer.getFeature(0)
+        log_message(f"Service area calculated for feature {self.feature.id()}.")
+        return
 
     def finished(self, result: bool) -> None:
         """
@@ -109,6 +150,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         if result:
             log_message(
                 "Native Network Analysis Processing Task calculation completed successfully."
+                "Access the service area feature using the 'service_area' attribute."
             )
         else:
             log_message("Native Network Analysis Processing Task calculation failed.")
