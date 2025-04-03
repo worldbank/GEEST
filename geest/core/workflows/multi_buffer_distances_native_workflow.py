@@ -21,6 +21,7 @@ from geest.core.ors_client import ORSClient
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem, setting
 from geest.utilities import log_message
+from geest.core.algorithms import NativeNetworkAnalysisProcessor
 
 
 class MultiBufferDistancesNativeWorkflow(WorkflowBase):
@@ -183,7 +184,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         :param index: Index of the current area being processed.
         :return: QgsVectorLayer containing the buffers as polygons.
         """
-        log_message(f"Using ORS API key: {self.masked_api_key}")
 
         # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
@@ -193,9 +193,8 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         # Process features one at a time
         for i in range(0, total_features):
             feature = features[i]
-            feature_layer = self._create_subset_layer([feature], point_layer)
             # Process this point using QGIS native network analysis
-            layer = self._create_isochrone_layer(feature_layer)
+            layer = self._create_isochrone_layer(feature)
             if layer:
                 self.temp_layers.append(layer)
             log_message(f"Processed subset {i} of {total_features}")
@@ -223,49 +222,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         else:
             log_message("No isochrones were created.", level=Qgis.Warning)
             return False
-
-    def _create_subset_layer(self, subset_features, point_layer):
-        """
-        Create a subset layer for processing, with reprojection of points
-        from the point_layer CRS to EPSG:4326 (WGS 84).
-
-        :param subset_features: List of QgsFeature objects to add to the subset layer.
-        :param point_layer: The original point layer (QgsVectorLayer) to reproject from.
-        :return: A QgsVectorLayer (subset layer) with reprojected features.
-        """
-        target_crs = QgsCoordinateReferenceSystem("EPSG:4326")
-
-        # Create a new memory layer with the target CRS (EPSG:4326)
-        subset_layer = QgsVectorLayer(
-            f"Point?crs={target_crs.authid()}", "subset", "memory"
-        )
-        subset_layer_data = subset_layer.dataProvider()
-
-        # Add attributes (fields) from the point_layer
-        subset_layer_data.addAttributes(point_layer.fields())
-        subset_layer.updateFields()
-
-        # Create coordinate transformation from point_layer CRS to the target CRS (EPSG:4326)
-        source_crs = point_layer.crs()
-        transform_context = self.context.project().transformContext()
-        transform = QgsCoordinateTransform(source_crs, target_crs, transform_context)
-
-        # Reproject and add features to the subset layer
-        reprojected_features = []
-        for feature in subset_features:
-            reprojected_feature = QgsFeature(feature)
-            geom = reprojected_feature.geometry()
-
-            # Transform the geometry to the target CRS
-            geom.transform(transform)
-            reprojected_feature.setGeometry(geom)
-
-            reprojected_features.append(reprojected_feature)
-
-        # Add reprojected features to the new subset layer
-        subset_layer_data.addFeatures(reprojected_features)
-
-        return subset_layer
 
     def _fetch_isochrones(self, layer: QgsVectorLayer) -> dict:
         """
@@ -332,15 +288,15 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             return False
         return json
 
-    def _create_isochrone_layer(self, isochrone_data):
+    def _create_isochrone_layer(self, feature):
         """
-        Create a QgsVectorLayer from the isochrone data.
+        Run the native isochrone algorithm for the given feature.
 
         :param isochrone_data: JSON data returned from ORS.
         :return: A QgsVectorLayer containing the isochrones as polygons.
         """
         isochrone_layer = QgsVectorLayer(
-            "Polygon?crs=EPSG:4326", "isochrones", "memory"
+            f"Polygon?crs=EPSG:{self.target_crs.authid}", "isochrones", "memory"
         )
         provider = isochrone_layer.dataProvider()
 
@@ -349,46 +305,27 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         isochrone_layer.addAttribute(QgsField("value", QVariant.Int))
         isochrone_layer.commitChanges()
 
-        # Parse the features from ORS response
+        # Parse the features from the networking analysis response
         verbose_mode = int(setting(key="verbose_mode", default=0))
-        if isochrone_data and "features" in isochrone_data:
-            if verbose_mode:
-                log_message(
-                    f"Creating isochrone layer with {len(isochrone_data['features'])} features",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
-        else:
+        processor = NativeNetworkAnalysisProcessor(
+            self.working_directory,
+            self.target_crs,
+            feature,
+            self.distances,
+            self.mode,
+            self.measurement,
+        )
+        processor.execute()
+        isochrones = processor.service_areas
+        if not isochrones:
+            log_message(
+                "No isochrones were created.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
             return None
-        features = []
-        for feature_data in isochrone_data["features"]:
-            geometry = feature_data["geometry"]
-            # Check if the geometry type is Polygon or MultiPolygon
-            if geometry["type"] == "Polygon":
-                coordinates = geometry["coordinates"]
-                # Create QgsPolygon from the coordinate array
-                qgs_geometry = QgsGeometry.fromPolygonXY(
-                    [[QgsPointXY(pt[0], pt[1]) for pt in ring] for ring in coordinates]
-                )
-            elif geometry["type"] == "MultiPolygon":
-                coordinates = geometry["coordinates"]
-                # Create QgsMultiPolygon from the coordinate array
-                qgs_geometry = QgsGeometry.fromMultiPolygonXY(
-                    [
-                        [[QgsPointXY(pt[0], pt[1]) for pt in ring] for ring in polygon]
-                        for polygon in coordinates
-                    ]
-                )
-            else:
-                raise ValueError(f"Unsupported geometry type: {geometry['type']}")
-            feat = QgsFeature()
-            feat.setGeometry(qgs_geometry)
-            feat.setAttributes(
-                [feature_data["properties"].get("value", 0)]
-            )  # Add attributes as needed
-            features.append(feat)
 
-        provider.addFeatures(features)
+        provider.addFeatures(isochrones)
         return isochrone_layer
 
     def _merge_layers(self, layers=None, index=None):
