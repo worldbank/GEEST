@@ -7,6 +7,7 @@ from qgis.core import (
     QgsFeature,
     QgsVectorLayer,
     QgsCoordinateReferenceSystem,
+    QgsRectangle,
 )
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsPointXY
 from qgis import processing
@@ -26,7 +27,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         feature: The feature to use as the origin for the network analysis.
         crs: The coordinate reference system to use for the analysis.
         mode: Travel time or travel distance ("time" or "distance").
-        value: The time (in seconds) or distance (in meters) value to use for the analysis.
+        values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
         working_directory: The directory to save the output files.
         force_clear: Flag to clear the output directory before running the analysis.
     """
@@ -37,9 +38,19 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         feature: QgsFeature,
         crs: QgsCoordinateReferenceSystem,
         mode: str,
-        value: float,
+        values: List[int],
         working_directory: str,
     ):
+        """
+        Initializes the Native Network Analysis Processor.
+
+        Args:
+            network_layer_path (str): Path to the GeoPackage containing the network layer.
+            feature (QgsFeature): The feature to use as the origin for the network analysis.
+            crs (QgsCoordinateReferenceSystem): The coordinate reference system to use for the analysis.
+            mode (str): Travel mode, either "time" or "distance".
+            working_directory (str): The directory to save the output files.
+        """
         super().__init__("Native Network Analysis Processor", QgsTask.CanCancel)
         self.working_directory = working_directory
         os.makedirs(self.working_directory, exist_ok=True)
@@ -51,10 +62,10 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         self.mode = mode
         if self.mode not in ["time", "distance"]:
             raise ValueError("Invalid mode. Must be 'time' or 'distance'.")
-        self.value = value
-        if self.value <= 0:
-            raise ValueError("Value must be greater than 0.")
-        self.service_area = None  # Will hold the calculated service area feature
+        self.values = values
+        if not all(isinstance(value, int) and value > 0 for value in self.values):
+            raise ValueError("All values must be positive integers.")
+        self.service_areas = []  # Will hold the calculated service area features
         log_message("Initialized Native Network Analysis Processing Task")
 
     def run(self) -> bool:
@@ -75,10 +86,23 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         """
         Calculates all the points on the network that are reachable from the origin feature
         within the specified time or distance.
+
+        This function calculates the reachable areas on a network from a given origin point
+        within specified time or distance limits. It performs the following steps:
+
+        1. Creates a memory layer with the origin point.
+        2. Determines the largest travel value to construct a bounding rectangle.
+        3. Clips the network layer to the bounding rectangle for efficiency.
+        4. Iterates over each travel value (distance in meters or time in seconds):
+           - Runs a service area analysis to find reachable network points.
+           - Converts multipart geometries that the points are returned as to single parts.
+           - Generates a concave hull polygon around the reachable points.
+           - Adds the travel value as an attribute to the resulting polygon.
+        5. Stores the resulting polygons in `self.service_areas`.
         """
 
         log_message(
-            f"Calculating Network for feature {self.feature.id()} using {self.mode} {self.value}..."
+            f"Calculating Network for feature {self.feature.id()} using {self.mode} with these values: {self.values}..."
         )
         output_path = os.path.join(
             self.working_directory, f"network_{self.feature.id()}.gpkg"
@@ -93,54 +117,102 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         provider.addFeature(self.feature)
         point_layer.updateExtents()
 
-        result1 = processing.run(
-            "native:serviceareafromlayer",
+        # Determine the largest value
+        largest_value = max(self.values)
+
+        # Get the geometry of the feature
+        geometry = self.feature.geometry()
+        if not geometry.isEmpty():
+            center_point = geometry.asPoint()
+        else:
+            raise ValueError("Feature geometry is invalid or not a single point.")
+
+        # Construct a QgsRectangle with the point at its center
+        rect = QgsRectangle(
+            center_point.x() - largest_value,
+            center_point.y() - largest_value,
+            center_point.x() + largest_value,
+            center_point.y() + largest_value,
+        )
+        log_message(f"Constructed rectangle: {rect.toString()}")
+
+        processing.run(
+            "native:extractbyextent",
             {
-                "INPUT": self.network_layer_path,  # Use parameterized road layer input
-                "STRATEGY": 0,
-                "DIRECTION_FIELD": "",
-                "VALUE_FORWARD": "",
-                "VALUE_BACKWARD": "",
-                "VALUE_BOTH": "",
-                "DEFAULT_DIRECTION": 2,
-                "SPEED_FIELD": "",
-                "DEFAULT_SPEED": 50,
-                "TOLERANCE": 0,
-                "START_POINTS": point_layer,  # Use the created memory layer as input
-                "TRAVEL_COST2": self.value,
-                "INCLUDE_BOUNDS": False,
-                "POINT_TOLERANCE": None,
-                "OUTPUT_LINES": None,
+                "INPUT": self.network_layer_path,
+                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [EPSG:{self.crs.authid()}]",
+                "CLIP": False,
                 "OUTPUT": "TEMPORARY_OUTPUT",
             },
         )
 
-        result2 = processing.run(
-            "native:multiparttosingleparts",
+        # Clip the network layer to the bounding rectangle
+        clipped_layer = processing.run(
+            "native:extractbyextent",
             {
-                "INPUT": result1["OUTPUT"],  # Pass output from service area step
+                "INPUT": self.network_layer_path,
+                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [EPSG:{self.crs.authid()}]",
+                "CLIP": False,
                 "OUTPUT": "TEMPORARY_OUTPUT",
             },
-        )
+        )["OUTPUT"]
 
-        result3 = processing.run(
-            "native:concavehull",
-            {
-                "INPUT": result2["OUTPUT"],  # Pass output from multipart step
-                "ALPHA": 0.3,
-                "HOLES": False,
-                "NO_MULTIGEOMETRY": False,
-                "OUTPUT": "TEMPORARY_OUTPUT",
-            },
-        )
+        # Iterate over each value in self.values
+        for value in self.values:
+            service_area_result = processing.run(
+                "native:serviceareafromlayer",
+                {
+                    "INPUT": clipped_layer,  # Use the clipped network layer
+                    "STRATEGY": 0,
+                    "DIRECTION_FIELD": "",
+                    "VALUE_FORWARD": "",
+                    "VALUE_BACKWARD": "",
+                    "VALUE_BOTH": "",
+                    "DEFAULT_DIRECTION": 2,
+                    "SPEED_FIELD": "",
+                    "DEFAULT_SPEED": 50,
+                    "TOLERANCE": 0,
+                    "START_POINTS": point_layer,  # Use the created memory layer as input
+                    "TRAVEL_COST2": value,
+                    "INCLUDE_BOUNDS": False,
+                    "POINT_TOLERANCE": None,
+                    "OUTPUT_LINES": None,
+                    "OUTPUT": "TEMPORARY_OUTPUT",
+                },
+            )
 
-        # There should only be one feature in the concave hull layer
-        concave_hull_layer = result3["OUTPUT"]
-        if concave_hull_layer.featureCount() != 1:
-            raise ValueError("Concave hull layer should have only one feature.")
-        # return the feature
-        self.service_area = concave_hull_layer.getFeature(0)
-        log_message(f"Service area calculated for feature {self.feature.id()}.")
+            single_part_edge_points_result = processing.run(
+                "native:multiparttosingleparts",
+                {
+                    "INPUT": service_area_result[
+                        "OUTPUT"
+                    ],  # Pass output from service area step
+                    "OUTPUT": "TEMPORARY_OUTPUT",
+                },
+            )
+
+            concave_hull_result = processing.run(
+                "native:concavehull",
+                {
+                    "INPUT": single_part_edge_points_result[
+                        "OUTPUT"
+                    ],  # Pass output from multipart step
+                    "ALPHA": 0.3,
+                    "HOLES": False,
+                    "NO_MULTIGEOMETRY": False,
+                    "OUTPUT": "TEMPORARY_OUTPUT",
+                },
+            )
+
+            # Extract features from the concave hull layer
+            # Typically there will only be one feature
+            concave_hull_layer = concave_hull_result["OUTPUT"]
+            for feature in concave_hull_layer.getFeatures():
+                # Add the travel cost value as an attribute to the feature
+                feature.setAttributes(feature.attributes() + [value])
+                self.service_areas.append(feature)
+
+        log_message(f"Service areas calculated for feature {self.feature.id()}.")
         return
 
     def finished(self, result: bool) -> None:
@@ -149,8 +221,9 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         """
         if result:
             log_message(
-                "Native Network Analysis Processing Task calculation completed successfully."
-                "Access the service area feature using the 'service_area' attribute."
+                "Native Network Analysis Processing Task calculation completed successfully. "
+                "Access the service area feature using the 'service_area' attribute. "
+                f"Service areas created: {len(self.service_areas)}"
             )
         else:
             log_message("Native Network Analysis Processing Task calculation failed.")

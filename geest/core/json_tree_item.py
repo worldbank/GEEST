@@ -467,7 +467,14 @@ class JsonTreeItem:
            back to the tree model.🚨
         """
         if len(self.itemData) > 3:
-            return self.itemData[3]
+            try:
+                return self.itemData[3]
+            except KeyError:
+                log_message(
+                    f"Error: {self.itemData} item 3 is not a dictionary",
+                    level=Qgis.Warning,
+                )
+                return {}
         else:
             return {}
 
