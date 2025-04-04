@@ -29,7 +29,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         mode: Travel time or travel distance ("time" or "distance").
         values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
         working_directory: The directory to save the output files.
-        force_clear: Flag to clear the output directory before running the analysis.
     """
 
     def __init__(
@@ -41,21 +40,23 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         values: List[int],
         working_directory: str,
     ):
-        """
-        Initializes the Native Network Analysis Processor.
-
-        Args:
-            network_layer_path (str): Path to the GeoPackage containing the network layer.
-            feature (QgsFeature): The feature to use as the origin for the network analysis.
-            crs (QgsCoordinateReferenceSystem): The coordinate reference system to use for the analysis.
-            mode (str): Travel mode, either "time" or "distance".
-            working_directory (str): The directory to save the output files.
-        """
         super().__init__("Native Network Analysis Processor", QgsTask.CanCancel)
         self.working_directory = working_directory
         os.makedirs(self.working_directory, exist_ok=True)
 
         self.network_layer_path = network_layer_path
+        # Verify the network layer is a valid line layer and in the
+        # same crs as the self.crs
+        network_layer = QgsVectorLayer(self.network_layer_path, "network_layer", "ogr")
+        if not network_layer.isValid():
+            raise ValueError(f"Network layer is invalid: {self.network_layer_path}")
+        if network_layer.geometryType() != QgsWkbTypes.LineGeometry:
+            raise ValueError("Network layer must be a line layer.")
+        if network_layer.crs() != self.crs:
+            raise ValueError(
+                f"Network layer CRS {network_layer.crs().authid()} does not match the specified CRS {self.crs.authid()}."
+            )
+
         self.feature = feature
         self.crs = crs
 
@@ -64,7 +65,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             raise ValueError("Invalid mode. Must be 'time' or 'distance'.")
         self.values = values
         if not all(isinstance(value, int) and value > 0 for value in self.values):
-            raise ValueError("All values must be positive integers.")
+            raise ValueError(f"All values must be positive integers. {self.values}")
         self.service_areas = []  # Will hold the calculated service area features
         log_message("Initialized Native Network Analysis Processing Task")
 
@@ -79,7 +80,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())
-            self.item.setAttribute(self.result_key, f"Task failed: {e}")
             return False
 
     def calculate_network(self) -> None:

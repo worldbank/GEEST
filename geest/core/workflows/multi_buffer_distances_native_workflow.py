@@ -77,7 +77,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 )
                 raise Exception("Invalid travel distances.")
         try:
-            self.distances = [float(x.strip()) for x in self.distances.split(",")]
+            self.distances = [int(x.strip()) for x in self.distances.split(",")]
         except Exception as e:
             log_message(
                 "Invalid travel distances provided. Distances should be a comma-separated list of up to 5 numbers.",
@@ -114,15 +114,9 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         mode = self.attributes.get("multi_buffer_travel_mode", "Walking")
         self.mode = None
         if mode == "Walking":
-            self.mode = "foot-walking"
-        else:
-            self.mode = "driving-car"
-        self.measurement = None
-        measurement = self.attributes.get("multi_buffer_travel_units", "Distance")
-        if measurement == "Distance":
-            self.measurement = "distance"
-        else:
-            self.measurement = "time"
+            self.mode = "distance"
+        else:  # Driving
+            self.mode = "time"
 
         self.temp_layers = []  # Store intermediate layers
         log_message("Multi Buffer Distances Native Workflow initialized")
@@ -223,71 +217,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             log_message("No isochrones were created.", level=Qgis.Warning)
             return False
 
-    def _fetch_isochrones(self, layer: QgsVectorLayer) -> dict:
-        """
-        Fetch isochrones for the given subset of features using ORSClient.
-
-        Args:
-            layer (QgsVectorLayer): A QgsVectorLayer containing the subset of features.
-
-        Returns:
-            dict: A dict representing the JSON response from the ORS API.
-
-        Raises:
-            ValueError: If no valid coordinates are found in the layer.
-            Any exceptions raised by ORSClient.make_request will propagate.
-        """
-        # Prepare the coordinates for the API request
-        coordinates = []
-        for feature in layer.getFeatures():
-            geom = feature.geometry()
-            if geom and not geom.isMultipart():  # Single point geometry
-                coords = geom.asPoint()
-                coordinates.append([coords.x(), coords.y()])
-
-        if not coordinates:
-            raise ValueError("No valid coordinates found in the layer")
-
-        # Prepare parameters for ORS API
-        params = {
-            "locations": coordinates,
-            "range": self.distances,  # Distances or times in the list
-            "range_type": self.measurement,
-        }
-
-        # Make the request to ORS API using ORSClient
-        # Any exceptions will be propogated
-        try:
-            json = self.ors_client.make_request(self.mode, params)
-        except Exception as e:
-            error_file = os.path.join(self.workflow_directory, "error.txt")
-            if os.path.exists(error_file):
-                os.remove(error_file)
-            # Write the traceback to error.txt in the workflow_directory
-            error_path = os.path.join(self.workflow_directory, "error.txt")
-            with open(error_path, "w") as f:
-                f.write(f"Failed to process {self.workflow_name}: {e}\n")
-                f.write(traceback.format_exc())
-
-            log_message(
-                f"Failed to fetch isochrones layer for {self.workflow_name}: {e}",
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            log_message(
-                traceback.format_exc(),
-                tag="Geest",
-                level=Qgis.Critical,
-            )
-            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
-            self.attributes[self.result_file_key] = ""
-            self.attributes["error_file"] = error_path
-            self.attributes["error"] = (
-                f"Failed to generate isochrones for {self.workflow_name}: {e}"
-            )
-            return False
-        return json
-
     def _create_isochrone_layer(self, feature):
         """
         Run the native isochrone algorithm for the given feature.
@@ -307,15 +236,26 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         # Parse the features from the networking analysis response
         verbose_mode = int(setting(key="verbose_mode", default=0))
+        # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
+        # feature: The feature to use as the origin for the network analysis.
+        # crs: The coordinate reference system to use for the analysis.
+        # mode: Travel time or travel distance ("time" or "distance").
+        # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
+        # working_directory: The directory to save the output files.
+        # force_clear: Flag to clear the output directory before running the analysis.
         processor = NativeNetworkAnalysisProcessor(
-            self.working_directory,
-            self.target_crs,
-            feature,
-            self.distances,
-            self.mode,
-            self.measurement,
+            network_layer_path=None,
+            feature=feature,
+            crs=self.target_crs,
+            mode=self.mode,
+            values=self.distances,
+            working_directory=self.workflow_directory,
         )
-        processor.execute()
+        try:
+            result = processor.run()
+        except Exception as e:
+            self.item.setAttribute(self.result_key, f"Task failed: {e}")
+
         isochrones = processor.service_areas
         if not isochrones:
             log_message(
