@@ -9,8 +9,13 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsRectangle,
     QgsWkbTypes,
+    QgsVectorFileWriter,
+    QgsFields,
+    QgsField,
+    QgsProject,
 )
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsPointXY
+from qgis.PyQt.QtCore import QVariant
 from qgis import processing
 from geest.utilities import log_message, resources_path
 
@@ -23,6 +28,12 @@ class NativeNetworkAnalysisProcessor(QgsTask):
     the road network that can be travelled to within a specified time limit
     or distance.
 
+    The output polygon is written to the isochrones geopackage in the
+    working directory. If they geopackage already exists, it will be appended to.
+    If the geopackage does not exist, it will be created.
+    The output is a GeoPackage with the name "isochrones.gpkg" in the working directory.
+    The output polygon is a single part polygon, and the travel time or distance
+
     Args:
         network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
         feature: The feature to use as the origin for the network analysis.
@@ -30,6 +41,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         mode: Travel time or travel distance ("time" or "distance").
         values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
         working_directory: The directory to save the output files.
+
     """
 
     def __init__(
@@ -68,7 +80,58 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         if not all(isinstance(value, int) and value > 0 for value in self.values):
             raise ValueError(f"All values must be positive integers. {self.values}")
         self.service_areas = []  # Will hold the calculated service area features
+
+        self.isochrone_layer_path = os.path.join(
+            self.working_directory, "isochrones.gpkg"
+        )
+        layer_name: str = "isochrones"
+        # try to open the GeoPackage to check if it exists
+        self.isochrone_layer = QgsVectorLayer(
+            self.isochrone_layer_path, layer_name, "ogr"
+        )
+        if self.isochrone_layer.isValid():
+            # If the layer exists, append to it
+            log_message(
+                f"Appending to existing GeoPackage: {self.isochrone_layer_path}"
+            )
+        else:
+            # Define the fields (attributes)
+            fields: QgsFields = QgsFields()
+            fields.append(QgsField("value", QVariant.Double))
+
+            # Create the GeoPackage layer
+
+            # SaveVectorOptions contains many settings for the writer process
+            save_options = QgsVectorFileWriter.SaveVectorOptions()
+            # save_options.driverName = "ESRI Shapefile"
+            # save_options.fileEncoding = "UTF-8"
+            # if driverName is not set, Write to a GeoPackage (default)
+            transform_context = QgsProject.instance().transformContext()
+            self.writer = QgsVectorFileWriter.create(
+                self.isochrone_layer_path,
+                fields,
+                QgsWkbTypes.Polygon,
+                self.crs,
+                transform_context,
+                save_options,
+            )
+            if self.writer.hasError() != QgsVectorFileWriter.NoError:
+                log_message(
+                    "Error when creating isochrone gpkg: ", self.writer.errorMessage()
+                )
+
+            else:
+                log_message("Isochrone layer created with success!")
+
         log_message("Initialized Native Network Analysis Processing Task")
+
+    def __del__(self):
+        """
+        Destructor to clean up resources.
+        """
+        if hasattr(self, "writer") and self.writer:
+            del self.writer
+        log_message("Native Network Analysis Processor resources cleaned up.")
 
     def run(self) -> bool:
         """
@@ -210,8 +273,9 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             concave_hull_layer = concave_hull_result["OUTPUT"]
             for feature in concave_hull_layer.getFeatures():
                 # Add the travel cost value as an attribute to the feature
-                feature.setAttributes(feature.attributes() + [value])
-                self.service_areas.append(feature)
+                self.writer.addFeature(feature)
+                self.writer.commitChanges()
+                self.writer.updateExtents()
 
         log_message(f"Service areas calculated for feature {self.feature.id()}.")
         return

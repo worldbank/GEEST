@@ -4,13 +4,13 @@ from qgis.core import (
     edit,
     Qgis,
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsFeature,
+    QgsWkbTypes,
+    QgsVectorFileWriter,
     QgsFeatureRequest,
     QgsFeedback,
     QgsField,
     QgsGeometry,
-    QgsPointXY,
+    QgsFields,
     QgsProcessingContext,
     QgsVectorLayer,
 )
@@ -119,6 +119,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             self.mode = "time"
 
         self.temp_layers = []  # Store intermediate layers
+
         log_message("Multi Buffer Distances Native Workflow initialized")
 
     def _process_features_for_area(
@@ -224,15 +225,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         :param isochrone_data: JSON data returned from ORS.
         :return: A QgsVectorLayer containing the isochrones as polygons.
         """
-        isochrone_layer = QgsVectorLayer(
-            f"Polygon?crs=EPSG:{self.target_crs.authid}", "isochrones", "memory"
-        )
-        provider = isochrone_layer.dataProvider()
-
-        # Add the 'value' field to the layer's attribute table
-        isochrone_layer.startEditing()
-        isochrone_layer.addAttribute(QgsField("value", QVariant.Int))
-        isochrone_layer.commitChanges()
 
         # Parse the features from the networking analysis response
         verbose_mode = int(setting(key="verbose_mode", default=0))
@@ -251,17 +243,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         except Exception as e:
             self.item.setAttribute(self.result_key, f"Task failed: {e}")
 
-        isochrones = processor.service_areas
-        if not isochrones:
-            log_message(
-                "No isochrones were created.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-            return None
-
-        provider.addFeatures(isochrones)
-        return isochrone_layer
+        return result
 
     def _merge_layers(self, layers=None, index=None):
         """
