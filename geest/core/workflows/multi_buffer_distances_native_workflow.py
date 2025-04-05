@@ -236,20 +236,15 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         # Parse the features from the networking analysis response
         verbose_mode = int(setting(key="verbose_mode", default=0))
-        # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
-        # feature: The feature to use as the origin for the network analysis.
-        # crs: The coordinate reference system to use for the analysis.
-        # mode: Travel time or travel distance ("time" or "distance").
-        # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
-        # working_directory: The directory to save the output files.
-        # force_clear: Flag to clear the output directory before running the analysis.
+        # Shamelessly hard coding network layer for now
+        path = "/home/timlinux/dev/python/GEEST/data/StLucia/osm_.gpkg|layername=highway_motorway_highway_motorway_link_32620"
         processor = NativeNetworkAnalysisProcessor(
-            network_layer_path=None,
-            feature=feature,
-            crs=self.target_crs,
-            mode=self.mode,
-            values=self.distances,
-            working_directory=self.workflow_directory,
+            network_layer_path=path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
+            feature=feature,  # feature: The feature to use as the origin for the network analysis.
+            crs=self.target_crs,  # crs: The coordinate reference system to use for the analysis.
+            mode=self.mode,  # mode: Travel time or travel distance ("time" or "distance").
+            values=self.distances,  # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
+            working_directory=self.workflow_directory,  # working_directory: The directory to save the output files.
         )
         try:
             result = processor.run()

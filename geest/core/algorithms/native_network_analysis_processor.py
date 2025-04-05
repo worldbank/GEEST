@@ -8,6 +8,7 @@ from qgis.core import (
     QgsVectorLayer,
     QgsCoordinateReferenceSystem,
     QgsRectangle,
+    QgsWkbTypes,
 )
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsPointXY
 from qgis import processing
@@ -43,6 +44,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         super().__init__("Native Network Analysis Processor", QgsTask.CanCancel)
         self.working_directory = working_directory
         os.makedirs(self.working_directory, exist_ok=True)
+        self.crs = crs
 
         self.network_layer_path = network_layer_path
         # Verify the network layer is a valid line layer and in the
@@ -58,7 +60,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             )
 
         self.feature = feature
-        self.crs = crs
 
         self.mode = mode
         if self.mode not in ["time", "distance"]:
