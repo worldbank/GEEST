@@ -94,6 +94,18 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             log_message(
                 f"Appending to existing GeoPackage: {self.isochrone_layer_path}"
             )
+            self.writer = QgsVectorFileWriter(
+                self.isochrone_layer_path,
+                "ogr",
+                self.isochrone_layer.fields(),
+                QgsWkbTypes.Polygon,
+                self.crs,
+                "GPKG",
+            )
+            if self.writer.hasError() != QgsVectorFileWriter.NoError:
+                log_message(
+                    "Error when creating isochrone gpkg: ", self.writer.errorMessage()
+                )
         else:
             # Define the fields (attributes)
             fields: QgsFields = QgsFields()
@@ -200,16 +212,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         )
         log_message(f"Constructed rectangle: {rect.toString()}")
 
-        processing.run(
-            "native:extractbyextent",
-            {
-                "INPUT": self.network_layer_path,
-                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [EPSG:{self.crs.authid()}]",
-                "CLIP": False,
-                "OUTPUT": "TEMPORARY_OUTPUT",
-            },
-        )
-
         # Clip the network layer to the bounding rectangle
         clipped_layer = processing.run(
             "native:extractbyextent",
@@ -245,38 +247,41 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 },
             )
 
+            service_area_layer = service_area_result["OUTPUT"]
+
             single_part_edge_points_result = processing.run(
                 "native:multiparttosingleparts",
                 {
-                    "INPUT": service_area_result[
-                        "OUTPUT"
-                    ],  # Pass output from service area step
+                    "INPUT": service_area_layer,  # Pass output from service area step
                     "OUTPUT": "TEMPORARY_OUTPUT",
                 },
             )
+            del service_area_layer
 
+            singlepart_layer = single_part_edge_points_result["OUTPUT"]
             concave_hull_result = processing.run(
                 "native:concavehull",
                 {
-                    "INPUT": single_part_edge_points_result[
-                        "OUTPUT"
-                    ],  # Pass output from multipart step
+                    "INPUT": singlepart_layer,  # Pass output from multipart step
                     "ALPHA": 0.3,
                     "HOLES": False,
                     "NO_MULTIGEOMETRY": False,
                     "OUTPUT": "TEMPORARY_OUTPUT",
                 },
             )
-
+            del singlepart_layer
             # Extract features from the concave hull layer
             # Typically there will only be one feature
             concave_hull_layer = concave_hull_result["OUTPUT"]
             for feature in concave_hull_layer.getFeatures():
                 # Add the travel cost value as an attribute to the feature
+                feature.setAttribute("value", value)
                 self.writer.addFeature(feature)
                 self.writer.commitChanges()
                 self.writer.updateExtents()
-
+                log_message(f"Added feature with value {value} to the GeoPackage.")
+            del concave_hull_layer
+        del clipped_layer
         log_message(f"Service areas calculated for feature {self.feature.id()}.")
         return
 
