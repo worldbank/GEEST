@@ -13,6 +13,7 @@ from qgis.core import (
     QgsFields,
     QgsField,
     QgsProject,
+    edit,
 )
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsPointXY
 from qgis.PyQt.QtCore import QVariant
@@ -94,18 +95,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             log_message(
                 f"Appending to existing GeoPackage: {self.isochrone_layer_path}"
             )
-            self.writer = QgsVectorFileWriter(
-                self.isochrone_layer_path,
-                "ogr",
-                self.isochrone_layer.fields(),
-                QgsWkbTypes.Polygon,
-                self.crs,
-                "GPKG",
-            )
-            if self.writer.hasError() != QgsVectorFileWriter.NoError:
-                log_message(
-                    "Error when creating isochrone gpkg: ", self.writer.errorMessage()
-                )
         else:
             # Define the fields (attributes)
             fields: QgsFields = QgsFields()
@@ -134,6 +123,9 @@ class NativeNetworkAnalysisProcessor(QgsTask):
 
             else:
                 log_message("Isochrone layer created with success!")
+                self.isochrone_layer = QgsVectorLayer(
+                    self.isochrone_layer_path, layer_name, "ogr"
+                )
 
         log_message("Initialized Native Network Analysis Processing Task")
 
@@ -275,8 +267,18 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             concave_hull_layer = concave_hull_result["OUTPUT"]
             for feature in concave_hull_layer.getFeatures():
                 # Add the travel cost value as an attribute to the feature
-                feature.setAttribute("value", value)
-                self.writer.addFeature(feature)
+                # if the feature does not have a value attribute, add it
+                # Get the geometry from the feature
+                geometry = feature.geometry()
+                # Create a new feature with the same geometry
+                new_feature = QgsFeature(self.isochrone_layer.fields())
+                new_feature.setGeometry(geometry)
+                # Set the value attribute to the travel cost value
+                # and add the feature to the writer
+                new_feature.setAttribute("value", value)
+                # Add the feature to the layer inside an edit session
+                with edit(self.isochrone_layer):
+                    self.isochrone_layer.addFeature(new_feature)
                 self.writer.commitChanges()
                 self.writer.updateExtents()
                 log_message(f"Added feature with value {value} to the GeoPackage.")

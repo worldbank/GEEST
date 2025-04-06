@@ -350,7 +350,7 @@ class JsonTreeItem:
                         return "Required and not configured"
                     if child_status == "Error":
                         return "Workflow failed"
-                    if child_status.contains("Failed"):
+                    if "Failed" in child_status:
                         return "Workflow failed"
 
             if self.isDimension():
