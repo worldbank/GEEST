@@ -108,7 +108,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             # save_options.fileEncoding = "UTF-8"
             # if driverName is not set, Write to a GeoPackage (default)
             transform_context = QgsProject.instance().transformContext()
-            self.writer = QgsVectorFileWriter.create(
+            writer = QgsVectorFileWriter.create(
                 self.isochrone_layer_path,
                 fields,
                 QgsWkbTypes.Polygon,
@@ -116,9 +116,9 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 transform_context,
                 save_options,
             )
-            if self.writer.hasError() != QgsVectorFileWriter.NoError:
+            if writer.hasError() != QgsVectorFileWriter.NoError:
                 log_message(
-                    "Error when creating isochrone gpkg: ", self.writer.errorMessage()
+                    "Error when creating isochrone gpkg: ", writer.errorMessage()
                 )
 
             else:
@@ -133,8 +133,12 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         """
         Destructor to clean up resources.
         """
-        if hasattr(self, "writer") and self.writer:
-            del self.writer
+        if hasattr(self, "isochrone_layer") and self.isochrone_layer:
+            try:
+                self.isochrone_layer.stopeEditing(saveChanges=True)
+            except Exception as e:
+                log_message(f"Error stopping editing: {e}")
+            del self.isochrone_layer
         log_message("Native Network Analysis Processor resources cleaned up.")
 
     def run(self) -> bool:
@@ -143,7 +147,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         """
         try:
             self.calculate_network()
-            # self.service_area should be set after the calculation
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
@@ -277,10 +280,11 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 # and add the feature to the writer
                 new_feature.setAttribute("value", value)
                 # Add the feature to the layer inside an edit session
-                with edit(self.isochrone_layer):
-                    self.isochrone_layer.addFeature(new_feature)
-                self.writer.commitChanges()
-                self.writer.updateExtents()
+                if not self.isochrone_layer.isEditable():
+                    self.isochrone_layer.startEditing()
+                self.isochrone_layer.addFeature(new_feature)
+                self.isochrone_layer.commitChanges()  # leaves the layer in edit mode
+                self.isochrone_layer.updateExtents()
                 log_message(f"Added feature with value {value} to the GeoPackage.")
             del concave_hull_layer
         del clipped_layer

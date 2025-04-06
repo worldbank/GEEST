@@ -118,8 +118,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         else:  # Driving
             self.mode = "time"
 
-        self.temp_layers = []  # Store intermediate layers
-
         log_message("Multi Buffer Distances Native Workflow initialized")
 
     def _process_features_for_area(
@@ -180,7 +178,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         :return: QgsVectorLayer containing the buffers as polygons.
         """
 
-        # Collect intermediate layers from ORS API
         features = list(point_layer.getFeatures())
         log_message(f"Creating buffers for {len(features)} points")
         total_features = len(features)
@@ -189,10 +186,8 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         for i in range(0, total_features):
             feature = features[i]
             # Process this point using QGIS native network analysis
-            layer = self._create_isochrone_layer(feature)
-            if layer:
-                self.temp_layers.append(layer)
-            log_message(f"Processed subset {i} of {total_features}")
+            self._create_isochrone_layer(feature)
+            log_message(f"Processed point {i} of {total_features}")
 
         # Merge all isochrone layers into one final output
         if self.temp_layers:
@@ -201,18 +196,8 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            merged_layer = self._merge_layers(self.temp_layers, index)
-            log_message(
-                f"Merged isochrone layer created at {merged_layer.source()}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            log_message(
-                f"Removing overlaps between isochrones for {merged_layer.source()}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            result = self._create_bands(merged_layer, index)
+            log_message(f"Removing overlaps between isochrones")
+            result = self._create_bands()
             return result
         else:
             log_message("No isochrones were created.", level=Qgis.Warning)
@@ -245,28 +230,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         return result
 
-    def _merge_layers(self, layers=None, index=None):
-        """
-        Merge all temporary isochrone layers into a single layer.
-
-        :param layers: List of temporary QgsVectorLayers to merge.
-        :param crs: The CRS to use for the merged layer.
-        :param index: The index of the current area being processed.
-
-        :return: A QgsVectorLayer representing the merged isochrone layers.
-        """
-        merge_output = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_merged_isochrones_{index}.shp"
-        )
-        merge_params = {
-            "LAYERS": layers,
-            "CRS": self.target_crs,
-            "OUTPUT": merge_output,
-        }
-        merged_result = processing.run("native:mergevectorlayers", merge_params)
-        merge = QgsVectorLayer(merged_result["OUTPUT"], "merge", "ogr")
-        return merge
-
     def _create_bands(self, layer, index):
         """
         Create bands by computing differences between isochrone ranges.
@@ -292,20 +255,20 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 f"Field '{ranges_field}' does not exist in the merged layer."
             )
 
-        unique_ranges = sorted({feat[ranges_field] for feat in layer.getFeatures()})
+        unique_ranges = sorted(self.distances, reverse=False)
 
         range_layers = {}
-        for r in unique_ranges:
-            expr = f'"{ranges_field}" = {r}'
-            request = QgsFeatureRequest().setFilterExpression(expr)
+        for value in unique_ranges:
+            expression = f'"value" = {value}'
+            request = QgsFeatureRequest().setFilterExpression(expression)
             features = [feat for feat in layer.getFeatures(request)]
             if features:
-                range_layer = QgsVectorLayer(f"Polygon", f"range_{r}", "memory")
+                range_layer = QgsVectorLayer(f"Polygon", f"range_{value}", "memory")
                 range_layer.setCrs(self.target_crs)
-                dp = range_layer.dataProvider()
-                dp.addAttributes(layer.fields())
+                data_provider = range_layer.dataProvider()
+                data_provider.addAttributes(layer.fields())
                 range_layer.updateFields()
-                dp.addFeatures(features)
+                data_provider.addFeatures(features)
 
                 dissolve_params = {
                     "INPUT": range_layer,
@@ -314,7 +277,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 }
                 dissolve_result = processing.run("native:dissolve", dissolve_params)
                 dissolved_layer = dissolve_result["OUTPUT"]
-                range_layers[r] = dissolved_layer
+                range_layers[value] = dissolved_layer
 
         band_layers = []
         sorted_ranges = sorted(range_layers.keys(), reverse=True)
