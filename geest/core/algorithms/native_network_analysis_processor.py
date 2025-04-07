@@ -208,17 +208,20 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         log_message(f"Constructed rectangle: {rect.toString()}")
 
         # Clip the network layer to the bounding rectangle
+
+        # Note this algorithm leaves some spurious output on the console.
+        # See
+
         clipped_layer = processing.run(
             "native:extractbyextent",
             {
                 "INPUT": self.network_layer_path,
-                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [EPSG:{self.crs.authid()}]",
+                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [{self.crs.authid()}]",
                 "CLIP": False,
                 "OUTPUT": "TEMPORARY_OUTPUT",
             },
         )["OUTPUT"]
 
-        # Iterate over each value in self.values
         for value in self.values:
             service_area_result = processing.run(
                 "native:serviceareafromlayer",
