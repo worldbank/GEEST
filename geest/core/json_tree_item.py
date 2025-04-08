@@ -343,7 +343,7 @@ class JsonTreeItem:
                 # If any child indicator has a status of "Workflow failed", return "Workflow failed"
                 for child in self.childItems:
                     child_status = child.getStatus()
-                    log_message(f"Child status: {child_status}")
+                    # log_message(f"Child status: {child_status}")
                     if child_status == "Workflow failed":
                         return "Workflow failed"
                     if child_status == "Required and not configured":
