@@ -140,19 +140,21 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
 
-        # Step 2: Process these areas in batches and create buffers
-        buffers = self.create_multibuffers(
+        # Step 1: Process these areas in batches and create buffers
+        isochrones_gpkg = self.create_isochrones(
             point_layer=area_features,
-            index=index,
+            area_index=index,
         )
-        # Merge all isochrone layers into one final output
-        isochrones = self._create_bands(index=index)
-        scored_buffers = self._assign_scores(isochrones)
+        # Step 2: Merge all isochrone layers into one final output, removing any overlaps
+        bands = self._create_bands(isochrones_gpkg_path=isochrones_gpkg, index=index)
+
+        # Step 3: Assign scores to the buffers based on the distances
+        scored_buffers = self._assign_scores(bands)
 
         if scored_buffers is False:
             log_message("No scored buffers were created.", level=Qgis.Warning)
             return False
-
+        # Step 4: Rasterize the scored buffers
         raster_output = self._rasterize(
             input_layer=scored_buffers,
             bbox=current_bbox,
@@ -162,10 +164,10 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         return raster_output
 
-    def create_multibuffers(
+    def create_isochrones(
         self,
         point_layer: QgsVectorLayer,
-        index: int = 0,
+        area_index: int = 0,
     ):
         """
         Create multiple buffers (isochrones) for each point in the input point layer using ORSClient.
@@ -176,13 +178,15 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         :param point_layer: QgsVectorLayer containing point features to process.
         :param index: Index of the current area being processed.
-        :return: QgsVectorLayer containing the buffers as polygons.
+        :return: Path to the GeoPackage.
         """
 
         features = list(point_layer.getFeatures())
         log_message(f"Creating isochrones for {len(features)} points")
         total_features = len(features)
-        isochrone_layer_path = os.path.join(self.workflow_directory, "isochrones.gpkg")
+        isochrone_layer_path = os.path.join(
+            self.workflow_directory, f"isochrones_{area_index}.gpkg"
+        )
         if os.path.exists(isochrone_layer_path):
             os.remove(isochrone_layer_path)
         # Process features one at a time
@@ -191,14 +195,17 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             # Process this point using QGIS native network analysis
             log_message("\n\n*************************************")
             log_message(f"Processing point {i+1} of {total_features}")
-            self._create_isochrone_layer(feature)
+            self._create_isochrone_for_point(feature, area_index)
             log_message(f"Processed point {i+1} of {total_features}")
+        return isochrone_layer_path
 
-    def _create_isochrone_layer(self, feature):
+    def _create_isochrone_for_point(self, point_feature, area_index):
         """
         Run the native isochrone algorithm for the given feature.
 
-        :param isochrone_data: JSON data returned from ORS.
+        :param point_feature: The feature to use as the origin for the network analysis.
+        :param area_index: The index of the current area being processed.
+
         :return: A QgsVectorLayer containing the isochrones as polygons.
         """
 
@@ -208,35 +215,34 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         path = "/home/timlinux/dev/python/GEEST/data/StLucia/osm_.gpkg|layername=highway_motorway_highway_motorway_link_32620"
         processor = NativeNetworkAnalysisProcessor(
             network_layer_path=path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
-            feature=feature,  # feature: The feature to use as the origin for the network analysis.
+            feature=point_feature,  # feature: The feature to use as the origin for the network analysis.
+            area_index=area_index,  # area_id: The ID of the area being processed.
             crs=self.target_crs,  # crs: The coordinate reference system to use for the analysis.
             mode=self.mode,  # mode: Travel time or travel distance ("time" or "distance").
             values=self.distances,  # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
             working_directory=self.workflow_directory,  # working_directory: The directory to save the output files.
         )
         try:
-            result = processor.run()
+            isochrones_gpkg_path = processor.run()
         except Exception as e:
             self.item.setAttribute(self.result_key, f"Task failed: {e}")
 
-        return result
+        return isochrones_gpkg_path
 
-    def _create_bands(self, index):
+    def _create_bands(self, isochrones_gpkg_path, index):
         """
         Create bands by computing differences between isochrone ranges.
 
         This method computes the differences between isochrone ranges to create bands
         of non overlapping polygons. The bands are then merged into a final output layer.
 
-        :param crs: Coordinate reference system for the output.
-        :param index: The index of the current area being processed.
+        :param isochrones_gpkg_path: Path to the GeoPackage containing the isochrones.
 
         Returns:
             QgsVectoryLayer: The final output QgsVectorLayer layer path containing the bands.
         """
-        isochrone_layer_path = os.path.join(
-            self.workflow_directory, "isochrones.gpkg|layername=isochrones"
-        )
+        isochrone_layer_path = f"{isochrones_gpkg_path}|layername=isochrones"
+
         layer = QgsVectorLayer(isochrone_layer_path, "isochrones", "ogr")
         if not layer.isValid():
             raise ValueError(
@@ -376,47 +382,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 layer.updateFeature(feature)
         layer.commitChanges()
         return layer
-
-    def reproject_isochrones(self, layer: QgsVectorLayer):
-        """
-        Reproject the isochrone layer to target crs.
-
-        The resulting layer will be saved in the working directory too.
-
-        Parameters:
-            layer (QgsVectorLayer): The input isochrone layer to reproject.
-
-        Returns:
-            QgsVectorLayer: The reprojected isochrone layer.
-        """
-
-        # reproject the later to self.target_crs
-        input_path = layer.source()
-        reprojected_layer_path = input_path.replace(
-            ".shp", f"_epsg{self.target_crs.postgisSrid()}.shp"
-        )
-        transform_params = {
-            "INPUT": layer,
-            "TARGET_CRS": self.target_crs,
-            "OUTPUT": reprojected_layer_path,
-        }
-        log_message(
-            f"Reprojecting input layer to {self.target_crs.authid()}",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        reprojected_layer_result = processing.run(
-            "native:reprojectlayer", transform_params
-        )
-        reprojected_layer = QgsVectorLayer(
-            reprojected_layer_result["OUTPUT"], "reprojected_layer", "ogr"
-        )
-
-        if not reprojected_layer.isValid():
-            raise ValueError(
-                f"Failed to reproject input layer to {self.target_crs.authid()}"
-            )
-        return reprojected_layer
 
     # Default implementation of the abstract method - not used in this workflow
     def _process_raster_for_area(

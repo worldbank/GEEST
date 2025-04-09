@@ -24,6 +24,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
     def __init__(
         self,
         network_layer_path: str,
+        area_index: int,
         feature: QgsFeature,
         crs: QgsCoordinateReferenceSystem,
         mode: str,
@@ -36,7 +37,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         self.instance_id = (
             NativeNetworkAnalysisProcessor._instance_counter
         )  # Assign unique ID to instance
-
+        self.area_index = area_index
         self.working_directory = working_directory
         os.makedirs(self.working_directory, exist_ok=True)
         self.crs = crs
@@ -62,7 +63,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         self.service_areas = []
 
         self.isochrone_layer_path = os.path.join(
-            self.working_directory, "isochrones.gpkg"
+            self.working_directory, f"isochrones_{str(area_index)}.gpkg"
         )
         self._initialize_isochrone_layer()
 
@@ -96,10 +97,10 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             f"Native Network Analysis Processor resources cleaned up instance {self.instance_id}."
         )
 
-    def run(self) -> bool:
+    def run(self) -> str:
         try:
             self.calculate_network()
-            return True
+            return self.isochrone_layer_path
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())
@@ -142,7 +143,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 "INPUT": self.network_layer_path,
                 "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [{self.crs.authid()}]",
                 "CLIP": False,
-                "OUTPUT": "TEMPORARY_OUTPUT",
+                "OUTPUT": output_path,
             },
         )["OUTPUT"]
 
@@ -266,88 +267,3 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         del point_layer
         log_message(f"Service areas calculated for feature {self.feature.id()}.")
         return
-
-    def _calculate_angle(self, p1, p2):
-        """Calculate the angle between two points."""
-        return degrees(atan2(p2[1] - p1[1], p2[0] - p1[0]))
-
-    def _distance(self, p1, p2):
-        """Calculate the Euclidean distance between two points."""
-        return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
-
-    def _find_concave_hull(self, points, k):
-        """Compute the concave hull of a set of points in a single iteration."""
-        if len(points) < 3:
-            raise ValueError("At least 3 points are required to compute a hull.")
-        if k < 3:
-            raise ValueError("k must be at least 3.")
-
-        points = np.array(points)
-        hull = []
-
-        # Find the starting point (lowest y, then lowest x)
-        start = points[np.lexsort((points[:, 0], points[:, 1]))][0]
-        hull.append(start.tolist())
-        current_point = start
-        points = points.tolist()
-        points.remove(start.tolist())
-
-        prev_angle = 0
-        while True:
-            # Sort points by angle and distance
-            sorted_points = sorted(
-                points,
-                key=lambda p: (
-                    (self._calculate_angle(current_point, p) - prev_angle) % 360,
-                    self._distance(current_point, p),
-                ),
-            )
-
-            # Iterate through sorted points to find the next valid point
-            for next_point in sorted_points:
-                if len(hull) > 2:
-                    # Check for intersections with the existing hull
-                    if self._creates_intersection(hull, current_point, next_point):
-                        continue
-
-                hull.append(next_point)
-                points.remove(next_point)
-                current_point = next_point
-                prev_angle = self._calculate_angle(hull[-2], hull[-1])
-
-                # Close the hull if we return to the starting point
-                if len(hull) > 3 and hull[-1] == hull[0]:
-                    return hull[:-1]
-                break
-            else:
-                # If no valid next point is found, terminate
-                break
-
-        return hull
-
-    def _creates_intersection(self, hull, current_point, next_point):
-        """Check if adding the next point creates an intersection in the hull."""
-        new_segment = (current_point, next_point)
-        for i in range(len(hull) - 1):
-            existing_segment = (hull[i], hull[i + 1])
-            if self._segments_intersect(new_segment, existing_segment):
-                return True
-        return False
-
-    def _segments_intersect(self, seg1, seg2):
-        """Check if two line segments intersect."""
-
-        def ccw(a, b, c):
-            return (c[1] - a[1]) * (b[0] - a[0]) > (b[1] - a[1]) * (c[0] - a[0])
-
-        a, b = seg1
-        c, d = seg2
-        return ccw(a, c, d) != ccw(b, c, d) and ccw(a, b, c) != ccw(a, b, d)
-
-    def finished(self, result: bool) -> None:
-        if result:
-            log_message(
-                "Native Network Analysis Processing Task calculation completed successfully."
-            )
-        else:
-            log_message("Native Network Analysis Processing Task calculation failed.")
