@@ -24,8 +24,9 @@ class NativeNetworkAnalysisProcessor(QgsTask):
     def __init__(
         self,
         network_layer_path: str,
+        isochrone_layer_path: str,
         area_index: int,
-        feature: QgsFeature,
+        point_feature: QgsFeature,
         crs: QgsCoordinateReferenceSystem,
         mode: str,
         values: List[int],
@@ -53,7 +54,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 f"Network layer CRS {network_layer.crs().authid()} does not match the specified CRS {self.crs.authid()}."
             )
 
-        self.feature = feature
+        self.feature = point_feature
         self.mode = mode
         if self.mode not in ["time", "distance"]:
             raise ValueError("Invalid mode. Must be 'time' or 'distance'.")
@@ -62,9 +63,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             raise ValueError(f"All values must be positive integers. {self.values}")
         self.service_areas = []
 
-        self.isochrone_layer_path = os.path.join(
-            self.working_directory, f"isochrones_{str(area_index)}.gpkg"
-        )
+        self.isochrone_layer_path = isochrone_layer_path
         self._initialize_isochrone_layer()
 
         log_message(
@@ -100,7 +99,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
     def run(self) -> str:
         try:
             self.calculate_network()
-            return self.isochrone_layer_path
+            return True
         except Exception as e:
             log_message(f"Task failed: {e}")
             log_message(traceback.format_exc())

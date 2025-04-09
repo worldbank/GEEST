@@ -36,7 +36,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         # Create an instance of the processor
         self.processor = NativeNetworkAnalysisProcessor(
             network_layer_path=self.network_layer_path,
-            feature=self.feature,
+            point_feature=self.feature,
             crs=self.crs,
             mode=self.mode,
             values=self.values,
@@ -55,7 +55,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         with self.assertRaises(ValueError):
             NativeNetworkAnalysisProcessor(
                 network_layer_path=self.network_layer_path,
-                feature=self.feature,
+                point_feature=self.feature,
                 crs=self.crs,
                 mode="invalid_mode",
                 values=self.values,
@@ -66,7 +66,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         with self.assertRaises(ValueError):
             NativeNetworkAnalysisProcessor(
                 network_layer_path=self.network_layer_path,
-                feature=self.feature,
+                point_feature=self.feature,
                 crs=self.crs,
                 mode=self.mode,
                 values=[-10, 2000],  # Negative value
@@ -76,7 +76,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         with self.assertRaises(ValueError):
             NativeNetworkAnalysisProcessor(
                 network_layer_path=self.network_layer_path,
-                feature=self.feature,
+                point_feature=self.feature,
                 crs=self.crs,
                 mode=self.mode,
                 values=["1000", 2000],  # Non-integer value

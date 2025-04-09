@@ -34,7 +34,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
     It will create concentric buffers (isochrones) around the points and calculate
     the distances to the points of interest.
 
-    The buffers will be calcuated either using travel time or travel distance.
+    The isochrones will be calcuated either using travel time or travel distance.
 
     The results will be stored as a collection of tif files scaled to the likert scale.
 
@@ -172,7 +172,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         """
         Create multiple buffers (isochrones) for each point in the input point layer using ORSClient.
 
-        This method processes the point features in subsets (to handle large datasets), makes API calls
+        This method processes the point features using a QgsVectorLayer iterator, makes API calls
         to the OpenRouteService to fetch the isochrones (buffers) for each subset, and merges the results
         into a final output layer.
 
@@ -180,54 +180,44 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         :param index: Index of the current area being processed.
         :return: Path to the GeoPackage.
         """
+        verbose_mode = int(setting(key="verbose_mode", default=0))
 
-        features = list(point_layer.getFeatures())
-        log_message(f"Creating isochrones for {len(features)} points")
-        total_features = len(features)
+        total_features = point_layer.featureCount()
         isochrone_layer_path = os.path.join(
-            self.workflow_directory, f"isochrones_{area_index}.gpkg"
+            self.workflow_directory, f"isochrones_area_{area_index}.gpkg"
         )
+        log_message(f"Creating isochrones for {total_features} points")
+        log_message(f"Writing isochrones to {isochrone_layer_path}")
+
         if os.path.exists(isochrone_layer_path):
             os.remove(isochrone_layer_path)
-        # Process features one at a time
-        for i in range(0, total_features):
-            feature = features[i]
+
+        # Shamelessly hard coding network layer for now
+        network_layer_path = "/home/timlinux/dev/python/GEEST/data/StLucia/osm_.gpkg|layername=highway_motorway_highway_motorway_link_32620"
+
+        # Process features using an iterator
+        for i, point_feature in enumerate(point_layer.getFeatures()):
             # Process this point using QGIS native network analysis
             log_message("\n\n*************************************")
             log_message(f"Processing point {i+1} of {total_features}")
-            self._create_isochrone_for_point(feature, area_index)
+            # Parse the features from the networking analysis response
+            processor = NativeNetworkAnalysisProcessor(
+                network_layer_path=network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
+                isochrone_layer_path=isochrone_layer_path,  # isochrone_layer_path: Path to the output GeoPackage for the isochrones.
+                point_feature=point_feature,  # feature: The feature to use as the origin for the network analysis.
+                area_index=area_index,  # area_id: The ID of the area being processed.
+                crs=self.target_crs,  # crs: The coordinate reference system to use for the analysis.
+                mode=self.mode,  # mode: Travel time or travel distance ("time" or "distance").
+                values=self.distances,  # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
+                working_directory=self.workflow_directory,  # working_directory: The directory to save the output files.
+            )
+            try:
+                result = processor.run()
+            except Exception as e:
+                self.item.setAttribute(self.result_key, f"Task failed: {e}")
+
             log_message(f"Processed point {i+1} of {total_features}")
         return isochrone_layer_path
-
-    def _create_isochrone_for_point(self, point_feature, area_index):
-        """
-        Run the native isochrone algorithm for the given feature.
-
-        :param point_feature: The feature to use as the origin for the network analysis.
-        :param area_index: The index of the current area being processed.
-
-        :return: A QgsVectorLayer containing the isochrones as polygons.
-        """
-
-        # Parse the features from the networking analysis response
-        verbose_mode = int(setting(key="verbose_mode", default=0))
-        # Shamelessly hard coding network layer for now
-        path = "/home/timlinux/dev/python/GEEST/data/StLucia/osm_.gpkg|layername=highway_motorway_highway_motorway_link_32620"
-        processor = NativeNetworkAnalysisProcessor(
-            network_layer_path=path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
-            feature=point_feature,  # feature: The feature to use as the origin for the network analysis.
-            area_index=area_index,  # area_id: The ID of the area being processed.
-            crs=self.target_crs,  # crs: The coordinate reference system to use for the analysis.
-            mode=self.mode,  # mode: Travel time or travel distance ("time" or "distance").
-            values=self.distances,  # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
-            working_directory=self.workflow_directory,  # working_directory: The directory to save the output files.
-        )
-        try:
-            isochrones_gpkg_path = processor.run()
-        except Exception as e:
-            self.item.setAttribute(self.result_key, f"Task failed: {e}")
-
-        return isochrones_gpkg_path
 
     def _create_bands(self, isochrones_gpkg_path, index):
         """
