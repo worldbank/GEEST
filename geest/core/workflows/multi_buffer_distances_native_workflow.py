@@ -145,8 +145,9 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             point_layer=area_features,
             index=index,
         )
-
-        scored_buffers = self._assign_scores(buffers)
+        # Merge all isochrone layers into one final output
+        isochrones = self._create_bands(index=index)
+        scored_buffers = self._assign_scores(isochrones)
 
         if scored_buffers is False:
             log_message("No scored buffers were created.", level=Qgis.Warning)
@@ -179,29 +180,19 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         """
 
         features = list(point_layer.getFeatures())
-        log_message(f"Creating buffers for {len(features)} points")
+        log_message(f"Creating isochrones for {len(features)} points")
         total_features = len(features)
-
+        isochrone_layer_path = os.path.join(self.workflow_directory, "isochrones.gpkg")
+        if os.path.exists(isochrone_layer_path):
+            os.remove(isochrone_layer_path)
         # Process features one at a time
         for i in range(0, total_features):
             feature = features[i]
             # Process this point using QGIS native network analysis
+            log_message("\n\n*************************************")
+            log_message(f"Processing point {i+1} of {total_features}")
             self._create_isochrone_layer(feature)
-            log_message(f"Processed point {i} of {total_features}")
-
-        # Merge all isochrone layers into one final output
-        if self.temp_layers:
-            log_message(
-                f"Merging {len(self.temp_layers)} isochrone layers",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-            log_message(f"Removing overlaps between isochrones")
-            result = self._create_bands()
-            return result
-        else:
-            log_message("No isochrones were created.", level=Qgis.Warning)
-            return False
+            log_message(f"Processed point {i+1} of {total_features}")
 
     def _create_isochrone_layer(self, feature):
         """
@@ -230,20 +221,27 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         return result
 
-    def _create_bands(self, layer, index):
+    def _create_bands(self, index):
         """
         Create bands by computing differences between isochrone ranges.
 
         This method computes the differences between isochrone ranges to create bands
         of non overlapping polygons. The bands are then merged into a final output layer.
 
-        :param layer: The merged isochrone layer.
         :param crs: Coordinate reference system for the output.
         :param index: The index of the current area being processed.
 
         Returns:
             QgsVectoryLayer: The final output QgsVectorLayer layer path containing the bands.
         """
+        isochrone_layer_path = os.path.join(
+            self.workflow_directory, "isochrones.gpkg|layername=isochrones"
+        )
+        layer = QgsVectorLayer(isochrone_layer_path, "isochrones", "ogr")
+        if not layer.isValid():
+            raise ValueError(
+                f"Failed to load isochrone layer from {isochrone_layer_path}"
+            )
         output_path = os.path.join(
             self.workflow_directory, f"final_isochrones_{index}.shp"
         )
@@ -252,7 +250,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         field_index = layer.fields().indexFromName(ranges_field)
         if field_index == -1:
             raise KeyError(
-                f"Field '{ranges_field}' does not exist in the merged layer."
+                f"Field '{ranges_field}' does not exist in isochrones layer: {isochrone_layer_path}"
             )
 
         unique_ranges = sorted(self.distances, reverse=False)

@@ -253,7 +253,9 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 new_feature.SetField("value", value)
                 self.isochrone_layer.CreateFeature(new_feature)
                 new_feature = None
-                log_message(f"Added feature with value {value} to the GeoPackage.")
+                log_message(
+                    f"Added feature with value **{value}** to the GeoPackage.\n\n"
+                )
                 # show how many features in the isochrone layer
                 log_message(
                     f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
