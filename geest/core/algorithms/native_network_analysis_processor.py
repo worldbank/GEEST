@@ -112,14 +112,22 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         output_path = os.path.join(
             self.working_directory, f"network_{self.feature.id()}.gpkg"
         )
-        point_layer = QgsVectorLayer(
-            f"Point?crs=EPSG:{self.crs.authid()}&field=id:integer",
-            "start_point",
-            "memory",
+        service_area_multipart_point_output_path = os.path.join(
+            self.working_directory,
+            f"service_area_multipart_point_{self.feature.id()}.gpkg",
         )
-        provider = point_layer.dataProvider()
-        provider.addFeature(self.feature)
-        point_layer.updateExtents()
+        service_area_singlepart_point_output_path = os.path.join(
+            self.working_directory,
+            f"service_area_singlepart_point_{self.feature.id()}.gpkg",
+        )
+        # point_layer = QgsVectorLayer(
+        #     f"Point?crs=EPSG:{self.crs.authid()}&field=id:integer",
+        #     "start_point",
+        #     "memory",
+        # )
+        # provider = point_layer.dataProvider()
+        # provider.addFeature(self.feature)
+        # point_layer.updateExtents()
 
         largest_value = max(self.values)
         geometry = self.feature.geometry()
@@ -147,8 +155,33 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         )["OUTPUT"]
 
         for value in self.values:
+            # There are two ways to calculate the service area:
+            # 1. Using the service area from layer algorithm
+            # 2. Using the service area from point algorithm
+            # The first one is commented out because it does not work reliably
+            # service_area_result = processing.run(
+            #     "native:serviceareafromlayer",
+            #     {
+            #         "INPUT": clipped_layer,
+            #         "STRATEGY": 0,
+            #         "DIRECTION_FIELD": "",
+            #         "VALUE_FORWARD": "",
+            #         "VALUE_BACKWARD": "",
+            #         "VALUE_BOTH": "",
+            #         "DEFAULT_DIRECTION": 2,
+            #         "SPEED_FIELD": "",
+            #         "DEFAULT_SPEED": 50,
+            #         "TOLERANCE": 0,
+            #         "START_POINTS": point_layer,
+            #         "TRAVEL_COST2": value,
+            #         "INCLUDE_BOUNDS": False,
+            #         "POINT_TOLERANCE": 50,  # Maximum distance a point can be from the network
+            #         "OUTPUT_LINES": None,
+            #         "OUTPUT": service_area_multipart_point_output_path,
+            #     },
+            # )
             service_area_result = processing.run(
-                "native:serviceareafromlayer",
+                "native:serviceareafrompoint",
                 {
                     "INPUT": clipped_layer,
                     "STRATEGY": 0,
@@ -159,29 +192,33 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                     "DEFAULT_DIRECTION": 2,
                     "SPEED_FIELD": "",
                     "DEFAULT_SPEED": 50,
-                    "TOLERANCE": 0,
-                    "START_POINTS": point_layer,
+                    "TOLERANCE": 50,
+                    "START_POINT": f"{center_point.x()},{center_point.y()} [{self.crs.authid()}]",
                     "TRAVEL_COST2": value,
+                    "POINT_TOLERANCE": 50,  # Maximum distance a point can be from the network
                     "INCLUDE_BOUNDS": False,
-                    "POINT_TOLERANCE": None,
-                    "OUTPUT_LINES": None,
-                    "OUTPUT": "TEMPORARY_OUTPUT",
+                    "OUTPUT": service_area_multipart_point_output_path,
                 },
             )
-
             service_area_layer = service_area_result["OUTPUT"]
             log_message("Service area layer created successfully.")
             single_part_edge_points_result = processing.run(
                 "native:multiparttosingleparts",
                 {
                     "INPUT": service_area_layer,
-                    "OUTPUT": "TEMPORARY_OUTPUT",
+                    "OUTPUT": service_area_singlepart_point_output_path,
                 },
             )
             del service_area_layer
             log_message("Converted multipart to singlepart successfully.")
-
-            singlepart_layer = single_part_edge_points_result["OUTPUT"]
+            singlepart_layer_path = single_part_edge_points_result["OUTPUT"]
+            singlepart_layer = QgsVectorLayer(
+                singlepart_layer_path, "singlepart_layer", "ogr"
+            )
+            if not singlepart_layer.isValid():
+                raise ValueError(
+                    f"Singlepart layer is invalid: {singlepart_layer_path}"
+                )
             # Show how many features in the singlepart layer
             log_message(
                 f"Singlepart layer has {singlepart_layer.featureCount()} features."
@@ -189,22 +226,31 @@ class NativeNetworkAnalysisProcessor(QgsTask):
 
             # Compute the concave hull using grass
             # for some reason, grass output (lower case) is a path not a qgsvectorlayer obnect
+            # concave_hull_result_path = processing.run(
+            #     "grass:v.hull",
+            #     {
+            #         "input": singlepart_layer,
+            #         "where": "",
+            #         "-f": False,
+            #         "output": "TEMPORARY_OUTPUT",
+            #         "GRASS_REGION_PARAMETER": None,
+            #         "GRASS_SNAP_TOLERANCE_PARAMETER": -1,
+            #         "GRASS_MIN_AREA_PARAMETER": 0.0001,
+            #         "GRASS_OUTPUT_TYPE_PARAMETER": 0,
+            #         "GRASS_VECTOR_DSCO": "",
+            #         "GRASS_VECTOR_LCO": "",
+            #         "GRASS_VECTOR_EXPORT_NOCAT": False,
+            #     },
+            # )["output"]
             concave_hull_result_path = processing.run(
-                "grass:v.hull",
+                "qgis:minimumboundinggeometry",
                 {
-                    "input": singlepart_layer,
-                    "where": "",
-                    "-f": False,
-                    "output": "TEMPORARY_OUTPUT",
-                    "GRASS_REGION_PARAMETER": None,
-                    "GRASS_SNAP_TOLERANCE_PARAMETER": -1,
-                    "GRASS_MIN_AREA_PARAMETER": 0.0001,
-                    "GRASS_OUTPUT_TYPE_PARAMETER": 0,
-                    "GRASS_VECTOR_DSCO": "",
-                    "GRASS_VECTOR_LCO": "",
-                    "GRASS_VECTOR_EXPORT_NOCAT": False,
-                },
-            )["output"]
+                    "INPUT": singlepart_layer,
+                    "FIELD": "",
+                    "TYPE": 3,
+                    "OUTPUT": "TEMPORARY_OUTPUT",
+                }["OUTPUT"],
+            )
             # Load the output as a QgsVetorLayer
             concave_hull_result_layer = QgsVectorLayer(
                 concave_hull_result_path, "concave_hull", "ogr"
@@ -263,6 +309,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             del concave_hull_result_layer
 
         del clipped_layer
-        del point_layer
+        # del point_layer
         log_message(f"Service areas calculated for feature {self.feature.id()}.")
         return
