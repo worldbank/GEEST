@@ -242,22 +242,20 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             #         "GRASS_VECTOR_EXPORT_NOCAT": False,
             #     },
             # )["output"]
-            concave_hull_result_path = processing.run(
+            concave_hull_result = processing.run(
                 "qgis:minimumboundinggeometry",
                 {
                     "INPUT": singlepart_layer,
                     "FIELD": "",
-                    "TYPE": 3,
+                    "TYPE": 3,  # convex hull polygon
                     "OUTPUT": "TEMPORARY_OUTPUT",
-                }["OUTPUT"],
+                },
             )
             # Load the output as a QgsVetorLayer
-            concave_hull_result_layer = QgsVectorLayer(
-                concave_hull_result_path, "concave_hull", "ogr"
-            )
+            concave_hull_result_layer = concave_hull_result["OUTPUT"]
             if not concave_hull_result_layer.isValid():
                 raise ValueError(
-                    f"Concave hull result layer is invalid: {concave_hull_result_path}"
+                    f"Concave hull result layer is invalid: {concave_hull_result_layer}"
                 )
             log_message("Concave hull created successfully.")
 
