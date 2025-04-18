@@ -97,6 +97,9 @@
        <pointsize>16</pointsize>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
+     </property>
      <property name="text">
       <string>📂 Open an existing project</string>
      </property>
@@ -130,6 +133,9 @@
       <font>
        <pointsize>16</pointsize>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
      </property>
      <property name="text">
       <string>⭐️ Create a new project</string>
@@ -169,6 +175,9 @@
         <font>
          <pointsize>16</pointsize>
         </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
        </property>
        <property name="text">
         <string>◀️</string>

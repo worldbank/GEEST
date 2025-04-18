@@ -82,6 +82,9 @@
          <pointsize>16</pointsize>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
+       </property>
        <property name="text">
         <string>◀️</string>
        </property>
@@ -118,6 +121,9 @@
         <font>
          <pointsize>16</pointsize>
         </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
        </property>
        <property name="text">
         <string>▶️</string>
@@ -169,7 +175,7 @@
         <x>0</x>
         <y>0</y>
         <width>542</width>
-        <height>643</height>
+        <height>629</height>
        </rect>
       </property>
       <property name="styleSheet">

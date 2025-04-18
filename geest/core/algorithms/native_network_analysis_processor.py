@@ -224,6 +224,8 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 f"Singlepart layer has {singlepart_layer.featureCount()} features."
             )
 
+            # Doesnt work with some datasets for inexplicable reasons
+
             # Compute the concave hull using grass
             # for some reason, grass output (lower case) is a path not a qgsvectorlayer obnect
             # concave_hull_result_path = processing.run(

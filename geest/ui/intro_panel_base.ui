@@ -68,6 +68,9 @@
          <pointsize>16</pointsize>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
+       </property>
        <property name="text">
         <string>▶️</string>
        </property>
@@ -108,7 +111,7 @@
         <x>0</x>
         <y>0</y>
         <width>556</width>
-        <height>664</height>
+        <height>655</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
