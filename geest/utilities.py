@@ -35,6 +35,18 @@ from qgis.core import QgsProject, Qgis
 from geest.core import setting
 
 
+standard_stylesheet = """
+            QToolTip {
+                color: #000000;
+                background-color: #FFFFDC;
+                border: 1px solid black;
+                border-radius: 8px; /* Rounded corners */
+                padding: 5px;
+                max-width: 200px; /* Fixed maximum width */
+            };
+            background-color: rgba(0, 0, 0, 0);"""
+
+
 def log_window_geometry(geometry):
     """
     Creates an ASCII-art diagram of the dialog's dimensions based on the

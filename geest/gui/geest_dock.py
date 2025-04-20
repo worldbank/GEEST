@@ -5,7 +5,7 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import Qt, QEvent, QPoint
 from qgis.PyQt.QtGui import QPixmap, QPainter
 
 from qgis.core import Qgis, QgsProject
@@ -25,6 +25,7 @@ from geest.utilities import (
     log_message,
     is_qgis_dark_theme_active,
     version,
+    standard_stylesheet,
 )
 
 INTRO_PANEL = 0
@@ -71,7 +72,7 @@ class GeestDock(QDockWidget):
             self.background_image = QPixmap(
                 resources_path("resources", "images", "background.png")
             )
-
+        self.setStyleSheet(standard_stylesheet)
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
 
@@ -88,6 +89,7 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
             )
+            self.intro_widget.setStyleSheet(standard_stylesheet)
             # CREDITS_PANEL = 1
             # Create and add the "Credits" panel (CreditsPanel)
             self.credits_widget: CreditsPanel = CreditsPanel()
@@ -104,6 +106,7 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+            self.credits_widget.setStyleSheet(standard_stylesheet)
             # SETUP_PANEL = 2
             # Create and add the "Project" panel (SetupPanel)
             self.setup_widget: SetupPanel = SetupPanel()
@@ -127,6 +130,7 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(CREDITS_PANEL)
             )
+            self.setup_widget.setStyleSheet(standard_stylesheet)
             # OPEN_PROJECT_PANEL = 3
             # Create and add the "Open Project" panel
             self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
@@ -152,6 +156,7 @@ class GeestDock(QDockWidget):
                     self.open_project_widget.working_dir
                 )
             )
+            self.open_project_widget.setStyleSheet(standard_stylesheet)
             # CREATE_PROJECT_PANEL = 4
             # Create and add the "Create Project" panel
             self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
@@ -177,6 +182,7 @@ class GeestDock(QDockWidget):
                     self.create_project_widget.working_dir
                 )
             )
+            self.create_project_widget.setStyleSheet(standard_stylesheet)
             # TREE_PANEL = 5
             # Create and add the "Tree" panel (TreePanel)
             self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
@@ -193,6 +199,7 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+            self.tree_widget.setStyleSheet(standard_stylesheet)
 
             # HELP_PANEL = 6
             # Create and add the "Help" panel (HelpPanel)
@@ -206,6 +213,8 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
+            help_widget.setStyleSheet(standard_stylesheet)
+
             # Add the stacked widget to the main layout
             layout.addWidget(self.stacked_widget)
 
@@ -223,7 +232,6 @@ class GeestDock(QDockWidget):
 
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
-
             log_message("GeestDock initialized successfully.")
 
         except Exception as e:

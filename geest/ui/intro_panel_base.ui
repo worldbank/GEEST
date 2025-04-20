@@ -130,7 +130,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="intro_label">
          <property name="styleSheet">
-          <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>The Gender Enabling Environments Spatial Tool (GEEST), developed by the **World Bank**, evaluates locations based on how supportive they are of women’s employment and business opportunities. 

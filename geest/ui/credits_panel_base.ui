@@ -203,7 +203,7 @@
           </sizepolicy>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>This plugin is built with support from the **Canada Clean Energy and Forest Climate Facility (CCEFCFy)**, the **Geospatial Operational Support Team (GOST, DECSC)** for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector. 

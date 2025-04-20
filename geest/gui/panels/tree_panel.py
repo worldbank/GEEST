@@ -65,7 +65,7 @@ from geest.core.algorithms import (
 )
 from geest.core.reports.study_area_report import StudyAreaReport
 
-from geest.utilities import log_message
+from geest.utilities import log_message, standard_stylesheet
 
 
 class TreePanel(QWidget):
@@ -87,7 +87,7 @@ class TreePanel(QWidget):
         self.items_to_run = 0  # Count of items that need to be run
 
         layout = QVBoxLayout()
-
+        layout.setContentsMargins(0, 0, 0, 0)
         if json_file:
             # Load JSON data
             self.load_json()
@@ -98,6 +98,8 @@ class TreePanel(QWidget):
         self.treeView = JsonTreeView()
         self.treeView.setDragDropMode(QTreeView.InternalMove)
         self.treeView.setDefaultDropAction(Qt.MoveAction)
+
+        self.treeView.setStyleSheet(standard_stylesheet)
 
         # Create a model for the QTreeView using custom JsonTreeModel
         self.model = JsonTreeModel(self.json_data)
