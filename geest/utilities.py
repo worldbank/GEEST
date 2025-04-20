@@ -44,11 +44,9 @@ standard_stylesheet = """
         padding: 5px;
         max-width: 200px; /* Fixed maximum width */
     };
-    background-color: rgba(0, 0, 0, 0);"""
+    background-color: rgba(0, 0, 0, 0);    
+    """
 
-button_stylesheet = """
-    background-color: rgba(118, 182, 178, 255);
-"""
 standard_stylesheet_dark = """
     QToolTip {
         color: #000000;
@@ -59,10 +57,51 @@ standard_stylesheet_dark = """
         max-width: 200px; /* Fixed maximum width */
     };
     background-color: rgba(0, 0, 0, 0);"""
-
+button_stylesheet = """
+    background-color: rgba(118, 182, 178, 255);
+"""
 button_stylesheet_dark = """
     background-color: rgba(118, 182, 178, 255);
     color: #ffffff;
+"""
+dialog_stylesheet = """
+    background-color: rgba(118, 182, 178, 255);
+"""
+dialog_stylesheet_dark = """
+    background-color: rgba(118, 182, 178, 255);
+    color: #000000;
+"""
+menu_stylesheet = """
+    QMenu {
+        background-color: #ffffff; /* Solid white background */
+        color: #000000;            /* Text color */
+        border: 1px solid #aaa;
+        border-radius: 6px;
+    }
+
+    QMenu::item {
+        padding: 5px 20px;
+    }
+
+    QMenu::item:selected {
+        background-color: #f0f0f0;
+    }
+"""
+menu_stylesheet_dark = """
+    QMenu {
+        background-color: #000000; /* Solid white background */
+        color: #ffffff;            /* Text color */
+        border: 1px solid #aaa;
+        border-radius: 6px;
+    }
+
+    QMenu::item {
+        padding: 5px 20px;
+    }
+
+    QMenu::item:selected {
+        background-color: #f0f0f0;
+    }
 """
 
 

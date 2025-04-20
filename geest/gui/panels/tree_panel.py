@@ -33,7 +33,8 @@ from qgis.PyQt.QtCore import (
     pyqtSignal,
     QModelIndex,
 )
-from qgis.PyQt.QtGui import QMovie
+from qgis.PyQt.QtGui import QMovie, QPalette, QColor
+
 from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import (
     Qgis,
@@ -69,8 +70,13 @@ from geest.utilities import (
     standard_stylesheet,
     button_stylesheet,
     button_stylesheet_dark,
+    dialog_stylesheet,
+    dialog_stylesheet_dark,
+    menu_stylesheet,
+    menu_stylesheet_dark,
     log_message,
 )
+from geest.gui.widgets import SolidMenu
 
 
 class TreePanel(QWidget):
@@ -173,7 +179,7 @@ class TreePanel(QWidget):
         self.prepare_analysis_button.clicked.connect(self.run_all)
 
         # Create the menu for additional options
-        prepare_analysis_menu = QMenu(self.prepare_analysis_button)
+        prepare_analysis_menu = SolidMenu(self.prepare_analysis_button)
 
         # Add "Run all" action
         run_all_action = QAction("Run all", self)
@@ -282,6 +288,10 @@ class TreePanel(QWidget):
         """
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Warning)
+        if is_qgis_dark_theme_active():
+            msg_box.setStyleSheet(dialog_stylesheet_dark)
+        else:
+            msg_box.setStyleSheet(dialog_stylesheet)
         msg_box.setWindowTitle("Clear Workflows")
         msg_box.setText(
             f"This action will DELETE all files and folders in the working directory ({self.working_directory}). Do you want to continue?"
@@ -504,7 +514,16 @@ class TreePanel(QWidget):
         clear_results_action.triggered.connect(self.clear_workflows)
 
         # Update when menu shows
-        menu = QMenu(self)
+        menu = SolidMenu(self)
+
+        # Hack to fix transparency
+        palette = QPalette()
+        palette.setColor(QPalette.Base, QColor("#ffffff"))  # background color
+        palette.setColor(QPalette.Window, QColor("#ffffff"))  # window background
+        menu.setWindowFlags(menu.windowFlags() | Qt.NoDropShadowWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        menu.setPalette(palette)
+
         menu.aboutToShow.connect(update_action_text)
         # Add event filter to menu to update when shift is pressed while menu is open
         menu.installEventFilter(self)
@@ -520,7 +539,7 @@ class TreePanel(QWidget):
         )
 
         if item.role == "analysis":
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
             edit_analysis_action.triggered.connect(
                 lambda: self.edit_analysis_aggregation(item)
@@ -605,7 +624,7 @@ class TreePanel(QWidget):
                 lambda: self.model.remove_item(item)
             )
             # Add actions to menu
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             menu.addAction(edit_aggregation_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
@@ -632,7 +651,7 @@ class TreePanel(QWidget):
             remove_factor_action.triggered.connect(lambda: self.model.remove_item(item))
 
             # Add actions to menu
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             menu.addAction(edit_aggregation_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
@@ -657,7 +676,7 @@ class TreePanel(QWidget):
             )
 
             # Add actions to menu
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             menu.addAction(show_properties_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
@@ -862,24 +881,34 @@ class TreePanel(QWidget):
         # Add buttons
         button_layout = QHBoxLayout()
 
+        # Get the stylesheet for the buttons
+        if is_qgis_dark_theme_active():
+            stylesheet = button_stylesheet_dark
+        else:
+            stylesheet = button_stylesheet
+
         # Close button
         close_button = QPushButton("Close")
         close_button.clicked.connect(dialog.close)
         button_layout.addWidget(close_button)
+        close_button.setStyleSheet(stylesheet)
 
         # Maximize button
         maximize_button = QPushButton("AutoSize Columns")
         maximize_button.clicked.connect(lambda: self.maximize_dialog(dialog, table))
         button_layout.addWidget(maximize_button)
+        maximize_button.setStyleSheet(stylesheet)
 
         # Copy button
         copy_button = QPushButton("Copy to Clipboard")
         copy_button.clicked.connect(lambda: self.copy_to_clipboard_as_markdown(table))
         button_layout.addWidget(copy_button)
+        copy_button.setStyleSheet(stylesheet)
 
         # Show Error File button
         if error_file_content is not None:
             show_error_file_button = QPushButton("Show Error File")
+            show_error_file_button.setStyleSheet(stylesheet)
             button_layout.addWidget(show_error_file_button)
             show_error_file_button.clicked.connect(
                 lambda: self.show_error_file_popup(error_file_content)
@@ -999,7 +1028,7 @@ class TreePanel(QWidget):
             return  # If no cell is clicked, do nothing
 
         # Create the context menu
-        menu = QMenu()
+        menu = SolidMenu()
         copy_action = menu.addAction("Copy")
 
         # Execute the menu at the position and check if an action was selected
