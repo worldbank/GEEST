@@ -47,7 +47,6 @@ from qgis.core import (
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
 from geest.core import JsonTreeItem
-from geest.utilities import resources_path
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
 from geest.gui.dialogs import (
@@ -64,8 +63,14 @@ from geest.core.algorithms import (
     OpportunitiesByWeeScorePopulationProcessingTask,
 )
 from geest.core.reports.study_area_report import StudyAreaReport
-
-from geest.utilities import log_message, standard_stylesheet
+from geest.utilities import (
+    resources_path,
+    is_qgis_dark_theme_active,
+    standard_stylesheet,
+    button_stylesheet,
+    button_stylesheet_dark,
+    log_message,
+)
 
 
 class TreePanel(QWidget):
@@ -159,6 +164,10 @@ class TreePanel(QWidget):
         self.prepare_analysis_button = QToolButton()
         self.prepare_analysis_button.setText("▶️ Run all")
         self.prepare_analysis_button.setPopupMode(QToolButton.MenuButtonPopup)
+        if is_qgis_dark_theme_active():
+            self.prepare_analysis_button.setStyleSheet(button_stylesheet_dark)
+        else:
+            self.prepare_analysis_button.setStyleSheet(button_stylesheet)
 
         # Connect the main button click to run all
         self.prepare_analysis_button.clicked.connect(self.run_all)
@@ -183,9 +192,18 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.prepare_analysis_button)
 
         self.project_button = QPushButton("Project")
+        if is_qgis_dark_theme_active():
+            self.project_button.setStyleSheet(button_stylesheet_dark)
+        else:
+            self.project_button.setStyleSheet(button_stylesheet)
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
+
         self.help_button = QPushButton("Help")
+        if is_qgis_dark_theme_active():
+            self.help_button.setStyleSheet(button_stylesheet_dark)
+        else:
+            self.help_button.setStyleSheet(button_stylesheet)
         self.help_button.clicked.connect(self.switch_to_next_tab)
         button_bar.addWidget(self.help_button)
         # Add two progress bars to monitor all workflow progress and individual progress

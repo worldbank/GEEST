@@ -36,15 +36,34 @@ from geest.core import setting
 
 
 standard_stylesheet = """
-            QToolTip {
-                color: #000000;
-                background-color: #FFFFDC;
-                border: 1px solid black;
-                border-radius: 8px; /* Rounded corners */
-                padding: 5px;
-                max-width: 200px; /* Fixed maximum width */
-            };
-            background-color: rgba(0, 0, 0, 0);"""
+    QToolTip {
+        color: #000000;
+        background-color: #FFFFDC;
+        border: 1px solid black;
+        border-radius: 8px; /* Rounded corners */
+        padding: 5px;
+        max-width: 200px; /* Fixed maximum width */
+    };
+    background-color: rgba(0, 0, 0, 0);"""
+
+button_stylesheet = """
+    background-color: rgba(118, 182, 178, 255);
+"""
+standard_stylesheet_dark = """
+    QToolTip {
+        color: #000000;
+        background-color: #FFFFDC;
+        border: 1px solid black;
+        border-radius: 8px; /* Rounded corners */
+        padding: 5px;
+        max-width: 200px; /* Fixed maximum width */
+    };
+    background-color: rgba(0, 0, 0, 0);"""
+
+button_stylesheet_dark = """
+    background-color: rgba(118, 182, 178, 255);
+    color: #ffffff;
+"""
 
 
 def log_window_geometry(geometry):
