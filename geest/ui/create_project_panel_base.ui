@@ -77,9 +77,6 @@
          <pointsize>16</pointsize>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-       </property>
        <property name="text">
         <string>◀️</string>
        </property>
@@ -123,9 +120,6 @@
          <pointsize>16</pointsize>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-       </property>
        <property name="text">
         <string>▶️</string>
        </property>
@@ -148,9 +142,6 @@
    </item>
    <item row="3" column="0">
     <widget class="QScrollArea" name="scrollArea">
-     <property name="styleSheet">
-      <string notr="true">background: transparent;</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -211,9 +202,6 @@
              <pointsize>16</pointsize>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-           </property>
           </widget>
          </item>
          <item>
@@ -222,9 +210,6 @@
             <font>
              <pointsize>16</pointsize>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
            </property>
            <property name="text">
             <string>...</string>
@@ -239,9 +224,6 @@
           <font>
            <pointsize>16</pointsize>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
          </property>
          <property name="text">
           <string>⬇️ Download from Open Street Map</string>
@@ -263,9 +245,6 @@
           <font>
            <pointsize>16</pointsize>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
          </property>
          <property name="minimum">
           <number>1</number>
@@ -317,9 +296,6 @@
              <pointsize>16</pointsize>
             </font>
            </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-           </property>
           </widget>
          </item>
          <item>
@@ -328,9 +304,6 @@
             <font>
              <pointsize>16</pointsize>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
            </property>
            <property name="text">
             <string>...</string>
@@ -379,9 +352,6 @@
           <font>
            <pointsize>16</pointsize>
           </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
          </property>
         </widget>
        </item>
@@ -436,9 +406,6 @@
             <font>
              <pointsize>16</pointsize>
             </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
            </property>
            <property name="text">
             <string>📂 Create or select a project directory</string>

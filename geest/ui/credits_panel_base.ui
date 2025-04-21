@@ -82,9 +82,6 @@
          <pointsize>16</pointsize>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-       </property>
        <property name="text">
         <string>◀️</string>
        </property>
@@ -122,9 +119,6 @@
          <pointsize>16</pointsize>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-       </property>
        <property name="text">
         <string>▶️</string>
        </property>
@@ -160,9 +154,6 @@
    </item>
    <item row="3" column="0">
     <widget class="QScrollArea" name="scrollArea">
-     <property name="styleSheet">
-      <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -177,9 +168,6 @@
         <width>542</width>
         <height>629</height>
        </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">

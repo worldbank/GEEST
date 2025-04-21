@@ -393,7 +393,17 @@ class JsonTreeModel(QAbstractItemModel):
         elif role == Qt.ToolTipRole and index.column() == 1:
             return item.getStatus()
         elif role == Qt.ToolTipRole and index.column() == 0:
-            return item.getItemTooltip()
+            # if the item role is "indicator" then use the
+            # description from its parent for the tooltip
+            if item.role == "indicator":
+                parent = item.parent()
+                if parent and parent.role == "factor":
+                    # Force it to rich text so it doen't get cut off
+                    return f"<p>{parent.getItemTooltip()}</p>"
+            # Analysis, dimension and factor items use their own tooltip
+            # Force it to rich text so it doen't get cut off
+            return f"<p>{item.getItemTooltip()}</p>"
+
         elif role == Qt.FontRole:
             return item.getFont()
 

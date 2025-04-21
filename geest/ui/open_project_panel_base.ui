@@ -92,9 +92,6 @@
          <pointsize>10</pointsize>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-       </property>
       </widget>
      </item>
      <item>
@@ -103,9 +100,6 @@
         <font>
          <pointsize>10</pointsize>
         </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -148,9 +142,6 @@
          <pointsize>16</pointsize>
         </font>
        </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
-       </property>
        <property name="text">
         <string>◀️</string>
        </property>
@@ -187,9 +178,6 @@
         <font>
          <pointsize>16</pointsize>
         </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
        </property>
        <property name="text">
         <string>▶️</string>

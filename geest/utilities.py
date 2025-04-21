@@ -56,23 +56,29 @@ def theme_stylesheet() -> str:
     Returns:
         str: The stylesheet for the active theme (light or dark).
     """
+    # 🚩 Be careful: One mistake in the style sheet and none of the
+    # subsequent rules will evaluate. If you are changing something,
+    # try move it to the top and check that all the subsequent rules work still...
     light_theme_stylesheet = f"""
+        QPushButton {{
+            background-color: rgba(118, 182, 178, 255);
+        }}
         QToolTip {{
             color: #000000;
             background-color: #FFFFDC;
             border: 1px solid black;
-            border-radius: 8px; /* Rounded corners */
-            padding: 5px;
-            max-width: 200px; /* Fixed maximum width */
-        }};
-
+            border-radius: 2px; /* Rounded corners */
+            padding: 0px;
+        }}
         QMenu {{
             background-color: #ffffff; /* Solid white background */
             color: #000000;            /* Text color */
             border: 1px solid #aaa;
             border-radius: 6px;
         }}
-        QDockWidget {{
+        /* checked to here */
+        
+        QDockWidget, QDialog {{
             background-image: url({resources_path("resources", "images", "background-light.png")});
             background-repeat: no-repeat;
             background-position: center;
@@ -84,18 +90,25 @@ def theme_stylesheet() -> str:
         QMenu::item:selected {{
             background-color: #f0f0f0;
         }}
-
-        QPushButton {{
-            background-color: rgba(118, 182, 178, 255);
+        QTreeView {{
+            background-color: rgba(0, 0, 0, 0);
         }}
-
-        QDialog {{
-            background-color: rgba(118, 182, 178, 255);
-        }}
-
         QScrollArea {{
-            background: transparent;
+            background-color: rgba(0, 0, 0, 0);
         }}
+        QScrollArea > QWidget > QWidget {{
+            background-color: rgba(0, 0, 0, 0);
+        }}
+        QScrollArea > QWidget > QWidget > QLabel{{
+            background-color: rgba(118, 182, 178, 0);
+        }}
+        /* Uncomment this last rule when making a change to check that
+        all rules are rendering, then comment it out again... */
+        /*
+        QWidget {{
+            border: 2px solid red;
+        }}
+        */
     """
 
     dark_theme_stylesheet = f"""

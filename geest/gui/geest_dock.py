@@ -62,9 +62,6 @@ class GeestDock(QDockWidget):
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for a cleaner look
         layout.setSpacing(0)  # Remove spacing between elements
 
-        # Load the background image
-        self.background_image = theme_background_image()
-        self.setStyleSheet(theme_stylesheet())
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
 
@@ -228,6 +225,11 @@ class GeestDock(QDockWidget):
             import traceback
 
             log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+
+        # Load the background image and style sheet
+        # do this last so it applies to all the widgets
+        self.background_image = theme_background_image()
+        main_widget.setStyleSheet(theme_stylesheet())
 
     def paintEvent(self, event):
         with QPainter(self) as painter:

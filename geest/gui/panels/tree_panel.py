@@ -286,7 +286,7 @@ class TreePanel(QWidget):
                     os.system(f'xdg-open "{self.working_directory}"')
                 return
 
-        if reply == QMessageBox.No:
+        if reply == QMessageBox.No or reply == QMessageBox.Rejected:
             return
         self.run_only_incomplete = False
         # Remove every file in self.working_directory except
