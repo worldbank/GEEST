@@ -26,6 +26,7 @@ from geest.core import WorkflowQueueManager
 from geest.utilities import log_message
 from geest.gui.widgets import CustomBannerLabel
 from geest.core.reports.study_area_report import StudyAreaReport
+from geest.core.osm_downloaders.osm_roads_downloader import OSMRoadsDownloader
 import platform
 
 
@@ -77,7 +78,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
-
+        self.download_road_layer_button.connect(self.download_road_layer_button_clicked)
         self.create_project_directory_button.clicked.connect(
             self.create_new_project_folder
         )
@@ -243,6 +244,13 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
             widget.setEnabled(True)
+
+    def download_road_layer_button_clicked(self):
+        """Triggered when the Download Road Layer button is pressed."""
+        # get the extents of the study area
+        layer = self.layer_combo.currentLayer()
+        extents = layer.extent()
+        downloader = OSMRoadsDownloader(extents=extents, output_path=self.working_dir)
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def progress_updated(self, progress: float):
