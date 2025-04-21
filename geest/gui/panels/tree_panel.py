@@ -491,6 +491,7 @@ class TreePanel(QWidget):
 
         # Update when menu shows
         menu = SolidMenu(self)
+
         menu.aboutToShow.connect(update_action_text)
         # Add event filter to menu to update when shift is pressed while menu is open
         menu.installEventFilter(self)

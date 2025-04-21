@@ -5,8 +5,8 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qgis.PyQt.QtCore import Qt, QEvent, QPoint
-from qgis.PyQt.QtGui import QPixmap, QPainter
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QPainter
 
 from qgis.core import Qgis, QgsProject
 from typing import Optional
@@ -19,11 +19,9 @@ from geest.gui.panels import (
     OpenProjectPanel,
     CreateProjectPanel,
 )
-from geest.core import set_setting, setting
+from geest.core import setting
 from geest.utilities import (
-    resources_path,
     log_message,
-    is_qgis_dark_theme_active,
     version,
     theme_background_image,
     theme_stylesheet,
@@ -66,7 +64,7 @@ class GeestDock(QDockWidget):
 
         # Load the background image
         self.background_image = theme_background_image()
-
+        self.setStyleSheet(theme_stylesheet())
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
 

@@ -2,11 +2,8 @@ from qgis.PyQt.QtGui import QPixmap, QPainter
 from qgis.PyQt.QtCore import QRect, Qt
 from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout
 from geest.utilities import (
-    resources_path,
-    setting,
     theme_stylesheet,
     theme_background_image,
-    is_qgis_dark_theme_active,
 )
 
 
