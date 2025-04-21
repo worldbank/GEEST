@@ -25,9 +25,10 @@ from geest.utilities import (
     is_qgis_dark_theme_active,
 )
 from geest.gui.widgets import CustomBannerLabel
+from .custom_base_dialog import CustomBaseDialog
 
 
-class DimensionAggregationDialog(QDialog):
+class DimensionAggregationDialog(CustomBaseDialog):
     def __init__(self, dimension_name, dimension_data, dimension_item, parent=None):
         super().__init__(parent)
 
@@ -363,7 +364,7 @@ class DimensionAggregationDialog(QDialog):
         enabled_rows_count = len(enabled_rows)
         if enabled_rows_count == 0:
             valid_sum = True
-
+        # TODO: Move this to stylesheet rather
         if is_qgis_dark_theme_active():
             normal_color = "color: white;"
         else:

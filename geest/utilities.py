@@ -28,6 +28,7 @@ import platform
 import subprocess
 
 from qgis.PyQt.QtCore import QUrl, QSettings, QRect
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt import uic
 from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsLayerTreeGroup, QgsVectorLayer
 from qgis.PyQt.QtWidgets import QApplication
@@ -35,74 +36,118 @@ from qgis.core import QgsProject, Qgis
 from geest.core import setting
 
 
-standard_stylesheet = """
-    QToolTip {
-        color: #000000;
-        background-color: #FFFFDC;
-        border: 1px solid black;
-        border-radius: 8px; /* Rounded corners */
-        padding: 5px;
-        max-width: 200px; /* Fixed maximum width */
-    };
-    background-color: rgba(0, 0, 0, 0);    
+def theme_background_image() -> QPixmap:
+    # Load the background image
+    if is_qgis_dark_theme_active():
+        background_image = QPixmap(
+            resources_path("resources", "images", "background-dark.png")
+        )
+    else:
+        background_image = QPixmap(
+            resources_path("resources", "images", "background.png")
+        )
+    return background_image
+
+
+def theme_stylesheet() -> str:
+    """
+    Returns the appropriate stylesheet based on whether the QGIS dark theme is active.
+
+    Returns:
+        str: The stylesheet for the active theme (light or dark).
+    """
+    light_theme_stylesheet = f"""
+        QToolTip {{
+            color: #000000;
+            background-color: #FFFFDC;
+            border: 1px solid black;
+            border-radius: 8px; /* Rounded corners */
+            padding: 5px;
+            max-width: 200px; /* Fixed maximum width */
+        }};
+
+        QMenu {{
+            background-color: #ffffff; /* Solid white background */
+            color: #000000;            /* Text color */
+            border: 1px solid #aaa;
+            border-radius: 6px;
+        }}
+        QDockWidget {{
+            background-image: url({resources_path("resources", "images", "background-light.png")});
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+        QMenu::item {{
+            padding: 5px 20px;
+        }}
+
+        QMenu::item:selected {{
+            background-color: #f0f0f0;
+        }}
+
+        QPushButton {{
+            background-color: rgba(118, 182, 178, 255);
+        }}
+
+        QDialog {{
+            background-color: rgba(118, 182, 178, 255);
+        }}
+
+        QScrollArea {{
+            background: transparent;
+        }}
     """
 
-standard_stylesheet_dark = """
-    QToolTip {
-        color: #000000;
-        background-color: #FFFFDC;
-        border: 1px solid black;
-        border-radius: 8px; /* Rounded corners */
-        padding: 5px;
-        max-width: 200px; /* Fixed maximum width */
-    };
-    background-color: rgba(0, 0, 0, 0);"""
-button_stylesheet = """
-    background-color: rgba(118, 182, 178, 255);
-"""
-button_stylesheet_dark = """
-    background-color: rgba(118, 182, 178, 255);
-    color: #ffffff;
-"""
-dialog_stylesheet = """
-    background-color: rgba(118, 182, 178, 255);
-"""
-dialog_stylesheet_dark = """
-    background-color: rgba(118, 182, 178, 255);
-    color: #000000;
-"""
-menu_stylesheet = """
-    QMenu {
-        background-color: #ffffff; /* Solid white background */
-        color: #000000;            /* Text color */
-        border: 1px solid #aaa;
-        border-radius: 6px;
-    }
+    dark_theme_stylesheet = f"""
+        QToolTip {{
+            color: #ffffff;
+            background-color: #333333;
+            border: 1px solid #555555;
+            border-radius: 8px; /* Rounded corners */
+            padding: 5px;
+            max-width: 200px; /* Fixed maximum width */
+        }};
 
-    QMenu::item {
-        padding: 5px 20px;
-    }
+        QMenu {{
+            background-color: #000000; /* Solid black background */
+            color: #ffffff;            /* Text color */
+            border: 1px solid #555555;
+            border-radius: 6px;
+        }}
 
-    QMenu::item:selected {
-        background-color: #f0f0f0;
-    }
-"""
-menu_stylesheet_dark = """
-    QMenu {
-        background-color: #000000; /* Solid white background */
-        color: #ffffff;            /* Text color */
-        border: 1px solid #aaa;
-        border-radius: 6px;
-    }
+        QDockWidget {{
+            background-image: url({resources_path("resources", "images", "background-dark.png")});
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
 
-    QMenu::item {
-        padding: 5px 20px;
-    }
+        QMenu::item {{
+            padding: 5px 20px;
+        }}
 
-    QMenu::item:selected {
-        background-color: #f0f0f0;
-    }
-"""
+        QMenu::item:selected {{
+            background-color: #444444;
+        }}
+
+        QPushButton {{
+            background-color: rgba(118, 182, 178, 255);
+            color: #ffffff;
+        }}
+
+        QDialog {{
+            background-color: rgba(118, 182, 178, 255);
+            color: #000000;
+        }}
+
+        QScrollArea {{
+            background: transparent;
+        }}
+    """
+
+    if is_qgis_dark_theme_active():
+        return dark_theme_stylesheet
+    else:
+        return light_theme_stylesheet
 
 
 def log_window_geometry(geometry):

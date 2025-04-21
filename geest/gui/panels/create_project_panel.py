@@ -334,12 +334,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.description.setFont(QFont("Arial", font_size))
         self.description2.setFont(QFont("Arial", font_size))
         self.description3.setFont(QFont("Arial", font_size))
+        self.description4.setFont(QFont("Arial", font_size))
         self.create_project_directory_button.setFont(QFont("Arial", font_size))
         self.load_boundary_button.setFont(QFont("Arial", font_size))
         self.cell_size_spinbox.setFont(QFont("Arial", font_size))
         self.layer_combo.setFont(QFont("Arial", font_size))
         self.field_combo.setFont(QFont("Arial", font_size))
         self.road_layer_combo.setFont(QFont("Arial", font_size))
+        self.load_road_layer_button.setFont(QFont("Arial", font_size))
         self.download_road_layer_button.setFont(QFont("Arial", font_size))
 
     def add_bboxes_to_map(self):

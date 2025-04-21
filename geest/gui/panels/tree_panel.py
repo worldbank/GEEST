@@ -33,7 +33,7 @@ from qgis.PyQt.QtCore import (
     pyqtSignal,
     QModelIndex,
 )
-from qgis.PyQt.QtGui import QMovie, QPalette, QColor
+from qgis.PyQt.QtGui import QMovie, QPalette, QColor, QPixmap
 
 from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import (
@@ -66,14 +66,7 @@ from geest.core.algorithms import (
 from geest.core.reports.study_area_report import StudyAreaReport
 from geest.utilities import (
     resources_path,
-    is_qgis_dark_theme_active,
-    standard_stylesheet,
-    button_stylesheet,
-    button_stylesheet_dark,
-    dialog_stylesheet,
-    dialog_stylesheet_dark,
-    menu_stylesheet,
-    menu_stylesheet_dark,
+    theme_stylesheet,
     log_message,
 )
 from geest.gui.widgets import SolidMenu
@@ -109,8 +102,6 @@ class TreePanel(QWidget):
         self.treeView = JsonTreeView()
         self.treeView.setDragDropMode(QTreeView.InternalMove)
         self.treeView.setDefaultDropAction(Qt.MoveAction)
-
-        self.treeView.setStyleSheet(standard_stylesheet)
 
         # Create a model for the QTreeView using custom JsonTreeModel
         self.model = JsonTreeModel(self.json_data)
@@ -170,10 +161,6 @@ class TreePanel(QWidget):
         self.prepare_analysis_button = QToolButton()
         self.prepare_analysis_button.setText("▶️ Run all")
         self.prepare_analysis_button.setPopupMode(QToolButton.MenuButtonPopup)
-        if is_qgis_dark_theme_active():
-            self.prepare_analysis_button.setStyleSheet(button_stylesheet_dark)
-        else:
-            self.prepare_analysis_button.setStyleSheet(button_stylesheet)
 
         # Connect the main button click to run all
         self.prepare_analysis_button.clicked.connect(self.run_all)
@@ -198,18 +185,10 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.prepare_analysis_button)
 
         self.project_button = QPushButton("Project")
-        if is_qgis_dark_theme_active():
-            self.project_button.setStyleSheet(button_stylesheet_dark)
-        else:
-            self.project_button.setStyleSheet(button_stylesheet)
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
 
         self.help_button = QPushButton("Help")
-        if is_qgis_dark_theme_active():
-            self.help_button.setStyleSheet(button_stylesheet_dark)
-        else:
-            self.help_button.setStyleSheet(button_stylesheet)
         self.help_button.clicked.connect(self.switch_to_next_tab)
         button_bar.addWidget(self.help_button)
         # Add two progress bars to monitor all workflow progress and individual progress
@@ -288,10 +267,7 @@ class TreePanel(QWidget):
         """
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Warning)
-        if is_qgis_dark_theme_active():
-            msg_box.setStyleSheet(dialog_stylesheet_dark)
-        else:
-            msg_box.setStyleSheet(dialog_stylesheet)
+        msg_box.setStyleSheet(theme_stylesheet())
         msg_box.setWindowTitle("Clear Workflows")
         msg_box.setText(
             f"This action will DELETE all files and folders in the working directory ({self.working_directory}). Do you want to continue?"
@@ -515,15 +491,6 @@ class TreePanel(QWidget):
 
         # Update when menu shows
         menu = SolidMenu(self)
-
-        # Hack to fix transparency
-        palette = QPalette()
-        palette.setColor(QPalette.Base, QColor("#ffffff"))  # background color
-        palette.setColor(QPalette.Window, QColor("#ffffff"))  # window background
-        menu.setWindowFlags(menu.windowFlags() | Qt.NoDropShadowWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
-        menu.setPalette(palette)
-
         menu.aboutToShow.connect(update_action_text)
         # Add event filter to menu to update when shift is pressed while menu is open
         menu.installEventFilter(self)
@@ -881,34 +848,24 @@ class TreePanel(QWidget):
         # Add buttons
         button_layout = QHBoxLayout()
 
-        # Get the stylesheet for the buttons
-        if is_qgis_dark_theme_active():
-            stylesheet = button_stylesheet_dark
-        else:
-            stylesheet = button_stylesheet
-
         # Close button
         close_button = QPushButton("Close")
         close_button.clicked.connect(dialog.close)
         button_layout.addWidget(close_button)
-        close_button.setStyleSheet(stylesheet)
 
         # Maximize button
         maximize_button = QPushButton("AutoSize Columns")
         maximize_button.clicked.connect(lambda: self.maximize_dialog(dialog, table))
         button_layout.addWidget(maximize_button)
-        maximize_button.setStyleSheet(stylesheet)
 
         # Copy button
         copy_button = QPushButton("Copy to Clipboard")
         copy_button.clicked.connect(lambda: self.copy_to_clipboard_as_markdown(table))
         button_layout.addWidget(copy_button)
-        copy_button.setStyleSheet(stylesheet)
 
         # Show Error File button
         if error_file_content is not None:
             show_error_file_button = QPushButton("Show Error File")
-            show_error_file_button.setStyleSheet(stylesheet)
             button_layout.addWidget(show_error_file_button)
             show_error_file_button.clicked.connect(
                 lambda: self.show_error_file_popup(error_file_content)
