@@ -31,11 +31,16 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         self.mode = "distance"
         self.values = [1000, 2000, 3000]  # Distances in meters
         self.working_directory = tempfile.mkdtemp()
+        self.isochrone_layer_path = os.path.join(
+            self.working_directory, "isochrone_layer.gpkg"
+        )
         # self.addCleanup(lambda: os.rmdir(self.working_directory))
         print(f"Native Network Analysis Working directory: {self.working_directory}")
         # Create an instance of the processor
         self.processor = NativeNetworkAnalysisProcessor(
             network_layer_path=self.network_layer_path,
+            isochrone_layer_path=self.isochrone_layer_path,
+            area_index=1,
             point_feature=self.feature,
             crs=self.crs,
             mode=self.mode,
@@ -55,6 +60,8 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         with self.assertRaises(ValueError):
             NativeNetworkAnalysisProcessor(
                 network_layer_path=self.network_layer_path,
+                isochrone_layer_path=self.isochrone_layer_path,
+                area_index=1,
                 point_feature=self.feature,
                 crs=self.crs,
                 mode="invalid_mode",
@@ -66,6 +73,8 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         with self.assertRaises(ValueError):
             NativeNetworkAnalysisProcessor(
                 network_layer_path=self.network_layer_path,
+                isochrone_layer_path=self.isochrone_layer_path,
+                area_index=1,
                 point_feature=self.feature,
                 crs=self.crs,
                 mode=self.mode,
@@ -76,6 +85,8 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         with self.assertRaises(ValueError):
             NativeNetworkAnalysisProcessor(
                 network_layer_path=self.network_layer_path,
+                isochrone_layer_path=self.isochrone_layer_path,
+                area_index=1,
                 point_feature=self.feature,
                 crs=self.crs,
                 mode=self.mode,
@@ -91,12 +102,11 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         self.processor.calculate_network()
 
         # Check if the service areas were set correctly
+        # There should be one per isochrone distance
         self.assertEqual(
-            len(self.processor.service_areas),
+            self.processor.isochrone_feature_count(),
             len(self.values),
         )
-        for value, service_area in zip(self.values, self.processor.service_areas):
-            self.assertIsInstance(service_area, QgsFeature)
 
 
 if __name__ == "__main__":

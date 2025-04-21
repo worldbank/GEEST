@@ -61,8 +61,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         self.values = values
         if not all(isinstance(value, int) and value > 0 for value in self.values):
             raise ValueError(f"All values must be positive integers. {self.values}")
-        self.service_areas = []
-
+        self.isochrone_layer = None
         self.isochrone_layer_path = isochrone_layer_path
         self._initialize_isochrone_layer()
 
@@ -88,6 +87,14 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             field_defn = ogr.FieldDefn("value", ogr.OFTReal)
             self.isochrone_layer.CreateField(field_defn)
             log_message("Isochrone layer created successfully!")
+
+    def isochrone_feature_count(self) -> int:
+        if self.isochrone_layer is None:
+            raise ValueError("Isochrone layer is not initialized.")
+        if not self.isochrone_layer:
+            raise ValueError("Isochrone layer is invalid.")
+        # Check if the layer is valid
+        return self.isochrone_layer.GetFeatureCount()
 
     def __del__(self):
         if hasattr(self, "isochrone_ds") and self.isochrone_ds:
@@ -303,6 +310,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                     f"Added feature with value **{value}** to the GeoPackage.\n\n"
                 )
                 # show how many features in the isochrone layer
+                # This might be slow!
                 log_message(
                     f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
                 )
