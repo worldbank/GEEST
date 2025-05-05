@@ -89,10 +89,10 @@ class OSMDownloaderTask(QgsTask):
             self.setProgress(1)  # Trigger the UI to update with a small value
             log_message(f"Downloading roads starting....")
             downloader = OSMRoadsDownloader(
-                extents=self.layer_extent, output_path=self.working_dir
+                extents=self.layer_extent, output_path=self.gpkg_path
             )
             self.setProgress(100)  # Trigger the UI to update with completion value
-            log_message(f"OSM Downloaded to {self.working_dir}.")
+            log_message(f"OSM Downloaded to {self.gpkg_path}.")
 
         except Exception as e:
             log_message(f"Error in run(): {str(e)}")

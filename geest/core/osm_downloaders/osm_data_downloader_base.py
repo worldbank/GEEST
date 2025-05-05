@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
+import time
 
 from qgis.core import (
     QgsVectorLayer,
@@ -134,19 +135,34 @@ class OSMDataDownloaderBase(ABC):
 
     def process_line_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
+        total_start = time.perf_counter()
+
+        parse_start = time.perf_counter()
         root = ET.fromstring(response_data)
+        parse_end = time.perf_counter()
+
+        # Build a lookup dict of all nodes by ID
+        index_start = time.perf_counter()
+        node_lookup = {node.get("id"): node for node in root.findall(".//node")}
+        index_end = time.perf_counter()
+
+        layer_init_start = time.perf_counter()
         layer = QgsVectorLayer("LineString?crs=EPSG:4326", "OSM Line Data", "memory")
         provider = layer.dataProvider()
         provider.addAttributes([QgsField("id", QVariant.String)])
         layer.updateFields()
+        layer_init_end = time.perf_counter()
+
         features_added = 0
         log_message("Finding and processing all ways...")
+
+        loop_start = time.perf_counter()
         for way in root.findall(".//way"):
             way_id = way.get("id")
             coords = []
             for nd in way.findall("nd"):
                 ref = nd.get("ref")
-                node = root.find(f".//node[@id='{ref}']")
+                node = node_lookup.get(ref)
                 if node is not None:
                     lat = float(node.get("lat"))
                     lon = float(node.get("lon"))
@@ -160,11 +176,22 @@ class OSMDataDownloaderBase(ABC):
                 features_added += 1
                 if features_added % 1000 == 0:
                     log_message(f"Added {features_added} features to the layer...")
+        loop_end = time.perf_counter()
 
+        write_start = time.perf_counter()
         QgsVectorFileWriter.writeAsVectorFormat(
             layer, self.output_path, "UTF-8", layer.crs(), "GPKG"
         )
-        log_message(f"GeoPackage written to: {self.output_path}")
+        write_end = time.perf_counter()
+
+        total_end = time.perf_counter()
+
+        log_message(f"Time - XML parse: {parse_end - parse_start:.2f}s")
+        log_message(f"Time - Node index: {index_end - index_start:.2f}s")
+        log_message(f"Time - Layer init: {layer_init_end - layer_init_start:.2f}s")
+        log_message(f"Time - Feature loop: {loop_end - loop_start:.2f}s")
+        log_message(f"Time - Write to GPKG: {write_end - write_start:.2f}s")
+        log_message(f"Time - Total: {total_end - total_start:.2f}s")
 
     def process_point_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
