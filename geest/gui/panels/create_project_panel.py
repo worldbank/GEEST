@@ -26,7 +26,7 @@ from geest.core import WorkflowQueueManager
 from geest.utilities import log_message
 from geest.gui.widgets import CustomBannerLabel
 from geest.core.reports.study_area_report import StudyAreaReport
-from geest.core.osm_downloaders.osm_roads_downloader import OSMRoadsDownloader
+from geest.core.tasks import OSMDownloaderTask
 import platform
 
 
@@ -78,7 +78,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
-        self.download_road_layer_button.connect(self.download_road_layer_button_clicked)
+        self.download_road_layer_button.clicked.connect(
+            self.download_road_layer_button_clicked
+        )
         self.create_project_directory_button.clicked.connect(
             self.create_new_project_folder
         )
@@ -249,8 +251,78 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """Triggered when the Download Road Layer button is pressed."""
         # get the extents of the study area
         layer = self.layer_combo.currentLayer()
-        extents = layer.extent()
-        downloader = OSMRoadsDownloader(extents=extents, output_path=self.working_dir)
+        if self.use_boundary_crs.isChecked():
+            crs = self.layer_combo.currentLayer().crs()
+        else:
+            crs = None
+        # Create the processor instance and process the features
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
+        try:
+            log_message("Creating OSM Downloader Task")
+            processor = OSMDownloaderTask(
+                layer=layer,
+                crs=crs,
+                working_dir=self.working_dir,
+                feedback=feedback,
+            )
+            log_message("OSM Downloader Task created, setting up call backs")
+            # Hook up the QTask feedback signal to the progress bar
+            # Measure overall task progress from the task object itself
+            processor.progressChanged.connect(self.download_progress_updated)
+            processor.taskCompleted.connect(self.download_done)
+            # Measure subtask progress from the feedback object
+            feedback.progressChanged.connect(self.download_subtask_progress_updated)
+            self.disable_widgets()
+            if debug_env:
+                processor.run()
+            else:
+                log_message("Adding task to queue manager")
+                self.queue_manager.add_task(processor)
+                self.queue_manager.start_processing()
+                log_message("Processing started")
+        except Exception as e:
+            trace = traceback.format_exc()
+            QMessageBox.critical(
+                self, "Error", f"Error processing study area: {e}\n{trace}"
+            )
+            self.enable_widgets()
+            return
+
+    # Slot that listens for changes in the study_area task object which is used to measure overall task progress
+    def download_progress_updated(self, progress: float):
+        """Slot to be called when the download task progress is updated."""
+        log_message(f"\n\n\n\n\n\n\Progress: {progress}\n\n\n\n\n\n\n\n")
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setEnabled(True)
+        self.progress_bar.setValue(int(progress))
+        # This is a sneaky hack to show the exact progress in the label
+        # since QProgressBar only takes ints. See Qt docs for more info.
+        # Use the 'setFormat' method to display the exact float:
+        float_value_as_string = f"Total progress: {progress}%"
+        self.progress_bar.setFormat(float_value_as_string)
+
+    # Slot that listens for changes in the progress object which is used to measure subtask progress
+    def download_subtask_progress_updated(self, progress: float):
+        self.child_progress_bar.setVisible(True)
+        self.child_progress_bar.setEnabled(True)
+        self.child_progress_bar.setValue(int(progress))
+        # This is a sneaky hack to show the exact progress in the label
+        # since QProgressBar only takes ints. See Qt docs for more info.
+        # Use the 'setFormat' method to display the exact float:
+        float_value_as_string = f"OSM download progress: {progress}%"
+        self.child_progress_bar.setFormat(float_value_as_string)
+
+    def download_done(self):
+        """Slot to be called when the download task completes successfully."""
+        log_message(
+            "*** OSM download completed successfully. ***",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        self.progress_bar.setVisible(False)
+        self.child_progress_bar.setVisible(False)
+        self.enable_widgets()
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def progress_updated(self, progress: float):

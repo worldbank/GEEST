@@ -92,12 +92,15 @@ class OSMDataDownloaderBase(ABC):
             )
 
         # Send the request and connect the finished signal
+        log_message("Sending request to Overpass API...")
         response = self.network_manager.blockingPost(
             request, QByteArray(f"data={self.formatted_query}".encode())
         )
+        log_message("Request sent. Response received...")
 
         # Check HTTP status code
         status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        log_message(f"HTTP Status Code: {status_code}")
         if status_code is None:
             raise RuntimeError("No status code received. Network issue?")
 
@@ -114,16 +117,18 @@ class OSMDataDownloaderBase(ABC):
         if status_code == 200:
             response_data = response.content().data().decode("utf-8")
             if self.output_type == "point":
+                log_message("Processing point data...")
                 self.process_point_response(response_data)
             elif self.output_type == "line":
+                log_message("Processing line data...")
                 self.process_line_response(response_data)
             elif self.output_type == "polygon":
+                log_message("Processing polygon data...")
                 self.process_polygon_response(response_data)
             else:
                 raise ValueError(
                     "Invalid output type. Must be 'point', 'line', or 'polygon'."
                 )
-            self.process_line_response(response_data)
         else:
             raise RuntimeError(f"Request failed with error: {response.errorMessage()}")
 
@@ -134,7 +139,8 @@ class OSMDataDownloaderBase(ABC):
         provider = layer.dataProvider()
         provider.addAttributes([QgsField("id", QVariant.String)])
         layer.updateFields()
-
+        features_added = 0
+        log_message("Finding and processing all ways...")
         for way in root.findall(".//way"):
             way_id = way.get("id")
             coords = []
@@ -151,11 +157,14 @@ class OSMDataDownloaderBase(ABC):
                 feature.setGeometry(QgsGeometry.fromPolylineXY(coords))
                 feature.setAttributes([way_id])
                 provider.addFeature(feature)
+                features_added += 1
+                if features_added % 1000 == 0:
+                    log_message(f"Added {features_added} features to the layer...")
 
         QgsVectorFileWriter.writeAsVectorFormat(
             layer, self.output_path, "UTF-8", layer.crs(), "GPKG"
         )
-        print(f"GeoPackage written to: {self.output_path}")
+        log_message(f"GeoPackage written to: {self.output_path}")
 
     def process_point_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
@@ -164,6 +173,8 @@ class OSMDataDownloaderBase(ABC):
         provider = layer.dataProvider()
         provider.addAttributes([QgsField("id", QVariant.String)])
         layer.updateFields()
+        features_added = 0
+        log_message("Finding and processing all nodes...")
 
         for node in root.findall(".//node"):
             node_id = node.get("id")
@@ -173,11 +184,13 @@ class OSMDataDownloaderBase(ABC):
             feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
             feature.setAttributes([node_id])
             provider.addFeature(feature)
-
+            features_added += 1
+            if features_added % 1000 == 0:
+                log_message(f"Added {features_added} features to the layer...")
         QgsVectorFileWriter.writeAsVectorFormat(
             layer, self.output_path, "UTF-8", layer.crs(), "GPKG"
         )
-        print(f"GeoPackage written to: {self.output_path}")
+        log_message(f"GeoPackage written to: {self.output_path}")
 
     def process_polygon_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
@@ -186,6 +199,8 @@ class OSMDataDownloaderBase(ABC):
         provider = layer.dataProvider()
         provider.addAttributes([QgsField("id", QVariant.String)])
         layer.updateFields()
+        features_added = 0
+        log_message("Finding and processing all nodes...")
 
         for way in root.findall(".//way"):
             way_id = way.get("id")
@@ -203,8 +218,11 @@ class OSMDataDownloaderBase(ABC):
                 feature.setGeometry(QgsGeometry.fromPolygonXY([coords]))
                 feature.setAttributes([way_id])
                 provider.addFeature(feature)
+                features_added += 1
+                if features_added % 1000 == 0:
+                    log_message(f"Added {features_added} features to the layer...")
 
         QgsVectorFileWriter.writeAsVectorFormat(
             layer, self.output_path, "UTF-8", layer.crs(), "GPKG"
         )
-        print(f"GeoPackage written to: {self.output_path}")
+        log_message(f"GeoPackage written to: {self.output_path}")

@@ -1,0 +1,114 @@
+import os
+import re
+import glob
+import traceback
+import datetime
+import time
+
+# GDAL / OGR / OSR imports
+from osgeo import ogr, osr, gdal
+from typing import List, Optional
+from qgis.core import (
+    QgsTask,
+    QgsFeedback,
+    QgsVectorLayer,
+    QgsProject,
+    QgsCoordinateTransform,
+    QgsCoordinateReferenceSystem,
+)
+from geest.utilities import log_message
+from geest.core.osm_downloaders import OSMRoadsDownloader
+from geest.core import setting
+
+
+class OSMDownloaderTask(QgsTask):
+    """
+    A QgsTask subclass for downloading OSM data.
+
+
+    Args:
+        layer (QgsVectorLayer): The input vector layer that determines the download extents.
+        working_dir (str): The directory path where outputs will be saved.
+        feedback (QgsFeedback): A feedback object to report progress.
+        crs (Optional[QgsCoordinateReferenceSystem]): The target CRS. OSM Data will be reprojected to this CRS:.
+
+    Returns:
+        _type_: _description_
+    """
+
+    def __init__(
+        self,
+        layer: QgsVectorLayer,
+        working_dir,
+        feedback: QgsFeedback = None,
+        crs=None,
+    ):
+        """
+        :param input_vector_path: Path to an OGR-readable vector file (e.g. .gpkg or .shp).
+        :param working_dir: Directory path where outputs will be saved.
+        :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
+        """
+        super().__init__("Study Area Preparation", QgsTask.CanCancel)
+
+        self.reference_layer = layer  # used to determin bbox of download
+        self.working_dir = working_dir
+        self.gpkg_path = os.path.join(working_dir, "study_area", "osm.gpkg")
+        self.feedback = feedback
+        # Make sure output directory exists
+        self.create_study_area_directory(self.working_dir)
+
+        # If GPKG already exists, remove it to start fresh
+        if os.path.exists(self.gpkg_path):
+            try:
+                os.remove(self.gpkg_path)
+                log_message(f"Removed existing GeoPackage: {self.gpkg_path}")
+            except Exception as e:
+                log_message(
+                    f"Error removing existing GeoPackage: {e}", level="CRITICAL"
+                )
+
+        # Compute bounding box from entire layer
+        # (OGR Envelope: (xmin, xmax, ymin, ymax))
+        self.layer_extent = self.reference_layer.extent()
+        # Convert to EPSG:4326 if needed
+        if self.reference_layer.crs().authid() != "EPSG:4326":
+            # Transform the extent to EPSG:4326
+            transform = QgsCoordinateTransform(
+                self.reference_layer.crs(),
+                QgsCoordinateReferenceSystem("EPSG:4326"),
+                QgsProject.instance(),
+            )
+            self.layer_extent = transform.transformBoundingBox(self.layer_extent)
+        self.crs = self.reference_layer.crs()
+
+    def run(self):
+        """
+        Main entry point (mimics process_study_area from QGIS code).
+        """
+        try:
+            self.setProgress(1)  # Trigger the UI to update with a small value
+            log_message(f"Downloading roads starting....")
+            downloader = OSMRoadsDownloader(
+                extents=self.layer_extent, output_path=self.working_dir
+            )
+            self.setProgress(100)  # Trigger the UI to update with completion value
+            log_message(f"OSM Downloaded to {self.working_dir}.")
+
+        except Exception as e:
+            log_message(f"Error in run(): {str(e)}")
+            log_message(traceback.format_exc())
+            with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
+                f.write(f"{datetime.datetime.now()}\n")
+                f.write(traceback.format_exc())
+            return False
+
+        return True
+
+    def create_study_area_directory(self, working_dir):
+        """
+        Create 'study_area' subdir if not exist
+        """
+        study_area_dir = os.path.join(working_dir, "study_area")
+        if not os.path.exists(study_area_dir):
+            os.makedirs(study_area_dir)
+            log_message(f"Created directory {study_area_dir}")
