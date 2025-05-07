@@ -3,6 +3,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
     QgsProject,
+    QgsFeedback,
 )
 from qgis.gui import QgsMapCanvas
 from .osm_data_downloader_base import OSMDataDownloaderBase
@@ -14,6 +15,10 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         self,
         extents: QgsRectangle,
         output_path: str = None,
+        filename: str = None,  # will also set the layer name in the gpkg
+        use_cache: bool = False,
+        delete_gpkg: bool = True,
+        feedback: QgsFeedback = None,
     ):
         """
         Initialize the OSMRoadsDownloader class.
@@ -21,8 +26,16 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         Args:
             extents: A QgsRectangle object containing the bounding box coordinates for the query.
         """
-        super().__init__(extents=extents, output_path=output_path)
+        super().__init__(
+            extents=extents,
+            output_path=output_path,
+            filename=filename,
+            use_cache=use_cache,
+            delete_gpkg=delete_gpkg,
+            feedback=feedback,
+        )
         # set the output type to line
+        # note the timeout - 60s needed to allow for larger country queries
         self._set_output_type("line")
         osm_query = """[out:xml][timeout:60];
 (

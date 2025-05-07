@@ -65,7 +65,9 @@ jq --arg pyenv "\${workspaceFolder}/.env" \
    '.["python.envFile"] = $pyenv |
     .["python.analysis.extraPaths"] += [$qgispath] |
     .["terminal.integrated.env.linux"].PYTHONPATH = $qgispath |
-    .["git.enableCommitSigning"] = true' \
+    .["git.enableCommitSigning"] = true |
+    .["editor.formatOnSave"] = true |
+    .["editor.defaultFormatter"] = "ms-python.black-formatter"' \
    "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
 
 echo "✅ VSCode settings.json updated successfully!"

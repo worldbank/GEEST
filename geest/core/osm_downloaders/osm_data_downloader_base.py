@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 import time
 import os
+from osgeo import ogr
 
 from qgis.core import (
     QgsVectorLayer,
@@ -12,6 +13,7 @@ from qgis.core import (
     QgsVectorFileWriter,
     QgsPointXY,
     QgsNetworkAccessManager,
+    QgsFeedback,
 )
 from qgis.PyQt.QtCore import QVariant, QUrl, QByteArray
 from qgis.PyQt.QtNetwork import QNetworkRequest
@@ -19,11 +21,18 @@ from qgis.PyQt.QtNetwork import QNetworkRequest
 from geest.core import setting
 from geest.utilities import log_message
 from .query_preparation import QueryPreparation
-from osgeo import ogr
 
 
 class OSMDataDownloaderBase(ABC):
-    def __init__(self, extents: QgsRectangle, output_path: str = None):
+    def __init__(
+        self,
+        extents: QgsRectangle,
+        output_path: str = None,
+        filename: str = None,  # will also set the layer name in the gpkg
+        use_cache: bool = False,
+        delete_gpkg: bool = True,
+        feedback: QgsFeedback = None,
+    ):
         """
         Initialize the OSMDataDownloaderBase class.
 
@@ -40,9 +49,15 @@ class OSMDataDownloaderBase(ABC):
         # These are required
         self.extents = extents  # The bounding box extents (S, E, N, W)
         self.output_path = output_path  # The output path for the GeoPackage
+
+        self.filename = filename  # will also set the layer name in the gpkg
+        self.use_cache = use_cache
+        self.delete_gpkg = delete_gpkg
+        self.feedback = feedback
+
         # Use the base name of the output path + .xml to store the overpass response
         self.output_xml_path = output_path.replace(".gpkg", ".xml")
-        if os.path.exists(self.output_xml_path):
+        if os.path.exists(self.output_xml_path) and not self.use_cache:
             os.remove(self.output_xml_path)
         if self.extents is None:
             raise ValueError("Bounding box extents not set.")
@@ -86,6 +101,10 @@ class OSMDataDownloaderBase(ABC):
 
     def submit_query(self) -> None:
         """Download OSM data using the Overpass API and save it as a shapefile."""
+        if self.use_cache and os.path.exists(self.output_xml_path):
+            log_message(f"Using cached data from {self.output_xml_path}")
+            return
+
         request = QNetworkRequest()
         request.setUrl(QUrl(self.base_url))
 
@@ -158,7 +177,7 @@ class OSMDataDownloaderBase(ABC):
 
         # Create the output GeoPackage
         gpkg_driver = ogr.GetDriverByName("GPKG")
-        if os.path.exists(self.output_path):
+        if os.path.exists(self.output_path) and self.delete_gpkg:
             gpkg_driver.DeleteDataSource(self.output_path)
         output_data_source = gpkg_driver.CreateDataSource(self.output_path)
         if output_data_source is None:
@@ -178,22 +197,54 @@ class OSMDataDownloaderBase(ABC):
 
         # Copy features from the OSM 'lines' layer to the output layer
         features_added = 0
-        total_features = lines_layer.GetFeatureCount()
-        log_message(f"Total features to process: {total_features}")
+        # Use file size to estimate progress
+        file_size = os.path.getsize(self.output_xml_path)
+        log_message(f"File size of OSM XML: {file_size} bytes")
 
-        for i, feature in enumerate(lines_layer):
+        bytes_read = 0
+        feature_buffer = []  # Buffer to store features before committing
+        # Start a transaction for batch processing
+        output_layer.StartTransaction()
+        batch_size = 1000
+
+        for feature in lines_layer:
+            # Update bytes_read based on the current feature's approximate size
+            # Note: This is a rough estimate as OGR does not provide exact byte offsets
+            bytes_read += len(feature.ExportToJson())  # Approximate size of the feature
+
             output_feature = ogr.Feature(output_layer.GetLayerDefn())
             output_feature.SetGeometry(feature.GetGeometryRef().Clone())
             output_feature.SetField("id", feature.GetField("osm_id"))
-            output_layer.CreateFeature(output_feature)
-            output_feature = None  # Free the feature
+            feature_buffer.append(output_feature)  # Add to buffer
 
             features_added += 1
-            if features_added % 1000 == 0 or features_added == total_features:
-                progress = (features_added / total_features) * 100
+
+            # Commit features in batches
+            if len(feature_buffer) >= batch_size:
+                for buffered_feature in feature_buffer:
+                    output_layer.CreateFeature(buffered_feature)
+                    buffered_feature = None  # Free the feature
+                feature_buffer.clear()  # Clear the buffer
+
+            # Calculate progress based on bytes read
+            progress = (bytes_read / file_size) * 100
+            if features_added % batch_size == 0 or progress >= 100:
                 log_message(
-                    f"Processed {features_added}/{total_features} features ({progress:.2f}%)"
+                    f"Processed {features_added} features ({progress:.2f}% of file read)"
                 )
+            self.feedback.setProgress(int(progress))
+            if self.feedback.isCanceled():
+                log_message("Processing canceled by user.")
+                break
+
+        # Commit any remaining features in the buffer
+        for buffered_feature in feature_buffer:
+            output_layer.CreateFeature(buffered_feature)
+            buffered_feature = None  # Free the feature
+        feature_buffer.clear()  # Clear the buffer
+
+        # Commit the transaction
+        output_layer.CommitTransaction()
 
         # Close the data sources
         osm_data_source = None

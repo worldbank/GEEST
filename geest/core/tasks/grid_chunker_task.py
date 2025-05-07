@@ -3,7 +3,7 @@ from osgeo import ogr, osr
 from geest.utilities import log_message
 
 
-class GridChunker:
+class GridChunkerTask:
     """
     A class to divide a bbox into chunks and process each chunk.
 

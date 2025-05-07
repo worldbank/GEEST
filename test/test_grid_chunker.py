@@ -1,5 +1,5 @@
 import unittest
-from geest.core.tasks.grid_chunker import GridChunker
+from geest.core.tasks.grid_chunker_task import GridChunkerTask
 from osgeo import ogr, osr
 import os
 
@@ -7,7 +7,7 @@ import os
 class TestGridChunker(unittest.TestCase):
 
     def setUp(self):
-        self.grid_chunker = GridChunker(0, 100, 0, 100, 10, 5, 3857)
+        self.grid_chunker = GridChunkerTask(0, 100, 0, 100, 10, 5, 3857)
 
     def tearDown(self):
         self.grid_chunker = None

@@ -261,9 +261,12 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         try:
             log_message("Creating OSM Downloader Task")
             processor = OSMDownloaderTask(
-                layer=layer,
+                reference_layer=layer,
                 crs=crs,
                 working_dir=self.working_dir,
+                filename="road_network",
+                use_cache=True,
+                delete_gpkg=True,
                 feedback=feedback,
             )
             log_message("OSM Downloader Task created, setting up call backs")

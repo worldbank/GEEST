@@ -38,27 +38,37 @@ class OSMDownloaderTask(QgsTask):
 
     def __init__(
         self,
-        layer: QgsVectorLayer,
+        reference_layer: QgsVectorLayer,
         working_dir,
+        filename,
+        use_cache=True,
+        delete_gpkg=True,
         feedback: QgsFeedback = None,
         crs=None,
     ):
         """
         :param input_vector_path: Path to an OGR-readable vector file (e.g. .gpkg or .shp).
         :param working_dir: Directory path where outputs will be saved.
+        :param filename: Name of the output file.
+        :param use_cache: If True, use cached data if available.
+        :param feedback: QgsFeedback object for reporting progress.
         :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
         """
         super().__init__("Study Area Preparation", QgsTask.CanCancel)
 
-        self.reference_layer = layer  # used to determin bbox of download
+        self.reference_layer = reference_layer  # used to determin bbox of download
         self.working_dir = working_dir
-        self.gpkg_path = os.path.join(working_dir, "study_area", "osm.gpkg")
+        self.gpkg_path = os.path.join(working_dir, "study_area", f"{filename}.gpkg")
+        self.filename = filename
+        self.use_cache = use_cache
+        self.delete_gpkg = delete_gpkg
         self.feedback = feedback
         # Make sure output directory exists
         self.create_study_area_directory(self.working_dir)
 
         # If GPKG already exists, remove it to start fresh
-        if os.path.exists(self.gpkg_path):
+        # I think this is redundant as the downloader base class has similar logic
+        if os.path.exists(self.gpkg_path) and self.delete_gpkg:
             try:
                 os.remove(self.gpkg_path)
                 log_message(f"Removed existing GeoPackage: {self.gpkg_path}")
@@ -89,7 +99,12 @@ class OSMDownloaderTask(QgsTask):
             self.setProgress(1)  # Trigger the UI to update with a small value
             log_message(f"Downloading roads starting....")
             downloader = OSMRoadsDownloader(
-                extents=self.layer_extent, output_path=self.gpkg_path
+                extents=self.layer_extent,
+                output_path=self.gpkg_path,
+                filename=self.filename,  # will also set the layer name in the gpkg
+                use_cache=self.use_cache,
+                delete_gpkg=True,
+                feedback=self.feedback,
             )
             self.setProgress(100)  # Trigger the UI to update with completion value
             log_message(f"OSM Downloaded to {self.gpkg_path}.")

@@ -4,7 +4,7 @@ from qgis.core import QgsTask
 from geest.utilities import log_message
 
 
-class GridFromBbox(QgsTask):
+class GridFromBboxTask(QgsTask):
     """
     A QGIS task to generate grid cells in a bounding box chunk, check intersections,
     and store them in memory for later writing.
