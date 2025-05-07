@@ -175,99 +175,65 @@ class OSMDataDownloaderBase(ABC):
             )
 
     def process_line_response(self) -> None:
-        """Process the streamed OSM XML response and save it as a GeoPackage."""
+        """
+        Process the streamed OSM XML response and efficiently save the 'lines' layer into a GeoPackage.
+
+        This method uses OGR's built-in CopyLayer functionality for optimal performance, similar to ogr2ogr.
+        It provides indeterminate progress feedback since exact feature count is unavailable.
+
+        If the GeoPackage already exists:
+        - When 'delete_gpkg' is True, the whole GeoPackage file is removed and recreated.
+        - When 'delete_gpkg' is False, only the target layer ('OSM_Line_Data') is removed if it exists,
+        and then recreated without deleting the entire GeoPackage.
+
+        Raises:
+            RuntimeError: If the input XML cannot be read or if the output GeoPackage layer cannot be created.
+
+        """
         total_start = time.perf_counter()
-        self.feedback.setProgress(0)  # Reset progress to 0
-        # Open the OSM XML file
+
+        self.feedback.setProgress(20)
+
+        # Open input OSM XML data source
         osm_driver = ogr.GetDriverByName("OSM")
-        osm_data_source = osm_driver.Open(self.output_xml_path, 0)  # 0 means read-only
+        osm_data_source = osm_driver.Open(self.output_xml_path, 0)
         if osm_data_source is None:
             raise RuntimeError(f"Failed to open OSM XML file: {self.output_xml_path}")
 
-        # Get the 'lines' layer from the OSM data source
         lines_layer = osm_data_source.GetLayerByName("lines")
         if lines_layer is None:
             raise RuntimeError("No 'lines' layer found in the OSM XML file.")
 
-        # Create the output GeoPackage
         gpkg_driver = ogr.GetDriverByName("GPKG")
-        if os.path.exists(self.output_path) and self.delete_gpkg:
-            gpkg_driver.DeleteDataSource(self.output_path)
-        output_data_source = gpkg_driver.CreateDataSource(self.output_path)
+
+        if os.path.exists(self.output_path):
+            if self.delete_gpkg:
+                gpkg_driver.DeleteDataSource(self.output_path)
+                output_data_source = gpkg_driver.CreateDataSource(self.output_path)
+            else:
+                output_data_source = gpkg_driver.Open(self.output_path, update=1)
+                # Remove existing layer if present
+                existing_layer = output_data_source.GetLayerByName(self.filename)
+                if existing_layer:
+                    output_data_source.DeleteLayer(self.filename)
+        else:
+            output_data_source = gpkg_driver.CreateDataSource(self.output_path)
+
         if output_data_source is None:
-            raise RuntimeError(f"Failed to create GeoPackage: {self.output_path}")
-
-        # Create the output layer
-        srs = lines_layer.GetSpatialRef()
-        output_layer = output_data_source.CreateLayer(
-            "OSM Line Data", srs, ogr.wkbLineString
-        )
+            raise RuntimeError(
+                f"Failed to create or open GeoPackage: {self.output_path}"
+            )
+        self.feedback.setProgress(40)
+        # Perform efficient layer copy
+        output_layer = output_data_source.CopyLayer(lines_layer, "OSM_Line_Data")
         if output_layer is None:
-            raise RuntimeError("Failed to create output layer in GeoPackage.")
-
-        # Add fields to the output layer
-        id_field = ogr.FieldDefn("id", ogr.OFTString)
-        output_layer.CreateField(id_field)
-
-        # Copy features from the OSM 'lines' layer to the output layer
-        features_added = 0
-        # Use file size to estimate progress
-        file_size = os.path.getsize(self.output_xml_path)
-        log_message(f"File size of OSM XML: {file_size} bytes")
-
-        bytes_read = 0
-        feature_buffer = []  # Buffer to store features before committing
-        # Start a transaction for batch processing
-        output_layer.StartTransaction()
-        batch_size = 10000
-
-        for feature in lines_layer:
-            # Update bytes_read based on the current feature's approximate size
-            # Note: This is a rough estimate as OGR does not provide exact byte offsets
-            bytes_read += (
-                3
-                * len(  # 3x magic number since it seems to underestimate by a factor of 3
-                    feature.ExportToJson()
-                )
-            )  # Approximate size of the feature
-
-            output_feature = ogr.Feature(output_layer.GetLayerDefn())
-            output_feature.SetGeometry(feature.GetGeometryRef().Clone())
-            output_feature.SetField("id", feature.GetField("osm_id"))
-            feature_buffer.append(output_feature)  # Add to buffer
-
-            features_added += 1
-
-            # Commit features in batches
-            if len(feature_buffer) >= batch_size:
-                for buffered_feature in feature_buffer:
-                    output_layer.CreateFeature(buffered_feature)
-                    buffered_feature = None  # Free the feature
-                feature_buffer.clear()  # Clear the buffer
-
-            # Calculate progress based on bytes read
-            progress = (bytes_read / file_size) * 100
-            if features_added % batch_size == 0 or progress >= 100:
-                log_message(
-                    f"Processed {features_added} features ({progress:.2f}% of file read)"
-                )
-            self.feedback.setProgress(int(progress))
-            if self.feedback.isCanceled():
-                log_message("Processing canceled by user.")
-                break
-
-        # Commit any remaining features in the buffer
-        for buffered_feature in feature_buffer:
-            output_layer.CreateFeature(buffered_feature)
-            buffered_feature = None  # Free the feature
-        feature_buffer.clear()  # Clear the buffer
-
-        # Commit the transaction
-        output_layer.CommitTransaction()
-
-        # Close the data sources
+            raise RuntimeError("Failed to copy lines layer to GeoPackage.")
+        self.feedback.setProgress(60)
+        # Cleanup data sources
         osm_data_source = None
         output_data_source = None
+
+        self.feedback.setProgress(100)  # Set progress complete
 
         total_end = time.perf_counter()
         log_message(f"GeoPackage written to: {self.output_path}")
