@@ -68,14 +68,21 @@ class OSMDownloaderTask(QgsTask):
 
         # If GPKG already exists, remove it to start fresh
         # I think this is redundant as the downloader base class has similar logic
-        if os.path.exists(self.gpkg_path) and self.delete_gpkg:
-            try:
-                os.remove(self.gpkg_path)
-                log_message(f"Removed existing GeoPackage: {self.gpkg_path}")
-            except Exception as e:
+        if os.path.exists(self.gpkg_path):
+            if self.delete_gpkg:
+                try:
+                    os.remove(self.gpkg_path)
+                    log_message(f"Removed existing GeoPackage: {self.gpkg_path}")
+                except Exception as e:
+                    log_message(
+                        f"Error removing existing GeoPackage: {e}", level="CRITICAL"
+                    )
+            else:
                 log_message(
-                    f"Error removing existing GeoPackage: {e}", level="CRITICAL"
+                    f"GeoPackage already exists and delete_gpkg is False: {self.gpkg_path}"
                 )
+        else:
+            log_message(f"Writing to new GeoPackage: {self.gpkg_path}")
 
         # Compute bounding box from entire layer
         # (OGR Envelope: (xmin, xmax, ymin, ymax))
@@ -103,10 +110,11 @@ class OSMDownloaderTask(QgsTask):
                 output_path=self.gpkg_path,
                 filename=self.filename,  # will also set the layer name in the gpkg
                 use_cache=self.use_cache,
-                delete_gpkg=True,
+                delete_gpkg=self.delete_gpkg,
                 feedback=self.feedback,
             )
             self.setProgress(100)  # Trigger the UI to update with completion value
+            downloader.process_response()
             log_message(f"OSM Downloaded to {self.gpkg_path}.")
 
         except Exception as e:

@@ -117,3 +117,4 @@ out geom;"""
         self.set_osm_query(osm_query)
         self.submit_query()
         log_message("OSMRoadsDownloader Initialized")
+        log_message("Now call process_response to convert from osm xml to gpkg")

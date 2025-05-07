@@ -299,11 +299,19 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.progress_bar.setVisible(True)
         self.progress_bar.setEnabled(True)
         self.progress_bar.setValue(int(progress))
-        # This is a sneaky hack to show the exact progress in the label
-        # since QProgressBar only takes ints. See Qt docs for more info.
-        # Use the 'setFormat' method to display the exact float:
-        float_value_as_string = f"Total progress: {progress}%"
-        self.progress_bar.setFormat(float_value_as_string)
+        if progress == 0:
+            self.progress_bar.setFormat("Fetching OSM data...")
+            self.progress_bar.setMinimum(0)
+            self.progress_bar.setMaximum(0)
+        else:
+            self.progress_bar.setMinimum(0)
+            self.progress_bar.setMaximum(100)  # makes it bounce indefinitely
+
+            # This is a sneaky hack to show the exact progress in the label
+            # since QProgressBar only takes ints. See Qt docs for more info.
+            # Use the 'setFormat' method to display the exact float:
+            float_value_as_string = f"OSM download progress: {progress}%"
+            self.progress_bar.setFormat(float_value_as_string)
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress
     def download_subtask_progress_updated(self, progress: float):
@@ -313,7 +321,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # This is a sneaky hack to show the exact progress in the label
         # since QProgressBar only takes ints. See Qt docs for more info.
         # Use the 'setFormat' method to display the exact float:
-        float_value_as_string = f"OSM download progress: {progress}%"
+        float_value_as_string = f"OSM extract progress: {progress}%"
         self.child_progress_bar.setFormat(float_value_as_string)
 
     def download_done(self):
@@ -334,11 +342,18 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.progress_bar.setVisible(True)
         self.progress_bar.setEnabled(True)
         self.progress_bar.setValue(int(progress))
-        # This is a sneaky hack to show the exact progress in the label
-        # since QProgressBar only takes ints. See Qt docs for more info.
-        # Use the 'setFormat' method to display the exact float:
-        float_value_as_string = f"Total progress: {progress}%"
-        self.progress_bar.setFormat(float_value_as_string)
+        if progress == 0:
+            self.progress_bar.setFormat("Processing study area...")
+            self.progress_bar.setMinimum(0)
+            self.progress_bar.setMaximum(0)  # makes it bounce indefinitely
+        else:
+            # This is a sneaky hack to show the exact progress in the label
+            # since QProgressBar only takes ints. See Qt docs for more info.
+            # Use the 'setFormat' method to display the exact float:
+            float_value_as_string = f"Total progress: {progress}%"
+            self.progress_bar.setFormat(float_value_as_string)
+            self.progress_bar.setMinimum(0)
+            self.progress_bar.setMaximum(100)  # makes it bounce indefinitely
         self.add_bboxes_to_map()  # will just refresh them if already there
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress

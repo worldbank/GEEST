@@ -100,7 +100,13 @@ class OSMDataDownloaderBase(ABC):
         self.output_type = output_type
 
     def submit_query(self) -> None:
-        """Download OSM data using the Overpass API and save it as a shapefile."""
+        """Download OSM data using the Overpass API and save it as a shapefile.
+
+        :return: None
+        :raises ValueError: If the query or output path is not set.
+        :raises RuntimeError: If the request fails or if the response is not valid.
+        :raises Exception: If the request fails or if the response is not valid.
+        """
         if self.use_cache and os.path.exists(self.output_xml_path):
             log_message(f"Using cached data from {self.output_xml_path}")
             return
@@ -143,22 +149,30 @@ class OSMDataDownloaderBase(ABC):
             raise RuntimeError(f"HTTP Error {status_code}: {response.content()}")
 
         if status_code == 200:
-
-            if self.output_type == "point":
-                log_message("Processing point data...")
-                self.process_point_response()
-            elif self.output_type == "line":
-                log_message("Processing line data...")
-                self.process_line_response()
-            elif self.output_type == "polygon":
-                log_message("Processing polygon data...")
-                self.process_polygon_response()
-            else:
-                raise ValueError(
-                    "Invalid output type. Must be 'point', 'line', or 'polygon'."
-                )
+            return
         else:
             raise RuntimeError(f"Request failed with error: {response.errorMessage()}")
+
+    def process_response(self) -> bool:
+        """ "Process the downloaded OSM data and save it as a GeoPackage.
+
+        This method will call the appropriate processing method based on the output type.
+
+        :return: bool True if processing was successful, False otherwise.
+        """
+        if self.output_type == "point":
+            log_message("Processing point data...")
+            self.process_point_response()
+        elif self.output_type == "line":
+            log_message("Processing line data...")
+            self.process_line_response()
+        elif self.output_type == "polygon":
+            log_message("Processing polygon data...")
+            self.process_polygon_response()
+        else:
+            raise ValueError(
+                "Invalid output type. Must be 'point', 'line', or 'polygon'."
+            )
 
     def process_line_response(self) -> None:
         """Process the streamed OSM XML response and save it as a GeoPackage."""
