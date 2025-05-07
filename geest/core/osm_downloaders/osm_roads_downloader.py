@@ -24,7 +24,7 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         super().__init__(extents=extents, output_path=output_path)
         # set the output type to line
         self._set_output_type("line")
-        osm_query = """[out:xml][timeout:25];
+        osm_query = """[out:xml][timeout:60];
 (
 node["highway"="motorway"]({{bbox}});
 node["highway"="motorway_link"]({{bbox}});

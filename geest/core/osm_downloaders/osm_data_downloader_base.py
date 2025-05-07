@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 import time
+import os
 
 from qgis.core import (
     QgsVectorLayer,
@@ -18,6 +19,7 @@ from qgis.PyQt.QtNetwork import QNetworkRequest
 from geest.core import setting
 from geest.utilities import log_message
 from .query_preparation import QueryPreparation
+from osgeo import ogr
 
 
 class OSMDataDownloaderBase(ABC):
@@ -38,6 +40,10 @@ class OSMDataDownloaderBase(ABC):
         # These are required
         self.extents = extents  # The bounding box extents (S, E, N, W)
         self.output_path = output_path  # The output path for the GeoPackage
+        # Use the base name of the output path + .xml to store the overpass response
+        self.output_xml_path = output_path.replace(".gpkg", ".xml")
+        if os.path.exists(self.output_xml_path):
+            os.remove(self.output_xml_path)
         if self.extents is None:
             raise ValueError("Bounding box extents not set.")
         if self.output_path is None:
@@ -94,9 +100,11 @@ class OSMDataDownloaderBase(ABC):
 
         # Send the request and connect the finished signal
         log_message("Sending request to Overpass API...")
-        response = self.network_manager.blockingPost(
-            request, QByteArray(f"data={self.formatted_query}".encode())
-        )
+        with open(self.output_xml_path, "wb") as output_file:
+            response = self.network_manager.blockingPost(
+                request, QByteArray(f"data={self.formatted_query}".encode())
+            )
+            output_file.write(response.content().data())
         log_message("Request sent. Response received...")
 
         # Check HTTP status code
@@ -116,16 +124,16 @@ class OSMDataDownloaderBase(ABC):
             raise RuntimeError(f"HTTP Error {status_code}: {response.content()}")
 
         if status_code == 200:
-            response_data = response.content().data().decode("utf-8")
+
             if self.output_type == "point":
                 log_message("Processing point data...")
-                self.process_point_response(response_data)
+                self.process_point_response()
             elif self.output_type == "line":
                 log_message("Processing line data...")
-                self.process_line_response(response_data)
+                self.process_line_response()
             elif self.output_type == "polygon":
                 log_message("Processing polygon data...")
-                self.process_polygon_response(response_data)
+                self.process_polygon_response()
             else:
                 raise ValueError(
                     "Invalid output type. Must be 'point', 'line', or 'polygon'."
@@ -133,65 +141,67 @@ class OSMDataDownloaderBase(ABC):
         else:
             raise RuntimeError(f"Request failed with error: {response.errorMessage()}")
 
-    def process_line_response(self, response_data: str) -> None:
-        """Process the OSM response and save it as a GeoPackage."""
+    def process_line_response(self) -> None:
+        """Process the streamed OSM XML response and save it as a GeoPackage."""
         total_start = time.perf_counter()
 
-        parse_start = time.perf_counter()
-        root = ET.fromstring(response_data)
-        parse_end = time.perf_counter()
+        # Open the OSM XML file
+        osm_driver = ogr.GetDriverByName("OSM")
+        osm_data_source = osm_driver.Open(self.output_xml_path, 0)  # 0 means read-only
+        if osm_data_source is None:
+            raise RuntimeError(f"Failed to open OSM XML file: {self.output_xml_path}")
 
-        # Build a lookup dict of all nodes by ID
-        index_start = time.perf_counter()
-        node_lookup = {node.get("id"): node for node in root.findall(".//node")}
-        index_end = time.perf_counter()
+        # Get the 'lines' layer from the OSM data source
+        lines_layer = osm_data_source.GetLayerByName("lines")
+        if lines_layer is None:
+            raise RuntimeError("No 'lines' layer found in the OSM XML file.")
 
-        layer_init_start = time.perf_counter()
-        layer = QgsVectorLayer("LineString?crs=EPSG:4326", "OSM Line Data", "memory")
-        provider = layer.dataProvider()
-        provider.addAttributes([QgsField("id", QVariant.String)])
-        layer.updateFields()
-        layer_init_end = time.perf_counter()
+        # Create the output GeoPackage
+        gpkg_driver = ogr.GetDriverByName("GPKG")
+        if os.path.exists(self.output_path):
+            gpkg_driver.DeleteDataSource(self.output_path)
+        output_data_source = gpkg_driver.CreateDataSource(self.output_path)
+        if output_data_source is None:
+            raise RuntimeError(f"Failed to create GeoPackage: {self.output_path}")
 
-        features_added = 0
-        log_message("Finding and processing all ways...")
-
-        loop_start = time.perf_counter()
-        for way in root.findall(".//way"):
-            way_id = way.get("id")
-            coords = []
-            for nd in way.findall("nd"):
-                ref = nd.get("ref")
-                node = node_lookup.get(ref)
-                if node is not None:
-                    lat = float(node.get("lat"))
-                    lon = float(node.get("lon"))
-                    coords.append(QgsPointXY(lon, lat))
-
-            if coords:
-                feature = QgsFeature()
-                feature.setGeometry(QgsGeometry.fromPolylineXY(coords))
-                feature.setAttributes([way_id])
-                provider.addFeature(feature)
-                features_added += 1
-                if features_added % 1000 == 0:
-                    log_message(f"Added {features_added} features to the layer...")
-        loop_end = time.perf_counter()
-
-        write_start = time.perf_counter()
-        QgsVectorFileWriter.writeAsVectorFormat(
-            layer, self.output_path, "UTF-8", layer.crs(), "GPKG"
+        # Create the output layer
+        srs = lines_layer.GetSpatialRef()
+        output_layer = output_data_source.CreateLayer(
+            "OSM Line Data", srs, ogr.wkbLineString
         )
-        write_end = time.perf_counter()
+        if output_layer is None:
+            raise RuntimeError("Failed to create output layer in GeoPackage.")
+
+        # Add fields to the output layer
+        id_field = ogr.FieldDefn("id", ogr.OFTString)
+        output_layer.CreateField(id_field)
+
+        # Copy features from the OSM 'lines' layer to the output layer
+        features_added = 0
+        total_features = lines_layer.GetFeatureCount()
+        log_message(f"Total features to process: {total_features}")
+
+        for i, feature in enumerate(lines_layer):
+            output_feature = ogr.Feature(output_layer.GetLayerDefn())
+            output_feature.SetGeometry(feature.GetGeometryRef().Clone())
+            output_feature.SetField("id", feature.GetField("osm_id"))
+            output_layer.CreateFeature(output_feature)
+            output_feature = None  # Free the feature
+
+            features_added += 1
+            if features_added % 1000 == 0 or features_added == total_features:
+                progress = (features_added / total_features) * 100
+                log_message(
+                    f"Processed {features_added}/{total_features} features ({progress:.2f}%)"
+                )
+
+        # Close the data sources
+        osm_data_source = None
+        output_data_source = None
 
         total_end = time.perf_counter()
-
-        log_message(f"Time - XML parse: {parse_end - parse_start:.2f}s")
-        log_message(f"Time - Node index: {index_end - index_start:.2f}s")
-        log_message(f"Time - Layer init: {layer_init_end - layer_init_start:.2f}s")
-        log_message(f"Time - Feature loop: {loop_end - loop_start:.2f}s")
-        log_message(f"Time - Write to GPKG: {write_end - write_start:.2f}s")
-        log_message(f"Time - Total: {total_end - total_start:.2f}s")
+        log_message(f"GeoPackage written to: {self.output_path}")
+        log_message(f"Total processing time: {total_end - total_start:.2f}s")
 
     def process_point_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
