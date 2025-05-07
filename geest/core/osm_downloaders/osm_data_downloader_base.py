@@ -177,7 +177,7 @@ class OSMDataDownloaderBase(ABC):
     def process_line_response(self) -> None:
         """Process the streamed OSM XML response and save it as a GeoPackage."""
         total_start = time.perf_counter()
-
+        self.feedback.setProgress(0)  # Reset progress to 0
         # Open the OSM XML file
         osm_driver = ogr.GetDriverByName("OSM")
         osm_data_source = osm_driver.Open(self.output_xml_path, 0)  # 0 means read-only
@@ -219,12 +219,17 @@ class OSMDataDownloaderBase(ABC):
         feature_buffer = []  # Buffer to store features before committing
         # Start a transaction for batch processing
         output_layer.StartTransaction()
-        batch_size = 1000
+        batch_size = 10000
 
         for feature in lines_layer:
             # Update bytes_read based on the current feature's approximate size
             # Note: This is a rough estimate as OGR does not provide exact byte offsets
-            bytes_read += len(feature.ExportToJson())  # Approximate size of the feature
+            bytes_read += (
+                3
+                * len(  # 3x magic number since it seems to underestimate by a factor of 3
+                    feature.ExportToJson()
+                )
+            )  # Approximate size of the feature
 
             output_feature = ogr.Feature(output_layer.GetLayerDefn())
             output_feature.SetGeometry(feature.GetGeometryRef().Clone())

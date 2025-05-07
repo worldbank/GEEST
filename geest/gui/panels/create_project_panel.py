@@ -272,10 +272,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             log_message("OSM Downloader Task created, setting up call backs")
             # Hook up the QTask feedback signal to the progress bar
             # Measure overall task progress from the task object itself
-            processor.progressChanged.connect(self.download_progress_updated)
+            processor.progressChanged.connect(self.osm_download_progress_updated)
             processor.taskCompleted.connect(self.download_done)
             # Measure subtask progress from the feedback object
-            feedback.progressChanged.connect(self.download_subtask_progress_updated)
+            feedback.progressChanged.connect(self.osm_extract_progress_updated)
             self.disable_widgets()
             if debug_env:
                 processor.run()
@@ -293,7 +293,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             return
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
-    def download_progress_updated(self, progress: float):
+    def osm_download_progress_updated(self, progress: float):
         """Slot to be called when the download task progress is updated."""
         log_message(f"\n\n\n\n\n\n\Progress: {progress}\n\n\n\n\n\n\n\n")
         self.progress_bar.setVisible(True)
@@ -301,11 +301,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.progress_bar.setValue(int(progress))
         if progress == 0:
             self.progress_bar.setFormat("Fetching OSM data...")
-            self.progress_bar.setMinimum(0)
+            self.progress_bar.setMinimum(0)  # makes it bounce indefinitely
             self.progress_bar.setMaximum(0)
         else:
             self.progress_bar.setMinimum(0)
-            self.progress_bar.setMaximum(100)  # makes it bounce indefinitely
+            self.progress_bar.setMaximum(100)
 
             # This is a sneaky hack to show the exact progress in the label
             # since QProgressBar only takes ints. See Qt docs for more info.
@@ -314,15 +314,22 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.progress_bar.setFormat(float_value_as_string)
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress
-    def download_subtask_progress_updated(self, progress: float):
+    def osm_extract_progress_updated(self, progress: float):
         self.child_progress_bar.setVisible(True)
         self.child_progress_bar.setEnabled(True)
-        self.child_progress_bar.setValue(int(progress))
-        # This is a sneaky hack to show the exact progress in the label
-        # since QProgressBar only takes ints. See Qt docs for more info.
-        # Use the 'setFormat' method to display the exact float:
-        float_value_as_string = f"OSM extract progress: {progress}%"
-        self.child_progress_bar.setFormat(float_value_as_string)
+        if progress == 0:
+            self.progress_bar.setFormat("Extracting OSM data...")
+            self.progress_bar.setMinimum(0)  # makes it bounce indefinitely
+            self.progress_bar.setMaximum(0)
+        else:
+            self.progress_bar.setMinimum(0)
+            self.progress_bar.setMaximum(100)
+            self.child_progress_bar.setValue(int(progress))
+            # This is a sneaky hack to show the exact progress in the label
+            # since QProgressBar only takes ints. See Qt docs for more info.
+            # Use the 'setFormat' method to display the exact float:
+            float_value_as_string = f"OSM extract progress: {progress}%"
+            self.child_progress_bar.setFormat(float_value_as_string)
 
     def download_done(self):
         """Slot to be called when the download task completes successfully."""
