@@ -72,6 +72,7 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_name = json_data.get("analysis_name", "Analysis")
         analysis_description = json_data.get("description", "No Description")
         analysis_cell_size_m = json_data.get("analysis_cell_size_m", 100.0)
+        network_layer_path = json_data.get("network_layer_path", "")
         working_folder = json_data.get("working_folder", "Not Set")
         guid = json_data.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         analysis_result = json_data.get("result", "")
@@ -120,6 +121,7 @@ class JsonTreeModel(QAbstractItemModel):
             "description": analysis_description,
             "working_folder": working_folder,
             "analysis_cell_size_m": analysis_cell_size_m,
+            "network_layer_path": network_layer_path,
             "result": analysis_result,
             "result_file": analysis_result_file,
             "execution_start_time": analysis_execution_start_time,
@@ -476,6 +478,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "description": item.attribute("description"),
                     "working_folder": item.attribute("working_folder"),
                     "analysis_cell_size_m": item.attribute("analysis_cell_size_m"),
+                    "network_layer_path": item.attribute("network_layer_path"),
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }

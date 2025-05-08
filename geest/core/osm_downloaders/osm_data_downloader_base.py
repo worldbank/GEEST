@@ -225,7 +225,7 @@ class OSMDataDownloaderBase(ABC):
             )
         self.feedback.setProgress(40)
         # Perform efficient layer copy
-        output_layer = output_data_source.CopyLayer(lines_layer, "OSM_Line_Data")
+        output_layer = output_data_source.CopyLayer(lines_layer, self.filename)
         if output_layer is None:
             raise RuntimeError("Failed to copy lines layer to GeoPackage.")
         self.feedback.setProgress(60)

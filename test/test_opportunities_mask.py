@@ -47,6 +47,7 @@ class TestPolygonOpportunitiesMask(unittest.TestCase):
                 "aggregation_layer_wkb_type": 6,
                 "aggregation_shapefile": "",
                 "analysis_cell_size_m": 1000,
+                "network_layer_path": "",
                 "analysis_mode": "analysis_aggregation",
                 "analysis_name": "Women's Economic Empowerment - wee_score",
                 "buffer_distance_m": 100,

@@ -1270,6 +1270,22 @@ class TreePanel(QWidget):
         )
         return cell_size_m
 
+    def network_layer(self):
+        """Get the layer used for network analysis."""
+        network_layer = QgsVectorLayer(
+            self.model.get_analysis_item().attributes().get("network_layer", ""),
+            "Network Layer",
+            "ogr",
+        )
+        return network_layer
+
+    def network_layer_path(self):
+        """Get the layer used for network analysis."""
+        network_layer_path = (
+            self.model.get_analysis_item().attributes().get("network_layer", "")
+        )
+        return network_layer_path
+
     def queue_workflow_task(self, item, role):
         """Queue a workflow task based on the role of the item.
 

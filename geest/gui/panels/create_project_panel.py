@@ -192,10 +192,13 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 QMessageBox.critical(self, "Error", f"Failed to copy model.json: {e}")
                 self.enable_widgets()
                 return
-            # open the model.json to set the analysis cell size, then close it again
+            # open the model.json to set the analysis cell size and the network layer path, then close it again
             with open(model_path, "r") as f:
                 model = json.load(f)
                 model["analysis_cell_size_m"] = self.cell_size_spinbox.value()
+                model["network_layer_path"] = (
+                    self.road_layer_combo.currentLayer().source()
+                )
             with open(model_path, "w") as f:
                 json.dump(model, f)
 
@@ -338,6 +341,21 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             tag="Geest",
             level=Qgis.Info,
         )
+        network_layer_path = os.path.join(
+            self.working_dir, "study_area", "road_network.gpkg"
+        )
+        network_layer_path = f"{network_layer_path}|layername=road_network"
+        log_message(f"Loading network layer from {network_layer_path}")
+        layer = QgsVectorLayer(network_layer_path, "Road Network", "ogr")
+        if not layer.isValid():
+            QMessageBox.critical(
+                self, "Error", "Could not load the road network layer."
+            )
+            return
+        # Load the layer in QGIS
+        QgsProject.instance().addMapLayer(layer)
+        self.road_layer_combo.setLayer(layer)
+        self.road_layer_combo.setLayer(layer)
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
         self.enable_widgets()

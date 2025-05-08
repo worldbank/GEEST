@@ -700,7 +700,7 @@ class StudyAreaProcessingTask(QgsTask):
             index = chunk["index"]
             relationship = chunk["type"]  # inside, edge or undefined
             if relationship != "undefined":
-                task = GridFromBbox(
+                task = GridFromBboxTask(
                     index,
                     (
                         chunk["x_start"],
