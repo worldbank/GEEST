@@ -14,9 +14,11 @@ from qgis.core import (
     QgsPointXY,
     QgsNetworkAccessManager,
     QgsFeedback,
+    QgsCoordinateReferenceSystem,
 )
 from qgis.PyQt.QtCore import QVariant, QUrl, QByteArray
 from qgis.PyQt.QtNetwork import QNetworkRequest
+from qgis import processing  # QGIS processing API
 
 from geest.core import setting
 from geest.utilities import log_message
@@ -28,6 +30,7 @@ class OSMDataDownloaderBase(ABC):
         self,
         extents: QgsRectangle,
         output_path: str = None,
+        output_crs: QgsCoordinateReferenceSystem = None,
         filename: str = None,  # will also set the layer name in the gpkg
         use_cache: bool = False,
         delete_gpkg: bool = True,
@@ -49,6 +52,7 @@ class OSMDataDownloaderBase(ABC):
         # These are required
         self.extents = extents  # The bounding box extents (S, E, N, W)
         self.output_path = output_path  # The output path for the GeoPackage
+        self.output_crs = output_crs
 
         self.filename = filename  # will also set the layer name in the gpkg
         self.use_cache = use_cache
@@ -58,6 +62,9 @@ class OSMDataDownloaderBase(ABC):
         # Use the base name of the output path + .xml to store the overpass response
         self.output_xml_path = output_path.replace(".gpkg", ".xml")
         if os.path.exists(self.output_xml_path) and not self.use_cache:
+            log_message(
+                "OSM xml file exists but use_cache is false: Deleting existing XML file..."
+            )
             os.remove(self.output_xml_path)
         if self.extents is None:
             raise ValueError("Bounding box extents not set.")
@@ -179,6 +186,7 @@ class OSMDataDownloaderBase(ABC):
         Process the streamed OSM XML response and efficiently save the 'lines' layer into a GeoPackage.
 
         This method uses OGR's built-in CopyLayer functionality for optimal performance, similar to ogr2ogr.
+        If self.output_crs is provided, the data will be reprojected from EPSG:4326 to the specified CRS.
         It provides indeterminate progress feedback since exact feature count is unavailable.
 
         If the GeoPackage already exists:
@@ -188,7 +196,6 @@ class OSMDataDownloaderBase(ABC):
 
         Raises:
             RuntimeError: If the input XML cannot be read or if the output GeoPackage layer cannot be created.
-
         """
         total_start = time.perf_counter()
 
@@ -205,7 +212,7 @@ class OSMDataDownloaderBase(ABC):
             raise RuntimeError("No 'lines' layer found in the OSM XML file.")
 
         gpkg_driver = ogr.GetDriverByName("GPKG")
-
+        working_layer = self.filename + "_4326"
         if os.path.exists(self.output_path):
             if self.delete_gpkg:
                 gpkg_driver.DeleteDataSource(self.output_path)
@@ -216,6 +223,9 @@ class OSMDataDownloaderBase(ABC):
                 existing_layer = output_data_source.GetLayerByName(self.filename)
                 if existing_layer:
                     output_data_source.DeleteLayer(self.filename)
+                existing_layer = output_data_source.GetLayerByName(working_layer)
+                if existing_layer:
+                    output_data_source.DeleteLayer(working_layer)
         else:
             output_data_source = gpkg_driver.CreateDataSource(self.output_path)
 
@@ -223,16 +233,34 @@ class OSMDataDownloaderBase(ABC):
             raise RuntimeError(
                 f"Failed to create or open GeoPackage: {self.output_path}"
             )
+
         self.feedback.setProgress(40)
-        # Perform efficient layer copy
-        output_layer = output_data_source.CopyLayer(lines_layer, self.filename)
+
+        # Perform layer copy with reprojection if specified
+        output_layer = output_data_source.CopyLayer(lines_layer, working_layer)
         if output_layer is None:
             raise RuntimeError("Failed to copy lines layer to GeoPackage.")
+
         self.feedback.setProgress(60)
+
         # Cleanup data sources
         osm_data_source = None
         output_data_source = None
 
+        # Now use QGIS processing to reproject the layer from 4326 to the project crs
+        # I tried to do this in one operation passing options for crs to CopyLayer
+        # but it seems it is not supported / working
+        log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
+        reproject = processing.run(
+            "native:reprojectlayer",
+            {
+                "INPUT": "/home/timlinux/dev/python/GEEST/data/GeestWorkingDirectory/Tunisia/study_area/road_network.gpkg|layername=road_network_4326",
+                "TARGET_CRS": self.output_crs,
+                "CONVERT_CURVED_GEOMETRIES": False,
+                "OPERATION": "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=36 +ellps=WGS84",
+                "OUTPUT": "ogr:dbname='/home/timlinux/dev/python/GEEST/data/GeestWorkingDirectory/Tunisia/study_area/road_network.gpkg' table=\"road_network\" (geom)",
+            },
+        )
         self.feedback.setProgress(100)  # Set progress complete
 
         total_end = time.perf_counter()

@@ -15,6 +15,7 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         self,
         extents: QgsRectangle,
         output_path: str = None,
+        output_crs: QgsCoordinateReferenceSystem = None,
         filename: str = None,  # will also set the layer name in the gpkg
         use_cache: bool = False,
         delete_gpkg: bool = True,
@@ -29,6 +30,7 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         super().__init__(
             extents=extents,
             output_path=output_path,
+            output_crs=output_crs,
             filename=filename,
             use_cache=use_cache,
             delete_gpkg=delete_gpkg,

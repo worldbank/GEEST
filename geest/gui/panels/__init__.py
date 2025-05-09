@@ -6,3 +6,4 @@ from .help_panel import HelpPanel
 from .ors_panel import OrsPanel
 from .create_project_panel import CreateProjectPanel
 from .open_project_panel import OpenProjectPanel
+from .road_network_panel import RoadNetworkPanel

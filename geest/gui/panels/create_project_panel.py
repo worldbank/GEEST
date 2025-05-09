@@ -84,8 +84,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.create_project_directory_button.clicked.connect(
             self.create_new_project_folder
         )
-        project_crs = QgsProject.instance().crs().authid()
-        if project_crs == "EPSG:4326" or project_crs == "":
+        self.project_crs = QgsProject.instance().crs()
+        if self.project_crs.authid() == "EPSG:4326" or self.project_crs.authid() == "":
             self.use_boundary_crs.setChecked(False)
             self.use_boundary_crs.setEnabled(False)
 
@@ -153,10 +153,15 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
+
         if self.use_boundary_crs.isChecked():
             crs = self.layer_combo.currentLayer().crs()
         else:
-            crs = None
+            if self.project_crs.authid() == "EPSG:4326":
+                crs = None  # will be calculated from UTM zone
+            else:
+                crs = self.project_crs
+
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
             self.settings.setValue(
@@ -257,7 +262,8 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         if self.use_boundary_crs.isChecked():
             crs = self.layer_combo.currentLayer().crs()
         else:
-            crs = None
+            crs = self.project_crs
+        log_message(f"Using CRS: {crs.authid()} for OSM download")
         # Create the processor instance and process the features
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress

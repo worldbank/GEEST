@@ -44,7 +44,7 @@ class OSMDownloaderTask(QgsTask):
         use_cache=True,
         delete_gpkg=True,
         feedback: QgsFeedback = None,
-        crs=None,
+        crs: QgsCoordinateReferenceSystem = None,
     ):
         """
         :param input_vector_path: Path to an OGR-readable vector file (e.g. .gpkg or .shp).
@@ -96,7 +96,7 @@ class OSMDownloaderTask(QgsTask):
                 QgsProject.instance(),
             )
             self.layer_extent = transform.transformBoundingBox(self.layer_extent)
-        self.crs = self.reference_layer.crs()
+        self.output_crs = crs
 
     def run(self):
         """
@@ -105,9 +105,12 @@ class OSMDownloaderTask(QgsTask):
         try:
             self.setProgress(1)  # Trigger the UI to update with a small value
             log_message(f"Downloading roads starting....")
+            log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
+
             downloader = OSMRoadsDownloader(
                 extents=self.layer_extent,
                 output_path=self.gpkg_path,
+                output_crs=self.output_crs,
                 filename=self.filename,  # will also set the layer name in the gpkg
                 use_cache=self.use_cache,
                 delete_gpkg=self.delete_gpkg,

@@ -208,6 +208,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 },
             )
             service_area_layer = service_area_result["OUTPUT"]
+
             log_message("Service area layer created successfully.")
             single_part_edge_points_result = processing.run(
                 "native:multiparttosingleparts",

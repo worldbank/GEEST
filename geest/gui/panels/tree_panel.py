@@ -75,6 +75,7 @@ from geest.gui.widgets import SolidMenu
 class TreePanel(QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    switch_to_road_network_tab = pyqtSignal()  # Signal to open the road network tab
 
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)
@@ -291,9 +292,15 @@ class TreePanel(QWidget):
         self.run_only_incomplete = False
         # Remove every file in self.working_directory except
         # mode.json and the study_area folder
+        exceptions = [
+            "model.json",
+            "study_area",
+            "study_area_report.pdf",
+            "road_network.gpkg",
+        ]
         for filename in os.listdir(self.working_directory):
             file_path = os.path.join(self.working_directory, filename)
-            if filename != "model.json" and filename != "study_area":
+            if filename not in exceptions:
                 try:
                     if os.path.isfile(file_path) or os.path.islink(file_path):
                         os.unlink(file_path)
@@ -341,7 +348,7 @@ class TreePanel(QWidget):
                 log_message(f"Loaded model.json from {model_path}")
 
                 # If this is a first time use of the analysis project lets set some things up
-                analysis_item = self.model.rootItem.child(0)
+                analysis_item = self.model.get_analysis_item()
                 analysis_data = analysis_item.attributes()
                 log_message(analysis_item.attributesAsMarkdown())
                 if analysis_data.get("working_folder", "Not Set"):
@@ -400,6 +407,14 @@ class TreePanel(QWidget):
         if working_directory:
             self.working_directory = working_directory
             self.working_directory_changed(working_directory)
+
+    @pyqtSlot()
+    def set_network_layer_path(self, network_layer_path):
+        if network_layer_path:
+            log_message(f"Setting network_layer_path in model to {network_layer_path}")
+            self.network_layer_path = network_layer_path
+            analysis_item = self.model.rootItem.child(0)
+            analysis_item.setData("network_layer_path", network_layer_path)
 
     @pyqtSlot()
     def save_json_to_working_directory(self):
@@ -512,7 +527,12 @@ class TreePanel(QWidget):
             edit_analysis_action.triggered.connect(
                 lambda: self.edit_analysis_aggregation(item)
             )  # Connect to method
+            set_road_network_layer_action = QAction("🚗 Set Road Network Layer")
+            set_road_network_layer_action.triggered.connect(
+                self.switch_to_road_network_tab
+            )  # Connect to method
             menu.addAction(edit_analysis_action)
+            menu.addAction(set_road_network_layer_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
@@ -1281,9 +1301,10 @@ class TreePanel(QWidget):
 
     def network_layer_path(self):
         """Get the layer used for network analysis."""
-        network_layer_path = (
-            self.model.get_analysis_item().attributes().get("network_layer", "")
-        )
+        analysis_item = self.model.get_analysis_item()
+        log_message(analysis_item.attributesAsMarkdown())
+        network_layer_path = analysis_item.attributes().get("network_layer_path", "")
+        log_message(f"Network layer path: {network_layer_path}")
         return network_layer_path
 
     def queue_workflow_task(self, item, role):
@@ -1295,6 +1316,10 @@ class TreePanel(QWidget):
         task = None
 
         attributes = item.attributes()
+
+        # Include the network layer in the attributes by default
+        attributes["network_layer_path"] = self.network_layer_path()
+
         if attributes.get("result_file", None) and self.run_only_incomplete:
             return
         if role == item.role and role == "factor":

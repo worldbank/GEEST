@@ -117,7 +117,15 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             self.mode = "distance"
         else:  # Driving
             self.mode = "time"
-
+        self.network_layer_path = self.attributes.get("network_layer_path", None)
+        log_message(f"Using network layer at {self.network_layer_path}")
+        if not self.network_layer_path:
+            log_message(
+                f"Invalid network layer found in {self.network_layer_path}.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            raise Exception("Invalid network layer found.")
         log_message("Multi Buffer Distances Native Workflow initialized")
 
     def _process_features_for_area(
@@ -145,6 +153,16 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             point_layer=area_features,
             area_index=index,
         )
+        # A return of false does not neccessarily indicate an error -
+        # there may be no coincident points in a given area in which case
+        # we just skip it
+        if not isochrones_gpkg:
+            log_message(
+                f"No isochrones created for area {index}.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return False
         # Step 2: Merge all isochrone layers into one final output, removing any overlaps
         bands = self._create_bands(isochrones_gpkg_path=isochrones_gpkg, index=index)
 
@@ -183,6 +201,9 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         verbose_mode = int(setting(key="verbose_mode", default=0))
 
         total_features = point_layer.featureCount()
+        if total_features == 0:
+            log_message(f"No features to process for area {area_index}.")
+            return False
         isochrone_layer_path = os.path.join(
             self.workflow_directory, f"isochrones_area_{area_index}.gpkg"
         )
@@ -192,9 +213,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         if os.path.exists(isochrone_layer_path):
             os.remove(isochrone_layer_path)
 
-        # Shamelessly hard coding network layer for now
-        network_layer_path = "/home/timlinux/dev/python/GEEST/data/StLucia/osm_.gpkg|layername=highway_motorway_highway_motorway_link_32620"
-
         # Process features using an iterator
         for i, point_feature in enumerate(point_layer.getFeatures()):
             # Process this point using QGIS native network analysis
@@ -202,7 +220,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             log_message(f"Processing point {i+1} of {total_features}")
             # Parse the features from the networking analysis response
             processor = NativeNetworkAnalysisProcessor(
-                network_layer_path=network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
+                network_layer_path=self.network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
                 isochrone_layer_path=isochrone_layer_path,  # isochrone_layer_path: Path to the output GeoPackage for the isochrones.
                 point_feature=point_feature,  # feature: The feature to use as the origin for the network analysis.
                 area_index=area_index,  # area_id: The ID of the area being processed.
@@ -302,7 +320,11 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
             band_layers.append(diff_layer)
 
-        smallest_range = sorted_ranges[-1]
+        try:
+            smallest_range = sorted_ranges[-1]
+        except IndexError:
+            return None
+
         smallest_layer = range_layers[smallest_range]
         smallest_layer.dataProvider().addAttributes(
             [QgsField("distance", QVariant.Int)]
