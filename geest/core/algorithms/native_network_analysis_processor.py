@@ -208,66 +208,115 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 },
             )
             service_area_layer = service_area_result["OUTPUT"]
-
             log_message("Service area layer created successfully.")
-            single_part_edge_points_result = processing.run(
-                "native:multiparttosingleparts",
-                {
-                    "INPUT": service_area_layer,
-                    "OUTPUT": service_area_singlepart_point_output_path,
-                },
-            )
-            del service_area_layer
-            log_message("Converted multipart to singlepart successfully.")
-            singlepart_layer_path = single_part_edge_points_result["OUTPUT"]
-            singlepart_layer = QgsVectorLayer(
-                singlepart_layer_path, "singlepart_layer", "ogr"
-            )
-            if not singlepart_layer.isValid():
-                raise ValueError(
-                    f"Singlepart layer is invalid: {singlepart_layer_path}"
+            use_geos_hull = True
+            if use_geos_hull:
+                # Try to compute the concave hull directly using the GEOS API first
+                service_area_vector_layer = QgsVectorLayer(
+                    service_area_layer, "service_area", "ogr"
                 )
-            # Show how many features in the singlepart layer
-            log_message(
-                f"Singlepart layer has {singlepart_layer.featureCount()} features."
-            )
+                if not service_area_vector_layer.isValid():
+                    log_message(f"Service area layer is invalid: {service_area_layer}")
+                else:
+                    service_area_features = list(
+                        service_area_vector_layer.getFeatures()
+                    )
+                    if service_area_features:
+                        service_area_feature = service_area_features[0]
+                        service_area_geometry = service_area_feature.geometry()
 
-            # Doesnt work with some datasets for inexplicable reasons
+                        # Convert QGIS geometry to OGR geometry
+                        ogr_geometry = ogr.CreateGeometryFromWkt(
+                            service_area_geometry.asWkt()
+                        )
 
-            # Compute the concave hull using grass
-            # for some reason, grass output (lower case) is a path not a qgsvectorlayer obnect
-            # concave_hull_result_path = processing.run(
-            #     "grass:v.hull",
-            #     {
-            #         "input": singlepart_layer,
-            #         "where": "",
-            #         "-f": False,
-            #         "output": "TEMPORARY_OUTPUT",
-            #         "GRASS_REGION_PARAMETER": None,
-            #         "GRASS_SNAP_TOLERANCE_PARAMETER": -1,
-            #         "GRASS_MIN_AREA_PARAMETER": 0.0001,
-            #         "GRASS_OUTPUT_TYPE_PARAMETER": 0,
-            #         "GRASS_VECTOR_DSCO": "",
-            #         "GRASS_VECTOR_LCO": "",
-            #         "GRASS_VECTOR_EXPORT_NOCAT": False,
-            #     },
-            # )["output"]
-            concave_hull_result = processing.run(
-                "qgis:minimumboundinggeometry",
-                {
-                    "INPUT": singlepart_layer,
-                    "FIELD": "",
-                    "TYPE": 3,  # convex hull polygon
-                    "OUTPUT": "TEMPORARY_OUTPUT",
-                },
-            )
-            # Load the output as a QgsVetorLayer
-            concave_hull_result_layer = concave_hull_result["OUTPUT"]
-            if not concave_hull_result_layer.isValid():
-                raise ValueError(
-                    f"Concave hull result layer is invalid: {concave_hull_result_layer}"
+                        try:
+                            # Calculate the concave hull with a ratio of 0.3 and no holes
+                            concave_hull_geometry = ogr_geometry.ConcaveHull(0.3, False)
+
+                            if concave_hull_geometry:
+                                log_message(
+                                    "Concave hull computed successfully using GEOS API."
+                                )
+
+                                # Add the concave hull directly to the isochrone layer
+                                new_feature = ogr.Feature(
+                                    self.isochrone_layer.GetLayerDefn()
+                                )
+                                new_feature.SetGeometry(concave_hull_geometry)
+                                new_feature.SetField("value", value)
+                                self.isochrone_layer.CreateFeature(new_feature)
+                                new_feature = None
+
+                                log_message(
+                                    f"Added concave hull feature with value {value} to the GeoPackage."
+                                )
+                                continue  # Skip the rest of the processing for this value
+                        except Exception as e:
+                            log_message(
+                                f"Failed to compute concave hull using GEOS API: {e}"
+                            )
+                            log_message("Falling back to standard processing...")
+            else:
+
+                single_part_edge_points_result = processing.run(
+                    "native:multiparttosingleparts",
+                    {
+                        "INPUT": service_area_layer,
+                        "OUTPUT": service_area_singlepart_point_output_path,
+                    },
                 )
-            log_message("Concave hull created successfully.")
+                del service_area_layer
+                log_message("Converted multipart to singlepart successfully.")
+                singlepart_layer_path = single_part_edge_points_result["OUTPUT"]
+                singlepart_layer = QgsVectorLayer(
+                    singlepart_layer_path, "singlepart_layer", "ogr"
+                )
+                if not singlepart_layer.isValid():
+                    raise ValueError(
+                        f"Singlepart layer is invalid: {singlepart_layer_path}"
+                    )
+                # Show how many features in the singlepart layer
+                log_message(
+                    f"Singlepart layer has {singlepart_layer.featureCount()} features."
+                )
+
+                # Doesnt work with some datasets for inexplicable reasons
+
+                # Compute the concave hull using grass
+                # for some reason, grass output (lower case) is a path not a qgsvectorlayer obnect
+                # concave_hull_result_path = processing.run(
+                #     "grass:v.hull",
+                #     {
+                #         "input": singlepart_layer,
+                #         "where": "",
+                #         "-f": False,
+                #         "output": "TEMPORARY_OUTPUT",
+                #         "GRASS_REGION_PARAMETER": None,
+                #         "GRASS_SNAP_TOLERANCE_PARAMETER": -1,
+                #         "GRASS_MIN_AREA_PARAMETER": 0.0001,
+                #         "GRASS_OUTPUT_TYPE_PARAMETER": 0,
+                #         "GRASS_VECTOR_DSCO": "",
+                #         "GRASS_VECTOR_LCO": "",
+                #         "GRASS_VECTOR_EXPORT_NOCAT": False,
+                #     },
+                # )["output"]
+                concave_hull_result = processing.run(
+                    "qgis:minimumboundinggeometry",
+                    {
+                        "INPUT": singlepart_layer,
+                        "FIELD": "",
+                        "TYPE": 3,  # convex hull polygon
+                        "OUTPUT": "TEMPORARY_OUTPUT",
+                    },
+                )
+                # Load the output as a QgsVetorLayer
+                concave_hull_result_layer = concave_hull_result["OUTPUT"]
+                if not concave_hull_result_layer.isValid():
+                    raise ValueError(
+                        f"Concave hull result layer is invalid: {concave_hull_result_layer}"
+                    )
+                log_message("Concave hull created successfully.")
 
             # Crashes QGIS randomly
 
