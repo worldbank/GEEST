@@ -169,7 +169,12 @@ class OSMDataDownloaderBase(ABC):
         """
         if self.output_type == "point":
             log_message("Processing point data...")
-            self.process_point_response()
+            try:
+                self.process_point_response()
+            except Exception as e:
+                log_message(f"Error processing point data: {e}")
+                raise e
+
         elif self.output_type == "line":
             log_message("Processing line data...")
             self.process_line_response()

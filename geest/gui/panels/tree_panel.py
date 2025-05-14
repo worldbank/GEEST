@@ -527,7 +527,7 @@ class TreePanel(QWidget):
             edit_analysis_action.triggered.connect(
                 lambda: self.edit_analysis_aggregation(item)
             )  # Connect to method
-            set_road_network_layer_action = QAction("🚗 Set Road Network Layer")
+            set_road_network_layer_action = QAction("Set Road Network Layer")
             set_road_network_layer_action.triggered.connect(
                 self.switch_to_road_network_tab
             )  # Connect to method

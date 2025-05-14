@@ -1,0 +1,16 @@
+2025-05-14 23:14:48.248362
+Traceback (most recent call last):
+  File "/home/timlinux/.local/share/QGIS/QGIS3/profiles/GEEST2/python/plugins/geest/core/tasks/osm_downloader_task.py", line 123, in run
+    downloader.process_response()
+  File "/home/timlinux/.local/share/QGIS/QGIS3/profiles/GEEST2/python/plugins/geest/core/osm_downloaders/osm_data_downloader_base.py", line 180, in process_response
+    self.process_line_response()
+  File "/home/timlinux/.local/share/QGIS/QGIS3/profiles/GEEST2/python/plugins/geest/core/osm_downloaders/osm_data_downloader_base.py", line 211, in process_line_response
+    osm_data_source = osm_driver.Open(self.output_xml_path, 0)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/25j4q064c2z7n7q8di3hnr8zgd7kna88-gdal-3.10.2/lib/python3.12/site-packages/osgeo/gdal.py", line 4010, in Open
+    return OpenEx(utf8_path,
+           ^^^^^^^^^^^^^^^^^
+  File "/nix/store/25j4q064c2z7n7q8di3hnr8zgd7kna88-gdal-3.10.2/lib/python3.12/site-packages/osgeo/gdal.py", line 9231, in OpenEx
+    return _gdal.OpenEx(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: `study_area/road_network.xml' not recognized as being in a supported file format.

@@ -160,7 +160,15 @@ class GeestDock(QDockWidget):
 
             self.create_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL)
+                lambda: [
+                    self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
+                    self.road_network_widget.set_reference_layer(
+                        self.create_project_widget.reference_layer()
+                    ),
+                    self.road_network_widget.set_crs(self.create_project_widget.crs()),
+                ][
+                    -1
+                ]  # The [-1] ensures the lambda returns the last value
             )
 
             self.create_project_widget.set_working_directory.connect(
@@ -213,7 +221,16 @@ class GeestDock(QDockWidget):
             )
             self.tree_widget.switch_to_road_network_tab.connect(
                 # Switch to the road network tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL)
+                # This is also called from the context menu in the tree_panel
+                lambda: [
+                    self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
+                    self.road_network_widget.set_reference_layer(
+                        self.create_project_widget.reference_layer()
+                    ),
+                    self.road_network_widget.set_crs(self.create_project_widget.crs()),
+                ][
+                    -1
+                ]  # The [-1] ensures the lambda returns the last value
             )
             # HELP_PANEL = 7
             # Create and add the "Help" panel (HelpPanel)

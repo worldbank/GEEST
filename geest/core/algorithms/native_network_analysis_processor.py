@@ -113,6 +113,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             return False
 
     def calculate_network(self) -> None:
+        self.feedback.setProgress(1)
         log_message(
             f"Calculating Network for feature {self.feature.id()} using {self.mode} with these values: {self.values}..."
         )
@@ -127,6 +128,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             self.working_directory,
             f"service_area_singlepart_point_{self.feature.id()}.gpkg",
         )
+        self.feedback.setProgress(2)
         # point_layer = QgsVectorLayer(
         #     f"Point?crs=EPSG:{self.crs.authid()}&field=id:integer",
         #     "start_point",
@@ -150,7 +152,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             center_point.y() + largest_value,
         )
         log_message(f"Constructed rectangle: {rect.toString()}")
-
+        self.feedback.setProgress(3)
         clipped_layer = processing.run(
             "native:extractbyextent",
             {
@@ -160,8 +162,11 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 "OUTPUT": output_path,
             },
         )["OUTPUT"]
-
-        for value in self.values:
+        self.feedback.setProgress(4)
+        interval = 80.0 / len(self.values)
+        for index, value in enumerate(self.values):
+            self.feedback.setProgress(int((index + 1) * interval))
+            log_message(f"Processing value: {value}")
             # There are two ways to calculate the service area:
             # 1. Using the service area from layer algorithm
             # 2. Using the service area from point algorithm
@@ -208,6 +213,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 },
             )
             service_area_layer = service_area_result["OUTPUT"]
+            self.feedback.setProgress(int(((index + 1) * interval) + (interval / 2)))
             log_message("Service area layer created successfully.")
             use_geos_hull = True
             if use_geos_hull:
@@ -301,7 +307,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 #         "GRASS_VECTOR_EXPORT_NOCAT": False,
                 #     },
                 # )["output"]
-                concave_hull_result = processing.run(
+                hull_result = processing.run(
                     "qgis:minimumboundinggeometry",
                     {
                         "INPUT": singlepart_layer,
@@ -311,44 +317,45 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                     },
                 )
                 # Load the output as a QgsVetorLayer
-                concave_hull_result_layer = concave_hull_result["OUTPUT"]
-                if not concave_hull_result_layer.isValid():
+                hull_result_layer = hull_result["OUTPUT"]
+                if not hull_result_layer.isValid():
                     raise ValueError(
-                        f"Concave hull result layer is invalid: {concave_hull_result_layer}"
+                        f"Concave hull result layer is invalid: {hull_result_layer}"
                     )
                 log_message("Concave hull created successfully.")
 
-            # Crashes QGIS randomly
+                # Crashes QGIS randomly
 
-            # concave_hull_result = processing.run(
-            #     "qgis:minimumboundinggeometry",
-            #     {
-            #         "INPUT": singlepart_layer,
-            #         "FIELD": "",
-            #         "TYPE": 3, # concave hull polygon
-            #         "OUTPUT": "TEMPORARY_OUTPUT",
-            #     },
-            # )
+                # concave_hull_result = processing.run(
+                #     "qgis:minimumboundinggeometry",
+                #     {
+                #         "INPUT": singlepart_layer,
+                #         "FIELD": "",
+                #         "TYPE": 3, # concave hull polygon
+                #         "OUTPUT": "TEMPORARY_OUTPUT",
+                #     },
+                # )
 
-            # Also crashes QGIS randomly
+                # Also crashes QGIS randomly
 
-            # concave_hull_result = processing.run(
-            #     "native:concavehull",
-            #     {
-            #         "INPUT": singlepart_layer,
-            #         "ALPHA": 0.3,
-            #         "HOLES": False,
-            #         "NO_MULTIGEOMETRY": False,
-            #         "OUTPUT": "TEMPORARY_OUTPUT",
-            #     },
-            # )
+                # concave_hull_result = processing.run(
+                #     "native:concavehull",
+                #     {
+                #         "INPUT": singlepart_layer,
+                #         "ALPHA": 0.3,
+                #         "HOLES": False,
+                #         "NO_MULTIGEOMETRY": False,
+                #         "OUTPUT": "TEMPORARY_OUTPUT",
+                #     },
+                # )
 
-            del singlepart_layer
+                del singlepart_layer
             # Show how many features in the concave hull layer
             log_message(
-                f"Concave hull layer has {concave_hull_result_layer.featureCount()} features."
+                f"Concave hull layer has {hull_result_layer.featureCount()} features."
             )
-            for feature in concave_hull_result_layer.getFeatures():
+            self.progress.setProgress(90)
+            for feature in hull_result_layer.getFeatures():
                 geometry = feature.geometry()
                 ogr_geometry = ogr.CreateGeometryFromWkt(geometry.asWkt())
                 new_feature = ogr.Feature(self.isochrone_layer.GetLayerDefn())
@@ -364,9 +371,12 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 log_message(
                     f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
                 )
-            del concave_hull_result_layer
+            del hull_result_layer
 
         del clipped_layer
         # del point_layer
+        self.progress.setProgress(100)
+        self.isochrone_ds = None
+        self.isochrone_layer = None
         log_message(f"Service areas calculated for feature {self.feature.id()}.")
         return

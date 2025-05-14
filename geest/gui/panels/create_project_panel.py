@@ -255,23 +255,27 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         for widget in self.findChildren(QWidget):
             widget.setEnabled(True)
 
+    def reference_layer(self):
+        """Get the admin boundary reference layer."""
+        return self.layer_combo.currentLayer()
+
+    def crs(self):
+        """Get the crs for the Geest project."""
+        if self.use_boundary_crs.isChecked():
+            return self.layer_combo.currentLayer().crs()
+        else:
+            return self.project_crs
+
     def download_road_layer_button_clicked(self):
         """Triggered when the Download Road Layer button is pressed."""
-        # get the extents of the study area
-        layer = self.layer_combo.currentLayer()
-        if self.use_boundary_crs.isChecked():
-            crs = self.layer_combo.currentLayer().crs()
-        else:
-            crs = self.project_crs
-        log_message(f"Using CRS: {crs.authid()} for OSM download")
         # Create the processor instance and process the features
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
         try:
             log_message("Creating OSM Downloader Task")
             processor = OSMDownloaderTask(
-                reference_layer=layer,
-                crs=crs,
+                reference_layer=self.reference_layer(),
+                crs=self.crs(),
                 working_dir=self.working_dir,
                 filename="road_network",
                 use_cache=True,

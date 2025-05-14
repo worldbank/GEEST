@@ -8,6 +8,7 @@ import time
 # GDAL / OGR / OSR imports
 from osgeo import ogr, osr, gdal
 from typing import List, Optional
+from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import (
     QgsTask,
     QgsFeedback,
@@ -35,6 +36,8 @@ class OSMDownloaderTask(QgsTask):
     Returns:
         _type_: _description_
     """
+
+    error_occurred = pyqtSignal(str)
 
     def __init__(
         self,
@@ -126,8 +129,7 @@ class OSMDownloaderTask(QgsTask):
             with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
                 f.write(f"{datetime.datetime.now()}\n")
                 f.write(traceback.format_exc())
-            return False
-
+            self.error_occurred.emit(f"Error in OSMDownloaderTask: {str(e)}")
         return True
 
     def create_study_area_directory(self, working_dir):

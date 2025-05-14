@@ -92,10 +92,12 @@ def theme_stylesheet() -> str:
         }}
         QTreeView {{
             background-color: rgba(0, 0, 0, 0);
+            border: 1px solid #aaa;
+
         }}
         QScrollArea {{
             background-color: rgba(0, 0, 0, 0);
-        }}
+s        }}
         QScrollArea > QWidget > QWidget {{
             background-color: rgba(0, 0, 0, 0);
         }}

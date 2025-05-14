@@ -3,6 +3,7 @@ from qgis.core import QgsApplication
 from PyQt5.QtCore import QObject, pyqtSignal
 from typing import List, Optional
 from .workflow_job import WorkflowJob
+from geest.utilities import log_message
 
 
 class WorkflowQueue(QObject):
@@ -15,6 +16,7 @@ class WorkflowQueue(QObject):
     status_changed = pyqtSignal()
     processing_completed = pyqtSignal(bool)
     status_message = pyqtSignal(str)
+    processing_error = pyqtSignal(str)  # propogate error messages
 
     def __init__(self, pool_size: int, parent=None):
         super().__init__(parent=parent)
@@ -103,7 +105,15 @@ class WorkflowQueue(QObject):
             job.taskTerminated.connect(
                 partial(self.finalize_task, job_name=job.description())
             )
-
+            # Connect to error signal - this assumes your WorkflowJob has an error_occurred signal
+            if hasattr(job, "error_occurred"):
+                job.error_occurred.connect(self.handle_job_error)
+            else:
+                log_message("######################################################")
+                log_message(
+                    f"Job {job.description()} does not have an error_occurred signal."
+                )
+                log_message("######################################################")
             QgsApplication.taskManager().addTask(job)
 
         self.update_status()
@@ -131,3 +141,12 @@ class WorkflowQueue(QObject):
         """
         self.job_queue.append(job)
         self.total_queue_size += 1
+
+    def handle_job_error(self, error_message: str):
+        """
+        Handle errors from workflow jobs
+        :param error_message: The error message from the job
+        """
+        self.status_message.emit(f"Error in workflow: {error_message}")
+        # Propagate the error up to listeners
+        self.processing_error.emit(error_message)

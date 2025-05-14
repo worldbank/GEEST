@@ -39,6 +39,9 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         # For running study area processing in a separate thread
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
+        # Connect the error_occurred signal to show error message
+        self.queue_manager.processing_error.connect(self.show_error_message)
+
         self.working_dir = ""
         self.settings = (
             QSettings()
@@ -47,6 +50,25 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.setupUi(self)
         log_message(f"Loading setup panel")
         self.initUI()
+        self._reference_layer = None
+        self._crs = None
+
+    def show_error_message(self, message, details=None):
+        """Show an error message box when workflow queue manager reports an error."""
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Critical)
+        msg_box.setWindowTitle("Error")
+        msg_box.setText(message)
+        if details:
+            msg_box.setDetailedText(details)
+        msg_box.exec_()
+        self.enable_widgets()  # Re-enable widgets in case they were disabled
+
+    def set_reference_layer(self, layer):
+        self._reference_layer = layer
+
+    def set_crs(self, crs):
+        self._crs = crs
 
     def initUI(self):
         self.custom_label = CustomBannerLabel(
@@ -107,20 +129,24 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
 
     def download_road_layer_button_clicked(self):
         """Triggered when the Download Road Layer button is pressed."""
-        # get the extents of the study area
-        layer = self.layer_combo.currentLayer()
-        if self.use_boundary_crs.isChecked():
-            crs = self.layer_combo.currentLayer().crs()
-        else:
-            crs = None
+        if self._reference_layer is None:
+            QMessageBox.critical(
+                self,
+                "Error",
+                "No boundary (reference) layer is set, unable to continue.",
+            )
+            return
+        if self._crs is None:
+            QMessageBox.critical(self, "Error", "No CRS is set, unable to continue.")
+            return
         # Create the processor instance and process the features
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
         try:
             log_message("Creating OSM Downloader Task")
             processor = OSMDownloaderTask(
-                reference_layer=layer,
-                crs=crs,
+                reference_layer=self._reference_layer,
+                crs=self._crs,
                 working_dir=self.working_dir,
                 filename="road_network",
                 use_cache=True,
@@ -145,7 +171,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         except Exception as e:
             trace = traceback.format_exc()
             QMessageBox.critical(
-                self, "Error", f"Error processing study area: {e}\n{trace}"
+                self, "Error", f"Error downloading network for study area: {e}\n{trace}"
             )
             self.enable_widgets()
             return
