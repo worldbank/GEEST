@@ -37,7 +37,7 @@ class OSMDownloaderTask(QgsTask):
         _type_: _description_
     """
 
-    error_occurred = pyqtSignal(str)
+    error_occurred = pyqtSignal(str)  # for propogating error messages out of the thread
 
     def __init__(
         self,
@@ -60,8 +60,13 @@ class OSMDownloaderTask(QgsTask):
         super().__init__("Study Area Preparation", QgsTask.CanCancel)
 
         self.reference_layer = reference_layer  # used to determin bbox of download
+        if working_dir is None or working_dir == "":
+            raise ValueError("Working directory cannot be None")
+        if not isinstance(reference_layer, QgsVectorLayer):
+            raise ValueError("Reference layer must be a QgsVectorLayer")
         self.working_dir = working_dir
         self.gpkg_path = os.path.join(working_dir, "study_area", f"{filename}.gpkg")
+        log_message(f"GeoPackage path: {self.gpkg_path}")
         self.filename = filename
         self.use_cache = use_cache
         self.delete_gpkg = delete_gpkg

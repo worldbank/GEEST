@@ -37,7 +37,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
-    set_working_directory = pyqtSignal(str)  # Signal to set the working directory
+    working_directory_changed = pyqtSignal(str)  # Signal to set the working directory
 
     def __init__(self):
         super().__init__()
@@ -242,7 +242,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 self.enable_widgets()
                 return
             self.settings.setValue("last_working_directory", self.working_dir)
-            self.set_working_directory.emit(self.working_dir)
+            self.working_directory_changed.emit(self.working_dir)
             self.enable_widgets()
 
     def disable_widgets(self):

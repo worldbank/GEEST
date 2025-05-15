@@ -162,6 +162,9 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: [
                     self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
+                    self.road_network_widget.set_working_directory(
+                        self.create_project_widget.working_dir
+                    ),
                     self.road_network_widget.set_reference_layer(
                         self.create_project_widget.reference_layer()
                     ),
@@ -171,7 +174,7 @@ class GeestDock(QDockWidget):
                 ]  # The [-1] ensures the lambda returns the last value
             )
 
-            self.create_project_widget.set_working_directory.connect(
+            self.create_project_widget.working_directory_changed.connect(
                 lambda: self.tree_widget.set_working_directory(
                     self.create_project_widget.working_dir
                 )
@@ -203,6 +206,12 @@ class GeestDock(QDockWidget):
                     self.road_network_widget.network_layer_path
                 )
             )
+            self.open_project_widget.set_working_directory.connect(
+                # Switch to the previous tab when the button is clicked
+                lambda: self.tree_widget.set_working_directory(
+                    self.open_project_widget.working_dir
+                )
+            )
             # TREE_PANEL = 6
             # Create and add the "Tree" panel (TreePanel)
             self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
@@ -224,14 +233,9 @@ class GeestDock(QDockWidget):
                 # This is also called from the context menu in the tree_panel
                 lambda: [
                     self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
-                    self.road_network_widget.set_reference_layer(
-                        self.create_project_widget.reference_layer()
-                    ),
-                    self.road_network_widget.set_crs(self.create_project_widget.crs()),
-                ][
-                    -1
-                ]  # The [-1] ensures the lambda returns the last value
+                ]
             )
+
             # HELP_PANEL = 7
             # Create and add the "Help" panel (HelpPanel)
             help_widget: HelpPanel = HelpPanel()
@@ -315,6 +319,7 @@ class GeestDock(QDockWidget):
             if geest_project and os.path.exists(
                 os.path.join(geest_project, "model.json")
             ):
+                self.road_network_widget.set_working_directory(geest_project)
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
 
@@ -337,6 +342,17 @@ class GeestDock(QDockWidget):
         elif index == CREATE_PROJECT_PANEL:
             self.create_project_widget.set_font_size()
             log_message("Switched to Create Project panel")
+        elif index == ROAD_NETWORK_PANEL:
+            working_directory = self.tree_widget.working_directory
+            log_message(
+                f"Setting road network panel working directory to: {working_directory}"
+            )
+            self.road_network_widget.set_working_directory(working_directory)
+            self.road_network_widget.set_reference_layer(
+                self.create_project_widget.reference_layer()
+            )
+            self.road_network_widget.set_crs(self.create_project_widget.crs())
+
         elif index == TREE_PANEL:
             log_message("Switched to Tree panel")
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)

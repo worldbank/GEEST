@@ -14,8 +14,8 @@ from qgis.core import (
     QgsFeedback,
 )
 
-from qgis.PyQt.QtCore import QSettings, pyqtSignal
-from qgis.PyQt.QtGui import QPixmap, QFont
+from qgis.PyQt.QtCore import QSettings, pyqtSignal, pyqtSlot
+from qgis.PyQt.QtGui import QFont
 from geest.utilities import get_ui_class, resources_path, linear_interpolation
 from geest.core import WorkflowQueueManager
 from geest.utilities import log_message
@@ -42,7 +42,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         # Connect the error_occurred signal to show error message
         self.queue_manager.processing_error.connect(self.show_error_message)
 
-        self.working_dir = ""
+        self.working_directory = ""
         self.settings = (
             QSettings()
         )  # Initialize QSettings to store and retrieve settings
@@ -63,6 +63,23 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             msg_box.setDetailedText(details)
         msg_box.exec_()
         self.enable_widgets()  # Re-enable widgets in case they were disabled
+
+    @pyqtSlot(str)
+    def working_directory_changed(self, new_directory):
+        """Change the working directory and load the model.json if available."""
+        log_message(f"Working directory changed to {new_directory}")
+        self.working_directory = new_directory
+
+    def set_working_directory(self, working_directory):
+        """Set the working directory for the task."""
+        log_message(f"Setting the working directory to {working_directory}")
+        if working_directory is None or working_directory == "":
+            raise Exception("Invalid working directory: None or empty string")
+        if not os.path.exists(working_directory):
+            raise Exception(f"Invalid working directory: {working_directory}")
+        if not os.path.isdir(working_directory):
+            raise Exception(f"Invalid working directory: {working_directory}")
+        self.working_directory = working_directory
 
     def set_reference_layer(self, layer):
         self._reference_layer = layer
@@ -139,6 +156,10 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         if self._crs is None:
             QMessageBox.critical(self, "Error", "No CRS is set, unable to continue.")
             return
+        if self.working_directory is None or self.working_directory == "":
+            QMessageBox.critical(self, "Error", "Working directory is not set")
+            return
+
         # Create the processor instance and process the features
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
@@ -147,7 +168,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             processor = OSMDownloaderTask(
                 reference_layer=self._reference_layer,
                 crs=self._crs,
-                working_dir=self.working_dir,
+                working_dir=self.working_directory,
                 filename="road_network",
                 use_cache=True,
                 delete_gpkg=True,
@@ -223,7 +244,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             level=Qgis.Info,
         )
         network_layer_path = os.path.join(
-            self.working_dir, "study_area", "road_network.gpkg"
+            self.working_directory, "study_area", "road_network.gpkg"
         )
         network_layer_path = f"{network_layer_path}|layername=road_network"
         log_message(f"Loading network layer from {network_layer_path}")

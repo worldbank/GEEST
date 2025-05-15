@@ -61,6 +61,7 @@ class OSMDataDownloaderBase(ABC):
 
         # Use the base name of the output path + .xml to store the overpass response
         self.output_xml_path = output_path.replace(".gpkg", ".xml")
+
         if os.path.exists(self.output_xml_path) and not self.use_cache:
             log_message(
                 "OSM xml file exists but use_cache is false: Deleting existing XML file..."
