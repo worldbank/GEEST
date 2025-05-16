@@ -5,6 +5,8 @@ import os
 from osgeo import ogr
 
 from qgis.core import (
+    QgsProject,
+    QgsCoordinateTransform,
     QgsVectorLayer,
     QgsFeature,
     QgsRectangle,
@@ -257,20 +259,31 @@ class OSMDataDownloaderBase(ABC):
         # I tried to do this in one operation passing options for crs to CopyLayer
         # but it seems it is not supported / working
         log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
+        source_crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        transform_context = QgsProject.instance().transformContext()
+
+        transform = QgsCoordinateTransform(
+            source_crs, self.output_crs, transform_context
+        )
+        # pipeline = transform.coordinateOperation().projString()
+
+        # log_message(f"Proj4 operation: {pipeline}")
         reproject = processing.run(
             "native:reprojectlayer",
             {
-                "INPUT": "/home/timlinux/dev/python/GEEST/data/GeestWorkingDirectory/Tunisia/study_area/road_network.gpkg|layername=road_network_4326",
+                "INPUT": f"{self.output_path}|layername={self.filename}_4326",
                 "TARGET_CRS": self.output_crs,
                 "CONVERT_CURVED_GEOMETRIES": False,
-                "OPERATION": "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=36 +ellps=WGS84",
-                "OUTPUT": "ogr:dbname='/home/timlinux/dev/python/GEEST/data/GeestWorkingDirectory/Tunisia/study_area/road_network.gpkg' table=\"road_network\" (geom)",
+                # "OPERATION": "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=36 +ellps=WGS84",
+                # The proj4 pipeline string is only available in QGIS >= 3.26
+                # "OPERATION": pipeline,
+                "OUTPUT": f"ogr:dbname='{self.output_path}' table=\"{self.filename}\" (geom)",
             },
         )
         self.feedback.setProgress(100)  # Set progress complete
 
         total_end = time.perf_counter()
-        log_message(f"GeoPackage written to: {self.output_path}")
+        log_message(f"GeoPackage written to: {self.output_path} table: {self.filename}")
         log_message(f"Total processing time: {total_end - total_start:.2f}s")
 
     def process_point_response(self, response_data: str) -> None:
