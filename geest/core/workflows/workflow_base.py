@@ -108,6 +108,10 @@ class WorkflowBase(QObject):
 
         # Will be populated by the workflow
         self.attributes = self.item.attributes()
+        self.attributes["error"] = None
+        self.attributes["error_file"] = None
+        self.attributes["execution_start_time"] = None
+        self.attributes["execution_end_time"] = None
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
@@ -259,9 +263,9 @@ class WorkflowBase(QObject):
             for index, (current_area, clip_area, current_bbox, progress) in enumerate(
                 area_iterator
             ):
-                feedback.pushInfo(
-                    f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"
-                )
+                message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"
+                feedback.pushInfo(message)
+                log_message(message)
                 if self.feedback.isCanceled():
                     log_message(
                         f"{self.class_name} Processing was canceled by the user.",
@@ -275,8 +279,18 @@ class WorkflowBase(QObject):
                         current_area,
                         output_prefix=f"{self.layer_id}_area_features_{index}",
                     )
-
-                    if area_features.featureCount() == 0:
+                    # Some workflows do not take in vector data (a features layer)
+                    # but are not raster based. e,g,index_score_workflow
+                    # Logic below is a check for that
+                    if (
+                        not isinstance(self.features_layer, bool)
+                        and area_features.featureCount() == 0
+                    ):
+                        log_message(
+                            f"No area features ... skipping",
+                            tag="Geest",
+                            level=Qgis.Warning,
+                        )
                         continue
 
                     # Step 2: Process the area features - work happens in concrete class
