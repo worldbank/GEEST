@@ -76,8 +76,11 @@ def theme_stylesheet() -> str:
             border: 1px solid #aaa;
             border-radius: 6px;
         }}
-        /* checked to here */
         
+        QDialog {{
+            background-color: rgba(255, 255, 255, 255);
+            color: #000000;
+        }}      
         QDockWidget, QDialog {{
             background-image: url({resources_path("resources", "images", "background-light.png")});
             background-repeat: no-repeat;
@@ -90,7 +93,7 @@ def theme_stylesheet() -> str:
         QMenu::item:selected {{
             background-color: #f0f0f0;
         }}
-        QTreeView {{
+        QTreeView, QTableWidget {{
             background-color: rgba(0, 0, 0, 0);
             border: 1px solid #aaa;
 
