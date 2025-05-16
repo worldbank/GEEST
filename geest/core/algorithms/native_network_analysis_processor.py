@@ -10,6 +10,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsRectangle,
     QgsWkbTypes,
+    QgsFeedback,
 )
 from qgis.PyQt.QtCore import QVariant
 from qgis import processing
@@ -33,7 +34,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         working_directory: str,
     ):
         super().__init__("Native Network Analysis Processor", QgsTask.CanCancel)
-
+        self.feedback = QgsFeedback()
         NativeNetworkAnalysisProcessor._instance_counter += 1  # Increment counter
         self.instance_id = (
             NativeNetworkAnalysisProcessor._instance_counter
