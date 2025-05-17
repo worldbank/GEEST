@@ -74,6 +74,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
                 "multi_buffer_shapefile": self.points_layer_path,
                 "multi_buffer_travel_mode": "Walking",
                 "multi_buffer_travel_units": "Distance",
+                "network_layer_path": self.network_layer_path,
             },
         ]
         self.indicator_item = JsonTreeItem(

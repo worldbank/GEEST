@@ -225,12 +225,26 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 if not service_area_vector_layer.isValid():
                     log_message(f"Service area layer is invalid: {service_area_layer}")
                 else:
+                    log_message(
+                        f"Service area feature count (1 is expected): f{service_area_vector_layer.featureCount()}"
+                    )
                     service_area_features = list(
                         service_area_vector_layer.getFeatures()
                     )
                     if service_area_features:
                         service_area_feature = service_area_features[0]
                         service_area_geometry = service_area_feature.geometry()
+                        # Get number of parts in the geometry
+                        parts_count = 1  # Default for single geometries
+                        if service_area_geometry.isMultipart():
+                            parts_count = (
+                                service_area_geometry.constGet().numGeometries()
+                            )
+
+                        log_message(
+                            f"Service area geometry type: {service_area_geometry.wkbType()}"
+                        )
+                        log_message(f"Service area geometry has {parts_count} parts")
 
                         # Convert QGIS geometry to OGR geometry
                         ogr_geometry = ogr.CreateGeometryFromWkt(
@@ -257,6 +271,9 @@ class NativeNetworkAnalysisProcessor(QgsTask):
 
                                 log_message(
                                     f"Added concave hull feature with value {value} to the GeoPackage."
+                                )
+                                log_message(
+                                    f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
                                 )
                                 continue  # Skip the rest of the processing for this value
                         except Exception as e:
@@ -372,11 +389,12 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 log_message(
                     f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
                 )
+
             del hull_result_layer
 
         del clipped_layer
         # del point_layer
-        self.progress.setProgress(100)
+        self.feedback.setProgress(100)
         self.isochrone_ds = None
         self.isochrone_layer = None
         log_message(f"Service areas calculated for feature {self.feature.id()}.")

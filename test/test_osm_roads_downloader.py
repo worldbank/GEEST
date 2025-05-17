@@ -36,7 +36,7 @@ class TestOSMRoadsDownloader(unittest.TestCase):
 
         mock_set_osm_query.assert_called_once()
         mock_submit_query.assert_called_once()
-        self.assertIn("[out:xml][timeout:25];", mock_set_osm_query.call_args[0][0])
+        self.assertIn("[out:xml][timeout:60];", mock_set_osm_query.call_args[0][0])
 
     @patch("geest.core.osm_downloaders.osm_roads_downloader.log_message")
     def test_log_message_called(self, mock_log_message):

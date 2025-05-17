@@ -20,7 +20,9 @@ __revision__ = "$Format:%H$"
 
 import os
 import datetime
+import unittest
 from typing import Optional
+
 
 from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QIcon
@@ -30,6 +32,9 @@ from qgis.PyQt.QtWidgets import (
     QAction,
     QDockWidget,
     QApplication,
+    QComboBox,
+    QVBoxLayout,
+    QDialog,
 )
 from qgis.core import Qgis, QgsProject
 
@@ -158,8 +163,16 @@ class GeestPlugin:
             )
             self.tests_action.triggered.connect(self.run_tests)
             self.iface.addToolBarIcon(self.tests_action)
+
+            single_test_icon = QIcon(resources_path("resources", "run-single-test.svg"))
+            self.single_test_action = QAction(
+                single_test_icon, "Run Single Test", self.iface.mainWindow()
+            )
+            self.single_test_action.triggered.connect(self.run_single_test)
+            self.iface.addToolBarIcon(self.single_test_action)
         else:
             self.tests_action = None
+            self.single_test_action = None
             self.debug_action = None
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
@@ -217,6 +230,74 @@ for module_name in list(sys.modules.keys()):
                         log_message("Test modules unloaded")
                         break
 
+    def run_single_test(self):
+        """Prompt user to select a single test to run in the Python console."""
+
+        # Step 1: Discover all test cases
+        test_dir = "/home/timlinux/dev/python/GEEST/test"
+        loader = unittest.TestLoader()
+        suite = loader.discover(start_dir=test_dir, pattern="test_*.py")
+
+        test_names = []
+        for test_group in suite:
+            for test_case in test_group:
+                for test in test_case:
+                    test_names.append(
+                        test.id()
+                    )  # e.g., test_module.ClassName.test_method
+
+        # Step 2: Create and show dialog
+        class TestPickerDialog(QDialog):
+            def __init__(self, tests, parent=None):
+                super().__init__(parent)
+                self.setWindowTitle("Select Test to Run")
+                layout = QVBoxLayout(self)
+                self.combo = QComboBox()
+                self.combo.addItems(tests)
+                layout.addWidget(self.combo)
+                run_button = QPushButton("Run Test")
+                layout.addWidget(run_button)
+                run_button.clicked.connect(self.accept)
+
+            def selected_test(self):
+                return self.combo.currentText()
+
+        dialog = TestPickerDialog(test_names, self.iface.mainWindow())
+        if not dialog.exec_():
+            return  # Cancelled
+
+        selected_test = dialog.selected_test()
+
+        # Step 3: Open Python console and inject run command
+        main_window = self.iface.mainWindow()
+        action = main_window.findChild(QAction, "mActionShowPythonDialog")
+        action.trigger()
+
+        for child in main_window.findChildren(QDockWidget, "PythonConsole"):
+            if child.objectName() == "PythonConsole":
+                child.show()
+                for widget in child.children():
+                    if widget.__class__.__name__ == "PythonConsole":
+                        shell = widget.console.shell
+                        shell.runCommand("")
+                        shell.runCommand("import unittest, sys")
+                        shell.runCommand(f"test_name = '{selected_test}'")
+                        shell.runCommand(
+                            "test_case = unittest.defaultTestLoader.loadTestsFromName(test_name)"
+                        )
+                        shell.runCommand(
+                            "runner = unittest.TextTestRunner(verbosity=2)"
+                        )
+                        shell.runCommand("runner.run(test_case)")
+                        shell.runCommand(
+                            """
+for module_name in list(sys.modules.keys()):
+    if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
+        del sys.modules[module_name]
+                        """
+                        )
+                        break
+
     def save_geometry(self) -> None:
         """
         Saves the geometry and dock area of GeestDock to QSettings.
@@ -272,6 +353,11 @@ for module_name in list(sys.modules.keys()):
             self.iface.removeToolBarIcon(self.run_action)
             self.run_action.deleteLater()
             self.run_action = None
+
+        if self.single_test_action:
+            self.iface.removeToolBarIcon(self.single_test_action)
+            self.single_test_action.deleteLater()
+            self.single_test_action = None
 
         if self.debug_action:
             self.iface.removeToolBarIcon(self.debug_action)
