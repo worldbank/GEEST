@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-# Install required extensions
-echo "code --user-data-dir='.vscode' \\"
-echo "--profile='geest' \\"
-echo "--extensions-dir='.vscode-extensions' . \\"
-code --user-data-dir='.vscode' \
---profile='geest' \
---extensions-dir='.vscode-extensions' . \
---list-extensions \
---show-versions | xargs -L 1 echo code --extensions-dir=".vscode-extensions" --install-extension 
+EXT_DIR=".vscode-extensions"
 
-echo ""
-echo "Paste the above lines into your .vscode.sh and add a back slash at the end of each install-extension line except the last."
+find "$EXT_DIR" -maxdepth 1 -mindepth 1 -type d | while read -r dir; do
+    pkg="$dir/package.json"
+    if [[ -f "$pkg" ]]; then
+        name=$(jq -r '.name' < "$pkg")
+        publisher=$(jq -r '.publisher' < "$pkg")
+        version=$(jq -r '.version' < "$pkg")
+        echo "--install-extension ${publisher}.${name}@${version} \\"
+    fi
+done
+

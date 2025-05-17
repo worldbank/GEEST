@@ -22,9 +22,10 @@ from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..factor_configuration_widget import FactorConfigurationWidget
 from geest.utilities import log_message, is_qgis_dark_theme_active
 from geest.gui.widgets import CustomBannerLabel
+from .custom_base_dialog import CustomBaseDialog
 
 
-class FactorAggregationDialog(QDialog):
+class FactorAggregationDialog(CustomBaseDialog):
 
     def __init__(self, factor_name, factor_data, factor_item, parent=None):
         super().__init__(parent)

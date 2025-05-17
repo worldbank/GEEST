@@ -14,6 +14,7 @@ class WorkflowQueueManager(QObject):
 
     # Qt signal for when the queue is completed
     processing_completed = pyqtSignal()
+    processing_error = pyqtSignal(str)  # error message as payload
 
     def __init__(self, pool_size: int, parent=None):
         """
@@ -28,6 +29,9 @@ class WorkflowQueueManager(QObject):
         self.workflow_queue.status_changed.connect(self.update_status)
         self.workflow_queue.processing_completed.connect(self.on_processing_completed)
         self.workflow_queue.status_message.connect(self.log_status_message)
+
+        # Connect to error signal from workflow queue
+        self.workflow_queue.processing_error.connect(self.on_processing_error)
 
     def add_task(self, task: QgsTask) -> None:
         """
@@ -119,3 +123,14 @@ class WorkflowQueueManager(QObject):
         :param message: Status message to log
         """
         log_message(message)
+
+    def on_processing_error(self, error_message: str) -> None:
+        """
+        Handle when a task in the queue encounters an error.
+        :param error_message: The error message from the failed task
+        """
+        log_message(
+            f"Workflow error: {error_message}", tag="Geest", level=Qgis.Critical
+        )
+        # Forward the error through the manager's signal
+        self.processing_error.emit(error_message)

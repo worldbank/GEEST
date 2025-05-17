@@ -32,11 +32,12 @@ from geest.utilities import (
 from qgis.gui import QgsMapLayerComboBox
 from geest.gui.widgets import CustomBannerLabel
 from geest.core import setting
+from .custom_base_dialog import CustomBaseDialog
 
 FORM_CLASS = get_ui_class("analysis_dialog_base.ui")
 
 
-class AnalysisAggregationDialog(FORM_CLASS, QDialog):
+class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
     def __init__(self, analysis_item, parent=None):
         super().__init__(parent)
         # Dynamically load the .ui file

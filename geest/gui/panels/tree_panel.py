@@ -33,7 +33,8 @@ from qgis.PyQt.QtCore import (
     pyqtSignal,
     QModelIndex,
 )
-from qgis.PyQt.QtGui import QMovie
+from qgis.PyQt.QtGui import QMovie, QPalette, QColor, QPixmap
+
 from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import (
     Qgis,
@@ -47,7 +48,6 @@ from qgis.core import (
 from functools import partial
 from geest.gui.views import JsonTreeView, JsonTreeModel
 from geest.core import JsonTreeItem
-from geest.utilities import resources_path
 from geest.core import setting, set_setting
 from geest.core import WorkflowQueueManager
 from geest.gui.dialogs import (
@@ -64,13 +64,18 @@ from geest.core.algorithms import (
     OpportunitiesByWeeScorePopulationProcessingTask,
 )
 from geest.core.reports.study_area_report import StudyAreaReport
-
-from geest.utilities import log_message
+from geest.utilities import (
+    resources_path,
+    theme_stylesheet,
+    log_message,
+)
+from geest.gui.widgets import SolidMenu
 
 
 class TreePanel(QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    switch_to_road_network_tab = pyqtSignal()  # Signal to open the road network tab
 
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)
@@ -87,7 +92,7 @@ class TreePanel(QWidget):
         self.items_to_run = 0  # Count of items that need to be run
 
         layout = QVBoxLayout()
-
+        layout.setContentsMargins(0, 0, 0, 0)
         if json_file:
             # Load JSON data
             self.load_json()
@@ -162,7 +167,7 @@ class TreePanel(QWidget):
         self.prepare_analysis_button.clicked.connect(self.run_all)
 
         # Create the menu for additional options
-        prepare_analysis_menu = QMenu(self.prepare_analysis_button)
+        prepare_analysis_menu = SolidMenu(self.prepare_analysis_button)
 
         # Add "Run all" action
         run_all_action = QAction("Run all", self)
@@ -183,6 +188,7 @@ class TreePanel(QWidget):
         self.project_button = QPushButton("Project")
         self.project_button.clicked.connect(self.switch_to_previous_tab)
         button_bar.addWidget(self.project_button)
+
         self.help_button = QPushButton("Help")
         self.help_button.clicked.connect(self.switch_to_next_tab)
         button_bar.addWidget(self.help_button)
@@ -262,6 +268,7 @@ class TreePanel(QWidget):
         """
         msg_box = QMessageBox(self)
         msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setStyleSheet(theme_stylesheet())
         msg_box.setWindowTitle("Clear Workflows")
         msg_box.setText(
             f"This action will DELETE all files and folders in the working directory ({self.working_directory}). Do you want to continue?"
@@ -280,14 +287,20 @@ class TreePanel(QWidget):
                     os.system(f'xdg-open "{self.working_directory}"')
                 return
 
-        if reply == QMessageBox.No:
+        if reply == QMessageBox.No or reply == QMessageBox.Rejected:
             return
         self.run_only_incomplete = False
         # Remove every file in self.working_directory except
         # mode.json and the study_area folder
+        exceptions = [
+            "model.json",
+            "study_area",
+            "study_area_report.pdf",
+            "road_network.gpkg",
+        ]
         for filename in os.listdir(self.working_directory):
             file_path = os.path.join(self.working_directory, filename)
-            if filename != "model.json" and filename != "study_area":
+            if filename not in exceptions:
                 try:
                     if os.path.isfile(file_path) or os.path.islink(file_path):
                         os.unlink(file_path)
@@ -335,7 +348,7 @@ class TreePanel(QWidget):
                 log_message(f"Loaded model.json from {model_path}")
 
                 # If this is a first time use of the analysis project lets set some things up
-                analysis_item = self.model.rootItem.child(0)
+                analysis_item = self.model.get_analysis_item()
                 analysis_data = analysis_item.attributes()
                 log_message(analysis_item.attributesAsMarkdown())
                 if analysis_data.get("working_folder", "Not Set"):
@@ -394,6 +407,14 @@ class TreePanel(QWidget):
         if working_directory:
             self.working_directory = working_directory
             self.working_directory_changed(working_directory)
+
+    @pyqtSlot()
+    def set_network_layer_path(self, network_layer_path):
+        if network_layer_path:
+            log_message(f"Setting network_layer_path in model to {network_layer_path}")
+            self.network_layer_path = network_layer_path
+            analysis_item = self.model.rootItem.child(0)
+            analysis_item.setData("network_layer_path", network_layer_path)
 
     @pyqtSlot()
     def save_json_to_working_directory(self):
@@ -484,7 +505,8 @@ class TreePanel(QWidget):
         clear_results_action.triggered.connect(self.clear_workflows)
 
         # Update when menu shows
-        menu = QMenu(self)
+        menu = SolidMenu(self)
+
         menu.aboutToShow.connect(update_action_text)
         # Add event filter to menu to update when shift is pressed while menu is open
         menu.installEventFilter(self)
@@ -500,12 +522,17 @@ class TreePanel(QWidget):
         )
 
         if item.role == "analysis":
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
             edit_analysis_action.triggered.connect(
                 lambda: self.edit_analysis_aggregation(item)
             )  # Connect to method
+            set_road_network_layer_action = QAction("Set Road Network Layer")
+            set_road_network_layer_action.triggered.connect(
+                self.switch_to_road_network_tab
+            )  # Connect to method
             menu.addAction(edit_analysis_action)
+            menu.addAction(set_road_network_layer_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
@@ -585,7 +612,7 @@ class TreePanel(QWidget):
                 lambda: self.model.remove_item(item)
             )
             # Add actions to menu
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             menu.addAction(edit_aggregation_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
@@ -612,7 +639,7 @@ class TreePanel(QWidget):
             remove_factor_action.triggered.connect(lambda: self.model.remove_item(item))
 
             # Add actions to menu
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             menu.addAction(edit_aggregation_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
@@ -637,7 +664,7 @@ class TreePanel(QWidget):
             )
 
             # Add actions to menu
-            menu = QMenu(self)
+            menu = SolidMenu(self)
             menu.addAction(show_properties_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
@@ -979,7 +1006,7 @@ class TreePanel(QWidget):
             return  # If no cell is clicked, do nothing
 
         # Create the context menu
-        menu = QMenu()
+        menu = SolidMenu()
         copy_action = menu.addAction("Copy")
 
         # Execute the menu at the position and check if an action was selected
@@ -1263,6 +1290,23 @@ class TreePanel(QWidget):
         )
         return cell_size_m
 
+    def network_layer(self):
+        """Get the layer used for network analysis."""
+        network_layer = QgsVectorLayer(
+            self.model.get_analysis_item().attributes().get("network_layer", ""),
+            "Network Layer",
+            "ogr",
+        )
+        return network_layer
+
+    def network_layer_path(self):
+        """Get the layer used for network analysis."""
+        analysis_item = self.model.get_analysis_item()
+        log_message(analysis_item.attributesAsMarkdown())
+        network_layer_path = analysis_item.attributes().get("network_layer_path", "")
+        log_message(f"Network layer path: {network_layer_path}")
+        return network_layer_path
+
     def queue_workflow_task(self, item, role):
         """Queue a workflow task based on the role of the item.
 
@@ -1272,6 +1316,10 @@ class TreePanel(QWidget):
         task = None
 
         attributes = item.attributes()
+
+        # Include the network layer in the attributes by default
+        attributes["network_layer_path"] = self.network_layer_path()
+
         if attributes.get("result_file", None) and self.run_only_incomplete:
             return
         if role == item.role and role == "factor":

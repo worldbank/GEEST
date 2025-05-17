@@ -5,7 +5,7 @@ Test suite for grid_from_bbox.py.
 Version Changed: 2025-01-24
 """
 
-from geest.core.tasks import GridFromBbox
+from geest.core.tasks import GridFromBboxTask
 from qgis.core import QgsRectangle, QgsCoordinateReferenceSystem
 
 
@@ -25,7 +25,7 @@ def test_create_grid_from_bbox_standard():
     crs = example_crs()
 
     for cell_width, cell_height in [(10, 10), (5, 5), (20, 20)]:
-        grid = GridFromBbox(
+        grid = GridFromBboxTask(
             bbox=bbox, cell_width=cell_width, cell_height=cell_height, crs=crs
         )
 
@@ -40,13 +40,13 @@ def test_create_grid_from_bbox_edge_cases():
 
     # Zero-area bbox
     zero_area_bbox = QgsRectangle(10, 10, 10, 10)
-    grid = GridFromBbox(bbox=zero_area_bbox, cell_width=5, cell_height=5, crs=crs)
+    grid = GridFromBboxTask(bbox=zero_area_bbox, cell_width=5, cell_height=5, crs=crs)
     assert grid.featureCount() == 0, "Grid for zero-area bbox should have no features."
 
     # Inverted bbox
     inverted_bbox = QgsRectangle(100, 100, 0, 0)
     try:
-        GridFromBbox(bbox=inverted_bbox, cell_width=10, cell_height=10, crs=crs)
+        GridFromBboxTask(bbox=inverted_bbox, cell_width=10, cell_height=10, crs=crs)
         assert False, "Expected ValueError for inverted bbox, but none was raised."
     except ValueError as e:
         assert "Invalid bounding box dimensions" in str(
@@ -61,7 +61,7 @@ def test_invalid_cell_dimensions():
 
     # Negative cell dimensions
     try:
-        GridFromBbox(bbox=bbox, cell_width=-10, cell_height=10, crs=crs)
+        GridFromBboxTask(bbox=bbox, cell_width=-10, cell_height=10, crs=crs)
         assert (
             False
         ), "Expected ValueError for negative cell width, but none was raised."
@@ -71,7 +71,7 @@ def test_invalid_cell_dimensions():
         ), f"Unexpected error message: {e}"
 
     try:
-        GridFromBbox(bbox=bbox, cell_width=10, cell_height=-10, crs=crs)
+        GridFromBboxTask(bbox=bbox, cell_width=10, cell_height=-10, crs=crs)
         assert (
             False
         ), "Expected ValueError for negative cell height, but none was raised."

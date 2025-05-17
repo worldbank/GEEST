@@ -9,6 +9,14 @@ case $choice in
 esac
 
 # Running on local used to skip tests that will not work in a local dev env
-nix-shell -p \
-  'qgis.override { extraPythonPackages = (ps: [ ps.pyqtwebengine ps.jsonschema ps.debugpy ps.future ps.psutil ]);}' \
-  --command "GEEST_DEBUG=${DEBUG_MODE} RUNNING_ON_LOCAL=1 qgis --profile GEEST2"
+GEEST_LOG=$HOME/GEEST2.log
+rm -f $GEEST_LOG
+#nix-shell -p \
+#  This is the old way using default nix packages with overrides
+#  'qgis.override { extraPythonPackages = (ps: [ ps.pyqtwebengine ps.jsonschema ps.debugpy ps.future ps.psutil ]);}' \
+#  --command "GEEST_LOG=${GEEST_LOG} GEEST_DEBUG=${DEBUG_MODE} RUNNING_ON_LOCAL=1 qgis --profile GEEST2"
+
+# This is the new way, using Ivan Mincis nix spatial project and a flake
+# see flake.nix for implementation details
+GEEST_LOG=${GEEST_LOG} GEEST_DEBUG=${DEBUG_MODE} RUNNING_ON_LOCAL=1 \
+      nix run .#default -- qgis --profile GEEST2

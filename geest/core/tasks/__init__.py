@@ -1,3 +1,4 @@
-from .study_area import StudyAreaProcessingTask
-from .ors_checker import OrsCheckerTask
-from .grid_from_bbox import GridFromBbox
+from .study_area_processing_task import StudyAreaProcessingTask
+from .ors_checker_task import OrsCheckerTask
+from .grid_from_bbox_task import GridFromBboxTask
+from .osm_downloader_task import OSMDownloaderTask

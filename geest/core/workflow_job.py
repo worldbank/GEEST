@@ -17,6 +17,7 @@ class WorkflowJob(QgsTask):
     job_canceled = pyqtSignal()
     # Custom signal to emit when the job is finished
     job_finished = pyqtSignal(bool)
+    error_occurred = pyqtSignal(str)
 
     def __init__(
         self,
@@ -115,6 +116,8 @@ class WorkflowJob(QgsTask):
                 tag="Geest",
                 level=Qgis.Critical,
             )
+            error_message = f"Error in {self.description()}: {str(e)}"
+            self.error_occurred.emit(error_message)
             return False
 
     def feedback(self) -> QgsFeedback:

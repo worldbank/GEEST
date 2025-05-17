@@ -7,6 +7,7 @@ from .opportunities_by_wee_score_processor import OpportunitiesByWeeScoreProcess
 from .opportunities_by_wee_score_population_processor import (
     OpportunitiesByWeeScorePopulationProcessingTask,
 )
+from .native_network_analysis_processor import NativeNetworkAnalysisProcessor
 from .utilities import (
     assign_crs_to_raster_layer,
     assign_crs_to_vector_layer,

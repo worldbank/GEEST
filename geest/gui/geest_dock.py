@@ -6,7 +6,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QPixmap, QPainter
+from qgis.PyQt.QtGui import QPainter
 
 from qgis.core import Qgis, QgsProject
 from typing import Optional
@@ -18,13 +18,14 @@ from geest.gui.panels import (
     HelpPanel,
     OpenProjectPanel,
     CreateProjectPanel,
+    RoadNetworkPanel,
 )
-from geest.core import set_setting, setting
+from geest.core import setting
 from geest.utilities import (
-    resources_path,
     log_message,
-    is_qgis_dark_theme_active,
     version,
+    theme_background_image,
+    theme_stylesheet,
 )
 
 INTRO_PANEL = 0
@@ -32,8 +33,9 @@ CREDITS_PANEL = 1
 SETUP_PANEL = 2
 OPEN_PROJECT_PANEL = 3
 CREATE_PROJECT_PANEL = 4
-TREE_PANEL = 5
-HELP_PANEL = 6
+ROAD_NETWORK_PANEL = 5
+TREE_PANEL = 6
+HELP_PANEL = 7
 
 
 class GeestDock(QDockWidget):
@@ -61,16 +63,6 @@ class GeestDock(QDockWidget):
         layout: QVBoxLayout = QVBoxLayout(main_widget)
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for a cleaner look
         layout.setSpacing(0)  # Remove spacing between elements
-
-        # Load the background image
-        if is_qgis_dark_theme_active():
-            self.background_image = QPixmap(
-                resources_path("resources", "images", "background-dark.png")
-            )
-        else:
-            self.background_image = QPixmap(
-                resources_path("resources", "images", "background.png")
-            )
 
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
@@ -168,16 +160,59 @@ class GeestDock(QDockWidget):
 
             self.create_project_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+                lambda: [
+                    self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
+                    self.road_network_widget.set_working_directory(
+                        self.create_project_widget.working_dir
+                    ),
+                    self.road_network_widget.set_reference_layer(
+                        self.create_project_widget.reference_layer()
+                    ),
+                    self.road_network_widget.set_crs(self.create_project_widget.crs()),
+                ][
+                    -1
+                ]  # The [-1] ensures the lambda returns the last value
             )
 
-            self.create_project_widget.set_working_directory.connect(
-                # Switch to the previous tab when the button is clicked
+            self.create_project_widget.working_directory_changed.connect(
                 lambda: self.tree_widget.set_working_directory(
                     self.create_project_widget.working_dir
                 )
             )
-            # TREE_PANEL = 5
+            # ROAD_NETWORK_PANEL = 5
+            # Create and add the "Road Network" panel
+            self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
+            road_network_panel: QWidget = QWidget()
+            road_network_layout: QVBoxLayout = QVBoxLayout(road_network_panel)
+            road_network_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
+            road_network_layout.addWidget(self.road_network_widget)
+            self.stacked_widget.addWidget(road_network_panel)
+
+            self.road_network_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                # 🚩 Note we set the back button and the forward
+                #    button both to the TREE_PANEL so that the
+                #    User can re-invoke the network panel any time
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
+            self.road_network_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
+            self.road_network_widget.set_network_layer_path.connect(
+                lambda: self.tree_widget.set_network_layer_path(
+                    self.road_network_widget.network_layer_path
+                )
+            )
+            self.open_project_widget.set_working_directory.connect(
+                # Switch to the previous tab when the button is clicked
+                lambda: self.tree_widget.set_working_directory(
+                    self.open_project_widget.working_dir
+                )
+            )
+            # TREE_PANEL = 6
             # Create and add the "Tree" panel (TreePanel)
             self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
             tree_panel: QWidget = QWidget()
@@ -193,8 +228,15 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
+            self.tree_widget.switch_to_road_network_tab.connect(
+                # Switch to the road network tab when the button is clicked
+                # This is also called from the context menu in the tree_panel
+                lambda: [
+                    self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
+                ]
+            )
 
-            # HELP_PANEL = 6
+            # HELP_PANEL = 7
             # Create and add the "Help" panel (HelpPanel)
             help_widget: HelpPanel = HelpPanel()
             help_panel: QWidget = QWidget()
@@ -206,6 +248,7 @@ class GeestDock(QDockWidget):
                 # Switch to the previous tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
+
             # Add the stacked widget to the main layout
             layout.addWidget(self.stacked_widget)
 
@@ -223,7 +266,6 @@ class GeestDock(QDockWidget):
 
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
-
             log_message("GeestDock initialized successfully.")
 
         except Exception as e:
@@ -235,6 +277,11 @@ class GeestDock(QDockWidget):
             import traceback
 
             log_message(traceback.format_exc(), tag="Geest", level=Qgis.Critical)
+
+        # Load the background image and style sheet
+        # do this last so it applies to all the widgets
+        self.background_image = theme_background_image()
+        main_widget.setStyleSheet(theme_stylesheet())
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
@@ -272,6 +319,7 @@ class GeestDock(QDockWidget):
             if geest_project and os.path.exists(
                 os.path.join(geest_project, "model.json")
             ):
+                self.road_network_widget.set_working_directory(geest_project)
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
 
@@ -294,6 +342,17 @@ class GeestDock(QDockWidget):
         elif index == CREATE_PROJECT_PANEL:
             self.create_project_widget.set_font_size()
             log_message("Switched to Create Project panel")
+        elif index == ROAD_NETWORK_PANEL:
+            working_directory = self.tree_widget.working_directory
+            log_message(
+                f"Setting road network panel working directory to: {working_directory}"
+            )
+            self.road_network_widget.set_working_directory(working_directory)
+            self.road_network_widget.set_reference_layer(
+                self.create_project_widget.reference_layer()
+            )
+            self.road_network_widget.set_crs(self.create_project_widget.crs())
+
         elif index == TREE_PANEL:
             log_message("Switched to Tree panel")
             # self.tree_widget.set_working_directory(self.setup_widget.working_dir)

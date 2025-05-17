@@ -16,8 +16,8 @@ from qgis.core import (
     QgsProject,
 )
 from geest.utilities import log_message
-from .grid_from_bbox import GridFromBbox
-from .grid_chunker import GridChunker
+from .grid_from_bbox_task import GridFromBboxTask
+from .grid_chunker_task import GridChunkerTask
 from geest.core import setting
 
 
@@ -652,7 +652,7 @@ class StudyAreaProcessingTask(QgsTask):
         # size is squared so 5 will make a 5x5 cell chunk
         chunk_size = int(setting(key="chunk_size", default=50))
 
-        chunker = GridChunker(
+        chunker = GridChunkerTask(
             xmin,
             xmax,
             ymin,
@@ -700,7 +700,7 @@ class StudyAreaProcessingTask(QgsTask):
             index = chunk["index"]
             relationship = chunk["type"]  # inside, edge or undefined
             if relationship != "undefined":
-                task = GridFromBbox(
+                task = GridFromBboxTask(
                     index,
                     (
                         chunk["x_start"],

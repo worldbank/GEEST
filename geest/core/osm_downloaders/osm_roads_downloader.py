@@ -3,6 +3,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
     QgsProject,
+    QgsFeedback,
 )
 from qgis.gui import QgsMapCanvas
 from .osm_data_downloader_base import OSMDataDownloaderBase
@@ -14,6 +15,11 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         self,
         extents: QgsRectangle,
         output_path: str = None,
+        output_crs: QgsCoordinateReferenceSystem = None,
+        filename: str = None,  # will also set the layer name in the gpkg
+        use_cache: bool = False,
+        delete_gpkg: bool = True,
+        feedback: QgsFeedback = None,
     ):
         """
         Initialize the OSMRoadsDownloader class.
@@ -21,10 +27,19 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         Args:
             extents: A QgsRectangle object containing the bounding box coordinates for the query.
         """
-        super().__init__(extents=extents, output_path=output_path)
+        super().__init__(
+            extents=extents,
+            output_path=output_path,
+            output_crs=output_crs,
+            filename=filename,
+            use_cache=use_cache,
+            delete_gpkg=delete_gpkg,
+            feedback=feedback,
+        )
         # set the output type to line
+        # note the timeout - 60s needed to allow for larger country queries
         self._set_output_type("line")
-        osm_query = """[out:xml][timeout:25];
+        osm_query = """[out:xml][timeout:60];
 (
 node["highway"="motorway"]({{bbox}});
 node["highway"="motorway_link"]({{bbox}});
@@ -104,3 +119,4 @@ out geom;"""
         self.set_osm_query(osm_query)
         self.submit_query()
         log_message("OSMRoadsDownloader Initialized")
+        log_message("Now call process_response to convert from osm xml to gpkg")

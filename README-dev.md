@@ -12,7 +12,8 @@ Welcome to the GEEST Developer Guide! This document is your one-stop resource fo
 5. [Making a Patch or Pull Request](#making-a-patch-or-pull-request)
 6. [Running Tests](#running-tests)
 7. [Tagging a Release](#tagging-a-release)
-8. [Credits and Notes](#credits-and-notes)
+8. [Coding Standards](#coding-standards)
+9. [Credits and Notes](#credits-and-notes)
 
 ---
 
@@ -128,6 +129,13 @@ The `admin.py` script provides various commands for managing the plugin, such as
    git tag vX.Y.Z
    git push origin vX.Y.Z
    ```
+
+---
+
+## Coding Standards 🧑‍💻
+
+To ensure consistency and maintainability, please follow the coding standards outlined in the [CODING.md](CODING.md) file. This document provides guidelines on formatting, naming conventions, and best practices for contributing to the GEEST project.
+
 
 ---
 

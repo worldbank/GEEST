@@ -343,14 +343,14 @@ class JsonTreeItem:
                 # If any child indicator has a status of "Workflow failed", return "Workflow failed"
                 for child in self.childItems:
                     child_status = child.getStatus()
-                    log_message(f"Child status: {child_status}")
+                    # log_message(f"Child status: {child_status}")
                     if child_status == "Workflow failed":
                         return "Workflow failed"
                     if child_status == "Required and not configured":
                         return "Required and not configured"
                     if child_status == "Error":
                         return "Workflow failed"
-                    if child_status.contains("Failed"):
+                    if "Failed" in child_status:
                         return "Workflow failed"
 
             if self.isDimension():
@@ -467,7 +467,14 @@ class JsonTreeItem:
            back to the tree model.🚨
         """
         if len(self.itemData) > 3:
-            return self.itemData[3]
+            try:
+                return self.itemData[3]
+            except KeyError:
+                log_message(
+                    f"Error: {self.itemData} item 3 is not a dictionary",
+                    level=Qgis.Warning,
+                )
+                return {}
         else:
             return {}
 

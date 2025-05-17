@@ -10,7 +10,7 @@ from geest.core.workflows import (
     FactorAggregationWorkflow,
     DimensionAggregationWorkflow,
     AnalysisAggregationWorkflow,
-    MultiBufferDistancesWorkflow,
+    MultiBufferDistancesNativeWorkflow,
     PointPerCellWorkflow,
     PolylinePerCellWorkflow,
     PolygonPerCellWorkflow,
@@ -69,7 +69,7 @@ class WorkflowFactory:
             elif analysis_mode == "Do Not Use":
                 return DontUseWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_multi_buffer_point":
-                return MultiBufferDistancesWorkflow(
+                return MultiBufferDistancesNativeWorkflow(
                     item, cell_size_m, feedback, context
                 )
             elif analysis_mode == "use_single_buffer_point":
