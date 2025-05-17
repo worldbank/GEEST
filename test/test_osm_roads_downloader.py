@@ -41,7 +41,13 @@ class TestOSMRoadsDownloader(unittest.TestCase):
     @patch("geest.core.osm_downloaders.osm_roads_downloader.log_message")
     def test_log_message_called(self, mock_log_message):
         OSMRoadsDownloader(extents=self.mock_extents, output_path=self.mock_output_path)
-        mock_log_message.assert_called_once_with("OSMRoadsDownloader Initialized")
+        expected_calls = [
+            unittest.mock.call("OSMRoadsDownloader Initialized"),
+            unittest.mock.call(
+                "Now call process_response to convert from osm xml to gpkg"
+            ),
+        ]
+        mock_log_message.assert_has_calls(expected_calls)
 
 
 if __name__ == "__main__":
