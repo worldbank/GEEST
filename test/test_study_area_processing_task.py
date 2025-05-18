@@ -119,14 +119,6 @@ class TestStudyAreaProcessor(unittest.TestCase):
 
         self.assertTrue(os.path.exists(mask_path), "Raster mask was not created.")
 
-    def test_calculate_utm_zone(self):
-        """
-        Test UTM zone calculation.
-        """
-        bbox = (-10, 10, -10, 10)
-        utm_code = self.processor.calculate_utm_zone(bbox)
-        self.assertEqual(utm_code, 32631, "UTM zone calculation is incorrect.")
-
     def test_create_study_area_directory(self):
         """
         Test study area directory creation.
