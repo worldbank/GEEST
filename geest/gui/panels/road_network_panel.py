@@ -126,6 +126,8 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.switch_to_previous_tab.emit()
 
     def network_layer_path(self):
+        if self.road_layer_combo.currentLayer() is None:
+            return None
         return self.road_layer_combo.currentLayer().source()
 
     def load_road_layer(self):
