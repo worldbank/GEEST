@@ -1,6 +1,6 @@
 # coding=utf-8
 
-"""Utilities for AnimationWorkbench."""
+"""Utilities for GEEST."""
 
 __copyright__ = "Copyright 2022, Tim Sutton"
 __license__ = "GPL version 3"
@@ -563,6 +563,8 @@ def calculate_utm_zone_from_layer(layer):
     Determine a UTM zone from the centroid of a layer's bounding box.
     Reprojected into WGS84 if possible. Return EPSG code.
     """
+    if layer is None:
+        return None
     # Get the layer's extent
     extent = layer.extent()
     bbox = (extent.xMinimum(), extent.xMaximum(), extent.yMinimum(), extent.yMaximum())
