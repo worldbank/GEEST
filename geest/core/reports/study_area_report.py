@@ -5,6 +5,8 @@ from qgis.core import (
     QgsVectorLayer,
     QgsLayout,
     QgsLayoutItemLabel,
+    QgsLayoutFrame,
+    QgsLayoutItemAttributeTable,
     QgsLayoutPoint,
     QgsUnitTypes,
     QgsLayoutExporter,
@@ -21,6 +23,7 @@ from qgis.core import (
     QgsLayoutItemMapGrid,
     QgsUnitTypes,
     QgsCoordinateReferenceSystem,
+    QgsFeatureRequest,
 )
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtGui import QFont, QColor
@@ -334,90 +337,142 @@ class StudyAreaReport:
             )
             self.layout.addLayoutItem(summary_label)
 
-            # Add a map item for the current layer
-            map_item = QgsLayoutItemMap(self.layout)
-            map_item.setLayers([layer])
-            map_item.attemptMove(
-                QgsLayoutPoint(20, 110, QgsUnitTypes.LayoutMillimeters),
-                page=current_page,
-            )
-            map_width_mm = 170
-            map_height_mm = 100
-            map_item.attemptResize(
-                # 170mm width x 100mm height
-                QgsLayoutSize(
-                    map_width_mm, map_height_mm, QgsUnitTypes.LayoutMillimeters
+            if layer_name == "study_area_creation_status":
+                # I would have liked to just used a table here
+                # but the table is not working - it crashes QGIS in 3.42
+
+                start_x = 20
+                start_y = 110
+                row_height = 8  # mm between rows
+
+                # Create a request to sort by geom_total_duration_secs in descending order
+                request = QgsFeatureRequest()
+                clause = QgsFeatureRequest.OrderByClause(
+                    "geom_total_duration_secs", ascending=False
                 )
-            )
-            # if the extent does not have the same aspect ratio as
-            # the map item, the extent will be expanded to fit the map item
-            # Calculate the aspect ratio of the map item
-            map_aspect_ratio = map_width_mm / map_height_mm
-            # ---------------------------
-            # Set up a grid over the map
-            # ---------------------------
-            # Create a new map grid for the map item
-            grid = QgsLayoutItemMapGrid("Grid 1", map_item)
-            grid.setEnabled(True)
-            grid.setCrs(QgsCoordinateReferenceSystem("EPSG:4326"))
+                orderby = QgsFeatureRequest.OrderBy([clause])
+                request.setOrderBy(orderby)
 
-            # Specify that the grid is a graticule (i.e. based on geographic coordinates)
-            # grid.setGridType(QgsLayoutItemMapGrid.Graticule)
+                # Use the request in getFeatures
+                for i, feat in enumerate(layer.getFeatures(request)):
+                    name = feat["area_name"]
+                    duration = round(feat["geom_total_duration_secs"], 2)
 
-            # Define a grid interval of 1 degree.
-            grid.setIntervalX(1)
-            grid.setIntervalY(1)
+                    y_offset = start_y + i * row_height
+                    if y_offset > 240:
+                        continue
+                    # Label: Area name
+                    name_label = QgsLayoutItemLabel(self.layout)
+                    name_label.setText(f"{name}")
+                    name_label.adjustSizeToText()
+                    name_label.attemptMove(
+                        QgsLayoutPoint(
+                            start_x, y_offset, QgsUnitTypes.LayoutMillimeters
+                        ),
+                        page=current_page,
+                    )
+                    self.layout.addLayoutItem(name_label)
 
-            grid.setAnnotationDirection(
-                QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Bottom
-            )
-            grid.setAnnotationDirection(
-                QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Top
-            )
+                    # Label: Duration
+                    duration_label = QgsLayoutItemLabel(self.layout)
+                    duration_label.setText(f"{duration:.2f}")
+                    duration_label.adjustSizeToText()
+                    duration_label.attemptMove(
+                        QgsLayoutPoint(
+                            start_x + 60,
+                            y_offset,
+                            QgsUnitTypes.LayoutMillimeters,
+                        ),
+                        page=current_page,
+                    )
+                    self.layout.addLayoutItem(duration_label)
 
-            # (Optional) Enable and configure annotations for the grid lines
-            grid.setAnnotationEnabled(True)
-            # Example format: degrees and minutes (you can customize this format as needed)
-            # grid.setAnnotationFormat("dd° mm'")
-
-            # Add the grid to the map item. The map_item.grids() returns a list;
-            # append our configured grid to it.
-            map_item.grids().addGrid(grid)
-
-            # If needed, refresh or update your layout to see the grid applied.
-
-            # Get the current extent of the layer
-            layer_extent = layer.extent()
-
-            # Calculate the aspect ratio of the layer's extent
-            layer_aspect_ratio = layer_extent.width() / layer_extent.height()
-
-            # Initialize variables for the new extent
-            new_extent = QgsRectangle(layer_extent)
-
-            # Adjust the extent to match the map item's aspect ratio
-            if layer_aspect_ratio > map_aspect_ratio:
-                # Layer is wider than the map item; adjust height
-                new_height = layer_extent.width() / map_aspect_ratio
-                height_diff = new_height - layer_extent.height()
-                new_extent.setYMinimum(layer_extent.yMinimum() - height_diff / 2)
-                new_extent.setYMaximum(layer_extent.yMaximum() + height_diff / 2)
             else:
-                # Layer is taller than the map item; adjust width
-                new_width = layer_extent.height() * map_aspect_ratio
-                width_diff = new_width - layer_extent.width()
-                new_extent.setXMinimum(layer_extent.xMinimum() - width_diff / 2)
-                new_extent.setXMaximum(layer_extent.xMaximum() + width_diff / 2)
 
-            # Set the new extent to the map item
-            map_item.setExtent(new_extent)
+                # Add a map item for the current layer
+                map_item = QgsLayoutItemMap(self.layout)
+                map_item.setLayers([layer])
+                map_item.attemptMove(
+                    QgsLayoutPoint(20, 110, QgsUnitTypes.LayoutMillimeters),
+                    page=current_page,
+                )
+                map_width_mm = 170
+                map_height_mm = 100
+                map_item.attemptResize(
+                    # 170mm width x 100mm height
+                    QgsLayoutSize(
+                        map_width_mm, map_height_mm, QgsUnitTypes.LayoutMillimeters
+                    )
+                )
+                # if the extent does not have the same aspect ratio as
+                # the map item, the extent will be expanded to fit the map item
+                # Calculate the aspect ratio of the map item
+                map_aspect_ratio = map_width_mm / map_height_mm
+                # ---------------------------
+                # Set up a grid over the map
+                # ---------------------------
+                # Create a new map grid for the map item
+                grid = QgsLayoutItemMapGrid("Grid 1", map_item)
+                grid.setEnabled(True)
+                grid.setCrs(QgsCoordinateReferenceSystem("EPSG:4326"))
 
-            map_item.refresh()
-            self.layout.addLayoutItem(map_item)
-            # Add a black frame around the map item
-            map_item.setFrameEnabled(True)
-            map_item.setFrameStrokeColor(QColor(0, 0, 0))
-            map_item.setFrameStrokeWidth(QgsLayoutMeasurement(0.5))
+                # Specify that the grid is a graticule (i.e. based on geographic coordinates)
+                # grid.setGridType(QgsLayoutItemMapGrid.Graticule)
+
+                # Define a grid interval of 1 degree.
+                grid.setIntervalX(1)
+                grid.setIntervalY(1)
+
+                grid.setAnnotationDirection(
+                    QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Bottom
+                )
+                grid.setAnnotationDirection(
+                    QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Top
+                )
+
+                # (Optional) Enable and configure annotations for the grid lines
+                grid.setAnnotationEnabled(True)
+                # Example format: degrees and minutes (you can customize this format as needed)
+                # grid.setAnnotationFormat("dd° mm'")
+
+                # Add the grid to the map item. The map_item.grids() returns a list;
+                # append our configured grid to it.
+                map_item.grids().addGrid(grid)
+
+                # If needed, refresh or update your layout to see the grid applied.
+
+                # Get the current extent of the layer
+                layer_extent = layer.extent()
+
+                # Calculate the aspect ratio of the layer's extent
+                layer_aspect_ratio = layer_extent.width() / layer_extent.height()
+
+                # Initialize variables for the new extent
+                new_extent = QgsRectangle(layer_extent)
+
+                # Adjust the extent to match the map item's aspect ratio
+                if layer_aspect_ratio > map_aspect_ratio:
+                    # Layer is wider than the map item; adjust height
+                    new_height = layer_extent.width() / map_aspect_ratio
+                    height_diff = new_height - layer_extent.height()
+                    new_extent.setYMinimum(layer_extent.yMinimum() - height_diff / 2)
+                    new_extent.setYMaximum(layer_extent.yMaximum() + height_diff / 2)
+                else:
+                    # Layer is taller than the map item; adjust width
+                    new_width = layer_extent.height() * map_aspect_ratio
+                    width_diff = new_width - layer_extent.width()
+                    new_extent.setXMinimum(layer_extent.xMinimum() - width_diff / 2)
+                    new_extent.setXMaximum(layer_extent.xMaximum() + width_diff / 2)
+
+                # Set the new extent to the map item
+                map_item.setExtent(new_extent)
+
+                map_item.refresh()
+                self.layout.addLayoutItem(map_item)
+                # Add a black frame around the map item
+                map_item.setFrameEnabled(True)
+                map_item.setFrameStrokeColor(QColor(0, 0, 0))
+                map_item.setFrameStrokeWidth(QgsLayoutMeasurement(0.5))
             # Add the page footer
             self.add_header_and_footer(page_number=current_page)
             current_page += 1
