@@ -201,9 +201,9 @@ class GeestDock(QDockWidget):
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
 
-            self.road_network_widget.set_network_layer_path.connect(
+            self.road_network_widget.network_layer_path_changed.connect(
                 lambda: self.tree_widget.set_network_layer_path(
-                    self.road_network_widget.network_layer_path
+                    self.road_network_widget.network_layer_path()
                 )
             )
             self.open_project_widget.set_working_directory.connect(
@@ -319,9 +319,9 @@ class GeestDock(QDockWidget):
             if geest_project and os.path.exists(
                 os.path.join(geest_project, "model.json")
             ):
-                self.road_network_widget.set_working_directory(geest_project)
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
+                self.road_network_widget.set_working_directory(geest_project)
 
     def on_panel_changed(self, index: int) -> None:
         """

@@ -412,9 +412,15 @@ class TreePanel(QWidget):
     def set_network_layer_path(self, network_layer_path):
         if network_layer_path:
             log_message(f"Setting network_layer_path in model to {network_layer_path}")
-            self.network_layer_path = network_layer_path
             analysis_item = self.model.rootItem.child(0)
-            analysis_item.setData("network_layer_path", network_layer_path)
+            try:
+                analysis_item.setAttribute("network_layer_path", network_layer_path)
+            except Exception as e:
+                log_message(
+                    f"Error setting network path: {str(e)}", level=Qgis.Critical
+                )
+        else:
+            log_message(f"No network layer path provided.")
 
     @pyqtSlot()
     def save_json_to_working_directory(self):
