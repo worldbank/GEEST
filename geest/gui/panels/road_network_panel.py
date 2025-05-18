@@ -31,7 +31,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
-    set_network_layer_path = pyqtSignal(str)  # Signal to set the network layer path
+    network_layer_path_changed = pyqtSignal(str)  # Signal to set the network layer path
 
     def __init__(self):
         super().__init__()
@@ -101,6 +101,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         #     QPixmap(resources_path("resources", "icons", "failed.svg"))
         # )
         self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
+        self.road_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
         self.download_road_layer_button.clicked.connect(
             self.download_road_layer_button_clicked
@@ -111,11 +112,21 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
 
+    def emit_layer_change(self):
+        layer = self.road_layer_combo.currentLayer()
+        if layer:
+            self.network_layer_path_changed.emit(layer.source())
+        else:
+            self.network_layer_path_changed.emit(None)
+
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
+
+    def network_layer_path(self):
+        return self.road_layer_combo.currentLayer().source()
 
     def load_road_layer(self):
         """Load a road network layer from a file."""
@@ -256,7 +267,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             return
         # Load the layer in QGIS
         QgsProject.instance().addMapLayer(layer)
-        self.road_layer_combo.setLayer(layer)
         self.road_layer_combo.setLayer(layer)
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)

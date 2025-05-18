@@ -26,6 +26,7 @@ import tempfile
 import re
 import platform
 import subprocess
+from osgeo import ogr, osr
 
 from qgis.PyQt.QtCore import QUrl, QSettings, QRect
 from qgis.PyQt.QtGui import QPixmap
@@ -552,3 +553,61 @@ def version():
     except FileNotFoundError:
         log_message("metadata.txt file not found", level=Qgis.Warning)
     return version
+
+
+##########################################################################
+# CRS / UTM calculation
+##########################################################################
+def calculate_utm_zone_from_layer(layer):
+    """
+    Determine a UTM zone from the centroid of a layer's bounding box.
+    Reprojected into WGS84 if possible. Return EPSG code.
+    """
+    # Get the layer's extent
+    extent = layer.extent()
+    bbox = (extent.xMinimum(), extent.xMaximum(), extent.yMinimum(), extent.yMaximum())
+
+    # Get the source EPSG code from the layer
+    source_epsg = layer.crs().authid().split(":")[-1] if layer.crs().authid() else None
+
+    # Calculate the UTM zone
+    utm_zone = calculate_utm_zone(bbox, source_epsg)
+    return utm_zone
+
+
+def calculate_utm_zone(bbox, source_epsg=None):
+    """
+    Determine a UTM zone from the centroid of (xmin, xmax, ymin, ymax),
+    reprojected into WGS84 if possible. Return EPSG code.
+    """
+    (xmin, xmax, ymin, ymax) = bbox
+    cx = 0.5 * (xmin + xmax)
+    cy = 0.5 * (ymin + ymax)
+
+    # If there's no source SRS, we'll assume it's already lat/lon
+    if not source_epsg:
+        # fallback if no known EPSG
+        log_message(
+            "Source has no EPSG, defaulting to a naive assumption of WGS84 bounding box."
+        )
+        lon, lat = cx, cy
+    else:
+        # We have a known EPSG, so transform centroid to WGS84
+        src_ref = osr.SpatialReference()
+        src_ref.ImportFromEPSG(int(source_epsg))
+        wgs84_ref = osr.SpatialReference()
+        wgs84_ref.ImportFromEPSG(4326)
+        ct = osr.CoordinateTransformation(src_ref, wgs84_ref)
+        point = ogr.Geometry(ogr.wkbPoint)
+        point.AddPoint(cx, cy)
+        point.Transform(ct)
+        lon = point.GetX()
+        lat = point.GetY()
+
+    # Standard formula for UTM zone
+    utm_zone = int((lon + 180) / 6) + 1
+    # We guess north or south
+    if lat >= 0:
+        return 32600 + utm_zone  # Northern Hemisphere
+    else:
+        return 32700 + utm_zone  # Southern Hemisphere

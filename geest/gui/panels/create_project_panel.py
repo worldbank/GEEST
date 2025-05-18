@@ -16,6 +16,7 @@ from qgis.core import (
     QgsProject,
     QgsFeedback,
     QgsLayerTreeGroup,
+    QgsCoordinateReferenceSystem,
 )
 
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
@@ -23,10 +24,9 @@ from qgis.PyQt.QtGui import QPixmap, QFont
 from geest.core.tasks import StudyAreaProcessingTask
 from geest.utilities import get_ui_class, resources_path, linear_interpolation
 from geest.core import WorkflowQueueManager
-from geest.utilities import log_message
+from geest.utilities import log_message, calculate_utm_zone_from_layer
 from geest.gui.widgets import CustomBannerLabel
 from geest.core.reports.study_area_report import StudyAreaReport
-from geest.core.tasks import OSMDownloaderTask
 import platform
 
 
@@ -36,7 +36,6 @@ FORM_CLASS = get_ui_class("create_project_panel_base.ui")
 class CreateProjectPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
-
     working_directory_changed = pyqtSignal(str)  # Signal to set the working directory
 
     def __init__(self):
@@ -73,18 +72,15 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.field_combo.setFilters(QgsFieldProxyModel.String)
 
         # Link the map layer combo box with the field combo box
-        self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
+        self.layer_combo.layerChanged.connect(self.layer_changed)
         self.field_combo.setLayer(self.layer_combo.currentLayer())
 
-        self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
-        self.load_road_layer_button.clicked.connect(self.load_road_layer)
-        self.download_road_layer_button.clicked.connect(
-            self.download_road_layer_button_clicked
-        )
         self.create_project_directory_button.clicked.connect(
             self.create_new_project_folder
         )
         self.project_crs = QgsProject.instance().crs()
+        # We only allow the user to select a CRS based on the admin layer
+        # if the admin CRS is not WGS84
         if self.project_crs.authid() == "EPSG:4326" or self.project_crs.authid() == "":
             self.use_boundary_crs.setChecked(False)
             self.use_boundary_crs.setEnabled(False)
@@ -96,26 +92,26 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
+        # Esnure crs is set on first load
+        self.layer_changed(self.layer_combo.currentLayer())
+
+    def layer_changed(self, layer):
+        """Slot to be called when the layer in the combo box changes."""
+        if layer:
+            self.field_combo.setLayer(layer)
+            # Check if the layer has a valid CRS
+            if layer.crs().authid() == "EPSG:4326":
+                self.use_boundary_crs.setChecked(False)
+                self.use_boundary_crs.setEnabled(False)
+            else:
+                self.use_boundary_crs.setEnabled(True)
+        else:
+            self.field_combo.clear()
+            self.use_boundary_crs.setEnabled(False)
+        self.crs_label.setText(self.crs().authid())
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
-
-    def load_road_layer(self):
-        """Load a road network layer from a file."""
-        file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
-        file_dialog.setNameFilter("Shapefile (*.shp);;GeoPackage (*.gpkg)")
-        if file_dialog.exec_():
-            file_path = file_dialog.selectedFiles()[0]
-            layer = QgsVectorLayer(file_path, "Road Network", "ogr")
-            if not layer.isValid():
-                QMessageBox.critical(
-                    self, "Error", "Could not load the road network layer."
-                )
-                return
-            # Load the layer in QGIS
-            QgsProject.instance().addMapLayer(layer)
-            self.road_layer_combo.setLayer(layer)
 
     def load_boundary(self):
         """Load a boundary layer from a file."""
@@ -201,9 +197,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             with open(model_path, "r") as f:
                 model = json.load(f)
                 model["analysis_cell_size_m"] = self.cell_size_spinbox.value()
-                model["network_layer_path"] = (
-                    self.road_layer_combo.currentLayer().source()
-                )
             with open(model_path, "w") as f:
                 json.dump(model, f)
 
@@ -261,114 +254,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     def crs(self):
         """Get the crs for the Geest project."""
+        crs = None
         if self.use_boundary_crs.isChecked():
-            return self.layer_combo.currentLayer().crs()
+            crs = self.layer_combo.currentLayer().crs()
         else:
-            return self.project_crs
-
-    def download_road_layer_button_clicked(self):
-        """Triggered when the Download Road Layer button is pressed."""
-        # Create the processor instance and process the features
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
-        try:
-            log_message("Creating OSM Downloader Task")
-            processor = OSMDownloaderTask(
-                reference_layer=self.reference_layer(),
-                crs=self.crs(),
-                working_dir=self.working_dir,
-                filename="road_network",
-                use_cache=True,
-                delete_gpkg=True,
-                feedback=feedback,
-            )
-            log_message("OSM Downloader Task created, setting up call backs")
-            # Hook up the QTask feedback signal to the progress bar
-            # Measure overall task progress from the task object itself
-            processor.progressChanged.connect(self.osm_download_progress_updated)
-            processor.taskCompleted.connect(self.download_done)
-            # Measure subtask progress from the feedback object
-            feedback.progressChanged.connect(self.osm_extract_progress_updated)
-            self.disable_widgets()
-            if debug_env:
-                processor.run()
-            else:
-                log_message("Adding task to queue manager")
-                self.queue_manager.add_task(processor)
-                self.queue_manager.start_processing()
-                log_message("Processing started")
-        except Exception as e:
-            trace = traceback.format_exc()
-            QMessageBox.critical(
-                self, "Error", f"Error processing study area: {e}\n{trace}"
-            )
-            self.enable_widgets()
-            return
-
-    # Slot that listens for changes in the study_area task object which is used to measure overall task progress
-    def osm_download_progress_updated(self, progress: float):
-        """Slot to be called when the download task progress is updated."""
-        log_message(f"\n\n\n\n\n\n\Progress: {progress}\n\n\n\n\n\n\n\n")
-        self.progress_bar.setVisible(True)
-        self.progress_bar.setEnabled(True)
-        self.progress_bar.setValue(int(progress))
-        if progress == 0:
-            self.progress_bar.setFormat("Fetching OSM data...")
-            self.progress_bar.setMinimum(0)  # makes it bounce indefinitely
-            self.progress_bar.setMaximum(0)
-        else:
-            self.progress_bar.setMinimum(0)
-            self.progress_bar.setMaximum(100)
-
-            # This is a sneaky hack to show the exact progress in the label
-            # since QProgressBar only takes ints. See Qt docs for more info.
-            # Use the 'setFormat' method to display the exact float:
-            float_value_as_string = f"OSM download progress: {progress}%"
-            self.progress_bar.setFormat(float_value_as_string)
-
-    # Slot that listens for changes in the progress object which is used to measure subtask progress
-    def osm_extract_progress_updated(self, progress: float):
-        self.child_progress_bar.setVisible(True)
-        self.child_progress_bar.setEnabled(True)
-        if progress == 0:
-            self.progress_bar.setFormat("Extracting OSM data...")
-            self.progress_bar.setMinimum(0)  # makes it bounce indefinitely
-            self.progress_bar.setMaximum(0)
-        else:
-            self.progress_bar.setMinimum(0)
-            self.progress_bar.setMaximum(100)
-            self.child_progress_bar.setValue(int(progress))
-            # This is a sneaky hack to show the exact progress in the label
-            # since QProgressBar only takes ints. See Qt docs for more info.
-            # Use the 'setFormat' method to display the exact float:
-            float_value_as_string = f"OSM extract progress: {progress}%"
-            self.child_progress_bar.setFormat(float_value_as_string)
-
-    def download_done(self):
-        """Slot to be called when the download task completes successfully."""
-        log_message(
-            "*** OSM download completed successfully. ***",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        network_layer_path = os.path.join(
-            self.working_dir, "study_area", "road_network.gpkg"
-        )
-        network_layer_path = f"{network_layer_path}|layername=road_network"
-        log_message(f"Loading network layer from {network_layer_path}")
-        layer = QgsVectorLayer(network_layer_path, "Road Network", "ogr")
-        if not layer.isValid():
-            QMessageBox.critical(
-                self, "Error", "Could not load the road network layer."
-            )
-            return
-        # Load the layer in QGIS
-        QgsProject.instance().addMapLayer(layer)
-        self.road_layer_combo.setLayer(layer)
-        self.road_layer_combo.setLayer(layer)
-        self.progress_bar.setVisible(False)
-        self.child_progress_bar.setVisible(False)
-        self.enable_widgets()
+            epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
+            crs = QgsCoordinateReferenceSystem(f"EPSG:{epsg}")
+        self.crs_label.setText(f"CRS: {crs.authid()}" if crs else "CRS: Not set")
+        return crs
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def progress_updated(self, progress: float):
@@ -385,7 +278,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             # This is a sneaky hack to show the exact progress in the label
             # since QProgressBar only takes ints. See Qt docs for more info.
             # Use the 'setFormat' method to display the exact float:
-            float_value_as_string = f"Total progress: {progress}%"
+            float_value_as_string = f"Total: {progress}%"
             self.progress_bar.setFormat(float_value_as_string)
             self.progress_bar.setMinimum(0)
             self.progress_bar.setMaximum(100)  # makes it bounce indefinitely
@@ -399,7 +292,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # This is a sneaky hack to show the exact progress in the label
         # since QProgressBar only takes ints. See Qt docs for more info.
         # Use the 'setFormat' method to display the exact float:
-        float_value_as_string = f"Current geometry progress: {progress}%"
+        float_value_as_string = f"Current geometry : {progress}%"
         self.child_progress_bar.setFormat(float_value_as_string)
 
     def on_task_completed(self):
@@ -467,15 +360,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.description.setFont(QFont("Arial", font_size))
         self.description2.setFont(QFont("Arial", font_size))
         self.description3.setFont(QFont("Arial", font_size))
-        self.description4.setFont(QFont("Arial", font_size))
         self.create_project_directory_button.setFont(QFont("Arial", font_size))
         self.load_boundary_button.setFont(QFont("Arial", font_size))
         self.cell_size_spinbox.setFont(QFont("Arial", font_size))
         self.layer_combo.setFont(QFont("Arial", font_size))
         self.field_combo.setFont(QFont("Arial", font_size))
-        self.road_layer_combo.setFont(QFont("Arial", font_size))
-        self.load_road_layer_button.setFont(QFont("Arial", font_size))
-        self.download_road_layer_button.setFont(QFont("Arial", font_size))
 
     def add_bboxes_to_map(self):
         """Add the study area layers to the map.
