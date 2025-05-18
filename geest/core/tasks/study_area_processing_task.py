@@ -858,6 +858,8 @@ class StudyAreaProcessingTask(QgsTask):
                 else:
                     dissolved_geom = dissolved_geom.Union(cell_geom)
             count += 1
+            if count % 1000 == 0:
+                log_message(f"Processed {count} grid cells.")
         grid_layer.ResetReading()
 
         # Also union the original geom itself

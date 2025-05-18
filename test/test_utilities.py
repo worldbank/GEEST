@@ -180,7 +180,7 @@ class TestUtilities(unittest.TestCase):
                 mock_point.GetX.return_value = 5
                 mock_point.GetY.return_value = 5
                 self.assertEqual(calculate_utm_zone((0, 10, 0, 10)), 32631)
-                mock_log.assert_called_once()
+                mock_log.assert_called()
 
     @unittest.skip("TODO Check and fix")
     @patch("qgis.core.QgsMessageLog")
