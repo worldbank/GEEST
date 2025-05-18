@@ -16,6 +16,7 @@ from qgis.core import (
     QgsProject,
     QgsFeedback,
     QgsLayerTreeGroup,
+    QgsCoordinateReferenceSystem,
 )
 
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
@@ -23,7 +24,7 @@ from qgis.PyQt.QtGui import QPixmap, QFont
 from geest.core.tasks import StudyAreaProcessingTask
 from geest.utilities import get_ui_class, resources_path, linear_interpolation
 from geest.core import WorkflowQueueManager
-from geest.utilities import log_message
+from geest.utilities import log_message, calculate_utm_zone_from_layer
 from geest.gui.widgets import CustomBannerLabel
 from geest.core.reports.study_area_report import StudyAreaReport
 import platform
@@ -71,13 +72,15 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.field_combo.setFilters(QgsFieldProxyModel.String)
 
         # Link the map layer combo box with the field combo box
-        self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
+        self.layer_combo.layerChanged.connect(self.layer_changed)
         self.field_combo.setLayer(self.layer_combo.currentLayer())
 
         self.create_project_directory_button.clicked.connect(
             self.create_new_project_folder
         )
         self.project_crs = QgsProject.instance().crs()
+        # We only allow the user to select a CRS based on the admin layer
+        # if the admin CRS is not WGS84
         if self.project_crs.authid() == "EPSG:4326" or self.project_crs.authid() == "":
             self.use_boundary_crs.setChecked(False)
             self.use_boundary_crs.setEnabled(False)
@@ -89,6 +92,23 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
+        # Esnure crs is set on first load
+        self.layer_changed(self.layer_combo.currentLayer())
+
+    def layer_changed(self, layer):
+        """Slot to be called when the layer in the combo box changes."""
+        if layer:
+            self.field_combo.setLayer(layer)
+            # Check if the layer has a valid CRS
+            if layer.crs().authid() == "EPSG:4326":
+                self.use_boundary_crs.setChecked(False)
+                self.use_boundary_crs.setEnabled(False)
+            else:
+                self.use_boundary_crs.setEnabled(True)
+        else:
+            self.field_combo.clear()
+            self.use_boundary_crs.setEnabled(False)
+        self.crs_label.setText(self.crs().authid())
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -234,10 +254,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     def crs(self):
         """Get the crs for the Geest project."""
+        crs = None
         if self.use_boundary_crs.isChecked():
-            return self.layer_combo.currentLayer().crs()
+            crs = self.layer_combo.currentLayer().crs()
         else:
-            return self.project_crs
+            epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
+            crs = QgsCoordinateReferenceSystem(f"EPSG:{epsg}")
+        self.crs_label.setText(f"CRS: {crs.authid()}" if crs else "CRS: Not set")
+        return crs
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def progress_updated(self, progress: float):
