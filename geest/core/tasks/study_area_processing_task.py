@@ -119,7 +119,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         if crs is None:
             # Attempt to pick a suitable UTM zone
-            self.epsg_code = self.calculate_utm_zone(self.layer_bbox, self.src_epsg)
+            self.epsg_code = calculate_utm_zone(self.layer_bbox, self.src_epsg)
         else:
             auth_id = crs.authid()  # e.g. "EPSG:4326"
             if auth_id.lower().startswith("epsg:"):
