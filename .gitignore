@@ -84,3 +84,5 @@ core
 # Don't ignore directories named 'core'
 !core/
 test_osm_roads_output.gpkg
+history.mp4
+history.gif

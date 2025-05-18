@@ -66,6 +66,8 @@ in pkgs.mkShell rec {
     pinnedPkgs.skate # Distributed key/value store
     pinnedPkgs.glow # terminal markdown viewer
     pinnedPkgs.gdb
+    gource # Software version control visualization
+    ffmpeg
   ];
   # Run this command, only after creating the virtual environment
   PROJECT_ROOT = builtins.getEnv "PWD";

@@ -603,14 +603,14 @@ def calculate_utm_zone(bbox, source_epsg=None):
         wgs84_ref.ImportFromEPSG(4326)
         ct = osr.CoordinateTransformation(src_ref, wgs84_ref)
         point = ogr.Geometry(ogr.wkbPoint)
-        point.AddPoint(cy, cx)
+        point.AddPoint(cx, cy)
         point.Transform(ct)
         lon = point.GetX()
         lat = point.GetY()
         log_message("Transformed centroid: %s, %s" % (lon, lat))
 
     # Standard formula for UTM zone
-    utm_zone = floor((lon + 180) / 6) + 1
+    utm_zone = int((lon + 180) // 6) + 1
     log_message("UTM zone: %s" % utm_zone)
     # We guess north or south
     if lat >= 0:
