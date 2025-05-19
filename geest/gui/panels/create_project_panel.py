@@ -311,7 +311,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
-            os.startfile(os.path.join(self.working_directory, "study_area_report.pdf"))
+            os.startfile(os.path.join(self.working_dir, "study_area_report.pdf"))
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
