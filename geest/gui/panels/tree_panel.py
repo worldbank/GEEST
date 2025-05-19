@@ -659,16 +659,11 @@ class TreePanel(QWidget):
             # Editing an indicator will open the attributes dialog
             # of its parent factor...
             show_properties_action = QAction("🔘 Edit Weights", self)
-            remove_indicator_action = QAction("❌ Remove Indicator", self)
 
             # Connect actions
             show_properties_action.triggered.connect(
                 lambda: self.edit_factor_aggregation(item.parent())
             )
-            remove_indicator_action.triggered.connect(
-                lambda: self.model.remove_item(item)
-            )
-
             # Add actions to menu
             menu = SolidMenu(self)
             menu.addAction(show_properties_action)
@@ -1364,6 +1359,7 @@ class TreePanel(QWidget):
             self.run_only_incomplete = False
         else:
             self.run_only_incomplete = True
+
         indicators = item.getDescendantIndicators(
             include_completed=not self.run_only_incomplete, include_disabled=False
         )
@@ -1388,7 +1384,9 @@ class TreePanel(QWidget):
             self.queue_workflow_task(factor, factor.role)
         for dimension in dimensions:
             self.queue_workflow_task(dimension, dimension.role)
-        self.queue_workflow_task(item, item.role)
+
+        # Commented out see issue #50 - causes double execution of indicator
+        # self.queue_workflow_task(item, item.role)
         self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
