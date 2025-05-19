@@ -139,8 +139,17 @@ class WorkflowQueue(QObject):
         """
         Adds a job to the queue
         """
-        self.job_queue.append(job)
-        self.total_queue_size += 1
+        if job not in self.job_queue:
+            # Check if the job is already in the queue
+            self.status_message.emit(f"Adding workflow task: {job.description()}")
+            self.job_queue.append(job)
+            self.total_queue_size += 1
+        else:
+            # Job is already in the queue
+            self.status_message.emit(
+                f"Job {job.description()} is already in the queue. Skipping."
+            )
+            return
 
     def handle_job_error(self, error_message: str):
         """

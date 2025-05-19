@@ -381,16 +381,58 @@ for module_name in list(sys.modules.keys()):
             self.dock_widget = None
 
     def kill_debug(self):
-        # Note that even though this kills the debugpy process I still
-        # cannot successfully restart the debugger in vscode without restarting QGIS
-        if self.debug_running:
+        """Kill any running debugpy debugging sessions"""
+        try:
+            # First try to use debugpy's built-in close method if available
+            try:
+                import debugpy
+
+                if (
+                    hasattr(debugpy, "is_client_connected")
+                    and debugpy.is_client_connected()
+                ):
+                    log_message("Closing debugpy connection via API")
+                    debugpy.disconnect()
+            except (ImportError, AttributeError) as e:
+                log_message(f"Could not disconnect debugpy via API: {e}")
+
+            # Now look for any debugpy processes on port 9000 and kill them
             import psutil
             import signal
 
-            """Find the PID of the process listening on the specified port."""
+            killed = False
+
+            # Look for connections in any state, not just LISTEN
             for conn in psutil.net_connections(kind="tcp"):
-                if conn.laddr.port == 9000 and conn.status == psutil.CONN_LISTEN:
-                    os.kill(conn.pid, signal.SIGTERM)
+                if conn.laddr.port == 9000:
+                    try:
+                        process = psutil.Process(conn.pid)
+                        log_message(f"Killing debug process {conn.pid}")
+                        # Try SIGTERM first, then SIGKILL if necessary
+                        process.terminate()
+                        gone, still_alive = psutil.wait_procs([process], timeout=3)
+                        if still_alive:
+                            for p in still_alive:
+                                p.kill()
+                        killed = True
+                    except (
+                        psutil.NoSuchProcess,
+                        psutil.AccessDenied,
+                        psutil.ZombieProcess,
+                    ) as e:
+                        log_message(f"Error killing process {conn.pid}: {e}")
+
+            # Reset the debug state
+            self.debug_running = False
+            if self.debug_action:
+                self.debug_action.setEnabled(True)
+
+            if killed:
+                log_message("Debug processes successfully terminated")
+            return killed
+        except Exception as e:
+            log_message(f"Error in kill_debug: {e}")
+            return False
 
     def debug(self):
         """
