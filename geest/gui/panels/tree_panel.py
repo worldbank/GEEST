@@ -63,7 +63,7 @@ from geest.core.algorithms import (
     OpportunitiesByWeeScoreProcessingTask,
     OpportunitiesByWeeScorePopulationProcessingTask,
 )
-from geest.core.reports.study_area_report import StudyAreaReport
+from geest.core.reports import StudyAreaReport, AnalysisReport
 from geest.utilities import (
     resources_path,
     theme_stylesheet,
@@ -589,6 +589,10 @@ class TreePanel(QWidget):
             add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
             menu.addAction(add_study_area_layers_action)
 
+            add_analysis_report_action = QAction("Show Analysis Report", self)
+            add_analysis_report_action.triggered.connect(self.generate_analysis_report)
+            menu.addAction(add_analysis_report_action)
+
             add_study_area_report_action = QAction("Show Study Area Report", self)
             add_study_area_report_action.triggered.connect(
                 self.generate_study_area_report
@@ -676,6 +680,26 @@ class TreePanel(QWidget):
 
         # Show the menu at the cursor's position
         menu.exec_(self.treeView.viewport().mapToGlobal(position))
+
+    def generate_analysis_report(self):
+        """Add a report showing analysis results."""
+        report = AnalysisReport(report_name="Study Area Summary")
+        report.create_layout()
+        report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
+        # open the pdf using the system PDF viewer
+        # Windows
+        if os.name == "nt":  # Windows
+            os.startfile(os.path.join(self.working_directory, "analysis_report.pdf"))
+        else:  # macOS and Linux
+            system = platform.system().lower()
+            if system == "darwin":  # macOS
+                os.system(
+                    f'open "{os.path.join(self.working_directory, "analysis_report.pdf")}"'
+                )
+            else:  # Linux
+                os.system(
+                    f'xdg-open "{os.path.join(self.working_directory, "analysis_report.pdf")}"'
+                )
 
     def generate_study_area_report(self):
         """Add a report showing population information for the study area."""
