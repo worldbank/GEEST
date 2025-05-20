@@ -683,7 +683,8 @@ class TreePanel(QWidget):
 
     def generate_analysis_report(self):
         """Add a report showing analysis results."""
-        report = AnalysisReport(report_name="Study Area Summary")
+        model_path = os.path.join(self.working_directory, "model.json")
+        report = AnalysisReport(model_path=model_path, report_name="Study Area Summary")
         report.create_layout()
         report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
         # open the pdf using the system PDF viewer

@@ -5,8 +5,6 @@ from qgis.core import (
     QgsVectorLayer,
     QgsLayout,
     QgsLayoutItemLabel,
-    QgsLayoutFrame,
-    QgsLayoutItemAttributeTable,
     QgsLayoutPoint,
     QgsUnitTypes,
     QgsLayoutExporter,
@@ -37,7 +35,7 @@ class BaseReport:
 
     """
 
-    def __init__(self, str, report_name="Report"):
+    def __init__(self, template_path: str, str, report_name="Report"):
         """
         Initialize the report.
 
@@ -48,9 +46,7 @@ class BaseReport:
         self.layout = None  # Will hold the QgsLayout for the report
 
         self.report_name = report_name
-        self.template_path = resources_path(
-            "resources", "qpt", f"study_area_report_template.qpt"
-        )
+        self.template_path = template_path
         self.page_descriptions = {}
 
     def __del__(self):

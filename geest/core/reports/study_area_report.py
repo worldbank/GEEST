@@ -1,33 +1,25 @@
-from collections import defaultdict
-
 from qgis.core import (
     QgsProject,
     QgsVectorLayer,
     QgsLayout,
     QgsLayoutItemLabel,
-    QgsLayoutFrame,
-    QgsLayoutItemAttributeTable,
     QgsLayoutPoint,
     QgsUnitTypes,
-    QgsLayoutExporter,
-    QgsLayoutItemMap,
     QgsLayoutSize,
-    QgsLayoutItemPage,
-    QgsLayoutMeasurement,
-    QgsRectangle,
     QgsLayoutItemLabel,
-    QgsLayoutItemMap,
-    QgsReadWriteContext,
-    QgsLayoutExporter,
     QgsVectorLayer,
-    QgsLayoutItemMapGrid,
     QgsUnitTypes,
-    QgsCoordinateReferenceSystem,
-    QgsFeatureRequest,
+    QgsProject,
+    QgsLayout,
+    QgsLayoutItemLabel,
+    QgsLayoutItemShape,
+    QgsUnitTypes,
+    QgsLayoutSize,
+    QgsLayoutPoint,
+    QgsSimpleFillSymbolLayer,
 )
-from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtGui import QFont, QColor
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import QSizeF
 from geest.utilities import log_message, resources_path
 from .base_report import BaseReport
 
@@ -53,7 +45,10 @@ class StudyAreaReport(BaseReport):
             ValueError: If the layer cannot be loaded from the given file path.
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
-        super().__init__(report_name)
+        template_path = resources_path(
+            "resources", "qpt", f"study_area_report_template.qpt"
+        )
+        super().__init__(template_path, report_name)
 
         self.layers = None  # Will hold the loaded layers from the GeoPackage
 

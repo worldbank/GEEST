@@ -81,9 +81,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.project_crs = QgsProject.instance().crs()
         # We only allow the user to select a CRS based on the admin layer
         # if the admin CRS is not WGS84
-        if self.project_crs.authid() == "EPSG:4326" or self.project_crs.authid() == "":
-            self.use_boundary_crs.setChecked(False)
-            self.use_boundary_crs.setEnabled(False)
+        self.use_boundary_crs.setChecked(False)
+        self.use_boundary_crs.setEnabled(False)
+        self.use_boundary_crs.toggled.connect(
+            self.update_crs
+        )  # Update the CRS label when the checkbox is toggled
 
         self.next_button.clicked.connect(self.create_project)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
@@ -92,11 +94,13 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
-        # Esnure crs is set on first load
+        # Ensure crs is set on first load
         self.layer_changed(self.layer_combo.currentLayer())
 
     def layer_changed(self, layer):
         """Slot to be called when the layer in the combo box changes."""
+        log_message(f"Layer changed: {layer.name() if layer else 'None'}")
+        log_message(f"Layer crs: {layer.crs().authid() if layer else 'None'}")
         if layer:
             self.field_combo.setLayer(layer)
             # Check if the layer has a valid CRS
@@ -109,6 +113,16 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.field_combo.clear()
             self.use_boundary_crs.setEnabled(False)
         self.crs_label.setText(self.crs().authid())
+
+    def update_crs(self):
+        """Update the CRS label based on the checkbox state."""
+        if self.use_boundary_crs.isChecked():
+            self.crs_label.setText(
+                f"CRS: {self.layer_combo.currentLayer().crs().authid()}"
+            )
+        else:
+            epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
+            self.crs_label.setText(f"CRS: EPSG:{epsg}")
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -153,10 +167,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         if self.use_boundary_crs.isChecked():
             crs = self.layer_combo.currentLayer().crs()
         else:
-            if self.project_crs.authid() == "EPSG:4326":
-                crs = None  # will be calculated from UTM zone
-            else:
-                crs = self.project_crs
+            crs = None  # will be calculated from UTM zone
 
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
@@ -256,8 +267,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         """Get the crs for the Geest project."""
         crs = None
         if self.use_boundary_crs.isChecked():
+            log_message("Using boundary CRS")
             crs = self.layer_combo.currentLayer().crs()
         else:
+            log_message("Using UTM zone CRS")
             epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
             crs = QgsCoordinateReferenceSystem(f"EPSG:{epsg}")
         self.crs_label.setText(f"CRS: {crs.authid()}" if crs else "CRS: Not set")
