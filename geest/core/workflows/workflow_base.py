@@ -280,7 +280,7 @@ class WorkflowBase(QObject):
                         output_prefix=f"{self.layer_id}_area_features_{index}",
                     )
                     # Some workflows do not take in vector data (a features layer)
-                    # but are not raster based. e,g,index_score_workflow
+                    # but are not raster based. e.g. index_score_workflow
                     # Logic below is a check for that
                     if (
                         not isinstance(self.features_layer, bool)
@@ -522,7 +522,7 @@ class WorkflowBase(QObject):
             "EXTRA": f"-a_srs {self.target_crs.authid()} -at",  # Assign all touched pixels
             "OUTPUT": output_path,
         }
-
+        log_message(f"Rasterize parameters: {params}")
         #'OUTPUT':'TEMPORARY_OUTPUT'})
 
         processing.run("gdal:rasterize", params)

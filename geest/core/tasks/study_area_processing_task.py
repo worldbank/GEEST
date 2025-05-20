@@ -128,7 +128,9 @@ class StudyAreaProcessingTask(QgsTask):
             else:
                 # Handle case where it's not an EPSG-based CRS
                 epsg_int = None
-                raise Exception(f"CRS is not an EPSG-based ID: {auth_id}")
+                raise Exception(
+                    f"CRS Passed to function: {crs}. CRS is not an EPSG-based ID: {auth_id}"
+                )
             self.epsg_code = epsg_int
 
         # Prepare OSR objects for source->target transformation
