@@ -1,4 +1,5 @@
 from collections import defaultdict
+import math
 
 from qgis.core import (
     QgsProject,
@@ -22,6 +23,8 @@ from qgis.core import (
     QgsUnitTypes,
     QgsCoordinateReferenceSystem,
     QgsFeatureRequest,
+    QgsCoordinateTransform,
+    QgsReadWriteContext,
 )
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtGui import QFont, QColor
@@ -234,70 +237,26 @@ class BaseReport:
     def make_map(
         self,
         vector_layers: list[QgsVectorLayer],
+        crs,
         current_page: int,
     ):
-
-        # Add a map item for the current layer
-        map_item = QgsLayoutItemMap(self.layout)
-        map_item.setLayers(vector_layers)
-        map_item.attemptMove(
-            QgsLayoutPoint(20, 110, QgsUnitTypes.LayoutMillimeters),
-            page=current_page,
-        )
-        map_width_mm = 170
-        map_height_mm = 100
-        map_item.attemptResize(
-            # 170mm width x 100mm height
-            QgsLayoutSize(map_width_mm, map_height_mm, QgsUnitTypes.LayoutMillimeters)
-        )
-        # if the extent does not have the same aspect ratio as
-        # the map item, the extent will be expanded to fit the map item
-        # Calculate the aspect ratio of the map item
-        map_aspect_ratio = map_width_mm / map_height_mm
-        # ---------------------------
-        # Set up a grid over the map
-        # ---------------------------
-        # Create a new map grid for the map item
-        grid = QgsLayoutItemMapGrid("Grid 1", map_item)
-        grid.setEnabled(True)
-        grid.setCrs(QgsCoordinateReferenceSystem("EPSG:4326"))
-
-        # Specify that the grid is a graticule (i.e. based on geographic coordinates)
-        # grid.setGridType(QgsLayoutItemMapGrid.Graticule)
-
-        # Define a grid interval of 1 degree.
-        grid.setIntervalX(1)
-        grid.setIntervalY(1)
-
-        grid.setAnnotationDirection(
-            QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Bottom
-        )
-        grid.setAnnotationDirection(
-            QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Top
-        )
-
-        # (Optional) Enable and configure annotations for the grid lines
-        grid.setAnnotationEnabled(True)
-        # Example format: degrees and minutes (you can customize this format as needed)
-        # grid.setAnnotationFormat("dd° mm'")
-
-        # Add the grid to the map item. The map_item.grids() returns a list;
-        # append our configured grid to it.
-        map_item.grids().addGrid(grid)
-
-        # If needed, refresh or update your layout to see the grid applied.
 
         # Get the current extent of all the layers
         layers_extent = QgsRectangle()
         for layer in vector_layers:
             layers_extent.combineExtentWith(layer.extent())
 
+        map_item = QgsLayoutItemMap(self.layout)
         # Calculate the aspect ratio of the layer's extent
         layer_aspect_ratio = layers_extent.width() / layers_extent.height()
-
+        map_width_mm = 170
+        map_height_mm = 100
         # Initialize variables for the new extent
         new_extent = QgsRectangle(layers_extent)
-
+        # if the extent does not have the same aspect ratio as
+        # the map item, the extent will be expanded to fit the map item
+        # Calculate the aspect ratio of the map item
+        map_aspect_ratio = map_width_mm / map_height_mm
         # Adjust the extent to match the map item's aspect ratio
         if layer_aspect_ratio > map_aspect_ratio:
             # Layer is wider than the map item; adjust height
@@ -312,15 +271,103 @@ class BaseReport:
             new_extent.setXMinimum(layers_extent.xMinimum() - width_diff / 2)
             new_extent.setXMaximum(layers_extent.xMaximum() + width_diff / 2)
 
-        # Set the new extent to the map item
-        map_item.setExtent(new_extent)
+        geo_crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        transform = QgsCoordinateTransform(crs, geo_crs, QgsProject.instance())
+        # Calculate the extent in EPGS:4326
+        geo_extent = transform.transformBoundingBox(new_extent)
+        log_message(
+            f"Map extent in EPSG:4326: {geo_extent.xMinimum()}, {geo_extent.yMinimum()}, "
+            f"{geo_extent.xMaximum()}, {geo_extent.yMaximum()}"
+        )
+        log_message(
+            f"Map extent in CRS: {new_extent.xMinimum()}, {new_extent.yMinimum()}, {new_extent.xMaximum()}, {new_extent.yMaximum()}"
+        )
 
-        map_item.refresh()
+        map_item.setLayers(vector_layers)
+        map_item.attemptMove(
+            QgsLayoutPoint(20, 110, QgsUnitTypes.LayoutMillimeters),
+            page=current_page,
+        )
+
+        map_item.attemptResize(
+            # 170mm width x 100mm height
+            QgsLayoutSize(map_width_mm, map_height_mm, QgsUnitTypes.LayoutMillimeters)
+        )
+
+        # ---------------------------
+        # Set up a grid over the map
+        # ---------------------------
+        # Create a new map grid for the map item
+        grid = QgsLayoutItemMapGrid("Grid 1", map_item)
+        grid.setEnabled(True)
+        grid.setCrs(geo_crs)
+
+        def round_down_to_sig_fig(x: float) -> float:
+            if x == 0:
+                return 0
+            exp = math.floor(math.log10(abs(x)))
+            factor = 10**exp
+            return math.floor(x / factor * 10) / 10 * factor
+
+        # Define a grid interval of 1 degree
+        interval_x = round_down_to_sig_fig(geo_extent.width() / 10.0)
+        interval_y = round_down_to_sig_fig(geo_extent.height() / 10.0)
+        log_message(f"Grid interval: {interval_x}, {interval_y}")
+        log_message(f"X Range: {geo_extent.xMaximum() - geo_extent.xMinimum()}")
+        log_message(f"Y Range: {geo_extent.yMaximum() - geo_extent.yMinimum()}")
+        grid.setIntervalX(interval_x)
+        grid.setIntervalY(interval_y)
+
+        grid.setAnnotationDirection(
+            QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Bottom
+        )
+        grid.setAnnotationDirection(
+            QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Top
+        )
+        # Set the bottom to show x/ lon  only
+        # This prevents stray labels from lon rendering on the lat area and verce versa
+        grid.setAnnotationDisplay(
+            QgsLayoutItemMapGrid.DisplayMode.LongitudeOnly, QgsLayoutItemMapGrid.Bottom
+        )
+        grid.setAnnotationDisplay(
+            QgsLayoutItemMapGrid.DisplayMode.HideAll, QgsLayoutItemMapGrid.Top
+        )
+        grid.setAnnotationDisplay(
+            QgsLayoutItemMapGrid.DisplayMode.LatitudeOnly, QgsLayoutItemMapGrid.Left
+        )
+        grid.setAnnotationDisplay(
+            QgsLayoutItemMapGrid.DisplayMode.HideAll, QgsLayoutItemMapGrid.Right
+        )
+
+        # (Optional) Enable and configure annotations for the grid lines
+        grid.setAnnotationEnabled(True)
+        # Example format: degrees and minutes (you can customize this format as needed)
+        # grid.setAnnotationFormat("dd° mm'")
+
+        # Add the grid to the map item. The map_item.grids() returns a list;
+        # append our configured grid to it.
+        map_item.grids().addGrid(grid)
+
+        # If needed, refresh or update your layout to see the grid applied.
+
         self.layout.addLayoutItem(map_item)
         # Add a black frame around the map item
         map_item.setFrameEnabled(True)
         map_item.setFrameStrokeColor(QColor(0, 0, 0))
         map_item.setFrameStrokeWidth(QgsLayoutMeasurement(0.5))
+        # Set the new extent to the map item
+        # Get the QgsProject CRS and set the extent in the map item
+        project_crs = QgsProject.instance().crs()
+        project_transform = QgsCoordinateTransform(
+            crs, project_crs, QgsProject.instance()
+        )
+        map_extent = project_transform.transformBoundingBox(new_extent)
+        log_message(
+            f"Map extent in project CRS: {map_extent.xMinimum()}, {map_extent.yMinimum()}, "
+            f"{map_extent.xMaximum()}, {map_extent.yMaximum()}"
+        )
+        map_item.setExtent(map_extent)
+        map_item.refresh()
 
     def make_footer(self, current_page: int):
         """
@@ -402,4 +449,9 @@ class BaseReport:
         export_settings.rasterizeWholeImage = True
         exporter = QgsLayoutExporter(self.layout)
         result = exporter.exportToPdf(output_path, export_settings)
+        # Save it as a qpt too
+        qpt_path = output_path.replace(".pdf", ".qpt")
+        context = QgsReadWriteContext()
+        self.layout.saveAsTemplate(qpt_path, context)
+        log_message(f"Saved layout as template: {qpt_path}")
         return result == QgsLayoutExporter.Success
