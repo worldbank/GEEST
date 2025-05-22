@@ -229,9 +229,11 @@ class StudyAreaReport(BaseReport):
                 )
             else:
                 layers = [layer]
+                crs = layer.crs()
                 self.make_map(
                     vector_layers=layers,
                     current_page=current_page,
+                    crs=crs,
                 )
             # Add the page footer
             self.add_header_and_footer(page_number=current_page)
