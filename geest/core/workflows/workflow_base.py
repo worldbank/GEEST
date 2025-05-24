@@ -60,7 +60,9 @@ class WorkflowBase(QObject):
         # we will log the layer count again at then end of the workflow
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.cell_size_m = cell_size_m
-        self.feedback = feedback
+        self.feedback = (
+            feedback  # we connect this to the QgsTask progressUpdated signal
+        )
         self.context = context  # QgsProcessingContext
         self.workflow_name = None  # This is set in the concrete class
         # This is set in the setup panel
@@ -115,8 +117,17 @@ class WorkflowBase(QObject):
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
-        self.progressChanged.emit(0.0)
+        self.updateProgress(0.0)
         self.output_filename = self.attributes.get("output_filename", "")
+        self.feedback.progressChanged.connect(self.updateProgress)
+
+    def updateProgress(self, progress: float):
+        """
+        Used by the workflow to set the progress of the task.
+        :param progress: The progress value
+        """
+        log_message(f"Progress in workflow is : {progress}")
+        self.progressChanged.emit(progress)
 
     #
     # Every concrete subclass needs to implement these three methods
@@ -522,6 +533,7 @@ class WorkflowBase(QObject):
             "INVERT": False,
             "EXTRA": f"-a_srs {self.target_crs.authid()} -at",  # Assign all touched pixels
             "OUTPUT": output_path,
+            "PROGRESS": self.feedback,
         }
         log_message(f"Rasterize parameters: {params}")
         #'OUTPUT':'TEMPORARY_OUTPUT'})

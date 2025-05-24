@@ -90,10 +90,12 @@ class PolylinePerCellWorkflow(WorkflowBase):
         output_path = os.path.join(
             self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
         )
-        area_grid = select_grid_cells(self.grid_layer, area_features, output_path)
+        area_grid = select_grid_cells(
+            self.grid_layer, area_features, output_path, self.feedback
+        )
 
         # Step 2: Assign values to grid cells
-        grid = assign_values_to_grid(area_grid)
+        grid = assign_values_to_grid(area_grid, feedback=self.feedback)
 
         # Step 3: Rasterize the grid layer using the assigned values
         # Create a scored boundary layer

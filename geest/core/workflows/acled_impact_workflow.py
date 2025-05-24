@@ -55,6 +55,7 @@ class AcledImpactWorkflow(WorkflowBase):
             error = f"ACLED CSV layer is not valid.: {self.csv_file}"
             self.attributes["error"] = error
             raise Exception(error)
+        self.feedback.setProgress(1.0)
 
     def _process_features_for_area(
         self,
@@ -78,12 +79,15 @@ class AcledImpactWorkflow(WorkflowBase):
 
         # Step 1: Buffer the selected features by 5 km
         buffered_layer = self._buffer_features(area_features)
+        self.feedback.setProgress(10.0)
 
         # Step 2: Assign values based on event_type
         scored_layer = self._assign_scores(buffered_layer)
+        self.feedback.setProgress(40.0)
 
         # Step 3: Dissolve and remove overlapping areas, keeping areas with the lowest value
         dissolved_layer = self._overlay_analysis(scored_layer)
+        self.feedback.setProgress(600.0)
 
         # Step 4: Rasterize the dissolved layer
         raster_output = self._rasterize(
@@ -93,6 +97,7 @@ class AcledImpactWorkflow(WorkflowBase):
             value_field="min_value",
             default_value=5,
         )
+        self.feedback.setProgress(80.0)
 
         return raster_output
 

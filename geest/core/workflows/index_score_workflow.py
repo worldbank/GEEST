@@ -67,13 +67,18 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         log_message(f"Processing area {index} score workflow")
 
         log_message(f"Index score: {self.index_score}")
+        self.progressChanged.emit(
+            10.0
+        )  # We just use nominal intervals for progress updates
 
         # Create a scored boundary layer filtered by current_area
         scored_layer = self.create_scored_boundary_layer(
             clip_area=clip_area,
             index=index,
         )
-
+        self.progressChanged.emit(
+            30.0
+        )  # We just use nominal intervals for progress updates
         # Create a scored boundary layer
         raster_output = self._rasterize(
             scored_layer,
@@ -82,6 +87,10 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             value_field="score",
             default_value=255,
         )
+        self.progressChanged.emit(
+            100.0
+        )  # We just use nominal intervals for progress updates
+
         log_message(f"Raster output: {raster_output}")
         log_message(f"Workflow completed for area {index}")
         return raster_output
@@ -97,6 +106,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         """
         output_prefix = f"{self.layer_id}_area_{index}"
 
+        self.progressChanged.emit(
+            20.0
+        )  # We just use nominal intervals for progress updates
         # Create a new memory layer with the target CRS (EPSG:4326)
         subset_layer = QgsVectorLayer(f"Polygon", "subset", "memory")
         subset_layer.setCrs(self.target_crs)
@@ -106,6 +118,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Add attributes (fields) from the point_layer
         subset_layer_data.addAttributes(fields)
         subset_layer.updateFields()
+        self.progressChanged.emit(
+            40.0
+        )  # We just use nominal intervals for progress updates
 
         feature = QgsFeature(subset_layer.fields())
         feature.setGeometry(clip_area)
@@ -115,6 +130,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Add reprojected features to the new subset layer
         subset_layer_data.addFeatures(features)
         subset_layer.commitChanges()
+        self.progressChanged.emit(
+            60.0
+        )  # We just use nominal intervals for progress updates
 
         shapefile_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
         # Use QgsVectorFileWriter to save the layer to a shapefile
@@ -126,6 +144,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "ESRI Shapefile",
         )
         layer = QgsVectorLayer(shapefile_path, "area_layer", "ogr")
+        self.progressChanged.emit(
+            80.0
+        )  # We just use nominal intervals for progress updates
 
         return layer
 

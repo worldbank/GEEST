@@ -121,6 +121,8 @@ class SafetyPolygonWorkflow(WorkflowBase):
                 layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
                 layer.updateFields()
 
+            feature_count = layer.featureCount()
+            counter = 0
             for feature in layer.getFeatures():
                 perceived_safety = feature[self.selected_field]
                 score = self.safety_mapping_table.get(perceived_safety)
@@ -128,6 +130,13 @@ class SafetyPolygonWorkflow(WorkflowBase):
                 reclass_val = self._scale_value(score, 0, 100, 0, 5)
                 feature.setAttribute("value", reclass_val)
                 layer.updateFeature(feature)
+                counter += 1
+                if self.feedback.isCanceled():
+                    log_message(
+                        "Workflow cancelled by user.", tag="Geest", level=Qgis.Warning
+                    )
+                    return layer
+                self.feedback.setProgress(int(counter / feature_count * 100))
         return layer
 
     def _scale_value(self, value, min_in, max_in, min_out, max_out):

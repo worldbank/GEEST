@@ -1,6 +1,14 @@
 import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsField, QgsFields
+from qgis.core import (
+    QgsVectorLayer,
+    QgsFeature,
+    QgsGeometry,
+    QgsField,
+    QgsFields,
+    QgsFeedback,
+)
+
 from qgis.PyQt.QtCore import QVariant
 from geest.core.algorithms.features_per_cell_processor import (
     select_grid_cells,
@@ -77,10 +85,12 @@ class TestSpatialProcessing(unittest.TestCase):
         """
         Test the select_grid_cells function.
         """
+        feedback = QgsFeedback()
         output_layer = select_grid_cells(
             grid_layer=self.grid_layer,
             features_layer=self.features_layer,
             output_path=self.output_path,
+            feedback=feedback,
         )
 
         self.assertTrue(output_layer.isValid(), "Output layer is not valid.")
@@ -111,11 +121,13 @@ class TestSpatialProcessing(unittest.TestCase):
         """
         Test the assign_values_to_grid function.
         """
+        feedback = QgsFeedback()
         # First, generate the intersecting feature counts
         output_layer = select_grid_cells(
             grid_layer=self.grid_layer,
             features_layer=self.features_layer,
             output_path=self.output_path,
+            feedback=feedback,
         )
         updated_layer = assign_values_to_grid(output_layer)
 

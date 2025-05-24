@@ -236,8 +236,10 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
             log_message(f"Processed point {i+1} of {total_features}")
             progress = ((i + 1) / total_features) * 100.0
-            self.feedback.setProgress(int(progress))
-            self.progressChanged.emit(progress)
+            # Todo: feedback should show text messages rather
+            # since QgsTask.setProgress already provides needded functionality
+            # for progress reporting
+            self.feedback.setProgress(progress)
             log_message(f"Task progress: {progress}")
             if self.feedback.isCanceled():
                 log_message("Processing canceled by user.")

@@ -39,6 +39,7 @@ class AggregationWorkflowBase(WorkflowBase):
         self.id = None  # This should be set by the child class
         self.weight_key = None  # This should be set by the child class
         self.aggregation = True
+        self.feedback.setProgress(10.0)
 
     def aggregate(self, input_files: list, index: int) -> str:
         """
@@ -72,7 +73,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-
+        layer_count = len(raster_layers) - len(invalid_layers)
         # Create QgsRasterCalculatorEntries for each raster layer
         entries = []
         ref_names = []
@@ -101,6 +102,8 @@ class AggregationWorkflowBase(WorkflowBase):
             else:
                 expression += f"+ ({weight} * {ref_names[i]}@1)"
             sum_of_weights += weight
+
+            self.feedback.setProgress((i / layer_count) * 100.0)
 
         # I believe these are wrong and should be removed since the total weight
         # of the aggregate layers should already be 1.0 - Tim
