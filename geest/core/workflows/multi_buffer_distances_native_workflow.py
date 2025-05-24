@@ -188,10 +188,10 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         area_index: int = 0,
     ):
         """
-        Create multiple buffers (isochrones) for each point in the input point layer using ORSClient.
+        Create multiple buffers (isochrones) for each point in the input point layer using network analysis.
 
-        This method processes the point features using a QgsVectorLayer iterator, makes API calls
-        to the OpenRouteService to fetch the isochrones (buffers) for each subset, and merges the results
+        This method processes the point features using a QgsVectorLayer iterator, uses
+        QGIS native routing analysis, and merges the results
         into a final output layer.
 
         :param point_layer: QgsVectorLayer containing point features to process.
@@ -235,6 +235,10 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 self.item.setAttribute(self.result_key, f"Task failed: {e}")
 
             log_message(f"Processed point {i+1} of {total_features}")
+            self.feedback.setProgress(int((i + 1) / total_features * 100))
+            if self.feedback.isCanceled():
+                log_message("Processing canceled by user.")
+                return False
         return isochrone_layer_path
 
     def _create_bands(self, isochrones_gpkg_path, index):

@@ -15,7 +15,6 @@ from qgis.core import (
     QgsSimpleFillSymbolLayer,
     QgsUnitTypes,
 )
-from qgis.PyQt.QtCore import QSizeF
 from qgis.PyQt.QtGui import QFont, QColor
 from geest.utilities import log_message, resources_path
 from .base_report import BaseReport
