@@ -235,7 +235,10 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 self.item.setAttribute(self.result_key, f"Task failed: {e}")
 
             log_message(f"Processed point {i+1} of {total_features}")
-            self.feedback.setProgress(int((i + 1) / total_features * 100))
+            progress = ((i + 1) / total_features) * 100.0
+            self.feedback.setProgress(int(progress))
+            self.progressChanged.emit(progress)
+            log_message(f"Task progress: {progress}")
             if self.feedback.isCanceled():
                 log_message("Processing canceled by user.")
                 return False

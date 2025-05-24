@@ -49,19 +49,22 @@ class WorkflowJob(QgsTask):
             feedback=self._feedback,
             context=self.context,
         )  # Create the workflow
-        self.setProgress(0)
+        self.setProgress(0.0)  # always use float
+        # This should be automatic see https://qgis.org/pyqgis/3.40/core/QgsTask.html#qgis.core.QgsTask.setProgress
         self._workflow.progressChanged.connect(self.updateProgress)
+
         # TODO this raises an error... need to figure out how to connect this signal
         # self._workflow.progressChanged.connect(self.setProgress)
         # Emit the 'queued' signal upon initialization
         self.job_queued.emit()
 
     # Dont call this setProgress to avoid recursion
-    def updateProgress(self, progress: int):
+    def updateProgress(self, progress: float):
         """
         Used by the workflow to set the progress of the task.
         :param progress: The progress value
         """
+        log_message(f"Progress in workflow job is : {progress}")
         self.setProgress(progress)
 
     def run(self) -> bool:

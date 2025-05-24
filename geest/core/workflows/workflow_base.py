@@ -37,7 +37,7 @@ class WorkflowBase(QObject):
     """
 
     # Signal for progress changes - will be propagated to the task that owns this workflow
-    progressChanged = pyqtSignal(int)
+    progressChanged = pyqtSignal(float)
 
     def __init__(
         self,
@@ -115,7 +115,7 @@ class WorkflowBase(QObject):
         self.layer_id = self.attributes.get("id", "").lower().replace(" ", "_")
         self.aggregation = False
         self.analysis_mode = self.item.attribute("analysis_mode", "")
-        self.progressChanged.emit(0)
+        self.progressChanged.emit(0.0)
         self.output_filename = self.attributes.get("output_filename", "")
 
     #
@@ -329,7 +329,8 @@ class WorkflowBase(QObject):
                     index=index,
                 )
                 output_rasters.append(masked_layer)
-                self.progressChanged.emit(int(progress))
+                log_message("Iterator progress for workflow")
+                self.progressChanged.emit(progress)  # float please
             # Combine all area rasters into a VRT
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
             self.attributes[self.result_file_key] = vrt_filepath
