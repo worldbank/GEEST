@@ -1284,7 +1284,10 @@ class TreePanel(QWidget):
         dimensions = item.getDescendantDimensions(
             include_completed=not self.run_only_incomplete
         )
-
+        # Fix for issue #50 - we need to run the analysis last
+        analyses = item.getDescendantAnalyses(
+            include_completed=not self.run_only_incomplete
+        )
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
         self.help_button.setVisible(False)
@@ -1299,7 +1302,9 @@ class TreePanel(QWidget):
             self.queue_workflow_task(factor, factor.role)
         for dimension in dimensions:
             self.queue_workflow_task(dimension, dimension.role)
-
+        # Fix for issue #50 - we need to run the analysis last
+        for analysis in analyses:
+            self.queue_workflow_task(analysis, analysis.role)
         # Commented out see issue #50 - causes double execution of indicator
         # self.queue_workflow_task(item, item.role)
         self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1

@@ -45,6 +45,8 @@ in pkgs.mkShell rec {
     pythonPackages.numpy
     pythonPackages.gdal
     pythonPackages.pip
+    pythonPackages.toml
+    pythonPackages.typer
     pythonPackages.pyqtwebengine
     pinnedPkgs.vim
     pinnedPkgs.pre-commit
