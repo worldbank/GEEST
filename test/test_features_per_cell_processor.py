@@ -129,7 +129,7 @@ class TestSpatialProcessing(unittest.TestCase):
             output_path=self.output_path,
             feedback=feedback,
         )
-        updated_layer = assign_values_to_grid(output_layer)
+        updated_layer = assign_values_to_grid(output_layer, feedback=feedback)
 
         # Verify the 'value' field
         value_map = {f["id"]: f["value"] for f in updated_layer.getFeatures()}

@@ -183,5 +183,6 @@ def assign_values_to_grid(
                 feature["value"] = 5
             grid_layer.updateFeature(feature)
             counter += 1
-            feedback.setProgress((counter / feature_count) * 100.0)
+            if feedback:
+                feedback.setProgress((counter / feature_count) * 100.0)
     return grid_layer
