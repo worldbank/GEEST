@@ -232,6 +232,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "TABLE": self.reclassification_rules,  # Reclassification table
             "RANGE_BOUNDARIES": self.range_boundaries,
             "OUTPUT": "TEMPORARY_OUTPUT",
+            "PROGRESS": self.feedback,
         }
 
         # Perform the reclassification using the raster calculator
@@ -247,6 +248,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
             "OUTPUT": reclassified_raster_path,
+            "PROGRESS": self.feedback,
         }
 
         processing.run(

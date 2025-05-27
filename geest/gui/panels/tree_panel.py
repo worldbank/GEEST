@@ -14,7 +14,6 @@ from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
-    QMenu,
     QMessageBox,
     QProgressBar,
     QPushButton,
@@ -38,7 +37,6 @@ from qgis.PyQt.QtGui import QMovie, QPalette, QColor, QPixmap
 from qgis.PyQt.QtWidgets import QSizePolicy
 from qgis.core import (
     Qgis,
-    QgsRasterLayer,
     QgsProject,
     QgsVectorLayer,
     QgsLayerTreeGroup,
@@ -68,6 +66,9 @@ from geest.utilities import (
     resources_path,
     theme_stylesheet,
     log_message,
+)
+from geest.core.utilities import (
+    add_to_map,
 )
 from geest.gui.widgets import SolidMenu
 
@@ -243,7 +244,7 @@ class TreePanel(QWidget):
         show_layer_on_click = setting(key="show_layer_on_click", default=False)
         if show_layer_on_click:
             item = index.internalPointer()
-            self.add_to_map(item)
+            add_to_map(item)
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -1108,117 +1109,6 @@ class TreePanel(QWidget):
                     f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )
 
-    def add_to_map(
-        self, item, key="result_file", layer_name=None, qml_key=None, group="Geest"
-    ):
-        """Add the item to the map."""
-        log_message(item.attributesAsMarkdown())
-        layer_uri = item.attribute(f"{key}")
-        log_message(f"Adding {layer_uri} for key {key} to map")
-        if layer_uri:
-            if not layer_name:
-                layer_name = item.data(0)
-
-            if "gpkg" in layer_uri:
-                log_message(f"Adding GeoPackage layer: {layer_name}")
-                layer = QgsVectorLayer(layer_uri, layer_name, "ogr")
-                if qml_key:
-                    qml_path = item.attribute(qml_key)
-                    if qml_path:
-                        result = layer.loadNamedStyle(qml_path)
-            else:
-                log_message(f"Adding raster layer: {layer_name}")
-                layer = QgsRasterLayer(layer_uri, layer_name)
-
-            if not layer.isValid():
-                log_message(
-                    f"Layer {layer_name} is invalid and cannot be added.",
-                    tag="Geest",
-                    level=Qgis.Warning,
-                )
-                return
-
-            project = QgsProject.instance()
-
-            # Check if 'Geest' group exists, otherwise create it
-            root = project.layerTreeRoot()
-            geest_group = root.findGroup(group)
-            if geest_group is None:
-                geest_group = root.insertGroup(
-                    0, group
-                )  # Insert at the top of the layers panel
-                geest_group.setIsMutuallyExclusive(
-                    True
-                )  # Make the group mutually exclusive
-
-            # Traverse the tree view structure to determine the appropriate subgroup based on paths
-            path_list = item.getPaths()
-            parent_group = geest_group
-            # truncate the last item from the path list
-            # as we want to add the layer to the group
-            # that is the parent of the layer
-            path_list = path_list[:-1]
-
-            for path in path_list:
-                sub_group = parent_group.findGroup(path)
-                if sub_group is None:
-                    sub_group = parent_group.addGroup(path)
-                    sub_group.setIsMutuallyExclusive(
-                        True
-                    )  # Make each subgroup mutually exclusive
-
-                parent_group = sub_group
-
-            # Check if a layer with the same data source exists in the correct group
-            existing_layer = None
-            layer_tree_layer = None
-            for child in parent_group.children():
-                if isinstance(child, QgsLayerTreeGroup):
-                    continue
-                if child.layer().source() == layer_uri:
-                    existing_layer = child.layer()
-                    layer_tree_layer = child
-                    break
-
-            # If the layer exists, refresh it instead of removing and re-adding
-            if existing_layer is not None:
-                log_message(
-                    f"Refreshing existing layer: {existing_layer.name()}",
-                    tag="Geest",
-                    level=Qgis.Info,
-                )
-                # Make the layer visible
-                layer_tree_layer.setItemVisibilityChecked(True)
-                existing_layer.reload()
-            else:
-                # Add the new layer to the appropriate subgroup
-                QgsProject.instance().addMapLayer(layer, False)
-                layer_tree_layer = parent_group.addLayer(layer)
-                layer_tree_layer.setExpanded(
-                    False
-                )  # Collapse the legend for the layer by default
-                log_message(
-                    f"Added layer: {layer.name()} to group: {parent_group.name()}"
-                )
-
-            # Ensure the layer and its parent groups are visible
-            current_group = parent_group
-            while current_group is not None:
-                current_group.setExpanded(True)  # Expand the group
-                current_group.setItemVisibilityChecked(
-                    True
-                )  # Set the group to be visible
-                current_group = current_group.parent()
-
-            # Set the layer itself to be visible
-            layer_tree_layer.setItemVisibilityChecked(True)
-
-            log_message(
-                f"Layer {layer.name()} and its parent groups are now visible.",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
         dialog = AnalysisAggregationDialog(analysis_item, parent=self)
@@ -1413,6 +1303,8 @@ class TreePanel(QWidget):
         # Commented out see issue #50 - causes double execution of indicator
         # self.queue_workflow_task(item, item.role)
         self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
+        log_message(f"Total workflows to run: {self.items_to_run}")
+        self.overall_progress_bar.setMaximum(self.items_to_run)
 
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
@@ -1517,11 +1409,13 @@ class TreePanel(QWidget):
         Slot for handling when a workflow is completed.
         Update the tree item to indicate success or failure.
         """
+        queue_length = self.queue_manager.workflow_queue.active_queue_size()
+        log_message(f"Queued {queue_length} workflows for processing.")
         self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
+        self.overall_progress_bar.setMaximum(self.items_to_run - 1)
         self.workflow_progress_bar.setValue(0)
         self.save_json_to_working_directory()
-
-        self.add_to_map(item)
+        add_to_map(item)
 
         # Now cancel the animated icon
         node_index = self.model.itemIndex(item)
@@ -1711,6 +1605,7 @@ class TreePanel(QWidget):
         # pop the first item from the queue
         next_workflow = self.workflow_queue.pop(0)
         self.start_workflows(workflow_type=next_workflow)
+
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         if debug_env:
             self.queue_manager.start_processing_in_foreground()

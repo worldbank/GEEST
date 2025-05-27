@@ -6,7 +6,7 @@ from qgis.core import (
     QgsFeatureRequest,
     QgsFields,
     QgsField,
-    QgsProcessingException,
+    QgsFeedback,
     QgsSpatialIndex,
     QgsVectorFileWriter,
     QgsVectorLayer,
@@ -22,6 +22,7 @@ def select_grid_cells(
     grid_layer: QgsVectorLayer,
     features_layer: QgsVectorLayer,
     output_path: str,
+    feedback: QgsFeedback = None,
 ) -> QgsVectorLayer:
     """
     Select grid cells that intersect with features, count the number of intersecting features for each cell,
@@ -46,7 +47,8 @@ def select_grid_cells(
 
     # Create a dictionary to hold the count of intersecting features for each grid cell ID
     grid_feature_counts = {}
-
+    counter = 0
+    feature_count = features_layer.featureCount()
     # Iterate over each feature and use the spatial index to find the intersecting grid cells
     for feature in features_layer.getFeatures():
         feature_geom = feature.geometry()
@@ -85,6 +87,10 @@ def select_grid_cells(
                 grid_feature_counts[grid_id] += 1
             else:
                 grid_feature_counts[grid_id] = 1
+        counter += 1
+        feedback.setProgress(
+            (counter / feature_count) * 100.0
+        )  # We just use nominal intervals for progress updates
 
     log_message(f"{len(grid_feature_counts)} intersections found.")
 
@@ -109,9 +115,7 @@ def select_grid_cells(
         options=options,
     )
     if writer.hasError() != QgsVectorFileWriter.NoError:
-        raise QgsProcessingException(
-            f"Failed to create output layer: {writer.errorMessage()}"
-        )
+        raise Exception(f"Failed to create output layer: {writer.errorMessage()}")
 
     # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
     request = QgsFeatureRequest().setFilterFids(list(grid_feature_counts.keys()))
@@ -120,7 +124,7 @@ def select_grid_cells(
         tag="Geest",
         level=Qgis.Info,
     )
-    counter = 0
+
     for grid_feature in grid_layer.getFeatures(request):
         log_message(f"Writing Feature #{counter}")
         counter += 1
@@ -153,7 +157,9 @@ def select_grid_cells(
     )
 
 
-def assign_values_to_grid(grid_layer: QgsVectorLayer) -> QgsVectorLayer:
+def assign_values_to_grid(
+    grid_layer: QgsVectorLayer, feedback: QgsFeedback = None
+) -> QgsVectorLayer:
     """
     Assign values to grid cells based on the number of intersecting features.
 
@@ -166,6 +172,8 @@ def assign_values_to_grid(grid_layer: QgsVectorLayer) -> QgsVectorLayer:
     Returns:
         QgsVectorLayer: The grid layer with values assigned to the 'value' field.
     """
+    feature_count = grid_layer.featureCount()
+    counter = 0
     with edit(grid_layer):
         for feature in grid_layer.getFeatures():
             intersecting_features = feature["intersecting_features"]
@@ -174,4 +182,7 @@ def assign_values_to_grid(grid_layer: QgsVectorLayer) -> QgsVectorLayer:
             elif intersecting_features > 1:
                 feature["value"] = 5
             grid_layer.updateFeature(feature)
+            counter += 1
+            if feedback:
+                feedback.setProgress((counter / feature_count) * 100.0)
     return grid_layer

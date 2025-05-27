@@ -32,7 +32,14 @@ from math import floor
 from qgis.PyQt.QtCore import QUrl, QSettings, QRect
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt import uic
-from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsLayerTreeGroup, QgsVectorLayer
+from qgis.core import (
+    QgsMessageLog,
+    Qgis,
+    QgsProject,
+    QgsLayerTreeGroup,
+    QgsVectorLayer,
+    QgsRasterLayer,
+)
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsProject, Qgis
 from geest.core import setting

@@ -126,6 +126,7 @@ class SafetyRasterWorkflow(WorkflowBase):
             "NODATA_FOR_MISSING": False,
             "NO_DATA": 255,  # No data value
             "OUTPUT": reclassified_raster,
+            "PROGRESS": self.feedback,
         }
 
         # Perform the reclassification using the raster calculator

@@ -121,14 +121,6 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         output_path = os.path.join(
             self.working_directory, f"network_{self.feature.id()}.gpkg"
         )
-        service_area_multipart_point_output_path = os.path.join(
-            self.working_directory,
-            f"service_area_multipart_point_{self.feature.id()}.gpkg",
-        )
-        service_area_singlepart_point_output_path = os.path.join(
-            self.working_directory,
-            f"service_area_singlepart_point_{self.feature.id()}.gpkg",
-        )
         self.feedback.setProgress(2)
         # point_layer = QgsVectorLayer(
         #     f"Point?crs=EPSG:{self.crs.authid()}&field=id:integer",
@@ -165,35 +157,14 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         )["OUTPUT"]
         self.feedback.setProgress(4)
         interval = 80.0 / len(self.values)
+        # hack for https://github.com/worldbank/GEEST/issues/54
+        # See below for logic
+        first_run = True
         for index, value in enumerate(self.values):
             self.feedback.setProgress(int((index + 1) * interval))
             log_message(f"Processing value: {value}")
-            # There are two ways to calculate the service area:
-            # 1. Using the service area from layer algorithm
-            # 2. Using the service area from point algorithm
-            # The first one is commented out because it does not work reliably
-            # service_area_result = processing.run(
-            #     "native:serviceareafromlayer",
-            #     {
-            #         "INPUT": clipped_layer,
-            #         "STRATEGY": 0,
-            #         "DIRECTION_FIELD": "",
-            #         "VALUE_FORWARD": "",
-            #         "VALUE_BACKWARD": "",
-            #         "VALUE_BOTH": "",
-            #         "DEFAULT_DIRECTION": 2,
-            #         "SPEED_FIELD": "",
-            #         "DEFAULT_SPEED": 50,
-            #         "TOLERANCE": 0,
-            #         "START_POINTS": point_layer,
-            #         "TRAVEL_COST2": value,
-            #         "INCLUDE_BOUNDS": False,
-            #         "POINT_TOLERANCE": 50,  # Maximum distance a point can be from the network
-            #         "OUTPUT_LINES": None,
-            #         "OUTPUT": service_area_multipart_point_output_path,
-            #     },
-            # )
-            service_area_result = processing.run(
+            # Hack end
+            service_area_vector_layer = processing.run(
                 "native:serviceareafrompoint",
                 {
                     "INPUT": clipped_layer,
@@ -210,164 +181,70 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                     "TRAVEL_COST2": value,
                     "POINT_TOLERANCE": 50,  # Maximum distance a point can be from the network
                     "INCLUDE_BOUNDS": False,
-                    "OUTPUT": service_area_multipart_point_output_path,
+                    "OUTPUT": "TEMPORARY_OUTPUT",
                 },
-            )
-            service_area_layer = service_area_result["OUTPUT"]
+            )["OUTPUT"]
+
             self.feedback.setProgress(int(((index + 1) * interval) + (interval / 2)))
             log_message("Service area layer created successfully.")
-            use_geos_hull = True
-            if use_geos_hull:
-                # Try to compute the concave hull directly using the GEOS API first
-                service_area_vector_layer = QgsVectorLayer(
-                    service_area_layer, "service_area", "ogr"
-                )
-                if not service_area_vector_layer.isValid():
-                    log_message(f"Service area layer is invalid: {service_area_layer}")
-                else:
-                    log_message(
-                        f"Service area feature count (1 is expected): f{service_area_vector_layer.featureCount()}"
-                    )
-                    service_area_features = list(
-                        service_area_vector_layer.getFeatures()
-                    )
-                    if service_area_features:
-                        service_area_feature = service_area_features[0]
-                        service_area_geometry = service_area_feature.geometry()
-                        # Get number of parts in the geometry
-                        parts_count = 1  # Default for single geometries
-                        if service_area_geometry.isMultipart():
-                            parts_count = (
-                                service_area_geometry.constGet().numGeometries()
-                            )
-
-                        log_message(
-                            f"Service area geometry type: {service_area_geometry.wkbType()}"
-                        )
-                        log_message(f"Service area geometry has {parts_count} parts")
-
-                        # Convert QGIS geometry to OGR geometry
-                        ogr_geometry = ogr.CreateGeometryFromWkt(
-                            service_area_geometry.asWkt()
-                        )
-
-                        try:
-                            # Calculate the concave hull with a ratio of 0.3 and no holes
-                            concave_hull_geometry = ogr_geometry.ConcaveHull(0.3, False)
-
-                            if concave_hull_geometry:
-                                log_message(
-                                    "Concave hull computed successfully using GEOS API."
-                                )
-
-                                # Add the concave hull directly to the isochrone layer
-                                new_feature = ogr.Feature(
-                                    self.isochrone_layer.GetLayerDefn()
-                                )
-                                new_feature.SetGeometry(concave_hull_geometry)
-                                new_feature.SetField("value", value)
-                                self.isochrone_layer.CreateFeature(new_feature)
-                                new_feature = None
-
-                                log_message(
-                                    f"Added concave hull feature with value {value} to the GeoPackage."
-                                )
-                                log_message(
-                                    f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
-                                )
-                                continue  # Skip the rest of the processing for this value
-                        except Exception as e:
-                            log_message(
-                                f"Failed to compute concave hull using GEOS API: {e}"
-                            )
-                            log_message("Falling back to standard processing...")
-            else:
-
-                single_part_edge_points_result = processing.run(
-                    "native:multiparttosingleparts",
-                    {
-                        "INPUT": service_area_layer,
-                        "OUTPUT": service_area_singlepart_point_output_path,
-                    },
-                )
-                del service_area_layer
-                log_message("Converted multipart to singlepart successfully.")
-                singlepart_layer_path = single_part_edge_points_result["OUTPUT"]
-                singlepart_layer = QgsVectorLayer(
-                    singlepart_layer_path, "singlepart_layer", "ogr"
-                )
-                if not singlepart_layer.isValid():
-                    raise ValueError(
-                        f"Singlepart layer is invalid: {singlepart_layer_path}"
-                    )
-                # Show how many features in the singlepart layer
+            # Try to compute the concave hull directly using the GEOS API
+            if not service_area_vector_layer.isValid():
                 log_message(
-                    f"Singlepart layer has {singlepart_layer.featureCount()} features."
+                    f"Service area layer is invalid: {service_area_vector_layer.source()}"
                 )
-
-                # Doesnt work with some datasets for inexplicable reasons
-
-                # Compute the concave hull using grass
-                # for some reason, grass output (lower case) is a path not a qgsvectorlayer obnect
-                # concave_hull_result_path = processing.run(
-                #     "grass:v.hull",
-                #     {
-                #         "input": singlepart_layer,
-                #         "where": "",
-                #         "-f": False,
-                #         "output": "TEMPORARY_OUTPUT",
-                #         "GRASS_REGION_PARAMETER": None,
-                #         "GRASS_SNAP_TOLERANCE_PARAMETER": -1,
-                #         "GRASS_MIN_AREA_PARAMETER": 0.0001,
-                #         "GRASS_OUTPUT_TYPE_PARAMETER": 0,
-                #         "GRASS_VECTOR_DSCO": "",
-                #         "GRASS_VECTOR_LCO": "",
-                #         "GRASS_VECTOR_EXPORT_NOCAT": False,
-                #     },
-                # )["output"]
-                hull_result = processing.run(
-                    "qgis:minimumboundinggeometry",
-                    {
-                        "INPUT": singlepart_layer,
-                        "FIELD": "",
-                        "TYPE": 3,  # convex hull polygon
-                        "OUTPUT": "TEMPORARY_OUTPUT",
-                    },
+            else:
+                log_message(
+                    f"Service area feature count (1 is expected): f{service_area_vector_layer.featureCount()}"
                 )
-                # Load the output as a QgsVetorLayer
-                hull_result_layer = hull_result["OUTPUT"]
-                if not hull_result_layer.isValid():
-                    raise ValueError(
-                        f"Concave hull result layer is invalid: {hull_result_layer}"
+                service_area_features = list(service_area_vector_layer.getFeatures())
+                if service_area_features:
+                    service_area_feature = service_area_features[0]
+                    service_area_geometry = service_area_feature.geometry()
+                    # Get number of parts in the geometry
+                    parts_count = 1  # Default for single geometries
+                    if service_area_geometry.isMultipart():
+                        parts_count = service_area_geometry.constGet().numGeometries()
+
+                    log_message(
+                        f"Service area geometry type: {service_area_geometry.wkbType()}"
                     )
-                log_message("Concave hull created successfully.")
+                    log_message(f"Service area geometry has {parts_count} parts")
 
-                # Crashes QGIS randomly
+                    # Convert QGIS geometry to OGR geometry
+                    ogr_geometry = ogr.CreateGeometryFromWkt(
+                        service_area_geometry.asWkt()
+                    )
 
-                # concave_hull_result = processing.run(
-                #     "qgis:minimumboundinggeometry",
-                #     {
-                #         "INPUT": singlepart_layer,
-                #         "FIELD": "",
-                #         "TYPE": 3, # concave hull polygon
-                #         "OUTPUT": "TEMPORARY_OUTPUT",
-                #     },
-                # )
+                    try:
+                        # Calculate the concave hull with a ratio of 0.3 and no holes
+                        concave_hull_geometry = ogr_geometry.ConcaveHull(0.3, False)
 
-                # Also crashes QGIS randomly
+                        if concave_hull_geometry:
+                            log_message(
+                                "Concave hull computed successfully using GEOS API."
+                            )
 
-                # concave_hull_result = processing.run(
-                #     "native:concavehull",
-                #     {
-                #         "INPUT": singlepart_layer,
-                #         "ALPHA": 0.3,
-                #         "HOLES": False,
-                #         "NO_MULTIGEOMETRY": False,
-                #         "OUTPUT": "TEMPORARY_OUTPUT",
-                #     },
-                # )
+                            # Add the concave hull directly to the isochrone layer
+                            new_feature = ogr.Feature(
+                                self.isochrone_layer.GetLayerDefn()
+                            )
+                            new_feature.SetGeometry(concave_hull_geometry)
+                            new_feature.SetField("value", value)
+                            self.isochrone_layer.CreateFeature(new_feature)
+                            new_feature = None
 
-                del singlepart_layer
+                            log_message(
+                                f"Added concave hull feature with value {value} to the GeoPackage."
+                            )
+                            log_message(
+                                f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
+                            )
+                            continue  # Skip the rest of the processing for this value
+                    except Exception as e:
+                        log_message(
+                            f"Failed to compute concave hull using GEOS API: {e}"
+                        )
+                        log_message("Falling back to standard processing...")
             # Show how many features in the concave hull layer
             log_message(
                 f"Concave hull layer has {hull_result_layer.featureCount()} features."

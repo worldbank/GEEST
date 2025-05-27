@@ -124,7 +124,8 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
             if layer.fields().indexFromName("value") == -1:
                 layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
                 layer.updateFields()
-
+            count = layer.featureCount()
+            counter = 0
             for feature in layer.getFeatures():
                 score = feature[self.selected_field]
                 # Scale values between 0 and 5
@@ -132,6 +133,11 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
                 log_message(f"Scaled {score} to: {reclass_val}")
                 feature.setAttribute("value", reclass_val)
                 layer.updateFeature(feature)
+                counter += 1
+                if self.feedback.isCanceled():
+                    log_message("Feedback cancelled, stopping processing.")
+                    return layer
+                self.feedback.setProgress(int((counter / count) * 100))
         return layer
 
     def _scale_value(self, value, min_in, max_in, min_out, max_out):
