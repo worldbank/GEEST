@@ -1,11 +1,22 @@
 import json
 import os
+import platform
 import shutil
 import traceback
+from functools import partial
 from logging import getLogger
-from typing import Union, Dict, List
-import platform
+from typing import Dict, List, Union
 
+from qgis.core import (
+    Qgis,
+    QgsFeedback,
+    QgsLayerTreeGroup,
+    QgsProcessingContext,
+    QgsProject,
+    QgsVectorLayer,
+)
+from qgis.PyQt.QtCore import QModelIndex, QPoint, QSettings, Qt, pyqtSignal, pyqtSlot
+from qgis.PyQt.QtGui import QMovie
 from qgis.PyQt.QtWidgets import (
     QAction,
     QApplication,
@@ -17,6 +28,7 @@ from qgis.PyQt.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
     QToolButton,
@@ -24,53 +36,33 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qgis.PyQt.QtCore import (
-    pyqtSlot,
-    QPoint,
-    Qt,
-    QSettings,
-    pyqtSignal,
-    QModelIndex,
-)
-from qgis.PyQt.QtGui import QMovie, QPalette, QColor, QPixmap
 
-from qgis.PyQt.QtWidgets import QSizePolicy
-from qgis.core import (
-    Qgis,
-    QgsProject,
-    QgsVectorLayer,
-    QgsLayerTreeGroup,
-    QgsFeedback,
-    QgsProcessingContext,
+from geest.core import (
+    JsonTreeItem,
+    WorkflowQueueManager,
+    set_setting,
+    setting,
+    MapCanvasItem,
 )
-from functools import partial
-from geest.gui.views import JsonTreeView, JsonTreeModel
-from geest.core import JsonTreeItem
-from geest.core import setting, set_setting
-from geest.core import WorkflowQueueManager
-from geest.gui.dialogs import (
-    FactorAggregationDialog,
-    DimensionAggregationDialog,
-    AnalysisAggregationDialog,
-)
+
 from geest.core.algorithms import (
-    PopulationRasterProcessingTask,
-    WEEByPopulationScoreProcessingTask,
-    SubnationalAggregationProcessingTask,
-    OpportunitiesMaskProcessor,
-    OpportunitiesByWeeScoreProcessingTask,
     OpportunitiesByWeeScorePopulationProcessingTask,
+    OpportunitiesByWeeScoreProcessingTask,
+    OpportunitiesMaskProcessor,
+    PopulationRasterProcessingTask,
+    SubnationalAggregationProcessingTask,
+    WEEByPopulationScoreProcessingTask,
 )
-from geest.core.reports import StudyAreaReport, AnalysisReport
-from geest.utilities import (
-    resources_path,
-    theme_stylesheet,
-    log_message,
+from geest.core.reports import AnalysisReport, StudyAreaReport
+from geest.core.utilities import add_to_map
+from geest.gui.dialogs import (
+    AnalysisAggregationDialog,
+    DimensionAggregationDialog,
+    FactorAggregationDialog,
 )
-from geest.core.utilities import (
-    add_to_map,
-)
+from geest.gui.views import JsonTreeModel, JsonTreeView
 from geest.gui.widgets import SolidMenu
+from geest.utilities import log_message, resources_path, theme_stylesheet
 
 
 class TreePanel(QWidget):
@@ -245,6 +237,9 @@ class TreePanel(QWidget):
         if show_layer_on_click:
             item = index.internalPointer()
             add_to_map(item)
+        show_overlay = setting(key="show_overlay", default=False)
+        if show_overlay:
+            QSettings().setValue("geest/overlay_label", item.data(0))
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()

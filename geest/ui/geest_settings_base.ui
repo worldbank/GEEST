@@ -88,6 +88,13 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="show_overlay">
+        <property name="text">
+         <string>Show canvas overlay with current layer details</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

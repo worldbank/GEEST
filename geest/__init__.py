@@ -39,7 +39,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.core import Qgis, QgsProject
 
 # Import your plugin components here
-from .core import setting  # , JSONValidator
+from .core import setting, MapCanvasItem  # , JSONValidator
 from .utilities import resources_path, log_message, version
 from .gui import GeestOptionsFactory, GeestDock
 import datetime
@@ -99,6 +99,7 @@ class GeestPlugin:
         self.run_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.run_action)
         self.debug_running = False
+        self.overlay = None  # for rendering info over the canvas
         # Create the dock widget
         self.dock_widget = GeestDock(
             parent=self.iface.mainWindow(),
@@ -181,6 +182,7 @@ class GeestPlugin:
 
         self.options_factory = GeestOptionsFactory()
         self.iface.registerOptionsWidgetFactory(self.options_factory)
+        self.setup_map_canvas_item()
 
     def run_tests(self):
         """Run unit tests in the python console."""
@@ -229,6 +231,18 @@ for module_name in list(sys.modules.keys()):
 
                         log_message("Test modules unloaded")
                         break
+
+    def setup_map_canvas_item(self):
+        self.overlay = MapCanvasItem(self.iface.mapCanvas())
+
+    def remove_map_canvas_item(self):
+        try:
+            if self.overlay:
+                overlay.setCanvas(None)
+                overlay.deleteLater()
+                overlay = None
+        except Exception as e:
+            pass
 
     def run_single_test(self):
         """Prompt user to select a single test to run in the Python console."""
@@ -334,7 +348,7 @@ for module_name in list(sys.modules.keys()):
         Unload the plugin from QGIS.
         Removes all added actions, widgets, and options to ensure a clean unload.
         """
-
+        self.remove_map_canvas_item()
         self.kill_debug()
         # Save geometry before unloading
         self.save_geometry()
