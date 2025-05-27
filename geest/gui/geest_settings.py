@@ -66,6 +66,9 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         show_overlay = setting(key="show_overlay", default=True)
         self.show_overlay.setChecked(bool(show_overlay))
 
+        show_pie_overlay = setting(key="show_pie_overlay", default=False)
+        self.show_pie_overlay.setChecked(bool(show_pie_overlay))
+
     def apply(self):
         """Process the animation sequence.
 
@@ -94,6 +97,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             key="show_layer_on_click", value=self.show_layer_on_click.isChecked()
         )
         set_setting(key="show_overlay", value=self.show_overlay.isChecked())
+        set_setting(key="show_pie_overlay", value=self.show_pie_overlay.isChecked())
 
 
 class GeestOptionsFactory(QgsOptionsWidgetFactory):

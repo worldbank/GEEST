@@ -42,8 +42,8 @@ from geest.core import (
     WorkflowQueueManager,
     set_setting,
     setting,
-    MapCanvasItem,
 )
+
 
 from geest.core.algorithms import (
     OpportunitiesByWeeScorePopulationProcessingTask,
@@ -240,6 +240,10 @@ class TreePanel(QWidget):
         show_overlay = setting(key="show_overlay", default=False)
         if show_overlay:
             QSettings().setValue("geest/overlay_label", item.data(0))
+        show_pie = setting(key="show_pie_overlay", default=False)
+        if show_pie:
+            # TODO - calculate the pie data
+            QSettings().setValue("geest/pie_data", item.data(0))
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
