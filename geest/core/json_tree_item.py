@@ -614,6 +614,24 @@ class JsonTreeItem:
             )
         return dimensions
 
+    def getDescendantAnalyses(self, include_completed=True):
+        """Return the top level analysis item or None if it is completed and include_completed is False.
+
+        Will also return None if self is not the top level node
+
+        :param include_completed: If True, include dimensions that are completed.
+        :param include_disabled: If True, include dimensions that are disabled.
+        result_file
+        """
+
+        analyses = []
+        if self.isAnalysis():
+            if self.getStatus() != "Completed successfully" or include_completed:
+                analyses.append(self)
+        for child in self.childItems:
+            analyses.extend(child.getDescendantAnalyses(include_completed))
+        return analyses
+
     def getFactorIndicatorGuids(self):
         """Return the list of indicators under this factor."""
         guids = []
