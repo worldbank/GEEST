@@ -3,8 +3,8 @@
     "name": "Gender Enabling Environments Spatial Tool (GEEST)",
     "qgisMinimumVersion": 3.0,
     "qgisMaximumVersion": 3.99,
-    "icon": "icon.png",
-    "experimental": true,
+    "icon": "icon.svg",
+    "experimental": false,
     "deprecated": false,
     "homepage": "https://github.com/worldbank/GEEST",
     "tracker": "https://github.com/worldbank/GEEST/issues",
@@ -18,7 +18,7 @@
     "author": "Kartoza for and with The World Bank",
     "email": "info@kartoza.com, gost@worldbank.org",
     "description": "Gender Enabling Environments Spatial Tool",
-    "version": "0.7.5",
+    "version": "1.0.0",
     "changelog": "",
     "server": false
   }

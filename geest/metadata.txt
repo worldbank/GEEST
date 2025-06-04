@@ -1,8 +1,9 @@
 [general]
 name=GEEST
+icon=icon.svg
 description=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
 about=Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector
-version=2.0
+version=1.0
 qgisMinimumVersion=3.6
 author=Tim Sutton
 email=tim@kartoza.com

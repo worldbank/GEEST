@@ -7,6 +7,12 @@ case $choice in
 	"🪲 Yes") DEBUG_MODE=1 ;;
 	"🐞 No") DEBUG_MODE=0 ;;
 esac
+echo "Do you want to enable experimental features?"
+choice=$(gum choose "🪲 Yes" "🐞 No" )
+case $choice in
+	"🪲 Yes") GEEST_EXPERIMENTAL=1 ;;
+	"🐞 No") GEEST_EXPERIMENTAL=0 ;;
+esac
 
 # Running on local used to skip tests that will not work in a local dev env
 GEEST_LOG=$HOME/GEEST2.log
@@ -18,5 +24,8 @@ rm -f $GEEST_LOG
 
 # This is the new way, using Ivan Mincis nix spatial project and a flake
 # see flake.nix for implementation details
-GEEST_LOG=${GEEST_LOG} GEEST_DEBUG=${DEBUG_MODE} RUNNING_ON_LOCAL=1 \
-      nix run .#default -- qgis --profile GEEST2
+GEEST_LOG=${GEEST_LOG} \
+	GEEST_DEBUG=${DEBUG_MODE} \
+	GEEST_EXPERIMENTAL=${GEEST_EXPERIMENTAL} \
+	RUNNING_ON_LOCAL=1 \
+    nix run .#default -- qgis --profile GEEST2

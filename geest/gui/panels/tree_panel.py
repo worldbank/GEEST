@@ -42,8 +42,8 @@ from geest.core import (
     WorkflowQueueManager,
     set_setting,
     setting,
-    MapCanvasItem,
 )
+
 
 from geest.core.algorithms import (
     OpportunitiesByWeeScorePopulationProcessingTask,
@@ -240,6 +240,10 @@ class TreePanel(QWidget):
         show_overlay = setting(key="show_overlay", default=False)
         if show_overlay:
             QSettings().setValue("geest/overlay_label", item.data(0))
+        show_pie = setting(key="show_pie_overlay", default=False)
+        if show_pie:
+            # TODO - calculate the pie data
+            QSettings().setValue("geest/pie_data", item.data(0))
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -294,6 +298,13 @@ class TreePanel(QWidget):
             "study_area_report.pdf",
             "road_network.gpkg",
         ]
+        if filename is None or self.working_directory is None:
+            log_message(
+                "No working directory set, cannot clear workflows.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
         for filename in os.listdir(self.working_directory):
             file_path = os.path.join(self.working_directory, filename)
             if filename not in exceptions:

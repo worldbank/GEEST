@@ -9,15 +9,14 @@ It will show geest lablel on top of the map canvas,
 showing which layer is active etc.
 """
 from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtGui import QPixmap
-from ..utilities import resources_path
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QPixmap, QImage, QIcon, QPainter
+from ...utilities import resources_path
 from geest.core import (
     setting,
 )
 
 
-class MapCanvasItem(QgsMapCanvasItem):
+class LayerDescriptionItem(QgsMapCanvasItem):
     def __init__(self, canvas):
         super().__init__(canvas)
         self.setZValue(1000)  # Draw on top
@@ -31,7 +30,7 @@ class MapCanvasItem(QgsMapCanvasItem):
         painter.setPen(QColor(0, 0, 0))
         font = QFont("Arial", 12, QFont.Bold)
         painter.setFont(font)
-
+        painter.setRenderHint(QPainter.Antialiasing)
         rect_x = 10
         rect_y = 10
         # Calculate width based on text

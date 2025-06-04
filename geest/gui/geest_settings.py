@@ -6,10 +6,12 @@ __license__ = "GPL version 3"
 __email__ = "tim@kartoza.com"
 __revision__ = "$Format:%H$"
 
+import os
 from qgis.PyQt.QtGui import QIcon
 from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory
 from geest.core import set_setting, setting
 from geest.utilities import get_ui_class, resources_path
+from geest.utilities import log_message
 
 FORM_CLASS = get_ui_class("geest_settings_base.ui")
 
@@ -66,6 +68,20 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         show_overlay = setting(key="show_overlay", default=True)
         self.show_overlay.setChecked(bool(show_overlay))
 
+        show_pie_overlay = setting(key="show_pie_overlay", default=False)
+        self.show_pie_overlay.setChecked(bool(show_pie_overlay))
+        experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
+        log_message(
+            f"GEEST_EXPERIMENTAL environment variable is set to: {experimental_features}"
+        )
+        self.show_pie_overlay.hide()
+
+        if experimental_features:
+            log_message("Experimental features are enabled.")
+            self.show_pie_overlay.show()
+        else:
+            log_message("Experimental features are disabled.")
+
     def apply(self):
         """Process the animation sequence.
 
@@ -94,6 +110,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             key="show_layer_on_click", value=self.show_layer_on_click.isChecked()
         )
         set_setting(key="show_overlay", value=self.show_overlay.isChecked())
+        set_setting(key="show_pie_overlay", value=self.show_pie_overlay.isChecked())
 
 
 class GeestOptionsFactory(QgsOptionsWidgetFactory):
