@@ -236,7 +236,9 @@ for module_name in list(sys.modules.keys()):
 
     def setup_map_canvas_items(self):
         self.label_overlay = LayerDescriptionItem(self.iface.mapCanvas())
-        self.pie_overlay = PieChartItem(self.iface.mapCanvas())
+        experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
+        if experimental_features:
+            self.pie_overlay = PieChartItem(self.iface.mapCanvas())
 
     def remove_map_canvas_items(self):
         try:

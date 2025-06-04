@@ -298,6 +298,13 @@ class TreePanel(QWidget):
             "study_area_report.pdf",
             "road_network.gpkg",
         ]
+        if filename is None or self.working_directory is None:
+            log_message(
+                "No working directory set, cannot clear workflows.",
+                tag="Geest",
+                level=Qgis.Warning,
+            )
+            return
         for filename in os.listdir(self.working_directory):
             file_path = os.path.join(self.working_directory, filename)
             if filename not in exceptions:

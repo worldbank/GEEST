@@ -100,6 +100,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def layer_changed(self, layer):
         """Slot to be called when the layer in the combo box changes."""
         log_message(f"Layer changed: {layer.name() if layer else 'None'}")
+        if self.crs() is None:
+            log_message(
+                "CRS is None, cannot set layer or field combo box.",
+                tag="Geest",
+                level=Qgis.Critical,
+            )
+            self.crs_label.setText("Invalid CRS")
+            return
         log_message(f"Layer crs: {layer.crs().authid() if layer else 'None'}")
         if layer:
             self.field_combo.setLayer(layer)
@@ -271,7 +279,15 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             crs = self.layer_combo.currentLayer().crs()
         else:
             log_message("Using UTM zone CRS")
-            epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
+            try:
+                epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
+            except Exception as e:
+                log_message(
+                    f"Error calculating UTM zone from layer: {e}",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+                return None
             crs = QgsCoordinateReferenceSystem(f"EPSG:{epsg}")
         self.crs_label.setText(f"CRS: {crs.authid()}" if crs else "CRS: Not set")
         return crs
