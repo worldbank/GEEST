@@ -71,7 +71,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
                 "id": "street_crossings",
                 "result": "Not Run",
                 "multi_buffer_travel_distances": "1000,2000,3000",
-                "multi_buffer_shapefile": self.points_layer_path,
+                "multi_buffer_point_shapefile": self.points_layer_path,
                 "multi_buffer_travel_mode": "Walking",
                 "multi_buffer_travel_units": "Distance",
                 "network_layer_path": self.network_layer_path,
