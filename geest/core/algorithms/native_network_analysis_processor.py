@@ -17,6 +17,10 @@ from qgis import processing
 from geest.utilities import log_message
 import numpy as np
 from math import atan2, degrees
+from functools import lru_cache
+
+# Import the Timer module
+from geest.core.timer import Timer, timed
 
 
 class NativeNetworkAnalysisProcessor(QgsTask):
@@ -44,16 +48,19 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         os.makedirs(self.working_directory, exist_ok=True)
         self.crs = crs
 
-        self.network_layer_path = network_layer_path
-        network_layer = QgsVectorLayer(self.network_layer_path, "network_layer", "ogr")
-        if not network_layer.isValid():
-            raise ValueError(f"Network layer is invalid: {self.network_layer_path}")
-        if network_layer.geometryType() != QgsWkbTypes.LineGeometry:
-            raise ValueError("Network layer must be a line layer.")
-        if network_layer.crs() != self.crs:
-            raise ValueError(
-                f"Network layer CRS {network_layer.crs().authid()} does not match the specified CRS {self.crs.authid()}."
+        with Timer("🔍 initialize_network_layer"):
+            self.network_layer_path = network_layer_path
+            network_layer = QgsVectorLayer(
+                self.network_layer_path, "network_layer", "ogr"
             )
+            if not network_layer.isValid():
+                raise ValueError(f"Network layer is invalid: {self.network_layer_path}")
+            if network_layer.geometryType() != QgsWkbTypes.LineGeometry:
+                raise ValueError("Network layer must be a line layer.")
+            if network_layer.crs() != self.crs:
+                raise ValueError(
+                    f"Network layer CRS {network_layer.crs().authid()} does not match the specified CRS {self.crs.authid()}."
+                )
 
         self.feature = point_feature
         self.mode = mode
@@ -64,32 +71,39 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             raise ValueError(f"All values must be positive integers. {self.values}")
         self.isochrone_layer = None
         self.isochrone_layer_path = isochrone_layer_path
-        self._initialize_isochrone_layer()
+
+        with Timer("🧩 initialize_isochrone_layer"):
+            self._initialize_isochrone_layer()
 
         log_message(
-            f"Initialized Native Network Analysis Processing Task Instance: {self.instance_id}."
+            f"✅ Initialized Native Network Analysis Processing Task Instance: {self.instance_id}."
         )
 
     def _initialize_isochrone_layer(self):
+        """Initialize or open the isochrone output layer."""
         driver = ogr.GetDriverByName("GPKG")
         if os.path.exists(self.isochrone_layer_path):
-            log_message(
-                f"Appending to existing GeoPackage: {self.isochrone_layer_path}"
-            )
-            self.isochrone_ds = driver.Open(self.isochrone_layer_path, 1)
-            self.isochrone_layer = self.isochrone_ds.GetLayerByName("isochrones")
+            with Timer("📂 open_existing_gpkg"):
+                log_message(
+                    f"Appending to existing GeoPackage: {self.isochrone_layer_path}"
+                )
+                self.isochrone_ds = driver.Open(self.isochrone_layer_path, 1)
+                self.isochrone_layer = self.isochrone_ds.GetLayerByName("isochrones")
         else:
-            self.isochrone_ds = driver.CreateDataSource(self.isochrone_layer_path)
-            srs = osr.SpatialReference()
-            srs.ImportFromProj4(self.crs.toProj4())
-            self.isochrone_layer = self.isochrone_ds.CreateLayer(
-                "isochrones", srs, ogr.wkbPolygon
-            )
-            field_defn = ogr.FieldDefn("value", ogr.OFTReal)
-            self.isochrone_layer.CreateField(field_defn)
-            log_message("Isochrone layer created successfully!")
+            with Timer("🆕 create_new_gpkg"):
+                self.isochrone_ds = driver.CreateDataSource(self.isochrone_layer_path)
+                srs = osr.SpatialReference()
+                srs.ImportFromProj4(self.crs.toProj4())
+                self.isochrone_layer = self.isochrone_ds.CreateLayer(
+                    "isochrones", srs, ogr.wkbPolygon
+                )
+                field_defn = ogr.FieldDefn("value", ogr.OFTReal)
+                self.isochrone_layer.CreateField(field_defn)
+                log_message("🆕 Isochrone layer created successfully!")
 
+    @lru_cache(maxsize=128)
     def isochrone_feature_count(self) -> int:
+        """Return the number of features in the isochrone layer."""
         if self.isochrone_layer is None:
             raise ValueError("Isochrone layer is not initialized.")
         if not self.isochrone_layer:
@@ -98,72 +112,125 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         return self.isochrone_layer.GetFeatureCount()
 
     def __del__(self):
+        """Cleanup resources when object is destroyed."""
         if hasattr(self, "isochrone_ds") and self.isochrone_ds:
             self.isochrone_ds = None
         log_message(
-            f"Native Network Analysis Processor resources cleaned up instance {self.instance_id}."
+            f"🧹 Native Network Analysis Processor resources cleaned up instance {self.instance_id}."
         )
 
+    @timed
     def run(self) -> str:
+        """Main task runner method."""
         try:
-            self.calculate_network()
+            with Timer("🚀 network_calculation"):
+                self.calculate_network()
             return True
         except Exception as e:
-            log_message(f"Task failed: {e}")
+            log_message(f"❌ Task failed: {e}")
             log_message(traceback.format_exc())
             return False
 
+    @timed
     def calculate_network(self) -> None:
+        """Main method to calculate network analysis."""
         self.feedback.setProgress(1)
         log_message(
-            f"Calculating Network for feature {self.feature.id()} using {self.mode} with these values: {self.values}..."
+            f"🧮 Calculating Network for feature {self.feature.id()} using {self.mode} with these values: {self.values}..."
         )
+
+        # Prepare geometry and extent
+        with Timer("📐 geometry_preparation"):
+            center_point, rect = self._prepare_geometry()
+
+        # Clip network by extent
+        with Timer("✂️ network_clipping"):
+            clipped_layer = self._clip_network(rect)
+
+        # Process each value to create isochrones
+        with Timer("🚗 isochrone_processing"):
+            self._process_isochrones(center_point, clipped_layer)
+
+        # Cleanup
+        with Timer("🧹 resource_cleanup"):
+            self._cleanup_resources(clipped_layer)
+
+        # Print performance summary at the end
+        Timer.print_summary()
+        return
+
+    @timed
+    def _prepare_geometry(self):
+        """Prepare geometry and calculate clipping extent."""
+        largest_value = max(self.values)
+
+        with Timer("📍 extract_point"):
+            geometry = self.feature.geometry()
+            if not geometry.isEmpty():
+                center_point = geometry.asPoint()
+            else:
+                raise ValueError("Feature geometry is invalid or not a single point.")
+
+        with Timer("🔲 create_extent"):
+            rect = QgsRectangle(
+                center_point.x() - largest_value,
+                center_point.y() - largest_value,
+                center_point.x() + largest_value,
+                center_point.y() + largest_value,
+            )
+            log_message(f"📏 Constructed rectangle: {rect.toString()}")
+            self.feedback.setProgress(3)
+
+        return center_point, rect
+
+    @timed
+    def _clip_network(self, rect):
+        """Clip network by extent."""
         output_path = os.path.join(
             self.working_directory, f"network_{self.feature.id()}.gpkg"
         )
-        self.feedback.setProgress(2)
-        # point_layer = QgsVectorLayer(
-        #     f"Point?crs=EPSG:{self.crs.authid()}&field=id:integer",
-        #     "start_point",
-        #     "memory",
-        # )
-        # provider = point_layer.dataProvider()
-        # provider.addFeature(self.feature)
-        # point_layer.updateExtents()
 
-        largest_value = max(self.values)
-        geometry = self.feature.geometry()
-        if not geometry.isEmpty():
-            center_point = geometry.asPoint()
-        else:
-            raise ValueError("Feature geometry is invalid or not a single point.")
+        with Timer("🔪 extract_by_extent"):
+            clipped_layer = processing.run(
+                "native:extractbyextent",
+                {
+                    "INPUT": self.network_layer_path,
+                    "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [{self.crs.authid()}]",
+                    "CLIP": False,
+                    "OUTPUT": output_path,
+                },
+            )["OUTPUT"]
+            self.feedback.setProgress(4)
 
-        rect = QgsRectangle(
-            center_point.x() - largest_value,
-            center_point.y() - largest_value,
-            center_point.x() + largest_value,
-            center_point.y() + largest_value,
-        )
-        log_message(f"Constructed rectangle: {rect.toString()}")
-        self.feedback.setProgress(3)
-        clipped_layer = processing.run(
-            "native:extractbyextent",
-            {
-                "INPUT": self.network_layer_path,
-                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [{self.crs.authid()}]",
-                "CLIP": False,
-                "OUTPUT": output_path,
-            },
-        )["OUTPUT"]
-        self.feedback.setProgress(4)
+        return clipped_layer
+
+    @timed
+    def _process_isochrones(self, center_point, clipped_layer):
+        """Process isochrones for all values."""
         interval = 80.0 / len(self.values)
-        # hack for https://github.com/worldbank/GEEST/issues/54
-        # See below for logic
         first_run = True
+
         for index, value in enumerate(self.values):
-            self.feedback.setProgress(int((index + 1) * interval))
-            log_message(f"Processing value: {value}")
-            # Hack end
+            with Timer(f"🔄 process_value_{value}"):
+                self.feedback.setProgress(int((index + 1) * interval))
+                log_message(f"⏱️ Processing value: {value}")
+
+                # Calculate service area
+                service_area_layer = self._calculate_service_area(
+                    center_point, clipped_layer, value
+                )
+
+                # Create concave hull and add to output
+                self._create_concave_hull(service_area_layer, value)
+
+                self.feedback.setProgress(
+                    int(((index + 1) * interval) + (interval / 2))
+                )
+
+    @timed
+    def _calculate_service_area(self, center_point, clipped_layer, value):
+        """Calculate service area for a specific value."""
+        with Timer(f"🚗 service_area_{value}"):
             service_area_vector_layer = processing.run(
                 "native:serviceareafrompoint",
                 {
@@ -179,100 +246,135 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                     "TOLERANCE": 50,
                     "START_POINT": f"{center_point.x()},{center_point.y()} [{self.crs.authid()}]",
                     "TRAVEL_COST2": value,
-                    "POINT_TOLERANCE": 50,  # Maximum distance a point can be from the network
+                    "POINT_TOLERANCE": 50,
                     "INCLUDE_BOUNDS": False,
                     "OUTPUT": "TEMPORARY_OUTPUT",
                 },
             )["OUTPUT"]
 
-            self.feedback.setProgress(int(((index + 1) * interval) + (interval / 2)))
-            log_message("Service area layer created successfully.")
-            # Try to compute the concave hull directly using the GEOS API
+        log_message("✅ Service area layer created successfully.")
+
+        # Check if layer is valid
+        with Timer("🔍 validate_service_area"):
             if not service_area_vector_layer.isValid():
                 log_message(
-                    f"Service area layer is invalid: {service_area_vector_layer.source()}"
+                    f"⚠️ Service area layer is invalid: {service_area_vector_layer.source()}"
                 )
             else:
                 log_message(
-                    f"Service area feature count (1 is expected): f{service_area_vector_layer.featureCount()}"
+                    f"ℹ️ Service area feature count (1 is expected): {service_area_vector_layer.featureCount()}"
                 )
-                service_area_features = list(service_area_vector_layer.getFeatures())
-                if service_area_features:
-                    service_area_feature = service_area_features[0]
-                    service_area_geometry = service_area_feature.geometry()
-                    # Get number of parts in the geometry
-                    parts_count = 1  # Default for single geometries
-                    if service_area_geometry.isMultipart():
-                        parts_count = service_area_geometry.constGet().numGeometries()
+
+        return service_area_vector_layer
+
+    @timed
+    def _create_concave_hull(self, service_area_layer, value):
+        """Create concave hull from service area and add to output."""
+        with Timer(f"🔷 concave_hull_{value}"):
+            service_area_features = list(service_area_layer.getFeatures())
+
+            if not service_area_features:
+                log_message("⚠️ No service area features found.")
+                return
+
+            with Timer("🔍 extract_geometry"):
+                service_area_feature = service_area_features[0]
+                service_area_geometry = service_area_feature.geometry()
+
+                # Get number of parts in the geometry
+                parts_count = 1  # Default for single geometries
+                if service_area_geometry.isMultipart():
+                    parts_count = service_area_geometry.constGet().numGeometries()
+
+                log_message(
+                    f"ℹ️ Service area geometry type: {service_area_geometry.wkbType()}"
+                )
+                log_message(f"ℹ️ Service area geometry has {parts_count} parts")
+
+                # Convert QGIS geometry to OGR geometry
+                ogr_geometry = ogr.CreateGeometryFromWkt(service_area_geometry.asWkt())
+
+            try:
+                # Calculate the concave hull
+                with Timer(f"🔶 direct_concave_hull_{value}"):
+                    concave_hull_geometry = ogr_geometry.ConcaveHull(0.3, False)
+
+                if concave_hull_geometry:
+                    log_message("✅ Concave hull computed successfully using GEOS API.")
+
+                    # Add to output
+                    with Timer(f"💾 save_direct_hull_{value}"):
+                        new_feature = ogr.Feature(self.isochrone_layer.GetLayerDefn())
+                        new_feature.SetGeometry(concave_hull_geometry)
+                        new_feature.SetField("value", value)
+                        self.isochrone_layer.CreateFeature(new_feature)
+                        new_feature = None
 
                     log_message(
-                        f"Service area geometry type: {service_area_geometry.wkbType()}"
+                        f"✅ Added concave hull feature with value {value} to the GeoPackage."
                     )
-                    log_message(f"Service area geometry has {parts_count} parts")
+                    log_message(
+                        f"ℹ️ Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
+                    )
+                    return
+            except Exception as e:
+                log_message(f"⚠️ Failed to compute concave hull using GEOS API: {e}")
+                log_message("⚠️ Falling back to standard processing...")
 
-                    # Convert QGIS geometry to OGR geometry
-                    ogr_geometry = ogr.CreateGeometryFromWkt(
-                        service_area_geometry.asWkt()
+            # Fallback processing
+            with Timer(f"🔄 fallback_processing_{value}"):
+                # Run the concave hull algorithm from QGIS processing
+                hull_params = {
+                    "INPUT": service_area_layer,
+                    "ALPHA": 0.3,
+                    "HOLES": False,
+                    "NO_MULTIGEOMETRY": True,
+                    "OUTPUT": "TEMPORARY_OUTPUT",
+                }
+
+                try:
+                    with Timer("🔄 run_concave_hull"):
+                        hull_result = processing.run("native:concavehull", hull_params)
+                        hull_result_layer = hull_result["OUTPUT"]
+
+                    # Show how many features in the concave hull layer
+                    log_message(
+                        f"ℹ️ Concave hull layer has {hull_result_layer.featureCount()} features."
                     )
 
-                    try:
-                        # Calculate the concave hull with a ratio of 0.3 and no holes
-                        concave_hull_geometry = ogr_geometry.ConcaveHull(0.3, False)
-
-                        if concave_hull_geometry:
-                            log_message(
-                                "Concave hull computed successfully using GEOS API."
-                            )
-
-                            # Add the concave hull directly to the isochrone layer
+                    with Timer("💾 save_fallback_hull"):
+                        for feature in hull_result_layer.getFeatures():
+                            geometry = feature.geometry()
+                            ogr_geometry = ogr.CreateGeometryFromWkt(geometry.asWkt())
                             new_feature = ogr.Feature(
                                 self.isochrone_layer.GetLayerDefn()
                             )
-                            new_feature.SetGeometry(concave_hull_geometry)
+                            new_feature.SetGeometry(ogr_geometry)
                             new_feature.SetField("value", value)
                             self.isochrone_layer.CreateFeature(new_feature)
                             new_feature = None
-
                             log_message(
-                                f"Added concave hull feature with value {value} to the GeoPackage."
+                                f"✅ Added feature with value {value} to the GeoPackage."
                             )
-                            log_message(
-                                f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
-                            )
-                            continue  # Skip the rest of the processing for this value
-                    except Exception as e:
-                        log_message(
-                            f"Failed to compute concave hull using GEOS API: {e}"
-                        )
-                        log_message("Falling back to standard processing...")
-            # Show how many features in the concave hull layer
-            log_message(
-                f"Concave hull layer has {hull_result_layer.featureCount()} features."
-            )
-            self.progress.setProgress(90)
-            for feature in hull_result_layer.getFeatures():
-                geometry = feature.geometry()
-                ogr_geometry = ogr.CreateGeometryFromWkt(geometry.asWkt())
-                new_feature = ogr.Feature(self.isochrone_layer.GetLayerDefn())
-                new_feature.SetGeometry(ogr_geometry)
-                new_feature.SetField("value", value)
-                self.isochrone_layer.CreateFeature(new_feature)
-                new_feature = None
-                log_message(
-                    f"Added feature with value **{value}** to the GeoPackage.\n\n"
-                )
-                # show how many features in the isochrone layer
-                # This might be slow!
-                log_message(
-                    f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
-                )
 
-            del hull_result_layer
+                    # Show how many features in the isochrone layer
+                    log_message(
+                        f"ℹ️ Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
+                    )
 
-        del clipped_layer
-        # del point_layer
-        self.feedback.setProgress(100)
-        self.isochrone_ds = None
-        self.isochrone_layer = None
-        log_message(f"Service areas calculated for feature {self.feature.id()}.")
-        return
+                    with Timer("🗑️ cleanup_temp_layer"):
+                        del hull_result_layer
+
+                except Exception as e:
+                    log_message(f"❌ Fallback concave hull processing failed: {e}")
+
+    @timed
+    def _cleanup_resources(self, clipped_layer):
+        """Clean up resources."""
+        with Timer("🧹 delete_clipped_layer"):
+            del clipped_layer
+            self.feedback.setProgress(100)
+
+        # Only close these resources if we're explicitly cleaning up
+        # The __del__ method will handle final cleanup
+        log_message(f"✅ Service areas calculated for feature {self.feature.id()}.")
