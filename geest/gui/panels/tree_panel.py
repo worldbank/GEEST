@@ -298,7 +298,7 @@ class TreePanel(QWidget):
             "study_area_report.pdf",
             "road_network.gpkg",
         ]
-        if filename is None or self.working_directory is None:
+        if self.working_directory is None:
             log_message(
                 "No working directory set, cannot clear workflows.",
                 tag="Geest",

@@ -243,7 +243,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                     "DEFAULT_DIRECTION": 2,
                     "SPEED_FIELD": "",
                     "DEFAULT_SPEED": 50,
-                    "TOLERANCE": 50,
+                    "TOLERANCE": 0,
                     "START_POINT": f"{center_point.x()},{center_point.y()} [{self.crs.authid()}]",
                     "TRAVEL_COST2": value,
                     "POINT_TOLERANCE": 50,

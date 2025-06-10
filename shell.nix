@@ -47,6 +47,7 @@ in pkgs.mkShell rec {
     pythonPackages.pip
     pythonPackages.toml
     pythonPackages.typer
+    pythonPackages.snakeviz
     pythonPackages.pyqtwebengine
     pinnedPkgs.vim
     pinnedPkgs.pre-commit
