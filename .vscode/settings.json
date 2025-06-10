@@ -1,14 +1,21 @@
 {
-  "python.testing.pytestArgs": [
-    "test"
-  ],
-  "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true,
-  "python.envFile": "${workspaceFolder}/.env",
-  "python.analysis.extraPaths": [
-    "/nix/store/1lzzg2pl8h9ji0ks8nd2viyxgif9can7-qgis-3.38.3/share/qgis/python",
-  ],
-  "terminal.integrated.env.linux": {
-    "PYTHONPATH": "/nix/store/1lzzg2pl8h9ji0ks8nd2viyxgif9can7-qgis-3.38.3/share/qgis/python"
-  }
+  "git.enableCommitSigning": true,
+  "[markdown]": {
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+  },
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format",
+    "editor.formatOnSave": true
+  },
+  "shellcheck.enable": true,
+  "shellformat.flag": "-i 4 -bn -ci",
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.pytestArgs": "test"
+  },
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.editor.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

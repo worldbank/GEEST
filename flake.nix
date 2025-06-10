@@ -20,6 +20,21 @@
           ];
         };
       in qgisWithExtras;
+    packages.x86_64-linux.qgis-ltr =
+      let
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+        };
+        qgisWithExtras = geospatial.packages.x86_64-linux.qgis-ltr.override {
+          extraPythonPackages = ps: [
+            ps.pyqtwebengine
+            ps.jsonschema
+            ps.debugpy
+            ps.future
+            ps.psutil
+          ];
+        };
+      in qgisWithExtras;
   };
 }
 

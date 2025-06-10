@@ -22,7 +22,10 @@ import os
 import datetime
 import unittest
 from typing import Optional
-
+import cProfile
+import pstats
+import io
+from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QIcon
@@ -35,6 +38,7 @@ from qgis.PyQt.QtWidgets import (
     QComboBox,
     QVBoxLayout,
     QDialog,
+    QFileDialog,
 )
 from qgis.core import Qgis, QgsProject
 
@@ -90,6 +94,11 @@ class GeestPlugin:
         self.debug_action: Optional[QAction] = None
         self.options_factory = None
         self.dock_widget = None
+        # Initialize profiler attributes
+        self.profiler = None
+        self.profiler_action = None
+        self.save_profile_action = None
+        self.is_profiling = False
 
     def initGui(self):  # pylint: disable=missing-function-docstring
         """
@@ -173,6 +182,9 @@ class GeestPlugin:
             )
             self.single_test_action.triggered.connect(self.run_single_test)
             self.iface.addToolBarIcon(self.single_test_action)
+
+            # Add profiler actions for developer mode
+            self.setup_profiler_actions()
         else:
             self.tests_action = None
             self.single_test_action = None
@@ -355,11 +367,121 @@ for module_name in list(sys.modules.keys()):
             if dock_area is not None:
                 self.iface.addDockWidget(dock_area, self.dock_widget)
 
+    def setup_profiler_actions(self):
+        """Set up cProfiler actions for developer mode."""
+        # Create profiler start/stop action
+        profile_icon = QIcon(
+            resources_path("resources", "geest-debug.svg")
+        )  # Reuse icon or create new
+        self.profiler_action = QAction(
+            profile_icon, "Start Profiling", self.iface.mainWindow()
+        )
+        self.profiler_action.triggered.connect(self.toggle_profiler)
+        self.iface.addToolBarIcon(self.profiler_action)
+
+        # Create save profile results action (initially disabled)
+        save_icon = QIcon(
+            resources_path("resources", "geest-main.svg")
+        )  # Reuse icon or create new
+        self.save_profile_action = QAction(
+            save_icon, "Save Profile Results", self.iface.mainWindow()
+        )
+        self.save_profile_action.triggered.connect(self.save_profile_results)
+        self.save_profile_action.setEnabled(False)
+        self.iface.addToolBarIcon(self.save_profile_action)
+
+        log_message("Profiler actions set up in developer mode")
+
+    def toggle_profiler(self):
+        """Toggle the cProfiler on/off."""
+        if not self.is_profiling:
+            # Start profiling
+            self.profiler = cProfile.Profile()
+            self.profiler.enable()
+            self.is_profiling = True
+            self.profiler_action.setText("Stop Profiling")
+            self.save_profile_action.setEnabled(False)
+            log_message("🔍 cProfiler started", level=Qgis.Info)
+            self.display_information_message_bar(
+                "Profiler",
+                "cProfiler is now running. Click 'Stop Profiling' when finished.",
+            )
+        else:
+            # Stop profiling
+            self.profiler.disable()
+            self.is_profiling = False
+            self.profiler_action.setText("Start Profiling")
+            self.save_profile_action.setEnabled(True)
+            log_message("⏹️ cProfiler stopped", level=Qgis.Info)
+            self.display_information_message_bar(
+                "Profiler",
+                "Profiling stopped. Click 'Save Profile Results' to save the data.",
+                duration=15,
+            )
+
+            # Show a quick summary in the log
+            s = io.StringIO()
+            stats = pstats.Stats(self.profiler, stream=s).sort_stats("cumulative")
+            stats.print_stats(20)  # Print top 20 time-consuming functions
+            log_message("===== Profile Summary =====")
+            log_message(s.getvalue())
+            log_message("==========================")
+
+    def save_profile_results(self):
+        """Save the cProfiler results to a file."""
+        if not self.profiler:
+            self.display_information_message_bar("Error", "No profile data available.")
+            return
+
+        # Ask user for file location
+        file_dialog = QFileDialog()
+        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        file_dialog.setDefaultSuffix("prof")
+        file_dialog.setNameFilter(
+            "Profile Data (*.prof);;Stats Text (*.txt);;All Files (*.*)"
+        )
+
+        if file_dialog.exec_():
+            selected_file = file_dialog.selectedFiles()[0]
+            file_format = file_dialog.selectedNameFilter()
+
+            try:
+                if "prof" in file_format:
+                    # Binary format for later analysis
+                    self.profiler.dump_stats(selected_file)
+                    message = f"Profile data saved to {selected_file}\n\nUse Python's pstats module or tools like SnakeViz to analyze."
+                else:
+                    # Text format
+                    with open(selected_file, "w") as f:
+                        stats = pstats.Stats(self.profiler, stream=f)
+                        stats.sort_stats("cumulative")
+                        stats.print_stats()
+                    message = f"Profile stats saved to {selected_file}"
+
+                self.display_information_message_box(
+                    title="Profile Saved", message=message
+                )
+                log_message(
+                    f"💾 Profile data saved to {selected_file}", level=Qgis.Info
+                )
+            except Exception as e:
+                self.display_information_message_box(
+                    title="Error Saving Profile",
+                    message=f"Failed to save profile data: {str(e)}",
+                )
+                log_message(f"Error saving profile: {e}", level=Qgis.Critical)
+
     def unload(self):  # pylint: disable=missing-function-docstring
         """
         Unload the plugin from QGIS.
         Removes all added actions, widgets, and options to ensure a clean unload.
         """
+        # Stop profiling if active
+        if self.is_profiling and self.profiler:
+            self.profiler.disable()
+            self.is_profiling = False
+            log_message("Profiler stopped during plugin unload")
+
         self.remove_map_canvas_items()
         self.kill_debug()
         # Save geometry before unloading
@@ -394,6 +516,17 @@ for module_name in list(sys.modules.keys()):
             self.iface.removeToolBarIcon(self.tests_action)
             self.tests_action.deleteLater()
             self.tests_action = None
+
+        # Clean up profiler actions
+        if self.profiler_action:
+            self.iface.removeToolBarIcon(self.profiler_action)
+            self.profiler_action.deleteLater()
+            self.profiler_action = None
+
+        if self.save_profile_action:
+            self.iface.removeToolBarIcon(self.save_profile_action)
+            self.save_profile_action.deleteLater()
+            self.save_profile_action = None
 
         # Unregister options widget factory
         if self.options_factory:

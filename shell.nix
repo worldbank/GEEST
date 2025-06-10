@@ -47,6 +47,7 @@ in pkgs.mkShell rec {
     pythonPackages.pip
     pythonPackages.toml
     pythonPackages.typer
+    pythonPackages.snakeviz # For visualising cprofiler outputs
     pythonPackages.pyqtwebengine
     pinnedPkgs.vim
     pinnedPkgs.pre-commit
@@ -68,6 +69,7 @@ in pkgs.mkShell rec {
     pinnedPkgs.skate # Distributed key/value store
     pinnedPkgs.glow # terminal markdown viewer
     pinnedPkgs.gdb
+    pinnedPkgs.jq
     gource # Software version control visualization
     ffmpeg
   ];
