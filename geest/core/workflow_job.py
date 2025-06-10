@@ -151,7 +151,7 @@ class WorkflowJob(QgsTask):
     @classmethod
     def save_profiling_stats(cls, output_file=None):
         """
-        Save the accumulated profiling stats to a file.
+        Save the accumulated profiling stats to a file in a format compatible with profiling tools.
 
         Args:
             output_file: Path to save stats. If None, will save to a default location.
@@ -172,14 +172,12 @@ class WorkflowJob(QgsTask):
             )
             profile_dir.mkdir(parents=True, exist_ok=True)
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = str(profile_dir / f"workflow_profile_{timestamp}.txt")
+            output_file = str(
+                profile_dir / f"workflow_profile_{timestamp}.prof"
+            )  # Use .prof extension
 
-        # Save the stats
-        with open(output_file, "w") as f:
-            stats = cls._combined_profiler
-            stats.sort_stats("cumulative")
-            stats.print_stats()
-            f.write(f"\nTotal workflow jobs profiled: {cls._jobs_profiled}\n")
+        # Save the stats in binary format
+        cls._combined_profiler.dump_stats(output_file)
 
         log_message(
             f"📊 WorkflowJob profiling stats saved to {output_file}", level=Qgis.Info
@@ -384,11 +382,18 @@ class WorkflowJob(QgsTask):
                 log_message(
                     f"Total jobs profiled so far: {self.__class__._jobs_profiled}"
                 )
-                log_message(self.print_profiling_summary())
                 # Only log detailed stats in verbose mode
                 verbose_mode = int(setting(key="verbose_mode", default=0))
                 if verbose_mode:
                     log_message(s.getvalue())
+
+                # Save profiling stats to a file
+                output_file = self.__class__.save_profiling_stats()
+                if output_file:
+                    log_message(
+                        f"Profiling stats saved to {output_file}",
+                        level=Qgis.Info,
+                    )
 
     @lru_cache(maxsize=8)
     def feedback(self) -> QgsFeedback:
