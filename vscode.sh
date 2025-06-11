@@ -16,7 +16,7 @@ REQUIRED_EXTENSIONS=(
     KevinRose.vsc-python-indent@1.21.0
     lextudio.restructuredtext@190.4.10
     ms-python.python@2025.6.1
-    GitHub.vscode-pull-request-github@0.110.0
+    GitHub.vscode-pull-request-github@0.108.0
     lextudio.restructuredtext-pack@1.0.3
     tht13.rst-vscode@3.0.1
     shd101wyy.markdown-preview-enhanced@0.8.18
@@ -39,7 +39,6 @@ REQUIRED_EXTENSIONS=(
     useblocks.sphinx-needs-vscode@0.3.2
     searKing.preview-vscode@2.3.12
     njpwerner.autodocstring@0.6.1
-    GitHub.vscode-pull-request-github@0.106.0
     ms-vscode.test-adapter-converter@0.2.1
     DavidAnson.vscode-markdownlint@0.60.0
     waderyan.gitblame@11.1.3
