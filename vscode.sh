@@ -300,7 +300,7 @@ else
 fi
 echo "🗨️ Ensuring Python Env File is set..."
 if ! jq -e '."[python]".envFile' "$SETTINGS_FILE" >/dev/null; then
-    jq '."[python]" += {"envFile": "\$\{workspaceFolder\}/.env"}' "$SETTINGS_FILE" >"$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+    jq '."[python]" += {"envFile": "${workspaceFolder}/.env"}' "$SETTINGS_FILE" >"$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
     echo "  🔧 Python Env file set up"
 else
     echo "  ✅ Python Env File already configured"

@@ -25,6 +25,7 @@ from typing import Optional
 import cProfile
 import pstats
 import io
+from shutil import which
 from functools import partial
 
 from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal
@@ -370,9 +371,7 @@ for module_name in list(sys.modules.keys()):
     def setup_profiler_actions(self):
         """Set up cProfiler actions for developer mode."""
         # Create profiler start/stop action
-        profile_icon = QIcon(
-            resources_path("resources", "geest-debug.svg")
-        )  # Reuse icon or create new
+        profile_icon = QIcon(resources_path("resources", "geest-start-profile.svg"))
         self.profiler_action = QAction(
             profile_icon, "Start Profiling", self.iface.mainWindow()
         )
@@ -380,9 +379,7 @@ for module_name in list(sys.modules.keys()):
         self.iface.addToolBarIcon(self.profiler_action)
 
         # Create save profile results action (initially disabled)
-        save_icon = QIcon(
-            resources_path("resources", "geest-main.svg")
-        )  # Reuse icon or create new
+        save_icon = QIcon(resources_path("resources", "geest-save-profile.svg"))
         self.save_profile_action = QAction(
             save_icon, "Save Profile Results", self.iface.mainWindow()
         )
@@ -400,6 +397,8 @@ for module_name in list(sys.modules.keys()):
             self.profiler.enable()
             self.is_profiling = True
             self.profiler_action.setText("Stop Profiling")
+            stop_icon = QIcon(resources_path("resources", "geest-stop-profile.svg"))
+            self.profiler_action.setIcon(stop_icon)
             self.save_profile_action.setEnabled(False)
             log_message("🔍 cProfiler started", level=Qgis.Info)
             self.display_information_message_bar(
@@ -470,6 +469,52 @@ for module_name in list(sys.modules.keys()):
                     message=f"Failed to save profile data: {str(e)}",
                 )
                 log_message(f"Error saving profile: {e}", level=Qgis.Critical)
+            # Check if pyprof2calltree is available in the path
+
+            if which("pyprof2calltree"):
+                try:
+                    # Convert the profile data to a call tree format
+                    kcachegrind_file = selected_file + ".calltree"
+                    with open(kcachegrind_file, "w") as f:
+                        stats = pstats.Stats(self.profiler)
+                        stats.stream = f
+                        stats.strip_dirs()
+                        stats.sort_stats("cumulative")
+                        stats.print_callers()
+                        stats.print_stats()
+                    os.system(
+                        f"pyprof2calltree -i {selected_file} -o {kcachegrind_file}"
+                    )
+                    log_message(
+                        f"Call tree data saved to {kcachegrind_file}", level=Qgis.Info
+                    )
+                except Exception as e:
+                    log_message(
+                        f"Error converting profile to call tree: {e}",
+                        level=Qgis.Critical,
+                    )
+            else:
+                log_message(
+                    "pyprof2calltree is not available in the system path",
+                    level=Qgis.Warning,
+                )
+            # Check if kcachegrind is available in the system path
+            if which("kcachegrind"):
+                try:
+                    os.system(f"kcachegrind {selected_file}.calltree &")
+                    log_message(
+                        "Opening call tree data in kcachegrind", level=Qgis.Info
+                    )
+                except Exception as e:
+                    log_message(f"Error opening kcachegrind: {e}", level=Qgis.Critical)
+            else:
+                self.display_information_message_box(
+                    title="KCacheGrind Not Found",
+                    message=(
+                        "KCacheGrind is not installed or not available in the system path. "
+                        "Please install it to view the call tree data."
+                    ),
+                )
 
     def unload(self):  # pylint: disable=missing-function-docstring
         """

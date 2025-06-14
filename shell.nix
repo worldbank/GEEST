@@ -70,6 +70,8 @@ in pkgs.mkShell rec {
     pinnedPkgs.glow # terminal markdown viewer
     pinnedPkgs.gdb
     pinnedPkgs.jq
+    pinnedPkgs.kcachegrind
+    pinnedPkgs.pyprof2calltree # needed to covert cprofile call trees into a format kcachegrind can read
     gource # Software version control visualization
     ffmpeg
   ];

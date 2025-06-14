@@ -12,7 +12,8 @@
   "editor.formatOnSave": true,
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.pytestArgs": "test"
+    "editor.pytestArgs": "test",
+    "envFile": "${workspaceFolder}/.env"
   },
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,
