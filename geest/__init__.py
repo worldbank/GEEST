@@ -454,6 +454,7 @@ for module_name in list(sys.modules.keys()):
                     with open(selected_file, "w") as f:
                         stats = pstats.Stats(self.profiler, stream=f)
                         stats.sort_stats("cumulative")
+                        stats.print_callers(lambda func: "geest" in func[0])
                         stats.print_stats()
                     message = f"Profile stats saved to {selected_file}"
 

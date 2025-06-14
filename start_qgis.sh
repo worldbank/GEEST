@@ -28,4 +28,4 @@ GEEST_LOG=${GEEST_LOG} \
 	GEEST_DEBUG=${DEBUG_MODE} \
 	GEEST_EXPERIMENTAL=${GEEST_EXPERIMENTAL} \
 	RUNNING_ON_LOCAL=1 \
-    nix run .#default -- qgis --profile GEEST2
+    nix run .#default -- --profile GEEST2
