@@ -52,7 +52,7 @@ def cacheable(maxsize=128, typed=False):
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Check if debug mode and caching are enabled
-            debug_mode = int(setting(key="debug_mode", default=0))
+            developer_mode = int(setting(key="developer_mode", default=0))
             cache_enabled = int(setting(key="enable_caching", default=1))
 
             if not cache_enabled:
@@ -73,7 +73,7 @@ def cacheable(maxsize=128, typed=False):
 
                 # Check if result is in cache
                 if cache_key in wrapper.cache:
-                    if debug_mode:
+                    if developer_mode:
                         log_message(
                             f"🔄 Cache hit for {func.__name__}", level=Qgis.Info
                         )
@@ -93,7 +93,7 @@ def cacheable(maxsize=128, typed=False):
                 return result
             except (TypeError, ValueError):
                 # If hashing fails, just call the function directly
-                if debug_mode:
+                if developer_mode:
                     log_message(
                         f"⚠️ Cannot cache call to {func.__name__} - unhashable arguments",
                         level=Qgis.Warning,
@@ -135,8 +135,8 @@ class WorkflowJob(QgsTask):
     def initialize_profiling(cls):
         """Initialize profiling if debug mode is enabled and not already initialized."""
         if not cls._profiling_initialized:
-            debug_mode = int(setting(key="debug_mode", default=0))
-            cls._profiling_enabled = debug_mode > 0
+            developer_mode = int(setting(key="developer_mode", default=0))
+            cls._profiling_enabled = developer_mode > 0
             if cls._profiling_enabled:
                 cls._combined_profiler = pstats.Stats()
                 log_message("🔍 WorkflowJob profiling enabled", level=Qgis.Info)

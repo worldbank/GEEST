@@ -161,8 +161,8 @@ class GeestPlugin:
         self.dock_widget.raise_()
 
         # Handle debug mode and additional settings
-        debug_mode = int(setting(key="debug_mode", default=0))
-        if debug_mode:
+        developer_mode = int(setting(key="developer_mode", default=0))
+        if developer_mode:
             debug_icon = QIcon(resources_path("resources", "geest-debug.svg"))
             self.debug_action = QAction(
                 debug_icon, "GEEST Debug Mode", self.iface.mainWindow()

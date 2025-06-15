@@ -626,7 +626,7 @@ class WorkflowBase(QObject):
             rasters, self.target_crs, vrt_filepath, source_qml
         )
         # if debug mode is off, remove all files except the VRT and the rasters it refers to
-        if not int(setting(key="debug_mode", default=0)):
+        if not int(setting(key="developer_mode", default=0)):
             log_message(
                 f"Debug mode is off. Removing all files except the VRT and the rasters it refers to."
             )
@@ -641,6 +641,7 @@ class WorkflowBase(QObject):
                     not file.endswith(".vrt")
                     and not file.endswith(".qml")
                     and not file.endswith(".tif")
+                    and not file.endswith("error.txt")
                 ):
                     log_message(f"Removing {file_path}")
                     try:

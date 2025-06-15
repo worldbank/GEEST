@@ -39,16 +39,13 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             int(setting(key="concurrent_tasks", default=1))
         )
 
-        # This is intended for developers to attach to the plugin using a
-        # remote debugger so that they can step through the code. Do not
-        # enable it if you do not have a remote debugger set up as it will
-        # block QGIS startup until a debugger is attached to the process.
-        # Requires restart after changing.
-        debug_mode = int(setting(key="debug_mode", default=0))
-        if debug_mode:
-            self.debug_mode_checkbox.setChecked(True)
+        # This provides more verbose logging output
+        # and keeps intermediate working files around
+        developer_mode = int(setting(key="developer_mode", default=0))
+        if developer_mode:
+            self.developer_mode_checkbox.setChecked(True)
         else:
-            self.debug_mode_checkbox.setChecked(False)
+            self.developer_mode_checkbox.setChecked(False)
         # Adds verbose log message, useful for diagnostics
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:
@@ -92,10 +89,10 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             value=self.spin_thread_pool_size.value(),
         )
 
-        if self.debug_mode_checkbox.isChecked():
-            set_setting(key="debug_mode", value=1)
+        if self.developer_mode_checkbox.isChecked():
+            set_setting(key="developer_mode", value=1)
         else:
-            set_setting(key="debug_mode", value=0)
+            set_setting(key="developer_mode", value=0)
 
         if self.verbose_mode_checkbox.isChecked():
             set_setting(key="verbose_mode", value=1)
