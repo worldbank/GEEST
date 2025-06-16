@@ -13,6 +13,7 @@ from geest.core.algorithms.features_per_cell_processor import (
     assign_values_to_grid,
 )
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class PolylinePerCellWorkflow(WorkflowBase):
@@ -40,7 +41,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_polyline_per_cell"
 
-        layer_path = self.attributes.get("polyline_per_cell_shapefile", None)
+        layer_path = unquote(self.attributes.get("polyline_per_cell_shapefile", None))
 
         if not layer_path:
             log_message(

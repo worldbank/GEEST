@@ -13,6 +13,7 @@ from geest.core.algorithms.features_per_cell_processor import (
     assign_values_to_grid,
 )
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class PointPerCellWorkflow(WorkflowBase):
@@ -39,7 +40,7 @@ class PointPerCellWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_point_per_cell"
-        layer_path = self.attributes.get("point_per_cell_shapefile", None)
+        layer_path = unquote(self.attributes.get("point_per_cell_shapefile", None))
 
         if not layer_path:
             layer_path = self.attributes.get("point_per_cell_layer_source", None)

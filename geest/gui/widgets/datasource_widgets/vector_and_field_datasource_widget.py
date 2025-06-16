@@ -1,4 +1,6 @@
 import os
+from urllib.parse import unquote
+
 from qgis.PyQt.QtWidgets import (
     QLineEdit,
     QToolButton,
@@ -97,7 +99,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.shapefile_button.clicked.connect(self.select_shapefile)
             if self.attributes.get(f"{self.widget_key}_shapefile", False):
                 self.shapefile_line_edit.setText(
-                    self.attributes[f"{self.widget_key}_shapefile"]
+                    unquote(self.attributes[f"{self.widget_key}_shapefile"])
                 )
                 self.shapefile_line_edit.setVisible(True)
                 self.layer_combo.setVisible(False)

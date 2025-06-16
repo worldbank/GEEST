@@ -22,6 +22,7 @@ from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem, setting
 from geest.utilities import log_message
 from geest.core.algorithms import NativeNetworkAnalysisProcessor
+from urllib.parse import unquote
 
 
 class MultiBufferDistancesNativeWorkflow(WorkflowBase):
@@ -86,7 +87,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             )
             raise Exception("Invalid travel distances provided.")
 
-        layer_path = self.attributes.get("multi_buffer_point_shapefile", None)
+        layer_path = unquote(self.attributes.get("multi_buffer_point_shapefile", None))
         if not layer_path:
             log_message(
                 "Invalid points layer found in multi_buffer_point_shapefile, trying Multi Buffer Point_layer_name.",

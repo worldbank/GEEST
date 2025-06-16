@@ -15,6 +15,7 @@ from geest.core.algorithms.features_per_cell_processor import (
     select_grid_cells,
 )
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class StreetLightsBufferWorkflow(WorkflowBase):
@@ -42,7 +43,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_street_lights"
 
-        layer_path = self.attributes.get("street_lights_shapefile", None)
+        layer_path = unquote(self.attributes.get("street_lights_shapefile", None))
 
         if not layer_path:
             log_message(

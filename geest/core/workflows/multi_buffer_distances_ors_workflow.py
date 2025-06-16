@@ -21,6 +21,7 @@ from geest.core.ors_client import ORSClient
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem, setting
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class MultiBufferDistancesORSWorkflow(WorkflowBase):
@@ -85,7 +86,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
             )
             raise Exception("Invalid travel distances provided.")
 
-        layer_path = self.attributes.get("multi_buffer_shapefile", None)
+        layer_path = unquote(self.attributes.get("multi_buffer_shapefile", None))
         if not layer_path:
             log_message(
                 "Invalid points layer found in multi_buffer_shapefile, trying Multi Buffer Point_layer_name.",

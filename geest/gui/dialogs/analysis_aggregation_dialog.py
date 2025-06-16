@@ -33,6 +33,7 @@ from qgis.gui import QgsMapLayerComboBox
 from geest.gui.widgets import CustomBannerLabel
 from geest.core import setting
 from .custom_base_dialog import CustomBaseDialog
+from urllib.parse import unquote
 
 FORM_CLASS = get_ui_class("analysis_dialog_base.ui")
 
@@ -663,7 +664,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             if layer:
                 combo.setLayer(layer)
         if item.attribute(f"{prefix}_shapefile", False):
-            lineedit.setText(item.attribute(f"{prefix}_shapefile"))
+            lineedit.setText(unquote(item.attribute(f"{prefix}_shapefile")))
             lineedit.setVisible(True)
         if item.attribute(f"{prefix}_raster", False):
             lineedit.setText(item.attribute(f"{prefix}_raster"))

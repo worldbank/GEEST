@@ -24,6 +24,7 @@ from .utilities import (
     combine_rasters_to_vrt,
 )
 from .area_iterator import AreaIterator
+from urllib.parse import unquote
 
 
 class OpportunitiesMaskProcessor(QgsTask):
@@ -116,7 +117,9 @@ class OpportunitiesMaskProcessor(QgsTask):
             # There are two ways a user can specify the polygon mask layer
             # either as a shapefile path added in a line edit or as a layer source
             # using a QgsMapLayerComboBox. We prioritize the shapefile path, so check that first.
-            layer_source = self.item.attribute(f"{self.mask_mode}_mask_shapefile", None)
+            layer_source = unquote(
+                self.item.attribute(f"{self.mask_mode}_mask_shapefile", None)
+            )
             provider_type = "ogr"
             if not layer_source:
                 # Fall back to the QgsMapLayerComboBox source
