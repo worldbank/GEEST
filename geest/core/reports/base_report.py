@@ -25,6 +25,7 @@ from qgis.core import (
     QgsFeatureRequest,
     QgsCoordinateTransform,
     QgsReadWriteContext,
+    QgsMapLayer,
 )
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt.QtGui import QFont, QColor
@@ -236,14 +237,14 @@ class BaseReport:
 
     def make_map(
         self,
-        vector_layers: list[QgsVectorLayer],
+        layers: list[QgsMapLayer],
         crs,
         current_page: int,
     ):
 
         # Get the current extent of all the layers
         layers_extent = QgsRectangle()
-        for layer in vector_layers:
+        for layer in layers:
             layers_extent.combineExtentWith(layer.extent())
 
         map_item = QgsLayoutItemMap(self.layout)
@@ -282,8 +283,12 @@ class BaseReport:
         log_message(
             f"Map extent in CRS: {new_extent.xMinimum()}, {new_extent.yMinimum()}, {new_extent.xMaximum()}, {new_extent.yMaximum()}"
         )
+        #
+        # Adding these layers to the map item
+        log_message(f"Adding {len(layers)} layers to the map item")
 
-        map_item.setLayers(vector_layers)
+        map_item.setLayers(layers)
+
         map_item.attemptMove(
             QgsLayoutPoint(20, 110, QgsUnitTypes.LayoutMillimeters),
             page=current_page,
