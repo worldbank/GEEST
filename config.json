@@ -18,8 +18,8 @@
     "author": "Kartoza for and with The World Bank",
     "email": "info@kartoza.com, gost@worldbank.org",
     "description": "Gender Enabling Environments Spatial Tool",
-    "version": "1.0.0",
-    "changelog": "",
+    "version": "1.1.0",
+    "changelog": "* Fixes for better handling of spaces and unicode in paths of files selected using the file dialog.\\n* Fix to ensure version displays nicely in dock title.\\n* Added profiling support so we can understand performance issues better.\\n* Fixed tooltips so they show an error if there is one, otherwise the description.",
     "server": false
   }
 }
