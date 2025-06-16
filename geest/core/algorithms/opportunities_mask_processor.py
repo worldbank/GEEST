@@ -1,6 +1,8 @@
 import os
 import shutil
 import traceback
+from urllib.parse import unquote
+
 from typing import Optional
 from qgis.core import (
     QgsRasterLayer,
@@ -24,7 +26,6 @@ from .utilities import (
     combine_rasters_to_vrt,
 )
 from .area_iterator import AreaIterator
-from urllib.parse import unquote
 
 
 class OpportunitiesMaskProcessor(QgsTask):
@@ -158,7 +159,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             log_message("Loading source raster mask layer")
             # First try the one defined in the line edit
             self.raster_layer = QgsRasterLayer(
-                self.item.attribute("raster_mask_raster"), "Raster Mask", "ogr"
+                unquote(self.item.attribute("raster_mask_raster")), "Raster Mask", "ogr"
             )
             if not self.raster_layer.isValid():
                 # Then fall back to the QgsMapLayerComboBox source

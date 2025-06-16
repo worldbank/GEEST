@@ -667,5 +667,5 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             lineedit.setText(unquote(item.attribute(f"{prefix}_shapefile")))
             lineedit.setVisible(True)
         if item.attribute(f"{prefix}_raster", False):
-            lineedit.setText(item.attribute(f"{prefix}_raster"))
+            lineedit.setText(unquote(item.attribute(f"{prefix}_raster")))
             lineedit.setVisible(True)

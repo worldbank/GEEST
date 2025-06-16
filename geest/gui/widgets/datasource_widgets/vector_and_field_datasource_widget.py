@@ -1,5 +1,6 @@
 import os
 from urllib.parse import unquote
+from urllib.parse import quote
 
 from qgis.PyQt.QtWidgets import (
     QLineEdit,
@@ -332,7 +333,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.attributes[f"{self.widget_key}_layer_id"] = (
                 layer.id()
             )  # Unique ID of the layer
-        self.attributes[f"{self.widget_key}_shapefile"] = (
+        self.attributes[f"{self.widget_key}_shapefile"] = quote(
             self.shapefile_line_edit.text()
         )
         self.data_changed.emit(self.attributes)

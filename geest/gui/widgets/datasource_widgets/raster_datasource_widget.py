@@ -1,4 +1,6 @@
 import os
+from urllib.parse import quote, unquote
+
 from qgis.PyQt.QtWidgets import (
     QLineEdit,
     QToolButton,
@@ -112,7 +114,9 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         self.raster_button.clicked.connect(self.select_raster)
 
         if self.attributes.get(f"{self.widget_key}_raster", False):
-            self.raster_line_edit.setText(self.attributes[f"{self.widget_key}_raster"])
+            self.raster_line_edit.setText(
+                unquote(self.attributes[f"{self.widget_key}_raster"])
+            )
             self.raster_line_edit.setVisible(True)
             self.raster_layer_combo.setVisible(False)
         else:
@@ -211,4 +215,6 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
                 raster_layer.crs().authid()
             )
             self.attributes[f"{self.widget_key}_layer_id"] = raster_layer.id()
-        self.attributes[f"{self.widget_key}_raster"] = self.raster_line_edit.text()
+        self.attributes[f"{self.widget_key}_raster"] = quote(
+            self.raster_line_edit.text()
+        )
