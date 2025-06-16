@@ -18,6 +18,14 @@ from qgis.core import (
 )
 from qgis.PyQt.QtGui import QFont, QColor
 from geest.utilities import log_message, resources_path, setting
+from geest.core.utilities import (
+    create_layer,
+    find_existing_layer,
+    add_layer_to_group,
+    ensure_visibility,
+    traverse_and_create_subgroups,
+    get_or_create_group,
+)
 from .base_report import BaseReport
 
 
@@ -148,29 +156,34 @@ class AnalysisReport(BaseReport):
                         )
                     else:
                         duration = None
+                    layer_uri = indicator.get(f"result_file")
+                    log_message(f"Adding {layer_uri} to map")
+                    if not layer_uri:
+                        continue
 
+                    # check if the layer is already loaded in the project
+                    # and get its legend layer
+                    parent_group = get_or_create_group(group="accessibility")
+                    layer, tree_layer = find_existing_layer(parent_group, layer_uri)
+                    if not layer:
+                        continue
                     # Create a new page for the indicator
                     page = self.make_page(
                         title=f"Indicator: {indicator_name}",
                         description_key=factor_name,
                         current_page=current_page,
                     )
-                    layer_uri = indicator.get(f"result_file")
-                    log_message(f"Adding {layer_uri} to map")
-                    if layer_uri:
-                        layer = QgsRasterLayer(layer_uri, indicator_name)
-                        if not layer.isValid():
-                            log_message(
-                                f"Layer {layer_uri} is invalid and cannot be added.",
-                                tag="Geest",
-                            )
-                        layers = [layer]
-                        crs = layer.crs()
-                        self.make_map(
-                            layers=layers,
-                            current_page=current_page,
-                            crs=crs,
-                        )
+
+                    ensure_visibility(
+                        layer_tree_layer=tree_layer, parent_group=parent_group
+                    )
+                    layers = [layer]
+                    crs = layer.crs()
+                    self.make_map(
+                        layers=layers,
+                        current_page=current_page,
+                        crs=crs,
+                    )
                     # Add footer for the indicator page
                     self.add_header_and_footer(page_number=current_page)
 
