@@ -180,7 +180,7 @@ class BaseReport:
             page=current_page,
         )
         description_label.setFixedSize(
-            QgsLayoutSize(80, 40, QgsUnitTypes.LayoutMillimeters)
+            QgsLayoutSize(100, 40, QgsUnitTypes.LayoutMillimeters)
         )
         description_label.setHAlign(Qt.AlignJustify)
         self.layout.addLayoutItem(description_label)

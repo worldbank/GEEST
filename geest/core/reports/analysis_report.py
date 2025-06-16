@@ -46,7 +46,6 @@ class AnalysisReport(BaseReport):
 
         self.report_name = report_name
         self.model_path = model_path
-        self.page_descriptions = {}
         self.page_descriptions[
             "analysis_summary"
         ] = """
@@ -149,7 +148,7 @@ class AnalysisReport(BaseReport):
             r = int(fg[0] + (or_[0] - fg[0]) * rel)
             g = int(fg[1] + (or_[1] - fg[1]) * rel)
             b = int(fg[2] + (or_[2] - fg[2]) * rel)
-            return f"rgb({r}, {g}, {b})"
+            return f"#{r:02x}{g:02x}{b:02x}"
 
         with open(self.model_path, "r", encoding="utf-8") as f:
             model = json.load(f)
@@ -261,6 +260,7 @@ class AnalysisReport(BaseReport):
 
             # Add bar (shape item)
             bar = QgsLayoutItemShape(self.layout)
+            log_message(f"Processing entry: {entry}")
             if entry.get("color", None) is None:
                 bar_width = 10.0
                 color = "#ff0000"
@@ -281,9 +281,14 @@ class AnalysisReport(BaseReport):
             )
 
             color = QColor(color)
-            symbol = bar.symbol()
-            symbol.deleteSymbolLayer(0)
-            symbol.appendSymbolLayer(QgsSimpleFillSymbolLayer(color=color))
-            bar.setSymbol(symbol)
+            symbol = QgsSimpleFillSymbolLayer(color=color)
+            log_message(f"Bar color: {color.name()}")
+            log_message(f"Bar width: {bar_width} mm")
+            log_message(f"Bar height: {row_height} mm")
+            symbol.setStrokeColor(QColor(0, 0, 0, 0))  # Set border color to transparent
+            bar_symbol = bar.symbol()
+            bar_symbol.deleteSymbolLayer(0)
+            bar_symbol.appendSymbolLayer(symbol)
+            bar.setSymbol(bar_symbol)
 
             self.layout.addLayoutItem(bar)
