@@ -15,7 +15,16 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QModelIndex, QPoint, QSettings, Qt, pyqtSignal, pyqtSlot
+from qgis.PyQt.QtCore import (
+    QMutex,
+    QMutexLocker,
+    QModelIndex,
+    QPoint,
+    QSettings,
+    Qt,
+    pyqtSignal,
+    pyqtSlot,
+)
 from qgis.PyQt.QtGui import QMovie
 from qgis.PyQt.QtWidgets import (
     QAction,
@@ -76,6 +85,7 @@ class TreePanel(QWidget):
         # Initialize the QueueManager
         self.working_directory = None
         pool_size = int(setting(key="concurrent_tasks", default=1))
+        log_message(f"Initializing TreePanel with pool size: {pool_size}")
         self.queue_manager = WorkflowQueueManager(pool_size=pool_size)
         self.json_file = json_file
         self.tree_view_visible = True
@@ -216,6 +226,9 @@ class TreePanel(QWidget):
         self.workflow_queue = []
         self.queue_manager.processing_completed.connect(self.run_next_workflow_queue)
 
+        # Initialize the mutex
+        self.workflow_mutex = QMutex()
+
     def on_item_double_clicked(self, index):
         # Action to trigger on double-click
         item = index.internalPointer()
@@ -289,6 +302,7 @@ class TreePanel(QWidget):
 
         if reply == QMessageBox.No or reply == QMessageBox.Rejected:
             return
+
         self.run_only_incomplete = False
         # Remove every file in self.working_directory except
         # mode.json and the study_area folder
@@ -432,21 +446,22 @@ class TreePanel(QWidget):
     @pyqtSlot()
     def save_json_to_working_directory(self):
         """Automatically save the current JSON model to the working directory."""
-        if not self.working_directory:
-            log_message(
-                "No working directory set, cannot save JSON.",
-                tag="Geest",
-                level=Qgis.Warning,
-            )
-        try:
-            json_data = self.model.to_json()
-
-            save_path = os.path.join(self.working_directory, "model.json")
-            with open(save_path, "w") as f:
-                json.dump(json_data, f, indent=4)
-            log_message(f"Saved JSON model to {save_path}")
-        except Exception as e:
-            log_message(f"Error saving JSON: {str(e)}", level=Qgis.Critical)
+        with QMutexLocker(self.workflow_mutex):
+            if not self.working_directory:
+                log_message(
+                    "No working directory set, cannot save JSON.",
+                    tag="Geest",
+                    level=Qgis.Warning,
+                )
+                return
+            try:
+                json_data = self.model.to_json()
+                save_path = os.path.join(self.working_directory, "model.json")
+                with open(save_path, "w") as f:
+                    json.dump(json_data, f, indent=4)
+                log_message(f"Saved JSON model to {save_path}")
+            except Exception as e:
+                log_message(f"Error saving JSON: {str(e)}", level=Qgis.Critical)
 
     def load_json(self):
         """Load the JSON data from the file."""
@@ -1275,353 +1290,95 @@ class TreePanel(QWidget):
             shift_pressed (bool): Whether the shift key is pressed.
 
         """
-        self.items_to_run = 0
-        if shift_pressed:
-            self.run_only_incomplete = False
-        else:
-            self.run_only_incomplete = True
+        with QMutexLocker(self.workflow_mutex):
+            self.items_to_run = 0
+            self.run_only_incomplete = not shift_pressed
 
-        indicators = item.getDescendantIndicators(
-            include_completed=not self.run_only_incomplete, include_disabled=False
-        )
-        factors = item.getDescendantFactors(
-            include_completed=not self.run_only_incomplete, include_disabled=False
-        )
-        dimensions = item.getDescendantDimensions(
-            include_completed=not self.run_only_incomplete
-        )
-        # Fix for issue #50 - we need to run the analysis last
-        analyses = item.getDescendantAnalyses(
-            include_completed=not self.run_only_incomplete
-        )
-        self.overall_progress_bar.setVisible(True)
-        self.workflow_progress_bar.setVisible(True)
-        self.help_button.setVisible(False)
-        self.project_button.setVisible(False)
-        self.overall_progress_bar.setValue(0)
-        self.overall_progress_bar.setMaximum(self.items_to_run)
-        self.workflow_progress_bar.setValue(0)
-
-        for indicator in indicators:
-            self.queue_workflow_task(indicator, indicator.role)
-        for factor in factors:
-            self.queue_workflow_task(factor, factor.role)
-        for dimension in dimensions:
-            self.queue_workflow_task(dimension, dimension.role)
-        # Fix for issue #50 - we need to run the analysis last
-        for analysis in analyses:
-            self.queue_workflow_task(analysis, analysis.role)
-        # Commented out see issue #50 - causes double execution of indicator
-        # self.queue_workflow_task(item, item.role)
-        self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
-        log_message(f"Total workflows to run: {self.items_to_run}")
-        self.overall_progress_bar.setMaximum(self.items_to_run)
-
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        if debug_env:
-            self.queue_manager.start_processing_in_foreground()
-        else:
-            self.queue_manager.start_processing()
-
-    @pyqtSlot()
-    def on_workflow_created(self, item):
-        """
-        Slot for handling when a workflow is created.
-        Does nothing right now...
-        """
-        pass
-
-    @pyqtSlot()
-    def on_workflow_started(self, item):
-        """
-        Slot for handling when a workflow starts.
-        Update the tree item to indicate that the workflow is running.
-        """
-        # Get the node index for the item
-        node_index = self.model.itemIndex(item)
-        if not node_index.isValid():
-            log_message(
-                f"Failed to find index for item {item} - animation not started",
-                tag="Geest",
-                level=Qgis.Warning,
+            indicators = item.getDescendantIndicators(
+                include_completed=not self.run_only_incomplete, include_disabled=False
             )
-            return
-
-        # Ensure we work with QModelIndex instead of QPersistentModelIndex
-        child_index = QModelIndex(node_index)
-
-        # Get row height and prepare movies
-        row_height = self.treeView.rowHeight(child_index)
-        self.child_movie = QMovie(resources_path("resources", "throbber.gif"))
-        self.parent_movie = QMovie(resources_path("resources", "throbber.gif"))
-
-        # If this is an indicator, caclulate height for parent in case the indicator is hidden
-        if item.role == "indicator":
-            parent_item = item.parent()
-            parent_index = self.model.itemIndex(parent_item)
-            row_height = self.treeView.rowHeight(parent_index)
-
-        # Scale movies
-        self.child_movie.setScaledSize(
-            self.child_movie.currentPixmap()
-            .size()
-            .scaled(row_height, row_height, Qt.KeepAspectRatio)
-        )
-        self.parent_movie.setScaledSize(
-            self.parent_movie.currentPixmap()
-            .size()
-            .scaled(row_height, row_height, Qt.KeepAspectRatio)
-        )
-
-        # Set animated icon for the child
-        child_label = QLabel()
-        child_label.setMovie(self.child_movie)
-        self.child_movie.start()
-
-        # Place child animation
-        second_column_index = self.model.index(
-            child_index.row(), 1, child_index.parent()
-        )
-        self.treeView.setIndexWidget(second_column_index, child_label)
-
-        # Always show parent animation if this is an indicator
-        if item.role == "indicator":
-            parent_item = item.parent()
-            if parent_item:
-                parent_index = self.model.itemIndex(parent_item)
-                if parent_index.isValid():
-                    # Create parent animation
-                    parent_label = QLabel()
-                    parent_label.setMovie(self.parent_movie)
-                    self.parent_movie.start()
-
-                    # Get parent's second column index
-                    parent_second_column_index = self.model.index(
-                        parent_index.row(), 1, parent_index.parent()
-                    )
-
-                    # Set parent animation and ensure it's visible
-                    self.treeView.setIndexWidget(
-                        parent_second_column_index, parent_label
-                    )
-                    parent_label.show()
-
-                    # Force immediate update
-                    self.treeView.viewport().update()
-
-    def task_progress_updated(self, progress):
-        """Slot to be called when the task progress is updated."""
-        log_message(f"Task progress: {progress}")
-        self.workflow_progress_bar.setValue(int(progress))
-
-    @pyqtSlot(bool)
-    def on_workflow_completed(self, item, success):
-        """
-        Slot for handling when a workflow is completed.
-        Update the tree item to indicate success or failure.
-        """
-        queue_length = self.queue_manager.workflow_queue.active_queue_size()
-        log_message(f"Queued {queue_length} workflows for processing.")
-        self.overall_progress_bar.setValue(self.overall_progress_bar.value() + 1)
-        self.overall_progress_bar.setMaximum(self.items_to_run - 1)
-        self.workflow_progress_bar.setValue(0)
-        self.save_json_to_working_directory()
-        add_to_map(item)
-
-        # Now cancel the animated icon
-        node_index = self.model.itemIndex(item)
-
-        if not node_index.isValid():
-            log_message(
-                f"Failed to find index for item {item} - animation not started",
-                tag="Geest",
-                level=Qgis.Warning,
+            factors = item.getDescendantFactors(
+                include_completed=not self.run_only_incomplete, include_disabled=False
             )
-            return
-
-        parent_second_column_index = None
-        if item.role == "indicator":
-            # Stop the animation on its parent too
-            parent_index = node_index.parent()
-            parent_second_column_index = self.model.index(
-                parent_index.row(), 1, parent_index.parent()
+            dimensions = item.getDescendantDimensions(
+                include_completed=not self.run_only_incomplete
             )
-
-        self.child_movie.stop()
-        self.parent_movie.stop()
-
-        second_column_index = self.model.index(node_index.row(), 1, node_index.parent())
-        self.treeView.setIndexWidget(second_column_index, None)
-        if parent_second_column_index:
-            self.treeView.setIndexWidget(parent_second_column_index, None)
-
-        # Emit dataChanged to refresh the decoration
-        self.model.dataChanged.emit(second_column_index, second_column_index)
-
-        if item.role == "analysis":
-            # Run some post processing on the analysis results
-            self.calculate_analysis_insights(item)
-
-    def calculate_analysis_insights(self, item: JsonTreeItem):
-        """Caclulate insights for the analysis.
-
-        Post process the analysis aggregation and store the output in the item.
-
-        Here we compute various other insights from the aggregated data:
-
-        - WEE x Population Score
-        - Opportunities Mask
-        - Subnational Aggregation
-
-        """
-        log_message("############################################")
-        log_message("Calculating analysis insights")
-        log_message("############################################")
-        log_message(item.attributesAsMarkdown())
-        # Prepare the population data if provided
-        population_data = item.attribute("population_layer_source", None)
-        gpkg_path = os.path.join(
-            self.working_directory, "study_area", "study_area.gpkg"
-        )
-        feedback = QgsFeedback()
-        context = QgsProcessingContext()
-        population_processor = PopulationRasterProcessingTask(
-            population_raster_path=population_data,
-            working_directory=self.working_directory,
-            study_area_gpkg_path=gpkg_path,
-            cell_size_m=self.cell_size_m(),
-            feedback=feedback,
-        )
-        population_processor.run()
-        wee_processor = WEEByPopulationScoreProcessingTask(
-            study_area_gpkg_path=gpkg_path,
-            working_directory=self.working_directory,
-            force_clear=False,
-        )
-        wee_processor.run()
-        # Shamelessly hard coded for now, needs to move to the wee processor class
-        output = os.path.join(
-            self.working_directory,
-            "wee_by_population_score",
-            "wee_by_population_score.vrt",
-        )
-        item.setAttribute("wee_by_population", output)
-
-        # Prepare the polygon mask data if provided
-
-        opportunities_mask_workflow = OpportunitiesMaskProcessor(
-            item=item,
-            study_area_gpkg_path=gpkg_path,
-            cell_size_m=self.cell_size_m(),
-            feedback=feedback,
-            context=context,
-            working_directory=self.working_directory,
-        )
-        opportunities_mask_workflow.run()
-
-        # Now apply the opportunities mask to the WEE Score and WEE Score x Population
-        # leaving us with 4 potential products:
-        # WEE Score Unmasked (already created above)
-        # WEE Score x Population Unmasked (already created above)
-        # WEE Score Masked by Job Opportunities
-        # WEE Score x Population masked by Job Opportunities
-        mask_processor = OpportunitiesByWeeScoreProcessingTask(
-            item=item,
-            study_area_gpkg_path=gpkg_path,
-            working_directory=self.working_directory,
-            force_clear=False,
-        )
-        mask_processor.run()
-
-        mask_processor = OpportunitiesByWeeScorePopulationProcessingTask(
-            item=item,
-            study_area_gpkg_path=gpkg_path,
-            working_directory=self.working_directory,
-            force_clear=False,
-        )
-        mask_processor.run()
-        # Now prepare the aggregation layers if an aggregation polygon layer is provided
-        # leaving us with 2 potential products:
-        # Subnational Aggregation fpr WEE Score x Population Unmasked
-        # Subnational Aggregation for WEE Score x Population masked by Job Opportunities
-        try:
-            subnational_processor = SubnationalAggregationProcessingTask(
-                item,
-                study_area_gpkg_path=gpkg_path,
-                working_directory=self.working_directory,
-                force_clear=False,
+            analyses = item.getDescendantAnalyses(
+                include_completed=not self.run_only_incomplete
             )
-            subnational_processor.run()
-        except Exception as e:
-            log_message(f"Failed to run subnational aggregation: {e}")
-            log_message(traceback.format_exc())
-        self.save_json_to_working_directory()
-        log_message("############################################")
-        log_message("END")
-        log_message("############################################")
+            self.overall_progress_bar.setVisible(True)
+            self.workflow_progress_bar.setVisible(True)
+            self.help_button.setVisible(False)
+            self.project_button.setVisible(False)
+            self.overall_progress_bar.setValue(0)
+            self.overall_progress_bar.setMaximum(self.items_to_run)
+            self.workflow_progress_bar.setValue(0)
 
-    def update_tree_item_status(self, item, status):
-        """
-        Update the tree item to show the workflow status.
-        :param item: The tree item representing the workflow.
-        :param status: The status message or icon to display.
-        """
-        # Assuming column 1 is where status updates are shown
-        item.setData(1, status)
+            for indicator in indicators:
+                self.queue_workflow_task(indicator, indicator.role)
+            for factor in factors:
+                self.queue_workflow_task(factor, factor.role)
+            for dimension in dimensions:
+                self.queue_workflow_task(dimension, dimension.role)
+            for analysis in analyses:
+                self.queue_workflow_task(analysis, analysis.role)
+
+            self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
+            log_message(f"Total workflows to run: {self.items_to_run}")
+            self.overall_progress_bar.setMaximum(self.items_to_run)
+
+            debug_env = int(os.getenv("GEEST_DEBUG", 0))
+            if debug_env:
+                self.queue_manager.start_processing_in_foreground()
+            else:
+                self.queue_manager.start_processing()
 
     def run_all(self):
-        """Run all workflows in the tree, regardless of their status."""
-        self.run_only_incomplete = False
-        self.clear_workflows()
-        self._count_workflows_to_run()
-        log_message(f"Total items to process: {self.items_to_run}")
-        self._queue_workflows()
+        """Run all workflows in the tree."""
+        with QMutexLocker(self.workflow_mutex):
+            self.run_only_incomplete = False
+            self.clear_workflows()
+            self._count_workflows_to_run()
+            log_message(f"Total items to process: {self.items_to_run}")
+            self._queue_workflows()
 
     def run_incomplete(self):
-        """
-        This function processes all nodes in the QTreeView that have the 'indicator' role.
-        It iterates over the entire tree, collecting nodes with the 'indicator' role, and
-        processes each one whilst showing an animated icon.
-        """
-        self.run_only_incomplete = True
-        self._count_workflows_to_run()
-        self._queue_workflows()
+        """Run incomplete workflows."""
+        with QMutexLocker(self.workflow_mutex):
+            self.run_only_incomplete = True
+            self._count_workflows_to_run()
+            self._queue_workflows()
 
     def _queue_workflows(self):
-        """
-        This function processes all nodes in the QTreeView working through them in
-        logical order of indicators then factors then dimensions, then the whole analysis.
-        """
-        self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
-        self.overall_progress_bar.setVisible(True)
-        self.workflow_progress_bar.setVisible(True)
-        self.help_button.setVisible(False)
-        self.project_button.setVisible(False)
-        self.overall_progress_bar.setValue(0)
-        self.overall_progress_bar.setMaximum(self.items_to_run)
-        self.workflow_progress_bar.setValue(0)
-        self.run_next_workflow_queue()
+        """Queue workflows in logical order."""
+        with QMutexLocker(self.workflow_mutex):
+            self.workflow_queue = ["indicators", "factors", "dimensions", "analysis"]
+            self.overall_progress_bar.setVisible(True)
+            self.workflow_progress_bar.setVisible(True)
+            self.help_button.setVisible(False)
+            self.project_button.setVisible(False)
+            self.overall_progress_bar.setValue(0)
+            self.overall_progress_bar.setMaximum(self.items_to_run)
+            self.workflow_progress_bar.setValue(0)
+            self.run_next_workflow_queue()
 
     def run_next_workflow_queue(self):
-        """
-        Run the next group of workflows in the queue.
-        If self.workflow_queue is empty, the function will return.
-        """
-        if len(self.workflow_queue) == 0:
-            self.overall_progress_bar.setVisible(False)
-            self.workflow_progress_bar.setVisible(False)
-            self.help_button.setVisible(True)
-            self.project_button.setVisible(True)
-            return
-        # pop the first item from the queue
-        next_workflow = self.workflow_queue.pop(0)
-        self.start_workflows(workflow_type=next_workflow)
+        """Run the next group of workflows in the queue."""
+        with QMutexLocker(self.workflow_mutex):
+            if len(self.workflow_queue) == 0:
+                self.overall_progress_bar.setVisible(False)
+                self.workflow_progress_bar.setVisible(False)
+                self.help_button.setVisible(True)
+                self.project_button.setVisible(True)
+                return
+            next_workflow = self.workflow_queue.pop(0)
+            self.start_workflows(workflow_type=next_workflow)
 
-        debug_env = int(os.getenv("GEEST_DEBUG", 0))
-        if debug_env:
-            self.queue_manager.start_processing_in_foreground()
-        else:
-            self.queue_manager.start_processing()
+            debug_env = int(os.getenv("GEEST_DEBUG", 0))
+            if debug_env:
+                self.queue_manager.start_processing_in_foreground()
+            else:
+                self.queue_manager.start_processing()
 
     def expand_all_nodes(self, index=None):
         """
