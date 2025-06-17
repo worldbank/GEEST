@@ -40,7 +40,9 @@ class PointPerCellWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_point_per_cell"
-        layer_path = unquote(self.attributes.get("point_per_cell_shapefile", None))
+        layer_path = self.attributes.get("point_per_cell_shapefile", None)
+        if layer_path:
+            layer_path = unquote(layer_path)
 
         if not layer_path:
             layer_path = self.attributes.get("point_per_cell_layer_source", None)

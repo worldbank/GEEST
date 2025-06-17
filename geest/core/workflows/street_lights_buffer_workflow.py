@@ -43,7 +43,9 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_street_lights"
 
-        layer_path = unquote(self.attributes.get("street_lights_shapefile", None))
+        layer_path = self.attributes.get("street_lights_shapefile", None)
+        if layer_path:
+            layer_path = unquote(layer_path)
 
         if not layer_path:
             log_message(
