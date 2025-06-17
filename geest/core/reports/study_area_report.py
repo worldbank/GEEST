@@ -231,7 +231,7 @@ class StudyAreaReport(BaseReport):
                 layers = [layer]
                 crs = layer.crs()
                 self.make_map(
-                    vector_layers=layers,
+                    layers=layers,
                     current_page=current_page,
                     crs=crs,
                 )

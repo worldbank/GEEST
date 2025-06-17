@@ -12,6 +12,7 @@ from qgis.PyQt.QtCore import QVariant
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class SafetyPolygonWorkflow(WorkflowBase):
@@ -38,8 +39,8 @@ class SafetyPolygonWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_safety_polygon_into_classes"
-        layer_path = self.attributes.get(
-            "classify_safety_polygon_into_classes_shapefile", None
+        layer_path = unquote(
+            self.attributes.get("classify_safety_polygon_into_classes_shapefile", "")
         )
 
         if not layer_path:

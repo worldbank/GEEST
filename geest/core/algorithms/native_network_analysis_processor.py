@@ -11,6 +11,7 @@ from qgis.core import (
     QgsRectangle,
     QgsWkbTypes,
     QgsFeedback,
+    QgsGeometry,
 )
 from qgis.PyQt.QtCore import QVariant
 from qgis import processing
@@ -118,19 +119,30 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         log_message(
             f"Calculating Network for feature {self.feature.id()} using {self.mode} with these values: {self.values}..."
         )
-        output_path = os.path.join(
-            self.working_directory, f"network_{self.feature.id()}.gpkg"
-        )
-        self.feedback.setProgress(2)
-        # point_layer = QgsVectorLayer(
-        #     f"Point?crs=EPSG:{self.crs.authid()}&field=id:integer",
-        #     "start_point",
-        #     "memory",
-        # )
-        # provider = point_layer.dataProvider()
-        # provider.addFeature(self.feature)
-        # point_layer.updateExtents()
 
+        output_path = self._prepare_output_path()
+        self.feedback.setProgress(2)
+
+        rect = self._construct_rectangle()
+        self.feedback.setProgress(3)
+
+        clipped_layer = self._clip_network_layer(rect, output_path)
+        self.feedback.setProgress(4)
+
+        self._process_values(clipped_layer)
+
+        del clipped_layer
+        self.feedback.setProgress(100)
+        self.isochrone_ds = None
+        self.isochrone_layer = None
+        log_message(f"Service areas calculated for feature {self.feature.id()}.")
+
+    def _prepare_output_path(self) -> str:
+        """Prepare the output path for the clipped network layer."""
+        return os.path.join(self.working_directory, f"network_{self.feature.id()}.gpkg")
+
+    def _construct_rectangle(self) -> QgsRectangle:
+        """Construct a rectangle around the feature's geometry."""
         largest_value = max(self.values)
         geometry = self.feature.geometry()
         if not geometry.isEmpty():
@@ -145,7 +157,12 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             center_point.y() + largest_value,
         )
         log_message(f"Constructed rectangle: {rect.toString()}")
-        self.feedback.setProgress(3)
+        return rect
+
+    def _clip_network_layer(
+        self, rect: QgsRectangle, output_path: str
+    ) -> QgsVectorLayer:
+        """Clip the network layer to the specified rectangle."""
         clipped_layer = processing.run(
             "native:extractbyextent",
             {
@@ -155,124 +172,77 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 "OUTPUT": output_path,
             },
         )["OUTPUT"]
-        self.feedback.setProgress(4)
+        return clipped_layer
+
+    def _process_values(self, clipped_layer: QgsVectorLayer) -> None:
+        """Process each value to calculate service areas and concave hulls."""
         interval = 80.0 / len(self.values)
-        # hack for https://github.com/worldbank/GEEST/issues/54
-        # See below for logic
-        first_run = True
         for index, value in enumerate(self.values):
             self.feedback.setProgress(int((index + 1) * interval))
             log_message(f"Processing value: {value}")
-            # Hack end
-            service_area_vector_layer = processing.run(
-                "native:serviceareafrompoint",
-                {
-                    "INPUT": clipped_layer,
-                    "STRATEGY": 0,
-                    "DIRECTION_FIELD": "",
-                    "VALUE_FORWARD": "",
-                    "VALUE_BACKWARD": "",
-                    "VALUE_BOTH": "",
-                    "DEFAULT_DIRECTION": 2,
-                    "SPEED_FIELD": "",
-                    "DEFAULT_SPEED": 50,
-                    "TOLERANCE": 50,
-                    "START_POINT": f"{center_point.x()},{center_point.y()} [{self.crs.authid()}]",
-                    "TRAVEL_COST2": value,
-                    "POINT_TOLERANCE": 50,  # Maximum distance a point can be from the network
-                    "INCLUDE_BOUNDS": False,
-                    "OUTPUT": "TEMPORARY_OUTPUT",
-                },
-            )["OUTPUT"]
 
+            service_area_layer = self._calculate_service_area(clipped_layer, value)
             self.feedback.setProgress(int(((index + 1) * interval) + (interval / 2)))
-            log_message("Service area layer created successfully.")
-            # Try to compute the concave hull directly using the GEOS API
-            if not service_area_vector_layer.isValid():
-                log_message(
-                    f"Service area layer is invalid: {service_area_vector_layer.source()}"
-                )
-            else:
-                log_message(
-                    f"Service area feature count (1 is expected): f{service_area_vector_layer.featureCount()}"
-                )
-                service_area_features = list(service_area_vector_layer.getFeatures())
-                if service_area_features:
-                    service_area_feature = service_area_features[0]
-                    service_area_geometry = service_area_feature.geometry()
-                    # Get number of parts in the geometry
-                    parts_count = 1  # Default for single geometries
-                    if service_area_geometry.isMultipart():
-                        parts_count = service_area_geometry.constGet().numGeometries()
 
-                    log_message(
-                        f"Service area geometry type: {service_area_geometry.wkbType()}"
-                    )
-                    log_message(f"Service area geometry has {parts_count} parts")
+            self._process_service_area(service_area_layer, value)
 
-                    # Convert QGIS geometry to OGR geometry
-                    ogr_geometry = ogr.CreateGeometryFromWkt(
-                        service_area_geometry.asWkt()
-                    )
+    def _calculate_service_area(
+        self, clipped_layer: QgsVectorLayer, value: int
+    ) -> QgsVectorLayer:
+        """Calculate the service area for a given value."""
+        service_area_layer = processing.run(
+            "native:serviceareafrompoint",
+            {
+                "INPUT": clipped_layer,
+                "STRATEGY": 0,
+                "DIRECTION_FIELD": "",
+                "VALUE_FORWARD": "",
+                "VALUE_BACKWARD": "",
+                "VALUE_BOTH": "",
+                "DEFAULT_DIRECTION": 2,
+                "SPEED_FIELD": "",
+                "DEFAULT_SPEED": 50,
+                "TOLERANCE": 50,
+                "START_POINT": f"{self.feature.geometry().asPoint().x()},{self.feature.geometry().asPoint().y()} [{self.crs.authid()}]",
+                "TRAVEL_COST2": value,
+                "POINT_TOLERANCE": 50,
+                "INCLUDE_BOUNDS": False,
+                "OUTPUT": "TEMPORARY_OUTPUT",
+            },
+        )["OUTPUT"]
+        log_message("Service area layer created successfully.")
+        return service_area_layer
 
-                    try:
-                        # Calculate the concave hull with a ratio of 0.3 and no holes
-                        concave_hull_geometry = ogr_geometry.ConcaveHull(0.3, False)
+    def _process_service_area(
+        self, service_area_layer: QgsVectorLayer, value: int
+    ) -> None:
+        """Process the service area layer and add features to the isochrone layer."""
+        if not service_area_layer.isValid():
+            log_message(f"Service area layer is invalid: {service_area_layer.source()}")
+            return
 
-                        if concave_hull_geometry:
-                            log_message(
-                                "Concave hull computed successfully using GEOS API."
-                            )
+        service_area_features = list(service_area_layer.getFeatures())
+        if service_area_features:
+            service_area_feature = service_area_features[0]
+            service_area_geometry = service_area_feature.geometry()
 
-                            # Add the concave hull directly to the isochrone layer
-                            new_feature = ogr.Feature(
-                                self.isochrone_layer.GetLayerDefn()
-                            )
-                            new_feature.SetGeometry(concave_hull_geometry)
-                            new_feature.SetField("value", value)
-                            self.isochrone_layer.CreateFeature(new_feature)
-                            new_feature = None
+            try:
+                self._add_concave_hull(service_area_geometry, value)
+            except Exception as e:
+                log_message(f"Failed to compute concave hull: {e}")
+                log_message("Falling back to standard processing...")
 
-                            log_message(
-                                f"Added concave hull feature with value {value} to the GeoPackage."
-                            )
-                            log_message(
-                                f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
-                            )
-                            continue  # Skip the rest of the processing for this value
-                    except Exception as e:
-                        log_message(
-                            f"Failed to compute concave hull using GEOS API: {e}"
-                        )
-                        log_message("Falling back to standard processing...")
-            # Show how many features in the concave hull layer
+    def _add_concave_hull(self, geometry: QgsGeometry, value: int) -> None:
+        """Add a concave hull of the geometry to the isochrone layer."""
+        ogr_geometry = ogr.CreateGeometryFromWkt(geometry.asWkt())
+        concave_hull_geometry = ogr_geometry.ConcaveHull(0.3, False)
+
+        if concave_hull_geometry:
+            log_message("Concave hull computed successfully.")
+            new_feature = ogr.Feature(self.isochrone_layer.GetLayerDefn())
+            new_feature.SetGeometry(concave_hull_geometry)
+            new_feature.SetField("value", value)
+            self.isochrone_layer.CreateFeature(new_feature)
             log_message(
-                f"Concave hull layer has {hull_result_layer.featureCount()} features."
+                f"Added concave hull feature with value {value} to the GeoPackage."
             )
-            self.progress.setProgress(90)
-            for feature in hull_result_layer.getFeatures():
-                geometry = feature.geometry()
-                ogr_geometry = ogr.CreateGeometryFromWkt(geometry.asWkt())
-                new_feature = ogr.Feature(self.isochrone_layer.GetLayerDefn())
-                new_feature.SetGeometry(ogr_geometry)
-                new_feature.SetField("value", value)
-                self.isochrone_layer.CreateFeature(new_feature)
-                new_feature = None
-                log_message(
-                    f"Added feature with value **{value}** to the GeoPackage.\n\n"
-                )
-                # show how many features in the isochrone layer
-                # This might be slow!
-                log_message(
-                    f"Isochrone layer has {self.isochrone_layer.GetFeatureCount()} features."
-                )
-
-            del hull_result_layer
-
-        del clipped_layer
-        # del point_layer
-        self.feedback.setProgress(100)
-        self.isochrone_ds = None
-        self.isochrone_layer = None
-        log_message(f"Service areas calculated for feature {self.feature.id()}.")
-        return

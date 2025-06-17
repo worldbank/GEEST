@@ -625,4 +625,42 @@ class WorkflowBase(QObject):
         vrt_filepath = combine_rasters_to_vrt(
             rasters, self.target_crs, vrt_filepath, source_qml
         )
+        # if debug mode is off, remove all files except the VRT and the rasters it refers to
+        if not int(setting(key="developer_mode", default=0)):
+            log_message(
+                f"Debug mode is off. Removing all files except the VRT and the rasters it refers to."
+            )
+            # Compile a list of all of the files in the workflow directory - recursively
+
+            all_files = os.listdir(self.workflow_directory)
+            # Remove all files except the VRT, qml and the rasters it refers to
+            # loop through all files in the workflow directory
+            for file in all_files:
+                file_path = os.path.join(self.workflow_directory, file)
+                if (
+                    not file.endswith(".vrt")
+                    and not file.endswith(".qml")
+                    and not file.endswith(".tif")
+                    and not file.endswith("error.txt")
+                ):
+                    log_message(f"Removing {file_path}")
+                    try:
+                        os.remove(file_path)
+                    except Exception as e:
+                        log_message(
+                            f"Failed to remove {file_path}: {e}",
+                            tag="Geest",
+                            level=Qgis.Warning,
+                        )
+                        log_message(
+                            traceback.format_exc(),
+                            tag="Geest",
+                            level=Qgis.Warning,
+                        )
+                        continue
+        else:
+            log_message(
+                f"Debug mode is on. Keeping all files in the workflow directory."
+            )
+
         return vrt_filepath

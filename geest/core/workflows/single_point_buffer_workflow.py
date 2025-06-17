@@ -14,6 +14,7 @@ from qgis import processing
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class SinglePointBufferWorkflow(WorkflowBase):
@@ -42,6 +43,8 @@ class SinglePointBufferWorkflow(WorkflowBase):
         self.workflow_name = "use_single_buffer_point"
 
         layer_source = self.attributes.get("single_buffer_point_layer_shapefile", None)
+        if layer_source is not None:
+            layer_source = unquote(layer_source)
         provider_type = "ogr"
         if not layer_source:
             layer_source = self.attributes.get("single_buffer_point_layer_source", None)

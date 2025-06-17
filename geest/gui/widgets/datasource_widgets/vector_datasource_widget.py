@@ -1,4 +1,5 @@
 import os
+import urllib.parse  # Add this import
 from qgis.PyQt.QtWidgets import (
     QLineEdit,
     QToolButton,
@@ -91,7 +92,9 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
 
             if self.attributes.get(f"{self.widget_key}_shapefile", False):
                 self.shapefile_line_edit.setText(
-                    self.attributes[f"{self.widget_key}_shapefile"]
+                    urllib.parse.unquote(
+                        self.attributes[f"{self.widget_key}_shapefile"]
+                    )
                 )
                 self.shapefile_line_edit.setVisible(True)
                 self.layer_combo.setVisible(False)
@@ -202,6 +205,9 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.attributes[f"{self.widget_key}_layer_id"] = (
                 layer.id()
             )  # Unique ID of the layer
-        self.attributes[f"{self.widget_key}_shapefile"] = (
-            self.shapefile_line_edit.text()
+
+        # Encode the shapefile path to handle spaces and special characters
+        shapefile_path = self.shapefile_line_edit.text()
+        self.attributes[f"{self.widget_key}_shapefile"] = urllib.parse.quote(
+            shapefile_path
         )

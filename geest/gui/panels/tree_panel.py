@@ -298,7 +298,7 @@ class TreePanel(QWidget):
             "study_area_report.pdf",
             "road_network.gpkg",
         ]
-        if filename is None or self.working_directory is None:
+        if self.working_directory is None:
             log_message(
                 "No working directory set, cannot clear workflows.",
                 tag="Geest",
@@ -552,7 +552,7 @@ class TreePanel(QWidget):
             menu.addAction(run_item_action)
             add_wee_score = QAction("Add WEE Score to Map")
             add_wee_score.triggered.connect(
-                lambda: self.add_to_map(
+                lambda: add_to_map(
                     item, key="result_file", layer_name="WEE Score", group="WEE"
                 )
             )
@@ -560,7 +560,7 @@ class TreePanel(QWidget):
 
             add_wee_by_population = QAction("Add WEE by Pop to Map")
             add_wee_by_population.triggered.connect(
-                lambda: self.add_to_map(
+                lambda: add_to_map(
                     item,
                     key="wee_by_population",
                     layer_name="WEE by Population",
@@ -583,7 +583,7 @@ class TreePanel(QWidget):
 
             add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
             add_job_opportunities_mask.triggered.connect(
-                lambda: self.add_to_map(
+                lambda: add_to_map(
                     item,
                     key="opportunities_mask_result_file",
                     layer_name="Opportunities Mask",
@@ -734,13 +734,13 @@ class TreePanel(QWidget):
 
     def add_masked_scores_to_map(self, item):
         """Add the masked scores to the map."""
-        self.add_to_map(
+        add_to_map(
             item,
             key="wee_by_opportunities_mask_result_file",
             layer_name="Masked WEE Score",
             group="WEE",
         )
-        self.add_to_map(
+        add_to_map(
             item,
             key="wee_by_population_by_opportunities_mask_result_file",
             layer_name="Masked WEE by Population Score",
@@ -749,25 +749,25 @@ class TreePanel(QWidget):
 
     def add_aggregates_to_map(self, item):
         """Add all the aggregate produts to the map"""
-        self.add_to_map(
+        add_to_map(
             item,
             key="wee_score_subnational_aggregation",
             layer_name="WEE Score Aggregate",
             group="WEE",
         )
-        self.add_to_map(
+        add_to_map(
             item,
             key="wee_by_population_subnational_aggregation",
             layer_name="WEE by Population Aggregate",
             group="WEE",
         )
-        self.add_to_map(
+        add_to_map(
             item,
             key="opportunities_by_wee_score_subnational_aggregation",
             layer_name="WEE Score by Opportunities Aggregate",
             group="WEE",
         )
-        self.add_to_map(
+        add_to_map(
             item,
             key="opportunities_by_wee_score_by_population_subnational_aggregation",
             layer_name="WEE Score by Population by Opportunities Aggregate",

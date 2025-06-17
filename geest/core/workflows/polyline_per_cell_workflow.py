@@ -13,6 +13,7 @@ from geest.core.algorithms.features_per_cell_processor import (
     assign_values_to_grid,
 )
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class PolylinePerCellWorkflow(WorkflowBase):
@@ -41,6 +42,8 @@ class PolylinePerCellWorkflow(WorkflowBase):
         self.workflow_name = "use_polyline_per_cell"
 
         layer_path = self.attributes.get("polyline_per_cell_shapefile", None)
+        if layer_path:
+            layer_path = unquote(layer_path)
 
         if not layer_path:
             log_message(

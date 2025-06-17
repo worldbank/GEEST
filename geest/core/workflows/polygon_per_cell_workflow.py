@@ -41,6 +41,8 @@ class PolygonPerCellWorkflow(WorkflowBase):
         self.workflow_name = "use_polygon_per_cell"
 
         layer_path = self.attributes.get("polygon_per_cell_shapefile", None)
+        if layer_path:
+            layer_path = os.path.expanduser(layer_path)
 
         if not layer_path:
             log_message(

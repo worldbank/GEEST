@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   width="181"
+   height="181"
+   viewBox="0 0 183 183">
+  <rect width="183" height="183" fill="#ffffff" />
+  <path
+    d="M30 30 H153 V153 H30 Z"
+    fill="#000000" />
+  <path
+    d="M60 60 H123 V123 H60 Z"
+    fill="#ffffff" />
+  <circle
+    cx="91.5"
+    cy="91.5"
+    r="15"
+    fill="#000000" />
+</svg>

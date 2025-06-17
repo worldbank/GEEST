@@ -14,9 +14,10 @@ from qgis.core import (
     QgsLayoutItemShape,
     QgsSimpleFillSymbolLayer,
     QgsUnitTypes,
+    QgsRasterLayer,
 )
 from qgis.PyQt.QtGui import QFont, QColor
-from geest.utilities import log_message, resources_path
+from geest.utilities import log_message, resources_path, setting
 from .base_report import BaseReport
 
 
@@ -46,7 +47,6 @@ class AnalysisReport(BaseReport):
 
         self.report_name = report_name
         self.model_path = model_path
-        self.page_descriptions = {}
         self.page_descriptions[
             "analysis_summary"
         ] = """
@@ -61,9 +61,8 @@ class AnalysisReport(BaseReport):
 
     def create_layout(self):
         """
-        Create a QGIS layout (report) that includes a title and a label with summary statistics.
-
-        The layout is stored in the attribute self.layout.
+        Create a QGIS layout (report) that includes a title, summary statistics,
+        and individual pages for each indicator.
         """
         project = QgsProject.instance()
         self.title = "Analysis Report"
@@ -71,7 +70,7 @@ class AnalysisReport(BaseReport):
         self.layout.initializeDefaults()
         self.load_template()
 
-        # Compute statistics and add a summary label
+        # Add a summary page
         summary_text = "Analysis Summary\n"
         summary_label = QgsLayoutItemLabel(self.layout)
         summary_label.setText(summary_text)
@@ -95,21 +94,107 @@ class AnalysisReport(BaseReport):
             page=current_page,
         )
 
-        # Add summary label to the current page
-        summary_label = QgsLayoutItemLabel(self.layout)
-        summary_label.setText(summary_text)
-        summary_label.setFont(QFont("Arial", 12))
-        summary_label.adjustSizeToText()
-        # Position the label on the current page
-        summary_label.attemptMove(
-            QgsLayoutPoint(120, 60, QgsUnitTypes.LayoutMillimeters),
-            page=current_page,
-        )
-        self.layout.addLayoutItem(summary_label)
-
-        # Add the page footer
+        # Add footer for the summary page
         self.add_header_and_footer(page_number=current_page)
         current_page += 1
+
+        # Add pages for each indicator
+        # check if developer mode is enabled
+        developer_mode = int(setting(key="developer_mode", default=0))
+        if developer_mode:
+            log_message(
+                "Developer mode is enabled. Creating detail pages for each indicator."
+            )
+            self.create_detail_pages(current_page=current_page)
+        else:
+            log_message(
+                "Developer mode is disabled. Skipping detail pages for each indicator."
+            )
+            return
+
+    def create_detail_pages(self, current_page: int = 1):
+        """
+        Iterate over each indicator and create a detail page for it.
+
+        Parameters
+        ----------
+        current_page : int
+            The current page number to start from. This is incremented for each new page created.
+        """
+
+        with open(self.model_path, "r", encoding="utf-8") as f:
+            model = json.load(f)
+
+        results = []
+
+        for dimension in model.get("dimensions", []):
+            dim_name = dimension.get("name", "")
+            for factor in dimension.get("factors", []):
+                factor_name = factor.get("name", "")
+                self.page_descriptions[factor_name] = factor.get(
+                    "description", f"Analysis for factor: {factor_name}"
+                )
+                for indicator in factor.get("indicators", []):
+                    indicator_name = indicator.get("indicator", "")
+                    start_str = indicator.get("execution_start_time", "")
+                    end_str = indicator.get("execution_end_time", "")
+
+                    start_datetime = self.parse_iso_datetime(start_str)
+                    end_datetime = self.parse_iso_datetime(end_str)
+
+                    if start_datetime and end_datetime:
+                        duration = round(
+                            (end_datetime - start_datetime).total_seconds() / 60, 2
+                        )
+                    else:
+                        duration = None
+
+                    # Create a new page for the indicator
+                    page = self.make_page(
+                        title=f"Indicator: {indicator_name}",
+                        description_key=factor_name,
+                        current_page=current_page,
+                    )
+                    layer_uri = indicator.get(f"result_file")
+                    log_message(f"Adding {layer_uri} to map")
+                    if layer_uri:
+                        layer = QgsRasterLayer(layer_uri, indicator_name)
+                        if not layer.isValid():
+                            log_message(
+                                f"Layer {layer_uri} is invalid and cannot be added.",
+                                tag="Geest",
+                            )
+                        layers = [layer]
+                        crs = layer.crs()
+                        self.make_map(
+                            layers=layers,
+                            current_page=current_page,
+                            crs=crs,
+                        )
+                    # Add footer for the indicator page
+                    self.add_header_and_footer(page_number=current_page)
+
+                    # Increment the page counter
+                    current_page += 1
+
+    def parse_iso_datetime(self, iso_str: str) -> Optional[datetime]:
+        """Parse ISO 8601 datetime string safely."""
+        try:
+            return datetime.fromisoformat(iso_str)
+        except Exception:
+            return None
+
+    def interpolate_color(self, rel: float) -> str:
+        """
+        Linearly interpolate between forest green and off-red.
+        rel = 0.0 => forest green (#228B22), rel = 1.0 => off-red (#CC4444)
+        """
+        fg = (34, 139, 34)  # Forest Green
+        or_ = (204, 68, 68)  # Off Red
+        r = int(fg[0] + (or_[0] - fg[0]) * rel)
+        g = int(fg[1] + (or_[1] - fg[1]) * rel)
+        b = int(fg[2] + (or_[2] - fg[2]) * rel)
+        return f"#{r:02x}{g:02x}{b:02x}"
 
     def extract_execution_times_with_colors(self) -> List[Dict[str, Optional[str]]]:
         """
@@ -132,25 +217,6 @@ class AnalysisReport(BaseReport):
                 - color (string "rgb(r, g, b)")
         """
 
-        def parse_iso_datetime(iso_str: str) -> Optional[datetime]:
-            """Parse ISO 8601 datetime string safely."""
-            try:
-                return datetime.fromisoformat(iso_str)
-            except Exception:
-                return None
-
-        def interpolate_color(rel: float) -> str:
-            """
-            Linearly interpolate between forest green and off-red.
-            rel = 0.0 => forest green (#228B22), rel = 1.0 => off-red (#CC4444)
-            """
-            fg = (34, 139, 34)  # Forest Green
-            or_ = (204, 68, 68)  # Off Red
-            r = int(fg[0] + (or_[0] - fg[0]) * rel)
-            g = int(fg[1] + (or_[1] - fg[1]) * rel)
-            b = int(fg[2] + (or_[2] - fg[2]) * rel)
-            return f"rgb({r}, {g}, {b})"
-
         with open(self.model_path, "r", encoding="utf-8") as f:
             model = json.load(f)
 
@@ -165,8 +231,8 @@ class AnalysisReport(BaseReport):
                     start_str = indicator.get("execution_start_time", "")
                     end_str = indicator.get("execution_end_time", "")
 
-                    start_dt = parse_iso_datetime(start_str)
-                    end_dt = parse_iso_datetime(end_str)
+                    start_dt = self.parse_iso_datetime(start_str)
+                    end_dt = self.parse_iso_datetime(end_str)
 
                     if start_dt and end_dt:
                         duration = round((end_dt - start_dt).total_seconds() / 60, 2)
@@ -201,7 +267,7 @@ class AnalysisReport(BaseReport):
                 if exec_time is not None:
                     rel = (exec_time - min_time) / range_time
                     r["relative_time"] = round(rel, 2)
-                    r["color"] = interpolate_color(rel)
+                    r["color"] = self.interpolate_color(rel)
                 else:
                     r["relative_time"] = None
                     r["color"] = None
@@ -244,6 +310,7 @@ class AnalysisReport(BaseReport):
             indicator = entry["indicator"]
             duration = entry["execution_time_minutes"]
             duration_label.setText(f"{indicator} - {duration} min")
+            duration_label.setFont(QFont("Arial", 10))
             duration_label.adjustSizeToText()
             duration_label.attemptMove(
                 QgsLayoutPoint(
@@ -261,6 +328,7 @@ class AnalysisReport(BaseReport):
 
             # Add bar (shape item)
             bar = QgsLayoutItemShape(self.layout)
+            log_message(f"Processing entry: {entry}")
             if entry.get("color", None) is None:
                 bar_width = 10.0
                 color = "#ff0000"
@@ -281,9 +349,14 @@ class AnalysisReport(BaseReport):
             )
 
             color = QColor(color)
-            symbol = bar.symbol()
-            symbol.deleteSymbolLayer(0)
-            symbol.appendSymbolLayer(QgsSimpleFillSymbolLayer(color=color))
-            bar.setSymbol(symbol)
+            symbol = QgsSimpleFillSymbolLayer(color=color)
+            log_message(f"Bar color: {color.name()}")
+            log_message(f"Bar width: {bar_width} mm")
+            log_message(f"Bar height: {row_height} mm")
+            symbol.setStrokeColor(QColor(0, 0, 0, 0))  # Set border color to transparent
+            bar_symbol = bar.symbol()
+            bar_symbol.deleteSymbolLayer(0)
+            bar_symbol.appendSymbolLayer(symbol)
+            bar.setSymbol(bar_symbol)
 
             self.layout.addLayoutItem(bar)

@@ -1,6 +1,8 @@
 import os
 import shutil
 import traceback
+from urllib.parse import unquote
+
 from typing import Optional
 from qgis.core import (
     QgsRasterLayer,
@@ -117,6 +119,8 @@ class OpportunitiesMaskProcessor(QgsTask):
             # either as a shapefile path added in a line edit or as a layer source
             # using a QgsMapLayerComboBox. We prioritize the shapefile path, so check that first.
             layer_source = self.item.attribute(f"{self.mask_mode}_mask_shapefile", None)
+            if layer_source:
+                layer_source = unquote(layer_source)
             provider_type = "ogr"
             if not layer_source:
                 # Fall back to the QgsMapLayerComboBox source
@@ -155,7 +159,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             log_message("Loading source raster mask layer")
             # First try the one defined in the line edit
             self.raster_layer = QgsRasterLayer(
-                self.item.attribute("raster_mask_raster"), "Raster Mask", "ogr"
+                unquote(self.item.attribute("raster_mask_raster")), "Raster Mask", "ogr"
             )
             if not self.raster_layer.isValid():
                 # Then fall back to the QgsMapLayerComboBox source

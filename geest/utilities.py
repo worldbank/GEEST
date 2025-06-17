@@ -383,7 +383,7 @@ def log_message(
         force (bool): If True, log the message even if verbose_mode is off.
     """
     verbose_mode = setting(key="verbose_mode", default=0)
-    if not verbose_mode and not force:
+    if not verbose_mode and not force and level != Qgis.Critical:
         return
     # Retrieve caller information
     caller_frame = inspect.stack()[1]
@@ -555,8 +555,9 @@ def version():
     try:
         with open(metadata_file, "r") as f:
             for line in f:
-                if line.startswith("version="):
-                    version = line.split("=")[1].strip()
+                # Handle both "version=" and "version ="
+                if line.strip().startswith("version"):
+                    version = line.split("=")[1].strip().strip('"').strip("'")
                     break
     except FileNotFoundError:
         log_message("metadata.txt file not found", level=Qgis.Warning)

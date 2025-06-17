@@ -13,6 +13,7 @@ from qgis import processing  # QGIS processing toolbox
 from .workflow_base import WorkflowBase
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+from urllib.parse import unquote
 
 
 class SafetyRasterWorkflow(WorkflowBase):
@@ -39,7 +40,7 @@ class SafetyRasterWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_nighttime_lights"
-        layer_name = self.attributes.get("nighttime_lights_raster", None)
+        layer_name = unquote(self.attributes.get("nighttime_lights_raster", None))
 
         if not layer_name:
             log_message(
