@@ -37,22 +37,18 @@ class AcledImpactWorkflow(WorkflowBase):
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
-        super().__init__(
-            item, cell_size_m, feedback, context, working_directory
-        )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+        super().__init__(item, cell_size_m, feedback, context, working_directory)
         self.csv_file = self.attributes.get("use_csv_to_point_layer_csv_file", "")
         if not self.csv_file:
             error = "No CSV file provided."
             self.attributes["error"] = error
             raise Exception(error)
-        self.features_layer = self._load_csv_as_point_layer()
+
+        # Load the CSV file as a point layer in a thread-safe manner
+        self.features_layer = self.thread_safe_execute(self._load_csv_as_point_layer)
         if not self.features_layer.isValid():
-            error = f"ACLED CSV layer is not valid.: {self.csv_file}"
+            error = f"ACLED CSV layer is not valid: {self.csv_file}"
             self.attributes["error"] = error
             raise Exception(error)
         self.feedback.setProgress(1.0)
@@ -66,49 +62,47 @@ class AcledImpactWorkflow(WorkflowBase):
         index: int,
     ) -> str:
         """
-        Executes the actual workflow logic for a single area
-        Must be implemented by subclasses.
-
-        :current_area: Current polygon from our study area.
-        :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-        :index: Iteration / number of area being processed.
-
-        :return: Raster file path of the output.
+        Executes the actual workflow logic for a single area.
         """
 
-        # Step 1: Buffer the selected features by 5 km
-        buffered_layer = self._buffer_features(area_features)
-        self.feedback.setProgress(10.0)
+        def process_area():
+            # Step 1: Buffer the selected features by 5 km
+            buffered_layer = self.thread_safe_execute(
+                self._buffer_features, area_features
+            )
+            self.feedback.setProgress(10.0)
 
-        # Step 2: Assign values based on event_type
-        scored_layer = self._assign_scores(buffered_layer)
-        self.feedback.setProgress(40.0)
+            # Step 2: Assign values based on event_type
+            scored_layer = self.thread_safe_execute(self._assign_scores, buffered_layer)
+            self.feedback.setProgress(40.0)
 
-        # Step 3: Dissolve and remove overlapping areas, keeping areas with the lowest value
-        dissolved_layer = self._overlay_analysis(scored_layer)
-        self.feedback.setProgress(600.0)
+            # Step 3: Dissolve and remove overlapping areas, keeping areas with the lowest value
+            dissolved_layer = self.thread_safe_execute(
+                self._overlay_analysis, scored_layer
+            )
+            self.feedback.setProgress(60.0)
 
-        # Step 4: Rasterize the dissolved layer
-        raster_output = self._rasterize(
-            dissolved_layer,
-            current_bbox,
-            index,
-            value_field="min_value",
-            default_value=5,
-        )
-        self.feedback.setProgress(80.0)
+            # Step 4: Rasterize the dissolved layer
+            raster_output = self.thread_safe_execute(
+                self._rasterize,
+                dissolved_layer,
+                current_bbox,
+                index,
+                value_field="min_value",
+                default_value=5,
+            )
+            self.feedback.setProgress(80.0)
 
-        return raster_output
+            return raster_output
+
+        # Execute the workflow logic in a thread-safe manner
+        return self.thread_safe_execute(process_area)
 
     def _load_csv_as_point_layer(self) -> QgsVectorLayer:
         """
         Load the CSV file, extract relevant columns (latitude, longitude, event_type),
         create a point layer from the retained columns, reproject the points to match the
         CRS of the layers from the GeoPackage, and save the result as a shapefile.
-
-        Returns:
-            QgsVectorLayer: The reprojected point layer created from the CSV.
         """
         source_crs = QgsCoordinateReferenceSystem(
             "EPSG:4326"
@@ -152,8 +146,8 @@ class AcledImpactWorkflow(WorkflowBase):
 
             point_provider.addFeatures(features)
             log_message(f"Loaded {len(features)} points from CSV")
+
         # Save the layer to disk as a shapefile
-        # Ensure the workflow directory exists
         if not os.path.exists(self.workflow_directory):
             os.makedirs(self.workflow_directory)
         shapefile_path = os.path.join(
@@ -187,12 +181,6 @@ class AcledImpactWorkflow(WorkflowBase):
     def _buffer_features(self, layer: QgsVectorLayer) -> QgsVectorLayer:
         """
         Buffer the input features by 5 km.
-
-        Args:
-            layer (QgsVectorLayer): The input feature layer.
-
-        Returns:
-            QgsVectorLayer: The buffered features layer.
         """
         output_name = f"{self.layer_id}_buffered"
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
@@ -211,16 +199,8 @@ class AcledImpactWorkflow(WorkflowBase):
     def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
         """
         Assign values to buffered polygons based on their event_type.
-
-        Args:
-            layer_path (str): The buffered features layer.
-
-        Returns:
-            QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
         """
-
         log_message(f"Assigning scores to {layer.name()}")
-        # Define scoring categories based on event_type
         event_scores = {
             "Battles": 0,
             "Explosions/Remote violence": 1,
@@ -229,12 +209,10 @@ class AcledImpactWorkflow(WorkflowBase):
             "Riots": 4,
         }
 
-        # Create a new field in the layer for the scores
         layer.startEditing()
         layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
         layer.updateFields()
 
-        # Assign scores based on event_type
         for feature in layer.getFeatures():
             event_type = feature["event_type"]
             score = event_scores.get(event_type, 5)
@@ -242,74 +220,19 @@ class AcledImpactWorkflow(WorkflowBase):
             layer.updateFeature(feature)
 
         layer.commitChanges()
-
         return layer
 
     def _overlay_analysis(self, input_layer):
         """
-        Perform an overlay analysis on a set of circular polygons, prioritizing areas with the lowest value in overlapping regions,
-        and save the result as a shapefile.
-
-        This function processes an input shapefile containing circular polygons, each with a value between 1 and 4, representing
-        different priority levels. The function performs an overlay analysis where the polygons overlap and ensures that for any
-        overlapping areas, the polygon with the lowest value (i.e., highest priority) is retained, while polygons with higher values
-        are removed from those regions.
-
-        The analysis is performed as follows:
-        1. The input layer is loaded from the provided shapefile path.
-        2. A dissolve operation is performed on the input layer to combine any adjacent polygons with the same value.
-        3. A union operation is performed on the input layer to break the polygons into distinct, non-overlapping areas.
-        4. For each distinct area, the value from the overlapping polygons is compared, and the minimum value (representing the highest priority) is assigned to that area.
-        5. The resulting dataset, which consists of non-overlapping polygons with the highest priority (smallest value), is saved to a new shapefile at the specified output path.
-
-        Parameters:
-        -----------
-        input_layer : QgsVectorLayer
-            The input shapefile containing the circular polygons with values between 1 and 4.
-
-        output_filepath : str
-            The file path where the output shapefile with the results of the overlay analysis will be saved. The
-            output will be saved in self.workflow_directory.
-
-        Returns:
-        --------
-        None
-            The function does not return a value but writes the result to the specified output shapefile.
-
-        Logging:
-        --------
-        Messages related to the status of the operation (success or failure) are logged using QgsMessageLog with the tag 'Geest'
-        and the log level set to Qgis.Info.
-
-        Raises:
-        -------
-        IOError:
-            If the input layer cannot be loaded or if an error occurs during the file writing process.
-
-        Example:
-        --------
-        To perform an overlay analysis on a shapefile located at "path/to/input.shp" and save the result to "path/to/output.shp",
-        use the following:
-
-        overlay_analysis(qgis_vector_layer)
+        Perform an overlay analysis on a set of circular polygons, prioritizing areas with the lowest value in overlapping regions.
         """
         log_message("Overlay analysis started")
-        # Step 1: Load the input layer from the provided shapefile path
-        # layer = QgsVectorLayer(input_filepath, "circles_layer", "ogr")
-
-        if not input_layer.isValid():
-            log_message("Layer failed to load!")
-            return
-
-        # Step 2: Create a memory layer to store the result
         result_layer = QgsVectorLayer(f"Polygon", "result_layer", "memory")
         result_layer.setCrs(self.target_crs)
         provider = result_layer.dataProvider()
-
-        # Step 3: Add a field to store the minimum value (lower number = higher rank)
         provider.addAttributes([QgsField("min_value", QVariant.Int)])
         result_layer.updateFields()
-        # Step 4: Perform the dissolve operation to separate disjoint polygons
+
         dissolve = processing.run(
             "native:dissolve",
             {
@@ -319,63 +242,38 @@ class AcledImpactWorkflow(WorkflowBase):
                 "OUTPUT": "TEMPORARY_OUTPUT",
             },
         )["OUTPUT"]
-        log_message(
-            f"Dissolved areas have {len(dissolve)} features",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        # Step 5: Perform the union to get all overlapping areas
+
         union = processing.run(
             "qgis:union",
             {
                 "INPUT": dissolve,
-                #'OVERLAY': '', #input_layer, # Do we need this?
                 "OUTPUT": "memory:",
             },
         )["OUTPUT"]
-        log_message(f"Unioned areas have {len(dissolve)} features")
-        # Step 6: Iterate through the unioned features to assign the minimum value in overlapping areas
-        unique_geometries = {}
 
+        unique_geometries = {}
         for feature in union.getFeatures():
             geom = feature.geometry().asWkt()
-            attrs = (
-                feature.attributes()
-            )  # Use geometry as a key to identify unique areas
+            attrs = feature.attributes()
             value_1 = attrs[input_layer.fields().indexFromName("value")]
-            value_2 = attrs[
-                input_layer.fields().indexFromName("value_2")
-            ]  # This comes from the unioned layer
-
-            # Assign the minimum value to the overlapping area
+            value_2 = attrs[input_layer.fields().indexFromName("value_2")]
             min_value = min(value_1, value_2)
 
-            log_message(
-                f"Processing feature with min value: {min_value}",
-                tag="Geest",
-                level=Qgis.Info,
-            )
-
-            # Check if this geometry is already in the dictionary
             if geom in unique_geometries:
-                # If it exists, update only if the new min_value is lower
                 if min_value < unique_geometries[geom].attributes()[0]:
                     unique_geometries[geom].setAttribute(0, min_value)
             else:
-                # Add new unique geometry with the min_value attribute
                 new_feature = QgsFeature()
                 new_feature.setGeometry(feature.geometry())
                 new_feature.setAttributes([min_value])
                 unique_geometries[geom] = new_feature
 
-        # Add the filtered features to the result layer
         for unique_feature in unique_geometries.values():
             provider.addFeature(unique_feature)
 
         full_output_filepath = os.path.join(
             self.workflow_directory, f"{self.layer_id}_final.shp"
         )
-        # Step 7: Save the result layer to the specified output shapefile
         error = QgsVectorFileWriter.writeAsVectorFormat(
             result_layer,
             full_output_filepath,

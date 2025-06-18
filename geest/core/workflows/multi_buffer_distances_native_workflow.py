@@ -201,53 +201,58 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         :param index: Index of the current area being processed.
         :return: Path to the GeoPackage.
         """
-        verbose_mode = int(setting(key="verbose_mode", default=0))
 
-        total_features = point_layer.featureCount()
-        if total_features == 0:
-            log_message(f"No features to process for area {area_index}.")
-            return False
-        isochrone_layer_path = os.path.join(
-            self.workflow_directory, f"isochrones_area_{area_index}.gpkg"
-        )
-        log_message(f"Creating isochrones for {total_features} points")
-        log_message(f"Writing isochrones to {isochrone_layer_path}")
+        def _create_isochrones():
+            verbose_mode = int(setting(key="verbose_mode", default=0))
 
-        if os.path.exists(isochrone_layer_path):
-            os.remove(isochrone_layer_path)
-
-        # Process features using an iterator
-        for i, point_feature in enumerate(point_layer.getFeatures()):
-            # Process this point using QGIS native network analysis
-            log_message("\n\n*************************************")
-            log_message(f"Processing point {i+1} of {total_features}")
-            # Parse the features from the networking analysis response
-            processor = NativeNetworkAnalysisProcessor(
-                network_layer_path=self.network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
-                isochrone_layer_path=isochrone_layer_path,  # isochrone_layer_path: Path to the output GeoPackage for the isochrones.
-                point_feature=point_feature,  # feature: The feature to use as the origin for the network analysis.
-                area_index=area_index,  # area_id: The ID of the area being processed.
-                crs=self.target_crs,  # crs: The coordinate reference system to use for the analysis.
-                mode=self.mode,  # mode: Travel time or travel distance ("time" or "distance").
-                values=self.distances,  # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
-                working_directory=self.workflow_directory,  # working_directory: The directory to save the output files.
-            )
-            try:
-                result = processor.run()
-            except Exception as e:
-                self.item.setAttribute(self.result_key, f"Task failed: {e}")
-
-            log_message(f"Processed point {i+1} of {total_features}")
-            progress = ((i + 1) / total_features) * 100.0
-            # Todo: feedback should show text messages rather
-            # since QgsTask.setProgress already provides needded functionality
-            # for progress reporting
-            self.feedback.setProgress(progress)
-            log_message(f"Task progress: {progress}")
-            if self.feedback.isCanceled():
-                log_message("Processing canceled by user.")
+            total_features = point_layer.featureCount()
+            if total_features == 0:
+                log_message(f"No features to process for area {area_index}.")
                 return False
-        return isochrone_layer_path
+            isochrone_layer_path = os.path.join(
+                self.workflow_directory, f"isochrones_area_{area_index}.gpkg"
+            )
+            log_message(f"Creating isochrones for {total_features} points")
+            log_message(f"Writing isochrones to {isochrone_layer_path}")
+
+            if os.path.exists(isochrone_layer_path):
+                os.remove(isochrone_layer_path)
+
+            # Process features using an iterator
+            for i, point_feature in enumerate(point_layer.getFeatures()):
+                # Process this point using QGIS native network analysis
+                log_message("\n\n*************************************")
+                log_message(f"Processing point {i+1} of {total_features}")
+                # Parse the features from the networking analysis response
+                processor = NativeNetworkAnalysisProcessor(
+                    network_layer_path=self.network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
+                    isochrone_layer_path=isochrone_layer_path,  # isochrone_layer_path: Path to the output GeoPackage for the isochrones.
+                    point_feature=point_feature,  # feature: The feature to use as the origin for the network analysis.
+                    area_index=area_index,  # area_id: The ID of the area being processed.
+                    crs=self.target_crs,  # crs: The coordinate reference system to use for the analysis.
+                    mode=self.mode,  # mode: Travel time or travel distance ("time" or "distance").
+                    values=self.distances,  # values (List[int]): A list of time (in seconds) or distance (in meters) values to use for the analysis.
+                    working_directory=self.workflow_directory,  # working_directory: The directory to save the output files.
+                )
+                try:
+                    result = processor.run()
+                except Exception as e:
+                    self.item.setAttribute(self.result_key, f"Task failed: {e}")
+
+                log_message(f"Processed point {i+1} of {total_features}")
+                progress = ((i + 1) / total_features) * 100.0
+                # Todo: feedback should show text messages rather
+                # since QgsTask.setProgress already provides needded functionality
+                # for progress reporting
+                self.feedback.setProgress(progress)
+                log_message(f"Task progress: {progress}")
+                if self.feedback.isCanceled():
+                    log_message("Processing canceled by user.")
+                    return False
+            return isochrone_layer_path
+
+        # Execute the function in a thread-safe manner
+        return self.thread_safe_execute(_create_isochrones)
 
     def _create_bands(self, isochrones_gpkg_path, index):
         """
@@ -261,104 +266,109 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         Returns:
             QgsVectoryLayer: The final output QgsVectorLayer layer path containing the bands.
         """
-        isochrone_layer_path = f"{isochrones_gpkg_path}|layername=isochrones"
 
-        layer = QgsVectorLayer(isochrone_layer_path, "isochrones", "ogr")
-        if not layer.isValid():
-            raise ValueError(
-                f"Failed to load isochrone layer from {isochrone_layer_path}"
-            )
-        output_path = os.path.join(
-            self.workflow_directory, f"final_isochrones_{index}.shp"
-        )
+        def _create_bands():
+            isochrone_layer_path = f"{isochrones_gpkg_path}|layername=isochrones"
 
-        ranges_field = "value"
-        field_index = layer.fields().indexFromName(ranges_field)
-        if field_index == -1:
-            raise KeyError(
-                f"Field '{ranges_field}' does not exist in isochrones layer: {isochrone_layer_path}"
+            layer = QgsVectorLayer(isochrone_layer_path, "isochrones", "ogr")
+            if not layer.isValid():
+                raise ValueError(
+                    f"Failed to load isochrone layer from {isochrone_layer_path}"
+                )
+            output_path = os.path.join(
+                self.workflow_directory, f"final_isochrones_{index}.shp"
             )
 
-        unique_ranges = sorted(self.distances, reverse=False)
+            ranges_field = "value"
+            field_index = layer.fields().indexFromName(ranges_field)
+            if field_index == -1:
+                raise KeyError(
+                    f"Field '{ranges_field}' does not exist in isochrones layer: {isochrones_layer_path}"
+                )
 
-        range_layers = {}
-        for value in unique_ranges:
-            expression = f'"value" = {value}'
-            request = QgsFeatureRequest().setFilterExpression(expression)
-            features = [feat for feat in layer.getFeatures(request)]
-            if features:
-                range_layer = QgsVectorLayer(f"Polygon", f"range_{value}", "memory")
-                range_layer.setCrs(self.target_crs)
-                data_provider = range_layer.dataProvider()
-                data_provider.addAttributes(layer.fields())
-                range_layer.updateFields()
-                data_provider.addFeatures(features)
+            unique_ranges = sorted(self.distances, reverse=False)
 
-                dissolve_params = {
-                    "INPUT": range_layer,
-                    "FIELD": [],
+            range_layers = {}
+            for value in unique_ranges:
+                expression = f'"value" = {value}'
+                request = QgsFeatureRequest().setFilterExpression(expression)
+                features = [feat for feat in layer.getFeatures(request)]
+                if features:
+                    range_layer = QgsVectorLayer(f"Polygon", f"range_{value}", "memory")
+                    range_layer.setCrs(self.target_crs)
+                    data_provider = range_layer.dataProvider()
+                    data_provider.addAttributes(layer.fields())
+                    range_layer.updateFields()
+                    data_provider.addFeatures(features)
+
+                    dissolve_params = {
+                        "INPUT": range_layer,
+                        "FIELD": [],
+                        "OUTPUT": "memory:",
+                    }
+                    dissolve_result = processing.run("native:dissolve", dissolve_params)
+                    dissolved_layer = dissolve_result["OUTPUT"]
+                    range_layers[value] = dissolved_layer
+
+            band_layers = []
+            sorted_ranges = sorted(range_layers.keys(), reverse=True)
+            for i in range(len(sorted_ranges) - 1):
+                current_range = sorted_ranges[i]
+                next_range = sorted_ranges[i + 1]
+                current_layer = range_layers[current_range]
+                next_layer = range_layers[next_range]
+
+                difference_params = {
+                    "INPUT": current_layer,
+                    "OVERLAY": next_layer,
                     "OUTPUT": "memory:",
                 }
-                dissolve_result = processing.run("native:dissolve", dissolve_params)
-                dissolved_layer = dissolve_result["OUTPUT"]
-                range_layers[value] = dissolved_layer
+                diff_result = processing.run("native:difference", difference_params)
+                diff_layer = diff_result["OUTPUT"]
 
-        band_layers = []
-        sorted_ranges = sorted(range_layers.keys(), reverse=True)
-        for i in range(len(sorted_ranges) - 1):
-            current_range = sorted_ranges[i]
-            next_range = sorted_ranges[i + 1]
-            current_layer = range_layers[current_range]
-            next_layer = range_layers[next_range]
+                diff_layer.dataProvider().addAttributes(
+                    [
+                        QgsField("distance", QVariant.Int),
+                    ]
+                )
+                diff_layer.updateFields()
+                with edit(diff_layer):
+                    for feat in diff_layer.getFeatures():
+                        feat["distance"] = current_range
+                        diff_layer.updateFeature(feat)
 
-            difference_params = {
-                "INPUT": current_layer,
-                "OVERLAY": next_layer,
-                "OUTPUT": "memory:",
-            }
-            diff_result = processing.run("native:difference", difference_params)
-            diff_layer = diff_result["OUTPUT"]
+                band_layers.append(diff_layer)
 
-            diff_layer.dataProvider().addAttributes(
-                [
-                    QgsField("distance", QVariant.Int),
-                ]
+            try:
+                smallest_range = sorted_ranges[-1]
+            except IndexError:
+                return None
+
+            smallest_layer = range_layers[smallest_range]
+            smallest_layer.dataProvider().addAttributes(
+                [QgsField("distance", QVariant.Int)]
             )
-            diff_layer.updateFields()
-            with edit(diff_layer):
-                for feat in diff_layer.getFeatures():
-                    feat["distance"] = current_range
-                    diff_layer.updateFeature(feat)
+            smallest_layer.updateFields()
+            with edit(smallest_layer):
+                for feat in smallest_layer.getFeatures():
+                    feat["distance"] = smallest_range
+                    smallest_layer.updateFeature(feat)
+            band_layers.append(smallest_layer)
 
-            band_layers.append(diff_layer)
+            merge_bands_params = {
+                "LAYERS": band_layers,
+                "CRS": self.target_crs,
+                "OUTPUT": output_path,
+            }
+            final_merge_result = processing.run(
+                "native:mergevectorlayers", merge_bands_params
+            )
+            final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
+            log_message(f"Multi-buffer layer created at {output_path}")
+            return final_layer
 
-        try:
-            smallest_range = sorted_ranges[-1]
-        except IndexError:
-            return None
-
-        smallest_layer = range_layers[smallest_range]
-        smallest_layer.dataProvider().addAttributes(
-            [QgsField("distance", QVariant.Int)]
-        )
-        smallest_layer.updateFields()
-        with edit(smallest_layer):
-            for feat in smallest_layer.getFeatures():
-                feat["distance"] = smallest_range
-                smallest_layer.updateFeature(feat)
-        band_layers.append(smallest_layer)
-
-        merge_bands_params = {
-            "LAYERS": band_layers,
-            "CRS": self.target_crs,
-            "OUTPUT": output_path,
-        }
-        final_merge_result = processing.run(
-            "native:mergevectorlayers", merge_bands_params
-        )
-        final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
-        log_message(f"Multi-buffer layer created at {output_path}")
-        return final_layer
+        # Execute the function in a thread-safe manner
+        return self.thread_safe_execute(_create_bands)
 
     def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
         """

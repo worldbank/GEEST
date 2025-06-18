@@ -16,7 +16,7 @@ from qgis.core import (
     Qgis,
 )
 from qgis import processing
-from qgis.PyQt.QtCore import QSettings, pyqtSignal, QObject
+from qgis.PyQt.QtCore import QSettings, pyqtSignal, QObject, QMutex, QMutexLocker
 from geest.core import JsonTreeItem, setting
 from geest.utilities import resources_path
 from geest.core.algorithms import (
@@ -38,6 +38,9 @@ class WorkflowBase(QObject):
 
     # Signal for progress changes - will be propagated to the task that owns this workflow
     progressChanged = pyqtSignal(float)
+
+    # Class-level mutex to ensure thread safety across all derived workflows
+    _workflow_mutex = QMutex()
 
     def __init__(
         self,
@@ -664,3 +667,14 @@ class WorkflowBase(QObject):
             )
 
         return vrt_filepath
+
+    def thread_safe_execute(self, func, *args, **kwargs):
+        """
+        Execute a function in a thread-safe manner using QMutexLocker.
+        :param func: Function to execute.
+        :param args: Positional arguments for the function.
+        :param kwargs: Keyword arguments for the function.
+        :return: Result of the function execution.
+        """
+        with QMutexLocker(self._workflow_mutex):
+            return func(*args, **kwargs)

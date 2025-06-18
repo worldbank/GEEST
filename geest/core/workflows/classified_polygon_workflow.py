@@ -38,6 +38,14 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_polygon_into_classes"
+
+        # Thread-safe initialization of attributes
+        self.thread_safe_execute(self._initialize_attributes)
+
+    def _initialize_attributes(self):
+        """
+        Initialize attributes in a thread-safe manner.
+        """
         layer_path = self.attributes.get(
             "classify_polygon_into_classes_shapefile", None
         )
@@ -57,9 +65,11 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
                     tag="Geest",
                     level=Qgis.Warning,
                 )
-                return False
+                raise ValueError("No valid layer found.")
 
         self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
+        if not self.features_layer.isValid():
+            raise ValueError(f"Invalid layer: {layer_path}")
 
         self.selected_field = self.attributes.get(
             "classify_polygon_into_classes_selected_field", ""
@@ -84,24 +94,32 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
 
         :return: A raster layer file path if processing completes successfully, False if canceled or failed.
         """
-        area_features_count = area_features.featureCount()
-        log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
-        # Step 1: Assign reclassification values based on perceived safety
-        reclassified_layer = self._assign_reclassification_to_safety(area_features)
 
-        # Step 2: Rasterize the data
-        raster_output = self._rasterize(
-            reclassified_layer,
-            current_bbox,
-            index,
-            value_field="value",
-            default_value=255,
-        )
-        return raster_output
+        def process_area():
+            area_features_count = area_features.featureCount()
+            log_message(
+                f"Features layer for area {index+1} loaded with {area_features_count} features.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            # Step 1: Assign reclassification values based on perceived safety
+            reclassified_layer = self.thread_safe_execute(
+                self._assign_reclassification_to_safety, area_features
+            )
+
+            # Step 2: Rasterize the data
+            raster_output = self.thread_safe_execute(
+                self._rasterize,
+                reclassified_layer,
+                current_bbox,
+                index,
+                value_field="value",
+                default_value=255,
+            )
+            return raster_output
+
+        # Execute the workflow logic in a thread-safe manner
+        return self.thread_safe_execute(process_area)
 
     def _assign_reclassification_to_safety(
         self, layer: QgsVectorLayer
@@ -109,36 +127,43 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         """
         Assign reclassification values to polygons based on thresholds.
         """
-        with edit(layer):
-            # Remove all other columns except the selected field and the new 'value' field
-            fields_to_keep = {self.selected_field, "value"}
-            fields_to_remove = [
-                field.name()
-                for field in layer.fields()
-                if field.name() not in fields_to_keep
-            ]
-            layer.dataProvider().deleteAttributes(
-                [layer.fields().indexFromName(field) for field in fields_to_remove]
-            )
-            layer.updateFields()
-            if layer.fields().indexFromName("value") == -1:
-                layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+
+        def assign_reclassification():
+            with edit(layer):
+                # Remove all other columns except the selected field and the new 'value' field
+                fields_to_keep = {self.selected_field, "value"}
+                fields_to_remove = [
+                    field.name()
+                    for field in layer.fields()
+                    if field.name() not in fields_to_keep
+                ]
+                layer.dataProvider().deleteAttributes(
+                    [layer.fields().indexFromName(field) for field in fields_to_remove]
+                )
                 layer.updateFields()
-            count = layer.featureCount()
-            counter = 0
-            for feature in layer.getFeatures():
-                score = feature[self.selected_field]
-                # Scale values between 0 and 5
-                reclass_val = self._scale_value(score, 0, 100, 0, 5)
-                log_message(f"Scaled {score} to: {reclass_val}")
-                feature.setAttribute("value", reclass_val)
-                layer.updateFeature(feature)
-                counter += 1
-                if self.feedback.isCanceled():
-                    log_message("Feedback cancelled, stopping processing.")
-                    return layer
-                self.feedback.setProgress(int((counter / count) * 100))
-        return layer
+                if layer.fields().indexFromName("value") == -1:
+                    layer.dataProvider().addAttributes(
+                        [QgsField("value", QVariant.Int)]
+                    )
+                    layer.updateFields()
+                count = layer.featureCount()
+                counter = 0
+                for feature in layer.getFeatures():
+                    score = feature[self.selected_field]
+                    # Scale values between 0 and 5
+                    reclass_val = self._scale_value(score, 0, 100, 0, 5)
+                    log_message(f"Scaled {score} to: {reclass_val}")
+                    feature.setAttribute("value", reclass_val)
+                    layer.updateFeature(feature)
+                    counter += 1
+                    if self.feedback.isCanceled():
+                        log_message("Feedback cancelled, stopping processing.")
+                        return layer
+                    self.feedback.setProgress(int((counter / count) * 100))
+            return layer
+
+        # Execute the reclassification logic in a thread-safe manner
+        return self.thread_safe_execute(assign_reclassification)
 
     def _scale_value(self, value, min_in, max_in, min_out, max_out):
         """
