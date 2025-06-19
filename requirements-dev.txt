@@ -50,6 +50,6 @@ rpds-py==0.17.1
 six==1.16.0
 toml == 0.10.2
 typer == 0.4.0
-urllib3==2.2.2
+urllib3==2.5.0
 virtualenv==20.26.6
 watchdog==5.0.2
