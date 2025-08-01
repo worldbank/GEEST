@@ -9,7 +9,7 @@ After installing the plugin, its interface should automatically appear:
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_1st.png" 
     alt="Plugin Interface" 
-    style="width:35%;" 
+    style="width:45%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -28,13 +28,13 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_2nd.png" 
     alt="First Page Next" 
-    style="width:35%;" 
+    style="width:45%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
   <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_3rd.png" 
     alt="Second Page Next" 
-    style="width:35%;" 
+    style="width:45%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
