@@ -143,12 +143,22 @@ Important Notes:
 
 #### 2. Click the Right Arrow Button
 > - Locate the **right arrow button** at the bottom-right corner of the interface (highlighted in red in the image).
-> - Clicking this button confirms all settings and transitions to the **Processing Data Interface**, where you can initiate the analysis.
+> - Clicking this button confirms all selected settings and initiates the first step of the processing workflow — splitting the study area into grids. After the area is successfully split into grids, the interface transitions to the **Processing Data Interface**, where you can initiate the main analysis.
 
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20final.jpg"
     alt="Geest Project final" 
-    style="width:65%;" 
+    style="width:55%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
+> - Now the process of splitting the area into grids has started, and a progress bar is displayed in the interface. Once completed, a report titled **Study Area Report** will open automatically. This report summarizes the processing time and provides an explanation of each generated output, including: study area bounding boxes, polygons, grid cells and processing chunks.
+
+<p align="center">
+ <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_report.png"
+    alt="Geest Project final" 
+    style="width:55%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
