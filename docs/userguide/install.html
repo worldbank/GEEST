@@ -494,6 +494,9 @@ document.write(`
 </li>
 <li><ol class="arabic simple" start="2">
 <li><p>If the icon is not visible, go to <strong>Plugins</strong> &gt; <strong>Manage and Install Plugins…</strong>, then click on the <strong>Installed</strong> tab.</p></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="3">
 <li><p>In the list, find <strong>Gender Enabling Environments Spatial Tool (GEEST)</strong> and ensure the checkbox is ticked. The GEEST panel should now appear in the QGIS interface.</p></li>
 </ol>
 </li>
@@ -507,17 +510,17 @@ document.write(`
 <blockquote>
 <div><ul class="simple">
 <li><ol class="arabic simple" start="4">
-<li><p>Optionally, you can customize the plugin’s behavior by navigating to: <strong>Settings Menu</strong> → <strong>Options</strong> → <strong>GEEST Settings</strong>. While the <strong>default settings are recommended</strong>, the following configurable sections are available:</p></li>
+<li><p>Optionally, you can customize the plugin’s behavior by navigating to: <strong>Settings Menu</strong> → <strong>Options</strong> → <strong>GEEST Settings</strong>. While the <strong>default settings are recommended</strong>, the following configurable sections are available:
+<strong>Chunk size</strong> determines how many cells are processed at once. For example, a chunk size of <code class="docutils literal notranslate"><span class="pre">10</span></code> processes 10×10 cell blocks. Increasing this value (e.g., to 50) can improve performance on powerful machines, but may slow down or crash QGIS on lower-spec systems.
+<strong>Analysis Options</strong> - <strong>Assign 0 to cells by default</strong> If checked, areas without data will be assigned a value of 0. If unchecked, those areas will be left as NoData. This is useful for consistent raster outputs when comparing or summing layers.
+<strong>User Interface Options</strong>
+✅ <strong>Show layer when clicking an item in the GEEST tree</strong> Automatically activates the corresponding layer in QGIS when selected in the GEEST panel.
+✅ <strong>Show canvas overlay with current layer details</strong>  Enables an overlay that provides quick visual feedback about selected layers.
+<strong>Advanced Options</strong> - <strong>Concurrent Tasks</strong> Specifies how many processing threads to run simultaneously. Set this equal to the number of CPU cores for efficient performance (e.g., 4 or more on most systems).
+<strong>Enable developer mode</strong> Intended for debugging — attaches the plugin to a remote debugger. ⚠️ Not recommended unless you’re actively developing the plugin.
+<strong>Verbose logging mode</strong> Enables detailed logging useful for troubleshooting and diagnostics. Requires a restart to take effect.</p></li>
 </ol>
 </li>
-<li><p><strong>Chunk size</strong> determines how many cells are processed at once. For example, a chunk size of <code class="docutils literal notranslate"><span class="pre">10</span></code> processes 10×10 cell blocks. Increasing this value (e.g., to 50) can improve performance on powerful machines, but may slow down or crash QGIS on lower-spec systems.</p></li>
-<li><p><strong>Analysis Options</strong> - <strong>Assign 0 to cells by default</strong> If checked, areas without data will be assigned a value of 0. If unchecked, those areas will be left as NoData. This is useful for consistent raster outputs when comparing or summing layers.</p></li>
-<li><p><strong>User Interface Options</strong></p></li>
-<li><p>✅ <strong>Show layer when clicking an item in the GEEST tree</strong> Automatically activates the corresponding layer in QGIS when selected in the GEEST panel.</p></li>
-<li><p>✅ <strong>Show canvas overlay with current layer details</strong>  Enables an overlay that provides quick visual feedback about selected layers.</p></li>
-<li><p><strong>Advanced Options</strong> - <strong>Concurrent Tasks</strong> Specifies how many processing threads to run simultaneously. Set this equal to the number of CPU cores for efficient performance (e.g., 4 or more on most systems).</p></li>
-<li><p><strong>Enable developer mode</strong> Intended for debugging — attaches the plugin to a remote debugger. ⚠️ Not recommended unless you’re actively developing the plugin.</p></li>
-<li><p><strong>Verbose logging mode</strong> Enables detailed logging useful for troubleshooting and diagnostics. Requires a restart to take effect.</p></li>
 </ul>
 </div></blockquote>
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_settings.png" target="_blank">
