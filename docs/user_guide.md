@@ -1,7 +1,7 @@
 # User Guide
 
 <p align="justify">
-Welcome to the **GEEST User Manual**! This guide will walk you through the essential features and functionalities of GEEST, ensuring a seamless user experience. Below is an overview of the key sections included in the manual:
+Welcome to the <strong>GEEST User Manual</strong>! This guide will walk you through the essential features and functionalities of GEEST, ensuring a seamless user experience. Below is an overview of the key sections included in the manual:
 </p>
 
 ## [Installing GEEST](https://worldbank.github.io/GEEST/docs/userguide/install.html)
