@@ -43,54 +43,15 @@ Once the plugin window is open, press the right arrow buttons highlighted in red
 
  - **About Page**: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.
 
-#### Setting Up the ORS Key
-
-To use the GEEST plugin effectively, you need to configure the **Open Route Service (ORS)** API key, as ORS is the backbone for processing **Accessibility** factors. The ORS platform is used for spatial analysis workflows, and obtaining an API key is a simple and free process. Below are the steps:
-
----
-
-##### Step 1: Get Your API Key
-> 1. Open your browser and go to the [ORS API Key Signup Page](https://openrouteservice.org/sign-up/).
-> 2. Register for an account or log in if you already have one.
-> 3. Once logged in, generate an API key by following the on-screen instructions.
-
-##### Step 2: Paste the API Key
-> **Note**: If you already entered your ORS API key under the **[Installing GEEST](https://github.com/worldbank/GEEST/blob/main/docs/userguide/install.md)** instructions in **Step 5: Verify the Installation and Configure the Tool**, the key will automatically appear here. In this case, you can skip this step and proceed to the next one.
-> 1. Copy the API key from the ORS website.
-> 2. Open the **GEEST ORS Setup** window in the plugin.
-> 3. Paste the API key into the text box provided (as shown in the screenshot below).
-
-<p align="center">
- <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ORS%20setup.jpg" 
-    alt="ORS key" 
-    style="width:65%;" 
-    title="Click to enlarge" 
-    onclick="window.open(this.src, '_blank')">
-</p>
-
-##### Step 3: Verify the Key
-> 1. After pasting the API key, click the **Check my key...** button.
-> 2. If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.
->   
-> **This step is crucial to unlock the full functionality of the plugin, including advanced spatial analysis workflows.**
-
----
- Tips for Setting Up the ORS Key
- - 💡 **Tip**: Ensure you paste the exact API key without any extra spaces or characters.
- - ⚠️ **Warning**: Avoid sharing your API key publicly to keep it secure.
- - 🔄 **If You Encounter Issues**: Double-check your internet connection and ensure your API key is valid.
----
-
 #### GEEST Project Selection
 
 In this step, you need to select a project folder to begin your work. The plugin provides you with two options:
 
 <p align="center">
 <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_set.png" 
     alt="Geest Project" 
-    style="width:65%;" 
+    style="width:55%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>

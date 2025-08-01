@@ -429,12 +429,6 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-plugin">Accessing the Plugin</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#project-setup">Project Setup</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-ors-key">Setting Up the ORS Key</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-get-your-api-key">Step 1: Get Your API Key</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-paste-the-api-key">Step 2: Paste the API Key</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-key">Step 3: Verify the Key</a></li>
-</ul>
-</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-project-selection">GEEST Project Selection</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
 </ul>
@@ -505,66 +499,14 @@ Click on the plugin’s toolbar icon to open its main window.</p></li>
 <li><p><strong>Welcome to GEEST Page</strong>: This is the introductory page of the plugin, providing an overview of its purpose and functionality. It serves as the starting point to familiarize users with the plugin’s capabilities and its relevance to geospatial analysis.</p></li>
 <li><p><strong>About Page</strong>: This page offers detailed information about the plugin, including its contributors, development background, and licensing. It highlights the open-source nature of the tool and acknowledges the organizations or individuals involved in its creation.</p></li>
 </ul>
-<section id="setting-up-the-ors-key">
-<h3>Setting Up the ORS Key<a class="headerlink" href="#setting-up-the-ors-key" title="Permalink to this heading">#</a></h3>
-<p>To use the GEEST plugin effectively, you need to configure the <strong>Open Route Service (ORS)</strong> API key, as ORS is the backbone for processing <strong>Accessibility</strong> factors. The ORS platform is used for spatial analysis workflows, and obtaining an API key is a simple and free process. Below are the steps:</p>
-<hr class="docutils" />
-<section id="step-1-get-your-api-key">
-<h4>Step 1: Get Your API Key<a class="headerlink" href="#step-1-get-your-api-key" title="Permalink to this heading">#</a></h4>
-<blockquote>
-<div><ol class="arabic simple">
-<li><p>Open your browser and go to the <a class="reference external" href="https://openrouteservice.org/sign-up/">ORS API Key Signup Page</a>.</p></li>
-<li><p>Register for an account or log in if you already have one.</p></li>
-<li><p>Once logged in, generate an API key by following the on-screen instructions.</p></li>
-</ol>
-</div></blockquote>
-</section>
-<section id="step-2-paste-the-api-key">
-<h4>Step 2: Paste the API Key<a class="headerlink" href="#step-2-paste-the-api-key" title="Permalink to this heading">#</a></h4>
-<blockquote>
-<div><p><strong>Note</strong>: If you already entered your ORS API key under the <strong><a class="reference external" href="https://github.com/worldbank/GEEST/blob/main/docs/userguide/install.md">Installing GEEST</a></strong> instructions in <strong>Step 5: Verify the Installation and Configure the Tool</strong>, the key will automatically appear here. In this case, you can skip this step and proceed to the next one.</p>
-<ol class="arabic simple">
-<li><p>Copy the API key from the ORS website.</p></li>
-<li><p>Open the <strong>GEEST ORS Setup</strong> window in the plugin.</p></li>
-<li><p>Paste the API key into the text box provided (as shown in the screenshot below).</p></li>
-</ol>
-</div></blockquote>
-<p align="center">
- <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ORS%20setup.jpg" 
-    alt="ORS key" 
-    style="width:65%;" 
-    title="Click to enlarge" 
-    onclick="window.open(this.src, '_blank')">
-</p>
-</section>
-<section id="step-3-verify-the-key">
-<h4>Step 3: Verify the Key<a class="headerlink" href="#step-3-verify-the-key" title="Permalink to this heading">#</a></h4>
-<blockquote>
-<div><ol class="arabic simple">
-<li><p>After pasting the API key, click the <strong>Check my key…</strong> button.</p></li>
-<li><p>If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.</p></li>
-</ol>
-<p><strong>This step is crucial to unlock the full functionality of the plugin, including advanced spatial analysis workflows.</strong></p>
-</div></blockquote>
-<hr class="docutils" />
-<p>Tips for Setting Up the ORS Key</p>
-<ul class="simple">
-<li><p>💡 <strong>Tip</strong>: Ensure you paste the exact API key without any extra spaces or characters.</p></li>
-<li><p>⚠️ <strong>Warning</strong>: Avoid sharing your API key publicly to keep it secure.</p></li>
-<li><p>🔄 <strong>If You Encounter Issues</strong>: Double-check your internet connection and ensure your API key is valid.</p></li>
-</ul>
-</section>
-</section>
-<hr class="docutils" />
 <section id="geest-project-selection">
 <h3>GEEST Project Selection<a class="headerlink" href="#geest-project-selection" title="Permalink to this heading">#</a></h3>
 <p>In this step, you need to select a project folder to begin your work. The plugin provides you with two options:</p>
 <p align="center">
 <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_set.png" 
     alt="Geest Project" 
-    style="width:65%;" 
+    style="width:55%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -876,12 +818,6 @@ Choose this option to start a new project. The plugin will guide you through cre
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-plugin">Accessing the Plugin</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#project-setup">Project Setup</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-the-ors-key">Setting Up the ORS Key</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-get-your-api-key">Step 1: Get Your API Key</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-paste-the-api-key">Step 2: Paste the API Key</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-key">Step 3: Verify the Key</a></li>
-</ul>
-</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-project-selection">GEEST Project Selection</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-steps-after-creating-the-folder">Additional Steps After Creating the Folder</a></li>
 </ul>
