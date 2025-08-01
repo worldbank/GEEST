@@ -73,7 +73,7 @@ Option 2: **Create a New Project**:
      
 <p align="center">
  <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20new.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_create1.png" 
     alt="New Geest Project" 
     style="width:65%;" 
     title="Click to enlarge" 
