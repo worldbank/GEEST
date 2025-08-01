@@ -63,7 +63,7 @@ Option 1: **Open an Existing Project**:
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20open.jpg" 
     alt="Open Geest Project" 
-    style="width:65%;" 
+    style="width:55%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -75,7 +75,7 @@ Option 2: **Create a New Project**:
  <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_create1.png" 
     alt="New Geest Project" 
-    style="width:65%;" 
+    style="width:55%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
