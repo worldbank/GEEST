@@ -21,5 +21,5 @@ Explore the analytical capabilities of GEEST, from combining data on the distrib
 
 ## [Data Collection](https://worldbank.github.io/GEEST/docs/userguide/datacollection.html)
 <p align="justify">  
-Learn how to efficiently collect, manage and utilize data within GEEST. This section offers comprehensive guidelines on identifying and sourcing relevant data for use with the GEEST tool. It also covers importing, exporting, and handling geospatial data to ensure seamless integration and analysis. To provide practical context, this section includes a detailed **St. Lucia use case**, showcasing real-world applications of data collection and management techniques within GEEST.
+Learn how to efficiently collect, manage and utilize data within GEEST. This section offers comprehensive guidelines on identifying and sourcing relevant data for use with the GEEST tool. It also covers importing, exporting, and handling geospatial data to ensure seamless integration and analysis. To provide practical context, this section includes a detailed <strong>St. Lucia use case</strong>!, showcasing real-world applications of data collection and management techniques within GEEST.
 </p>
