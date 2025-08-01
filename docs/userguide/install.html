@@ -487,39 +487,41 @@ document.write(`
 <section id="step-3-verify-the-installation-and-configure-the-tool">
 <h2>Step 3: Verify the Installation and Configure the Tool<a class="headerlink" href="#step-3-verify-the-installation-and-configure-the-tool" title="Permalink to this heading">#</a></h2>
 <blockquote>
-<div><ul>
+<div><ul class="simple">
 <li><ol class="arabic simple">
 <li><p>After installation, check the QGIS toolbar for the new <strong>GEEST</strong> icon <em>Show/Hide GEEST Panel</em>. <a class="reference external" href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg" title="Click to enlarge"><img alt="GEEST Toolbar Icons" src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg" /></a></p></li>
 </ol>
 </li>
 <li><ol class="arabic simple" start="2">
-<li><p>In the <strong>GEEST Settings</strong> window, locate the <strong>API Key for the Open Route Service</strong> field. Enter your ORS API key here to enable access to routing services.</p></li>
+<li><p>If the icon is not visible, go to <strong>Plugins</strong> &gt; <strong>Manage and Install Plugins…</strong>, then click on the <strong>Installed</strong> tab.</p></li>
+<li><p>In the list, find <strong>Gender Enabling Environments Spatial Tool (GEEST)</strong> and ensure the checkbox is ticked. The GEEST panel should now appear in the QGIS interface.</p></li>
 </ol>
-<ul class="simple">
-<li><p><strong>Note:</strong> To obtain an ORS API key, visit the <a class="reference external" href="https://openrouteservice.org/">OpenRouteService website</a>. This API key is essential for enabling routing services within the GEEST tool.</p></li>
-</ul>
-</li>
-<li><ol class="arabic simple" start="3">
-<li><p><strong>Optional</strong>: <strong>The default settings are recommended</strong> but you can adjust other settings as needed, such as <strong>Study Area Preparation Options</strong>, <strong>Analysis
-Options</strong> and <strong>User Interface Options</strong>, to enhance performance and debugging:</p></li>
-</ol>
-<ul class="simple">
-<li><p><em>Chunk Size</em>: Specifies how the study area is divided into smaller sections (chunks) for processing. For example, a chunk size of 10 means the area will be processed in chunks of 10x10 cells. Larger chunk sizes can speed up processing but require more memory, while smaller chunks are slower but less memory-intensive.</p></li>
-<li><p><em>Assign 0 to cells by default</em>: When enabled, cells without data are assigned a value of 0 during analysis. If unchecked, such cells are treated as “no data,” meaning they are excluded from calculations. This option ensures clarity in areas where no data is present.</p></li>
-<li><p><em>Show layer when clicking an item in the Geest tree</em>: Automatically displays the associated layer in the map view when an item is selected in the Geest tree. This feature improves usability by providing visual feedback for selected layers.</p></li>
-<li><p><em>Advanced Options</em>:</p>
-<ul>
-<li><p><em>Concurrent Tasks</em>: Controls the number of threads (tasks) that can run simultaneously during analysis. A value of 1 means tasks are executed sequentially (one at a time). Higher values (e.g., matching the number of CPU cores) can speed up processing but may require a more powerful machine.</p></li>
-<li><p><em>Enable Developer Mode</em>: Intended for developers to debug the plugin using a remote debugger. <strong>Important Note</strong>: Should only be enabled if a remote debugger is set up. Enabling this without proper setup can block QGIS startup. When active, it creates a debug log tab for tracking issues.</p></li>
-<li><p><em>Verbose Logging Mode</em>: Adds detailed log messages during processing, which are helpful for diagnosing issues. This option is useful when troubleshooting but can slow down performance due to the extra logging.</p></li>
-</ul>
-</li>
-</ul>
 </li>
 </ul>
 </div></blockquote>
-<a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
-  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/geest%20settings.jpg" alt="GEEST Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+<p align="center">
+  <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_show.png" target="_blank">
+    <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_show.png" alt="QGIS Plugin Installation" width="600" title="Click to enlarge">
+  </a>
+</p>
+<blockquote>
+<div><ul class="simple">
+<li><ol class="arabic simple" start="4">
+<li><p>Optionally, you can customize the plugin’s behavior by navigating to: <strong>Settings Menu</strong> → <strong>Options</strong> → <strong>GEEST Settings</strong>. While the <strong>default settings are recommended</strong>, the following configurable sections are available:</p></li>
+</ol>
+</li>
+<li><p><strong>Chunk size</strong> determines how many cells are processed at once. For example, a chunk size of <code class="docutils literal notranslate"><span class="pre">10</span></code> processes 10×10 cell blocks. Increasing this value (e.g., to 50) can improve performance on powerful machines, but may slow down or crash QGIS on lower-spec systems.</p></li>
+<li><p><strong>Analysis Options</strong> - <strong>Assign 0 to cells by default</strong> If checked, areas without data will be assigned a value of 0. If unchecked, those areas will be left as NoData. This is useful for consistent raster outputs when comparing or summing layers.</p></li>
+<li><p><strong>User Interface Options</strong></p></li>
+<li><p>✅ <strong>Show layer when clicking an item in the GEEST tree</strong> Automatically activates the corresponding layer in QGIS when selected in the GEEST panel.</p></li>
+<li><p>✅ <strong>Show canvas overlay with current layer details</strong>  Enables an overlay that provides quick visual feedback about selected layers.</p></li>
+<li><p><strong>Advanced Options</strong> - <strong>Concurrent Tasks</strong> Specifies how many processing threads to run simultaneously. Set this equal to the number of CPU cores for efficient performance (e.g., 4 or more on most systems).</p></li>
+<li><p><strong>Enable developer mode</strong> Intended for debugging — attaches the plugin to a remote debugger. ⚠️ Not recommended unless you’re actively developing the plugin.</p></li>
+<li><p><strong>Verbose logging mode</strong> Enables detailed logging useful for troubleshooting and diagnostics. Requires a restart to take effect.</p></li>
+</ul>
+</div></blockquote>
+<a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_settings.png" target="_blank">
+  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_settings.png" alt="GEEST Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 </section>
 </section>
