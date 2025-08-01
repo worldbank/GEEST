@@ -182,7 +182,7 @@ Once this pre-processing step is completed, you will seamlessly transition to th
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20data%20processing%20UI.jpg"
     alt="Geest data processing" 
-    style="width:55%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
@@ -196,7 +196,7 @@ The data processing interface serves as the central hub for managing, configurin
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Nav_understand.jpg"
     alt="Geest data processing" 
-    style="width:55%;" 
+    style="width:65%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
