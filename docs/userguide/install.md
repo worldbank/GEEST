@@ -17,8 +17,8 @@ Follow the steps below to install the GEEST QGIS plugin.
 > - 2. Search for `GEEST`.
 > - 3. Select the plugin and click **Install Plugin**.
 
-<a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/install.jpg" target="_blank">
-  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/install.jpg" alt="QGIS Plugin Installation" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
+<a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_plugin.png" target="_blank">
+  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_plugin.png" alt="QGIS Plugin Installation" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 
 ### Step 3: Verify the Installation and Configure the Tool
