@@ -7,7 +7,7 @@ The GEEST plugin interface is intuitive and easy to navigate. In this section, t
 After installing the plugin, its interface should automatically appear:  
 <p align="center">
   <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_1st.png" 
     alt="Plugin Interface" 
     style="width:65%;" 
     title="Click to enlarge" 
