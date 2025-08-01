@@ -11,26 +11,17 @@ Follow the steps below to install the GEEST QGIS plugin.
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins.JPG" alt="QGIS Plugin Setup" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 
-### Step 2: Check *Show also Experimental Plugins*
+### Step 2: Install the Plugin
 
-> - 1. In the **Plugin Manager** window, select the **Settings** tab.
-> - 2. Ensure the **Show also Experimental Plugins** option is checked.
-
-<a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins%20settings.jpg" target="_blank">
-  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins%20settings.jpg" alt="QGIS Plugin Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
-</a>
-
-### Step 3: Install the Plugin
-
-> - 1. Return to the **All** tab in the Plugin Manager.
+> - 1. In the **Plugin Manager** window, select the **All** tab in the Plugin Manager.
 > - 2. Search for `GEEST`.
-> - 3. Select the plugin and click **Install Experimental Plugin**.
+> - 3. Select the plugin and click **Install Plugin**.
 
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/install.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/install.jpg" alt="QGIS Plugin Installation" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
 
-### Step 4: Verify the Installation and Configure the Tool
+### Step 3: Verify the Installation and Configure the Tool
 
 > - 1. After installation, check the QGIS toolbar for the new **GEEST** icon *Show/Hide GEEST Panel*. [![GEEST Toolbar Icons](https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg)](https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/icons.jpg "Click to enlarge")
 > - 2. In the **GEEST Settings** window, locate the **API Key for the Open Route Service** field. Enter your ORS API key here to enable access to routing services.
