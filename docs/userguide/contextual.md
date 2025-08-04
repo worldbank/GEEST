@@ -93,7 +93,7 @@ After entering the values for the factors and adjusting their weights to achieve
 
 <p align="center">
 <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/CD_Run_item.jpg" 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/contextual_run.png" 
     alt="Contextual Run" 
     style="width:75%;" 
     title="Click to enlarge" 
