@@ -6,7 +6,7 @@ The Accessibility Dimension evaluates women’s daily mobility by examining thei
 
 ### General Overview
 ---
-This tool evaluates how easily women can access essential services and amenities, considering their caregiving roles and daily travel needs. It uses geospatial area analysis with Openrouteservices (ORS) and OpenStreetMap (OSM) data to measure accessibility for several factors, including:
+This tool evaluates how easily women can access essential services and amenities, considering their caregiving roles and daily travel needs. It uses geospatial area analysis with OpenStreetMap (OSM) data to measure accessibility for several factors, including:
 
 - **Women’s Travel Patterns:** Access to everyday services like pharmacies, markets, supermarkets, childcare centers, schools and parks.
 - **Access to Public Transport:** Proximity to bus stops, train stations and other transport facilities.
@@ -17,6 +17,8 @@ This tool evaluates how easily women can access essential services and amenities
 **Travel mode**: The user can select walking or driving as a travel mode, and it is recommended that the same travel mode should be selected for all accessibility factors. The default travel mode is walking due to its inclusive nature.
 
 **Measurement**: The default measurement for travel is distance in meters, which is most appropriate for walking. These thresholds are based on evidence from the literature at the factor level and are designed to provide consistency across analyses. If driving is selected as a travel mode, time in minutes is a more appropriate measurement.
+
+**The thresholds**: They can be adjusted depending on the scope of the analysis—whether it is conducted at a broader scale, such as the **national level**, or focused on a more localized context, such as **urban or regional** areas.
 
 ---
 
@@ -55,31 +57,45 @@ This tool evaluates how easily women can access essential services and amenities
 
 <table style="width:auto; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
   <tr style="border:1px solid black;">
-    <th style="border:1px solid black; width:250px;">Distance to Facilities (meters)</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Facilities (meters)</strong><br><span style="font-weight:normal;">(National Level Analysis)</span></th>
+    <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Facilities (meters)</strong><br><span style="font-weight:normal;">(Local Level Analysis)</span></th>
     <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">0 - 400</td>
     <td style="border:1px solid black; text-align:center;">5</td>
+    <td style="border:1px solid black;">0 - 300</td>
+    <td style="border:1px solid black; text-align:center;">5</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">401 - 800</td>
     <td style="border:1px solid black; text-align:center;">4</td>
+    <td style="border:1px solid black;">301 - 800</td>
+    <td style="border:1px solid black; text-align:center;">4</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">801 - 1,200</td>
     <td style="border:1px solid black; text-align:center;">3</td>
+    <td style="border:1px solid black;">801 - 1,000</td>
+    <td style="border:1px solid black; text-align:center;">3</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">1,201 - 1,500</td>
     <td style="border:1px solid black; text-align:center;">2</td>
+    <td style="border:1px solid black;">1,001 - 1,300</td>
+    <td style="border:1px solid black; text-align:center;">2</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">1,501 - 2,000</td>
     <td style="border:1px solid black; text-align:center;">1</td>
+    <td style="border:1px solid black;">1,301 - 1,500</td>
+    <td style="border:1px solid black; text-align:center;">1</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">Over 2,000</td>
+    <td style="border:1px solid black; text-align:center;">0</td>
+    <td style="border:1px solid black;">Over 1,500</td>
     <td style="border:1px solid black; text-align:center;">0</td>
   </tr>
 </table>
