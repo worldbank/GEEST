@@ -108,7 +108,7 @@ How to Create a New Folder
 >       - Areas marked as marine (C) pixels are excluded by assigning them a "NoData" value.
 >       - Land cells are assigned appropriate values to create a complete raster mask for the study area.
 >       - The resulting raster layers are stored in a dedicated directory, with files named according to the polygon’s name and part number (for multipart polygons).
->      - Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.
+>      - ⚠️ **Warning**: Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.
 >
 > - **Download or select the road network**: To conduct the analysis for the Accessibility dimension, a road network is required. The process uses geospatial area analysis based on road network data to evaluate accessibility. You can provide this data in two ways: either upload an existing road network or download it directly from OpenStreetMap (OSM) by clicking the **Download from Open Street Map** button. Once the download is complete, proceed by clicking the arrow in the bottom-right corner to continue.
 
