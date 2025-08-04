@@ -415,31 +415,45 @@ The process should be successfully completed and indicated by a green checkmark 
 
 <table style="width:auto; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
   <tr style="border:1px solid black;">
-    <th style="border:1px solid black; width:250px;">Distance to Financial Facilities (meters)</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Financial Facilities (meters)</strong><br><span style="font-weight:normal;">(National Level Analysis)</span></th>
+    <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Financial Facilities (meters)</strong><br><span style="font-weight:normal;">(Local Level Analysis)</span></th>
     <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">0 - 400</td>
     <td style="border:1px solid black; text-align:center;">5</td>
+    <td style="border:1px solid black;">0 - 500</td>
+    <td style="border:1px solid black; text-align:center;">5</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">401 - 800</td>
     <td style="border:1px solid black; text-align:center;">4</td>
+    <td style="border:1px solid black;">501 - 1,000</td>
+    <td style="border:1px solid black; text-align:center;">4</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">801 - 1,200</td>
     <td style="border:1px solid black; text-align:center;">3</td>
+    <td style="border:1px solid black;">1,001 - 1,500</td>
+    <td style="border:1px solid black; text-align:center;">3</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">1,201 - 2,000</td>
     <td style="border:1px solid black; text-align:center;">2</td>
+    <td style="border:1px solid black;">1,501 - 2,000</td>
+    <td style="border:1px solid black; text-align:center;">2</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">2,001 - 3,000</td>
     <td style="border:1px solid black; text-align:center;">1</td>
+    <td style="border:1px solid black;">2,001 - 2,500</td>
+    <td style="border:1px solid black; text-align:center;">1</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">Over 3,000</td>
+    <td style="border:1px solid black; text-align:center;">0</td>
+    <td style="border:1px solid black;">Over 2,500</td>
     <td style="border:1px solid black; text-align:center;">0</td>
   </tr>
 </table>
