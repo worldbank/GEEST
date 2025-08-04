@@ -18,6 +18,8 @@ Place Characterization factors refer to the following indicators:
 
 For certain factors, **multiple data input options** are available depending on the data's format and availability.
 
+As with the Accessibility dimension, **Safety and Water sanitation** factors can be processed according to the level of analysis—whether conducted at a broader scale, such as the **national level**, or tailored to a more localized context, such as **urban or regional** areas.
+
 ### Input Place Characterization factors
 ---
 #### Active Transport
