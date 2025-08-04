@@ -514,7 +514,7 @@ The outputs consist of all factors and subfactors, as well as the aggregation of
 
 The outputs are stored under the Accessibility folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
 
-If the results do not immediately appear in the Layer Panel after processing the Accessibility Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Accessibility Dimension and selecting **Add to map** from the context menu:
+If the results do not immediately appear in the Layer Panel after processing the Accessibility Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Accessibility Dimension and selecting <strong>Add to map</strong> from the context menu:
 </p>
 
 
