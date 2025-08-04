@@ -115,7 +115,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ### Visualizing the Outputs 
 ---
 <p align="justify"> 
-After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
+After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the <i>Mutually Exclusive Group</i> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
 The outputs consist of the Workplace Discrimination, Regulatory Frameworks, and Financial Inclusion factors, as well as the aggregation of these three factors into the final Contextual output. All scores are assessed on a scale from 0 to 5, categorized as follows: **≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling)**.
 </p>
@@ -129,9 +129,11 @@ The outputs consist of the Workplace Discrimination, Regulatory Frameworks, and 
     onclick="window.open(this.src, '_blank')">
 </p>
 
+<p align="justify">
 The outputs are stored under the Contextual folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
 
 If the results do not immediately appear in the Layer Panel after processing the Contextual Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Contextual Dimension and selecting **Add to map** from the context menu. There is also an option to directly open the working folder from within the interface:
+</p>
 
 <p align="center">
 <img 
