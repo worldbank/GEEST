@@ -109,6 +109,18 @@ How to Create a New Folder
 >       - Land cells are assigned appropriate values to create a complete raster mask for the study area.
 >       - The resulting raster layers are stored in a dedicated directory, with files named according to the polygon’s name and part number (for multipart polygons).
 >      - Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.
+>
+> - **Download or select the road network**: To conduct the analysis for the Accessibility dimension, a road network is required. The process uses geospatial area analysis based on road network data to evaluate accessibility. You can provide this data in two ways: either upload an existing road network or download it directly from OpenStreetMap (OSM) by clicking the **Download from Open Street Map** button. Once the download is complete, proceed by clicking the arrow in the bottom-right corner to continue.
+
+<p align="center">
+ <img 
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/navigation_road.png" 
+    alt="New Geest Project" 
+    style="width:45%;" 
+    title="Click to enlarge" 
+    onclick="window.open(this.src, '_blank')">
+</p>
+
 ---
    - 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
 ---      
