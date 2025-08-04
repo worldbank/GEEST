@@ -95,7 +95,7 @@ After entering the values for the factors and adjusting their weights to achieve
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/contextual_run.png" 
     alt="Contextual Run" 
-    style="width:65%;" 
+    style="width:55%;" 
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
