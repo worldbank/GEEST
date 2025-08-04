@@ -158,30 +158,44 @@ The successful completion of the process is indicated by the green checkmark wid
 
 <table style="width:auto; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
   <tr style="border:1px solid black;">
-    <th style="border:1px solid black; width:250px;">Distance to Public Transport stops (meters)</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Public Transport Stops (meters)</strong><br><span style="font-weight:normal;">(National Level Analysis)</span></th>
+    <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Public Transport Stops (meters)</strong><br><span style="font-weight:normal;">(Local Level Analysis)</span></th>
     <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
+    <td style="border:1px solid black;">0 - 250</td>
+    <td style="border:1px solid black; text-align:center;">5</td>
     <td style="border:1px solid black;">0 - 250</td>
     <td style="border:1px solid black; text-align:center;">5</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
+    <td style="border:1px solid black;">251 - 500</td>
+    <td style="border:1px solid black; text-align:center;">4</td>
     <td style="border:1px solid black;">251 - 500</td>
     <td style="border:1px solid black; text-align:center;">4</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
+    <td style="border:1px solid black;">501 - 750</td>
+    <td style="border:1px solid black; text-align:center;">3</td>
     <td style="border:1px solid black;">501 - 750</td>
     <td style="border:1px solid black; text-align:center;">3</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
+    <td style="border:1px solid black;">751 - 1,000</td>
+    <td style="border:1px solid black; text-align:center;">2</td>
     <td style="border:1px solid black;">751 - 1,000</td>
     <td style="border:1px solid black; text-align:center;">2</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
+    <td style="border:1px solid black;">1,001 - 1,500</td>
+    <td style="border:1px solid black; text-align:center;">1</td>
     <td style="border:1px solid black;">1,001 - 1,250</td>
     <td style="border:1px solid black; text-align:center;">1</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
+    <td style="border:1px solid black;">Over 1,500</td>
+    <td style="border:1px solid black; text-align:center;">0</td>
     <td style="border:1px solid black;">Over 1,250</td>
     <td style="border:1px solid black; text-align:center;">0</td>
   </tr>
@@ -237,31 +251,45 @@ The process should be successfully completed and indicated by a green checkmark 
 
 <table style="width:auto; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
   <tr style="border:1px solid black;">
-    <th style="border:1px solid black; width:250px;">Distance to Health Facilities (meters)</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Health Facilities (meters)</strong><br><span style="font-weight:normal;">(National Level Analysis)</span></th>
+    <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Health Facilities (meters)</strong><br><span style="font-weight:normal;">(Local Level Analysis)</span></th>
     <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">0 - 2,000</td>
     <td style="border:1px solid black; text-align:center;">5</td>
+    <td style="border:1px solid black;">0 - 400</td>
+    <td style="border:1px solid black; text-align:center;">5</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">2,001 - 4,000</td>
     <td style="border:1px solid black; text-align:center;">4</td>
+    <td style="border:1px solid black;">401 - 800</td>
+    <td style="border:1px solid black; text-align:center;">4</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">4,001 - 6,000</td>
     <td style="border:1px solid black; text-align:center;">3</td>
+    <td style="border:1px solid black;">801 - 1,250</td>
+    <td style="border:1px solid black; text-align:center;">3</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">6,001 - 8,000</td>
     <td style="border:1px solid black; text-align:center;">2</td>
+    <td style="border:1px solid black;">1,251 - 1,650</td>
+    <td style="border:1px solid black; text-align:center;">2</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">8,001 - 10,000</td>
     <td style="border:1px solid black; text-align:center;">1</td>
+    <td style="border:1px solid black;">1,651 - 2,500</td>
+    <td style="border:1px solid black; text-align:center;">1</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">Over 10,000</td>
+    <td style="border:1px solid black; text-align:center;">0</td>
+    <td style="border:1px solid black;">Over 2,500</td>
     <td style="border:1px solid black; text-align:center;">0</td>
   </tr>
 </table>
@@ -305,31 +333,45 @@ The process should be successfully completed and indicated by a green checkmark 
 
 <table style="width:auto; border:1px solid black; border-collapse:collapse; margin-left:0; font-size:12px;">
   <tr style="border:1px solid black;">
-    <th style="border:1px solid black; width:250px;">Distance to Facilities (meters)</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Facilities (meters)</strong><br><span style="font-weight:normal;">(National Level Analysis)</span></th>
+    <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
+    <th style="border:1px solid black; width:250px;"><strong>Distance to Facilities (meters)</strong><br><span style="font-weight:normal;">(Local Level Analysis)</span></th>
     <th style="border:1px solid black; width:80px; text-align:center;">Score</th>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">0 - 2,000</td>
     <td style="border:1px solid black; text-align:center;">5</td>
+    <td style="border:1px solid black;">0 - 350</td>
+    <td style="border:1px solid black; text-align:center;">5</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">2,001 - 4,000</td>
     <td style="border:1px solid black; text-align:center;">4</td>
+    <td style="border:1px solid black;">351 - 700</td>
+    <td style="border:1px solid black; text-align:center;">4</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">4,001 - 6,000</td>
     <td style="border:1px solid black; text-align:center;">3</td>
+    <td style="border:1px solid black;">701 - 1,100</td>
+    <td style="border:1px solid black; text-align:center;">3</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">6,001 - 8,000</td>
     <td style="border:1px solid black; text-align:center;">2</td>
+    <td style="border:1px solid black;">1,101 - 1,500</td>
+    <td style="border:1px solid black; text-align:center;">2</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">8,001 - 10,000</td>
     <td style="border:1px solid black; text-align:center;">1</td>
+    <td style="border:1px solid black;">1,501 - 2,100</td>
+    <td style="border:1px solid black; text-align:center;">1</td>
   </tr>
-  <tr style="border:1px solid black;">
+  <tr>
     <td style="border:1px solid black;">Over 10,000</td>
+    <td style="border:1px solid black; text-align:center;">0</td>
+    <td style="border:1px solid black;">Over 2,100</td>
     <td style="border:1px solid black; text-align:center;">0</td>
   </tr>
 </table>
