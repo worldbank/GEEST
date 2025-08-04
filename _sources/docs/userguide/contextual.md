@@ -116,7 +116,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
-The outputs consist of the Workplace Discrimination, Regulatory Frameworks, and Financial Inclusion factors, as well as the aggregation of these three factors into the final Contextual output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).
+The outputs consist of the Workplace Discrimination, Regulatory Frameworks, and Financial Inclusion factors, as well as the aggregation of these three factors into the final Contextual output. All scores are assessed on a scale from 0 to 5, categorized as follows: **≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling)**.
 
 <p align="center">
 <img 
