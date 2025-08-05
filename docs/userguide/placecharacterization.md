@@ -8,24 +8,57 @@ The Place Characterization Dimension refers to the social, environmental, and in
 
 Place Characterization factors refer to the following indicators:
 
-- **Active Transport:** identifies areas based on their ability to support safe and efficient active transport for women, such as walking, cycling, and other non-motorized modes of travel, by analyzing features like street crossings, block lengths, footpaths, and cycle paths.
+- **Active Transport:** identifies areas based on their capacity to support safe and efficient active transport for women—such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.
 - **Safety:** defines areas perceived as safe based on specific data or, alternatively, on how brightly lit they are, assuming that brightly lit areas are safer than those with no lights.
 - **Fragility, conflict and violence (FCV):** assigns scores to by analyzing overlap with ACLED data with buffers representing various types of events.
-- **Education:** computes a raster containing a standardized measure of the percentage of women who have attained higher education in the country/region of interest.
-- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure.
+- **Education:** computes a raster that provides a standardized measure of the percentage of women who have attained higher education within the country or region of interest, distributing this information across urbanized areas as defined by the GHS-SMOD classification.
+- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure by computing a national index score based on the Ookla dataset for both mobile and fixed network coverage.
 - **Environmental Hazards:** characterizes areas based on their vulnerability to natural disasters.
 - **Water sanitation:** assesses the availability and accessibility of clean water and sanitation facilities.
 
 For certain factors, **multiple data input options** are available depending on the data's format and availability.
 
-As with the Accessibility dimension, **Safety and Water sanitation** factors can be processed according to the level of analysis—whether conducted at a broader scale, such as the **national level**, or tailored to a more localized context, such as **urban or regional** areas.
+As with the Accessibility dimension, **Active transport, Safety and Water sanitation** factors can be processed according to the level of analysis—whether conducted at a broader scale, such as the **national level**, or tailored to a more localized context, such as **urban or regional** areas.
 
 ### Input Place Characterization factors
 ---
 #### Active Transport
 
 <p align="justify"> 
-<strong>Active Transport</strong> refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands. This factor is composed by 4 subfactors which provide additional granularity: street crossings | cycly paths | footpaths | block layout.
+<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands. This factor is calculated by assigning scores to road network features, obtained during the project setup phase, as stated below:
+
+### GEEST Scoring Table for Active Transport
+
+| Key                         | Highway (national or local level) | GEEST Score | Cycleway (national level) | GEEST Score | Cycleway (local level) | GEEST Score |
+|----------------------------|-----------------------------------|-------------|----------------------------|-------------|-------------------------|-------------|
+| 1                          | motorway                          | 1           | lane                       | 4           | lane                    | 5           |
+| 2                          | trunk                             | 1           | shared_lane                | 4           | shared_lane             | 4           |
+| 3                          | primary                           | 2           | share_busway               | 4           | share_busway            | 2           |
+| 4                          | secondary                         | 3           | track                      | 4           | track                   | 5           |
+| 5                          | tertiary                          | 4           | separate                   | 4           | separate                | 5           |
+| 6                          | unclassified                      | 3           | crossing                   | 4           | crossing                | 5           |
+| 7                          | residential                       | 5           | shoulder                   | 4           | shoulder                | 2           |
+| 8                          | motorway_link                     | 1           | link                       | 4           | link                    | 3           |
+| 9                          | trunk_link                        | 1           |                            |             |                         |             |
+| 10                         | primary_link                      | 2           |                            |             |                         |             |
+| 11                         | secondary_link                    | 3           |                            |             |                         |             |
+| 12                         | tertiary_link                     | 4           |                            |             |                         |             |
+| 13                         | living_street                     | 5           |                            |             |                         |             |
+| 14                         | service                           | 3           |                            |             |                         |             |
+| 15                         | road                              | 3           |                            |             |                         |             |
+| 16                         | pedestrian                        | 5           |                            |             |                         |             |
+| 17                         | footway                           | 5           |                            |             |                         |             |
+| 18                         | cycleway                          | 4           |                            |             |                         |             |
+| 19                         | path                              | 4           |                            |             |                         |             |
+| 20                         | bridleway                         | 3           |                            |             |                         |             |
+| 21                         | steps                             | 5           |                            |             |                         |             |
+| 22                         | track                              | 2           |                            |             |                         |             |
+| 23                         | bus_guideway                      | 0           |                            |             |                         |             |
+| 24                         | escape                            | 0           |                            |             |                         |             |
+| 25                         | raceway                           | 0           |                            |             |                         |             |
+| 26                         | construction                      | 0           |                            |             |                         |             |
+| 27                         | proposed                          | 0           |                            |             |                         |             |
+
 
 **Locate Active Transport Section**
 
@@ -45,16 +78,6 @@ As with the Accessibility dimension, **Safety and Water sanitation** factors can
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-
-<strong>Active transport</strong> factor is calculated based on the four subfactors averaged across the raster cells:
-
-| Subfactor               | Score 0          | Score 1               | Score 2                 | Score 3                 | Score 4                 | Score 5                 |
-|----------------------|------------------|-----------------------|-------------------------|-------------------------|-------------------------|-------------------------|
-| **Street Crossings** | None             | N/A                   | N/A                     | 1 crossing              | N/A                     | 2+ crossings           |
-| **Cycle Paths**      | None             | N/A                   | N/A                     | 1 cycle path            | N/A                     | 2+ paths               |
-| **Footpaths**        | None             | N/A                   | N/A                     | 1 path                  | N/A                     | 2+ paths               |
-| **Block Sizes**      | None             | >1 km                 | 751m - 1 km             | 501m - 750m             | 251m - 500m             | <250m                  |
-
 
 **Process Active Transport factors**
 
