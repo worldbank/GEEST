@@ -29,10 +29,6 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 
 ### GEEST Scoring Table for Active Transport
 
-### GEEST Scoring – Compact Format
-
-### GEEST Scoring Table – National and Local Levels
-
 | #  | Highway (national or local level) | GEEST SCORE (0–5) | Cycleway (national level) | GEEST SCORE (0–5) | Cycleway (local level) | GEEST SCORE (0–5) |
 |----|-----------------------------------|-------------------|----------------------------|-------------------|-------------------------|-------------------|
 | 1  | motorway                          | 1                 | lane                       | 4                 | lane                    | 5                 |
