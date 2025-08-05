@@ -292,7 +292,9 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process and distributing the resulting values across urbanized areas as defined by the **GHS-SMOD** classification. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.
+<p align="justify"> 
+<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process, distributing the resulting values across urbanized areas as defined by the <strong>GHS-SMOD</strong> classification. The spatial representation of educational attainment is confined to <strong>inhabited areas</strong>, as classified by <strong>GHS-SMOD</strong>. By default, classes <strong>10 (Water grid cell)</strong> and <strong>11 (Very low density rural grid cell)</strong> are excluded from the analysis. Each grid cell that intersects an inhabited class is marked as <strong>inhabited</strong> and is assigned the corresponding <strong>Education score</strong>. All other grid cells receive a score of <strong>0</strong>. The <strong>Education score</strong> reflects the percentage of <strong>female graduates in targeted fields of study</strong>, normalized on a 0–5 scale. For example, a 50% female STEM graduation rate would yield a score of <strong>2.5</strong>.
+</p>
 
 **Process Education factor**
 
@@ -348,7 +350,20 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-<strong>Digital Inclusion</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas where 100% of households have internet access, and <em>0</em> represents areas where no households have internet access.
+**Digital Inclusion** reclassifies the input data to a standardized scale from **0 to 5** using a linear scaling process. This is applied across regions where **Ookla** data has been collected for either **mobile** or **fixed** networks.
+
+- A score of **5** represents areas where **100% of households have internet access**.
+- A score of **0** represents areas where **no households have internet access**.
+
+Access values are normalized to the WEE scale (0–5). For example:
+
+> An area with 81.7% internet access would receive a score of:  
+> **(81.7 × 5) / 100 = 4.085**
+
+If national-level statistics on internet access are available, they are used in conjunction with **Ookla coverage polygons** to improve the spatial representation of digital access.
+
+Each **Ookla polygon** receives a **Digital Inclusion (DI) score**, which is then mapped to the underlying raster grid.  
+Raster cells that **do not intersect** any Ookla polygons are assigned a score of **0** (no access).
 
 **Process Digital Inclusion factor**
 
