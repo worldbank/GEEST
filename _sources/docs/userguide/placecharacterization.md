@@ -63,14 +63,14 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 
 <span style="color:red"><strong>In progress</strong></span>
 
-**Locate Active Transport Section**
+`**Locate Active Transport Section**`
 
-> - 🖱️🖱️ **Double-click** on the **Active Transport section** to open the pop-up.
-> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features for street crossings, lines for cycle paths and footpaths and polygons for block layout**) corresponding to the indicators by clicking the three-dot button.
-> - ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.
-> - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
-> - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
-> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
+`> - 🖱️🖱️ **Double-click** on the **Active Transport section** to open the pop-up.`
+`> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features for street crossings, lines for cycle paths and footpaths and polygons for block layout**) corresponding to the indicators by clicking the three-dot button.`
+`> - ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.`
+`> - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.`
+`> - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.`
+`> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.`
 
 
 <p align="center">
@@ -82,12 +82,12 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
     onclick="window.open(this.src, '_blank')">
 </p>
 
-**Process Active Transport factors**
+`**Process Active Transport factors**`
 
-Back in the Data Processing Interface:
+`Back in the Data Processing Interface:`
 
-> - 🖱️ **Right-click** on **Active Transport**.  
-> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
+`> - 🖱️ **Right-click** on **Active Transport**.`
+`> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.`
 
 <p align="center">
 <img 
@@ -98,7 +98,7 @@ Back in the Data Processing Interface:
     onclick="window.open(this.src, '_blank')">
 </p>
 
-The successful completion of the process is indicated by the green checkmark widgets.
+`The successful completion of the process is indicated by the green checkmark widgets.`
 
 ---
 #### Safety
