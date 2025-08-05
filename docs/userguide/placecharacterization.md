@@ -527,13 +527,16 @@ The process should be successfully completed and indicated by a green checkmark 
 
 ### Visualizing the Outputs 
 ---
-After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
+<p align="justify">
+After completing the process, the outputs are automatically added to the <strong>Layer Panel</strong> in <strong>QGIS</strong> as a <strong>group layer</strong>. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
-The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).
+The outputs consist of all <strong>factors</strong> and <strong>subfactors</strong>, as well as the aggregation of these into the final <strong>Place Characterization</strong> output. All scores are assessed on a scale from <strong>0 to 5</strong>, categorized as follows: ≤ 0.5 (<em>Not Enabling</em>) | 0.5–1.5 (<em>Very Low Enablement</em>) | 1.5–2.5 (<em>Low Enablement</em>) | 2.5–3.5 (<em>Moderately Enabling</em>) | 3.5–4.5 (<em>Enabling</em>) | 4.5–5.0 (<em>Highly Enabling</em>).
 
-The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
+The outputs are stored under the <strong>Place Characterization</strong> folder within the <strong>project folder</strong> created during the setup phase as <strong>raster files</strong>. These files can be shared and further utilized for various purposes, such as visualization in <strong>QGIS</strong> or other GIS software, integration into <strong>reports</strong>, overlaying with other <strong>spatial datasets</strong>, or performing <strong>advanced geospatial analyses</strong>, such as identifying priority areas or conducting trend analysis based on the scores.
 
-If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting **Add to map** from the context menu:
+If the results do not immediately appear in the <strong>Layer Panel</strong> after processing the <strong>Place Characterization</strong> dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the <strong>Place Characterization</strong> dimension and selecting <strong>Add to map</strong> from the context menu.
+</p>
+
 
 <p align="center">
 <img 
