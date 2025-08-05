@@ -1219,30 +1219,13 @@ This factor is composed, by default, of five subfactors representing different t
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:</p>
-<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Factor</p></th>
-<th class="head"><p>Score 0</p></th>
-<th class="head"><p>Score 1</p></th>
-<th class="head"><p>Score 2</p></th>
-<th class="head"><p>Score 3</p></th>
-<th class="head"><p>Score 4</p></th>
-<th class="head"><p>Score 5</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><strong>Water Sanitation</strong></p></td>
-<td><p>No water points</p></td>
-<td><p>N/A</p></td>
-<td><p>N/A</p></td>
-<td><p>1 water point</p></td>
-<td><p>N/A</p></td>
-<td><p>2 or more water points</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+<p><strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within each raster cell, using a buffer-based method.</p>
+<ul class="simple">
+<li><p>At the <strong>national level</strong>, each Point of Interest (POI) is enclosed in a <strong>3 km buffer</strong>.</p></li>
+<li><p>At the <strong>local level</strong>, a <strong>1 km buffer</strong> is applied.</p></li>
+</ul>
+<p>Raster grid cells that <strong>intersect</strong> a buffer are considered to have access and are assigned a score of <strong>5</strong>.<br />
+Cells that <strong>do not intersect</strong> any buffer receive a score of <strong>0</strong>.</p>
 <p><strong>Process Water sanitation factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
