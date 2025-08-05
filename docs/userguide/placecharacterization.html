@@ -750,7 +750,39 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <section id="safety">
 <h3>Safety<a class="headerlink" href="#safety" title="Permalink to this heading">#</a></h3>
 <p align="justify"> 
-<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
+<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services. Depending on the level of analysis, the scoring approach varies:
+<ul class="simple">
+<li><p><strong>At the national level</strong>, each Point of Interest (POI) is enclosed within a 1 km² buffer. Raster grid cells that intersect this buffer receive a score of <strong>5</strong> (indicating access to street lighting). Cells that do <strong>not</strong> intersect any buffer receive a score of <strong>0</strong> (indicating no access).</p></li>
+<li><p><strong>At the local level</strong>, a 20-meter buffer is computed around each POI. Raster cells are scored based on the percentage of their area that intersects with these buffers:</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>% of Raster Cell Intersected with Buffer</p></th>
+<th class="head"><p>Score</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0%</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>1–19%</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>20–39%</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>40–59%</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>60–79%</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>80–100%</p></td>
+<td><p>5</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </p>
 <p><strong>Locate Safety Section</strong></p>
 <blockquote>
