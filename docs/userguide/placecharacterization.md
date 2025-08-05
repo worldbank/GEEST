@@ -221,12 +221,22 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-<strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event's impact radius is known, it should be applied instead. Raster cells intersecting with these default buffers are scored as follows:
+<p align="justify"> 
+<strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of conflict-related events. Using geolocated point data of FCV incidents, circular buffers are generated to reflect the typical spatial influence of each event type. Each event type is assigned a **default buffer distance**—for example, **5 km** for battles and explosions, **2 km** for violence against civilians, and **1–2 km** for protests and riots. These buffers are used to assess the extent to which each event type may affect surrounding areas. Raster cells that intersect one or more event buffers are assigned scores based on the **severity** of the event type, as outlined in the table below:
+</p>
 
-| Factor   | Score 0              | Score 1                   | Score 2                         | Score 3             | Score 4                     | Score 5                      |
-|----------|----------------------|---------------------------|---------------------------------|---------------------|-----------------------------|------------------------------|
-| **FCV**  | battles and explosions | explosions and remote violence | violence against civilians |     not applicable               | protests and riots | no overlap with any event   |
+| **Event Type**                   | **Default Buffer Distance**       | **Score** |
+|----------------------------------|-----------------------------------|-----------|
+| Battles and explosions           | 5 km                              | 0         |
+| Explosions and remote violence   | 5 km                              | 1         |
+| Violence against civilians       | 2 km                              | 2         |
+| Protests and riots               | 1 km for protests, 2 km for riots | 4         |
+| No intersecting events           | NA                                | 5         |
 
+> ⚠️ **Note:** It is common for a single location to register multiple FCV events over time.  
+> In such cases, a **priority-based scoring approach** is applied: the raster cell receives the score of the **most severe** event type within its extent.  
+>  
+> *Example:* If an area experienced 4 protests, 2 riots, and 1 battle in the same year, the final score assigned would be **0**, reflecting the highest severity (battle or explosion).
 
 **Process FCV factor**
 
