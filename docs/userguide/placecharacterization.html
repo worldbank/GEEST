@@ -68,7 +68,7 @@
     <link rel="prev" title="Accessibility" href="accessibility.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 04, 2025"/>
+    <meta name="docbuild:last-update" content="Aug 05, 2025"/>
   </head>
   
   
@@ -430,6 +430,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-scoring-table-for-active-transport">GEEST Scoring Table for Active Transport</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
@@ -461,16 +464,16 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <h2>General Overview<a class="headerlink" href="#general-overview" title="Permalink to this heading">#</a></h2>
 <p>Place Characterization factors refer to the following indicators:</p>
 <ul class="simple">
-<li><p><strong>Active Transport:</strong> identifies areas based on their ability to support safe and efficient active transport for women, such as walking, cycling, and other non-motorized modes of travel, by analyzing features like street crossings, block lengths, footpaths, and cycle paths.</p></li>
+<li><p><strong>Active Transport:</strong> identifies areas based on their capacity to support safe and efficient active transport for women—such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.</p></li>
 <li><p><strong>Safety:</strong> defines areas perceived as safe based on specific data or, alternatively, on how brightly lit they are, assuming that brightly lit areas are safer than those with no lights.</p></li>
 <li><p><strong>Fragility, conflict and violence (FCV):</strong> assigns scores to by analyzing overlap with ACLED data with buffers representing various types of events.</p></li>
-<li><p><strong>Education:</strong> computes a raster containing a standardized measure of the percentage of women who have attained higher education in the country/region of interest.</p></li>
-<li><p><strong>Digital Inclusion:</strong> assesses the availability and accessibility of digital infrastructure.</p></li>
+<li><p><strong>Education:</strong> computes a raster that provides a standardized measure of the percentage of women who have attained higher education within the country or region of interest, distributing this information across urbanized areas as defined by the GHS-SMOD classification.</p></li>
+<li><p><strong>Digital Inclusion:</strong> assesses the availability and accessibility of digital infrastructure by computing a national index score based on the Ookla dataset for both mobile and fixed network coverage.</p></li>
 <li><p><strong>Environmental Hazards:</strong> characterizes areas based on their vulnerability to natural disasters.</p></li>
 <li><p><strong>Water sanitation:</strong> assesses the availability and accessibility of clean water and sanitation facilities.</p></li>
 </ul>
 <p>For certain factors, <strong>multiple data input options</strong> are available depending on the data’s format and availability.</p>
-<p>As with the Accessibility dimension, <strong>Safety and Water sanitation</strong> factors can be processed according to the level of analysis—whether conducted at a broader scale, such as the <strong>national level</strong>, or tailored to a more localized context, such as <strong>urban or regional</strong> areas.</p>
+<p>As with the Accessibility dimension, <strong>Active transport, Safety and Water sanitation</strong> factors can be processed according to the level of analysis—whether conducted at a broader scale, such as the <strong>national level</strong>, or tailored to a more localized context, such as <strong>urban or regional</strong> areas.</p>
 </section>
 <section id="input-place-characterization-factors">
 <h2>Input Place Characterization factors<a class="headerlink" href="#input-place-characterization-factors" title="Permalink to this heading">#</a></h2>
@@ -478,7 +481,242 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <section id="active-transport">
 <h3>Active Transport<a class="headerlink" href="#active-transport" title="Permalink to this heading">#</a></h3>
 <p align="justify"> 
-<strong>Active Transport</strong> refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands. This factor is composed by 4 subfactors which provide additional granularity: street crossings | cycly paths | footpaths | block layout.
+<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands. This factor is calculated by assigning scores to road network features, obtained during the project setup phase, as stated below:
+</section>
+</section>
+<section id="geest-scoring-table-for-active-transport">
+<h2>GEEST Scoring Table for Active Transport<a class="headerlink" href="#geest-scoring-table-for-active-transport" title="Permalink to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Highway (national or local level)</p></th>
+<th class="head"><p>GEEST Score</p></th>
+<th class="head"><p>Cycleway (national level)</p></th>
+<th class="head"><p>GEEST Score</p></th>
+<th class="head"><p>Cycleway (local level)</p></th>
+<th class="head"><p>GEEST Score</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>motorway</p></td>
+<td><p>1</p></td>
+<td><p>lane</p></td>
+<td><p>4</p></td>
+<td><p>lane</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>trunk</p></td>
+<td><p>1</p></td>
+<td><p>shared_lane</p></td>
+<td><p>4</p></td>
+<td><p>shared_lane</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>primary</p></td>
+<td><p>2</p></td>
+<td><p>share_busway</p></td>
+<td><p>4</p></td>
+<td><p>share_busway</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>secondary</p></td>
+<td><p>3</p></td>
+<td><p>track</p></td>
+<td><p>4</p></td>
+<td><p>track</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>tertiary</p></td>
+<td><p>4</p></td>
+<td><p>separate</p></td>
+<td><p>4</p></td>
+<td><p>separate</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>unclassified</p></td>
+<td><p>3</p></td>
+<td><p>crossing</p></td>
+<td><p>4</p></td>
+<td><p>crossing</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>residential</p></td>
+<td><p>5</p></td>
+<td><p>shoulder</p></td>
+<td><p>4</p></td>
+<td><p>shoulder</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>motorway_link</p></td>
+<td><p>1</p></td>
+<td><p>link</p></td>
+<td><p>4</p></td>
+<td><p>link</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>trunk_link</p></td>
+<td><p>1</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>primary_link</p></td>
+<td><p>2</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>11</p></td>
+<td><p>secondary_link</p></td>
+<td><p>3</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>tertiary_link</p></td>
+<td><p>4</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>13</p></td>
+<td><p>living_street</p></td>
+<td><p>5</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>14</p></td>
+<td><p>service</p></td>
+<td><p>3</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>15</p></td>
+<td><p>road</p></td>
+<td><p>3</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>16</p></td>
+<td><p>pedestrian</p></td>
+<td><p>5</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>17</p></td>
+<td><p>footway</p></td>
+<td><p>5</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>18</p></td>
+<td><p>cycleway</p></td>
+<td><p>4</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>19</p></td>
+<td><p>path</p></td>
+<td><p>4</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>bridleway</p></td>
+<td><p>3</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>21</p></td>
+<td><p>steps</p></td>
+<td><p>5</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>22</p></td>
+<td><p>track</p></td>
+<td><p>2</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>23</p></td>
+<td><p>bus_guideway</p></td>
+<td><p>0</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>24</p></td>
+<td><p>escape</p></td>
+<td><p>0</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>25</p></td>
+<td><p>raceway</p></td>
+<td><p>0</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>26</p></td>
+<td><p>construction</p></td>
+<td><p>0</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>27</p></td>
+<td><p>proposed</p></td>
+<td><p>0</p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p><strong>Locate Active Transport Section</strong></p>
 <blockquote>
 <div><ul class="simple">
@@ -498,54 +736,6 @@ The Place Characterization Dimension refers to the social, environmental, and in
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><strong>Active transport</strong> factor is calculated based on the four subfactors averaged across the raster cells:</p>
-<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Subfactor</p></th>
-<th class="head"><p>Score 0</p></th>
-<th class="head"><p>Score 1</p></th>
-<th class="head"><p>Score 2</p></th>
-<th class="head"><p>Score 3</p></th>
-<th class="head"><p>Score 4</p></th>
-<th class="head"><p>Score 5</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><strong>Street Crossings</strong></p></td>
-<td><p>None</p></td>
-<td><p>N/A</p></td>
-<td><p>N/A</p></td>
-<td><p>1 crossing</p></td>
-<td><p>N/A</p></td>
-<td><p>2+ crossings</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Cycle Paths</strong></p></td>
-<td><p>None</p></td>
-<td><p>N/A</p></td>
-<td><p>N/A</p></td>
-<td><p>1 cycle path</p></td>
-<td><p>N/A</p></td>
-<td><p>2+ paths</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Footpaths</strong></p></td>
-<td><p>None</p></td>
-<td><p>N/A</p></td>
-<td><p>N/A</p></td>
-<td><p>1 path</p></td>
-<td><p>N/A</p></td>
-<td><p>2+ paths</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Block Sizes</strong></p></td>
-<td><p>None</p></td>
-<td><p>&gt;1 km</p></td>
-<td><p>751m - 1 km</p></td>
-<td><p>501m - 750m</p></td>
-<td><p>251m - 500m</p></td>
-<td><p>&lt;250m</p></td>
-</tr>
-</tbody>
-</table>
-</div>
 <p><strong>Process Active Transport factors</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
@@ -563,7 +753,6 @@ The Place Characterization Dimension refers to the social, environmental, and in
     onclick="window.open(this.src, '_blank')">
 </p>
 <p>The successful completion of the process is indicated by the green checkmark widgets.</p>
-</section>
 <hr class="docutils" />
 <section id="safety">
 <h3>Safety<a class="headerlink" href="#safety" title="Permalink to this heading">#</a></h3>
@@ -1194,6 +1383,9 @@ This process ensures that the tool reassesses the input datasets and outputs the
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-scoring-table-for-active-transport">GEEST Scoring Table for Active Transport</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
@@ -1231,7 +1423,7 @@ By Development Data Group
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Aug 04, 2025.
+  Last updated on Aug 05, 2025.
   <br/>
 </p>
   </div>
