@@ -201,11 +201,11 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">📚Education</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Percentage of the labor force comprising women with university degrees</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Share of graduates by field, female (%)</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
-    <a href="https://genderdata.worldbank.org/en/indicator/sl-tlf-zs?education=Advanced">
-        WB data
-    </a>
+    <a href="https://genderdata.worldbank.org/en/indicator/se-ter-grad-fe-zs?fieldOfStudy=Science%2C+Technology%2C+Engineering+and+Mathematics+%28STEM%29">
+        WB data</a> |
+    <a href="https://www.ookla.com/ookla-for-good/open-data" target="_blank">Ookla data</a>
 </td>
 </tr>
   <tr>
@@ -213,8 +213,8 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">Individuals using the Internet (% of population)</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
     <a href="https://genderdata.worldbank.org/en/indicator/it-net-user-zs">
-        WB data
-    </a>
+        WB data</a> |
+    <a href="https://human-settlement.emergency.copernicus.eu/download.php?ds=smod"> GHS-SMOD</a>
 </td>
 </tr>
   <tr>
