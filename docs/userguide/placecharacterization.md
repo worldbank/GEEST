@@ -468,11 +468,13 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-<strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:
+**Water Sanitation** is assessed based on the presence of water and sanitation facilities within each raster cell, using a buffer-based method.
 
-| Factor                  | Score 0                   | Score 1 | Score 2 | Score 3                     | Score 4 | Score 5                        |
-|-------------------------|---------------------------|---------|---------|-----------------------------|---------|--------------------------------|
-| **Water Sanitation**    | No water points           | N/A     | N/A     | 1 water point               | N/A     | 2 or more water points         |
+- At the **national level**, each Point of Interest (POI) is enclosed in a **3 km buffer**.
+- At the **local level**, a **1 km buffer** is applied.
+
+Raster grid cells that **intersect** a buffer are considered to have access and are assigned a score of **5**.  
+Cells that **do not intersect** any buffer receive a score of **0**.
 
 **Process Water sanitation factor**
 
