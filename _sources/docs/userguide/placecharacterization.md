@@ -27,7 +27,7 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 <p align="justify"> 
 <strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands. This factor is calculated by assigning scores to road network features, obtained during the project setup phase, as detailed below:
 
-### GEEST Scoring Table for Active Transport
+##### GEEST Scoring Table for Active Transport
 
 | #  | Highway (national or local level) | GEEST SCORE (0–5) | Cycleway (national level) | GEEST SCORE (0–5) | Cycleway (local level) | GEEST SCORE (0–5) |
 |----|-----------------------------------|-------------------|----------------------------|-------------------|-------------------------|-------------------|
