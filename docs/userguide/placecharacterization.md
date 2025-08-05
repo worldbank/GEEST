@@ -360,10 +360,7 @@ Access values are normalized to the WEE scale (0–5). For example:
 > An area with 81.7% internet access would receive a score of:  
 > **(81.7 × 5) / 100 = 4.085**
 
-If national-level statistics on internet access are available, they are used in conjunction with **Ookla coverage polygons** to improve the spatial representation of digital access.
-
-Each **Ookla polygon** receives a **Digital Inclusion (DI) score**, which is then mapped to the underlying raster grid.  
-Raster cells that **do not intersect** any Ookla polygons are assigned a score of **0** (no access).
+If national-level statistics on internet access are available, they are used in conjunction with **Ookla coverage polygons** to improve the spatial representation of digital access. Each **Ookla polygon** receives a **Digital Inclusion (DI) score**, which is then mapped to the underlying raster grid. Raster cells that **do not intersect** any Ookla polygons are assigned a score of **0** (no access).
 
 **Process Digital Inclusion factor**
 
