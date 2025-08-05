@@ -901,30 +901,45 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
-<p><strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event’s impact radius is known, it should be applied instead. Raster cells intersecting with these default buffers are scored as follows:</p>
+<p align="justify"> 
+<strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of conflict-related events. Using geolocated point data of FCV incidents, circular buffers are generated to reflect the typical spatial influence of each event type. Each event type is assigned a **default buffer distance**—for example, **5 km** for battles and explosions, **2 km** for violence against civilians, and **1–2 km** for protests and riots. These buffers are used to assess the extent to which each event type may affect surrounding areas. Raster cells that intersect one or more event buffers are assigned scores based on the **severity** of the event type, as outlined in the table below:
+</p>
 <div class="pst-scrollable-table-container"><table class="colwidths-auto table">
 <thead>
-<tr class="row-odd"><th class="head"><p>Factor</p></th>
-<th class="head"><p>Score 0</p></th>
-<th class="head"><p>Score 1</p></th>
-<th class="head"><p>Score 2</p></th>
-<th class="head"><p>Score 3</p></th>
-<th class="head"><p>Score 4</p></th>
-<th class="head"><p>Score 5</p></th>
+<tr class="row-odd"><th class="head"><p><strong>Event Type</strong></p></th>
+<th class="head"><p><strong>Default Buffer Distance</strong></p></th>
+<th class="head"><p><strong>Score</strong></p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><strong>FCV</strong></p></td>
-<td><p>battles and explosions</p></td>
-<td><p>explosions and remote violence</p></td>
-<td><p>violence against civilians</p></td>
-<td><p>not applicable</p></td>
-<td><p>protests and riots</p></td>
-<td><p>no overlap with any event</p></td>
+<tr class="row-even"><td><p>Battles and explosions</p></td>
+<td><p>5 km</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Explosions and remote violence</p></td>
+<td><p>5 km</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>Violence against civilians</p></td>
+<td><p>2 km</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Protests and riots</p></td>
+<td><p>1 km for protests, 2 km for riots</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>No intersecting events</p></td>
+<td><p>NA</p></td>
+<td><p>5</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<blockquote>
+<div><p>⚠️ <strong>Note:</strong> It is common for a single location to register multiple FCV events over time.<br />
+In such cases, a <strong>priority-based scoring approach</strong> is applied: the raster cell receives the score of the <strong>most severe</strong> event type within its extent.</p>
+<p><em>Example:</em> If an area experienced 4 protests, 2 riots, and 1 battle in the same year, the final score assigned would be <strong>0</strong>, reflecting the highest severity (battle or explosion).</p>
+</div></blockquote>
 <p><strong>Process FCV factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
