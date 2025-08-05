@@ -31,35 +31,38 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 
 ### GEEST Scoring – Compact Format
 
-| #  | Highway           | Score | Cycleway (Nat.) | Score | Cycleway (Loc.) | Score |
-|----|-------------------|-------|------------------|-------|------------------|-------|
-| 1  | motorway          | 1     | lane             | 4     | lane             | 5     |
-| 2  | trunk             | 1     | shared_lane      | 4     | shared_lane      | 4     |
-| 3  | primary           | 2     | share_busway     | 4     | share_busway     | 2     |
-| 4  | secondary         | 3     | track            | 4     | track            | 5     |
-| 5  | tertiary          | 4     | separate         | 4     | separate         | 5     |
-| 6  | unclassified      | 3     | crossing         | 4     | crossing         | 5     |
-| 7  | residential       | 5     | shoulder         | 4     | shoulder         | 2     |
-| 8  | motorway_link     | 1     | link             | 4     | link             | 3     |
-| 9  | trunk_link        | 1     | —                | —     | —                | —     |
-| 10 | primary_link      | 2     | —                | —     | —                | —     |
-| 11 | secondary_link    | 3     | —                | —     | —                | —     |
-| 12 | tertiary_link     | 4     | —                | —     | —                | —     |
-| 13 | living_street     | 5     | —                | —     | —                | —     |
-| 14 | service           | 3     | —                | —     | —                | —     |
-| 15 | road              | 3     | —                | —     | —                | —     |
-| 16 | pedestrian        | 5     | —                | —     | —                | —     |
-| 17 | footway           | 5     | —                | —     | —                | —     |
-| 18 | cycleway          | 4     | —                | —     | —                | —     |
-| 19 | path              | 4     | —                | —     | —                | —     |
-| 20 | bridleway         | 3     | —                | —     | —                | —     |
-| 21 | steps             | 5     | —                | —     | —                | —     |
-| 22 | track             | 2     | —                | —     | —                | —     |
-| 23 | bus_guideway      | 0     | —                | —     | —                | —     |
-| 24 | escape            | 0     | —                | —     | —                | —     |
-| 25 | raceway           | 0     | —                | —     | —                | —     |
-| 26 | construction      | 0     | —                | —     | —                | —     |
-| 27 | proposed          | 0     | —                | —     | —                | —     |
+### GEEST Scoring Table – National and Local Levels
+
+| #  | Highway (national or local level) | GEEST SCORE (0–5) | Cycleway (national level) | GEEST SCORE (0–5) | Cycleway (local level) | GEEST SCORE (0–5) |
+|----|-----------------------------------|-------------------|----------------------------|-------------------|-------------------------|-------------------|
+| 1  | motorway                          | 1                 | lane                       | 4                 | lane                    | 5                 |
+| 2  | trunk                             | 1                 | shared_lane                | 4                 | shared_lane             | 4                 |
+| 3  | primary                           | 2                 | share_busway               | 4                 | share_busway            | 2                 |
+| 4  | secondary                         | 3                 | track                      | 4                 | track                   | 5                 |
+| 5  | tertiary                          | 4                 | separate                   | 4                 | separate                | 5                 |
+| 6  | unclassified                      | 3                 | crossing                   | 4                 | crossing                | 5                 |
+| 7  | residential                       | 5                 | shoulder                   | 4                 | shoulder                | 2                 |
+| 8  | motorway_link                     | 1                 | link                       | 4                 | link                    | 3                 |
+| 9  | trunk_link                        | 1                 |                            |                   |                         |                   |
+| 10 | primary_link                      | 2                 |                            |                   |                         |                   |
+| 11 | secondary_link                    | 3                 |                            |                   |                         |                   |
+| 12 | tertiary_link                     | 4                 |                            |                   |                         |                   |
+| 13 | living_street                     | 5                 |                            |                   |                         |                   |
+| 14 | service                           | 3                 |                            |                   |                         |                   |
+| 15 | road                              | 3                 |                            |                   |                         |                   |
+| 16 | pedestrian                        | 5                 |                            |                   |                         |                   |
+| 17 | footway                           | 5                 |                            |                   |                         |                   |
+| 18 | cycleway                          | 4                 |                            |                   |                         |                   |
+| 19 | path                              | 4                 |                            |                   |                         |                   |
+| 20 | bridleway                         | 3                 |                            |                   |                         |                   |
+| 21 | steps                             | 5                 |                            |                   |                         |                   |
+| 22 | track                             | 2                 |                            |                   |                         |                   |
+| 23 | bus_guideway                      | 0                 |                            |                   |                         |                   |
+| 24 | escape                            | 0                 |                            |                   |                         |                   |
+| 25 | raceway                           | 0                 |                            |                   |                         |                   |
+| 26 | construction                      | 0                 |                            |                   |                         |                   |
+| 27 | proposed                          | 0                 |                            |                   |                         |                   |
+
 
 
 
