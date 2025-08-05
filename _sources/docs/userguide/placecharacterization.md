@@ -292,7 +292,7 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.
+<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process and distributing the resulting values across urbanized areas as defined by the **GHS-SMOD** classification. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.
 
 **Process Education factor**
 
