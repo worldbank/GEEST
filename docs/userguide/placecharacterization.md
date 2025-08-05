@@ -104,7 +104,21 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 #### Safety
 
 <p align="justify"> 
-<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
+<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services. Depending on the level of analysis, the scoring approach varies:
+
+- **At the national level**, each Point of Interest (POI) is enclosed within a 1 km² buffer. Raster grid cells that intersect this buffer receive a score of **5** (indicating access to street lighting). Cells that do **not** intersect any buffer receive a score of **0** (indicating no access).
+
+- **At the local level**, a 20-meter buffer is computed around each POI. Raster cells are scored based on the percentage of their area that intersects with these buffers:
+
+| % of Raster Cell Intersected with Buffer | Score |
+|------------------------------------------|-------|
+| 0%                                       | 0     |
+| 1–19%                                    | 1     |
+| 20–39%                                   | 2     |
+| 40–59%                                   | 3     |
+| 60–79%                                   | 4     |
+| 80–100%                                  | 5     |
+
 </p>
 
 **Locate Safety Section**
