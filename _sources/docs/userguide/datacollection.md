@@ -256,22 +256,27 @@ This page provides guidance on finding and collecting relevant data for the GEES
 <p style="text-align: justify;">
 While the above table showcases data specific to Saint Lucia, similar data can be found for other countries through the following sources:
 
-1. **World Bank - Women, Business and the Law**: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
+1. <strong>World Bank - Women, Business and the Law</strong>: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
 
-2. **United Nations Development Programme (UNDP)**: Provides metrics on gender equality, economic participation, and sustainable development, essential for evaluating contextual and place-based factors.
+2. <strong>United Nations Development Programme (UNDP)</strong>: Provides metrics on gender equality, economic participation, and sustainable development, essential for evaluating contextual and place-based factors.
 
-3. **National Statistics Offices**: Many countries publish gender-disaggregated data, which is crucial for contextual and accessibility insights in specific regions.
+3. <strong>National Statistics Offices</strong>: Many countries publish gender-disaggregated data, which is crucial for contextual and accessibility insights in specific regions.
 
-4. **International Labour Organization (ILO)**: Collects data on labor force participation, wage disparities, and workplace regulations by country, supporting the analysis of gender gaps and regulatory environments.
+4. <strong>International Labour Organization (ILO)</strong>: Collects data on labor force participation, wage disparities, and workplace regulations by country, supporting the analysis of gender gaps and regulatory environments.
 
-5. **OpenStreetMap (OSM)**: A valuable open-source platform providing geospatial data, including the locations of educational, healthcare, and financial facilities, as well as transport and green spaces. OSM data can help assess accessibility and environmental factors at a local level.
+5. <strong>OpenStreetMap (OSM)</strong>: A valuable open-source platform providing geospatial data, including the locations of educational, healthcare, and financial facilities, as well as transport and green spaces. OSM data can help assess accessibility and environmental factors at a local level.
 
-6. **Humanitarian Data Exchange (Humdata)**: Maintained by the United Nations Office for the Coordination of Humanitarian Affairs (OCHA), Humdata offers open datasets on schools, health facilities, and other infrastructure, aiding in the geospatial analysis of services critical for accessibility assessments.
+6. <strong>Ookla - Open Data</strong>: <a href="https://www.ookla.com/ookla-for-good/open-data" target="_blank">Ookla data</a> offers high-resolution data on mobile and fixed internet performance. This information supports the assessment of digital infrastructure and helps quantify digital inclusion at both national and local levels.
 
-7. **Global Natural Hazards Data**: Provides data on environmental hazards, including earthquakes, floods, cyclones, landslides, fires and others across regions. This data is essential for assessing natural risks and planning in vulnerable areas.
+7. <strong>GHS-SMOD (Global Human Settlement - Degree of Urbanization)</strong>: Provides a standardized classification of urban, peri-urban, and rural areas based on population density and built-up areas. It is used to geographically constrain analyses to inhabited zones, particularly when scoring accessibility, education, and service availability.
 
-8. **Mapillary**: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
+8. <strong>Humanitarian Data Exchange (Humdata)</strong>: Maintained by the United Nations Office for the Coordination of Humanitarian Affairs (OCHA), Humdata offers open datasets on schools, health facilities, and other infrastructure, aiding in the geospatial analysis of services critical for accessibility assessments.
+
+9. <strong>Global Natural Hazards Data</strong>: Provides data on environmental hazards, including earthquakes, floods, cyclones, landslides, fires and others across regions. This data is essential for assessing natural risks and planning in vulnerable areas.
+
+10. <strong>Mapillary</strong>: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
 </p>
+
 
 ### Instructions for Data Collection:
 - **Query the Source**: Use the query instructions provided in the table to filter and collect specific data.
