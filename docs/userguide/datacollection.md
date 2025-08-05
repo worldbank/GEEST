@@ -266,7 +266,7 @@ While the above table showcases data specific to Saint Lucia, similar data can b
 
 5. <strong>OpenStreetMap (OSM)</strong>: A valuable open-source platform providing geospatial data, including the locations of educational, healthcare, and financial facilities, as well as transport and green spaces. OSM data can help assess accessibility and environmental factors at a local level.
 
-6. <strong>Ookla - Open Data</strong>: <a href="https://www.ookla.com/ookla-for-good/open-data" target="_blank">Ookla data</a> offers high-resolution data on mobile and fixed internet performance. This information supports the assessment of digital infrastructure and helps quantify digital inclusion at both national and local levels.
+6. <strong>Ookla - Open Data</strong>: offers high-resolution data on mobile and fixed internet performance. This information supports the assessment of digital infrastructure and helps quantify digital inclusion at both national and local levels.
 
 7. <strong>GHS-SMOD (Global Human Settlement - Degree of Urbanization)</strong>: Provides a standardized classification of urban, peri-urban, and rural areas based on population density and built-up areas. It is used to geographically constrain analyses to inhabited zones, particularly when scoring accessibility, education, and service availability.
 
