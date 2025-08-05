@@ -470,8 +470,7 @@ The successful completion of the process is indicated by the green checkmark wid
 - At the **national level**, each Point of Interest (POI) is enclosed in a **3 km buffer**.
 - At the **local level**, a **1 km buffer** is applied.
 
-Raster grid cells that **intersect** a buffer are considered to have access and are assigned a score of **5**.  
-Cells that **do not intersect** any buffer receive a score of **0**.
+Raster grid cells that **intersect** a buffer are considered to have access and are assigned a score of **5**. Cells that **do not intersect** any buffer receive a score of **0**.
 
 **Process Water sanitation factor**
 
