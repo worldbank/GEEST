@@ -11,8 +11,8 @@ Place Characterization factors refer to the following indicators:
 - **Active Transport:** identifies areas based on their capacity to support safe and efficient active transport for women—such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.
 - **Safety:** defines areas perceived as safe based on specific data or, alternatively, on how brightly lit they are, assuming that brightly lit areas are safer than those with no lights.
 - **Fragility, conflict and violence (FCV):** assigns scores to by analyzing overlap with ACLED data with buffers representing various types of events.
-- **Education:** computes a raster that provides a standardized measure of the percentage of women who have attained higher education within the country or region of interest, distributing this information across urbanized areas as defined by the GHS-SMOD classification.
-- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure by computing a national index score based on the Ookla dataset for both mobile and fixed network coverage.
+- **Education:** computes a raster that provides a standardized measure of the percentage of women who have attained higher education within the country or region of interest.
+- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure by computing a national index score.
 - **Environmental Hazards:** characterizes areas based on their vulnerability to natural disasters.
 - **Water sanitation:** assesses the availability and accessibility of clean water and sanitation facilities.
 
