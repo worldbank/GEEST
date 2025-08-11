@@ -68,7 +68,7 @@
     <link rel="prev" title="Accessibility" href="accessibility.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Aug 05, 2025"/>
+    <meta name="docbuild:last-update" content="Aug 11, 2025"/>
   </head>
   
   
@@ -429,10 +429,7 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-scoring-table-for-active-transport">GEEST Scoring Table for Active Transport</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
@@ -481,248 +478,18 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <section id="active-transport">
 <h3>Active Transport<a class="headerlink" href="#active-transport" title="Permalink to this heading">#</a></h3>
 <p align="justify"> 
-<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands. This factor is calculated by assigning scores to road network features, obtained during the project setup phase, as detailed below:
-<section id="geest-scoring-table-for-active-transport">
-<h4>GEEST Scoring Table for Active Transport<a class="headerlink" href="#geest-scoring-table-for-active-transport" title="Permalink to this heading">#</a></h4>
-<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
-<thead>
-<tr class="row-odd"><th class="head"><p>#</p></th>
-<th class="head"><p>Highway (national or local level)</p></th>
-<th class="head"><p>GEEST SCORE (0–5)</p></th>
-<th class="head"><p>Cycleway (national level)</p></th>
-<th class="head"><p>GEEST SCORE (0–5)</p></th>
-<th class="head"><p>Cycleway (local level)</p></th>
-<th class="head"><p>GEEST SCORE (0–5)</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>1</p></td>
-<td><p>motorway</p></td>
-<td><p>1</p></td>
-<td><p>lane</p></td>
-<td><p>4</p></td>
-<td><p>lane</p></td>
-<td><p>5</p></td>
-</tr>
-<tr class="row-odd"><td><p>2</p></td>
-<td><p>trunk</p></td>
-<td><p>1</p></td>
-<td><p>shared_lane</p></td>
-<td><p>4</p></td>
-<td><p>shared_lane</p></td>
-<td><p>4</p></td>
-</tr>
-<tr class="row-even"><td><p>3</p></td>
-<td><p>primary</p></td>
-<td><p>2</p></td>
-<td><p>share_busway</p></td>
-<td><p>4</p></td>
-<td><p>share_busway</p></td>
-<td><p>2</p></td>
-</tr>
-<tr class="row-odd"><td><p>4</p></td>
-<td><p>secondary</p></td>
-<td><p>3</p></td>
-<td><p>track</p></td>
-<td><p>4</p></td>
-<td><p>track</p></td>
-<td><p>5</p></td>
-</tr>
-<tr class="row-even"><td><p>5</p></td>
-<td><p>tertiary</p></td>
-<td><p>4</p></td>
-<td><p>separate</p></td>
-<td><p>4</p></td>
-<td><p>separate</p></td>
-<td><p>5</p></td>
-</tr>
-<tr class="row-odd"><td><p>6</p></td>
-<td><p>unclassified</p></td>
-<td><p>3</p></td>
-<td><p>crossing</p></td>
-<td><p>4</p></td>
-<td><p>crossing</p></td>
-<td><p>5</p></td>
-</tr>
-<tr class="row-even"><td><p>7</p></td>
-<td><p>residential</p></td>
-<td><p>5</p></td>
-<td><p>shoulder</p></td>
-<td><p>4</p></td>
-<td><p>shoulder</p></td>
-<td><p>2</p></td>
-</tr>
-<tr class="row-odd"><td><p>8</p></td>
-<td><p>motorway_link</p></td>
-<td><p>1</p></td>
-<td><p>link</p></td>
-<td><p>4</p></td>
-<td><p>link</p></td>
-<td><p>3</p></td>
-</tr>
-<tr class="row-even"><td><p>9</p></td>
-<td><p>trunk_link</p></td>
-<td><p>1</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>10</p></td>
-<td><p>primary_link</p></td>
-<td><p>2</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>11</p></td>
-<td><p>secondary_link</p></td>
-<td><p>3</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>12</p></td>
-<td><p>tertiary_link</p></td>
-<td><p>4</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>13</p></td>
-<td><p>living_street</p></td>
-<td><p>5</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>14</p></td>
-<td><p>service</p></td>
-<td><p>3</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>15</p></td>
-<td><p>road</p></td>
-<td><p>3</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>16</p></td>
-<td><p>pedestrian</p></td>
-<td><p>5</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>17</p></td>
-<td><p>footway</p></td>
-<td><p>5</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>18</p></td>
-<td><p>cycleway</p></td>
-<td><p>4</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>19</p></td>
-<td><p>path</p></td>
-<td><p>4</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>20</p></td>
-<td><p>bridleway</p></td>
-<td><p>3</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>21</p></td>
-<td><p>steps</p></td>
-<td><p>5</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>22</p></td>
-<td><p>track</p></td>
-<td><p>2</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>23</p></td>
-<td><p>bus_guideway</p></td>
-<td><p>0</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>24</p></td>
-<td><p>escape</p></td>
-<td><p>0</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>25</p></td>
-<td><p>raceway</p></td>
-<td><p>0</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p>26</p></td>
-<td><p>construction</p></td>
-<td><p>0</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p>27</p></td>
-<td><p>proposed</p></td>
-<td><p>0</p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><span style="color:red"><strong>In progress</strong></span></p>
-<p><code class="docutils literal notranslate"><span class="pre">**Locate</span> <span class="pre">Active</span> <span class="pre">Transport</span> <span class="pre">Section**</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">🖱️🖱️</span> <span class="pre">**Double-click**</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">**Active</span> <span class="pre">Transport</span> <span class="pre">section**</span> <span class="pre">to</span> <span class="pre">open</span> <span class="pre">the</span> <span class="pre">pop-up.</span></code>
-<code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">📝</span> <span class="pre">In</span> <span class="pre">the</span> <span class="pre">*Input*</span> <span class="pre">field,</span> <span class="pre">you</span> <span class="pre">can</span> <span class="pre">select</span> <span class="pre">layers</span> <span class="pre">already</span> <span class="pre">loaded</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">QGIS</span> <span class="pre">Layer</span> <span class="pre">Panel</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">dropdown</span> <span class="pre">menu</span> <span class="pre">or</span> <span class="pre">manually</span> <span class="pre">enter</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">path</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">shapefiles</span> <span class="pre">(**point</span> <span class="pre">features</span> <span class="pre">for</span> <span class="pre">street</span> <span class="pre">crossings,</span> <span class="pre">lines</span> <span class="pre">for</span> <span class="pre">cycle</span> <span class="pre">paths</span> <span class="pre">and</span> <span class="pre">footpaths</span> <span class="pre">and</span> <span class="pre">polygons</span> <span class="pre">for</span> <span class="pre">block</span> <span class="pre">layout**)</span> <span class="pre">corresponding</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">indicators</span> <span class="pre">by</span> <span class="pre">clicking</span> <span class="pre">the</span> <span class="pre">three-dot</span> <span class="pre">button.</span></code>
-<code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">⚖️</span> <span class="pre">**Assign</span> <span class="pre">Weights**:</span> <span class="pre">Assign</span> <span class="pre">appropriate</span> <span class="pre">weights</span> <span class="pre">to</span> <span class="pre">reflect</span> <span class="pre">the</span> <span class="pre">relative</span> <span class="pre">importance</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">factor</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">analysis.</span> <span class="pre">Ensure</span> <span class="pre">these</span> <span class="pre">values</span> <span class="pre">are</span> <span class="pre">consistent</span> <span class="pre">with</span> <span class="pre">your</span> <span class="pre">project</span> <span class="pre">objectives,</span> <span class="pre">accurately</span> <span class="pre">represent</span> <span class="pre">the</span> <span class="pre">significance</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">factor</span> <span class="pre">and</span> <span class="pre">add</span> <span class="pre">up</span> <span class="pre">to</span> <span class="pre">1</span> <span class="pre">for</span> <span class="pre">a</span> <span class="pre">balanced</span> <span class="pre">evaluation.</span></code>
-<code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">🚫</span> <span class="pre">**Exclude</span> <span class="pre">Unused</span> <span class="pre">Factors</span> <span class="pre">(optional)**:</span> <span class="pre">If</span> <span class="pre">a</span> <span class="pre">specific</span> <span class="pre">factor</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">intended</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">included</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">process,</span> <span class="pre">uncheck</span> <span class="pre">the</span> <span class="pre">**Use**</span> <span class="pre">button</span> <span class="pre">associated</span> <span class="pre">with</span> <span class="pre">it.</span></code>
-<code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">🔄</span> <span class="pre">**Readjust</span> <span class="pre">Weights**:</span> <span class="pre">After</span> <span class="pre">excluding</span> <span class="pre">any</span> <span class="pre">factors,</span> <span class="pre">make</span> <span class="pre">sure</span> <span class="pre">to</span> <span class="pre">**Balance</span> <span class="pre">Weights**</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">remaining</span> <span class="pre">factors.</span> <span class="pre">This</span> <span class="pre">step</span> <span class="pre">ensures</span> <span class="pre">the</span> <span class="pre">weight</span> <span class="pre">distribution</span> <span class="pre">remains</span> <span class="pre">balanced</span> <span class="pre">and</span> <span class="pre">totals</span> <span class="pre">correctly,</span> <span class="pre">preserving</span> <span class="pre">the</span> <span class="pre">integrity</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">analysis.</span></code>
-<code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">✅</span> <span class="pre">**Finalize**:</span> <span class="pre">Once</span> <span class="pre">all</span> <span class="pre">settings</span> <span class="pre">are</span> <span class="pre">configured,</span> <span class="pre">click</span> <span class="pre">OK</span> <span class="pre">to</span> <span class="pre">confirm</span> <span class="pre">and</span> <span class="pre">proceed</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">next</span> <span class="pre">step.</span></code></p>
+<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands. 
+<p><strong>Locate Active Transport Section</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️🖱️ <strong>Double-click</strong> on the <strong>Active Transport section</strong> to open the pop-up.</p></li>
+<li><p>📝 In the <em>Input</em> field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (<strong>point features for street crossings, lines for cycle paths and footpaths and polygons for block layout</strong>) corresponding to the indicators by clicking the three-dot button.</p></li>
+<li><p>⚖️ <strong>Assign Weights</strong>: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.</p></li>
+<li><p>🚫 <strong>Exclude Unused Factors (optional)</strong>: If a specific factor is not intended to be included in the process, uncheck the <strong>Use</strong> button associated with it.</p></li>
+<li><p>🔄 <strong>Readjust Weights</strong>: After excluding any factors, make sure to <strong>Balance Weights</strong> of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.</p></li>
+<li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
+</ul>
+</div></blockquote>
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveTr.jpg" 
@@ -731,10 +498,62 @@ The Place Characterization Dimension refers to the social, environmental, and in
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><code class="docutils literal notranslate"><span class="pre">**Process</span> <span class="pre">Active</span> <span class="pre">Transport</span> <span class="pre">factors**</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">Back</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">Data</span> <span class="pre">Processing</span> <span class="pre">Interface:</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">🖱️</span> <span class="pre">**Right-click**</span> <span class="pre">on</span> <span class="pre">**Active</span> <span class="pre">Transport**.</span></code>
-<code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">-</span> <span class="pre">▶️</span> <span class="pre">**Select</span> <span class="pre">&quot;Run</span> <span class="pre">Item</span> <span class="pre">Workflow&quot;**</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">context</span> <span class="pre">menu</span> <span class="pre">to</span> <span class="pre">initiate</span> <span class="pre">the</span> <span class="pre">process.</span></code></p>
+<p><strong>Active transport</strong> factor is calculated based on the four subfactors averaged across the raster cells:</p>
+<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Subfactor</p></th>
+<th class="head"><p>Score 0</p></th>
+<th class="head"><p>Score 1</p></th>
+<th class="head"><p>Score 2</p></th>
+<th class="head"><p>Score 3</p></th>
+<th class="head"><p>Score 4</p></th>
+<th class="head"><p>Score 5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Street Crossings</strong></p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>1 crossing</p></td>
+<td><p>N/A</p></td>
+<td><p>2+ crossings</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Cycle Paths</strong></p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>1 cycle path</p></td>
+<td><p>N/A</p></td>
+<td><p>2+ paths</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Footpaths</strong></p></td>
+<td><p>None</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>1 path</p></td>
+<td><p>N/A</p></td>
+<td><p>2+ paths</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Block Sizes</strong></p></td>
+<td><p>None</p></td>
+<td><p>&gt;1 km</p></td>
+<td><p>751m - 1 km</p></td>
+<td><p>501m - 750m</p></td>
+<td><p>251m - 500m</p></td>
+<td><p>&lt;250m</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Process Active Transport factors</strong></p>
+<p>Back in the Data Processing Interface:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>🖱️ <strong>Right-click</strong> on <strong>Active Transport</strong>.</p></li>
+<li><p>▶️ <strong>Select “Run Item Workflow”</strong> from the context menu to initiate the process.</p></li>
+</ul>
+</div></blockquote>
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveRun.jpg" 
@@ -743,14 +562,13 @@ The Place Characterization Dimension refers to the social, environmental, and in
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">successful</span> <span class="pre">completion</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">process</span> <span class="pre">is</span> <span class="pre">indicated</span> <span class="pre">by</span> <span class="pre">the</span> <span class="pre">green</span> <span class="pre">checkmark</span> <span class="pre">widgets.</span></code></p>
-</section>
+<p>The successful completion of the process is indicated by the green checkmark widgets.</p>
 </section>
 <hr class="docutils" />
 <section id="safety">
 <h3>Safety<a class="headerlink" href="#safety" title="Permalink to this heading">#</a></h3>
 <p align="justify"> 
-<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services. 
+<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
 </p>
 <p><strong>Locate Safety Section</strong></p>
 <blockquote>
@@ -813,11 +631,7 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
-<p>Depending on the level of analysis, the scoring approach varies:</p>
-<ul class="simple">
-<li><p><strong>At the national level</strong>, each Point of Interest (POI) is enclosed within a 1 km² buffer. Raster grid cells that intersect this buffer receive a score of <strong>5</strong> (indicating access to street lighting). Cells that do <strong>not</strong> intersect any buffer receive a score of <strong>0</strong> (indicating no access).</p></li>
-<li><p><strong>At the local level</strong>, a 20-meter buffer is computed around each POI. Raster cells are scored based on the percentage of their area that intersects with these buffers:</p></li>
-</ul>
+<p><strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights using the default thresholds:</p>
 <div class="pst-scrollable-table-container"><table class="colwidths-auto table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Factor</p></th>
@@ -901,45 +715,30 @@ The Place Characterization Dimension refers to the social, environmental, and in
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
-<p align="justify"> 
-<strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of conflict-related events. Using geolocated point data of FCV incidents, circular buffers are generated to reflect the typical spatial influence of each event type. Each event type is assigned a <strong>default buffer distance</strong>—for example, <strong>5 km</strong> for battles and explosions, <strong>2 km</strong> for violence against civilians, and <strong>1–2 km</strong> for protests and riots. These buffers are used to assess the extent to which each event type may affect surrounding areas. Raster cells that intersect one or more event buffers are assigned scores based on the <strong>severity</strong> of the event type, as outlined in the table below:
-</p>
+<p><strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event’s impact radius is known, it should be applied instead. Raster cells intersecting with these default buffers are scored as follows:</p>
 <div class="pst-scrollable-table-container"><table class="colwidths-auto table">
 <thead>
-<tr class="row-odd"><th class="head"><p><strong>Event Type</strong></p></th>
-<th class="head"><p><strong>Default Buffer Distance</strong></p></th>
-<th class="head"><p><strong>Score</strong></p></th>
+<tr class="row-odd"><th class="head"><p>Factor</p></th>
+<th class="head"><p>Score 0</p></th>
+<th class="head"><p>Score 1</p></th>
+<th class="head"><p>Score 2</p></th>
+<th class="head"><p>Score 3</p></th>
+<th class="head"><p>Score 4</p></th>
+<th class="head"><p>Score 5</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Battles and explosions</p></td>
-<td><p>5 km</p></td>
-<td><p>0</p></td>
-</tr>
-<tr class="row-odd"><td><p>Explosions and remote violence</p></td>
-<td><p>5 km</p></td>
-<td><p>1</p></td>
-</tr>
-<tr class="row-even"><td><p>Violence against civilians</p></td>
-<td><p>2 km</p></td>
-<td><p>2</p></td>
-</tr>
-<tr class="row-odd"><td><p>Protests and riots</p></td>
-<td><p>1 km for protests, 2 km for riots</p></td>
-<td><p>4</p></td>
-</tr>
-<tr class="row-even"><td><p>No intersecting events</p></td>
-<td><p>NA</p></td>
-<td><p>5</p></td>
+<tr class="row-even"><td><p><strong>FCV</strong></p></td>
+<td><p>battles and explosions</p></td>
+<td><p>explosions and remote violence</p></td>
+<td><p>violence against civilians</p></td>
+<td><p>not applicable</p></td>
+<td><p>protests and riots</p></td>
+<td><p>no overlap with any event</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<blockquote>
-<div><p>⚠️ <strong>Note:</strong> It is common for a single location to register multiple FCV events over time.<br />
-In such cases, a <strong>priority-based scoring approach</strong> is applied: the raster cell receives the score of the <strong>most severe</strong> event type within its extent.</p>
-<p><em>Example:</em> If an area experienced 4 protests, 2 riots, and 1 battle in the same year, the final score assigned would be <strong>0</strong>, reflecting the highest severity (battle or explosion).</p>
-</div></blockquote>
 <p><strong>Process FCV factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
@@ -999,9 +798,7 @@ In such cases, a <strong>priority-based scoring approach</strong> is applied: th
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
-<p align="justify"> 
-<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process, distributing the resulting values across urbanized areas as defined by the <strong>GHS-SMOD</strong> classification. The spatial representation of educational attainment is confined to <strong>inhabited areas</strong>, as classified by <strong>GHS-SMOD</strong>. By default, classes <strong>10 (Water grid cell)</strong> and <strong>11 (Very low density rural grid cell)</strong> are excluded from the analysis. Each grid cell that intersects an inhabited class is marked as <strong>inhabited</strong> and is assigned the corresponding <strong>Education score</strong>. All other grid cells receive a score of <strong>0</strong>. The <strong>Education score</strong> reflects the percentage of <strong>female graduates in targeted fields of study</strong>, normalized on a 0–5 scale. For example, a 50% female STEM graduation rate would yield a score of <strong>2.5</strong>.
-</p>
+<p><strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.</p>
 <p><strong>Process Education factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
@@ -1061,17 +858,7 @@ In such cases, a <strong>priority-based scoring approach</strong> is applied: th
 <li><p>✅ <strong>Finalize</strong>: Once all settings are configured, click OK to confirm and proceed to the next step.</p></li>
 </ul>
 </div></blockquote>
-<p><strong>Digital Inclusion</strong> reclassifies the input data to a standardized scale from <strong>0 to 5</strong> using a linear scaling process. This is applied across regions where <strong>Ookla</strong> data has been collected for either <strong>mobile</strong> or <strong>fixed</strong> networks.</p>
-<ul class="simple">
-<li><p>A score of <strong>5</strong> represents areas where <strong>100% of households have internet access</strong>.</p></li>
-<li><p>A score of <strong>0</strong> represents areas where <strong>no households have internet access</strong>.</p></li>
-</ul>
-<p>Access values are normalized to the WEE scale (0–5). For example:</p>
-<blockquote>
-<div><p>An area with 81.7% internet access would receive a score of:<br />
-<strong>(81.7 × 5) / 100 = 4.085</strong></p>
-</div></blockquote>
-<p>If national-level statistics on internet access are available, they are used in conjunction with <strong>Ookla coverage polygons</strong> to improve the spatial representation of digital access. Each <strong>Ookla polygon</strong> receives a <strong>Digital Inclusion (DI) score</strong>, which is then mapped to the underlying raster grid. Raster cells that <strong>do not intersect</strong> any Ookla polygons are assigned a score of <strong>0</strong> (no access).</p>
+<p><strong>Digital Inclusion</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas where 100% of households have internet access, and <em>0</em> represents areas where no households have internet access.</p>
 <p><strong>Process Digital Inclusion factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
@@ -1217,12 +1004,30 @@ This factor is composed, by default, of five subfactors representing different t
     title="Click to enlarge" 
     onclick="window.open(this.src, '_blank')">
 </p>
-<p><strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within each raster cell, using a buffer-based method.</p>
-<ul class="simple">
-<li><p>At the <strong>national level</strong>, each Point of Interest (POI) is enclosed in a <strong>3 km buffer</strong>.</p></li>
-<li><p>At the <strong>local level</strong>, a <strong>1 km buffer</strong> is applied.</p></li>
-</ul>
-<p>Raster grid cells that <strong>intersect</strong> a buffer are considered to have access and are assigned a score of <strong>5</strong>. Cells that <strong>do not intersect</strong> any buffer receive a score of <strong>0</strong>.</p>
+<p><strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:</p>
+<div class="pst-scrollable-table-container"><table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Factor</p></th>
+<th class="head"><p>Score 0</p></th>
+<th class="head"><p>Score 1</p></th>
+<th class="head"><p>Score 2</p></th>
+<th class="head"><p>Score 3</p></th>
+<th class="head"><p>Score 4</p></th>
+<th class="head"><p>Score 5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Water Sanitation</strong></p></td>
+<td><p>No water points</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>1 water point</p></td>
+<td><p>N/A</p></td>
+<td><p>2 or more water points</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p><strong>Process Water sanitation factor</strong></p>
 <p>Back in the Data Processing Interface:</p>
 <blockquote>
@@ -1283,12 +1088,10 @@ This factor is composed, by default, of five subfactors representing different t
 <section id="visualizing-the-outputs">
 <h2>Visualizing the Outputs<a class="headerlink" href="#visualizing-the-outputs" title="Permalink to this heading">#</a></h2>
 <hr class="docutils" />
-<p align="justify">
-After completing the process, the outputs are automatically added to the <strong>Layer Panel</strong> in <strong>QGIS</strong> as a <strong>group layer</strong>. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
-<p>The outputs consist of all <strong>factors</strong> and <strong>subfactors</strong>, as well as the aggregation of these into the final <strong>Place Characterization</strong> output. All scores are assessed on a scale from <strong>0 to 5</strong>, categorized as follows: ≤ 0.5 (<em>Not Enabling</em>) | 0.5–1.5 (<em>Very Low Enablement</em>) | 1.5–2.5 (<em>Low Enablement</em>) | 2.5–3.5 (<em>Moderately Enabling</em>) | 3.5–4.5 (<em>Enabling</em>) | 4.5–5.0 (<em>Highly Enabling</em>).</p>
-<p>The outputs are stored under the <strong>Place Characterization</strong> folder within the <strong>project folder</strong> created during the setup phase as <strong>raster files</strong>. These files can be shared and further utilized for various purposes, such as visualization in <strong>QGIS</strong> or other GIS software, integration into <strong>reports</strong>, overlaying with other <strong>spatial datasets</strong>, or performing <strong>advanced geospatial analyses</strong>, such as identifying priority areas or conducting trend analysis based on the scores.</p>
-<p>If the results do not immediately appear in the <strong>Layer Panel</strong> after processing the <strong>Place Characterization</strong> dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the <strong>Place Characterization</strong> dimension and selecting <strong>Add to map</strong> from the context menu.</p>
-</p>
+<p>After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.</p>
+<p>The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).</p>
+<p>The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.</p>
+<p>If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting <strong>Add to map</strong> from the context menu:</p>
 <p align="center">
 <img 
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_add.jpg" 
@@ -1390,10 +1193,7 @@ This process ensures that the tool reassesses the input datasets and outputs the
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-overview">General Overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-place-characterization-factors">Input Place Characterization factors</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geest-scoring-table-for-active-transport">GEEST Scoring Table for Active Transport</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#active-transport">Active Transport</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety">Safety</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fcv">FCV</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#education">Education</a></li>
@@ -1431,7 +1231,7 @@ By Development Data Group
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Aug 05, 2025.
+  Last updated on Aug 11, 2025.
   <br/>
 </p>
   </div>
