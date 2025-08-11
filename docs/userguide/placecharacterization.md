@@ -25,52 +25,16 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 #### Active Transport
 
 <p align="justify"> 
-<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands. This factor is calculated by assigning scores to road network features, obtained during the project setup phase, as detailed below:
+<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands. 
 
-##### GEEST Scoring Table for Active Transport
+**Locate Active Transport Section**
 
-| #  | Highway (national or local level) | GEEST SCORE (0–5) | Cycleway (national level) | GEEST SCORE (0–5) | Cycleway (local level) | GEEST SCORE (0–5) |
-|----|-----------------------------------|-------------------|----------------------------|-------------------|-------------------------|-------------------|
-| 1  | motorway                          | 1                 | lane                       | 4                 | lane                    | 5                 |
-| 2  | trunk                             | 1                 | shared_lane                | 4                 | shared_lane             | 4                 |
-| 3  | primary                           | 2                 | share_busway               | 4                 | share_busway            | 2                 |
-| 4  | secondary                         | 3                 | track                      | 4                 | track                   | 5                 |
-| 5  | tertiary                          | 4                 | separate                   | 4                 | separate                | 5                 |
-| 6  | unclassified                      | 3                 | crossing                   | 4                 | crossing                | 5                 |
-| 7  | residential                       | 5                 | shoulder                   | 4                 | shoulder                | 2                 |
-| 8  | motorway_link                     | 1                 | link                       | 4                 | link                    | 3                 |
-| 9  | trunk_link                        | 1                 |                            |                   |                         |                   |
-| 10 | primary_link                      | 2                 |                            |                   |                         |                   |
-| 11 | secondary_link                    | 3                 |                            |                   |                         |                   |
-| 12 | tertiary_link                     | 4                 |                            |                   |                         |                   |
-| 13 | living_street                     | 5                 |                            |                   |                         |                   |
-| 14 | service                           | 3                 |                            |                   |                         |                   |
-| 15 | road                              | 3                 |                            |                   |                         |                   |
-| 16 | pedestrian                        | 5                 |                            |                   |                         |                   |
-| 17 | footway                           | 5                 |                            |                   |                         |                   |
-| 18 | cycleway                          | 4                 |                            |                   |                         |                   |
-| 19 | path                              | 4                 |                            |                   |                         |                   |
-| 20 | bridleway                         | 3                 |                            |                   |                         |                   |
-| 21 | steps                             | 5                 |                            |                   |                         |                   |
-| 22 | track                             | 2                 |                            |                   |                         |                   |
-| 23 | bus_guideway                      | 0                 |                            |                   |                         |                   |
-| 24 | escape                            | 0                 |                            |                   |                         |                   |
-| 25 | raceway                           | 0                 |                            |                   |                         |                   |
-| 26 | construction                      | 0                 |                            |                   |                         |                   |
-| 27 | proposed                          | 0                 |                            |                   |                         |                   |
-
-
-
-<span style="color:red"><strong>In progress</strong></span>
-
-`**Locate Active Transport Section**`
-
-`> - 🖱️🖱️ **Double-click** on the **Active Transport section** to open the pop-up.`
-`> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features for street crossings, lines for cycle paths and footpaths and polygons for block layout**) corresponding to the indicators by clicking the three-dot button.`
-`> - ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.`
-`> - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.`
-`> - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.`
-`> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.`
+> - 🖱️🖱️ **Double-click** on the **Active Transport section** to open the pop-up.
+> - 📝 In the *Input* field, you can select layers already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point features for street crossings, lines for cycle paths and footpaths and polygons for block layout**) corresponding to the indicators by clicking the three-dot button.
+> - ⚖️ **Assign Weights**: Assign appropriate weights to reflect the relative importance of each factor in the analysis. Ensure these values are consistent with your project objectives, accurately represent the significance of each factor and add up to 1 for a balanced evaluation.
+> - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
+> - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
+> - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 
 <p align="center">
@@ -82,12 +46,22 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
     onclick="window.open(this.src, '_blank')">
 </p>
 
-`**Process Active Transport factors**`
+<strong>Active transport</strong> factor is calculated based on the four subfactors averaged across the raster cells:
 
-`Back in the Data Processing Interface:`
+| Subfactor               | Score 0          | Score 1               | Score 2                 | Score 3                 | Score 4                 | Score 5                 |
+|----------------------|------------------|-----------------------|-------------------------|-------------------------|-------------------------|-------------------------|
+| **Street Crossings** | None             | N/A                   | N/A                     | 1 crossing              | N/A                     | 2+ crossings           |
+| **Cycle Paths**      | None             | N/A                   | N/A                     | 1 cycle path            | N/A                     | 2+ paths               |
+| **Footpaths**        | None             | N/A                   | N/A                     | 1 path                  | N/A                     | 2+ paths               |
+| **Block Sizes**      | None             | >1 km                 | 751m - 1 km             | 501m - 750m             | 251m - 500m             | <250m                  |
 
-`> - 🖱️ **Right-click** on **Active Transport**.`
-`> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.`
+
+**Process Active Transport factors**
+
+Back in the Data Processing Interface:
+
+> - 🖱️ **Right-click** on **Active Transport**.  
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
 <img 
@@ -98,13 +72,13 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
     onclick="window.open(this.src, '_blank')">
 </p>
 
-`The successful completion of the process is indicated by the green checkmark widgets.`
+The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
 #### Safety
 
 <p align="justify"> 
-<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services. 
+<strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
 </p>
 
 **Locate Safety Section**
@@ -155,11 +129,7 @@ As with the Accessibility dimension, **Active transport, Safety and Water sanita
 > - 🚫 **Exclude Unused Factors (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-Depending on the level of analysis, the scoring approach varies:
-
-- **At the national level**, each Point of Interest (POI) is enclosed within a 1 km² buffer. Raster grid cells that intersect this buffer receive a score of **5** (indicating access to street lighting). Cells that do **not** intersect any buffer receive a score of **0** (indicating no access).
-
-- **At the local level**, a 20-meter buffer is computed around each POI. Raster cells are scored based on the percentage of their area that intersects with these buffers:
+<strong>Safety</strong> is calculated by generating 20-meter buffers around streetlights using the default thresholds:
 
 | Factor   | Score 0                | Score 1                 | Score 2                 | Score 3                 | Score 4                 | Score 5                 |
 |----------|------------------------|-------------------------|-------------------------|-------------------------|-------------------------|-------------------------|
@@ -221,22 +191,12 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-<p align="justify"> 
-<strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of conflict-related events. Using geolocated point data of FCV incidents, circular buffers are generated to reflect the typical spatial influence of each event type. Each event type is assigned a <strong>default buffer distance</strong>—for example, <strong>5 km</strong> for battles and explosions, <strong>2 km</strong> for violence against civilians, and <strong>1–2 km</strong> for protests and riots. These buffers are used to assess the extent to which each event type may affect surrounding areas. Raster cells that intersect one or more event buffers are assigned scores based on the <strong>severity</strong> of the event type, as outlined in the table below:
-</p>
+<strong>FCV</strong> is structured by assigning scores to raster cells based on their overlap with buffers representing different types of events. Using point locations of FCV (Fragility, Conflict, and Violence) events, create circular buffers with a radius of 5 km to estimate the spatial impact. If a specific event's impact radius is known, it should be applied instead. Raster cells intersecting with these default buffers are scored as follows:
 
-| **Event Type**                   | **Default Buffer Distance**       | **Score** |
-|----------------------------------|-----------------------------------|-----------|
-| Battles and explosions           | 5 km                              | 0         |
-| Explosions and remote violence   | 5 km                              | 1         |
-| Violence against civilians       | 2 km                              | 2         |
-| Protests and riots               | 1 km for protests, 2 km for riots | 4         |
-| No intersecting events           | NA                                | 5         |
+| Factor   | Score 0              | Score 1                   | Score 2                         | Score 3             | Score 4                     | Score 5                      |
+|----------|----------------------|---------------------------|---------------------------------|---------------------|-----------------------------|------------------------------|
+| **FCV**  | battles and explosions | explosions and remote violence | violence against civilians |     not applicable               | protests and riots | no overlap with any event   |
 
-> ⚠️ **Note:** It is common for a single location to register multiple FCV events over time.  
-> In such cases, a **priority-based scoring approach** is applied: the raster cell receives the score of the **most severe** event type within its extent.  
->  
-> *Example:* If an area experienced 4 protests, 2 riots, and 1 battle in the same year, the final score assigned would be **0**, reflecting the highest severity (battle or explosion).
 
 **Process FCV factor**
 
@@ -292,9 +252,7 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-<p align="justify"> 
-<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process, distributing the resulting values across urbanized areas as defined by the <strong>GHS-SMOD</strong> classification. The spatial representation of educational attainment is confined to <strong>inhabited areas</strong>, as classified by <strong>GHS-SMOD</strong>. By default, classes <strong>10 (Water grid cell)</strong> and <strong>11 (Very low density rural grid cell)</strong> are excluded from the analysis. Each grid cell that intersects an inhabited class is marked as <strong>inhabited</strong> and is assigned the corresponding <strong>Education score</strong>. All other grid cells receive a score of <strong>0</strong>. The <strong>Education score</strong> reflects the percentage of <strong>female graduates in targeted fields of study</strong>, normalized on a 0–5 scale. For example, a 50% female STEM graduation rate would yield a score of <strong>2.5</strong>.
-</p>
+<strong>Education</strong> reclassifies the input data to a standardized scale from 0 to 5 using a linear scaling process. In this scale, a <em>score of 5</em> represents areas where all women have a university degree, while a <em>score of 0</em> represents areas where no women have a university degree.
 
 **Process Education factor**
 
@@ -350,17 +308,7 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🚫 **Exclude Unused Factor (optional)**: If this factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
-**Digital Inclusion** reclassifies the input data to a standardized scale from **0 to 5** using a linear scaling process. This is applied across regions where **Ookla** data has been collected for either **mobile** or **fixed** networks.
-
-- A score of **5** represents areas where **100% of households have internet access**.
-- A score of **0** represents areas where **no households have internet access**.
-
-Access values are normalized to the WEE scale (0–5). For example:
-
-> An area with 81.7% internet access would receive a score of:  
-> **(81.7 × 5) / 100 = 4.085**
-
-If national-level statistics on internet access are available, they are used in conjunction with **Ookla coverage polygons** to improve the spatial representation of digital access. Each **Ookla polygon** receives a **Digital Inclusion (DI) score**, which is then mapped to the underlying raster grid. Raster cells that **do not intersect** any Ookla polygons are assigned a score of **0** (no access).
+<strong>Digital Inclusion</strong> reclassifies input data to a standardized scale of 0 to 5 using a linear scaling process, where <em>5</em> represents areas where 100% of households have internet access, and <em>0</em> represents areas where no households have internet access.
 
 **Process Digital Inclusion factor**
 
@@ -465,12 +413,11 @@ The successful completion of the process is indicated by the green checkmark wid
     onclick="window.open(this.src, '_blank')">
 </p>
 
-**Water Sanitation** is assessed based on the presence of water and sanitation facilities within each raster cell, using a buffer-based method.
+<strong>Water Sanitation</strong> is assessed based on the presence of water and sanitation facilities within a raster cell, applying a default 1000m buffer. The scoring is as follows:
 
-- At the **national level**, each Point of Interest (POI) is enclosed in a **3 km buffer**.
-- At the **local level**, a **1 km buffer** is applied.
-
-Raster grid cells that **intersect** a buffer are considered to have access and are assigned a score of **5**. Cells that **do not intersect** any buffer receive a score of **0**.
+| Factor                  | Score 0                   | Score 1 | Score 2 | Score 3                     | Score 4 | Score 5                        |
+|-------------------------|---------------------------|---------|---------|-----------------------------|---------|--------------------------------|
+| **Water Sanitation**    | No water points           | N/A     | N/A     | 1 water point               | N/A     | 2 or more water points         |
 
 **Process Water sanitation factor**
 
@@ -527,16 +474,13 @@ The process should be successfully completed and indicated by a green checkmark 
 
 ### Visualizing the Outputs 
 ---
-<p align="justify">
-After completing the process, the outputs are automatically added to the <strong>Layer Panel</strong> in <strong>QGIS</strong> as a <strong>group layer</strong>. This group layer has the <em>Mutually Exclusive Group</em> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
+After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
-The outputs consist of all <strong>factors</strong> and <strong>subfactors</strong>, as well as the aggregation of these into the final <strong>Place Characterization</strong> output. All scores are assessed on a scale from <strong>0 to 5</strong>, categorized as follows: ≤ 0.5 (<em>Not Enabling</em>) | 0.5–1.5 (<em>Very Low Enablement</em>) | 1.5–2.5 (<em>Low Enablement</em>) | 2.5–3.5 (<em>Moderately Enabling</em>) | 3.5–4.5 (<em>Enabling</em>) | 4.5–5.0 (<em>Highly Enabling</em>).
+The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Place Characterization output. All scores are assessed on a scale from 0 to 5, categorized as follows: ≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling).
 
-The outputs are stored under the <strong>Place Characterization</strong> folder within the <strong>project folder</strong> created during the setup phase as <strong>raster files</strong>. These files can be shared and further utilized for various purposes, such as visualization in <strong>QGIS</strong> or other GIS software, integration into <strong>reports</strong>, overlaying with other <strong>spatial datasets</strong>, or performing <strong>advanced geospatial analyses</strong>, such as identifying priority areas or conducting trend analysis based on the scores.
+The outputs are stored under the Place Characterization folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
 
-If the results do not immediately appear in the <strong>Layer Panel</strong> after processing the <strong>Place Characterization</strong> dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the <strong>Place Characterization</strong> dimension and selecting <strong>Add to map</strong> from the context menu.
-</p>
-
+If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting **Add to map** from the context menu:
 
 <p align="center">
 <img 
@@ -566,3 +510,4 @@ If the results do not immediately appear in the <strong>Layer Panel</strong> aft
 - **Input Accuracy**: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.
 
 - **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.
+
