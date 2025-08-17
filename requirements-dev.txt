@@ -9,7 +9,7 @@ debugpy==1.8.1
 distlib==0.3.8
 filelock==3.13.4
 ghp-import==2.1.0
-h11 == 0.14.0
+h11 == 0.16.0
 httpcore == 1.0.7
 httpx == 0.28.1
 idna==3.8
