@@ -16,7 +16,7 @@ esac
 
 # Running on local used to skip tests that will not work in a local dev env
 GEEST_LOG=$HOME/GEEST2.log
-rm -f $GEEST_LOG
+rm -f "$GEEST_LOG"
 #nix-shell -p \
 #  This is the old way using default nix packages with overrides
 #  'qgis.override { extraPythonPackages = (ps: [ ps.pyqtwebengine ps.jsonschema ps.debugpy ps.future ps.psutil ]);}' \
