@@ -85,11 +85,11 @@ def theme_stylesheet() -> str:
             border: 1px solid #aaa;
             border-radius: 6px;
         }}
-        
+
         QDialog {{
             background-color: rgba(255, 255, 255, 255);
             color: #000000;
-        }}      
+        }}
         QDockWidget, QDialog {{
             background-image: url({resources_path("resources", "images", "background-light.png")});
             background-repeat: no-repeat;

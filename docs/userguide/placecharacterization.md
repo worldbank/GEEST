@@ -1,6 +1,6 @@
 ## Place Characterization
 
-<p align="justify"> 
+<p align="justify">
 The Place Characterization Dimension refers to the social, environmental, and infrastructural attributes of geographical locations, such as walkability, safety, and vulnerability to natural hazards. Unlike the Accessibility Dimension, these factors do not involve mobility but focus on the inherent characteristics of a place that influence women’s ability to participate in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
 
@@ -22,7 +22,7 @@ For certain factors, **multiple data input options** are available depending on 
 ---
 #### Active Transport
 
-<p align="justify"> 
+<p align="justify">
 <strong>Active Transport</strong> refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands. This factor is composed by 4 subfactors which provide additional granularity: street crossings | cycly paths | footpaths | block layout.
 
 **Locate Active Transport Section**
@@ -36,11 +36,11 @@ For certain factors, **multiple data input options** are available depending on 
 
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveTr.jpg" 
-    alt="Active Transport input" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveTr.jpg"
+    alt="Active Transport input"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -58,15 +58,15 @@ For certain factors, **multiple data input options** are available depending on 
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Active Transport**.  
+> - 🖱️ **Right-click** on **Active Transport**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveRun.jpg" 
-    alt="Active transport run" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ActiveRun.jpg"
+    alt="Active transport run"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -75,7 +75,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 #### Safety
 
-<p align="justify"> 
+<p align="justify">
 <strong>Safety</strong> addresses the perceived security of public spaces, evaluated through the availability of adequate lighting, which affects women’s ability to move freely, seek employment, and access essential services.
 </p>
 
@@ -86,41 +86,41 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 1️⃣ Using **Perceived Safety data** index score as input:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_index.jpg" 
-    alt="Safety index score" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_index.jpg"
+    alt="Safety index score"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > - 2️⃣ Using **Classified Safety data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**polygon features**) corresponding to the safety data by clicking the three-dot button and the classification field; this layer will be used for processing:
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_classes.jpg" 
-    alt="Safety classes" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_classes.jpg"
+    alt="Safety classes"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for presence of area illumination at night time; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (**raster data**) corresponding to NTL by clicking the three-dot button; this layer will be used for processing:
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_NTL.jpg" 
-    alt="Safety NTL" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_NTL.jpg"
+    alt="Safety NTL"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > - 4️⃣ Using **Street lights data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point locations**) representing street lights by clicking the three-dot button; this layer will be used for processing:
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_street.jpg" 
-    alt="Safety street lights" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_street.jpg"
+    alt="Safety street lights"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -139,15 +139,15 @@ The successful completion of the process is indicated by the green checkmark wid
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Safety**.  
+> - 🖱️ **Right-click** on **Safety**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_run.jpg" 
-    alt="Safety run" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_run.jpg"
+    alt="Safety run"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -156,7 +156,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 #### FCV
 
-<p align="justify"> 
+<p align="justify">
 <strong>Fragility, conflict and violence (FCV)</strong> considers the frequency of events related to political unrest, conflict, and violence in a region, which can increase women’s vulnerability and limit their access to employment and essential services.
 </p>
 
@@ -167,22 +167,22 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 1️⃣ Using **Point features data** as input; select point locations representing data related to fragility, conflict and violence events; a buffer is needed to estimate the spatial impact of these events, the default radius is 5000m but if the impact radius of an event is known, it should be used instead:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCV1.jpg" 
-    alt="FCV points" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCV1.jpg"
+    alt="FCV points"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > - 2️⃣ Using **ACLED data** as input; select ACLED data in CSV format representing fragility, conflict, and violence events; this indicator is structured by assigning scores to rasters based on their overlap with buffers indicating different types of events. Using point locations of FCV events, generate circular buffers with a default radius of 5 km to estimate the spatial impact of these events. If the impact radius of an event is known, it should be used instead; a pop-up will appear to validate the CSV format.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCV2.jpg" 
-    alt="FCV csv data" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCV2.jpg"
+    alt="FCV csv data"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -200,15 +200,15 @@ The successful completion of the process is indicated by the green checkmark wid
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **FCV**.  
+> - 🖱️ **Right-click** on **FCV**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCVrun.jpg" 
-    alt="FCV run" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/FCVrun.jpg"
+    alt="FCV run"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -217,7 +217,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 #### Education
 
-<p align="justify"> 
+<p align="justify">
 <strong>Education</strong> refers to the proportion of women in a region who have attained higher education, particularly in the specific field of analysis, serving as an indicator of societal attitudes towards women working in that sector.
 </p>
 
@@ -225,25 +225,25 @@ The successful completion of the process is indicated by the green checkmark wid
 
 > - 🖱️🖱️ **Double-click** on the **Education section** to open the pop-up.
 > - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
-> - 1️⃣ Using **Index score** at the national or regional level, based on the proportion of women who have attained higher education as input: 
+> - 1️⃣ Using **Index score** at the national or regional level, based on the proportion of women who have attained higher education as input:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_index.jpg" 
-    alt="Education index score" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_index.jpg"
+    alt="Education index score"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > - 2️⃣ Using **Classify Polygon Into Classes data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**polygon features**) corresponding to the education data by clicking the three-dot button then, select the classification field to be used for processing:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_class.jpg" 
-    alt="Education classified polygons data" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_class.jpg"
+    alt="Education classified polygons data"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -256,15 +256,15 @@ The successful completion of the process is indicated by the green checkmark wid
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Education**.  
+> - 🖱️ **Right-click** on **Education**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_run.jpg" 
-    alt="Education run" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Edu_run.jpg"
+    alt="Education run"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -273,7 +273,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 #### Digital Inclusion
 
-<p align="justify"> 
+<p align="justify">
 <strong>Digital Inclusion</strong> assesses the presence of digital infrastructure in a specific location, which is essential for women to pursue job opportunities, access training and education opportunities, and use financial services.
 </p>
 
@@ -281,25 +281,25 @@ The successful completion of the process is indicated by the green checkmark wid
 
 > - 🖱️🖱️ **Double-click** on the **Digital Inclusion section** to open the pop-up.
 > - 📂 **Flexible Data Input Options**: Multiple data input options are available depending on the data's availability, format, or geographic coverage. Select one of the following options:
-> - 1️⃣ Using **Index score** at the national or regional level, based on the proportion of available digital infrastructure as input: 
+> - 1️⃣ Using **Index score** at the national or regional level, based on the proportion of available digital infrastructure as input:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_index.jpg" 
-    alt="Digital Inclusion index score" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_index.jpg"
+    alt="Digital Inclusion index score"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > - 2️⃣ Using **Classify Polygon Into Classes data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**polygon features**) corresponding to the digital inclusion data by clicking the three-dot button then, select the classification field to be used for processing:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_class.jpg" 
-    alt="Digital Inclusion classified polygons data" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_class.jpg"
+    alt="Digital Inclusion classified polygons data"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -312,15 +312,15 @@ The successful completion of the process is indicated by the green checkmark wid
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Digital Inclusion**.  
+> - 🖱️ **Right-click** on **Digital Inclusion**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_run.jpg" 
-    alt="Digital Inclusion run" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/DIG_run.jpg"
+    alt="Digital Inclusion run"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -329,7 +329,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 #### Environmental Hazards
 
-<p align="justify"> 
+<p align="justify">
 <strong>Environmental Hazards</strong> relate to the impact of environmental risks, such as floods, droughts, landslides, fires and extreme weather events, which can disrupt job stability, particularly for women in vulnerable sectors.
 </p>
 
@@ -351,11 +351,11 @@ The thresholds for defining hazard levels are based on a predefined scoring list
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_select.jpg" 
-    alt="Environmental Hazards data input" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_select.jpg"
+    alt="Environmental Hazards data input"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -374,15 +374,15 @@ The thresholds for defining hazard levels are based on a predefined scoring list
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Environmental Hazards**.  
+> - 🖱️ **Right-click** on **Environmental Hazards**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_run.jpg" 
-    alt="Environmental Hazards run" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ENV_run.jpg"
+    alt="Environmental Hazards run"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -391,7 +391,7 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 #### Water sanitation
 
-<p align="justify"> 
+<p align="justify">
 <strong>Water sanitation</strong> concerns the availability of clean water and sanitation facilities, affecting women’s time allocation and capacity to engage in employment.
 </p>
 
@@ -403,11 +403,11 @@ The successful completion of the process is indicated by the green checkmark wid
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_select.jpg" 
-    alt="Water sanitation input" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_select.jpg"
+    alt="Water sanitation input"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -421,22 +421,22 @@ The successful completion of the process is indicated by the green checkmark wid
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Water sanitation**.  
+> - 🖱️ **Right-click** on **Water sanitation**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_run.jpg" 
-    alt="Water run" 
-    style="width:55%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Water_run.jpg"
+    alt="Water run"
+    style="width:55%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
-**Additional Steps Before Processing**: 
+**Additional Steps Before Processing**:
 
 > - 🖱️🖱️ **Double-click** on the **Place Characterization section** to open the pop-up.
 > - ⚖️ **Assign Weights**: Ensure the **weights** are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project's objectives and reflect the significance of each factor accurately.
@@ -444,11 +444,11 @@ The successful completion of the process is indicated by the green checkmark wid
 > - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click **OK** to proceed.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_weights.jpg" 
-    alt="Place Characterization Weights" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_weights.jpg"
+    alt="Place Characterization Weights"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -456,21 +456,21 @@ The successful completion of the process is indicated by the green checkmark wid
 ---
 After configuring the factors and adjusting their weights to achieve balance, you can initiate the process workflow:
 
-> - 🖱️**Right-click on Place Characterization**.  
+> - 🖱️**Right-click on Place Characterization**.
 > - ▶️**Select Run Item Workflow** from the context menu.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_run.jpg" 
-    alt="Place Characterization Run" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_run.jpg"
+    alt="Place Characterization Run"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 The process should be successfully completed and indicated by a green checkmark widget.
 
-### Visualizing the Outputs 
+### Visualizing the Outputs
 ---
 After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
@@ -481,25 +481,25 @@ The outputs are stored under the Place Characterization folder within the projec
 If the results do not immediately appear in the Layer Panel after processing the Place Characterization Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Place Characterization Dimension and selecting **Add to map** from the context menu:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_add.jpg" 
-    alt="Place Characterization Add to map" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_add.jpg"
+    alt="Place Characterization Add to map"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > 💡 **Tip**: If the input needs to be changed for any reason (e.g., incorrect initial input), you can clear the results and reprocess them as follows:
-> - 🖱️ **Right-click** on the factor/dimension and select **Clear Item**.  
+> - 🖱️ **Right-click** on the factor/dimension and select **Clear Item**.
 > - 🖱️ **Right-click again** on the same cleared factor/dimension, and while holding the **SHIFT** key on your keyboard, select **Run Item Workflow**.
 > This process ensures that the tool reassesses the input datasets and outputs the corrected scores.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_rerun.jpg" 
-    alt="Place Characterization Clear and rerun" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/PC_rerun.jpg"
+    alt="Place Characterization Clear and rerun"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 

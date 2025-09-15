@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-""" QGIS plugin admin operations
-
-"""
+"""QGIS plugin admin operations"""
 
 import os
 

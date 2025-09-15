@@ -115,7 +115,7 @@ Thank you for contributing to GEEST!
 1. **Fork the repository**: If you haven't already, fork the GEEST repository on GitHub.
 
 2. **Clone your fork**: Clone the forked repository to your local machine.
-   
+
    ```bash
    git clone https://github.com/your-username/GEEST.git
    Add the plugin path: In QGIS, go to Plugins > Manage and Install Plugins > Settings > Plugin Paths and add the path to your GEEST folder.

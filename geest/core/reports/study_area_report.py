@@ -74,7 +74,7 @@ class StudyAreaReport(BaseReport):
         self.page_descriptions[
             "study_area_bboxes"
         ] = """
-        The study area bboxes are a set of smaller bounding boxes that surround each 
+        The study area bboxes are a set of smaller bounding boxes that surround each
         polygon in the study area. They are grid aligned such that the origin and
         furthest corners are guaranteed to be a factor of the analysis dimension
         apart.
@@ -82,13 +82,13 @@ class StudyAreaReport(BaseReport):
         self.page_descriptions[
             "study_area_polygons"
         ] = """
-        The study area polygons are the single part form of all polygons in the 
+        The study area polygons are the single part form of all polygons in the
         study area. Any invalid geometries will have been discarded.
         """
         self.page_descriptions[
             "study_area_grid"
         ] = """
-        The study area grid is a set of polygon squares that each have the 
+        The study area grid is a set of polygon squares that each have the
         x and y dimension of the analysis cell size. They are guaranteed to
         be aligned to the study area bbox and bboxes layers. The grid is used
         to create a version of the study_area_polygons that have been expanded

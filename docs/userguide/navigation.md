@@ -4,20 +4,20 @@ The GEEST plugin interface is intuitive and easy to navigate. In this section, t
 
 ### Accessing the Plugin
 ---
-After installing the plugin, its interface should automatically appear:  
+After installing the plugin, its interface should automatically appear:
 <p align="center">
-  <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page.jpg" 
-    alt="Plugin Interface" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+  <img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page.jpg"
+    alt="Plugin Interface"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
-> 1. **Locate the Toolbar Icon**  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Tool%20icon.jpg" alt="Toolbar Icon" style="width:5%;" title="Click to enlarge" onclick="window.open(this.src, '_blank')">  
+> 1. **Locate the Toolbar Icon**  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Tool%20icon.jpg" alt="Toolbar Icon" style="width:5%;" title="Click to enlarge" onclick="window.open(this.src, '_blank')">
 >   Find the plugin’s icon in the QGIS toolbar.
 >
-> 2. **Open the Plugin**  
+> 2. **Open the Plugin**
 >   Click on the plugin’s toolbar icon to open its main window.
 
 ### Project Setup
@@ -25,17 +25,17 @@ After installing the plugin, its interface should automatically appear:
 Once the plugin window is open, press the right arrow buttons highlighted in red to navigate through the pages:
 
 <p align="center">
-  <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page%20next.jpg" 
-    alt="First Page Next" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+  <img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/First%20page%20next.jpg"
+    alt="First Page Next"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
-  <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Second%20page%20next.jpg" 
-    alt="Second Page Next" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+  <img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Second%20page%20next.jpg"
+    alt="Second Page Next"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -61,18 +61,18 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 > 3. Paste the API key into the text box provided (as shown in the screenshot below).
 
 <p align="center">
- <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ORS%20setup.jpg" 
-    alt="ORS key" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+ <img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ORS%20setup.jpg"
+    alt="ORS key"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 ##### Step 3: Verify the Key
 > 1. After pasting the API key, click the **Check my key...** button.
 > 2. If the key is valid, a green checkmark will appear, indicating the API key has been successfully set up.
->   
+>
 > **This step is crucial to unlock the full functionality of the plugin, including advanced spatial analysis workflows.**
 
 ---
@@ -87,35 +87,35 @@ To use the GEEST plugin effectively, you need to configure the **Open Route Serv
 In this step, you need to select a project folder to begin your work. The plugin provides you with two options:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg" 
-    alt="Geest Project" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project.jpg"
+    alt="Geest Project"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
-Option 1: **Open an Existing Project**:  
+Option 1: **Open an Existing Project**:
    Select this option if you already have a project folder created previously. Choosing this will load the project along with all its associated files. Once loaded, press the right arrow button to proceed to the data input and processing interface for further analysis.
-   
+
 <p align="center">
- <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20open.jpg" 
-    alt="Open Geest Project" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+ <img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20open.jpg"
+    alt="Open Geest Project"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
-Option 2: **Create a New Project**:  
+Option 2: **Create a New Project**:
    Choose this option to start a new project. The plugin will guide you through creating a new folder that will store the GEEST project files and working analysis results for spatial processing.
-     
+
 <p align="center">
- <img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20new.jpg" 
-    alt="New Geest Project" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+ <img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20new.jpg"
+    alt="New Geest Project"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -137,10 +137,10 @@ How to Create a New Folder
 
 > - **Select a Layer**:
 >   - Click on the three dots button to choose a layer containing your Admin0 areas (country or region boundaries). The input layer must be in either SHP or GPKG format. Once selected, use the dropdown menu to specify the column that contains the names of the areas. Ensure the column is correctly populated to avoid errors during analysis.
->   
+>
 > - **Set the Analysis Cell Size**:
 >   - Enter a value between **100m and 1000m**:
->     - Smaller values (e.g., 100m) will provide **more detailed results but require longer processing times**. 
+>     - Smaller values (e.g., 100m) will provide **more detailed results but require longer processing times**.
 >     - Larger values (e.g., 1000m) will **reduce processing time but result in coarser outputs**.
 >     - **Note:** The tool processes the study area by iterating through each polygon and generating a grid cell raster based on the selected cell size (ranging from **100m to 1000m**). For each polygon, the following steps are performed:
 >       - The tool uses the raster bounding box associated with the polygon to generate the grid.
@@ -150,18 +150,18 @@ How to Create a New Folder
 >      - Considering these operations, processing time may vary significantly, ranging from a few minutes to several tens of minutes, depending on the selected cell size and the size of the region being analyzed. To enhance the user experience, a progress bar displays the estimated remaining time until completion.
 ---
    - 💡 **Tip**: For larger regions or countries, it is recommended to start with a larger cell size for initial testing to ensure faster processing times. Once the initial results are satisfactory, refine the analysis by reducing the cell size to achieve greater detail. This approach will help you unlock the full potential of the tool and ensure accurate and detailed outputs.
----      
+---
 
 - **Coordinate System Configuration**:
 
    - If your boundary layer uses a valid **projected CRS** (e.g., UTM or EPSG:3857), select the checkbox **Use Coordinate System of your boundary layer**. This ensures that spatial calculations, such as distances and areas, are accurate and aligned with your layer's CRS.
 
----   
+---
    - ⚠️ **Note**: This option is automatically disabled if the map units of your boundary layer are in degrees (e.g., EPSG:4326). Spatial analysis requires projected coordinate systems with units in meters for precision.
    - 💡 **Tip**: If your data uses geographic coordinates (latitude/longitude in degrees), reproject it to a projected CRS before proceeding with the analysis.
---- 
+---
 
-    
+
 ### Pre-Processing
 ---
 Once you have completed all required inputs on the **GEEST Project Creation** screen, follow these steps to proceed:
@@ -170,7 +170,7 @@ Once you have completed all required inputs on the **GEEST Project Creation** sc
 
 #### 1. Verify the Project Folder Path
 > - Ensure that the **folder path** displayed at the bottom of the interface is correct. This path indicates where the GEEST plugin will store analysis outputs and working files.
-> - **Example Path**:  
+> - **Example Path**:
 >  `C:/Work/GEEST/Analysis/Country/01152025`
 
 ---
@@ -186,9 +186,9 @@ Important Notes:
 
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20project%20final.jpg"
-    alt="Geest Project final" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+    alt="Geest Project final"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -210,9 +210,9 @@ Once this pre-processing step is completed, you will seamlessly transition to th
 
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/GEEST%20data%20processing%20UI.jpg"
-    alt="Geest data processing" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+    alt="Geest data processing"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -224,9 +224,9 @@ The data processing interface serves as the central hub for managing, configurin
 
 <p align="center">
  <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Nav_understand.jpg"
-    alt="Geest data processing" 
-    style="width:65%;" 
-    title="Click to enlarge" 
+    alt="Geest data processing"
+    style="width:65%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -294,5 +294,3 @@ The data processing interface serves as the central hub for managing, configurin
 
 
 By keeping these considerations in mind, you can ensure a smooth and efficient workflow while minimizing errors and maximizing the utility of the GEEST plugin.
-
-

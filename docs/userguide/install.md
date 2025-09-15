@@ -49,5 +49,3 @@ Options** and **User Interface Options**, to enhance performance and debugging:
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/geest%20settings.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/geest%20settings.jpg" alt="GEEST Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
-
-
