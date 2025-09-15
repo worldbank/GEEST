@@ -66,8 +66,6 @@ See [CODING.md](CODING.md)
 
 Please also read PRE-COMMIT-README.md
 
-
-
 Testing
 
 1. Write tests: Include unit tests for new features or bug fixes.
@@ -129,12 +127,12 @@ Packaging the Plugin
 Prepare the plugin:
 
 Ensure all necessary files are included.
-Update the metadata.txt and __init__.py files with the correct version and author information.
+Update the metadata.txt and **init**.py files with the correct version and author information.
 Create a zip package:
 
 bash
 Copy code
-zip -r GEEST.zip GEEST -x ".*" -x "__pycache__" -x "*.pyc"
+zip -r GEEST.zip GEEST -x ".*" -x "**pycache**" -x "*.pyc"
 Distribute: Share the zip file or upload it to a QGIS plugin repository.
 
 Write Clear Commits: Use descriptive commit messages.
