@@ -15,4 +15,3 @@ echo "Searching for __pycache__ directories in '$TARGET_DIR'..."
 find "$TARGET_DIR" -type d -name "__pycache__" -exec rm -rf {} +
 
 echo "All __pycache__ directories have been removed from '$TARGET_DIR'."
-

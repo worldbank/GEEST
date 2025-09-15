@@ -8,47 +8,14 @@ VSCODE_PROFILE="GEEST2"
 EXT_DIR=".vscode-extensions"
 VSCODE_DIR=".vscode"
 LOG_FILE="vscode.log"
+EXT_LIST_FILE="$(dirname "$0")/vscode-extensions.txt"
 
-REQUIRED_EXTENSIONS=(
-    naumovs.color-highlight@2.8.0
-    GitHub.copilot@1.277.0
-    ms-python.vscode-pylance@2025.4.1
-    KevinRose.vsc-python-indent@1.21.0
-    lextudio.restructuredtext@190.4.10
-    ms-python.python@2025.6.1
-    GitHub.vscode-pull-request-github@0.108.0
-    lextudio.restructuredtext-pack@1.0.3
-    tht13.rst-vscode@3.0.1
-    shd101wyy.markdown-preview-enhanced@0.8.18
-    lextudio.iis@1.0.15
-    donjayamanne.python-extension-pack@1.7.0
-    timonwong.shellcheck@0.37.7
-    batisteo.vscode-django@1.15.0
-    ms-python.black-formatter@2025.2.0
-    hbenl.vscode-test-explorer@2.22.1
-    foxundermoon.shell-format@7.2.5
-    aikebang.mkdocs-syntax-highlight@0.2.1
-    leonhard-s.python-sphinx-highlight@0.3.0
-    trond-snekvik.simple-rst@1.5.4
-    littlefoxteam.vscode-python-test-adapter@0.8.2
-    ms-python.debugpy@2025.8.0
-    GitHub.copilot@1.331.0
-    github.vscode-github-actions@0.27.1
-    donjayamanne.python-environment-manager@1.2.7
-    mkhl.direnv@0.17.0
-    useblocks.sphinx-needs-vscode@0.3.2
-    searKing.preview-vscode@2.3.12
-    njpwerner.autodocstring@0.6.1
-    ms-vscode.test-adapter-converter@0.2.1
-    DavidAnson.vscode-markdownlint@0.60.0
-    waderyan.gitblame@11.1.3
-    GitHub.copilot-chat@0.26.7
-    VisualStudioExptTeam.intellicode-api-usage-examples@0.2.9
-    wholroyd.jinja@0.0.8
-    jamesqquick.python-class-generator@0.0.3
-    yzhang.markdown-all-in-one@3.6.3
-    VisualStudioExptTeam.vscodeintellicode@1.3.2
-)
+# Read extensions from file
+if [[ ! -f "$EXT_LIST_FILE" ]]; then
+    echo "❌ Extension list file not found: $EXT_LIST_FILE"
+    exit 1
+fi
+mapfile -t REQUIRED_EXTENSIONS <"$EXT_LIST_FILE"
 
 # ----------------------------------------------
 # Functions
@@ -61,15 +28,20 @@ launch_vscode() {
 }
 
 list_installed_extensions() {
+    echo "Installed extensions:"
+    echo "" >"$EXT_LIST_FILE"
     find "$EXT_DIR" -maxdepth 1 -mindepth 1 -type d | while read -r dir; do
         pkg="$dir/package.json"
         if [[ -f "$pkg" ]]; then
             name=$(jq -r '.name' <"$pkg")
             publisher=$(jq -r '.publisher' <"$pkg")
             version=$(jq -r '.version' <"$pkg")
-            echo "${publisher}.${name}@${version}"
+            echo "${publisher}.${name}@${version}" >>"$EXT_LIST_FILE"
         fi
     done
+    # Now sort the extension list and pipe it through uniq to remove duplicates
+    sort -u "$EXT_LIST_FILE" -o "$EXT_LIST_FILE"
+    cat "$EXT_LIST_FILE"
 }
 
 clean() {
@@ -109,7 +81,6 @@ for arg in "$@"; do
             # Handled later in the script
             ;;
         --list-extensions)
-            echo "Installed extensions:"
             list_installed_extensions
             exit 0
             ;;
@@ -144,7 +115,7 @@ QGIS_PREFIX=$(dirname "$(dirname "$QGIS_BIN")")
 # Construct the correct QGIS Python path
 QGIS_PYTHON_PATH="$QGIS_PREFIX/share/qgis/python"
 # Needed for qgis processing module import
-PROCESSING_PATH="$QGIS_PREFIX/share/qgis/python/qgis"
+# PROCESSING_PATH="$QGIS_PREFIX/share/qgis/python/qgis"
 
 # Check if the Python directory exists
 if [[ ! -d "$QGIS_PYTHON_PATH" ]]; then
@@ -306,6 +277,14 @@ else
     echo "  ✅ Python Env File already configured"
 fi
 
+echo "🗨️ Ensuring nixfmt is run on save for .nix files..."
+if ! jq -e '."[nix]".editor.defaultFormatter' "$SETTINGS_FILE" >/dev/null; then
+    jq '."[nix]" += {"editor.defaultFormatter": "brettm12345.nixfmt", "editor.formatOnSave": true}' "$SETTINGS_FILE" >"$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+    echo "  🔧 Nix formatter set to brettm12345.nixfmt, formatOnSave enabled"
+else
+    echo "  ✅ Nix formatter already configured"
+fi
+
 # TODO
 #  "python.analysis.extraPaths": [
 ##    "/nix/store/1lzzg2pl8h9ji0ks8nd2viyxgif9can7-qgis-3.38.3/share/qgis/python",
@@ -319,21 +298,23 @@ if [[ " $* " == *" --verbose "* ]]; then
 fi
 
 # Add VSCode runner configuration
-
+# shellcheck disable=SC2154
 cat <<EOF >.vscode/launch.json
 {
     "version": "0.2.0",
+
     "configurations": [
         {
             "name": "QGIS Plugin Debug",
             "type": "debugpy",
             "request": "launch",
+
             "program": "${env:QGIS_EXECUTABLE}", // Set the QGIS executable path from an environment variable
             //"program": "/usr/bin/qgis", // Replace with the actual QGIS executable path
             "args": ["--project", "${workspaceFolder}/GEEST.qgs"], // Optional QGIS project
             "console": "integratedTerminal",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/geest"
+                "PYTHONPATH": "${workspaceFolder}/planet_explorer"
             }
         },
         {
@@ -346,11 +327,11 @@ cat <<EOF >.vscode/launch.json
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/geest", // Local path on your machine
-                    "remoteRoot": "${env:HOME}/.local/share/QGIS/QGIS3/profiles/GEEST2/python/plugins/geest" // Uses $HOME instead of hardcoding username
+                    "localRoot": "${workspaceFolder}/planet_explorer", // Local path on your machine
+                    "remoteRoot": "${env:HOME}/.local/share/QGIS/QGIS3/profiles/PLANET/python/plugins/planet_explorer" // Uses $HOME instead of hardcoding username
                 }
             ]
-        }               
+        }
     ]
 }
 EOF
