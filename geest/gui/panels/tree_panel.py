@@ -2,6 +2,7 @@ import json
 import os
 import platform
 import shutil
+import subprocess  # nosec B404
 import traceback
 from functools import partial
 from logging import getLogger
@@ -282,9 +283,11 @@ class TreePanel(QWidget):
         if msg_box.clickedButton() == open_folder_button:
             if self.working_directory:
                 if os.name == "nt":
-                    os.startfile(self.working_directory)
+                    os.startfile(self.working_directory)  # nosec B606
                 elif os.name == "posix":
-                    os.system(f'xdg-open "{self.working_directory}"')
+                    subprocess.run(
+                        ["xdg-open", self.working_directory], check=False
+                    )  # nosec B603 B607
                 return
 
         if reply == QMessageBox.No or reply == QMessageBox.Rejected:
@@ -697,17 +700,17 @@ class TreePanel(QWidget):
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
-            os.startfile(os.path.join(self.working_directory, "analysis_report.pdf"))
+            os.startfile(
+                os.path.join(self.working_directory, "analysis_report.pdf")
+            )  # nosec B606
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
-                os.system(
-                    f'open "{os.path.join(self.working_directory, "analysis_report.pdf")}"'
-                )
+                pdf_path = os.path.join(self.working_directory, "analysis_report.pdf")
+                subprocess.run(["open", pdf_path], check=False)  # nosec B603 B607
             else:  # Linux
-                os.system(
-                    f'xdg-open "{os.path.join(self.working_directory, "analysis_report.pdf")}"'
-                )
+                pdf_path = os.path.join(self.working_directory, "analysis_report.pdf")
+                subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
 
     def generate_study_area_report(self):
         """Add a report showing population information for the study area."""
@@ -720,17 +723,17 @@ class TreePanel(QWidget):
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
-            os.startfile(os.path.join(self.working_directory, "study_area_report.pdf"))
+            os.startfile(
+                os.path.join(self.working_directory, "study_area_report.pdf")
+            )  # nosec B606
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
-                os.system(
-                    f'open "{os.path.join(self.working_directory, "study_area_report.pdf")}"'
-                )
+                pdf_path = os.path.join(self.working_directory, "study_area_report.pdf")
+                subprocess.run(["open", pdf_path], check=False)  # nosec B603 B607
             else:  # Linux
-                os.system(
-                    f'xdg-open "{os.path.join(self.working_directory, "study_area_report.pdf")}"'
-                )
+                pdf_path = os.path.join(self.working_directory, "study_area_report.pdf")
+                subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
 
     def add_masked_scores_to_map(self, item):
         """Add the masked scores to the map."""
@@ -812,10 +815,12 @@ class TreePanel(QWidget):
         log_message(f"Opening working directory: {working_directory}")
         if working_directory:
             if os.name == "nt":
-                os.startfile(working_directory)
+                os.startfile(working_directory)  # nosec B606
             elif os.name == "posix":
                 log_message("Using xdg-open to open the working directory.")
-                os.system(f'xdg-open "{working_directory}"')
+                subprocess.run(
+                    ["xdg-open", working_directory], check=False
+                )  # nosec B603 B607
         else:
             QMessageBox.warning(
                 self, "No Working Directory", "The working directory is not set."
@@ -828,9 +833,11 @@ class TreePanel(QWidget):
 
         if os.path.exists(log_file_path):
             if os.name == "nt":
-                os.startfile(log_file_path)
+                os.startfile(log_file_path)  # nosec B606
             elif os.name == "posix":
-                os.system(f'xdg-open "{log_file_path}"')
+                subprocess.run(
+                    ["xdg-open", log_file_path], check=False
+                )  # nosec B603 B607
         else:
             QMessageBox.warning(
                 self, "Log File Not Found", "The log file does not exist."

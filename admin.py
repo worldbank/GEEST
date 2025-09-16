@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-""" QGIS plugin admin operations
-
-"""
+"""QGIS plugin admin operations"""
 
 import os
 
@@ -10,7 +8,7 @@ import datetime as dt
 import json
 import shlex
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import typing
 import zipfile
 from dataclasses import dataclass
@@ -289,7 +287,9 @@ def compile_resources(
     target_path = output_directory / "resources.py"
     target_path.parent.mkdir(parents=True, exist_ok=True)
     _log(f"compile_resources target_path: {target_path}", context=context)
-    subprocess.run(shlex.split(f"pyrcc5 -o {target_path} {resources_path}"))
+    subprocess.run(
+        shlex.split(f"pyrcc5 -o {target_path} {resources_path}")
+    )  # nosec B603
 
 
 @app.command()

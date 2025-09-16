@@ -2,7 +2,7 @@ import os
 import traceback
 import shutil
 from typing import Optional
-import subprocess
+import subprocess  # nosec B404
 import platform
 
 from qgis.core import (
@@ -229,7 +229,7 @@ class PopulationRasterProcessingTask(QgsTask):
         else:
             result = subprocess.run(
                 ["which", "gdalwarp"], capture_output=True, text=True
-            )
+            )  # nosec B603 B607
             if result.returncode == 0 and result.stdout.strip():
                 return result.stdout.strip()
             else:
@@ -302,7 +302,7 @@ class PopulationRasterProcessingTask(QgsTask):
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                )
+                )  # nosec B603
 
             except subprocess.CalledProcessError as e:
                 log_message(

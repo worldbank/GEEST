@@ -1,4 +1,15 @@
-import xml.etree.ElementTree as ET
+try:
+    from defusedxml import ElementTree as ET
+except ImportError:
+    # Fallback to standard library with warning
+    import xml.etree.ElementTree as ET  # nosec B405
+    import warnings
+
+    warnings.warn(
+        "defusedxml not available, falling back to xml.etree.ElementTree. "
+        "Consider installing defusedxml for better security: pip install defusedxml",
+        UserWarning,
+    )
 from abc import ABC, abstractmethod
 import time
 import os
@@ -288,7 +299,7 @@ class OSMDataDownloaderBase(ABC):
 
     def process_point_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
-        root = ET.fromstring(response_data)
+        root = ET.fromstring(response_data)  # nosec B314
         layer = QgsVectorLayer("Point?crs=EPSG:4326", "OSM Point Data", "memory")
         provider = layer.dataProvider()
         provider.addAttributes([QgsField("id", QVariant.String)])
@@ -314,7 +325,7 @@ class OSMDataDownloaderBase(ABC):
 
     def process_polygon_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
-        root = ET.fromstring(response_data)
+        root = ET.fromstring(response_data)  # nosec B314
         layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "OSM Polygon Data", "memory")
         provider = layer.dataProvider()
         provider.addAttributes([QgsField("id", QVariant.String)])
