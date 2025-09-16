@@ -4,17 +4,35 @@ from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
 from qgis.gui import QgsMapLayerComboBox
 from qgis.PyQt.QtCore import QByteArray, QSettings, Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap
-from qgis.PyQt.QtWidgets import (QAbstractScrollArea, QCheckBox, QDialog,
-                                 QDialogButtonBox, QDoubleSpinBox, QFileDialog,
-                                 QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-                                 QPushButton, QSizePolicy, QSpacerItem,
-                                 QTableWidget, QTableWidgetItem, QWidget)
+from qgis.PyQt.QtWidgets import (
+    QAbstractScrollArea,
+    QCheckBox,
+    QDialog,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QFileDialog,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QTableWidget,
+    QTableWidgetItem,
+    QWidget,
+)
 
 from geest.core import setting
 from geest.gui.widgets import CustomBannerLabel
-from geest.utilities import (get_ui_class, is_qgis_dark_theme_active,
-                             log_message, log_window_geometry, resources_path,
-                             setting)
+from geest.utilities import (
+    get_ui_class,
+    is_qgis_dark_theme_active,
+    log_message,
+    log_window_geometry,
+    resources_path,
+    setting,
+)
 
 from .custom_base_dialog import CustomBaseDialog
 

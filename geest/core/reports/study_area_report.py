@@ -1,6 +1,14 @@
-from qgis.core import (QgsLayout, QgsLayoutItemLabel, QgsLayoutItemShape,
-                       QgsLayoutPoint, QgsLayoutSize, QgsProject,
-                       QgsSimpleFillSymbolLayer, QgsUnitTypes, QgsVectorLayer)
+from qgis.core import (
+    QgsLayout,
+    QgsLayoutItemLabel,
+    QgsLayoutItemShape,
+    QgsLayoutPoint,
+    QgsLayoutSize,
+    QgsProject,
+    QgsSimpleFillSymbolLayer,
+    QgsUnitTypes,
+    QgsVectorLayer,
+)
 from qgis.PyQt.QtCore import QSizeF
 from qgis.PyQt.QtGui import QColor, QFont
 

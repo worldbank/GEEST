@@ -16,10 +16,20 @@ from abc import ABC, abstractmethod
 
 from osgeo import ogr
 from qgis import processing  # QGIS processing API
-from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
-                       QgsFeature, QgsFeedback, QgsField, QgsGeometry,
-                       QgsNetworkAccessManager, QgsPointXY, QgsProject,
-                       QgsRectangle, QgsVectorFileWriter, QgsVectorLayer)
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeedback,
+    QgsField,
+    QgsGeometry,
+    QgsNetworkAccessManager,
+    QgsPointXY,
+    QgsProject,
+    QgsRectangle,
+    QgsVectorFileWriter,
+    QgsVectorLayer,
+)
 from qgis.PyQt.QtCore import QByteArray, QUrl, QVariant
 from qgis.PyQt.QtNetwork import QNetworkRequest
 

@@ -6,8 +6,12 @@ from qgis.PyQt.QtWidgets import QMessageBox
 from geest.core import WorkflowQueueManager, set_setting, setting
 from geest.core.tasks import OrsCheckerTask
 from geest.gui.widgets import CustomBannerLabel
-from geest.utilities import (get_ui_class, linear_interpolation, log_message,
-                             resources_path)
+from geest.utilities import (
+    get_ui_class,
+    linear_interpolation,
+    log_message,
+    resources_path,
+)
 
 FORM_CLASS = get_ui_class("ors_panel_base.ui")
 

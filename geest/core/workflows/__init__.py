@@ -5,10 +5,8 @@ from .dimension_aggregation_workflow import DimensionAggregationWorkflow
 from .dont_use_workflow import DontUseWorkflow
 from .factor_aggregation_workflow import FactorAggregationWorkflow
 from .index_score_workflow import DefaultIndexScoreWorkflow
-from .multi_buffer_distances_native_workflow import \
-    MultiBufferDistancesNativeWorkflow
-from .multi_buffer_distances_ors_workflow import \
-    MultiBufferDistancesORSWorkflow
+from .multi_buffer_distances_native_workflow import MultiBufferDistancesNativeWorkflow
+from .multi_buffer_distances_ors_workflow import MultiBufferDistancesORSWorkflow
 from .point_per_cell_workflow import PointPerCellWorkflow
 from .polygon_per_cell_workflow import PolygonPerCellWorkflow
 from .polyline_per_cell_workflow import PolylinePerCellWorkflow

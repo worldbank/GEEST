@@ -4,15 +4,25 @@ from typing import Optional
 from qgis.core import Qgis, QgsProject
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPainter
-from qgis.PyQt.QtWidgets import (QDockWidget, QStackedWidget, QVBoxLayout,
-                                 QWidget)
+from qgis.PyQt.QtWidgets import QDockWidget, QStackedWidget, QVBoxLayout, QWidget
 
 from geest.core import setting
-from geest.gui.panels import (CreateProjectPanel, CreditsPanel, HelpPanel,
-                              IntroPanel, OpenProjectPanel, RoadNetworkPanel,
-                              SetupPanel, TreePanel)
-from geest.utilities import (log_message, theme_background_image,
-                             theme_stylesheet, version)
+from geest.gui.panels import (
+    CreateProjectPanel,
+    CreditsPanel,
+    HelpPanel,
+    IntroPanel,
+    OpenProjectPanel,
+    RoadNetworkPanel,
+    SetupPanel,
+    TreePanel,
+)
+from geest.utilities import (
+    log_message,
+    theme_background_image,
+    theme_stylesheet,
+    version,
+)
 
 INTRO_PANEL = 0
 CREDITS_PANEL = 1

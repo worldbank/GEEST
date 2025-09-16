@@ -8,8 +8,13 @@ from typing import List, Optional
 
 # GDAL / OGR / OSR imports
 from osgeo import gdal, ogr, osr
-from qgis.core import (QgsFeedback, QgsProject, QgsTask, QgsVectorFileWriter,
-                       QgsVectorLayer)
+from qgis.core import (
+    QgsFeedback,
+    QgsProject,
+    QgsTask,
+    QgsVectorFileWriter,
+    QgsVectorLayer,
+)
 
 from geest.core import setting
 from geest.utilities import calculate_utm_zone, log_message

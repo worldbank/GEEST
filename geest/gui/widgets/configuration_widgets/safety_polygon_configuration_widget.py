@@ -1,8 +1,13 @@
 import os
 
 from qgis.core import Qgis
-from qgis.PyQt.QtWidgets import (QLabel, QSizePolicy, QSpinBox, QTableWidget,
-                                 QTableWidgetItem)
+from qgis.PyQt.QtWidgets import (
+    QLabel,
+    QSizePolicy,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+)
 
 from geest.utilities import log_message
 

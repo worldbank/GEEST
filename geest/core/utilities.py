@@ -22,8 +22,13 @@ import os
 import sys
 from math import floor
 
-from qgis.core import (Qgis, QgsLayerTreeGroup, QgsProject, QgsRasterLayer,
-                       QgsVectorLayer)
+from qgis.core import (
+    Qgis,
+    QgsLayerTreeGroup,
+    QgsProject,
+    QgsRasterLayer,
+    QgsVectorLayer,
+)
 
 from ..utilities import log_message
 from .json_tree_item import JsonTreeItem

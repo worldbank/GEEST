@@ -13,13 +13,24 @@ versionadded: 2023-03-14
 
 
 # Import the utilities module
-from geest.utilities import (calculate_utm_zone, calculate_utm_zone_from_layer,
-                             geest_layer_ids, get_free_memory_mb, get_ui_class,
-                             is_qgis_dark_theme_active, linear_interpolation,
-                             log_layer_count, log_message, log_window_geometry,
-                             resource_url, resources_path,
-                             theme_background_image, theme_stylesheet,
-                             vector_layer_type, version)
+from geest.utilities import (
+    calculate_utm_zone,
+    calculate_utm_zone_from_layer,
+    geest_layer_ids,
+    get_free_memory_mb,
+    get_ui_class,
+    is_qgis_dark_theme_active,
+    linear_interpolation,
+    log_layer_count,
+    log_message,
+    log_window_geometry,
+    resource_url,
+    resources_path,
+    theme_background_image,
+    theme_stylesheet,
+    vector_layer_type,
+    version,
+)
 
 
 class TestUtilities(unittest.TestCase):

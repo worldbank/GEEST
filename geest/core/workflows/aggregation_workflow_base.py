@@ -1,8 +1,13 @@
 import os
 
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
-from qgis.core import (Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext,
-                       QgsRasterLayer)
+from qgis.core import (
+    Qgis,
+    QgsFeedback,
+    QgsGeometry,
+    QgsProcessingContext,
+    QgsRasterLayer,
+)
 
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
