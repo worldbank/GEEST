@@ -6,7 +6,7 @@
 exclude_dirs = ./test
 
 # Skip certain low-severity tests that are acceptable in this context:
-# - B101: Assert statements (legitimate in test files)  
+# - B101: Assert statements (legitimate in test files)
 # - B110: Try/except pass (acceptable for cleanup code)
 # - B404: Subprocess import (legitimate system integration)
 # - B603: Subprocess calls (using safe array arguments)

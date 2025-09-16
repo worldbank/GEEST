@@ -6,4 +6,4 @@ echo "--------------------------------"
 # see flake.nix for implementation details
 GEEST_LOG=${GEEST_LOG} \
 	RUNNING_ON_LOCAL=1 \
-    nix run .#qgis-ltr --profile QGIS
+    nix run .#qgis-ltr
