@@ -5,25 +5,16 @@ import traceback
 from abc import ABC, abstractmethod
 
 from qgis import processing
-from qgis.core import (
-    Qgis,
-    QgsFeedback,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsProcessingException,
-    QgsProcessingFeedback,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext,
+                       QgsProcessingException, QgsProcessingFeedback,
+                       QgsVectorLayer)
 from qgis.PyQt.QtCore import QObject, QSettings, pyqtSignal
 
 from geest.core import JsonTreeItem, setting
-from geest.core.algorithms import (
-    AreaIterator,
-    check_and_reproject_layer,
-    combine_rasters_to_vrt,
-    geometry_to_memory_layer,
-    subset_vector_layer,
-)
+from geest.core.algorithms import (AreaIterator, check_and_reproject_layer,
+                                   combine_rasters_to_vrt,
+                                   geometry_to_memory_layer,
+                                   subset_vector_layer)
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 from geest.utilities import log_layer_count, log_message, resources_path
 

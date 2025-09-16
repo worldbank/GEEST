@@ -1,7 +1,8 @@
 import os
 
 from qgis.core import Qgis
-from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QToolButton
+from qgis.PyQt.QtWidgets import (QFileDialog, QLineEdit, QMessageBox,
+                                 QToolButton)
 
 from geest.utilities import log_message
 

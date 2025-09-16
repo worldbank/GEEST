@@ -2,21 +2,11 @@ import csv
 import os
 
 from qgis import processing
-from qgis.core import (
-    Qgis,
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsFeature,
-    QgsFeedback,
-    QgsField,
-    QgsFields,
-    QgsGeometry,
-    QgsPointXY,
-    QgsProcessingContext,
-    QgsProcessingException,
-    QgsVectorFileWriter,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsCoordinateReferenceSystem,
+                       QgsCoordinateTransform, QgsFeature, QgsFeedback,
+                       QgsField, QgsFields, QgsGeometry, QgsPointXY,
+                       QgsProcessingContext, QgsProcessingException,
+                       QgsVectorFileWriter, QgsVectorLayer)
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem

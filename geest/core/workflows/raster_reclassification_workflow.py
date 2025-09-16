@@ -1,15 +1,8 @@
 import os
 
 from qgis import processing  # QGIS processing toolbox
-from qgis.core import (
-    Qgis,
-    QgsFeedback,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsProcessingFeedback,
-    QgsRasterLayer,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext,
+                       QgsProcessingFeedback, QgsRasterLayer, QgsVectorLayer)
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem

@@ -1,19 +1,12 @@
 import os
 from urllib.parse import unquote
 
-from qgis.core import (
-    Qgis,
-    QgsFeedback,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext,
+                       QgsVectorLayer)
 
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import (
-    assign_values_to_grid,
-    select_grid_cells,
-)
+    assign_values_to_grid, select_grid_cells)
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase

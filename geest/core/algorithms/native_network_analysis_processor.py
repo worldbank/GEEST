@@ -6,16 +6,9 @@ from typing import List, Optional
 import numpy as np
 from osgeo import ogr, osr
 from qgis import processing
-from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsFeature,
-    QgsFeedback,
-    QgsGeometry,
-    QgsRectangle,
-    QgsTask,
-    QgsVectorLayer,
-    QgsWkbTypes,
-)
+from qgis.core import (QgsCoordinateReferenceSystem, QgsFeature, QgsFeedback,
+                       QgsGeometry, QgsRectangle, QgsTask, QgsVectorLayer,
+                       QgsWkbTypes)
 from qgis.PyQt.QtCore import QVariant
 
 from geest.utilities import log_message

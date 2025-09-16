@@ -29,14 +29,8 @@ from datetime import datetime
 from math import floor
 
 from osgeo import ogr, osr
-from qgis.core import (
-    Qgis,
-    QgsLayerTreeGroup,
-    QgsMessageLog,
-    QgsProject,
-    QgsRasterLayer,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsLayerTreeGroup, QgsMessageLog, QgsProject,
+                       QgsRasterLayer, QgsVectorLayer)
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QRect, QSettings, QUrl
 from qgis.PyQt.QtGui import QPixmap

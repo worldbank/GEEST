@@ -1,14 +1,8 @@
 import os
 from urllib.parse import quote, unquote
 
-from qgis.core import (
-    Qgis,
-    QgsFieldProxyModel,
-    QgsMapLayerProxyModel,
-    QgsProject,
-    QgsVectorLayer,
-    QgsWkbTypes,
-)
+from qgis.core import (Qgis, QgsFieldProxyModel, QgsMapLayerProxyModel,
+                       QgsProject, QgsVectorLayer, QgsWkbTypes)
 from qgis.gui import QgsFieldComboBox, QgsMapLayerComboBox
 from qgis.PyQt.QtCore import QSettings, Qt
 from qgis.PyQt.QtGui import QIcon

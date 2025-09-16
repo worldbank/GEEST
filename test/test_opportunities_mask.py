@@ -6,9 +6,8 @@ from utilities_for_testing import prepare_fixtures
 
 from geest.core.algorithms import OpportunitiesMaskProcessor
 from geest.core.json_tree_item import JsonTreeItem
-from geest.core.tasks import (
-    StudyAreaProcessingTask,
-)  # Adjust the import path as necessary
+from geest.core.tasks import \
+    StudyAreaProcessingTask  # Adjust the import path as necessary
 
 
 @unittest.skip("Skip this test for now")

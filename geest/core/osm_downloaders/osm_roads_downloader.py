@@ -1,10 +1,5 @@
-from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsFeedback,
-    QgsProject,
-    QgsRectangle,
-)
+from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
+                       QgsFeedback, QgsProject, QgsRectangle)
 from qgis.gui import QgsMapCanvas
 
 from geest.utilities import log_message

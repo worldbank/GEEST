@@ -2,14 +2,9 @@ from qgis.core import Qgis
 
 from geest.core.settings import setting
 from geest.gui.widgets.datasource_widgets import (
-    AcledCsvDataSourceWidget,
-    BaseDataSourceWidget,
-    CsvDataSourceWidget,
-    FixedValueDataSourceWidget,
-    RasterDataSourceWidget,
-    VectorAndFieldDataSourceWidget,
-    VectorDataSourceWidget,
-)
+    AcledCsvDataSourceWidget, BaseDataSourceWidget, CsvDataSourceWidget,
+    FixedValueDataSourceWidget, RasterDataSourceWidget,
+    VectorAndFieldDataSourceWidget, VectorDataSourceWidget)
 from geest.utilities import log_message
 
 

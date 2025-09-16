@@ -34,17 +34,9 @@ from typing import Optional
 from qgis.core import Qgis, QgsProject
 from qgis.PyQt.QtCore import QSettings, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import (
-    QAction,
-    QApplication,
-    QComboBox,
-    QDialog,
-    QDockWidget,
-    QFileDialog,
-    QMessageBox,
-    QPushButton,
-    QVBoxLayout,
-)
+from qgis.PyQt.QtWidgets import (QAction, QApplication, QComboBox, QDialog,
+                                 QDockWidget, QFileDialog, QMessageBox,
+                                 QPushButton, QVBoxLayout)
 
 # Import your plugin components here
 from .core import setting

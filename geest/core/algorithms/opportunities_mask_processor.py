@@ -5,27 +5,16 @@ from typing import Optional
 from urllib.parse import unquote
 
 from qgis import processing
-from qgis.core import (
-    Qgis,
-    QgsFeedback,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsProcessingFeedback,
-    QgsRasterLayer,
-    QgsTask,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext,
+                       QgsProcessingFeedback, QgsRasterLayer, QgsTask,
+                       QgsVectorLayer)
 
 from geest.core import JsonTreeItem
 from geest.utilities import log_message, resources_path
 
 from .area_iterator import AreaIterator
-from .utilities import (
-    check_and_reproject_layer,
-    combine_rasters_to_vrt,
-    geometry_to_memory_layer,
-    subset_vector_layer,
-)
+from .utilities import (check_and_reproject_layer, combine_rasters_to_vrt,
+                        geometry_to_memory_layer, subset_vector_layer)
 
 
 class OpportunitiesMaskProcessor(QgsTask):

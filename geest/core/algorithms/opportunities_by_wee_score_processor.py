@@ -4,12 +4,8 @@ import traceback
 from typing import List, Optional
 
 from qgis import processing
-from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsRasterLayer,
-    QgsTask,
-    QgsVectorLayer,
-)
+from qgis.core import (QgsCoordinateReferenceSystem, QgsRasterLayer, QgsTask,
+                       QgsVectorLayer)
 
 from geest.core import JsonTreeItem
 from geest.core.algorithms import AreaIterator

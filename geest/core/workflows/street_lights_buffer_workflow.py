@@ -2,14 +2,8 @@ import os
 from urllib.parse import unquote
 
 from qgis import processing
-from qgis.core import (
-    Qgis,
-    QgsFeedback,
-    QgsField,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsFeedback, QgsField, QgsGeometry,
+                       QgsProcessingContext, QgsVectorLayer)
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem

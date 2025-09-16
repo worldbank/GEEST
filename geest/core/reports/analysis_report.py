@@ -3,17 +3,9 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from qgis.core import (
-    QgsLayout,
-    QgsLayoutItemLabel,
-    QgsLayoutItemShape,
-    QgsLayoutPoint,
-    QgsLayoutSize,
-    QgsProject,
-    QgsRasterLayer,
-    QgsSimpleFillSymbolLayer,
-    QgsUnitTypes,
-)
+from qgis.core import (QgsLayout, QgsLayoutItemLabel, QgsLayoutItemShape,
+                       QgsLayoutPoint, QgsLayoutSize, QgsProject,
+                       QgsRasterLayer, QgsSimpleFillSymbolLayer, QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor, QFont
 
 from geest.utilities import log_message, resources_path, setting

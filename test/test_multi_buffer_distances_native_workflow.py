@@ -3,15 +3,8 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
-from qgis.core import (
-    QgsFeature,
-    QgsFeedback,
-    QgsField,
-    QgsGeometry,
-    QgsPointXY,
-    QgsProcessingContext,
-    QgsVectorLayer,
-)
+from qgis.core import (QgsFeature, QgsFeedback, QgsField, QgsGeometry,
+                       QgsPointXY, QgsProcessingContext, QgsVectorLayer)
 from qgis.PyQt.QtCore import QVariant
 from utilities_for_testing import prepare_fixtures
 

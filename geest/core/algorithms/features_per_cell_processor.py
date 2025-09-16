@@ -1,20 +1,10 @@
 from typing import List
 
 from qgis import processing
-from qgis.core import (
-    Qgis,
-    QgsCoordinateTransformContext,
-    QgsFeature,
-    QgsFeatureRequest,
-    QgsFeedback,
-    QgsField,
-    QgsFields,
-    QgsSpatialIndex,
-    QgsVectorFileWriter,
-    QgsVectorLayer,
-    QgsWkbTypes,
-    edit,
-)
+from qgis.core import (Qgis, QgsCoordinateTransformContext, QgsFeature,
+                       QgsFeatureRequest, QgsFeedback, QgsField, QgsFields,
+                       QgsSpatialIndex, QgsVectorFileWriter, QgsVectorLayer,
+                       QgsWkbTypes, edit)
 from qgis.PyQt.QtCore import QVariant
 
 from geest.utilities import log_message

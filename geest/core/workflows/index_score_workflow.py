@@ -2,16 +2,9 @@ import glob
 import os
 
 from qgis import processing  # QGIS processing toolbox
-from qgis.core import (
-    Qgis,
-    QgsFeature,
-    QgsFeedback,
-    QgsField,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsVectorFileWriter,
-    QgsVectorLayer,
-)
+from qgis.core import (Qgis, QgsFeature, QgsFeedback, QgsField, QgsGeometry,
+                       QgsProcessingContext, QgsVectorFileWriter,
+                       QgsVectorLayer)
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem

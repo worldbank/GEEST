@@ -1,11 +1,9 @@
 import uuid
 
 from qgis.core import Qgis
-
 # Change to this when implementing in QGIS
 from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor
-
 # Change to this when implementing in QGIS
 from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QMessageBox, QTreeView
 

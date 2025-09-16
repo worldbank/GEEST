@@ -8,18 +8,12 @@ from typing import List, Optional
 
 # GDAL / OGR / OSR imports
 from osgeo import gdal, ogr, osr
-from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsFeedback,
-    QgsProject,
-    QgsTask,
-    QgsVectorLayer,
-)
+from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
+                       QgsFeedback, QgsProject, QgsTask, QgsVectorLayer)
 from qgis.PyQt.QtCore import pyqtSignal
 
-from geest.core.settings import setting
 from geest.core.osm_downloaders import OSMRoadsDownloader
+from geest.core.settings import setting
 from geest.utilities import log_message
 
 
