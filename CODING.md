@@ -14,20 +14,27 @@ This guide outlines coding practices for developing Python code in the GEEST pro
 Follow the standard Python naming conventions as defined in [PEP 8](https://peps.python.org/pep-0008/):
 
 - **Variable and Function Names**: Use `snake_case`.
+
   ```python
   def create_study_area_directory(working_dir: str) -> str:
       ...
   ```
+
 - **Class Names**: Use `PascalCase`.
+
   ```python
   class StudyAreaProcessor:
       ...
   ```
+
 - **Constants**: Use `UPPER_SNAKE_CASE`.
+
   ```python
   DEFAULT_EPSG_CODE = 4326
   ```
+
 - **Private Variables and Methods**: Use a leading underscore.
+
   ```python
   def _calculate_utm_zone(self, bbox: QgsRectangle) -> int:
       ...
@@ -36,10 +43,12 @@ Follow the standard Python naming conventions as defined in [PEP 8](https://peps
 ### Exceptions for PyQt Naming Conventions
 
 Follow the standard conventions for PyQt widgets and properties, even when they do not adhere to typical Python naming conventions:
+
 - **Signals and Slots**: Use `camelCase`.
 - **PyQt Widget Properties and Methods**: Use the default `camelCase` as provided by PyQt.
 
 Example:
+
 ```python
 self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
 ```
@@ -52,6 +61,7 @@ self.layer_combo.layerChanged.connect(self.field_combo.setLayer)
 - **Configuration**: Use the default line length of 88 characters. This ensures uniform formatting across all files and makes the codebase easier to read and maintain.
 
 To format code with Black:
+
 ```bash
 black .
 ```
@@ -69,11 +79,13 @@ black .
 - Always declare types for variables, parameters, and return values to enhance code clarity and type safety.
 
 Examples:
+
 ```python
 def create_study_area_directory(working_dir: str) -> str:
     study_area_dir: str = os.path.join(working_dir, "study_area")
     ...
 ```
+
 ```python
 layer: QgsVectorLayer = self.layer_combo.currentLayer()
 ```
@@ -84,6 +96,7 @@ layer: QgsVectorLayer = self.layer_combo.currentLayer()
 - If a function does not return any value, use `-> None`.
 
 Example:
+
 ```python
 def process_study_area(self) -> None:
     ...
@@ -92,10 +105,11 @@ def process_study_area(self) -> None:
 ### Type Imports
 
 - Import types from `typing` where necessary:
-    - `Optional`: To indicate optional parameters.
-    - `List`, `Dict`, `Tuple`: For more complex types.
+  - `Optional`: To indicate optional parameters.
+  - `List`, `Dict`, `Tuple`: For more complex types.
 
 Example:
+
 ```python
 from typing import List, Optional
 
@@ -119,6 +133,7 @@ def save_to_geopackage(features: List[QgsFeature], layer_name: str) -> None:
   - **`Qgis.Critical`**: For errors that need immediate attention.
 
 Examples:
+
 ```python
 QgsMessageLog.logMessage("Created study area grid.", tag="Geest", level=Qgis.Info)
 QgsMessageLog.logMessage("Warning: Invalid geometry found.", tag="Geest", level=Qgis.Warning)
@@ -131,6 +146,7 @@ QgsMessageLog.logMessage("Error transforming geometry.", tag="Geest", level=Qgis
 - **Use `try`/`except` Blocks**: Wrap code that may raise exceptions in `try`/`except` blocks and log the error.
 
 Example:
+
 ```python
 try:
     processor.process_study_area()
@@ -164,6 +180,7 @@ except Exception as e:
 - Include a brief description, parameters, and return values where applicable.
 
 Example:
+
 ```python
 def select_directory(self) -> None:
     """
@@ -178,6 +195,7 @@ def select_directory(self) -> None:
 - Use the `#` symbol with a space to start the comment.
 
 Example:
+
 ```python
 # Transform geometry to the correct CRS once at the start
 geom.transform(transform)

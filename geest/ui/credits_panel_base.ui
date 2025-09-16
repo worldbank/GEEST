@@ -194,7 +194,7 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>This plugin is built with support from the **Canada Clean Energy and Forest Climate Facility (CCEFCFy)**, the **Geospatial Operational Support Team (GOST, DECSC)** for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector. 
+          <string>This plugin is built with support from the **Canada Clean Energy and Forest Climate Facility (CCEFCFy)**, the **Geospatial Operational Support Team (GOST, DECSC)** for the project Geospatial Assessment of Women Employment and Business Opportunities in the Renewable Energy Sector.
 
 This project is open source, you can download the code at [https://github.com/worldbank/GEEST](https://github.com/worldbank/GEEST).</string>
          </property>

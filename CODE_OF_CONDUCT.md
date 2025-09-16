@@ -70,4 +70,3 @@ Covenant](https://www.contributor-covenant.org), version 2.1, available at
 
 For answers to common questions about this code of conduct, see
 [https://www.contributor-covenant.org/faq](https://www.contributor-covenant.org/faq).
-

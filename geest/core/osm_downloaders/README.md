@@ -1,4 +1,4 @@
-The following files are gratefully copied from Etienne Trimaille's 
+The following files are gratefully copied from Etienne Trimaille's
 Quick OSM Plugin:
 
 * connexion_oapi.py

@@ -127,13 +127,13 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>The Gender Enabling Environments Spatial Tool (GEEST), developed by the **World Bank**, evaluates locations based on how supportive they are of women’s employment and business opportunities. 
+          <string>The Gender Enabling Environments Spatial Tool (GEEST), developed by the **World Bank**, evaluates locations based on how supportive they are of women’s employment and business opportunities.
 
-By incorporating 15 spatial factors across three dimensions: 
+By incorporating 15 spatial factors across three dimensions:
 
-1. **Contextual** , 
-1. **Accessibility**, and 
-1. **Place Characterization**, 
+1. **Contextual** ,
+1. **Accessibility**, and
+1. **Place Characterization**,
 
 GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all.</string>
          </property>

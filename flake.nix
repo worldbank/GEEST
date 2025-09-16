@@ -88,6 +88,7 @@
       };
 
       devShells.${system}.default = pkgs.mkShell {
+        imports = [ ./scripts/neovim.nix ];
         packages = [
           pkgs.actionlint # for checking gh actions
           pkgs.bandit
@@ -126,7 +127,7 @@
           pkgs.vscode
           pkgs.yamlfmt
           pkgs.yamllint
-          pkgs.yamlfmt
+          pkgs.rpl
           pkgs.actionlint # for checking gh actions
           pkgs.bearer
           postgresWithPostGIS
@@ -221,7 +222,7 @@
           echo "  nix run .#qgis-master"
           echo ""
           echo "  To check if the plugin is properly usable from"
-          echo "  qgis_process, you can do this:
+          echo "  qgis_process, you can do this:"
           echo "  nix run .#qgis_process plugins enable geest2"
           echo "  nix run .#qgis_process list"
           echo ""
