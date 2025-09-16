@@ -127,7 +127,7 @@
           pkgs.vscode
           pkgs.yamlfmt
           pkgs.yamllint
-          pkgs.yamlfmt
+          pkgs.rpl
           pkgs.actionlint # for checking gh actions
           pkgs.bearer
           postgresWithPostGIS

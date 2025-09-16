@@ -3,7 +3,7 @@
 ## 🌍 Upcoming Course (April 2025)
 
 <p align="justify">
-The <strong>Geographic Considerations in Evaluating Women's Employment Opportunities</strong> course equips participants with a comprehensive understanding of how <strong>geographic factors</strong> impact women's access to <strong>employment and business opportunities</strong>. This course explores the <strong>intersection of geography and gender</strong>, highlighting how environmental characteristics can either <strong>enable or hinder women's empowerment</strong>.
+The <strong>Geographic Considerations in Evaluating Women's Employment Opportunities</strong> course will equip participants with a comprehensive understanding of how <strong>geographic factors</strong> impact women's access to <strong>employment and business opportunities</strong>. This course explores the <strong>intersection of geography and gender</strong>, highlighting how environmental characteristics can either <strong>enable or hinder women's empowerment</strong>.
 </p>
 
 <p align="justify">
