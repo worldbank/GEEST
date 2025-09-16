@@ -5,7 +5,7 @@ from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont, QIcon
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.utilities import is_qgis_dark_theme_active, log_message, resources_path
 
 
