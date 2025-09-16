@@ -8,7 +8,7 @@ jobs:
       image: qgis/qgis:release-3_16
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Fix Python command
         run: apt-get install python-is-python3
