@@ -9,8 +9,8 @@ import os
 import shutil
 import unittest
 
-from osgeo import gdal, ogr
-from qgis.core import QgsFeedback, QgsVectorLayer
+from osgeo import ogr
+from qgis.core import QgsVectorLayer
 from utilities_for_testing import prepare_fixtures
 
 from geest.core.tasks import StudyAreaProcessingTask

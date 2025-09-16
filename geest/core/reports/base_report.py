@@ -1,13 +1,26 @@
 import math
 from collections import defaultdict
 
-from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
-                       QgsFeatureRequest, QgsLayout, QgsLayoutExporter,
-                       QgsLayoutItemLabel, QgsLayoutItemMap,
-                       QgsLayoutItemMapGrid, QgsLayoutItemPage,
-                       QgsLayoutMeasurement, QgsLayoutPoint, QgsLayoutSize,
-                       QgsMapLayer, QgsProject, QgsReadWriteContext,
-                       QgsRectangle, QgsUnitTypes, QgsVectorLayer)
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeatureRequest,
+    QgsLayout,
+    QgsLayoutExporter,
+    QgsLayoutItemLabel,
+    QgsLayoutItemMap,
+    QgsLayoutItemMapGrid,
+    QgsLayoutItemPage,
+    QgsLayoutMeasurement,
+    QgsLayoutPoint,
+    QgsLayoutSize,
+    QgsMapLayer,
+    QgsProject,
+    QgsReadWriteContext,
+    QgsRectangle,
+    QgsUnitTypes,
+    QgsVectorLayer,
+)
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont
 from qgis.PyQt.QtXml import QDomDocument

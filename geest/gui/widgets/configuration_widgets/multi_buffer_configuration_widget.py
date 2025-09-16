@@ -1,6 +1,5 @@
 from qgis.core import Qgis
-from qgis.PyQt.QtWidgets import (QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-                                 QRadioButton)
+from qgis.PyQt.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QLineEdit, QRadioButton
 
 from geest.utilities import log_message
 

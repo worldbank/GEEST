@@ -130,6 +130,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         frame_width = self.shapefile_line_edit.style().pixelMetric(
             self.shapefile_line_edit.style().PM_DefaultFrameWidth
         )
+
         self.shapefile_line_edit.setStyleSheet(
             f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"
         )

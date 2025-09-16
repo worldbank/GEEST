@@ -18,8 +18,10 @@ except ImportError:
 import tempfile
 
 from osgeo import gdal
-from qgis.core import Qgis
+
+# flake8: noqa: F401
 from qgis.PyQt import Qt
+from qgis.core import Qgis
 
 
 def _run_tests(test_suite, package_name, with_coverage=False):

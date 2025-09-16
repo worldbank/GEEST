@@ -1,15 +1,30 @@
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap
-from qgis.PyQt.QtWidgets import (QCheckBox, QDialog, QDialogButtonBox,
-                                 QDoubleSpinBox, QHBoxLayout, QHeaderView,
-                                 QLabel, QPushButton, QSizePolicy, QSpacerItem,
-                                 QTableWidget, QTableWidgetItem, QVBoxLayout,
-                                 QWidget)
+from qgis.PyQt.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from geest.gui.widgets import CustomBannerLabel
-from geest.utilities import (is_qgis_dark_theme_active, log_message,
-                             resources_path, setting)
+from geest.utilities import (
+    is_qgis_dark_theme_active,
+    log_message,
+    resources_path,
+    setting,
+)
 
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..factor_configuration_widget import FactorConfigurationWidget

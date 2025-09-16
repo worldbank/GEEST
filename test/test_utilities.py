@@ -1,9 +1,3 @@
-import os
-import unittest
-from unittest.mock import MagicMock, patch
-
-from qgis.core import Qgis
-
 #!/usr/bin/env python
 """
 Test suite for utilities.py
@@ -11,15 +5,32 @@ Test suite for utilities.py
 versionadded: 2023-03-14
 """
 
+import os
+import unittest
+from unittest.mock import MagicMock, patch
+
+from qgis.core import Qgis
+
 
 # Import the utilities module
-from geest.utilities import (calculate_utm_zone, calculate_utm_zone_from_layer,
-                             geest_layer_ids, get_free_memory_mb, get_ui_class,
-                             is_qgis_dark_theme_active, linear_interpolation,
-                             log_layer_count, log_message, log_window_geometry,
-                             resource_url, resources_path,
-                             theme_background_image, theme_stylesheet,
-                             vector_layer_type, version)
+from geest.utilities import (
+    calculate_utm_zone,
+    calculate_utm_zone_from_layer,
+    geest_layer_ids,
+    get_free_memory_mb,
+    get_ui_class,
+    is_qgis_dark_theme_active,
+    linear_interpolation,
+    log_layer_count,
+    log_message,
+    log_window_geometry,
+    resource_url,
+    resources_path,
+    theme_background_image,
+    theme_stylesheet,
+    vector_layer_type,
+    version,
+)
 
 
 class TestUtilities(unittest.TestCase):

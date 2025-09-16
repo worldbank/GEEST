@@ -3,10 +3,20 @@ import traceback
 from urllib.parse import unquote
 
 from qgis import processing
-from qgis.core import (Qgis, QgsCoordinateReferenceSystem, QgsFeatureRequest,
-                       QgsFeedback, QgsField, QgsFields, QgsGeometry,
-                       QgsProcessingContext, QgsVectorFileWriter,
-                       QgsVectorLayer, QgsWkbTypes, edit)
+from qgis.core import (
+    Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsFeatureRequest,
+    QgsFeedback,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsProcessingContext,
+    QgsVectorFileWriter,
+    QgsVectorLayer,
+    QgsWkbTypes,
+    edit,
+)
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem, setting

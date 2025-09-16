@@ -6,9 +6,16 @@ import subprocess  # nosec B404
 import traceback
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
-from qgis.core import (Qgis, QgsCoordinateReferenceSystem, QgsFeedback,
-                       QgsFieldProxyModel, QgsLayerTreeGroup,
-                       QgsMapLayerProxyModel, QgsProject, QgsVectorLayer)
+from qgis.core import (
+    Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsFeedback,
+    QgsFieldProxyModel,
+    QgsLayerTreeGroup,
+    QgsMapLayerProxyModel,
+    QgsProject,
+    QgsVectorLayer,
+)
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QPixmap
 
@@ -16,8 +23,13 @@ from geest.core import WorkflowQueueManager
 from geest.core.reports.study_area_report import StudyAreaReport
 from geest.core.tasks import StudyAreaProcessingTask
 from geest.gui.widgets import CustomBannerLabel
-from geest.utilities import (calculate_utm_zone_from_layer, get_ui_class,
-                             linear_interpolation, log_message, resources_path)
+from geest.utilities import (
+    calculate_utm_zone_from_layer,
+    get_ui_class,
+    linear_interpolation,
+    log_message,
+    resources_path,
+)
 
 FORM_CLASS = get_ui_class("create_project_panel_base.ui")
 
