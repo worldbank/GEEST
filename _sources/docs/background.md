@@ -1,4 +1,4 @@
-# Project ## 1. The Geospatial Women's Employment Analytical Framework (GeoWEAF)ackground
+# Project ## 1. The Geospatial Women's Employment Analytical Framework (GeoWEAF) Background
 
 <h2 id="introduction">Introduction</h2>
 
