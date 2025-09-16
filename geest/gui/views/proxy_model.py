@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+from typing import Dict, List, Optional
+
 from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject, Qt
 
 from geest.core import JsonTreeItem
-from typing import Optional, Dict, List
 
 """
 This proxy model provides an alternate representation of the data model

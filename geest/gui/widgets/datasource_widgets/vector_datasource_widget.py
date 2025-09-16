@@ -1,16 +1,15 @@
 import os
 import urllib.parse  # Add this import
-from qgis.PyQt.QtWidgets import (
-    QLineEdit,
-    QToolButton,
-    QFileDialog,
-)
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtCore import QSettings, Qt
+
+from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
 from qgis.gui import QgsMapLayerComboBox
-from .base_datasource_widget import BaseDataSourceWidget
-from qgis.core import QgsMapLayerProxyModel, QgsProject, Qgis
+from qgis.PyQt.QtCore import QSettings, Qt
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QToolButton
+
 from geest.utilities import log_message, resources_path
+
+from .base_datasource_widget import BaseDataSourceWidget
 
 
 class VectorDataSourceWidget(BaseDataSourceWidget):

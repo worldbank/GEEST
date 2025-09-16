@@ -1,15 +1,13 @@
 import os
 import unittest
-from qgis.core import (
-    QgsVectorLayer,
-    QgsProcessingContext,
-    QgsFeedback,
-)
+
+from qgis.core import QgsFeedback, QgsProcessingContext, QgsVectorLayer
+from utilities_for_testing import prepare_fixtures
+
+from geest.core.algorithms import WEEByPopulationScoreProcessingTask
 from geest.core.tasks import (
     StudyAreaProcessingTask,
 )  # Adjust the import path as necessary
-from utilities_for_testing import prepare_fixtures
-from geest.core.algorithms import WEEByPopulationScoreProcessingTask
 
 
 class TestWEEScoreProcessingTask(unittest.TestCase):

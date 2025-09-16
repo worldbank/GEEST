@@ -1,5 +1,7 @@
 import os
+
 from osgeo import ogr, osr
+
 from geest.utilities import log_message
 
 

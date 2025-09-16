@@ -3,31 +3,29 @@ import os
 import shutil
 import traceback
 from abc import ABC, abstractmethod
-from qgis.core import (
-    QgsFeedback,
-    QgsVectorLayer,
-    Qgis,
-    QgsProcessingContext,
-    QgsProcessingFeedback,
-    QgsGeometry,
-    QgsProcessingFeedback,
-    QgsProcessingException,
-    QgsVectorLayer,
-    Qgis,
-)
+
 from qgis import processing
-from qgis.PyQt.QtCore import QSettings, pyqtSignal, QObject
+from qgis.core import (
+    Qgis,
+    QgsFeedback,
+    QgsGeometry,
+    QgsProcessingContext,
+    QgsProcessingException,
+    QgsProcessingFeedback,
+    QgsVectorLayer,
+)
+from qgis.PyQt.QtCore import QObject, QSettings, pyqtSignal
+
 from geest.core import JsonTreeItem, setting
-from geest.utilities import resources_path
 from geest.core.algorithms import (
     AreaIterator,
-    subset_vector_layer,
-    geometry_to_memory_layer,
     check_and_reproject_layer,
     combine_rasters_to_vrt,
+    geometry_to_memory_layer,
+    subset_vector_layer,
 )
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
-from geest.utilities import log_message, log_layer_count
+from geest.utilities import log_layer_count, log_message, resources_path
 
 
 class WorkflowBase(QObject):

@@ -1,7 +1,9 @@
+import json
 import os
 import unittest
-import json
+
 from qgis.PyQt.QtCore import QEventLoop
+
 from geest.core.ors_client import ORSClient
 
 

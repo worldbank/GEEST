@@ -1,18 +1,21 @@
 import os
+from urllib.parse import unquote
+
 from qgis.core import (
     Qgis,
     QgsFeedback,
-    QgsGeometry,
-    QgsVectorLayer,
-    QgsProcessingContext,
-    edit,
     QgsField,
+    QgsGeometry,
+    QgsProcessingContext,
+    QgsVectorLayer,
+    edit,
 )
 from qgis.PyQt.QtCore import QVariant
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
-from urllib.parse import unquote
+
+from .workflow_base import WorkflowBase
 
 
 class SafetyPolygonWorkflow(WorkflowBase):

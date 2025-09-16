@@ -1,15 +1,18 @@
 import os
+
+from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from qgis.core import (
     Qgis,
     QgsFeedback,
-    QgsRasterLayer,
-    QgsProcessingContext,
     QgsGeometry,
+    QgsProcessingContext,
+    QgsRasterLayer,
 )
-from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class AggregationWorkflowBase(WorkflowBase):

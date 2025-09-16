@@ -1,31 +1,31 @@
 import os
 import shutil
 import traceback
+from typing import Optional
 from urllib.parse import unquote
 
-from typing import Optional
+from qgis import processing
 from qgis.core import (
-    QgsRasterLayer,
     Qgis,
     QgsFeedback,
     QgsGeometry,
-    QgsVectorLayer,
     QgsProcessingContext,
-    QgsVectorLayer,
-    QgsGeometry,
     QgsProcessingFeedback,
+    QgsRasterLayer,
     QgsTask,
+    QgsVectorLayer,
 )
-from qgis import processing
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message, resources_path
+
+from .area_iterator import AreaIterator
 from .utilities import (
-    subset_vector_layer,
-    geometry_to_memory_layer,
     check_and_reproject_layer,
     combine_rasters_to_vrt,
+    geometry_to_memory_layer,
+    subset_vector_layer,
 )
-from .area_iterator import AreaIterator
 
 
 class OpportunitiesMaskProcessor(QgsTask):

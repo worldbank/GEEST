@@ -1,23 +1,25 @@
 import os
-import traceback
-import shutil
-from typing import Optional
-import subprocess  # nosec B404
 import platform
+import shutil
+import subprocess  # nosec B404
+import traceback
+from typing import Optional
 
+from qgis import processing
 from qgis.core import (
     QgsApplication,
-    QgsTask,
-    QgsProcessingContext,
-    QgsFeedback,
-    QgsRasterLayer,
-    QgsRasterDataProvider,
-    QgsVectorLayer,
     QgsFeature,
+    QgsFeedback,
+    QgsProcessingContext,
+    QgsRasterDataProvider,
+    QgsRasterLayer,
+    QgsTask,
+    QgsVectorLayer,
 )
-from qgis import processing
-from geest.utilities import log_message, resources_path
+
 from geest.core.algorithms import AreaIterator
+from geest.utilities import log_message, resources_path
+
 from .utilities import geometry_to_memory_layer
 
 

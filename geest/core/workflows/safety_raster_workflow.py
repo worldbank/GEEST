@@ -1,5 +1,8 @@
 import os
+from urllib.parse import unquote
+
 import numpy as np
+from qgis import processing  # QGIS processing toolbox
 from qgis.core import (
     Qgis,
     QgsFeedback,
@@ -9,11 +12,11 @@ from qgis.core import (
     QgsRasterLayer,
     QgsVectorLayer,
 )
-from qgis import processing  # QGIS processing toolbox
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
-from urllib.parse import unquote
+
+from .workflow_base import WorkflowBase
 
 
 class SafetyRasterWorkflow(WorkflowBase):

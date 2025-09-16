@@ -1,8 +1,11 @@
+import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
+
 from qgis.core import (
-    QgsFeature,
     QgsCoordinateReferenceSystem,
+    QgsFeature,
     QgsPointXY,
     QgsVectorLayer,
 )
@@ -10,8 +13,6 @@ from qgis.core import (
 from geest.core.algorithms.native_network_analysis_processor import (
     NativeNetworkAnalysisProcessor,
 )
-import os
-import tempfile
 
 
 class TestNativeNetworkAnalysisProcessor(unittest.TestCase):

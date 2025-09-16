@@ -1,9 +1,9 @@
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-)
 from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+from qgis.PyQt.QtWidgets import QLabel
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class RasterReclassificationConfigurationWidget(BaseConfigurationWidget):

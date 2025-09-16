@@ -1,3 +1,3 @@
-from .factor_aggregation_dialog import FactorAggregationDialog
-from .dimension_aggregation_dialog import DimensionAggregationDialog
 from .analysis_aggregation_dialog import AnalysisAggregationDialog
+from .dimension_aggregation_dialog import DimensionAggregationDialog
+from .factor_aggregation_dialog import FactorAggregationDialog

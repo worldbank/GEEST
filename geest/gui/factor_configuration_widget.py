@@ -1,9 +1,11 @@
-from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QButtonGroup
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import pyqtSignal
-from .configuration_widget_factory import ConfigurationWidgetFactory
+from qgis.PyQt.QtWidgets import QButtonGroup, QVBoxLayout, QWidget
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .configuration_widget_factory import ConfigurationWidgetFactory
 
 
 class FactorConfigurationWidget(QWidget):

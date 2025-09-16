@@ -1,17 +1,14 @@
 import os
-import traceback
-from typing import Optional, List
 import shutil
+import traceback
+from typing import List, Optional
 
-from qgis.PyQt.QtCore import QVariant
-from qgis.core import (
-    QgsVectorLayer,
-    QgsTask,
-    QgsCoordinateReferenceSystem,
-)
 from qgis import processing
-from geest.utilities import log_message, resources_path
+from qgis.core import QgsCoordinateReferenceSystem, QgsTask, QgsVectorLayer
+from qgis.PyQt.QtCore import QVariant
+
 from geest.core import JsonTreeItem
+from geest.utilities import log_message, resources_path
 
 
 class SubnationalAggregationProcessingTask(QgsTask):

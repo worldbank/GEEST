@@ -1,10 +1,8 @@
-from qgis.PyQt.QtGui import QPixmap, QPainter
 from qgis.PyQt.QtCore import QRect, Qt
+from qgis.PyQt.QtGui import QPainter, QPixmap
 from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout
-from geest.utilities import (
-    theme_stylesheet,
-    theme_background_image,
-)
+
+from geest.utilities import theme_background_image, theme_stylesheet
 
 
 class CustomBaseDialog(QDialog):

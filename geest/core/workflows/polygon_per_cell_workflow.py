@@ -1,17 +1,20 @@
 import os
+
 from qgis.core import (
     Qgis,
     QgsFeedback,
     QgsGeometry,
-    QgsVectorLayer,
     QgsProcessingContext,
+    QgsVectorLayer,
 )
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.core.algorithms.polygon_per_cell_processor import (
     assign_reclassification_to_polygons,
 )
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class PolygonPerCellWorkflow(WorkflowBase):

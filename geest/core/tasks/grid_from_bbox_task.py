@@ -1,6 +1,8 @@
 import time
+
 from osgeo import ogr
 from qgis.core import QgsTask
+
 from geest.utilities import log_message
 
 

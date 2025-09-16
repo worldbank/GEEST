@@ -1,19 +1,22 @@
 import os
+from urllib.parse import unquote
+
 from qgis.core import (
     Qgis,
-    QgsGeometry,
     QgsFeedback,
-    QgsVectorLayer,
+    QgsGeometry,
     QgsProcessingContext,
+    QgsVectorLayer,
 )
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import (
-    select_grid_cells,
     assign_values_to_grid,
+    select_grid_cells,
 )
 from geest.utilities import log_message
-from urllib.parse import unquote
+
+from .workflow_base import WorkflowBase
 
 
 class PointPerCellWorkflow(WorkflowBase):

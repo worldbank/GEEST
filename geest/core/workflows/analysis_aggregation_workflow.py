@@ -1,7 +1,10 @@
 import os
+
 from qgis.core import QgsFeedback, QgsProcessingContext
-from .aggregation_workflow_base import AggregationWorkflowBase
+
 from geest.core import JsonTreeItem
+
+from .aggregation_workflow_base import AggregationWorkflowBase
 
 
 class AnalysisAggregationWorkflow(AggregationWorkflowBase):

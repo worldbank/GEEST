@@ -1,6 +1,7 @@
-import unittest
 import os
-from unittest.mock import patch, MagicMock
+import unittest
+from unittest.mock import MagicMock, patch
+
 from qgis.core import Qgis
 
 #!/usr/bin/env python
@@ -13,22 +14,22 @@ versionadded: 2023-03-14
 
 # Import the utilities module
 from geest.utilities import (
-    theme_background_image,
-    theme_stylesheet,
-    log_window_geometry,
-    get_free_memory_mb,
-    log_layer_count,
-    resources_path,
-    resource_url,
-    get_ui_class,
-    log_message,
+    calculate_utm_zone,
+    calculate_utm_zone_from_layer,
     geest_layer_ids,
+    get_free_memory_mb,
+    get_ui_class,
     is_qgis_dark_theme_active,
     linear_interpolation,
+    log_layer_count,
+    log_message,
+    log_window_geometry,
+    resource_url,
+    resources_path,
+    theme_background_image,
+    theme_stylesheet,
     vector_layer_type,
     version,
-    calculate_utm_zone_from_layer,
-    calculate_utm_zone,
 )
 
 

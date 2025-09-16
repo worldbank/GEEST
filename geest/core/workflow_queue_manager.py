@@ -1,9 +1,11 @@
 from PyQt5.QtCore import QObject, pyqtSignal
-from qgis.core import Qgis, QgsTask, QgsProcessingContext, QgsProject
-from .workflow_queue import WorkflowQueue
-from .workflow_job import WorkflowJob
-from .json_tree_item import JsonTreeItem
+from qgis.core import Qgis, QgsProcessingContext, QgsProject, QgsTask
+
 from geest.utilities import log_message
+
+from .json_tree_item import JsonTreeItem
+from .workflow_job import WorkflowJob
+from .workflow_queue import WorkflowQueue
 
 
 class WorkflowQueueManager(QObject):

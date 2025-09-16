@@ -1,15 +1,14 @@
-from PyQt5.QtWidgets import (
-    QWidget,
-)
-from qgis.PyQt.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget
+from qgis.PyQt.QtCore import pyqtSignal
+
+from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
     get_ui_class,
-    resources_path,
-    log_message,
     linear_interpolation,
+    log_message,
+    resources_path,
 )
-from geest.gui.widgets import CustomBannerLabel
 
 FORM_CLASS = get_ui_class("setup_panel_base.ui")
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import json
+
 import jsonschema
 from jsonschema import validate
 

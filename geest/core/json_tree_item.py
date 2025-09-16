@@ -1,12 +1,12 @@
-import uuid
 import traceback
+import uuid
 
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont, QIcon
-from qgis.core import Qgis
-from geest.utilities import resources_path
-from geest.core import setting
-from geest.utilities import log_message, is_qgis_dark_theme_active
+
+from geest.core.settings import setting
+from geest.utilities import is_qgis_dark_theme_active, log_message, resources_path
 
 
 class JsonTreeItem:

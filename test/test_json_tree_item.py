@@ -1,7 +1,9 @@
 import unittest
+from uuid import UUID
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
-from uuid import UUID
+
 from geest.core.json_tree_item import JsonTreeItem
 
 

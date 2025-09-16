@@ -1,9 +1,10 @@
 import os
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-)
+
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import QLabel
+
 from geest.utilities import log_message
+
 from .base_configuration_widget import BaseConfigurationWidget
 
 

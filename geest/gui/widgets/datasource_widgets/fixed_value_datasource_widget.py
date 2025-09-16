@@ -1,11 +1,12 @@
 import os
-from qgis.PyQt.QtWidgets import (
-    QDoubleSpinBox,
-)
-from qgis.PyQt.QtCore import QSettings
+
 from qgis.core import Qgis
-from .base_datasource_widget import BaseDataSourceWidget
+from qgis.PyQt.QtCore import QSettings
+from qgis.PyQt.QtWidgets import QDoubleSpinBox
+
 from geest.utilities import log_message
+
+from .base_datasource_widget import BaseDataSourceWidget
 
 
 class FixedValueDataSourceWidget(BaseDataSourceWidget):

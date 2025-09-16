@@ -1,10 +1,7 @@
-from qgis.core import (
-    QgsFeatureRequest,
-    QgsVectorLayer,
-    QgsGeometry,
-    Qgis,
-)
 from typing import Iterator, Tuple
+
+from qgis.core import Qgis, QgsFeatureRequest, QgsGeometry, QgsVectorLayer
+
 from geest.utilities import log_message
 
 

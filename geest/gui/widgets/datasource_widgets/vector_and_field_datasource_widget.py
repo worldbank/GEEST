@@ -1,27 +1,22 @@
 import os
-from urllib.parse import unquote
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
-from qgis.PyQt.QtWidgets import (
-    QLineEdit,
-    QToolButton,
-    QFileDialog,
-)
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtCore import QSettings, Qt
-
-from qgis.gui import QgsMapLayerComboBox, QgsFieldComboBox
 from qgis.core import (
+    Qgis,
+    QgsFieldProxyModel,
     QgsMapLayerProxyModel,
     QgsProject,
-    QgsFieldProxyModel,
     QgsVectorLayer,
     QgsWkbTypes,
-    Qgis,
 )
+from qgis.gui import QgsFieldComboBox, QgsMapLayerComboBox
+from qgis.PyQt.QtCore import QSettings, Qt
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QToolButton
+
+from geest.utilities import log_message, resources_path
 
 from .base_datasource_widget import BaseDataSourceWidget
-from geest.utilities import log_message, resources_path
 
 
 class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):

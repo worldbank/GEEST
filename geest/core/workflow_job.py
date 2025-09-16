@@ -1,17 +1,19 @@
 import cProfile
-import pstats
-import io
-import os
-from functools import wraps, lru_cache
 import hashlib
 import inspect
+import io
+import os
+import pstats
+from functools import lru_cache, wraps
 
-from qgis.core import QgsTask, QgsFeedback, Qgis, QgsProcessingContext, QgsApplication
+from qgis.core import Qgis, QgsApplication, QgsFeedback, QgsProcessingContext, QgsTask
 from qgis.PyQt.QtCore import pyqtSignal
+
+from geest.core.settings import setting
+from geest.utilities import log_message
+
 from .json_tree_item import JsonTreeItem
 from .workflow_factory import WorkflowFactory
-from geest.utilities import log_message
-from geest.core import setting
 
 
 # Utility functions for caching support
@@ -164,8 +166,8 @@ class WorkflowJob(QgsTask):
 
         if output_file is None:
             # Use a default location in the QGIS user profile directory
-            from pathlib import Path
             import datetime
+            from pathlib import Path
 
             profile_dir = (
                 Path(QgsApplication.qgisSettingsDirPath()) / "geest" / "profiles"

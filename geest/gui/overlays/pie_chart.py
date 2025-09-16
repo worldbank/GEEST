@@ -1,14 +1,12 @@
 import math
 
-from qgis.PyQt.QtGui import QImage, QPainter, QFont, QColor
-from qgis.PyQt.QtCore import QRectF, Qt
 from qgis.gui import QgsMapCanvasItem
-from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtGui import QImage, QPainter
+from qgis.PyQt.QtCore import QRectF, QSettings, Qt
+from qgis.PyQt.QtGui import QColor, QFont, QImage, QPainter
+
+from geest.core.settings import setting
+
 from ...utilities import resources_path
-from geest.core import (
-    setting,
-)
 
 """
 A pie chart overlay item for the QGIS map canvas.

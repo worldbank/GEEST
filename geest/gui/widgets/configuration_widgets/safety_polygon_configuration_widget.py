@@ -1,14 +1,17 @@
 import os
+
+from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import (
     QLabel,
+    QSizePolicy,
+    QSpinBox,
     QTableWidget,
     QTableWidgetItem,
-    QSpinBox,
 )
-from qgis.PyQt.QtWidgets import QSizePolicy
-from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):

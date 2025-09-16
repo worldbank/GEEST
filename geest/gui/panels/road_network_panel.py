@@ -1,28 +1,27 @@
 import os
+import platform
 import traceback
-from PyQt5.QtWidgets import (
-    QWidget,
-    QFileDialog,
-    QMessageBox,
-)
-from qgis.core import (
-    QgsMapLayerProxyModel,
-    QgsVectorLayer,
-    QgsProject,
-    Qgis,
-    QgsProject,
-    QgsFeedback,
-)
 
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
+from qgis.core import (
+    Qgis,
+    QgsFeedback,
+    QgsMapLayerProxyModel,
+    QgsProject,
+    QgsVectorLayer,
+)
 from qgis.PyQt.QtCore import QSettings, pyqtSignal, pyqtSlot
 from qgis.PyQt.QtGui import QFont
-from geest.utilities import get_ui_class, resources_path, linear_interpolation
-from geest.core import WorkflowQueueManager
-from geest.utilities import log_message
-from geest.gui.widgets import CustomBannerLabel
-from geest.core.tasks import OSMDownloaderTask
-import platform
 
+from geest.core import WorkflowQueueManager
+from geest.core.tasks import OSMDownloaderTask
+from geest.gui.widgets import CustomBannerLabel
+from geest.utilities import (
+    get_ui_class,
+    linear_interpolation,
+    log_message,
+    resources_path,
+)
 
 FORM_CLASS = get_ui_class("road_network_panel_base.ui")
 

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """QGIS plugin admin operations"""
 
-import os
-
 import configparser
 import datetime as dt
 import json
+import os
 import shlex
 import shutil
 import subprocess  # nosec B404

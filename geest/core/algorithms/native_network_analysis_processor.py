@@ -1,23 +1,24 @@
-from osgeo import ogr, osr
 import os
 import traceback
-from typing import Optional, List
+from math import atan2, degrees
+from typing import List, Optional
 
+import numpy as np
+from osgeo import ogr, osr
+from qgis import processing
 from qgis.core import (
-    QgsTask,
-    QgsFeature,
-    QgsVectorLayer,
     QgsCoordinateReferenceSystem,
-    QgsRectangle,
-    QgsWkbTypes,
+    QgsFeature,
     QgsFeedback,
     QgsGeometry,
+    QgsRectangle,
+    QgsTask,
+    QgsVectorLayer,
+    QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import QVariant
-from qgis import processing
+
 from geest.utilities import log_message
-import numpy as np
-from math import atan2, degrees
 
 
 class NativeNetworkAnalysisProcessor(QgsTask):

@@ -1,16 +1,16 @@
 """Query preparation step."""
 
 import re
-
 from typing import List, Union
 
 from qgis.core import QgsRectangle
 from qgis.PyQt.QtCore import QUrl, QUrlQuery
 
-from .exceptions import QueryFactoryException, QueryNotSupported
-from .osm import QueryLanguage
 from geest.core.i18n import tr
 from geest.utilities import log_message
+
+from .exceptions import QueryFactoryException, QueryNotSupported
+from .osm import QueryLanguage
 
 __copyright__ = "Copyright 2021, 3Liz"
 __license__ = "GPL version 3"

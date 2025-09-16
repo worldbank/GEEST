@@ -1,5 +1,7 @@
-import os
 import glob
+import os
+
+from qgis import processing  # QGIS processing toolbox
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -11,10 +13,11 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
-from qgis import processing  # QGIS processing toolbox
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class DefaultIndexScoreWorkflow(WorkflowBase):

@@ -1,30 +1,26 @@
-from qgis.core import (
-    Qgis,
-    QgsProcessingContext,
-    QgsFeedback,
-)
+from qgis.core import Qgis, QgsFeedback, QgsProcessingContext
 
 from geest.core.workflows import (
-    DontUseWorkflow,
-    DefaultIndexScoreWorkflow,
-    FactorAggregationWorkflow,
-    DimensionAggregationWorkflow,
+    AcledImpactWorkflow,
     AnalysisAggregationWorkflow,
+    ClassifiedPolygonWorkflow,
+    DefaultIndexScoreWorkflow,
+    DimensionAggregationWorkflow,
+    DontUseWorkflow,
+    FactorAggregationWorkflow,
     MultiBufferDistancesNativeWorkflow,
     PointPerCellWorkflow,
-    PolylinePerCellWorkflow,
     PolygonPerCellWorkflow,
-    AcledImpactWorkflow,
-    SinglePointBufferWorkflow,
+    PolylinePerCellWorkflow,
+    RasterReclassificationWorkflow,
     SafetyPolygonWorkflow,
     SafetyRasterWorkflow,
-    RasterReclassificationWorkflow,
+    SinglePointBufferWorkflow,
     StreetLightsBufferWorkflow,
-    ClassifiedPolygonWorkflow,
 )
+from geest.utilities import log_message
 
 from .json_tree_item import JsonTreeItem
-from geest.utilities import log_message
 
 
 class WorkflowFactory:

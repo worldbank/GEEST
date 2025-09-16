@@ -11,7 +11,7 @@ Successfully extracted all base64-encoded images from the Gender Enabling Enviro
 3. **Replaced all base64 references** with file paths to the extracted images
 4. **Applied meaningful names** to the most commonly used tab icons:
    - `setup_tab.png` - Setup Tab icon
-   - `dimension_aggregation_tab.png` - Dimension Aggregation Tab icon  
+   - `dimension_aggregation_tab.png` - Dimension Aggregation Tab icon
    - `insights_tab.png` - Insights Tab icon
    - `raster_output_error.png` - Raster Output Error icon
    - `country_boundary_error.png` - Country Boundary Error icon

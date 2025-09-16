@@ -1,13 +1,13 @@
+from PyQt5.QtGui import QDesktopServices
+from qgis.PyQt.QtCore import Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtWidgets import (
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
     QVBoxLayout,
     QWidget,
-    QPushButton,
-    QLabel,
-    QSpacerItem,
-    QSizePolicy,
 )
-from qgis.PyQt.QtCore import QUrl, Qt, pyqtSignal
-from PyQt5.QtGui import QDesktopServices
 
 try:
     from PyQt5.QtWebEngineWidgets import QWebEngineView

@@ -1,9 +1,12 @@
 import os
-from qgis.core import QgsFeedback, QgsProcessingContext
+
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
-from .aggregation_workflow_base import AggregationWorkflowBase
-from geest.utilities import resources_path
+from qgis.core import QgsFeedback, QgsProcessingContext
+
 from geest.core import JsonTreeItem
+from geest.utilities import resources_path
+
+from .aggregation_workflow_base import AggregationWorkflowBase
 
 
 class DimensionAggregationWorkflow(AggregationWorkflowBase):

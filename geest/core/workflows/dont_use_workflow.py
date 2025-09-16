@@ -1,12 +1,11 @@
 import time
-from qgis.core import (
-    QgsFeedback,
-    QgsProcessingContext,
-    QgsGeometry,
-)
-from .workflow_base import WorkflowBase
+
+from qgis.core import QgsFeedback, QgsGeometry, QgsProcessingContext
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class DontUseWorkflow(WorkflowBase):

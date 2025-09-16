@@ -1,4 +1,6 @@
 from qgis.core import Qgis
+
+from geest.core.settings import setting
 from geest.gui.widgets.configuration_widgets import (
     AcledCsvConfigurationWidget,
     BaseConfigurationWidget,
@@ -13,7 +15,6 @@ from geest.gui.widgets.configuration_widgets import (
     SingleBufferConfigurationWidget,
     StreetLightsConfigurationWidget,
 )
-from geest.core import setting
 from geest.utilities import log_message
 
 

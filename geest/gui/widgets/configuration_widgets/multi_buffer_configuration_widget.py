@@ -1,14 +1,9 @@
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-    QGroupBox,
-    QRadioButton,
-    QHBoxLayout,
-    QLineEdit,
-)
-
 from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+from qgis.PyQt.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QLineEdit, QRadioButton
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class MultiBufferConfigurationWidget(BaseConfigurationWidget):

@@ -1,23 +1,23 @@
-from collections import defaultdict
 import json
+from collections import defaultdict
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 from qgis.core import (
-    QgsProject,
     QgsLayout,
     QgsLayoutItemLabel,
-    QgsLayoutPoint,
-    QgsUnitTypes,
-    QgsLayoutSize,
-    QgsLayoutItemLabel,
     QgsLayoutItemShape,
+    QgsLayoutPoint,
+    QgsLayoutSize,
+    QgsProject,
+    QgsRasterLayer,
     QgsSimpleFillSymbolLayer,
     QgsUnitTypes,
-    QgsRasterLayer,
 )
-from qgis.PyQt.QtGui import QFont, QColor
+from qgis.PyQt.QtGui import QColor, QFont
+
 from geest.utilities import log_message, resources_path, setting
+
 from .base_report import BaseReport
 
 
