@@ -25,6 +25,7 @@ from typing import Optional
 import cProfile
 import pstats
 import io
+import subprocess  # nosec B404
 from shutil import which
 from functools import partial
 
@@ -259,15 +260,15 @@ for module_name in list(sys.modules.keys()):
                 self.label_overlay.setCanvas(None)
                 self.label_overlay.deleteLater()
                 self.label_overlay = None
-        except Exception as e:
-            pass
+        except Exception as e:  # nosec B110
+            pass  # Cleanup code - acceptable to ignore exceptions
         try:
             if self.pie_overlay:
                 self.pie_overlay.setCanvas(None)
                 self.pie_overlay.deleteLater()
                 self.pie_overlay = None
-        except Exception as e:
-            pass
+        except Exception as e:  # nosec B110
+            pass  # Cleanup code - acceptable to ignore exceptions
 
     def run_single_test(self):
         """Prompt user to select a single test to run in the Python console."""
@@ -483,9 +484,16 @@ for module_name in list(sys.modules.keys()):
                         stats.sort_stats("cumulative")
                         stats.print_callers()
                         stats.print_stats()
-                    os.system(
-                        f"pyprof2calltree -i {selected_file} -o {kcachegrind_file}"
-                    )
+                    subprocess.run(
+                        [
+                            "pyprof2calltree",
+                            "-i",
+                            selected_file,
+                            "-o",
+                            kcachegrind_file,
+                        ],
+                        check=False,
+                    )  # nosec B603 B607
                     log_message(
                         f"Call tree data saved to {kcachegrind_file}", level=Qgis.Info
                     )
@@ -502,7 +510,9 @@ for module_name in list(sys.modules.keys()):
             # Check if kcachegrind is available in the system path
             if which("kcachegrind"):
                 try:
-                    os.system(f"kcachegrind {selected_file}.calltree &")
+                    subprocess.Popen(
+                        ["kcachegrind", f"{selected_file}.calltree"]
+                    )  # nosec B603 B607
                     log_message(
                         "Opening call tree data in kcachegrind", level=Qgis.Info
                     )
@@ -539,8 +549,8 @@ for module_name in list(sys.modules.keys()):
             QgsProject.instance().readProject.disconnect(
                 self.dock_widget.qgis_project_changed
             )
-        except:
-            pass
+        except:  # nosec B110
+            pass  # Cleanup code - acceptable to ignore exceptions
 
         # Remove toolbar icons and clean up
         if self.run_action:
@@ -654,7 +664,7 @@ for module_name in list(sys.modules.keys()):
         if multiprocessing.current_process().pid > 1:
             import debugpy  # pylint: disable=import-outside-toplevel
 
-            debugpy.listen(("0.0.0.0", 9000))
+            debugpy.listen(("127.0.0.1", 9000))  # nosec B104 - localhost only for debug
             debugpy.wait_for_client()
             self.display_information_message_bar(
                 title="GEEST",

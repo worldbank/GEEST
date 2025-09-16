@@ -25,7 +25,7 @@ from datetime import datetime
 import tempfile
 import re
 import platform
-import subprocess
+import subprocess  # nosec B404
 from osgeo import ogr, osr
 from math import floor
 
@@ -248,8 +248,8 @@ def get_free_memory_mb():
             memoryStatus.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
             ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(memoryStatus))
             return memoryStatus.ullAvailPhys / (1024 * 1024)
-        except Exception:
-            pass
+        except Exception:  # nosec B110
+            pass  # Platform-specific memory check - fallback acceptable
 
     # --- Linux ---
     elif system == "Linux":
@@ -260,14 +260,14 @@ def get_free_memory_mb():
                 match = re.search(r"^MemAvailable:\s+(\d+)\skB", meminfo, re.MULTILINE)
                 if match:
                     return float(match.group(1)) / 1024.0
-        except Exception:
-            pass
+        except Exception:  # nosec B110
+            pass  # Platform-specific memory check - fallback acceptable
 
     # --- macOS (Darwin) ---
     elif system == "Darwin":
         # One approach is to parse the output of the 'vm_stat' command
         try:
-            vm_stat = subprocess.check_output(["vm_stat"]).decode("utf-8")
+            vm_stat = subprocess.check_output(["vm_stat"]).decode("utf-8")  # nosec
             page_size = 4096  # Usually 4096 bytes
             free_pages = 0
             # Look for "Pages free: <number>"
@@ -275,8 +275,8 @@ def get_free_memory_mb():
             if match:
                 free_pages = int(match.group(1))
             return free_pages * page_size / (1024.0 * 1024.0)
-        except Exception:
-            pass
+        except Exception:  # nosec B110
+            pass  # Platform-specific memory check - fallback acceptable
 
     # If none of the above worked or on an unsupported OS, return 0.0
     return 0.0

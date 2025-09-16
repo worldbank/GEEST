@@ -11,13 +11,13 @@ jobs:
       image: qgis/qgis:release-3_34
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Fix Python command
         run: apt-get install python-is-python3
 
       - name: Install python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
 
       - name: Install plugin dependencies
         run: pip install -r requirements-dev.txt
@@ -25,7 +25,7 @@ jobs:
       - name: Get experimental info
         id: get-experimental
         run: |
-           echo "::set-output name=IS_EXPERIMENTAL::$(python -c "import json; f = open('config.json'); data=json.load(f); print(str(data['general']['experimental']).lower())")"
+           echo "IS_EXPERIMENTAL=$(python -c "import json; f = open('config.json'); data=json.load(f); print(str(data['general']['experimental']).lower())")" >> "$GITHUB_OUTPUT"
 
       - name: Create release from tag
         id: create-release
@@ -44,8 +44,8 @@ jobs:
       - name: get zip details
         id: get-zip-details
         run: |
-          echo "::set-output name=ZIP_PATH::dist/$(ls dist)\n"
-          echo "::set-output name=ZIP_NAME::$(ls dist)"
+          echo "ZIP_PATH=dist/$(ls dist)" >> "$GITHUB_OUTPUT"
+          echo "ZIP_NAME=$(ls dist)" >> "$GITHUB_OUTPUT"
 
       - name: Upload release asset
         id: upload-release-asset
@@ -59,12 +59,11 @@ jobs:
           asset_content_type: application/zip
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: release
       - name: Update custom plugin repository to include latest release
         run: |
-          echo "$(python admin.py generate-plugin-repo-xml)" >> docs/repository/plugins.xml
           python admin.py --verbose generate-plugin-repo-xml
           echo " " >> docs/repository/plugins.xml
           git config --global user.name "github-actions[bot]"

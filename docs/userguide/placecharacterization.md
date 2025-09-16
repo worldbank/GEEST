@@ -8,22 +8,26 @@ The Place Characterization Dimension refers to the social, environmental, and in
 
 Place Characterization factors refer to the following indicators:
 
-- **Active Transport:** identifies areas based on their ability to support safe and efficient active transport for women, such as walking, cycling, and other non-motorized modes of travel, by analyzing features like street crossings, block lengths, footpaths, and cycle paths.
+- **Active Transport:** identifies areas based on their capacity to support safe and efficient active transport for women—such as walking, cycling, and other non-motorized modes—by analyzing and categorizing the road network features downloaded during the project setup phase.
 - **Safety:** defines areas perceived as safe based on specific data or, alternatively, on how brightly lit they are, assuming that brightly lit areas are safer than those with no lights.
 - **Fragility, conflict and violence (FCV):** assigns scores to by analyzing overlap with ACLED data with buffers representing various types of events.
-- **Education:** computes a raster containing a standardized measure of the percentage of women who have attained higher education in the country/region of interest.
-- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure.
+- **Education:** computes a raster that provides a standardized measure of the percentage of women who have attained higher education within the country or region of interest.
+- **Digital Inclusion:** assesses the availability and accessibility of digital infrastructure by computing a national index score.
 - **Environmental Hazards:** characterizes areas based on their vulnerability to natural disasters.
 - **Water sanitation:** assesses the availability and accessibility of clean water and sanitation facilities.
 
 For certain factors, **multiple data input options** are available depending on the data's format and availability.
 
+As with the Accessibility dimension, **Active transport, Safety and Water sanitation** factors can be processed according to the level of analysis—whether conducted at a broader scale, such as the **national level**, or tailored to a more localized context, such as **urban or regional** areas.
+
 ### Input Place Characterization factors
+
 ---
+
 #### Active Transport
 
 <p align="justify">
-<strong>Active Transport</strong> refers to the presence of walkable environments and cycling infrastructure, as women often rely on walking or cycling for their daily commutes and errands. This factor is composed by 4 subfactors which provide additional granularity: street crossings | cycly paths | footpaths | block layout.
+<strong>Active Transport</strong> refers to the availability of walkable environments and cycling infrastructure, recognizing that women often rely on non-motorized modes of travel for daily commutes and errands.
 
 **Locate Active Transport Section**
 
@@ -33,7 +37,6 @@ For certain factors, **multiple data input options** are available depending on 
 > - 🚫 **Exclude Unused Factors (optional)**: If a specific factor is not intended to be included in the process, uncheck the **Use** button associated with it.
 > - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis.
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
-
 
 <p align="center">
 <img
@@ -52,7 +55,6 @@ For certain factors, **multiple data input options** are available depending on 
 | **Cycle Paths**      | None             | N/A                   | N/A                     | 1 cycle path            | N/A                     | 2+ paths               |
 | **Footpaths**        | None             | N/A                   | N/A                     | 1 path                  | N/A                     | 2+ paths               |
 | **Block Sizes**      | None             | >1 km                 | 751m - 1 km             | 501m - 750m             | 251m - 500m             | <250m                  |
-
 
 **Process Active Transport factors**
 
@@ -73,6 +75,7 @@ Back in the Data Processing Interface:
 The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
+
 #### Safety
 
 <p align="justify">
@@ -95,6 +98,7 @@ The successful completion of the process is indicated by the green checkmark wid
 </p>
 
 > - 2️⃣ Using **Classified Safety data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**polygon features**) corresponding to the safety data by clicking the three-dot button and the classification field; this layer will be used for processing:
+>
 <p align="center">
 <img
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_classes.jpg"
@@ -105,6 +109,7 @@ The successful completion of the process is indicated by the green checkmark wid
 </p>
 
 > - 3️⃣ Using **Nighttime Lights data** as input; VIIRS Nighttime Lights raster may be used as proxy data for presence of area illumination at night time; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the (**raster data**) corresponding to NTL by clicking the three-dot button; this layer will be used for processing:
+>
 <p align="center">
 <img
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_NTL.jpg"
@@ -115,6 +120,7 @@ The successful completion of the process is indicated by the green checkmark wid
 </p>
 
 > - 4️⃣ Using **Street lights data** as input; select the layer already loaded in the QGIS Layer Panel from the dropdown menu or manually enter the file path for the shapefiles (**point locations**) representing street lights by clicking the three-dot button; this layer will be used for processing:
+>
 <p align="center">
 <img
     src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Safety_street.jpg"
@@ -154,6 +160,7 @@ Back in the Data Processing Interface:
 The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
+
 #### FCV
 
 <p align="justify">
@@ -195,7 +202,6 @@ The successful completion of the process is indicated by the green checkmark wid
 |----------|----------------------|---------------------------|---------------------------------|---------------------|-----------------------------|------------------------------|
 | **FCV**  | battles and explosions | explosions and remote violence | violence against civilians |     not applicable               | protests and riots | no overlap with any event   |
 
-
 **Process FCV factor**
 
 Back in the Data Processing Interface:
@@ -215,6 +221,7 @@ Back in the Data Processing Interface:
 The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
+
 #### Education
 
 <p align="justify">
@@ -271,6 +278,7 @@ Back in the Data Processing Interface:
 The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
+
 #### Digital Inclusion
 
 <p align="justify">
@@ -327,6 +335,7 @@ Back in the Data Processing Interface:
 The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
+
 #### Environmental Hazards
 
 <p align="justify">
@@ -369,7 +378,6 @@ The thresholds for defining hazard levels are based on a predefined scoring list
 | **Tropical Cyclone Frequency (100 Years)** | >100 events        | 75–100 events        | 50–75 events         | 25–50 events         | <25 events           | No Data or 0         |
 | **Drought Data**                         | 4–5                | 3–4                  | 2–3                  | 1–2                  | 0–1                  | No Data or 0         |
 
-
 **Process Environmental Hazards factors**
 
 Back in the Data Processing Interface:
@@ -389,6 +397,7 @@ Back in the Data Processing Interface:
 The successful completion of the process is indicated by the green checkmark widgets.
 
 ---
+
 #### Water sanitation
 
 <p align="justify">
@@ -453,6 +462,7 @@ The successful completion of the process is indicated by the green checkmark wid
 </p>
 
 ### Process Place Characterization factors
+
 ---
 After configuring the factors and adjusting their weights to achieve balance, you can initiate the process workflow:
 
@@ -471,6 +481,7 @@ After configuring the factors and adjusting their weights to achieve balance, yo
 The process should be successfully completed and indicated by a green checkmark widget.
 
 ### Visualizing the Outputs
+
 ---
 After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the *Mutually Exclusive Group* feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 
@@ -490,6 +501,7 @@ If the results do not immediately appear in the Layer Panel after processing the
 </p>
 
 > 💡 **Tip**: If the input needs to be changed for any reason (e.g., incorrect initial input), you can clear the results and reprocess them as follows:
+>
 > - 🖱️ **Right-click** on the factor/dimension and select **Clear Item**.
 > - 🖱️ **Right-click again** on the same cleared factor/dimension, and while holding the **SHIFT** key on your keyboard, select **Run Item Workflow**.
 > This process ensures that the tool reassesses the input datasets and outputs the corrected scores.
@@ -504,7 +516,9 @@ If the results do not immediately appear in the Layer Panel after processing the
 </p>
 
 ### Key Considerations
+
 ---
+
 - **Input Accuracy**: Ensure all input datasets are carefully entered/selected and correspond to the correct factors and/or subfactors. Incorrect data will impact the outputs and subsequent analysis.
 
 - **Weight Adjustment**: Assign weights thoughtfully to reflect the importance of each factor in the overall analysis. After making changes, always balance the weights to ensure they sum up correctly.

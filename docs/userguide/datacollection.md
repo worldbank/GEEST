@@ -201,11 +201,10 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">📚Education</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Percentage of the labor force comprising women with university degrees</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Share of graduates by field, female (%)</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
-    <a href="https://genderdata.worldbank.org/en/indicator/sl-tlf-zs?education=Advanced">
-        WB data
-    </a>
+    <a href="https://genderdata.worldbank.org/en/indicator/se-ter-grad-fe-zs?fieldOfStudy=Science%2C+Technology%2C+Engineering+and+Mathematics+%28STEM%29">
+        WB data</a>
 </td>
 </tr>
   <tr>
@@ -213,8 +212,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">Individuals using the Internet (% of population)</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
     <a href="https://genderdata.worldbank.org/en/indicator/it-net-user-zs">
-        WB data
-    </a>
+        WB data</a>
 </td>
 </tr>
   <tr>
@@ -256,22 +254,23 @@ This page provides guidance on finding and collecting relevant data for the GEES
 <p style="text-align: justify;">
 While the above table showcases data specific to Saint Lucia, similar data can be found for other countries through the following sources:
 
-1. **World Bank - Women, Business and the Law**: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
+1. <strong>World Bank - Women, Business and the Law</strong>: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
 
-2. **United Nations Development Programme (UNDP)**: Provides metrics on gender equality, economic participation, and sustainable development, essential for evaluating contextual and place-based factors.
+2. <strong>United Nations Development Programme (UNDP)</strong>: Provides metrics on gender equality, economic participation, and sustainable development, essential for evaluating contextual and place-based factors.
 
-3. **National Statistics Offices**: Many countries publish gender-disaggregated data, which is crucial for contextual and accessibility insights in specific regions.
+3. <strong>National Statistics Offices</strong>: Many countries publish gender-disaggregated data, which is crucial for contextual and accessibility insights in specific regions.
 
-4. **International Labour Organization (ILO)**: Collects data on labor force participation, wage disparities, and workplace regulations by country, supporting the analysis of gender gaps and regulatory environments.
+4. <strong>International Labour Organization (ILO)</strong>: Collects data on labor force participation, wage disparities, and workplace regulations by country, supporting the analysis of gender gaps and regulatory environments.
 
-5. **OpenStreetMap (OSM)**: A valuable open-source platform providing geospatial data, including the locations of educational, healthcare, and financial facilities, as well as transport and green spaces. OSM data can help assess accessibility and environmental factors at a local level.
+5. <strong>OpenStreetMap (OSM)</strong>: A valuable open-source platform providing geospatial data, including the locations of educational, healthcare, and financial facilities, as well as transport and green spaces. OSM data can help assess accessibility and environmental factors at a local level.
 
-6. **Humanitarian Data Exchange (Humdata)**: Maintained by the United Nations Office for the Coordination of Humanitarian Affairs (OCHA), Humdata offers open datasets on schools, health facilities, and other infrastructure, aiding in the geospatial analysis of services critical for accessibility assessments.
+6. <strong>Humanitarian Data Exchange (Humdata)</strong>: Maintained by the United Nations Office for the Coordination of Humanitarian Affairs (OCHA), Humdata offers open datasets on schools, health facilities, and other infrastructure, aiding in the geospatial analysis of services critical for accessibility assessments.
 
-7. **Global Natural Hazards Data**: Provides data on environmental hazards, including earthquakes, floods, cyclones, landslides, fires and others across regions. This data is essential for assessing natural risks and planning in vulnerable areas.
+7. <strong>Global Natural Hazards Data</strong>: Provides data on environmental hazards, including earthquakes, floods, cyclones, landslides, fires and others across regions. This data is essential for assessing natural risks and planning in vulnerable areas.
 
-8. **Mapillary**: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
+8. <strong>Mapillary</strong>: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
 </p>
+
 
 ### Instructions for Data Collection:
 - **Query the Source**: Use the query instructions provided in the table to filter and collect specific data.

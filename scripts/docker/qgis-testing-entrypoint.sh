@@ -4,6 +4,7 @@
 
 set -e
 
+# shellcheck disable=SC1091
 source /tests_directory/scripts/docker/qgis-gender-indicator-tool-test-pre-scripts.sh
 
 # Run supervisor
