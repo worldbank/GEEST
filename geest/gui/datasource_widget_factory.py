@@ -1,6 +1,6 @@
 from qgis.core import Qgis
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.gui.widgets.datasource_widgets import (
     AcledCsvDataSourceWidget,
     BaseDataSourceWidget,

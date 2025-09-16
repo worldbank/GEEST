@@ -18,7 +18,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import pyqtSignal
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.core.osm_downloaders import OSMRoadsDownloader
 from geest.utilities import log_message
 

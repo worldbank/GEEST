@@ -3,7 +3,8 @@ from qgis.PyQt.QtCore import QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QFont, QPixmap
 from qgis.PyQt.QtWidgets import QMessageBox
 
-from geest.core import WorkflowQueueManager, set_setting, setting
+from geest.core import WorkflowQueueManager
+from geest.core.settings import set_setting, setting
 from geest.core.tasks import OrsCheckerTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (

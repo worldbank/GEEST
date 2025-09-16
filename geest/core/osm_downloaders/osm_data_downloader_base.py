@@ -33,7 +33,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QByteArray, QUrl, QVariant
 from qgis.PyQt.QtNetwork import QNetworkRequest
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.utilities import log_message
 
 from .query_preparation import QueryPreparation

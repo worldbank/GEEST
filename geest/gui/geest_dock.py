@@ -6,7 +6,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPainter
 from qgis.PyQt.QtWidgets import QDockWidget, QStackedWidget, QVBoxLayout, QWidget
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.gui.panels import (
     CreateProjectPanel,
     CreditsPanel,

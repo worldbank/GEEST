@@ -4,7 +4,7 @@ from qgis.gui import QgsMapCanvasItem
 from qgis.PyQt.QtCore import QRectF, QSettings, Qt
 from qgis.PyQt.QtGui import QColor, QFont, QImage, QPainter
 
-from geest.core import setting
+from geest.core.settings import setting
 
 from ...utilities import resources_path
 

@@ -16,7 +16,7 @@ from qgis.core import (
     QgsVectorLayer,
 )
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.utilities import calculate_utm_zone, log_message
 
 from .grid_chunker_task import GridChunkerTask

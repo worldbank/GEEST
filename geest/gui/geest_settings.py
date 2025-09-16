@@ -11,7 +11,7 @@ import os
 from qgis.gui import QgsOptionsPageWidget, QgsOptionsWidgetFactory
 from qgis.PyQt.QtGui import QIcon
 
-from geest.core import set_setting, setting
+from geest.core.settings import set_setting, setting
 from geest.utilities import get_ui_class, log_message, resources_path
 
 FORM_CLASS = get_ui_class("geest_settings_base.ui")

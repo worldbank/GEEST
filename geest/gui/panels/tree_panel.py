@@ -38,7 +38,8 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
-from geest.core import JsonTreeItem, WorkflowQueueManager, set_setting, setting
+from geest.core import JsonTreeItem, WorkflowQueueManager
+from geest.core.settings import set_setting, setting
 from geest.core.algorithms import (
     OpportunitiesByWeeScorePopulationProcessingTask,
     OpportunitiesByWeeScoreProcessingTask,

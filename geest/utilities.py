@@ -42,7 +42,7 @@ from qgis.PyQt.QtCore import QRect, QSettings, QUrl
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import QApplication
 
-from geest.core import setting
+from geest.core.settings import setting
 
 
 def theme_background_image() -> QPixmap:

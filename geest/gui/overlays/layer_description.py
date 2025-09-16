@@ -11,7 +11,7 @@ showing which layer is active etc.
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtGui import QIcon, QImage, QPainter, QPixmap
 
-from geest.core import setting
+from geest.core.settings import setting
 
 from ...utilities import resources_path
 

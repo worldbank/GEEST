@@ -5,7 +5,7 @@ from qgis.core import Qgis, QgsNetworkAccessManager, QgsNetworkReplyContent
 from qgis.PyQt.QtCore import QByteArray, QObject, QUrl, pyqtSignal
 from qgis.PyQt.QtNetwork import QNetworkRequest
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.utilities import log_message
 
 

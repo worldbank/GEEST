@@ -9,7 +9,7 @@ from functools import lru_cache, wraps
 from qgis.core import Qgis, QgsApplication, QgsFeedback, QgsProcessingContext, QgsTask
 from qgis.PyQt.QtCore import pyqtSignal
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.utilities import log_message
 
 from .json_tree_item import JsonTreeItem

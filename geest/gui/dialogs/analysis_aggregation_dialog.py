@@ -23,7 +23,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
-from geest.core import setting
+from geest.core.settings import setting
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
     get_ui_class,
