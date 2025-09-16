@@ -1,6 +1,6 @@
 ## Accessibility
 
-<p align="justify"> 
+<p align="justify">
 The Accessibility Dimension evaluates women’s daily mobility by examining their access to essential services. Levels of enablement for work access in this dimension are determined by service areas, which represent the geographic zones that facilities like childcare, supermarkets, universities, banks, and clinics can serve based on proximity. The nearer these facilities are to where women live, the more supportive and enabling the environment becomes for their participation in the workforce. For more information on data input used from open sources, please refer to the <a href="https://worldbank.github.io/GEEST/docs/userguide/datacollection.html" target="_blank">Data Collection section</a>.
 </p>
 
@@ -31,7 +31,7 @@ This tool evaluates how easily women can access essential services and amenities
 ### Input Accessibility factors
 ---
 #### Women’s Travel Patterns (WTP)
-<p align="justify"> 
+<p align="justify">
 <strong>Women’s Travel Patterns (WTP)</strong> refer to the unique travel behaviors of women, often involving multiple stops for household or caregiving tasks, making proximity to essential services like markets, supermarkets, childcare centers, primary schools, pharmacies and green spaces crucial. This factor is composed by 5 subfactors which provide additional granularity: kindergartens/childcare | primary schools | groceries | pharmacies | green spaces.
 
 **Locate Women's Travel Patterns Section**
@@ -45,11 +45,11 @@ This tool evaluates how easily women can access essential services and amenities
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20input.jpg" 
-    alt="WTP input" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20input.jpg"
+    alt="WTP input"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -106,34 +106,34 @@ This tool evaluates how easily women can access essential services and amenities
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Women's Travel Patterns**.  
-> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.  
+> - 🖱️ **Right-click** on **Women's Travel Patterns**.
+> - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20run.jpg" 
-    alt="WTP run" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20run.jpg"
+    alt="WTP run"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 The successful completion of the process is indicated by the green checkmark widgets:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20success.jpg" 
-    alt="WTP success" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WTP%20success.jpg"
+    alt="WTP success"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 ---
 #### Access to Public Transport
 
-<p align="justify"> 
+<p align="justify">
 <strong>Access to Public Transport</strong> focuses on the availability and proximity of public transportation stops, which is crucial for women, especially those who rely on buses, trains, or trams to access jobs, education, and essential services.
 </p>
 
@@ -146,11 +146,11 @@ The successful completion of the process is indicated by the green checkmark wid
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/APT.jpg" 
-    alt="APT input" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/APT.jpg"
+    alt="APT input"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -207,15 +207,15 @@ The successful completion of the process is indicated by the green checkmark wid
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Access to Public Transport**.  
+> - 🖱️ **Right-click** on **Access to Public Transport**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/APT%20run.jpg" 
-    alt="APT run" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/APT%20run.jpg"
+    alt="APT run"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -223,9 +223,9 @@ The process should be successfully completed and indicated by a green checkmark 
 
 
 ---
-#### Access to Health Facilities 
+#### Access to Health Facilities
 
-<p align="justify"> 
+<p align="justify">
 <strong>Access to Health Facilities</strong> evaluates how easily women can reach healthcare services in terms of distance, impacting their well-being and ability to participate in the workforce.
 </p>
 
@@ -239,11 +239,11 @@ The process should be successfully completed and indicated by a green checkmark 
 
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AHF.jpg" 
-    alt="AHF input" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AHF.jpg"
+    alt="AHF input"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -300,15 +300,15 @@ The process should be successfully completed and indicated by a green checkmark 
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Access to Health Facilities**.  
+> - 🖱️ **Right-click** on **Access to Health Facilities**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 The process should be successfully completed and indicated by a green checkmark widget.
 
 ---
-#### Access to Education and Training Facilities 
+#### Access to Education and Training Facilities
 
-<p align="justify"> 
+<p align="justify">
 <strong>Access to Education and Training Facilities</strong> assesses the proximity to higher education institutions and training centers, influencing women’s ability to gain necessary qualifications.
 </p>
 
@@ -321,11 +321,11 @@ The process should be successfully completed and indicated by a green checkmark 
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AET.jpg" 
-    alt="AET input" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AET.jpg"
+    alt="AET input"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -382,15 +382,15 @@ The process should be successfully completed and indicated by a green checkmark 
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Access to Education and Training Facilities**.  
+> - 🖱️ **Right-click** on **Access to Education and Training Facilities**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 The process should be successfully completed and indicated by a green checkmark widget.
 
 ---
-#### Access to Financial Facilities 
+#### Access to Financial Facilities
 
-<p align="justify"> 
+<p align="justify">
 <strong>Access to Financial Facilities</strong> focuses on the proximity of banks and financial institutions, which is essential for women’s economic empowerment and ability to access credit.
 </p>
 
@@ -403,11 +403,11 @@ The process should be successfully completed and indicated by a green checkmark 
 > - ✅ **Finalize**: Once all settings are configured, click OK to confirm and proceed to the next step.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AFF.jpg" 
-    alt="AFF input" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/AFF.jpg"
+    alt="AFF input"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -464,13 +464,13 @@ The process should be successfully completed and indicated by a green checkmark 
 
 Back in the Data Processing Interface:
 
-> - 🖱️ **Right-click** on **Access to Financial Facilities**.  
+> - 🖱️ **Right-click** on **Access to Financial Facilities**.
 > - ▶️ **Select "Run Item Workflow"** from the context menu to initiate the process.
 
 The process should be successfully completed and indicated by a green checkmark widget.
 
 ---
-**Additional Steps Before Processing**: 
+**Additional Steps Before Processing**:
 
 > - 🖱️🖱️ **Double-click** on the **Accessibility section** to open the pop-up.
 > - ⚖️ **Assign Weights**: Ensure the **weights** are correctly assigned, as they determine the relative importance of each factor in the analysis. Carefully review these values to ensure they are aligned with your project's objectives and reflect the significance of each factor accurately.
@@ -478,11 +478,11 @@ The process should be successfully completed and indicated by a green checkmark 
 > - 🔄 **Readjust Weights**: After excluding any factors, make sure to **Balance Weights** of the remaining factors. This step ensures the weight distribution remains balanced and totals correctly, preserving the integrity of the analysis, then click **OK** to proceed.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20weights.jpg" 
-    alt="Accessibility Weights" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20weights.jpg"
+    alt="Accessibility Weights"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -491,60 +491,60 @@ The process should be successfully completed and indicated by a green checkmark 
 ---
 After configuring the factors and adjusting their weights to achieve balance, you can initiate the process workflow:
 
-> - 🖱️**Right-click on Accessibility**.  
+> - 🖱️**Right-click on Accessibility**.
 > - ▶️**Select Run Item Workflow** from the context menu.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20run.jpg" 
-    alt="Accessibility Run" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20run.jpg"
+    alt="Accessibility Run"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 The process should be successfully completed and indicated by a green checkmark widget.
 
-### Visualizing the Outputs 
+### Visualizing the Outputs
 ---
-<p align="justify"> 
+<p align="justify">
 After completing the process, the outputs are automatically added to the Layer Panel in QGIS as a group layer. This group layer has the <i>Mutually Exclusive Group</i> feature activated, which ensures that only one layer within the group can be visible at a time. When this feature is enabled, turning on the visibility of one layer automatically turns off the visibility of the others within the same group, making it easier to compare results without overlapping visualizations.
 </p>
 
-<p align="justify"> 
+<p align="justify">
 The outputs consist of all factors and subfactors, as well as the aggregation of these into the final Accessibility output. All scores are assessed on a scale from 0 to 5, categorized as follows: <strong>≤ 0.5 (Not Enabling) | 0.5–1.5 (Very Low Enablement) | 1.5–2.5 (Low Enablement) | 2.5–3.5 (Moderately Enabling) | 3.5–4.5 (Enabling) | 4.5–5.0 (Highly Enabling)</strong>.
 </p>
 
-<p align="justify"> 
+<p align="justify">
 The outputs are stored under the Accessibility folder within the project folder created during the setup phase as raster files. These files can be shared and further utilized for various purposes, such as visualization in QGIS or other GIS software, integration into reports, overlaying with other spatial datasets, or performing advanced geospatial analyses, such as identifying priority areas or conducting trend analysis based on the scores.
 </p>
 
-<p align="justify"> 
+<p align="justify">
 If the results do not immediately appear in the Layer Panel after processing the Accessibility Dimension, you can resolve this by either adding them manually from the folder path or by right-clicking on the Accessibility Dimension and selecting <strong>Add to map</strong> from the context menu:
 </p>
 
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20add.jpg" 
-    alt="Accessibility Add to map" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20add.jpg"
+    alt="Accessibility Add to map"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > 💡 **Tip**: If the input needs to be changed for any reason (e.g., incorrect initial input), you can clear the results and reprocess them as follows:
-> - 🖱️ **Right-click** on the factor/dimension and select **Clear Item**.  
+> - 🖱️ **Right-click** on the factor/dimension and select **Clear Item**.
 > - 🖱️ **Right-click again** on the same cleared factor/dimension, and while holding the **SHIFT** key on your keyboard, select **Run Item Workflow**.
 > This process ensures that the tool reassesses the input datasets and outputs the corrected scores.
 
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20rerun.jpg" 
-    alt="Accessibility Clear and rerun" 
-    style="width:75%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/ACC%20rerun.jpg"
+    alt="Accessibility Clear and rerun"
+    style="width:75%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 

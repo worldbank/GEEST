@@ -198,7 +198,7 @@
 <li class="toctree-l2"><a class="reference internal" href="datacollection.html">Data Collection</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../background.html">Project Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../background.html">Project ## 1. The Geospatial Women’s Employment Analytical Framework (GeoWEAF)ackground</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../acknowledgements.html">Acknowledgements</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="../training.html">Training</a></li>
@@ -427,9 +427,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-open-the-plugin-manager-in-qgis">Step 1: Open the Plugin Manager in QGIS</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-the-plugin">Step 2: Install the Plugin</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-installation-and-configure-the-tool">Step 3: Verify the Installation and Configure the Tool</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-open-the-plugin-manager-in-qgis">Step 1: Open the Plugin Manager in QGIS</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-the-plugin">Step 2: Install the Plugin</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-installation-and-configure-the-tool">Step 3: Verify the Installation and Configure the Tool</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -452,7 +454,7 @@ document.write(`
 <li><p>Launch QGIS.</p></li>
 </ol>
 </li>
-<li><ol class="arabic simple" start="2">
+<li><ol class="arabic simple">
 <li><p>Go to <strong>Plugins</strong> &gt; <strong>Manage and Install Plugins…</strong>.</p></li>
 </ol>
 </li>
@@ -461,9 +463,8 @@ document.write(`
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins.JPG" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/plugins.JPG" alt="QGIS Plugin Setup" width="500" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
-</section>
 <section id="step-2-install-the-plugin">
-<h2>Step 2: Install the Plugin<a class="headerlink" href="#step-2-install-the-plugin" title="Permalink to this heading">#</a></h2>
+<h3>Step 2: Install the Plugin<a class="headerlink" href="#step-2-install-the-plugin" title="Permalink to this heading">#</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><ol class="arabic simple">
@@ -485,7 +486,7 @@ document.write(`
 </a>
 </section>
 <section id="step-3-verify-the-installation-and-configure-the-tool">
-<h2>Step 3: Verify the Installation and Configure the Tool<a class="headerlink" href="#step-3-verify-the-installation-and-configure-the-tool" title="Permalink to this heading">#</a></h2>
+<h3>Step 3: Verify the Installation and Configure the Tool<a class="headerlink" href="#step-3-verify-the-installation-and-configure-the-tool" title="Permalink to this heading">#</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><ol class="arabic simple">
@@ -510,22 +511,22 @@ document.write(`
 <blockquote>
 <div><ul>
 <li><ol class="arabic" start="4">
-<li><p>Optionally, you can customize the plugin’s behavior by navigating to:<br />
+<li><p>Optionally, you can customize the plugin’s behavior by navigating to:
 <strong>Settings Menu</strong> → <strong>Options</strong> → <strong>GEEST Settings</strong>. While the <strong>default settings are recommended</strong>, the following configurable sections are available:</p>
-<p>▪︎ <strong>Chunk size</strong><br />
+<p>▪︎ <strong>Chunk size</strong>
 Determines how many cells are processed at once. For example, a chunk size of <code class="docutils literal notranslate"><span class="pre">10</span></code> processes 10×10 cell blocks. Increasing this value (e.g., to <code class="docutils literal notranslate"><span class="pre">50</span></code>) can improve performance on powerful machines, but may slow down or crash QGIS on lower-spec systems.</p>
-<p>▪︎ <strong>Analysis Options – Assign 0 to cells by default</strong><br />
+<p>▪︎ <strong>Analysis Options – Assign 0 to cells by default</strong>
 If checked, areas without data will be assigned a value of 0. If unchecked, those areas will be left as NoData. This is useful for consistent raster outputs when comparing or summing layers.</p>
-<p>▪︎ <strong>User Interface Options</strong><br />
-▫︎ <strong>Show layer when clicking an item in the GEEST tree</strong><br />
+<p>▪︎ <strong>User Interface Options</strong>
+▫︎ <strong>Show layer when clicking an item in the GEEST tree</strong>
 Automatically activates the corresponding layer in QGIS when selected in the GEEST panel.</p>
-<p>▫︎ <strong>Show canvas overlay with current layer details</strong><br />
+<p>▫︎ <strong>Show canvas overlay with current layer details</strong>
 Enables an overlay that provides quick visual feedback about selected layers.</p>
-<p>▪︎ <strong>Advanced Options – Concurrent Tasks</strong><br />
+<p>▪︎ <strong>Advanced Options – Concurrent Tasks</strong>
 Specifies how many processing threads to run simultaneously. Set this equal to the number of CPU cores for efficient performance (e.g., 4 or more on most systems).</p>
-<p>▫︎ <strong>Enable developer mode</strong><br />
+<p>▫︎ <strong>Enable developer mode</strong>
 Intended for debugging — attaches the plugin to a remote debugger. ⚠️ Not recommended unless you’re actively developing the plugin.</p>
-<p>▫︎ <strong>Verbose logging mode</strong><br />
+<p>▫︎ <strong>Verbose logging mode</strong>
 Enables detailed logging useful for troubleshooting and diagnostics. Requires a restart to take effect.</p>
 </li>
 </ol>
@@ -535,6 +536,7 @@ Enables detailed logging useful for troubleshooting and diagnostics. Requires a 
 <a href="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_settings.png" target="_blank">
   <img src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Install_page_settings.png" alt="GEEST Settings" width="600" style="display: block; margin-left: auto; margin-right: auto;" title="Click to enlarge">
 </a>
+</section>
 </section>
 </section>
 
@@ -602,9 +604,11 @@ Enables detailed logging useful for troubleshooting and diagnostics. Requires a 
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-open-the-plugin-manager-in-qgis">Step 1: Open the Plugin Manager in QGIS</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-the-plugin">Step 2: Install the Plugin</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-installation-and-configure-the-tool">Step 3: Verify the Installation and Configure the Tool</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-open-the-plugin-manager-in-qgis">Step 1: Open the Plugin Manager in QGIS</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-the-plugin">Step 2: Install the Plugin</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-installation-and-configure-the-tool">Step 3: Verify the Installation and Configure the Tool</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
