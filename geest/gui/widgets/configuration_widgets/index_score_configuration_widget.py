@@ -1,7 +1,9 @@
-from qgis.PyQt.QtWidgets import QLabel, QDoubleSpinBox
-from .base_configuration_widget import BaseConfigurationWidget
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import QDoubleSpinBox, QLabel
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class IndexScoreConfigurationWidget(BaseConfigurationWidget):

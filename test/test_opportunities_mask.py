@@ -1,15 +1,13 @@
 import os
 import unittest
-from qgis.core import (
-    QgsProcessingContext,
-    QgsFeedback,
-)
-from geest.core.tasks import (
-    StudyAreaProcessingTask,
-)  # Adjust the import path as necessary
+
+from qgis.core import QgsFeedback, QgsProcessingContext
 from utilities_for_testing import prepare_fixtures
+
 from geest.core.algorithms import OpportunitiesMaskProcessor
 from geest.core.json_tree_item import JsonTreeItem
+from geest.core.tasks import \
+    StudyAreaProcessingTask  # Adjust the import path as necessary
 
 
 @unittest.skip("Skip this test for now")

@@ -1,32 +1,18 @@
 import os
-from qgis.PyQt.QtWidgets import (
-    QDockWidget,
-    QStackedWidget,
-    QVBoxLayout,
-    QWidget,
-)
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QPainter
+from typing import Optional
 
 from qgis.core import Qgis, QgsProject
-from typing import Optional
-from geest.gui.panels import (
-    IntroPanel,
-    CreditsPanel,
-    SetupPanel,
-    TreePanel,
-    HelpPanel,
-    OpenProjectPanel,
-    CreateProjectPanel,
-    RoadNetworkPanel,
-)
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QPainter
+from qgis.PyQt.QtWidgets import (QDockWidget, QStackedWidget, QVBoxLayout,
+                                 QWidget)
+
 from geest.core import setting
-from geest.utilities import (
-    log_message,
-    version,
-    theme_background_image,
-    theme_stylesheet,
-)
+from geest.gui.panels import (CreateProjectPanel, CreditsPanel, HelpPanel,
+                              IntroPanel, OpenProjectPanel, RoadNetworkPanel,
+                              SetupPanel, TreePanel)
+from geest.utilities import (log_message, theme_background_image,
+                             theme_stylesheet, version)
 
 INTRO_PANEL = 0
 CREDITS_PANEL = 1

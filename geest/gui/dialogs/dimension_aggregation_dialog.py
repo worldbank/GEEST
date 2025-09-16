@@ -1,30 +1,16 @@
-from qgis.PyQt.QtWidgets import (
-    QDialog,
-    QDialogButtonBox,
-    QHeaderView,
-    QLabel,
-    QDoubleSpinBox,
-    QPushButton,
-    QSizePolicy,
-    QSpacerItem,
-    QTableWidget,
-    QTableWidgetItem,
-    QVBoxLayout,
-    QCheckBox,
-    QWidget,
-    QHBoxLayout,
-    QSpacerItem,
-)
-from qgis.PyQt.QtGui import QPixmap, QDesktopServices
-from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.core import Qgis
-from geest.utilities import (
-    resources_path,
-    log_message,
-    setting,
-    is_qgis_dark_theme_active,
-)
+from qgis.PyQt.QtCore import Qt, QUrl
+from qgis.PyQt.QtGui import QDesktopServices, QPixmap
+from qgis.PyQt.QtWidgets import (QCheckBox, QDialog, QDialogButtonBox,
+                                 QDoubleSpinBox, QHBoxLayout, QHeaderView,
+                                 QLabel, QPushButton, QSizePolicy, QSpacerItem,
+                                 QTableWidget, QTableWidgetItem, QVBoxLayout,
+                                 QWidget)
+
 from geest.gui.widgets import CustomBannerLabel
+from geest.utilities import (is_qgis_dark_theme_active, log_message,
+                             resources_path, setting)
+
 from .custom_base_dialog import CustomBaseDialog
 
 

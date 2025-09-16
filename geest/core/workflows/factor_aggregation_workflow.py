@@ -1,8 +1,11 @@
 import os
+
 from qgis.core import QgsFeedback, QgsProcessingContext
-from .aggregation_workflow_base import AggregationWorkflowBase
-from geest.utilities import resources_path
+
 from geest.core import JsonTreeItem
+from geest.utilities import resources_path
+
+from .aggregation_workflow_base import AggregationWorkflowBase
 
 
 class FactorAggregationWorkflow(AggregationWorkflowBase):

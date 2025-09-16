@@ -1,19 +1,15 @@
 import os
-from qgis.core import (
-    Qgis,
-    QgsGeometry,
-    QgsFeedback,
-    QgsRasterLayer,
-    QgsProcessingContext,
-    QgsProcessingFeedback,
-    QgsVectorLayer,
-)
-from qgis.PyQt.QtCore import QVariant
+
 from qgis import processing  # QGIS processing toolbox
-from .workflow_base import WorkflowBase
+from qgis.core import (Qgis, QgsFeedback, QgsGeometry, QgsProcessingContext,
+                       QgsProcessingFeedback, QgsRasterLayer, QgsVectorLayer)
+from qgis.PyQt.QtCore import QVariant
+
 from geest.core import JsonTreeItem
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class RasterReclassificationWorkflow(WorkflowBase):

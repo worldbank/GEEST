@@ -6,13 +6,14 @@ versionadded: 2025-01-24
 """
 
 import os
-import unittest
 import shutil
+import unittest
 
-from osgeo import ogr, gdal
-from qgis.core import QgsVectorLayer, QgsFeedback
-from geest.core.tasks import StudyAreaProcessingTask
+from osgeo import gdal, ogr
+from qgis.core import QgsFeedback, QgsVectorLayer
 from utilities_for_testing import prepare_fixtures
+
+from geest.core.tasks import StudyAreaProcessingTask
 
 
 class TestStudyAreaProcessor(unittest.TestCase):

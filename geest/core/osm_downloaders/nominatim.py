@@ -7,11 +7,8 @@ import os
 from qgis.PyQt.QtCore import QDir, QTemporaryFile, QUrlQuery
 
 from .downloader import Downloader
-from .exceptions import (
-    NetWorkErrorException,
-    NominatimAreaException,
-    NominatimBadRequest,
-)
+from .exceptions import (NetWorkErrorException, NominatimAreaException,
+                         NominatimBadRequest)
 from .osm import OsmType
 
 __copyright__ = "Copyright 2021, 3Liz"

@@ -23,9 +23,10 @@ __copyright__ = (
 )
 
 import logging
-from qgis.PyQt.QtCore import QObject, pyqtSlot, pyqtSignal
+
 from qgis.core import QgsMapLayerRegistry
 from qgis.gui import QgsMapCanvasLayer
+from qgis.PyQt.QtCore import QObject, pyqtSignal, pyqtSlot
 
 LOGGER = logging.getLogger("qgis_templates_symbology")
 

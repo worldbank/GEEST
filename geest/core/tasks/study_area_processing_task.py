@@ -1,24 +1,21 @@
+import datetime
+import glob
 import os
 import re
-import glob
-import traceback
-import datetime
 import time
+import traceback
+from typing import List, Optional
 
 # GDAL / OGR / OSR imports
-from osgeo import ogr, osr, gdal
-from typing import List, Optional
-from qgis.core import (
-    QgsTask,
-    QgsFeedback,
-    QgsVectorLayer,
-    QgsVectorFileWriter,
-    QgsProject,
-)
-from geest.utilities import log_message, calculate_utm_zone
-from .grid_from_bbox_task import GridFromBboxTask
-from .grid_chunker_task import GridChunkerTask
+from osgeo import gdal, ogr, osr
+from qgis.core import (QgsFeedback, QgsProject, QgsTask, QgsVectorFileWriter,
+                       QgsVectorLayer)
+
 from geest.core import setting
+from geest.utilities import calculate_utm_zone, log_message
+
+from .grid_chunker_task import GridChunkerTask
+from .grid_from_bbox_task import GridFromBboxTask
 
 
 class StudyAreaProcessingTask(QgsTask):

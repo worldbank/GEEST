@@ -1,10 +1,6 @@
-from qgis.core import (
-    edit,
-    Qgis,
-    QgsField,
-    QgsVectorLayer,
-)
+from qgis.core import Qgis, QgsField, QgsVectorLayer, edit
 from qgis.PyQt.QtCore import QVariant
+
 from geest.utilities import log_message
 
 

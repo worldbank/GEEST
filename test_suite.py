@@ -1,6 +1,7 @@
-import sys
 import os
+import sys
 import unittest
+
 import qgis  # NOQA  For SIP API to V2 if run outside of QGIS
 
 try:
@@ -13,11 +14,12 @@ try:
 except ImportError:
     pipmain(["install", "coverage"])
     import coverage
-import tempfile
-from osgeo import gdal
-from qgis.PyQt import Qt
 
+import tempfile
+
+from osgeo import gdal
 from qgis.core import Qgis
+from qgis.PyQt import Qt
 
 
 def _run_tests(test_suite, package_name, with_coverage=False):

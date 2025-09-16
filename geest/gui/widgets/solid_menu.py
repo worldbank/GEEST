@@ -1,9 +1,7 @@
-from qgis.PyQt.QtWidgets import QMenu, QStyleOptionMenuItem, QStylePainter
 from qgis.PyQt.QtGui import QColor
-from geest.utilities import (
-    theme_stylesheet,
-    is_qgis_dark_theme_active,
-)
+from qgis.PyQt.QtWidgets import QMenu, QStyleOptionMenuItem, QStylePainter
+
+from geest.utilities import is_qgis_dark_theme_active, theme_stylesheet
 
 
 class SolidMenu(QMenu):

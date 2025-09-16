@@ -8,59 +8,28 @@ from functools import partial
 from logging import getLogger
 from typing import Dict, List, Union
 
-from qgis.core import (
-    Qgis,
-    QgsFeedback,
-    QgsLayerTreeGroup,
-    QgsProcessingContext,
-    QgsProject,
-    QgsVectorLayer,
-)
-from qgis.PyQt.QtCore import QModelIndex, QPoint, QSettings, Qt, pyqtSignal, pyqtSlot
+from qgis.core import (Qgis, QgsFeedback, QgsLayerTreeGroup,
+                       QgsProcessingContext, QgsProject, QgsVectorLayer)
+from qgis.PyQt.QtCore import (QModelIndex, QPoint, QSettings, Qt, pyqtSignal,
+                              pyqtSlot)
 from qgis.PyQt.QtGui import QMovie
-from qgis.PyQt.QtWidgets import (
-    QAction,
-    QApplication,
-    QDialog,
-    QFileDialog,
-    QHBoxLayout,
-    QHeaderView,
-    QLabel,
-    QMessageBox,
-    QProgressBar,
-    QPushButton,
-    QSizePolicy,
-    QTableWidget,
-    QTableWidgetItem,
-    QToolButton,
-    QTreeView,
-    QVBoxLayout,
-    QWidget,
-)
+from qgis.PyQt.QtWidgets import (QAction, QApplication, QDialog, QFileDialog,
+                                 QHBoxLayout, QHeaderView, QLabel, QMessageBox,
+                                 QProgressBar, QPushButton, QSizePolicy,
+                                 QTableWidget, QTableWidgetItem, QToolButton,
+                                 QTreeView, QVBoxLayout, QWidget)
 
-from geest.core import (
-    JsonTreeItem,
-    WorkflowQueueManager,
-    set_setting,
-    setting,
-)
-
-
+from geest.core import JsonTreeItem, WorkflowQueueManager, set_setting, setting
 from geest.core.algorithms import (
     OpportunitiesByWeeScorePopulationProcessingTask,
-    OpportunitiesByWeeScoreProcessingTask,
-    OpportunitiesMaskProcessor,
-    PopulationRasterProcessingTask,
-    SubnationalAggregationProcessingTask,
-    WEEByPopulationScoreProcessingTask,
-)
+    OpportunitiesByWeeScoreProcessingTask, OpportunitiesMaskProcessor,
+    PopulationRasterProcessingTask, SubnationalAggregationProcessingTask,
+    WEEByPopulationScoreProcessingTask)
 from geest.core.reports import AnalysisReport, StudyAreaReport
 from geest.core.utilities import add_to_map
-from geest.gui.dialogs import (
-    AnalysisAggregationDialog,
-    DimensionAggregationDialog,
-    FactorAggregationDialog,
-)
+from geest.gui.dialogs import (AnalysisAggregationDialog,
+                               DimensionAggregationDialog,
+                               FactorAggregationDialog)
 from geest.gui.views import JsonTreeModel, JsonTreeView
 from geest.gui.widgets import SolidMenu
 from geest.utilities import log_message, resources_path, theme_stylesheet

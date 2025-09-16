@@ -1,7 +1,9 @@
 from abc import abstractmethod
-from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QWidget, QSizePolicy
-from qgis.PyQt.QtCore import pyqtSignal
+
 from qgis.core import Qgis
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QRadioButton, QSizePolicy, QVBoxLayout, QWidget
+
 from geest.utilities import log_message
 
 

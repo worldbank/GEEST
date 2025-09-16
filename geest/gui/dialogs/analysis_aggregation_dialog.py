@@ -1,39 +1,22 @@
-from qgis.PyQt.QtWidgets import (
-    QDialog,
-    QDialogButtonBox,
-    QAbstractScrollArea,
-    QHeaderView,
-    QLabel,
-    QDoubleSpinBox,
-    QPushButton,
-    QSizePolicy,
-    QSpacerItem,
-    QTableWidget,
-    QTableWidgetItem,
-    QCheckBox,
-    QWidget,
-    QHBoxLayout,
-    QSpacerItem,
-    QSizePolicy,
-    QFileDialog,
-    QLineEdit,
-)
-from qgis.PyQt.QtGui import QPixmap, QDesktopServices
-from qgis.PyQt.QtCore import Qt, QUrl, QSettings, QByteArray
-from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
-from geest.utilities import (
-    resources_path,
-    log_message,
-    setting,
-    is_qgis_dark_theme_active,
-    get_ui_class,
-    log_window_geometry,
-)
-from qgis.gui import QgsMapLayerComboBox
-from geest.gui.widgets import CustomBannerLabel
-from geest.core import setting
-from .custom_base_dialog import CustomBaseDialog
 from urllib.parse import unquote
+
+from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
+from qgis.gui import QgsMapLayerComboBox
+from qgis.PyQt.QtCore import QByteArray, QSettings, Qt, QUrl
+from qgis.PyQt.QtGui import QDesktopServices, QPixmap
+from qgis.PyQt.QtWidgets import (QAbstractScrollArea, QCheckBox, QDialog,
+                                 QDialogButtonBox, QDoubleSpinBox, QFileDialog,
+                                 QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+                                 QPushButton, QSizePolicy, QSpacerItem,
+                                 QTableWidget, QTableWidgetItem, QWidget)
+
+from geest.core import setting
+from geest.gui.widgets import CustomBannerLabel
+from geest.utilities import (get_ui_class, is_qgis_dark_theme_active,
+                             log_message, log_window_geometry, resources_path,
+                             setting)
+
+from .custom_base_dialog import CustomBaseDialog
 
 FORM_CLASS = get_ui_class("analysis_dialog_base.ui")
 

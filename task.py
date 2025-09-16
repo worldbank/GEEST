@@ -9,9 +9,10 @@ This file is part of the GEEST QGIS Plugin. It is available under the terms of t
 See the LICENSE file in the project root for more information.
 """
 
-from qgis.core import QgsTask, QgsMessageLog, Qgis
-from PyQt5.QtCore import pyqtSignal
 import os
+
+from PyQt5.QtCore import pyqtSignal
+from qgis.core import Qgis, QgsMessageLog, QgsTask
 
 
 class GEESTTask(QgsTask):

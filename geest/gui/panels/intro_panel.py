@@ -1,18 +1,12 @@
-from PyQt5.QtWidgets import (
-    QWidget,
-)
+from PyQt5.QtWidgets import QWidget
 from qgis.core import Qgis
-
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtGui import QFont
+
 from geest.core.tasks import OrsCheckerTask
-from geest.utilities import (
-    get_ui_class,
-    resources_path,
-    log_message,
-    linear_interpolation,
-)
 from geest.gui.widgets import CustomBannerLabel
+from geest.utilities import (get_ui_class, linear_interpolation, log_message,
+                             resources_path)
 
 FORM_CLASS = get_ui_class("intro_panel_base.ui")
 

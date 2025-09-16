@@ -1,11 +1,9 @@
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-    QHBoxLayout,
-    QSpinBox,
-)
 from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QSpinBox
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class AcledCsvConfigurationWidget(BaseConfigurationWidget):

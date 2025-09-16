@@ -1,13 +1,10 @@
-from qgis.core import (
-    QgsRectangle,
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsProject,
-    QgsFeedback,
-)
+from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
+                       QgsFeedback, QgsProject, QgsRectangle)
 from qgis.gui import QgsMapCanvas
-from .osm_data_downloader_base import OSMDataDownloaderBase
+
 from geest.utilities import log_message
+
+from .osm_data_downloader_base import OSMDataDownloaderBase
 
 
 class OSMRoadsDownloader(OSMDataDownloaderBase):

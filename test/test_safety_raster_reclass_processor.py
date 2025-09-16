@@ -1,7 +1,8 @@
-import unittest
 import os
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsProcessingContext, QgsProject
+import unittest
 
+from qgis.core import (QgsProcessingContext, QgsProject, QgsRasterLayer,
+                       QgsVectorLayer)
 # from geest.core.algorithms import SafetyRasterReclassificationProcessor
 from utilities_for_testing import prepare_fixtures
 

@@ -1,17 +1,12 @@
 import os
 import shutil
-from qgis.core import (
-    QgsProcessingException,
-    QgsCoordinateReferenceSystem,
-    QgsGeometry,
-    QgsFeature,
-    QgsWkbTypes,
-    QgsVectorLayer,
-    QgsRasterLayer,
-    Qgis,
-    QgsProcessingFeedback,
-)
+
 from qgis import processing
+from qgis.core import (Qgis, QgsCoordinateReferenceSystem, QgsFeature,
+                       QgsGeometry, QgsProcessingException,
+                       QgsProcessingFeedback, QgsRasterLayer, QgsVectorLayer,
+                       QgsWkbTypes)
+
 from geest.utilities import log_message
 
 

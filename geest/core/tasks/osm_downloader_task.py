@@ -1,25 +1,20 @@
+import datetime
+import glob
 import os
 import re
-import glob
-import traceback
-import datetime
 import time
+import traceback
+from typing import List, Optional
 
 # GDAL / OGR / OSR imports
-from osgeo import ogr, osr, gdal
-from typing import List, Optional
+from osgeo import gdal, ogr, osr
+from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
+                       QgsFeedback, QgsProject, QgsTask, QgsVectorLayer)
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import (
-    QgsTask,
-    QgsFeedback,
-    QgsVectorLayer,
-    QgsProject,
-    QgsCoordinateTransform,
-    QgsCoordinateReferenceSystem,
-)
-from geest.utilities import log_message
-from geest.core.osm_downloaders import OSMRoadsDownloader
+
 from geest.core import setting
+from geest.core.osm_downloaders import OSMRoadsDownloader
+from geest.utilities import log_message
 
 
 class OSMDownloaderTask(QgsTask):

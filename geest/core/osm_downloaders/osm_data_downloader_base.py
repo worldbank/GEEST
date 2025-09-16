@@ -2,39 +2,30 @@ try:
     from defusedxml import ElementTree as ET
 except ImportError:
     # Fallback to standard library with warning
-    import xml.etree.ElementTree as ET  # nosec B405
     import warnings
+    import xml.etree.ElementTree as ET  # nosec B405
 
     warnings.warn(
         "defusedxml not available, falling back to xml.etree.ElementTree. "
         "Consider installing defusedxml for better security: pip install defusedxml",
         UserWarning,
     )
-from abc import ABC, abstractmethod
-import time
 import os
-from osgeo import ogr
+import time
+from abc import ABC, abstractmethod
 
-from qgis.core import (
-    QgsProject,
-    QgsCoordinateTransform,
-    QgsVectorLayer,
-    QgsFeature,
-    QgsRectangle,
-    QgsGeometry,
-    QgsField,
-    QgsVectorFileWriter,
-    QgsPointXY,
-    QgsNetworkAccessManager,
-    QgsFeedback,
-    QgsCoordinateReferenceSystem,
-)
-from qgis.PyQt.QtCore import QVariant, QUrl, QByteArray
-from qgis.PyQt.QtNetwork import QNetworkRequest
+from osgeo import ogr
 from qgis import processing  # QGIS processing API
+from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
+                       QgsFeature, QgsFeedback, QgsField, QgsGeometry,
+                       QgsNetworkAccessManager, QgsPointXY, QgsProject,
+                       QgsRectangle, QgsVectorFileWriter, QgsVectorLayer)
+from qgis.PyQt.QtCore import QByteArray, QUrl, QVariant
+from qgis.PyQt.QtNetwork import QNetworkRequest
 
 from geest.core import setting
 from geest.utilities import log_message
+
 from .query_preparation import QueryPreparation
 
 

@@ -5,8 +5,9 @@ Test suite for grid_from_bbox.py.
 Version Changed: 2025-01-24
 """
 
+from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
+
 from geest.core.tasks import GridFromBboxTask
-from qgis.core import QgsRectangle, QgsCoordinateReferenceSystem
 
 
 def example_bbox():

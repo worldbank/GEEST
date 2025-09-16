@@ -1,10 +1,12 @@
-import unittest
 import os
-from unittest.mock import patch, MagicMock, mock_open
+import unittest
+from unittest.mock import MagicMock, mock_open, patch
+
 from qgis.core import QgsVectorLayer
+from utilities_for_testing import prepare_fixtures
+
 from geest.core import JsonTreeItem
 from geest.core.workflows import AcledImpactWorkflow
-from utilities_for_testing import prepare_fixtures
 
 
 class TestAcledImpactWorkflow(unittest.TestCase):

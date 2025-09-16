@@ -1,9 +1,7 @@
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-    QSizePolicy,
-)
-from qgis.PyQt.QtGui import QPixmap, QPainter, QColor, QFont
 from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QColor, QFont, QPainter, QPixmap
+from qgis.PyQt.QtWidgets import QLabel, QSizePolicy
+
 from geest.utilities import log_message
 
 

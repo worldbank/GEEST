@@ -1,10 +1,8 @@
 from typing import Optional
 
-from qgis.core import (
-    QgsTask,
-    Qgis,
-)
+from qgis.core import Qgis, QgsTask
 from qgis.PyQt.QtCore import pyqtSignal
+
 from geest.core import setting
 from geest.core.ors_client import ORSClient
 from geest.utilities import log_message

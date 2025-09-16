@@ -1,25 +1,18 @@
-import os
 import csv
-from .workflow_base import WorkflowBase
-from geest.core import JsonTreeItem
-from qgis.core import (
-    Qgis,
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsFeature,
-    QgsFeedback,
-    QgsField,
-    QgsFields,
-    QgsGeometry,
-    QgsPointXY,
-    QgsProcessingContext,
-    QgsProcessingException,
-    QgsVectorFileWriter,
-    QgsVectorLayer,
-)
-from qgis.PyQt.QtCore import QVariant
+import os
+
 from qgis import processing
+from qgis.core import (Qgis, QgsCoordinateReferenceSystem,
+                       QgsCoordinateTransform, QgsFeature, QgsFeedback,
+                       QgsField, QgsFields, QgsGeometry, QgsPointXY,
+                       QgsProcessingContext, QgsProcessingException,
+                       QgsVectorFileWriter, QgsVectorLayer)
+from qgis.PyQt.QtCore import QVariant
+
+from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class AcledImpactWorkflow(WorkflowBase):

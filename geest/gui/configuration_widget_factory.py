@@ -1,19 +1,13 @@
 from qgis.core import Qgis
-from geest.gui.widgets.configuration_widgets import (
-    AcledCsvConfigurationWidget,
-    BaseConfigurationWidget,
-    ClassifiedPolygonConfigurationWidget,
-    DontUseConfigurationWidget,
-    FeaturePerCellConfigurationWidget,
-    IndexScoreConfigurationWidget,
-    MultiBufferConfigurationWidget,
-    RasterReclassificationConfigurationWidget,
-    SafetyPolygonConfigurationWidget,
-    SafetyRasterConfigurationWidget,
-    SingleBufferConfigurationWidget,
-    StreetLightsConfigurationWidget,
-)
+
 from geest.core import setting
+from geest.gui.widgets.configuration_widgets import (
+    AcledCsvConfigurationWidget, BaseConfigurationWidget,
+    ClassifiedPolygonConfigurationWidget, DontUseConfigurationWidget,
+    FeaturePerCellConfigurationWidget, IndexScoreConfigurationWidget,
+    MultiBufferConfigurationWidget, RasterReclassificationConfigurationWidget,
+    SafetyPolygonConfigurationWidget, SafetyRasterConfigurationWidget,
+    SingleBufferConfigurationWidget, StreetLightsConfigurationWidget)
 from geest.utilities import log_message
 
 

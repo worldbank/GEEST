@@ -49,13 +49,13 @@ repos:
       - id: flake8
         name: "🐍 flake8 Python Linter"
         language_version: python3
-        args: ['--extend-ignore=E203']
+
   - repo: https://github.com/PyCQA/isort
     rev: 6.0.1
     hooks:
       - id: isort
         name: "📦 isort - sort Python imports"
-        entry: isort --check --diff
+        entry: isort
         language: python
         types: [python]
         stages: [pre-commit]

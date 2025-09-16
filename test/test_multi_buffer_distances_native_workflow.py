@@ -1,21 +1,15 @@
-import unittest
-import tempfile
 import os
-from qgis.core import (
-    QgsVectorLayer,
-    QgsGeometry,
-    QgsPointXY,
-    QgsFeature,
-    QgsField,
-    QgsVectorLayer,
-    QgsProcessingContext,
-    QgsFeedback,
-)
-from qgis.PyQt.QtCore import QVariant
-from geest.core.workflows import MultiBufferDistancesNativeWorkflow
+import tempfile
+import unittest
 from unittest.mock import MagicMock, patch
-from geest.core import JsonTreeItem
+
+from qgis.core import (QgsFeature, QgsFeedback, QgsField, QgsGeometry,
+                       QgsPointXY, QgsProcessingContext, QgsVectorLayer)
+from qgis.PyQt.QtCore import QVariant
 from utilities_for_testing import prepare_fixtures
+
+from geest.core import JsonTreeItem
+from geest.core.workflows import MultiBufferDistancesNativeWorkflow
 
 
 class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):

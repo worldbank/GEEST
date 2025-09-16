@@ -1,20 +1,16 @@
-import os
 import glob
-from qgis.core import (
-    Qgis,
-    QgsFeature,
-    QgsFeedback,
-    QgsField,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsVectorFileWriter,
-    QgsVectorLayer,
-)
-from qgis.PyQt.QtCore import QVariant
+import os
+
 from qgis import processing  # QGIS processing toolbox
-from .workflow_base import WorkflowBase
+from qgis.core import (Qgis, QgsFeature, QgsFeedback, QgsField, QgsGeometry,
+                       QgsProcessingContext, QgsVectorFileWriter,
+                       QgsVectorLayer)
+from qgis.PyQt.QtCore import QVariant
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class DefaultIndexScoreWorkflow(WorkflowBase):

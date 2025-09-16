@@ -1,9 +1,9 @@
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-)
-from .base_configuration_widget import BaseConfigurationWidget
-from geest.utilities import log_message
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import QLabel
+
+from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class SafetyRasterConfigurationWidget(BaseConfigurationWidget):

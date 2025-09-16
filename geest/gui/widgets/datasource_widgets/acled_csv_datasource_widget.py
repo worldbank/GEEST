@@ -1,12 +1,11 @@
 import os
-from qgis.PyQt.QtWidgets import (
-    QLineEdit,
-    QToolButton,
-    QFileDialog,
-    QMessageBox,
-)
+
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import (QFileDialog, QLineEdit, QMessageBox,
+                                 QToolButton)
+
 from geest.utilities import log_message
+
 from .base_datasource_widget import BaseDataSourceWidget
 
 

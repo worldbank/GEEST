@@ -3,20 +3,14 @@
 import logging
 import os
 import re
-
 from typing import List
 
 from qgis.PyQt.QtCore import QDir, QFileInfo, QTemporaryFile
 
 from .downloader import Downloader
-from .exceptions import (
-    NetWorkErrorException,
-    OverpassBadRequestException,
-    OverpassManyRequestException,
-    OverpassMemoryException,
-    OverpassRuntimeError,
-    OverpassTimeoutException,
-)
+from .exceptions import (NetWorkErrorException, OverpassBadRequestException,
+                         OverpassManyRequestException, OverpassMemoryException,
+                         OverpassRuntimeError, OverpassTimeoutException)
 
 __copyright__ = "Copyright 2021, 3Liz"
 __license__ = "GPL version 3"

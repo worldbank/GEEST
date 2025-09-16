@@ -1,6 +1,6 @@
-from qgis.PyQt.QtWidgets import QWidget
-from qgis.PyQt.QtCore import Qt, pyqtSignal, QSize, QRect
+from qgis.PyQt.QtCore import QRect, QSize, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QPainter
+from qgis.PyQt.QtWidgets import QWidget
 
 
 class ToggleSwitch(QWidget):

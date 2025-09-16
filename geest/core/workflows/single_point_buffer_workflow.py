@@ -1,20 +1,15 @@
 import os
-from qgis.core import (
-    QgsField,
-    Qgis,
-    QgsFeedback,
-    QgsGeometry,
-    QgsVectorLayer,
-    QgsProcessingContext,
-    QgsVectorLayer,
-    QgsGeometry,
-)
-from qgis.PyQt.QtCore import QVariant
+from urllib.parse import unquote
+
 from qgis import processing
-from .workflow_base import WorkflowBase
+from qgis.core import (Qgis, QgsFeedback, QgsField, QgsGeometry,
+                       QgsProcessingContext, QgsVectorLayer)
+from qgis.PyQt.QtCore import QVariant
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
-from urllib.parse import unquote
+
+from .workflow_base import WorkflowBase
 
 
 class SinglePointBufferWorkflow(WorkflowBase):

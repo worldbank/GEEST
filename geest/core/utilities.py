@@ -18,16 +18,13 @@ __revision__ = "$Format:%H$"
 # (at your option) any later version.
 # ---------------------------------------------------------------------
 
-from math import floor
 import os
 import sys
-from qgis.core import (
-    Qgis,
-    QgsProject,
-    QgsVectorLayer,
-    QgsRasterLayer,
-    QgsLayerTreeGroup,
-)
+from math import floor
+
+from qgis.core import (Qgis, QgsLayerTreeGroup, QgsProject, QgsRasterLayer,
+                       QgsVectorLayer)
+
 from ..utilities import log_message
 from .json_tree_item import JsonTreeItem
 

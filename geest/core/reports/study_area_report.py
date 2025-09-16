@@ -1,26 +1,11 @@
-from qgis.core import (
-    QgsProject,
-    QgsVectorLayer,
-    QgsLayout,
-    QgsLayoutItemLabel,
-    QgsLayoutPoint,
-    QgsUnitTypes,
-    QgsLayoutSize,
-    QgsLayoutItemLabel,
-    QgsVectorLayer,
-    QgsUnitTypes,
-    QgsProject,
-    QgsLayout,
-    QgsLayoutItemLabel,
-    QgsLayoutItemShape,
-    QgsUnitTypes,
-    QgsLayoutSize,
-    QgsLayoutPoint,
-    QgsSimpleFillSymbolLayer,
-)
-from qgis.PyQt.QtGui import QFont, QColor
+from qgis.core import (QgsLayout, QgsLayoutItemLabel, QgsLayoutItemShape,
+                       QgsLayoutPoint, QgsLayoutSize, QgsProject,
+                       QgsSimpleFillSymbolLayer, QgsUnitTypes, QgsVectorLayer)
 from qgis.PyQt.QtCore import QSizeF
+from qgis.PyQt.QtGui import QColor, QFont
+
 from geest.utilities import log_message, resources_path
+
 from .base_report import BaseReport
 
 

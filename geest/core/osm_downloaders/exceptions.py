@@ -2,8 +2,9 @@
 
 from qgis.core import Qgis
 
-from .osm import OsmType
 from geest.core.i18n import tr
+
+from .osm import OsmType
 
 __copyright__ = "Copyright 2021, 3Liz"
 __license__ = "GPL version 3"

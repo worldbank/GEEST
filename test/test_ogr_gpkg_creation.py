@@ -1,6 +1,8 @@
-from osgeo import ogr, osr
 import os
 import unittest
+
+from osgeo import ogr, osr
+
 from geest.utilities import log_message
 
 

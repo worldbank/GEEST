@@ -1,18 +1,15 @@
 import os
-import traceback
-from typing import Optional, List
 import shutil
+import traceback
+from typing import List, Optional
 
-from qgis.core import (
-    QgsTask,
-    QgsRasterLayer,
-    QgsVectorLayer,
-    QgsCoordinateReferenceSystem,
-)
 from qgis import processing
+from qgis.core import (QgsCoordinateReferenceSystem, QgsRasterLayer, QgsTask,
+                       QgsVectorLayer)
+
 from geest.core import JsonTreeItem
-from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
+from geest.utilities import log_message, resources_path
 
 
 class OpportunitiesByWeeScoreProcessingTask(QgsTask):

@@ -1,20 +1,13 @@
-import unittest
 import os
-from qgis.core import (
-    QgsVectorLayer,
-    QgsFeature,
-    QgsGeometry,
-    QgsField,
-    QgsFields,
-    QgsFeedback,
-)
+import unittest
 
+from qgis.core import (QgsFeature, QgsFeedback, QgsField, QgsFields,
+                       QgsGeometry, QgsVectorLayer)
 from qgis.PyQt.QtCore import QVariant
-from geest.core.algorithms.features_per_cell_processor import (
-    select_grid_cells,
-    assign_values_to_grid,
-)
 from utilities_for_testing import prepare_fixtures
+
+from geest.core.algorithms.features_per_cell_processor import (
+    assign_values_to_grid, select_grid_cells)
 
 
 class TestSpatialProcessing(unittest.TestCase):

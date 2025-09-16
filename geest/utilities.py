@@ -18,30 +18,24 @@ __revision__ = "$Format:%H$"
 # (at your option) any later version.
 # ---------------------------------------------------------------------
 
-import os
-import logging
 import inspect
-from datetime import datetime
-import tempfile
-import re
+import logging
+import os
 import platform
+import re
 import subprocess  # nosec B404
-from osgeo import ogr, osr
+import tempfile
+from datetime import datetime
 from math import floor
 
-from qgis.PyQt.QtCore import QUrl, QSettings, QRect
-from qgis.PyQt.QtGui import QPixmap
+from osgeo import ogr, osr
+from qgis.core import (Qgis, QgsLayerTreeGroup, QgsMessageLog, QgsProject,
+                       QgsRasterLayer, QgsVectorLayer)
 from qgis.PyQt import uic
-from qgis.core import (
-    QgsMessageLog,
-    Qgis,
-    QgsProject,
-    QgsLayerTreeGroup,
-    QgsVectorLayer,
-    QgsRasterLayer,
-)
+from qgis.PyQt.QtCore import QRect, QSettings, QUrl
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import QApplication
-from qgis.core import QgsProject, Qgis
+
 from geest.core import setting
 
 

@@ -1,25 +1,14 @@
 import uuid
 
-# Change to this when implementing in QGIS
-from qgis.PyQt.QtWidgets import (
-    QAbstractItemDelegate,
-    QTreeView,
-    QMessageBox,
-)
-
-# Change to this when implementing in QGIS
-from qgis.PyQt.QtCore import (
-    QAbstractItemModel,
-    QModelIndex,
-    Qt,
-    pyqtSignal,
-)
-from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QTreeView, QMessageBox
-from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt
 from qgis.core import Qgis
-from geest.utilities import log_message
+# Change to this when implementing in QGIS
+from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt, pyqtSignal
+from qgis.PyQt.QtGui import QColor
+# Change to this when implementing in QGIS
+from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QMessageBox, QTreeView
+
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class JsonTreeModel(QAbstractItemModel):

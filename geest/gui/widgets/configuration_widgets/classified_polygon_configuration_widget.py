@@ -1,15 +1,14 @@
 import os
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-    QTableWidget,
-    QTableWidgetItem,
-    QSpinBox,
-)
+
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import QVariant
 from qgis.PyQt.QtGui import QBrush, QColor
-from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+from qgis.PyQt.QtWidgets import (QLabel, QSpinBox, QTableWidget,
+                                 QTableWidgetItem)
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class ClassifiedPolygonConfigurationWidget(BaseConfigurationWidget):

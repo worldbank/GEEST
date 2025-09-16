@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
+
 from qgis.core import QgsRectangle
+
 from geest.core.osm_downloaders.osm_roads_downloader import OSMRoadsDownloader
 
 

@@ -1,21 +1,16 @@
 import os
-from qgis.core import (
-    Qgis,
-    QgsFeedback,
-    QgsField,
-    QgsGeometry,
-    QgsProcessingContext,
-    QgsVectorLayer,
-)
-from qgis.PyQt.QtCore import QVariant
-from qgis import processing
-from .workflow_base import WorkflowBase
-from geest.core import JsonTreeItem
-from geest.core.algorithms.features_per_cell_processor import (
-    select_grid_cells,
-)
-from geest.utilities import log_message
 from urllib.parse import unquote
+
+from qgis import processing
+from qgis.core import (Qgis, QgsFeedback, QgsField, QgsGeometry,
+                       QgsProcessingContext, QgsVectorLayer)
+from qgis.PyQt.QtCore import QVariant
+
+from geest.core import JsonTreeItem
+from geest.core.algorithms.features_per_cell_processor import select_grid_cells
+from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class StreetLightsBufferWorkflow(WorkflowBase):

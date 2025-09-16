@@ -18,40 +18,31 @@ __revision__ = "$Format:%H$"
 # (at your option) any later version.
 # ---------------------------------------------------------------------
 
-import os
-import datetime
-import unittest
-from typing import Optional
 import cProfile
-import pstats
+import datetime
 import io
+import logging
+import os
+import pstats
 import subprocess  # nosec B404
-from shutil import which
+import tempfile
+import unittest
 from functools import partial
+from shutil import which
+from typing import Optional
 
-from qgis.PyQt.QtCore import Qt, QSettings, pyqtSignal
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import (
-    QMessageBox,
-    QPushButton,
-    QAction,
-    QDockWidget,
-    QApplication,
-    QComboBox,
-    QVBoxLayout,
-    QDialog,
-    QFileDialog,
-)
 from qgis.core import Qgis, QgsProject
+from qgis.PyQt.QtCore import QSettings, Qt, pyqtSignal
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import (QAction, QApplication, QComboBox, QDialog,
+                                 QDockWidget, QFileDialog, QMessageBox,
+                                 QPushButton, QVBoxLayout)
 
 # Import your plugin components here
 from .core import setting
+from .gui import GeestDock, GeestOptionsFactory
 from .gui.overlays import LayerDescriptionItem, PieChartItem
-from .utilities import resources_path, log_message, version
-from .gui import GeestOptionsFactory, GeestDock
-import datetime
-import logging
-import tempfile
+from .utilities import log_message, resources_path, version
 
 # Set up logging - see utilites.py log_message for usage
 # use log_message instead of QgsMessageLog.logMessage everywhere please....
@@ -612,8 +603,9 @@ for module_name in list(sys.modules.keys()):
                 log_message(f"Could not disconnect debugpy via API: {e}")
 
             # Now look for any debugpy processes on port 9000 and kill them
-            import psutil
             import signal
+
+            import psutil
 
             killed = False
 

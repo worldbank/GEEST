@@ -1,16 +1,16 @@
-from .base_configuration_widget import BaseConfigurationWidget
 from .acled_csv_configuration_widget import AcledCsvConfigurationWidget
+from .base_configuration_widget import BaseConfigurationWidget
+from .classified_polygon_configuration_widget import \
+    ClassifiedPolygonConfigurationWidget
 from .dont_use_configuration_widget import DontUseConfigurationWidget
+from .feature_per_cell_configuration_widget import \
+    FeaturePerCellConfigurationWidget
 from .index_score_configuration_widget import IndexScoreConfigurationWidget
 from .multi_buffer_configuration_widget import MultiBufferConfigurationWidget
-from .single_buffer_configuration_widget import SingleBufferConfigurationWidget
-from .feature_per_cell_configuration_widget import FeaturePerCellConfigurationWidget
-from .safety_polygon_configuration_widget import SafetyPolygonConfigurationWidget
-from .street_lights_configuration_widget import StreetLightsConfigurationWidget
-from .raster_reclassification_configuration_widget import (
-    RasterReclassificationConfigurationWidget,
-)
-from .classified_polygon_configuration_widget import (
-    ClassifiedPolygonConfigurationWidget,
-)
+from .raster_reclassification_configuration_widget import \
+    RasterReclassificationConfigurationWidget
+from .safety_polygon_configuration_widget import \
+    SafetyPolygonConfigurationWidget
 from .safety_raster_configuration_widget import SafetyRasterConfigurationWidget
+from .single_buffer_configuration_widget import SingleBufferConfigurationWidget
+from .street_lights_configuration_widget import StreetLightsConfigurationWidget

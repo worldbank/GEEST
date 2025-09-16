@@ -1,7 +1,9 @@
-import unittest
-from geest.core.tasks.grid_chunker_task import GridChunkerTask
-from osgeo import ogr, osr
 import os
+import unittest
+
+from osgeo import ogr, osr
+
+from geest.core.tasks.grid_chunker_task import GridChunkerTask
 
 
 class TestGridChunker(unittest.TestCase):

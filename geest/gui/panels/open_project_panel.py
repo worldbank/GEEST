@@ -1,16 +1,16 @@
 import os
-from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox, QComboBox
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFontMetrics
-from qgis.core import (
-    Qgis,
-)
+from PyQt5.QtWidgets import QComboBox, QFileDialog, QMessageBox, QWidget
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont
-from geest.utilities import get_ui_class, resources_path, linear_interpolation
+
 from geest.core import WorkflowQueueManager
-from geest.utilities import log_message
 from geest.gui.widgets import CustomBannerLabel
+from geest.utilities import (get_ui_class, linear_interpolation, log_message,
+                             resources_path)
 
 FORM_CLASS = get_ui_class("open_project_panel_base.ui")
 
