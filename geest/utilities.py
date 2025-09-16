@@ -267,9 +267,7 @@ def get_free_memory_mb():
     elif system == "Darwin":
         # One approach is to parse the output of the 'vm_stat' command
         try:
-            vm_stat = subprocess.check_output(["vm_stat"]).decode(
-                "utf-8"
-            )  # nosec B603 B607
+            vm_stat = subprocess.check_output(["vm_stat"]).decode("utf-8")  # nosec
             page_size = 4096  # Usually 4096 bytes
             free_pages = 0
             # Look for "Pages free: <number>"
