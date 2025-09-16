@@ -105,10 +105,11 @@ repos:
     hooks:
       - id: bandit-scripts
         name: "🔒 Bandit - Python security analysis"
-        entry: bandit -r scripts
+        entry: bandit -c .bandit.yml -r scripts
         language: system
         types: [python]
         stages: [pre-commit]
+        exclude: ^scripts/tests/
   - repo: local
     hooks:
       - id: shellcheck-scripts

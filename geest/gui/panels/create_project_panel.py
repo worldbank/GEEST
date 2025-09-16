@@ -1,6 +1,8 @@
 import os
 import json
+import platform
 import shutil
+import subprocess  # nosec B404
 import traceback
 from PyQt5.QtWidgets import (
     QWidget,
@@ -340,17 +342,17 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
-            os.startfile(os.path.join(self.working_dir, "study_area_report.pdf"))
+            os.startfile(
+                os.path.join(self.working_dir, "study_area_report.pdf")
+            )  # nosec B606
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
-                os.system(
-                    f'open "{os.path.join(self.working_dir, "study_area_report.pdf")}"'
-                )
+                pdf_path = os.path.join(self.working_dir, "study_area_report.pdf")
+                subprocess.run(["open", pdf_path], check=False)  # nosec B603 B607
             else:  # Linux
-                os.system(
-                    f'xdg-open "{os.path.join(self.working_dir, "study_area_report.pdf")}"'
-                )
+                pdf_path = os.path.join(self.working_dir, "study_area_report.pdf")
+                subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
         self.enable_widgets()
 
         self.switch_to_next_tab.emit()
