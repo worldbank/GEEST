@@ -157,7 +157,7 @@ class FactorConfigurationWidget(QWidget):
             if indicator is not None:
                 indicator_attributes = indicator.attributes()
                 indicator_attributes.update(changed_attributes)
-                log_message(f"Updated attributes for GUID {guid}:")
+                log_message(f"Updated attributes for GUID {guid}: ")
                 log_message(f"{indicator.attributesAsMarkdown()}")
             else:
                 log_message(

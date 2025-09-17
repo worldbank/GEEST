@@ -1,12 +1,10 @@
 import math
 
 from qgis.gui import QgsMapCanvasItem
-from qgis.PyQt.QtCore import QRectF, QSettings, Qt
+from qgis.PyQt.QtCore import QRectF, Qt
 from qgis.PyQt.QtGui import QColor, QFont, QImage, QPainter
 
 from geest.core.settings import setting
-
-from ...utilities import resources_path
 
 """
 A pie chart overlay item for the QGIS map canvas.
@@ -68,7 +66,7 @@ class PieChartItem(QgsMapCanvasItem):
         max_index = self.counts.index(max_count)
         # Draw drop shadow
         shadow_offset = 5
-        shadow_rect = QRectF(
+        _ = QRectF(  # shadow rectangle, not used further
             rect.x() + shadow_offset,
             rect.y() + shadow_offset,
             rect.width(),

@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
-    QDialog,
     QDialogButtonBox,
     QDoubleSpinBox,
     QHBoxLayout,
@@ -86,10 +86,10 @@ class FactorAggregationDialog(CustomBaseDialog):
         parent_item = self.tree_item.parent()
         if parent_item:
             hierarchy_label = QLabel(
-                f"{parent_item.data(0)} :: {self.tree_item.data(0)}"
+                f"{parent_item.data(0)} :: {self.tree_item.data(0)}"  # noqa E231
             )
             hierarchy_label.setStyleSheet(
-                "font-size: 14px; font-weight: bold; color: gray;"
+                "font-size: 14px; font-weight: bold; color: gray;"  # noqa E231
             )
             layout.addWidget(hierarchy_label, alignment=Qt.AlignTop)
 

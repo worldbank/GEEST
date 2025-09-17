@@ -134,8 +134,10 @@ class SafetyRasterWorkflow(WorkflowBase):
         }
 
         # Perform the reclassification using the raster calculator
-        reclass = processing.run(
-            "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
+        processing.run(
+            "native:reclassifybytable",  # noqa F841
+            params,  # noqa F841
+            feedback=QgsProcessingFeedback(),  # noqa F841
         )["OUTPUT"]
 
         log_message(

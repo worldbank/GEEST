@@ -1,4 +1,4 @@
-import os
+# -*- coding: utf-8 -*-
 from urllib.parse import unquote
 
 from qgis.core import (
@@ -97,7 +97,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
         """
         area_features_count = area_features.featureCount()
         log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            f"Features layer for area {index+1} loaded with {area_features_count} features.",  # noqa E226
             tag="Geest",
             level=Qgis.Info,
         )
@@ -152,8 +152,9 @@ class SafetyPolygonWorkflow(WorkflowBase):
                 max_out - min_out
             ) + min_out
             return result
-        except:
-            log_message(f"Invalid value, returning 0: {value}")
+        except Exception as e:
+            _ = e
+            log_message(f"Invalid value, returning 0: {value}")  # noqa E722
             return 0
 
     # Default implementation of the abstract method - not used in this workflow

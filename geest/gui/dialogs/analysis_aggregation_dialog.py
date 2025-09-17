@@ -7,7 +7,6 @@ from qgis.PyQt.QtGui import QDesktopServices, QPixmap
 from qgis.PyQt.QtWidgets import (
     QAbstractScrollArea,
     QCheckBox,
-    QDialog,
     QDialogButtonBox,
     QDoubleSpinBox,
     QFileDialog,
@@ -31,7 +30,6 @@ from geest.utilities import (
     log_message,
     log_window_geometry,
     resources_path,
-    setting,
 )
 
 from .custom_base_dialog import CustomBaseDialog
@@ -202,7 +200,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             log_message("Restoring dialog geometry")
             try:
                 self.restoreGeometry(geometry)
-            except Exception as e:
+            except Exception:
                 log_message(
                     "Restoring geometry failed", tag="Geest", level=Qgis.Warning
                 )
@@ -325,9 +323,9 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
         self.table.setMaximumHeight(
-            self.table.verticalHeader().length()
-            + self.table.horizontalHeader().height()
-            + 4
+            self.table.verticalHeader().length()  # noqa W503
+            + self.table.horizontalHeader().height()  # noqa W503
+            + 4  # noqa W503
         )  # Add 2 pixels to prevent scrollbar showing
         self.table.setFrameStyle(QTableWidget.NoFrame)
         parent_layout = self.wee_container.parent().layout()

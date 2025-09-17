@@ -93,7 +93,7 @@ class DataSourceWidgetFactory:
                 )
             else:
                 log_message(
-                    f"Datasource Factory did not match any widgets",
+                    "Datasource Factory did not match any widgets",
                     tag="Geest",
                     level=Qgis.Critical,
                 )

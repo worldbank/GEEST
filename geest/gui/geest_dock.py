@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from typing import Optional
 
@@ -308,9 +309,9 @@ class GeestDock(QDockWidget):
             # Check our settings to see if we have a Geest project associated with this project
             geest_project = setting(str(checksum), None, prefer_project_setting=True)
             log_message(
-                f"Geest project path: {geest_project} ({checksum})",
-                tag="Geest",
-                level=Qgis.Info,
+                f"Geest project path : {geest_project} ({checksum})",  # noqa E225
+                tag="Geest",  # noqa E225
+                level=Qgis.Info,  # noqa E225
             )
             if geest_project and os.path.exists(
                 os.path.join(geest_project, "model.json")
