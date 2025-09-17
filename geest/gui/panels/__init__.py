@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# flake8: noqa
+# isort: skip_file
+# black: skip-file
 from .create_project_panel import CreateProjectPanel
 from .credits_panel import CreditsPanel
 from .help_panel import HelpPanel

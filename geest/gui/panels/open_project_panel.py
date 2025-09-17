@@ -2,8 +2,8 @@ import os
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFontMetrics
-from PyQt5.QtWidgets import QComboBox, QFileDialog, QMessageBox, QWidget
-from qgis.core import Qgis
+from PyQt5.QtWidgets import QComboBox, QFileDialog, QWidget
+from qgis.core import Qgis  # noqa F401
 from qgis.PyQt.QtCore import QSettings, pyqtSignal
 from qgis.PyQt.QtGui import QFont
 
@@ -36,7 +36,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         )  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading open project panel")
+        log_message("Loading open project panel")
         self.initUI()
 
     def initUI(self):
@@ -107,8 +107,8 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             for index in range(self.previous_project_combo.count()):
                 full_path = self.previous_project_combo.itemData(index)
                 elided_text = self.elide_path(full_path)
-                log_message(f"Full text  : {full_path}")
-                log_message(f"Elided text: {elided_text}")
+                log_message(f"Full text  : {full_path}")  # noqa E203
+                log_message(f"Elided text : {elided_text}")  # noqa E203
                 self.previous_project_combo.setItemText(index, elided_text)
         return super().eventFilter(obj, event)
 

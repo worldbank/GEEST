@@ -51,7 +51,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         )  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading setup panel")
+        log_message("Loading setup panel")
         self.initUI()
 
     def initUI(self):
@@ -131,7 +131,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             )
         else:
             epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
-            self.crs_label.setText(f"CRS: EPSG:{epsg}")
+            self.crs_label.setText(f"CRS: EPSG:{epsg}")  # noqa E231
 
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
@@ -289,7 +289,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     level=Qgis.Critical,
                 )
                 return None
-            crs = QgsCoordinateReferenceSystem(f"EPSG:{epsg}")
+            crs = QgsCoordinateReferenceSystem(f"EPSG:{epsg}")  # noqa E231
         self.crs_label.setText(f"CRS: {crs.authid()}" if crs else "CRS: Not set")
         return crs
 
@@ -322,7 +322,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # This is a sneaky hack to show the exact progress in the label
         # since QProgressBar only takes ints. See Qt docs for more info.
         # Use the 'setFormat' method to display the exact float:
-        float_value_as_string = f"Current geometry : {progress}%"
+        float_value_as_string = f"Current geometry : {progress}%"  # noqa: E203
         self.child_progress_bar.setFormat(float_value_as_string)
 
     def on_task_completed(self):
@@ -457,7 +457,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             else:
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)
-                layer_tree_layer = geest_group.addLayer(layer)
+                _ = geest_group.addLayer(layer)
                 log_message(
                     f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )

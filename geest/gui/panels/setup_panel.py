@@ -27,7 +27,7 @@ class SetupPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading setup panel")
+        log_message("Loading setup panel")
         self.initUI()
 
     def initUI(self):

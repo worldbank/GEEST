@@ -1,10 +1,10 @@
 # coding=utf-8
-from future import standard_library
 import configparser
 import logging
 import os
 import unittest
 
+from future import standard_library
 
 __author__ = "Tim Sutton <tim@kartoza.com>"
 __revision__ = "$Format:%H$"

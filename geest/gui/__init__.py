@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# flake8: noqa
+# isort: skip_file
+# black: skip-file
 """
 Gui classes
 """

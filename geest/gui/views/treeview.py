@@ -2,10 +2,8 @@
 import uuid
 
 from qgis.core import Qgis
-
 from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor
-
 from qgis.PyQt.QtWidgets import QMessageBox, QTreeView
 
 from geest.core import JsonTreeItem

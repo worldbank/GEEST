@@ -1,5 +1,4 @@
 import os
-import platform
 import traceback
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
@@ -47,7 +46,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         )  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading setup panel")
+        log_message("Loading setup panel")
         self.initUI()
         self._reference_layer = None
         self._crs = None

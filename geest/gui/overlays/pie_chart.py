@@ -135,14 +135,14 @@ class PieChartItem(QgsMapCanvasItem):
                 # Label at the end of exploded slice
                 radius = min(rect.width(), rect.height()) / 2
                 label_x = (
-                    rect.center().x()
-                    + explode_x
-                    + radius * math.cos(math.radians(-mid_angle))
+                    rect.center().x()  # noqa W503
+                    + explode_x  # noqa W503
+                    + radius * math.cos(math.radians(-mid_angle))  # noqa W503
                 )
                 label_y = (
-                    rect.center().y()
-                    + explode_y
-                    + radius * math.sin(math.radians(-mid_angle))
+                    rect.center().y()  # noqa W503
+                    + explode_y  # noqa W503
+                    + radius * math.sin(math.radians(-mid_angle))  # noqa W503
                 )
 
                 self.painter.setPen(Qt.black)

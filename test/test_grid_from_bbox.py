@@ -7,7 +7,7 @@ Version Changed: 2025-01-24
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
 
-from geest.core.tasks import GridFromBboxTask, GridFromBbox
+from geest.core.tasks import GridFromBbox, GridFromBboxTask
 
 
 def example_bbox():
