@@ -120,7 +120,7 @@ def theme_stylesheet() -> str:
             border: 2px solid red;
         }}
         */
-    """
+    """  # noqa E241,E222,E221
 
     dark_theme_stylesheet = f"""
         QToolTip {{
@@ -166,7 +166,7 @@ def theme_stylesheet() -> str:
         QScrollArea {{
             background: transparent;
         }}
-    """
+    """  # noqa E202
 
     if is_qgis_dark_theme_active():
         return dark_theme_stylesheet
@@ -207,9 +207,9 @@ def log_window_geometry(geometry):
 
     diagram = (
         f"{top_line}\n"
-        f"|                                               |\n"
+        f"|                                               |\n"  # noqa E222
         f"{middle_line}\n"
-        f"|                                               |\n"
+        f"|                                               |\n"  # noqa E222
         f"{bottom_line}"
     )
 
@@ -294,7 +294,7 @@ def log_layer_count():
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Compose the log entry text
-    log_entry = f"{timestamp} - Layer count: {layer_count} - Free memory: {free_memory_mb:.2f} MB\n"
+    log_entry = f"""{timestamp} - Layer count: {layer_count} - Free memory: {free_memory_mb:.2f} MB\n"""  # noqa E501,E297,E222
 
     # Send to QGIS log (optional)
     log_message(log_entry, level=Qgis.Info, tag="LayerCount")

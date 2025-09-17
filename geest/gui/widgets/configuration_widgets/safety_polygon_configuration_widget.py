@@ -1,5 +1,4 @@
-import os
-
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import (
     QLabel,
@@ -66,7 +65,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
 
         self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
         safety_classes = self.attributes.get(
-            f"classify_safety_polygon_into_classes_unique_values", {}
+            "classify_safety_polygon_into_classes_unique_values", {}
         )
         if not isinstance(safety_classes, dict):
             safety_classes = {}

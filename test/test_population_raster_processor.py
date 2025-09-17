@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from qgis.core import QgsCoordinateReferenceSystem, QgsProcessingContext, QgsProject
+from qgis.core import QgsProcessingContext, QgsProject
 from utilities_for_testing import prepare_fixtures
 
 from geest.core.algorithms import PopulationRasterProcessingTask

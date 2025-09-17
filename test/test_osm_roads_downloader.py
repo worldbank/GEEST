@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from qgis.core import QgsRectangle
 
@@ -32,7 +32,7 @@ class TestOSMRoadsDownloader(unittest.TestCase):
         "geest.core.osm_downloaders.osm_roads_downloader.OSMDataDownloaderBase.submit_query"
     )
     def test_osm_query_and_submission(self, mock_submit_query, mock_set_osm_query):
-        downloader = OSMRoadsDownloader(
+        _ = OSMRoadsDownloader(
             extents=self.mock_extents, output_path=self.mock_output_path
         )
 

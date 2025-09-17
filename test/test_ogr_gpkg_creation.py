@@ -3,8 +3,6 @@ import unittest
 
 from osgeo import ogr, osr
 
-from geest.utilities import log_message
-
 
 class TestOGRGPKGCreation(unittest.TestCase):
 

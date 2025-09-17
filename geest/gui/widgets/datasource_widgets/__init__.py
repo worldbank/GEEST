@@ -1,7 +1,10 @@
-from .acled_csv_datasource_widget import AcledCsvDataSourceWidget
-from .base_datasource_widget import BaseDataSourceWidget
-from .csv_datasource_widget import CsvDataSourceWidget
-from .fixed_value_datasource_widget import FixedValueDataSourceWidget
-from .raster_datasource_widget import RasterDataSourceWidget
-from .vector_and_field_datasource_widget import VectorAndFieldDataSourceWidget
-from .vector_datasource_widget import VectorDataSourceWidget
+from .acled_csv_datasource_widget import AcledCsvDataSourceWidget  # noqa F401
+from .base_datasource_widget import BaseDataSourceWidget  # noqa F401
+from .csv_datasource_widget import CsvDataSourceWidget  # noqa F401
+from .fixed_value_datasource_widget import FixedValueDataSourceWidget  # noqa F401
+from .raster_datasource_widget import RasterDataSourceWidget  # noqa F401
+from .vector_and_field_datasource_widget import (  # noqa F401
+    VectorAndFieldDataSourceWidget,
+)  # noqa F401
+
+from .vector_datasource_widget import VectorDataSourceWidget  # noqa F401

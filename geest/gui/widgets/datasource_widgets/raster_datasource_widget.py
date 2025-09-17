@@ -140,7 +140,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
             self.raster_line_edit.style().PM_DefaultFrameWidth
         )
         self.raster_line_edit.setStyleSheet(
-            f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"
+            f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"  # noqa E702,E202,E201
         )
         sz = self.clear_button.sizeHint()
         self.clear_button.move(

@@ -1,9 +1,11 @@
 # coding=utf-8
-"""Tests QGIS plugin init."""
-
 from future import standard_library
+import configparser
+import logging
+import os
+import unittest
 
-standard_library.install_aliases()
+
 __author__ = "Tim Sutton <tim@kartoza.com>"
 __revision__ = "$Format:%H$"
 __date__ = "17/10/2010"
@@ -11,10 +13,10 @@ __license__ = "GPL"
 __copyright__ = "Copyright 2012, Australia Indonesia Facility for "
 __copyright__ += "Disaster Reduction"
 
-import configparser
-import logging
-import os
-import unittest
+
+"""Tests QGIS plugin init."""
+
+standard_library.install_aliases()
 
 LOGGER = logging.getLogger("QGIS")
 IS_LOCAL = os.getenv("RUNNING_ON_LOCAL") == "1"
