@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# flake8: noqa
+# isort: skip_file
+# black: skip-file
 from .acled_csv_configuration_widget import AcledCsvConfigurationWidget
 from .base_configuration_widget import BaseConfigurationWidget
 from .classified_polygon_configuration_widget import (

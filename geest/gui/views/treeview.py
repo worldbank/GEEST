@@ -1,13 +1,12 @@
+# -*- coding: utf-8 -*-
 import uuid
 
 from qgis.core import Qgis
 
-# Change to this when implementing in QGIS
 from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor
 
-# Change to this when implementing in QGIS
-from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QMessageBox, QTreeView
+from qgis.PyQt.QtWidgets import QMessageBox, QTreeView
 
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
@@ -429,7 +428,7 @@ class JsonTreeModel(QAbstractItemModel):
             if column == 2:  # tree_view column
                 try:
                     value = float(value)
-                    return item.setData(column, f"{value:.2f}")
+                    return item.setData(column, f"{value:.2f}")  # noqa E231
                 except ValueError:
                     QMessageBox.critical(
                         None,
@@ -454,7 +453,7 @@ class JsonTreeModel(QAbstractItemModel):
         if not index.isValid():
             return Qt.NoItemFlags
 
-        item = index.internalPointer()
+        _ = index.internalPointer()
         if index.column() == 0 or index.column() == 1:
             return Qt.ItemIsEditable | Qt.ItemIsSelectable | Qt.ItemIsEnabled
 
@@ -558,7 +557,7 @@ class JsonTreeModel(QAbstractItemModel):
         factor_weighting = 1 / num_factors
         for i in range(num_factors):
             factor_item = dimension_item.child(i)
-            factor_item.setData(2, f"{factor_weighting:.2f}")
+            factor_item.setData(2, f"{factor_weighting:.2f}")  # noqa E231
         # Update the dimension's total weighting
         dimension_item.setData(2, "1.00")
         # self.update_font_color(dimension_item, QColor(Qt.green))
@@ -600,7 +599,7 @@ class JsonTreeModel(QAbstractItemModel):
         layer_weighting = 1 / num_layers
         for i in range(num_layers):
             layer_item = factor_item.child(i)
-            layer_item.setData(2, f"{layer_weighting:.2f}")
+            layer_item.setData(2, f"{layer_weighting:.2f}")  # noqa E231
         # Update the factor's total weighting
         factor_item.setData(2, "1.00")
         # self.update_font_color(factor_item, QColor(Qt.green))
