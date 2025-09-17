@@ -1,15 +1,15 @@
-import os
-import unittest
-from unittest.mock import MagicMock, patch
-
-from qgis.core import Qgis
-
 #!/usr/bin/env python
 """
 Test suite for utilities.py
 
 versionadded: 2023-03-14
 """
+
+import os
+import unittest
+from unittest.mock import MagicMock, patch
+
+from qgis.core import Qgis
 
 
 # Import the utilities module

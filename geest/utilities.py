@@ -26,7 +26,6 @@ import re
 import subprocess  # nosec B404
 import tempfile
 from datetime import datetime
-from math import floor
 
 from osgeo import ogr, osr
 from qgis.core import (
@@ -34,7 +33,6 @@ from qgis.core import (
     QgsLayerTreeGroup,
     QgsMessageLog,
     QgsProject,
-    QgsRasterLayer,
     QgsVectorLayer,
 )
 from qgis.PyQt import uic
@@ -105,15 +103,14 @@ def theme_stylesheet() -> str:
         QTreeView, QTableWidget {{
             background-color: rgba(0, 0, 0, 0);
             border: 1px solid #aaa;
-
         }}
         QScrollArea {{
             background-color: rgba(0, 0, 0, 0);
-s        }}
+        }}
         QScrollArea > QWidget > QWidget {{
             background-color: rgba(0, 0, 0, 0);
         }}
-        QScrollArea > QWidget > QWidget > QLabel{{
+        QScrollArea > QWidget > QWidget > QLabel {{
             background-color: rgba(118, 182, 178, 0);
         }}
         /* Uncomment this last rule when making a change to check that
@@ -133,7 +130,7 @@ s        }}
             border-radius: 8px; /* Rounded corners */
             padding: 5px;
             max-width: 200px; /* Fixed maximum width */
-        }};
+        }}
 
         QMenu {{
             background-color: #000000; /* Solid black background */
@@ -204,9 +201,9 @@ def log_window_geometry(geometry):
     w = rect.width()
     h = rect.height()
     char_width = 20 - len(str(w))
-    top_line = f"\n+{'-'*char_width} {w} px {'-'*20}+"
+    top_line = f"\n+{'-' * char_width} {w} px {'-' * 20}+"
     middle_line = f"|{' ' * 47}{h} px"
-    bottom_line = f"+{'-'*47}+\n"
+    bottom_line = f"+{'-' * 47}+\n"
 
     diagram = (
         f"{top_line}\n"
@@ -392,7 +389,7 @@ def log_message(
     line_number = caller_frame.lineno
 
     # Combine caller information with message
-    full_message = f"[{caller_name}:{line_number}] {message}"
+    full_message = f"[{caller_name}: {line_number}] {message}"
 
     # Log to QGIS Message Log if it is critical or force is true
     if level == Qgis.Critical or force:

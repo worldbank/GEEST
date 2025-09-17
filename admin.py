@@ -15,7 +15,6 @@ from functools import lru_cache
 from pathlib import Path
 
 import httpx
-import toml
 import typer
 
 LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
@@ -124,7 +123,7 @@ def symlink(context: typer.Context):
     if not os.path.islink(destination_path):
         os.symlink(build_path, destination_path)
     else:
-        _log(f"Symlink already exists, skipping creation.", context=context)
+        _log("Symlink already exists, skipping creation.", context=context)
 
 
 @app.command()

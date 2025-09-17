@@ -3,8 +3,7 @@ import tempfile
 import unittest
 
 from osgeo import ogr, osr
-from qgis.core import QgsFeature, QgsField, QgsVectorLayer, QgsVectorLayerExporter
-from qgis.PyQt.QtCore import QVariant
+from qgis.core import QgsFeature, QgsVectorLayerExporter
 
 from geest.core.reports.study_area_report import StudyAreaReport
 from geest.utilities import log_message

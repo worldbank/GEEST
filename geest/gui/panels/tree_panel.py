@@ -39,7 +39,6 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from geest.core import JsonTreeItem, WorkflowQueueManager
-from geest.core.settings import set_setting, setting
 from geest.core.algorithms import (
     OpportunitiesByWeeScorePopulationProcessingTask,
     OpportunitiesByWeeScoreProcessingTask,
@@ -49,6 +48,7 @@ from geest.core.algorithms import (
     WEEByPopulationScoreProcessingTask,
 )
 from geest.core.reports import AnalysisReport, StudyAreaReport
+from geest.core.settings import set_setting, setting
 from geest.core.utilities import add_to_map
 from geest.gui.dialogs import (
     AnalysisAggregationDialog,

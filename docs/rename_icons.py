@@ -14,7 +14,7 @@ icon_mapping = {
 # Look at the larger icons to see what they might be
 print("Larger icons (likely screenshots):")
 for i in range(6, 38):  # icons 6-37 are the larger ones
-    filename = f"icon_{i:02d}.png"
+    filename = f"icon_{i: 02d}.png"
     if os.path.exists(f"images/{filename}"):
         size = os.path.getsize(f"images/{filename}")
         print(f"{filename}: {size} bytes")
@@ -28,6 +28,6 @@ for old_name, new_name in icon_mapping.items():
         shutil.copy2(old_path, new_path)
         print(f"Copied {old_name} to {new_name}")
 
-print(f"\nSmall tab icons have been given descriptive names.")
-print(f"Large screenshot icons (icon_06.png to icon_37.png) are left as is.")
-print(f"You may want to rename them based on their content if needed.")
+print("\nSmall tab icons have been given descriptive names.")
+print("Large screenshot icons (icon_06.png to icon_37.png) are left as is.")
+print("You may want to rename them based on their content if needed.")
