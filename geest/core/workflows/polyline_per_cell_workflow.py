@@ -96,7 +96,6 @@ class PolylinePerCellWorkflow(WorkflowBase):
         output_path = os.path.join(
             self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
         )
-        output_path = None
         area_grid = select_grid_cells(
             self.grid_layer, area_features, output_path, self.feedback
         )

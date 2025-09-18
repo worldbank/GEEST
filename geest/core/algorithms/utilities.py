@@ -2,7 +2,7 @@ import os
 import shutil
 
 from qgis import processing
-from qgis.core import (
+from qgis.core import (  # QgsWkbTypes,
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsFeature,
@@ -11,7 +11,6 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsRasterLayer,
     QgsVectorLayer,
-    # QgsWkbTypes,
 )
 
 from geest.utilities import log_message

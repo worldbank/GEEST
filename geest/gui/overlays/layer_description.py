@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from qgis.gui import QgsMapCanvasItem
-from qgis.PyQt.QtCore import QPainter, QRectF, QSettings, Qt
-from qgis.PyQt.QtGui import QColor, QFont, QIcon
+from qgis.PyQt.QtCore import QRectF, QSettings, Qt
+from qgis.PyQt.QtGui import QColor, QFont, QIcon, QPainter
 
 from geest.core.settings import setting
 
