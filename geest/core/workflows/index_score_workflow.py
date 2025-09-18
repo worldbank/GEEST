@@ -1,8 +1,7 @@
-import glob
 import os
 
-from qgis import processing  # QGIS processing toolbox
-from qgis.core import (
+from qgis import processing  # noqa: F401 # QGIS processing toolbox
+from qgis.core import (  # noqa: F401
     Qgis,
     QgsFeature,
     QgsFeedback,
@@ -113,7 +112,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             20.0
         )  # We just use nominal intervals for progress updates
         # Create a new memory layer with the target CRS (EPSG:4326)
-        subset_layer = QgsVectorLayer(f"Polygon", "subset", "memory")
+        subset_layer = QgsVectorLayer("Polygon", "subset", "memory")
         subset_layer.setCrs(self.target_crs)
         subset_layer_data = subset_layer.dataProvider()
         field = QgsField("score", QVariant.Double)

@@ -88,7 +88,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
         """
         area_features_count = area_features.featureCount()
         log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            f"Features layer for area {index + 1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -96,6 +96,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
         output_path = os.path.join(
             self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
         )
+        output_path = None
         area_grid = select_grid_cells(
             self.grid_layer, area_features, output_path, self.feedback
         )

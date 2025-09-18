@@ -87,7 +87,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
         """
         area_features_count = area_features.featureCount()
         log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            f"Features layer for area {index + 1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -95,6 +95,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
         output_path = os.path.join(
             self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
         )
+        del output_path
         # Step 2: Assign reclassification values to polygons based on their perimeter
         polygon_areas = assign_reclassification_to_polygons(area_features)
         raster_output = self._rasterize(

@@ -12,20 +12,18 @@ except ImportError:
     )
 import os
 import time
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from osgeo import ogr
 from qgis import processing  # QGIS processing API
 from qgis.core import (
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeature,
     QgsFeedback,
     QgsField,
     QgsGeometry,
     QgsNetworkAccessManager,
     QgsPointXY,
-    QgsProject,
     QgsRectangle,
     QgsVectorFileWriter,
     QgsVectorLayer,
@@ -33,7 +31,6 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QByteArray, QUrl, QVariant
 from qgis.PyQt.QtNetwork import QNetworkRequest
 
-from geest.core.settings import setting
 from geest.utilities import log_message
 
 from .query_preparation import QueryPreparation
@@ -271,16 +268,16 @@ class OSMDataDownloaderBase(ABC):
         # I tried to do this in one operation passing options for crs to CopyLayer
         # but it seems it is not supported / working
         log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
-        source_crs = QgsCoordinateReferenceSystem("EPSG:4326")
-        transform_context = QgsProject.instance().transformContext()
+        # source_crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        # transform_context = QgsProject.instance().transformContext()
 
-        transform = QgsCoordinateTransform(
-            source_crs, self.output_crs, transform_context
-        )
+        # transform = QgsCoordinateTransform(
+        #    source_crs, self.output_crs, transform_context
+        # )
         # pipeline = transform.coordinateOperation().projString()
 
         # log_message(f"Proj4 operation: {pipeline}")
-        reproject = processing.run(
+        processing.run(
             "native:reprojectlayer",
             {
                 "INPUT": f"{self.output_path}|layername={self.filename}_4326",
@@ -289,14 +286,18 @@ class OSMDataDownloaderBase(ABC):
                 # "OPERATION": "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=36 +ellps=WGS84",
                 # The proj4 pipeline string is only available in QGIS >= 3.26
                 # "OPERATION": pipeline,
-                "OUTPUT": f"ogr:dbname='{self.output_path}' table=\"{self.filename}\" (geom)",
+                "OUTPUT": f"ogr:dbname='{self.output_path}' table=\"{self.filename}\" (geom)",  # noqa E231
             },
         )
         self.feedback.setProgress(100)  # Set progress complete
 
         total_end = time.perf_counter()
-        log_message(f"GeoPackage written to: {self.output_path} table: {self.filename}")
-        log_message(f"Total processing time: {total_end - total_start:.2f}s")
+        log_message(
+            f"GeoPackage written to: {self.output_path} table: {self.filename}"  # noqa E231
+        )
+        log_message(
+            f"Total processing time: {total_end - total_start:.2f}s"  # noqa E231
+        )
 
     def process_point_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""

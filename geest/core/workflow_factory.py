@@ -53,10 +53,10 @@ class WorkflowFactory:
                 return DontUseWorkflow({}, feedback)
 
             attributes = item.attributes()
-            log_message(f"Workflow Factory Called")
-            log_message(f"-----------------------")
+            log_message("Workflow Factory Called")
+            log_message("-----------------------")
             log_message(f"{item.attributesAsMarkdown()}")
-            log_message(f"-----------------------")
+            log_message("-----------------------")
 
             analysis_mode = attributes.get("analysis_mode", "")
 

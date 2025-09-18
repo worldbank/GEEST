@@ -81,6 +81,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         try:
             self.distances = [float(x.strip()) for x in self.distances.split(",")]
         except Exception as e:
+            del e
             log_message(
                 "Invalid travel distances provided. Distances should be a comma-separated list of up to 5 numbers.",
                 tag="Geest",
@@ -210,7 +211,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
 
         # Process features in subsets to handle large datasets
         for i in range(0, total_features, self.subset_size):
-            subset_features = features[i : i + self.subset_size]
+            subset_features = features[i : i + self.subset_size]  # noqa E203
             subset_layer = self._create_subset_layer(subset_features, point_layer)
 
             # Make API calls using ORSClient for the subset
@@ -459,7 +460,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         field_index = layer.fields().indexFromName(ranges_field)
         if field_index == -1:
             raise KeyError(
-                f"Field '{ranges_field}' does not exist in the merged layer."
+                f"Field '{ranges_field}' does not exist in the merged layer."  # noqa E713
             )
 
         unique_ranges = sorted({feat[ranges_field] for feat in layer.getFeatures()})
@@ -470,7 +471,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
             request = QgsFeatureRequest().setFilterExpression(expr)
             features = [feat for feat in layer.getFeatures(request)]
             if features:
-                range_layer = QgsVectorLayer(f"Polygon", f"range_{r}", "memory")
+                range_layer = QgsVectorLayer("Polygon", f"range_{r}", "memory")
                 range_layer.setCrs(self.target_crs)
                 dp = range_layer.dataProvider()
                 dp.addAttributes(layer.fields())
@@ -535,6 +536,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         final_merge_result = processing.run(
             "native:mergevectorlayers", merge_bands_params
         )
+        del final_merge_result
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
         log_message(f"Multi-buffer layer created at {output_path}")
         return final_layer

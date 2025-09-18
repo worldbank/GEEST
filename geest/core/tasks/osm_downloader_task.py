@@ -1,13 +1,7 @@
 import datetime
-import glob
 import os
-import re
-import time
 import traceback
-from typing import List, Optional
 
-# GDAL / OGR / OSR imports
-from osgeo import gdal, ogr, osr
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
@@ -19,7 +13,6 @@ from qgis.core import (
 from qgis.PyQt.QtCore import pyqtSignal
 
 from geest.core.osm_downloaders import OSMRoadsDownloader
-from geest.core.settings import setting
 from geest.utilities import log_message
 
 
@@ -113,7 +106,7 @@ class OSMDownloaderTask(QgsTask):
         """
         try:
             self.setProgress(1)  # Trigger the UI to update with a small value
-            log_message(f"Downloading roads starting....")
+            log_message("Downloading roads starting....")
             log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
 
             downloader = OSMRoadsDownloader(

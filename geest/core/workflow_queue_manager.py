@@ -49,7 +49,7 @@ class WorkflowQueueManager(QObject):
         #    any changes made to the item will be reflected in the tree directly
 
         self.workflow_queue.add_job(task)
-        log_message(f"Task added")
+        log_message("Task added")
         return task
 
     def add_workflow(self, item: JsonTreeItem, cell_size_m: float) -> None:

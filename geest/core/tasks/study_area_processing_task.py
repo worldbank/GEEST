@@ -4,7 +4,6 @@ import os
 import re
 import time
 import traceback
-from typing import List, Optional
 
 # GDAL / OGR / OSR imports
 from osgeo import gdal, ogr, osr
@@ -146,7 +145,7 @@ class StudyAreaProcessingTask(QgsTask):
         else:
             self.coord_transform = None
 
-        log_message(f"Using output EPSG:{self.epsg_code}")
+        log_message(f"Using output EPSG:{self.epsg_code}")  # noqa: E231
 
         # Create aligned bounding box in target CRS space
         # We interpret the layer bbox in source CRS (if it has one), transform, and align
@@ -503,7 +502,8 @@ class StudyAreaProcessingTask(QgsTask):
             part_name = f"{normalized_name}_part{i}"
             try:
                 self.process_singlepart_geometry(part_geom, part_name, area_name)
-            except:
+            except Exception as e:
+                del e
                 self.error_count += 1
 
     ##########################################################################
@@ -556,7 +556,7 @@ class StudyAreaProcessingTask(QgsTask):
         x_max_snap = snap_up(xmax, cell_size) + cell_size
         y_max_snap = snap_up(ymax, cell_size) + cell_size
         log_message(
-            f"Aligned bbox                  : {x_min_snap}, {x_max_snap}, {y_min_snap}, {y_max_snap}"
+            f"Aligned bbox                  : {x_min_snap}, {x_max_snap}, {y_min_snap}, {y_max_snap}"  # noqa: E231, E203
         )
         return (x_min_snap, x_max_snap, y_min_snap, y_max_snap)
 
@@ -729,7 +729,7 @@ class StudyAreaProcessingTask(QgsTask):
             try:
                 current_progress = int((counter / chunk_count) * 100)
                 log_message(
-                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"
+                    f"XXXXXX Chunks Progress: {counter} / {chunk_count} : {current_progress}% XXXXXX"  # noqa: E203
                 )
                 self.feedback.setProgress(current_progress)
             except ZeroDivisionError:
@@ -750,7 +750,7 @@ class StudyAreaProcessingTask(QgsTask):
         # ----------------------------
         log_message("=== Metrics Summary ===")
         for k, v in self.metrics.items():
-            log_message(f"{k}: {v:.4f} seconds")
+            log_message(f"{k}: {v:.4f} seconds")  # noqa: E231
         self.total_cells += self.current_geom_actual_cell_count
         log_message(f"Grid creation completed for area {normalized_name}.")
 

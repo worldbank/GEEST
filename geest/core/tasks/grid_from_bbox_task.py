@@ -23,10 +23,10 @@ class GridFromBboxTask(QgsTask):
         self.features_out = []  # store geometries here
 
     def run(self):
-        log_message(f"##################################")
+        log_message("##################################")
         log_message(f"Processing chunk {self.chunk_id}...")
         log_message(f"Chunk bbox: {self.bbox_chunk}")
-        log_message(f"##################################")
+        log_message("##################################")
         start_time = time.time()
         x_start, x_end, y_start, y_end = self.bbox_chunk
 
@@ -53,12 +53,12 @@ class GridFromBboxTask(QgsTask):
         # If the whole chunk is within the geometry, skip intersection check
         if self.geom.Contains(chunk_bounds):
             log_message(
-                f"Whole chunk is within the geometry, we will skip check intersection for each feature..."
+                "Whole chunk is within the geometry, we will skip check intersection for each feature..."
             )
             skip_intersection_check = True
         else:
             log_message(
-                f"Whole chunk is NOT within the geometry, we will check intersection for each feature..."
+                "Whole chunk is NOT within the geometry, we will check intersection for each feature..."
             )
 
         x = x_start
@@ -96,7 +96,7 @@ class GridFromBboxTask(QgsTask):
         self.run_time = end_time - start_time
         # self.feedback.pushInfo(
         log_message(
-            f"Chunk {self.chunk_id} processed in {end_time - start_time:.2f} s; created {len(self.features_out)} features."
+            f"Chunk {self.chunk_id} processed in {end_time - start_time:.2f} s; created {len(self.features_out)} features."  # noqa E702, E231
         )
 
         return True
