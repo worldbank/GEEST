@@ -1,9 +1,7 @@
 import os
 import traceback
-from math import atan2, degrees
-from typing import List, Optional
+from typing import List
 
-import numpy as np
 from osgeo import ogr, osr
 from qgis import processing
 from qgis.core import (
@@ -16,7 +14,6 @@ from qgis.core import (
     QgsVectorLayer,
     QgsWkbTypes,
 )
-from qgis.PyQt.QtCore import QVariant
 
 from geest.utilities import log_message
 
@@ -168,7 +165,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             "native:extractbyextent",
             {
                 "INPUT": self.network_layer_path,
-                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [{self.crs.authid()}]",
+                "EXTENT": f"{rect.xMinimum()},{rect.xMaximum()},{rect.yMinimum()},{rect.yMaximum()} [{self.crs.authid()}]",  # noqa: E231
                 "CLIP": False,
                 "OUTPUT": output_path,
             },
@@ -204,7 +201,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
                 "SPEED_FIELD": "",
                 "DEFAULT_SPEED": 50,
                 "TOLERANCE": 50,
-                "START_POINT": f"{self.feature.geometry().asPoint().x()},{self.feature.geometry().asPoint().y()} [{self.crs.authid()}]",
+                "START_POINT": f"{self.feature.geometry().asPoint().x()},{self.feature.geometry().asPoint().y()} [{self.crs.authid()}]",  # noqa: E231
                 "TRAVEL_COST2": value,
                 "POINT_TOLERANCE": 50,
                 "INCLUDE_BOUNDS": False,

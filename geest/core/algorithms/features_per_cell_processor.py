@@ -1,6 +1,4 @@
-from typing import List
-
-from qgis import processing
+from qgis import processing  # noqa: F401
 from qgis.core import (
     Qgis,
     QgsCoordinateTransformContext,

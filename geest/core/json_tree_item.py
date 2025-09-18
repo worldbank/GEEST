@@ -182,8 +182,8 @@ class JsonTreeItem:
         if self.isFactor():
             data["dimension_weighting"] = data.get("default_dimension_weighting", 1.0)
             if (
-                self.parentItem
-                and self.parentItem.getStatus() == "Excluded from analysis"
+                self.parentItem  # noqa W503
+                and self.parentItem.getStatus() == "Excluded from analysis"  # noqa W503
             ):
                 self.parentItem.attributes()["analysis_weighting"] = (
                     self.parentItem.attribute("default_analysis_weighting")
@@ -191,16 +191,16 @@ class JsonTreeItem:
         if self.isIndicator():
             data["factor_weighting"] = data.get("default_factor_weighting", 1.0)
             if (
-                self.parentItem
-                and self.parentItem.getStatus() == "Excluded from analysis"
+                self.parentItem  # noqa W503
+                and self.parentItem.getStatus() == "Excluded from analysis"  # noqa W503
             ):
                 self.parentItem.attributes()["dimension_weighting"] = (
                     self.parentItem.attribute("default_dimension_weighting")
                 )
                 if (
-                    self.parentItem.parentItem
-                    and self.parentItem.parentItem.getStatus()
-                    == "Excluded from analysis"
+                    self.parentItem.parentItem  # noqa W503
+                    and self.parentItem.parentItem.getStatus()  # noqa W503
+                    == "Excluded from analysis"  # noqa W503
                 ):
                     self.parentItem.parentItem.attributes()["analysis_weighting"] = (
                         self.parentItem.parentItem.attribute(
@@ -279,7 +279,6 @@ class JsonTreeItem:
             qgis_layer_source_key = analysis_mode.replace("use_", "") + "_layer_source"
             qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
             qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
-            status = ""
 
             if "Workflow Completed" in data.get("result", "") and data.get(
                 "result_file", ""
@@ -306,10 +305,12 @@ class JsonTreeItem:
                     return "Excluded from analysis"
                 # If the grandparent's analysis weighting is zero, return "Excluded from analysis"
                 if (
-                    self.parentItem
-                    and self.parentItem.parentItem
-                    and not float(
-                        self.parentItem.parentItem.attribute("analysis_weighting", 0.0)
+                    self.parentItem  # noqa W503
+                    and self.parentItem.parentItem  # noqa W503
+                    and not float(  # noqa W503
+                        self.parentItem.parentItem.attribute(
+                            "analysis_weighting", 0.0
+                        )  # noqa W503
                     )
                 ):
                     return "Excluded from analysis"

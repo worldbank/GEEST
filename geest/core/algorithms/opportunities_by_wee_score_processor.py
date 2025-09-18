@@ -123,7 +123,9 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         """
         log_message("Validating input rasters")
         log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")
-        log_message(f"wee_score_raster raster  : {wee_score_raster.source()}")
+        log_message(
+            f"wee_score_raster raster  : {wee_score_raster.source()}"  # noqa: E203
+        )
 
         if not opportunities_mask_raster.isValid() or not wee_score_raster.isValid():
             raise ValueError("One or both input rasters are invalid.")

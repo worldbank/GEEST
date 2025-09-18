@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import json
-import os
-
 import pandas as pd
 
 
@@ -175,9 +173,6 @@ class SpreadsheetToJsonParser:
                 "default_factor_weighting": default_factor_weighting,
                 # Initialise the weighting to the default value
                 "factor_weighting": default_factor_weighting,
-                "index_score": (
-                    row["Index Score"] if not pd.isna(row["Index Score"]) else ""
-                ),
                 "index_score": (
                     row["Index Score"] if not pd.isna(row["Index Score"]) else ""
                 ),
