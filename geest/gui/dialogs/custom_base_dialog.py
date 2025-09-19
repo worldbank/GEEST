@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 from qgis.PyQt.QtCore import QRect, Qt
-from qgis.PyQt.QtGui import QPainter, QPixmap
-from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout
+from qgis.PyQt.QtGui import QPainter
+from qgis.PyQt.QtWidgets import QDialog
 
 from geest.utilities import theme_background_image, theme_stylesheet
 

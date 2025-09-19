@@ -25,7 +25,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont
 from qgis.PyQt.QtXml import QDomDocument
 
-from geest.utilities import log_message, resources_path
+from geest.utilities import log_message
 
 
 class BaseReport:
@@ -74,8 +74,8 @@ class BaseReport:
         for sub_layer in sub_layers:
             # sub_layer is a string in the format "layer_id!!::!!layer_name"
             log_message(f"Loading layer: {sub_layer}")
-            parts = sub_layer.split("!!::!!")
-            layer_id = parts[0]
+            parts = sub_layer.split("!!::!!")  # noqa E231
+            # layer_id = parts[0]
             layer_name = parts[1]
             uri = f"{self.gpkg_path}|layername={layer_name}"
             layer = QgsVectorLayer(uri, layer_name, "ogr")
@@ -218,7 +218,7 @@ class BaseReport:
 
             # Label: Duration
             duration_label = QgsLayoutItemLabel(self.layout)
-            duration_label.setText(f"{duration:.2f}")
+            duration_label.setText(f"{duration:.2f}")  # noqa E231
             duration_label.adjustSizeToText()
             duration_label.attemptMove(
                 QgsLayoutPoint(
@@ -272,7 +272,7 @@ class BaseReport:
         # Calculate the extent in EPGS:4326
         geo_extent = transform.transformBoundingBox(new_extent)
         log_message(
-            f"Map extent in EPSG:4326: {geo_extent.xMinimum()}, {geo_extent.yMinimum()}, "
+            f"Map extent in EPSG:4326: {geo_extent.xMinimum()}, {geo_extent.yMinimum()}, "  # noqa E231
             f"{geo_extent.xMaximum()}, {geo_extent.yMaximum()}"
         )
         log_message(

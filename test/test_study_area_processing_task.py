@@ -172,7 +172,6 @@ class TestStudyAreaProcessor(unittest.TestCase):
         """
         Test clip polygon creation.
         """
-        bbox = (-10, 10, -10, 10)
         aligned_box = (-12, 12, -12, 12)
 
         # Create a test geometry

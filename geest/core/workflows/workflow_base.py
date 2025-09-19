@@ -1,8 +1,7 @@
 import datetime
 import os
-import shutil
 import traceback
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from qgis import processing
 from qgis.core import (
@@ -124,7 +123,7 @@ class WorkflowBase(QObject):
         Used by the workflow to set the progress of the task.
         :param progress: The progress value
         """
-        log_message(f"Progress in workflow is : {progress}")
+        log_message(f"Progress in workflow is : {progress}")  # noqa E203
         self.progressChanged.emit(progress)
 
     #
@@ -272,7 +271,7 @@ class WorkflowBase(QObject):
             for index, (current_area, clip_area, current_bbox, progress) in enumerate(
                 area_iterator
             ):
-                message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"
+                message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
                 feedback.pushInfo(message)
                 log_message(message)
                 if self.feedback.isCanceled():
@@ -292,11 +291,11 @@ class WorkflowBase(QObject):
                     # but are not raster based. e.g. index_score_workflow
                     # Logic below is a check for that
                     if (
-                        not isinstance(self.features_layer, bool)
-                        and area_features.featureCount() == 0
+                        not isinstance(self.features_layer, bool)  # noqa W503
+                        and area_features.featureCount() == 0  # noqa W503
                     ):
                         log_message(
-                            f"No area features ... skipping",
+                            "No area features ... skipping",
                             tag="Geest",
                             level=Qgis.Warning,
                         )
@@ -310,9 +309,7 @@ class WorkflowBase(QObject):
                         area_features=area_features,
                         index=index,
                     )
-                elif (
-                    self.aggregation == False
-                ):  # assumes we are processing a raster input
+                elif not self.aggregation:  # assumes we are processing a raster input
                     area_raster = self._subset_raster_layer(
                         bbox=current_bbox, index=index
                     )
@@ -323,7 +320,7 @@ class WorkflowBase(QObject):
                         area_raster=area_raster,
                         index=index,
                     )
-                elif self.aggregation == True:  # we are processing an aggregate
+                elif self.aggregation:  # we are processing an aggregate
                     raster_output = self._process_aggregate_for_area(
                         current_area=current_area,
                         clip_area=clip_area,
@@ -450,7 +447,7 @@ class WorkflowBase(QObject):
             "TARGET_RESOLUTION": self.cell_size_m,
             "NODATA": -9999,
             "OUTPUT": "TEMPORARY_OUTPUT",
-            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
         }
 
         aoi = processing.run(
@@ -523,7 +520,7 @@ class WorkflowBase(QObject):
             "UNITS": 1,
             "WIDTH": x_res,
             "HEIGHT": y_res,
-            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
             "NODATA": 255,
             "OPTIONS": "",
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
@@ -534,7 +531,7 @@ class WorkflowBase(QObject):
             "PROGRESS": self.feedback,
         }
         log_message(f"Rasterize parameters: {params}")
-        #'OUTPUT':'TEMPORARY_OUTPUT'})
+        # 'OUTPUT':'TEMPORARY_OUTPUT'})
 
         processing.run("gdal:rasterize", params)
         log_message(f"Rasterize Parameter: {params}")
@@ -626,7 +623,7 @@ class WorkflowBase(QObject):
         # if debug mode is off, remove all files except the VRT and the rasters it refers to
         if not int(setting(key="developer_mode", default=0)):
             log_message(
-                f"Debug mode is off. Removing all files except the VRT and the rasters it refers to."
+                "Debug mode is off. Removing all files except the VRT and the rasters it refers to."
             )
             # Compile a list of all of the files in the workflow directory - recursively
 
@@ -636,10 +633,10 @@ class WorkflowBase(QObject):
             for file in all_files:
                 file_path = os.path.join(self.workflow_directory, file)
                 if (
-                    not file.endswith(".vrt")
-                    and not file.endswith(".qml")
-                    and not file.endswith(".tif")
-                    and not file.endswith("error.txt")
+                    not file.endswith(".vrt")  # noqa W503
+                    and not file.endswith(".qml")  # noqa W503
+                    and not file.endswith(".tif")  # noqa W503
+                    and not file.endswith("error.txt")  # noqa W503
                 ):
                     log_message(f"Removing {file_path}")
                     try:
@@ -658,7 +655,7 @@ class WorkflowBase(QObject):
                         continue
         else:
             log_message(
-                f"Debug mode is on. Keeping all files in the workflow directory."
+                "Debug mode is on. Keeping all files in the workflow directory."
             )
 
         return vrt_filepath

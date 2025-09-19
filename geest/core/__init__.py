@@ -2,6 +2,10 @@
 Core classes
 """
 
+# -*- coding: utf-8 -*-
+# flake8: noqa
+# isort: skip_file
+# black: skip-file
 from .constants import APPLICATION_NAME
 from .default_settings import default_settings
 from .json_tree_item import JsonTreeItem

@@ -2,7 +2,7 @@ import os
 import shutil
 
 from qgis import processing
-from qgis.core import (
+from qgis.core import (  # QgsWkbTypes,
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsFeature,
@@ -11,7 +11,6 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsRasterLayer,
     QgsVectorLayer,
-    QgsWkbTypes,
 )
 
 from geest.utilities import log_message
@@ -74,21 +73,21 @@ def subset_vector_layer(
     """
     if type(features_layer) != QgsVectorLayer:
         return None
-    log_message(f"subset_vector_layer Select Features Started")
+    log_message("subset_vector_layer Select Features Started")
     output_path = os.path.join(workflow_directory, f"{output_prefix}.shp")
 
     # Get the WKB type (geometry type) of the input layer (e.g., Point, LineString, Polygon)
-    geometry_type = features_layer.wkbType()
+    # geometry_type = features_layer.wkbType()
 
-    # Determine geometry type name based on input layer's geometry
-    if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
-        geometry_name = "Point"
-    elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
-        geometry_name = "LineString"
-    elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PolygonGeometry:
-        geometry_name = "Polygon"
-    else:
-        raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
+    # # Determine geometry type name based on input layer's geometry
+    # if QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PointGeometry:
+    #     geometry_name = "Point"
+    # elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.LineGeometry:
+    #     geometry_name = "LineString"
+    # elif QgsWkbTypes.geometryType(geometry_type) == QgsWkbTypes.PolygonGeometry:
+    #     geometry_name = "Polygon"
+    # else:
+    #     raise QgsProcessingException(f"Unsupported geometry type: {geometry_type}")
 
     params = {
         "INPUT": features_layer,

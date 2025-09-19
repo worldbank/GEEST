@@ -55,7 +55,7 @@ class AggregationWorkflowBase(WorkflowBase):
         """
         if len(input_files) == 0:
             log_message(
-                f"Error: Found no Input files. Cannot proceed with aggregation.",
+                "Error: Found no Input files. Cannot proceed with aggregation.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
@@ -86,18 +86,18 @@ class AggregationWorkflowBase(WorkflowBase):
             if raster_layer.source() in invalid_layers:
                 continue
             log_message(
-                f"Adding raster layer {i+1} to the raster calculator. {raster_layer.source()}",
+                f"Adding raster layer {i + 1} to the raster calculator. {raster_layer.source()}",
                 tag="Geest",
                 level=Qgis.Info,
             )
             entry = QgsRasterCalculatorEntry()
             ref_name = os.path.basename(raster_layer.source()).split(".")[0]
-            entry.ref = f"{ref_name}_{i+1}@1"  # Reference the first band
+            entry.ref = f"{ref_name}_{i + 1}@1"  # Reference the first band
             # entry.ref = f"layer_{i+1}@1"  # layer_1@1, layer_2@1, etc.
             entry.raster = raster_layer
             entry.bandNumber = 1
             entries.append(entry)
-            ref_names.append(f"{ref_name}_{i+1}")
+            ref_names.append(f"{ref_name}_{i + 1}")
             # input_files[raster_layer.source() returns the weight for the given layer
             weight = input_files[raster_layer.source()]
             if i == 0:

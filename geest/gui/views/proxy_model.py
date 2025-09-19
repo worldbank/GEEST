@@ -54,9 +54,9 @@ class PromotionProxyModel(QAbstractProxyModel):
 
             # Promote child if parent has only one child
             if (
-                parent_item.childCount() == 1
-                and parent_item is not self.source_model.rootItem
-                and parent_item.role is not "analysis"
+                parent_item.childCount() == 1  # noqa W503
+                and parent_item is not self.source_model.rootItem  # noqa W503
+                and parent_item.role is not "analysis"  # noqa W503
             ):
                 # log_message(
                 #    f"Found node with only one child {parent_item.data(0)}",
@@ -98,10 +98,10 @@ class PromotionProxyModel(QAbstractProxyModel):
         self, row: int, column: int, parent: QModelIndex = QModelIndex()
     ) -> QModelIndex:
         if (
-            self.source_model is None
-            or row < 0
-            or column < 0
-            or row >= len(self.flattened_structure)
+            self.source_model is None  # noqa W503
+            or row < 0  # noqa W503
+            or column < 0  # noqa W503
+            or row >= len(self.flattened_structure)  # noqa W503
         ):
             return QModelIndex()
 

@@ -1,5 +1,4 @@
 import os
-import shutil
 import traceback
 from typing import Optional
 from urllib.parse import unquote
@@ -193,9 +192,9 @@ class OpportunitiesMaskProcessor(QgsTask):
 
         self.mask_list = []
 
-        log_message(f"---------------------------------------------")
-        log_message(f"Initialized WEE Opportunities Mask Workflow")
-        log_message(f"---------------------------------------------")
+        log_message("---------------------------------------------")
+        log_message("Initialized WEE Opportunities Mask Workflow")
+        log_message("---------------------------------------------")
         log_message(f"Item: {self.item.name}")
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
         log_message(f"Working_directory: {self.working_directory}")
@@ -203,7 +202,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         log_message(f"Cell size: {self.cell_size_m}")
         log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
         log_message(f"Force clear: {self.force_clear}")
-        log_message(f"---------------------------------------------")
+        log_message("---------------------------------------------")
 
     def run(self) -> bool:
         """
@@ -284,19 +283,19 @@ class OpportunitiesMaskProcessor(QgsTask):
         if self.mask_mode == "point":
             log_message("Buffering job opportunity points")
             buffered_points_layer = self._buffer_features(area_features, index)
-            log_message(f"Clipping features to the current area's clip area")
+            log_message("Clipping features to the current area's clip area")
             clipped_layer = self._clip_features(buffered_points_layer, clip_area, index)
             log_message(f"Clipped features saved to {clipped_layer.source()}")
-            log_message(f"Generating mask layer")
+            log_message("Generating mask layer")
             mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
             log_message(f"Mask layer saved to {mask_layer}")
             return mask_layer
         elif self.mask_mode == "polygon":
             # Step 1: clip the selected features to the current area's clip area
-            log_message(f"Clipping features to the current area's clip area")
+            log_message("Clipping features to the current area's clip area")
             clipped_layer = self._clip_features(area_features, clip_area, index)
             log_message(f"Clipped features saved to {clipped_layer.source()}")
-            log_message(f"Generating mask layer")
+            log_message("Generating mask layer")
             mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
             log_message(f"Mask layer saved to {mask_layer}")
             return mask_layer
@@ -350,6 +349,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
         params = {"INPUT": layer, "OVERLAY": clip_layer, "OUTPUT": output_path}
         output = processing.run("native:clip", params)["OUTPUT"]
+        del output
         clipped_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return clipped_layer
 
@@ -392,6 +392,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         }
 
         output = processing.run("gdal:rasterize", params)["OUTPUT"]
+        del output
         return rasterized_polygons_path
 
     def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
@@ -421,12 +422,13 @@ class OpportunitiesMaskProcessor(QgsTask):
             "TARGET_RESOLUTION": self.cell_size_m,
             "NODATA": -9999,
             "OUTPUT": reprojected_raster_path,
-            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
         }
 
         aoi = processing.run(
             "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
         )["OUTPUT"]
+        del aoi
         return reprojected_raster_path
 
     def _process_raster_for_area(

@@ -1,5 +1,5 @@
 from functools import partial
-from typing import List, Optional
+from typing import List
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import QgsApplication

@@ -1,8 +1,6 @@
 import cProfile
-import hashlib
 import inspect
 import io
-import os
 import pstats
 from functools import lru_cache, wraps
 
@@ -290,7 +288,7 @@ class WorkflowJob(QgsTask):
         Used by the workflow to set the progress of the task.
         :param progress: The progress value
         """
-        log_message(f"Progress in workflow job is : {progress}")
+        log_message(f"Progress in workflow job is: {progress}")
         self.setProgress(progress)
 
     # Don't cache run - this is the main execution method and should always run
@@ -328,7 +326,7 @@ class WorkflowJob(QgsTask):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            attributes = self._item.attributes()
+            # attributes = self._item.attributes()
             log_message(f"{self._item.attributesAsMarkdown()}")
             if result:
                 log_message(

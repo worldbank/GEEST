@@ -1,5 +1,5 @@
 from qgis.core import Qgis
-from qgis.PyQt.QtWidgets import QDoubleSpinBox, QLabel
+from qgis.PyQt.QtWidgets import QLabel
 
 from geest.utilities import log_message
 

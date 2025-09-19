@@ -1,4 +1,5 @@
-from qgis.PyQt.QtCore import QRect, QSize, Qt, pyqtSignal
+# -*- coding: utf-8 -*-
+from qgis.PyQt.QtCore import QRect, QSize, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QPainter
 from qgis.PyQt.QtWidgets import QWidget
 

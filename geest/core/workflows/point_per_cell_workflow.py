@@ -64,7 +64,7 @@ class PointPerCellWorkflow(WorkflowBase):
                 layer_path, "point_per_cell_layer", "ogr"
             )
             if not self.features_layer.isValid():
-                error = f"Point per cell layer is not valid. : {layer_path}"
+                error = f"Point per cell layer is not valid: {layer_path}"
                 self.attributes["error"] = error
                 self.attributes["result"] = f"{self.workflow_name} Workflow Failed"
                 raise Exception(error)
@@ -104,7 +104,7 @@ class PointPerCellWorkflow(WorkflowBase):
         """
         area_features_count = area_features.featureCount()
         log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            f"Features layer for area {index + 1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,
         )

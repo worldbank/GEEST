@@ -10,7 +10,6 @@ from qgis.core import (
     QgsRasterLayer,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
@@ -201,8 +200,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
 
         :return: Path to the reclassified raster.
         """
-        _ = current_area  # Unused in this analysis
-        __ = clip_area  # Unused in this analysis
+        del current_area  # Unused in this analysis noqa F841
+        del clip_area  # Unused in this analysis noqa F841
 
         # Apply the reclassification rules
         reclassified_raster = self._apply_reclassification(
@@ -249,7 +248,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "CROP_TO_CUTLINE": True,
             "KEEP_RESOLUTION": True,
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
-            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
             "OUTPUT": reclassified_raster_path,
             "PROGRESS": self.feedback,
         }

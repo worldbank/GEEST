@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# flake8: noqa
+# isort: skip_file
+# black: skip-file
 from .acled_impact_workflow import AcledImpactWorkflow
 from .analysis_aggregation_workflow import AnalysisAggregationWorkflow
 from .classified_polygon_workflow import ClassifiedPolygonWorkflow

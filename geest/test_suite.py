@@ -14,7 +14,7 @@ import sys
 import tempfile
 import unittest
 
-import qgis  # pylint: disable=unused-import
+import qgis  # pylint: disable=unused-import # noqa F401
 from osgeo import gdal
 
 try:

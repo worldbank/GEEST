@@ -1,5 +1,3 @@
-import os
-
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 

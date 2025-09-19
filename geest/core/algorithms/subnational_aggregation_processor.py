@@ -1,11 +1,10 @@
 import os
 import shutil
 import traceback
-from typing import List, Optional
+from typing import Optional
 
 from qgis import processing
 from qgis.core import QgsCoordinateReferenceSystem, QgsTask, QgsVectorLayer
-from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem
 from geest.utilities import log_message, resources_path
@@ -105,7 +104,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
         )
         if not self.aggregation_layer.isValid():
             raise Exception(
-                f"Invalid aggregation areas layer:\n{self.aggregation_areas_path}"
+                f"Invalid aggregation areas layer:\n{self.aggregation_areas_path}"  # noqa E231
             )
 
         self.output_dir = os.path.join(working_directory, "subnational_aggregation")

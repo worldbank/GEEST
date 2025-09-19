@@ -120,7 +120,7 @@ class BaseConfigurationWidget(QWidget):
                     # to avoid breaking the datasource widget logic.
                     data = self.attributes
                 data["analysis_mode"] = self.analysis_mode
-                log_message(f"\nData changed:\n\n********\n {data}\n\n********")
+                log_message(f"\nData changed: \n\n********\n {data}\n\n********")
                 self.data_changed.emit(data)
             except Exception as e:
                 log_message(f"Error in update_data: {e}", level=Qgis.Critical)

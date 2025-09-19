@@ -2,8 +2,6 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont, QPainter, QPixmap
 from qgis.PyQt.QtWidgets import QLabel, QSizePolicy
 
-from geest.utilities import log_message
-
 
 class CustomBannerLabel(QLabel):
     def __init__(self, text, banner_path, parent=None):

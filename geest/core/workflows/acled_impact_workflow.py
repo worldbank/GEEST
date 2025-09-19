@@ -209,6 +209,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 "OUTPUT": output_path,
             },
         )["OUTPUT"]
+        del buffered_layer  # Free memory
         return QgsVectorLayer(output_path, output_name, "ogr")
 
     def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
@@ -305,7 +306,7 @@ class AcledImpactWorkflow(WorkflowBase):
             return
 
         # Step 2: Create a memory layer to store the result
-        result_layer = QgsVectorLayer(f"Polygon", "result_layer", "memory")
+        result_layer = QgsVectorLayer("Polygon", "result_layer", "memory")
         result_layer.setCrs(self.target_crs)
         provider = result_layer.dataProvider()
 
@@ -332,7 +333,6 @@ class AcledImpactWorkflow(WorkflowBase):
             "qgis:union",
             {
                 "INPUT": dissolve,
-                #'OVERLAY': '', #input_layer, # Do we need this?
                 "OUTPUT": "memory:",
             },
         )["OUTPUT"]

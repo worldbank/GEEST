@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 """
 Test suite for grid_from_bbox.py.
 
@@ -83,7 +86,7 @@ def test_invalid_cell_dimensions():
 
     # Zero cell dimensions
     try:
-        GridFromBbox(bbox=bbox, cell_width=0, cell_height=10, crs=crs)
+        GridFromBboxTask(bbox=bbox, cell_width=0, cell_height=10, crs=crs)
         assert False, "Expected ValueError for zero cell width, but none was raised."
     except ValueError as e:
         assert "Cell dimensions must be positive" in str(
@@ -95,7 +98,7 @@ def test_large_bbox():
     """Test handling of a large bounding box."""
     crs = example_crs()
     large_bbox = QgsRectangle(-180, -90, 180, 90)
-    grid = GridFromBbox(bbox=large_bbox, cell_width=1, cell_height=1, crs=crs)
+    grid = GridFromBboxTask(bbox=large_bbox, cell_width=1, cell_height=1, crs=crs)
 
     assert (
         grid.featureCount() > 10000
@@ -108,13 +111,15 @@ def test_crs_mismatch():
 
     invalid_crs = QgsCoordinateReferenceSystem()
     try:
-        GridFromBbox(bbox=bbox, cell_width=10, cell_height=10, crs=invalid_crs)
+        GridFromBboxTask(bbox=bbox, cell_width=10, cell_height=10, crs=invalid_crs)
         assert False, "Expected ValueError for invalid CRS, but none was raised."
     except ValueError as e:
         assert "Invalid CRS provided" in str(e), f"Unexpected error message: {e}"
 
     mismatched_crs = QgsCoordinateReferenceSystem("EPSG:3857")
-    result = GridFromBbox(bbox=bbox, cell_width=10, cell_height=10, crs=mismatched_crs)
+    result = GridFromBboxTask(
+        bbox=bbox, cell_width=10, cell_height=10, crs=mismatched_crs
+    )
 
     assert result.isValid(), "Grid generation should handle CRS mismatches gracefully."
 
@@ -135,6 +140,9 @@ def run_tests():
 
     test_crs_mismatch()
     print("test_crs_mismatch passed.")
+
+    test_large_bbox()
+    print("test_large_bbox passed.")
 
 
 if __name__ == "__main__":

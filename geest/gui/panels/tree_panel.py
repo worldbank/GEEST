@@ -6,7 +6,6 @@ import subprocess  # nosec B404
 import traceback
 from functools import partial
 from logging import getLogger
-from typing import Dict, List, Union
 
 from qgis.core import (
     Qgis,
@@ -424,7 +423,7 @@ class TreePanel(QWidget):
                     f"Error setting network path: {str(e)}", level=Qgis.Critical
                 )
         else:
-            log_message(f"No network layer path provided.")
+            log_message("No network layer path provided.")
 
     @pyqtSlot()
     def save_json_to_working_directory(self):
@@ -1111,7 +1110,7 @@ class TreePanel(QWidget):
             else:
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)
-                layer_tree_layer = geest_group.addLayer(layer)
+                _ = geest_group.addLayer(layer)
                 log_message(
                     f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )

@@ -1,16 +1,12 @@
 from qgis.core import (
     QgsLayout,
     QgsLayoutItemLabel,
-    QgsLayoutItemShape,
     QgsLayoutPoint,
-    QgsLayoutSize,
     QgsProject,
-    QgsSimpleFillSymbolLayer,
     QgsUnitTypes,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QSizeF
-from qgis.PyQt.QtGui import QColor, QFont
+from qgis.PyQt.QtGui import QFont
 
 from geest.utilities import log_message, resources_path
 
@@ -39,7 +35,7 @@ class StudyAreaReport(BaseReport):
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
         template_path = resources_path(
-            "resources", "qpt", f"study_area_report_template.qpt"
+            "resources", "qpt", "study_area_report_template.qpt"
         )
         super().__init__(template_path, report_name)
 
@@ -54,7 +50,7 @@ class StudyAreaReport(BaseReport):
         self.report_name = report_name
         self.load_layers_from_gpkg()
         self.template_path = resources_path(
-            "resources", "qpt", f"study_area_report_template.qpt"
+            "resources", "qpt", "study_area_report_template.qpt"
         )
         self.page_descriptions = {}
         self.page_descriptions[
@@ -176,12 +172,12 @@ class StudyAreaReport(BaseReport):
         # Compute statistics and add a summary label
         stats = self.compute_study_area_creation_statistics()
         summary_text = (
-            f"Total parts: {stats['count']}\n"
-            f"Minimum processing time: {stats['min']:.3f} sec\n"
-            f"Maximum processing time: {stats['max']:.3f} sec\n"
-            f"Average processing time: {stats['mean']:.3f} sec\n"
-            f"Total processing time: {stats['sum']:.3f} sec\n"
-            f"Standard Deviation: {stats['std_dev']:.3f} sec"
+            f"Total parts: {stats['count']}\n"  # noqa E231
+            f"Minimum processing time: {stats['min']:.3f} sec\n"  # noqa E231
+            f"Maximum processing time: {stats['max']:.3f} sec\n"  # noqa E231
+            f"Average processing time: {stats['mean']:.3f} sec\n"  # noqa E231
+            f"Total processing time: {stats['sum']:.3f} sec\n"  # noqa E231
+            f"Standard Deviation: {stats['std_dev']:.3f} sec"  # noqa E231
         )
         summary_label = QgsLayoutItemLabel(self.layout)
         summary_label.setText(summary_text)
@@ -201,6 +197,7 @@ class StudyAreaReport(BaseReport):
                 description_key=layer_name,
                 current_page=current_page,
             )
+            del page
 
             # Add summary label to the current page
             summary_label = QgsLayoutItemLabel(self.layout)

@@ -1,5 +1,3 @@
-import os
-
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtWidgets import QDoubleSpinBox
@@ -48,7 +46,7 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
         self.spin_box = QDoubleSpinBox()
         self.spin_box.setRange(0, 100)
         self.spin_box.setSingleStep(1)
-        self.spin_box.setValue(self.attributes.get(f"index_score", 0))
+        self.spin_box.setValue(self.attributes.get("index_score", 0))
         self.layout.addWidget(self.spin_box)
 
     def update_attributes(self):

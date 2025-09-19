@@ -182,8 +182,8 @@ class JsonTreeItem:
         if self.isFactor():
             data["dimension_weighting"] = data.get("default_dimension_weighting", 1.0)
             if (
-                self.parentItem
-                and self.parentItem.getStatus() == "Excluded from analysis"
+                self.parentItem  # noqa W503
+                and self.parentItem.getStatus() == "Excluded from analysis"  # noqa W503
             ):
                 self.parentItem.attributes()["analysis_weighting"] = (
                     self.parentItem.attribute("default_analysis_weighting")
@@ -191,16 +191,16 @@ class JsonTreeItem:
         if self.isIndicator():
             data["factor_weighting"] = data.get("default_factor_weighting", 1.0)
             if (
-                self.parentItem
-                and self.parentItem.getStatus() == "Excluded from analysis"
+                self.parentItem  # noqa W503
+                and self.parentItem.getStatus() == "Excluded from analysis"  # noqa W503
             ):
                 self.parentItem.attributes()["dimension_weighting"] = (
                     self.parentItem.attribute("default_dimension_weighting")
                 )
                 if (
-                    self.parentItem.parentItem
-                    and self.parentItem.parentItem.getStatus()
-                    == "Excluded from analysis"
+                    self.parentItem.parentItem  # noqa W503
+                    and self.parentItem.parentItem.getStatus()  # noqa W503
+                    == "Excluded from analysis"  # noqa W503
                 ):
                     self.parentItem.parentItem.attributes()["analysis_weighting"] = (
                         self.parentItem.parentItem.attribute(
@@ -279,7 +279,6 @@ class JsonTreeItem:
             qgis_layer_source_key = analysis_mode.replace("use_", "") + "_layer_source"
             qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
             qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
-            status = ""
 
             if "Workflow Completed" in data.get("result", "") and data.get(
                 "result_file", ""
@@ -306,10 +305,12 @@ class JsonTreeItem:
                     return "Excluded from analysis"
                 # If the grandparent's analysis weighting is zero, return "Excluded from analysis"
                 if (
-                    self.parentItem
-                    and self.parentItem.parentItem
-                    and not float(
-                        self.parentItem.parentItem.attribute("analysis_weighting", 0.0)
+                    self.parentItem  # noqa W503
+                    and self.parentItem.parentItem  # noqa W503
+                    and not float(  # noqa W503
+                        self.parentItem.parentItem.attribute(
+                            "analysis_weighting", 0.0
+                        )  # noqa W503
                     )
                 ):
                     return "Excluded from analysis"
@@ -385,15 +386,15 @@ class JsonTreeItem:
             if "Do Not Use" in analysis_mode:
                 return "Not configured (optional)"
             if (
-                self.isIndicator()
-                and analysis_mode == ""
-                and data.get("factor_weighting", 0.0) > 0
+                self.isIndicator()  # noqa W503
+                and analysis_mode == ""  # noqa W503
+                and data.get("factor_weighting", 0.0) > 0  # noqa W503
             ):
                 return "Required and not configured"
             if (
-                self.isIndicator()
-                and analysis_mode == ""
-                and data.get("factor_weighting", 0.0) == 0.0
+                self.isIndicator()  # noqa W503
+                and analysis_mode == ""  # noqa W503
+                and data.get("factor_weighting", 0.0) == 0.0  # noqa W503
             ):
                 return "Not configured (optional)"
 
@@ -513,15 +514,15 @@ class JsonTreeItem:
         table = []
 
         # Add header
-        header_line = (
-            f"| {headers[0]:<{col_widths[0]}} | {headers[1]:<{col_widths[1]}} |"
-        )
+        header_line = f"| {headers[0]:<{col_widths[0]}} | {headers[1]:<{col_widths[1]}} |"  # noqa E231
         table.append(header_line)
         table.append(f"|{'-' * (col_widths[0] + 2)}|{'-' * (col_widths[1] + 2)}|")
 
         # Add rows
         for key, value in rows:
-            row_line = f"| {key:<{col_widths[0]}} | {value:<{col_widths[1]}} |"
+            row_line = (
+                f"| {key:<{col_widths[0]}} | {value:<{col_widths[1]}} |"  # noqa E231
+            )
             table.append(row_line)
 
         return "\n" + "\n".join(table) + "\n"
@@ -543,7 +544,7 @@ class JsonTreeItem:
                 log_message(
                     f"Analysis mode for {self.attribute('id')} is set to Do Not Use"
                 )
-                log_message(f"Updating it to the first valid analysis mode")
+                log_message("Updating it to the first valid analysis mode")
                 # Set the analysis mode to the first matching key below that is not zero
                 # Get a list of all attributes that start with 'use_'
                 for key in self.attributes().keys():
@@ -676,7 +677,7 @@ class JsonTreeItem:
                 log_message(
                     f"Updating weighting for {indicator_guid} to {new_weighting}"
                 )
-                indicator_item.setData(2, f"{new_weighting:.2f}")
+                indicator_item.setData(2, f"{new_weighting:.2f}")  # noqa E231
                 # weighting references the level above (i.e. factor)
                 indicator_item.attributes()["factor_weighting"] = new_weighting
             else:
@@ -698,7 +699,7 @@ class JsonTreeItem:
             factor_item = self.getItemByGuid(factor_guid)
             # If found, update the weighting
             if factor_item:
-                factor_item.setData(2, f"{new_weighting:.2f}")
+                factor_item.setData(2, f"{new_weighting:.2f}")  # noqa E231
                 # weighting references the level above (i.e. dimension)
                 factor_item.attributes()["dimension_weighting"] = new_weighting
 
@@ -721,7 +722,7 @@ class JsonTreeItem:
             dimension_item = self.getItemByGuid(dimension_guid)
             # If found, update the weighting
             if dimension_item:
-                dimension_item.setData(2, f"{new_weighting:.2f}")
+                dimension_item.setData(2, f"{new_weighting:.2f}")  # noqa E231
                 # weighting references the level above (i.e. analysis)
                 dimension_item.attributes()["analysis_weighting"] = new_weighting
 

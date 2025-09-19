@@ -27,7 +27,6 @@ import pstats
 import subprocess  # nosec B404
 import tempfile
 import unittest
-from functools import partial
 from shutil import which
 from typing import Optional
 
@@ -69,13 +68,13 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
+log_message("»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 log_message(f"Geest started at {date}", force=True)
 version = version()
 log_message(f"Geest Version: {version}")
 log_message(f"Logging output to: {log_file_path}", force=True)
 log_message(f"log_path_env: {log_path_env}", force=True)
-log_message(f"»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
+log_message("»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
@@ -91,8 +90,8 @@ class GeestPlugin:
 
     def __init__(self, iface):
         self.iface = iface
-        self.run_action: Optional[QAction] = None
-        self.debug_action: Optional[QAction] = None
+        self.run_action = None  # type: Optional[QAction]
+        self.debug_action = None  # type: Optional[QAction]
         self.options_factory = None
         self.dock_widget = None
         # Initialize profiler attributes
@@ -120,9 +119,9 @@ class GeestPlugin:
         # Dont remove this, needed for geometry restore....
         self.dock_widget.setObjectName("GeestDockWidget")  # Set a unique object name
         self.dock_widget.setFeatures(
-            QDockWidget.DockWidgetClosable
-            | QDockWidget.DockWidgetMovable
-            | QDockWidget.DockWidgetFloatable
+            QDockWidget.DockWidgetClosable  # noqa: W503
+            | QDockWidget.DockWidgetMovable  # noqa: W503
+            | QDockWidget.DockWidgetFloatable  # noqa: W503
         )
         QgsProject.instance().readProject.connect(self.dock_widget.qgis_project_changed)
 
@@ -219,7 +218,7 @@ class GeestPlugin:
 
                     if widget_class_name == "PythonConsole":
                         log_message("Running tests in the Python console")
-                        widget_members = dir(widget.console)
+                        # widget_members = dir(widget.console)
                         # for member in widget_members:
                         #    log_message(f'Member: {member}, Type: {type(getattr(widget, member))}')
                         shell = widget.console.shell
@@ -236,12 +235,12 @@ class GeestPlugin:
                         shell.runCommand("test_runner.run(test_suite)")
                         # Unload test modules
                         shell.runCommand(
-                            f"""
+                            """
 for module_name in list(sys.modules.keys()):
     if module_name.startswith("test_") or module_name.startswith("utilities_for_testing"):
         del sys.modules[module_name]
 
-                            """
+                            """  # noqa: E241, E272
                         )
 
                         log_message("Test modules unloaded")
@@ -260,6 +259,7 @@ for module_name in list(sys.modules.keys()):
                 self.label_overlay.deleteLater()
                 self.label_overlay = None
         except Exception as e:  # nosec B110
+            del e
             pass  # Cleanup code - acceptable to ignore exceptions
         try:
             if self.pie_overlay:
@@ -267,6 +267,7 @@ for module_name in list(sys.modules.keys()):
                 self.pie_overlay.deleteLater()
                 self.pie_overlay = None
         except Exception as e:  # nosec B110
+            del e
             pass  # Cleanup code - acceptable to ignore exceptions
 
     def run_single_test(self):
@@ -548,7 +549,8 @@ for module_name in list(sys.modules.keys()):
             QgsProject.instance().readProject.disconnect(
                 self.dock_widget.qgis_project_changed
             )
-        except:  # nosec B110
+        except Exception as e:  # nosec B110
+            del e
             pass  # Cleanup code - acceptable to ignore exceptions
 
         # Remove toolbar icons and clean up
@@ -602,8 +604,8 @@ for module_name in list(sys.modules.keys()):
                 import debugpy
 
                 if (
-                    hasattr(debugpy, "is_client_connected")
-                    and debugpy.is_client_connected()
+                    hasattr(debugpy, "is_client_connected")  # noqa F841
+                    and debugpy.is_client_connected()  # noqa F841
                 ):
                     log_message("Closing debugpy connection via API")
                     debugpy.disconnect()
@@ -611,7 +613,7 @@ for module_name in list(sys.modules.keys()):
                 log_message(f"Could not disconnect debugpy via API: {e}")
 
             # Now look for any debugpy processes on port 9000 and kill them
-            import signal
+            # import signal
 
             import psutil
 

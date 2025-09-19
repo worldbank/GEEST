@@ -1,9 +1,6 @@
-import os
-
 from qgis.core import QgsFeedback, QgsProcessingContext
 
 from geest.core import JsonTreeItem
-from geest.utilities import resources_path
 
 from .aggregation_workflow_base import AggregationWorkflowBase
 

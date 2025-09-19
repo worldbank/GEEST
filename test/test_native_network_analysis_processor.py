@@ -1,7 +1,6 @@
 import os
 import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
 
 from qgis.core import (
     QgsCoordinateReferenceSystem,
@@ -104,7 +103,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
     def test_calculate_network(self):
         # Ensure the network layer exists
         self.assertTrue(os.path.exists(self.network_layer_path))
-        result = self.processor.run()
+        _ = self.processor.run()
         # Call the actual calculate_network method
         # self.processor.calculate_network()
 

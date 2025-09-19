@@ -159,7 +159,7 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             self.shapefile_line_edit.style().PM_DefaultFrameWidth
         )
         self.shapefile_line_edit.setStyleSheet(
-            f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"
+            f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"  # noqa E702,E202,E201
         )
         sz = self.clear_button.sizeHint()
         self.clear_button.move(
@@ -230,7 +230,8 @@ class VectorAndFieldDataSourceWidget(BaseDataSourceWidget):
             # Reapply the previously selected field if it exists
             if (
                 previous_field
-                and self.field_selection_combo.findText(previous_field) != -1
+                and self.field_selection_combo.findText(previous_field)  # noqa E503
+                != -1  # noqa E503
             ):
                 self.field_selection_combo.setCurrentText(previous_field)
 

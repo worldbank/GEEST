@@ -26,7 +26,7 @@ class OrsPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading ORS panel")
+        log_message("Loading ORS panel")
         self.initUI()
         self.queue_manager = WorkflowQueueManager(pool_size=1)
         self.set_font_size()

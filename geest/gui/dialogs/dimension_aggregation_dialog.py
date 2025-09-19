@@ -3,7 +3,6 @@ from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
-    QDialog,
     QDialogButtonBox,
     QDoubleSpinBox,
     QHBoxLayout,
@@ -62,7 +61,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         # If both grandparent and parent exist, create the label
         if parent_item:
             hierarchy_label = QLabel(
-                f"{parent_item.data(0)} :: {self.tree_item.data(0)}"
+                f"{parent_item.data(0)} :: {self.tree_item.data(0)}"  # noqa E203
             )
             hierarchy_label.setStyleSheet(
                 "font-size: 14px; font-weight: bold; color: gray;"

@@ -20,7 +20,6 @@ __revision__ = "$Format:%H$"
 
 import os
 import sys
-from math import floor
 
 from qgis.core import (
     Qgis,
@@ -118,7 +117,8 @@ def add_to_map(
             if qml_key:
                 qml_path = item.attribute(qml_key)
                 if qml_path:
-                    result = layer.loadNamedStyle(qml_path)
+                    result = layer.loadNamedStyle(qml_path)  # noqa: F841
+                    del result
         else:
             log_message(f"Adding raster layer: {layer_name}")
             layer = QgsRasterLayer(layer_uri, layer_name)

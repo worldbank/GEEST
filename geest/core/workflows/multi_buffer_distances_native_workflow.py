@@ -1,27 +1,21 @@
 import os
-import traceback
 from urllib.parse import unquote
 
 from qgis import processing
 from qgis.core import (
     Qgis,
-    QgsCoordinateReferenceSystem,
     QgsFeatureRequest,
     QgsFeedback,
     QgsField,
-    QgsFields,
     QgsGeometry,
     QgsProcessingContext,
-    QgsVectorFileWriter,
     QgsVectorLayer,
-    QgsWkbTypes,
     edit,
 )
 from qgis.PyQt.QtCore import QVariant
 
-from geest.core import JsonTreeItem, setting
+from geest.core import JsonTreeItem
 from geest.core.algorithms import NativeNetworkAnalysisProcessor
-from geest.core.ors_client import ORSClient
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -82,6 +76,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         try:
             self.distances = [int(x.strip()) for x in self.distances.split(",")]
         except Exception as e:
+            del e
             log_message(
                 "Invalid travel distances provided. Distances should be a comma-separated list of up to 5 numbers.",
                 tag="Geest",
@@ -203,7 +198,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         :param index: Index of the current area being processed.
         :return: Path to the GeoPackage.
         """
-        verbose_mode = int(setting(key="verbose_mode", default=0))
+        # verbose_mode = int(setting(key="verbose_mode", default=0))
 
         total_features = point_layer.featureCount()
         if total_features == 0:
@@ -222,7 +217,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         for i, point_feature in enumerate(point_layer.getFeatures()):
             # Process this point using QGIS native network analysis
             log_message("\n\n*************************************")
-            log_message(f"Processing point {i+1} of {total_features}")
+            log_message(f"Processing point {i + 1} of {total_features}")
             # Parse the features from the networking analysis response
             processor = NativeNetworkAnalysisProcessor(
                 network_layer_path=self.network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
@@ -236,10 +231,11 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             )
             try:
                 result = processor.run()
+                del result
             except Exception as e:
                 self.item.setAttribute(self.result_key, f"Task failed: {e}")
 
-            log_message(f"Processed point {i+1} of {total_features}")
+            log_message(f"Processed point {i + 1} of {total_features}")
             progress = ((i + 1) / total_features) * 100.0
             # Todo: feedback should show text messages rather
             # since QgsTask.setProgress already provides needded functionality
@@ -278,7 +274,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         field_index = layer.fields().indexFromName(ranges_field)
         if field_index == -1:
             raise KeyError(
-                f"Field '{ranges_field}' does not exist in isochrones layer: {isochrone_layer_path}"
+                f"Field '{ranges_field}' does not exist in isochrones layer: {isochrone_layer_path}"  # noqa E713
             )
 
         unique_ranges = sorted(self.distances, reverse=False)
@@ -289,7 +285,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             request = QgsFeatureRequest().setFilterExpression(expression)
             features = [feat for feat in layer.getFeatures(request)]
             if features:
-                range_layer = QgsVectorLayer(f"Polygon", f"range_{value}", "memory")
+                range_layer = QgsVectorLayer("Polygon", f"range_{value}", "memory")
                 range_layer.setCrs(self.target_crs)
                 data_provider = range_layer.dataProvider()
                 data_provider.addAttributes(layer.fields())
@@ -355,7 +351,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             "CRS": self.target_crs,
             "OUTPUT": output_path,
         }
-        final_merge_result = processing.run(
+        final_merge_result = processing.run(  # noqa F841
             "native:mergevectorlayers", merge_bands_params
         )
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")

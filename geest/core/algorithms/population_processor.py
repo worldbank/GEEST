@@ -8,7 +8,6 @@ from typing import Optional
 from qgis import processing
 from qgis.core import (
     QgsApplication,
-    QgsFeature,
     QgsFeedback,
     QgsProcessingContext,
     QgsRasterDataProvider,
@@ -76,16 +75,16 @@ class PopulationRasterProcessingTask(QgsTask):
         self.clipped_rasters = []
         self.reclassified_rasters = []
         self.resampled_rasters = []
-        log_message(f"---------------------------------------------")
-        log_message(f"Population raster processing task initialized")
-        log_message(f"---------------------------------------------")
+        log_message("---------------------------------------------")
+        log_message("Population raster processing task initialized")
+        log_message("---------------------------------------------")
         log_message(f"Population raster path: {self.population_raster_path}")
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
         log_message(f"Output directory: {self.output_dir}")
         log_message(f"Cell size: {self.cell_size_m}")
         log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
         log_message(f"Force clear: {self.force_clear}")
-        log_message(f"---------------------------------------------")
+        log_message("---------------------------------------------")
 
     def run(self) -> bool:
         """
@@ -181,7 +180,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 "MASK": clip_layer,
                 "SOURCE_CRS": None,
                 "TARGET_CRS": self.target_crs,
-                "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+                "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
                 "NODATA": None,
                 "ALPHA_BAND": False,
                 "CROP_TO_CUTLINE": False,
@@ -377,9 +376,9 @@ class PopulationRasterProcessingTask(QgsTask):
                 "OUTPUT": output_path,
             }
 
-            log_message(f"Reclassifying raster: {input_path}")
-            log_message(f"Reclassification table:\n {params['TABLE']}\n")
-            result = processing.run("native:reclassifybytable", params)
+            log_message(f"Reclassifying raster: {input_path}")  # noqa E231
+            log_message(f"Reclassification table:\n {params['TABLE']}\n")  # noqa E231
+            result = processing.run("native:reclassifybytable", params)  # noqa E231
 
             if not result["OUTPUT"]:
                 log_message(f"Failed to reclassify raster: {output_path}")
@@ -438,7 +437,7 @@ class PopulationRasterProcessingTask(QgsTask):
             log_message(
                 f"Generated VRT for reclassified rasters: {reclassified_vrt_path}"
             )
-            source_qml = resources_path("resources", "qml", f"population_3_classes.qml")
+            source_qml = resources_path("resources", "qml", "population_3_classes.qml")
 
             log_message(f"Copying QML from {source_qml} to {reclassified_qml_path}")
             shutil.copyfile(source_qml, reclassified_qml_path)

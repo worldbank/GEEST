@@ -154,7 +154,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         """
         log_message("Validating input rasters")
         log_message(f"GEEST Raster: {geest_raster.source()}")
-        log_message(f"POP Raster  : {pop_raster.source()}")
+        log_message(f"POP Raster  : {pop_raster.source()}")  # noqa E203
 
         if not geest_raster.isValid() or not pop_raster.isValid():
             raise ValueError("One or both input rasters are invalid.")

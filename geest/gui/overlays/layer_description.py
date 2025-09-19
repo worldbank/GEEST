@@ -1,6 +1,11 @@
+# -*- coding: utf-8 -*-
 from qgis.gui import QgsMapCanvasItem
-from qgis.PyQt.QtCore import QRectF, Qt
-from qgis.PyQt.QtGui import QColor, QFont, QPainter
+from qgis.PyQt.QtCore import QRectF, QSettings, Qt
+from qgis.PyQt.QtGui import QColor, QFont, QIcon, QPainter
+
+from geest.core.settings import setting
+
+from ...utilities import resources_path
 
 """
 An overlay item for the QGIS map canvas.
@@ -8,12 +13,6 @@ An overlay item for the QGIS map canvas.
 It will show geest lablel on top of the map canvas,
 showing which layer is active etc.
 """
-from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtGui import QIcon, QImage, QPainter, QPixmap
-
-from geest.core.settings import setting
-
-from ...utilities import resources_path
 
 
 class LayerDescriptionItem(QgsMapCanvasItem):

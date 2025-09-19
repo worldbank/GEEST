@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 from qgis.core import Qgis
 
-
 # Import the utilities module
 from geest.utilities import (
     calculate_utm_zone,

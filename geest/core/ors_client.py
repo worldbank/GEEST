@@ -1,8 +1,8 @@
 import json
 import os
 
-from qgis.core import Qgis, QgsNetworkAccessManager, QgsNetworkReplyContent
-from qgis.PyQt.QtCore import QByteArray, QObject, QUrl, pyqtSignal
+from qgis.core import QgsNetworkAccessManager
+from qgis.PyQt.QtCore import QObject, QUrl, pyqtSignal
 from qgis.PyQt.QtNetwork import QNetworkRequest
 
 from geest.core.settings import setting

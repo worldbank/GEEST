@@ -1,5 +1,4 @@
 import json
-from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -41,7 +40,7 @@ class AnalysisReport(BaseReport):
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
         template_path = resources_path(
-            "resources", "qpt", f"analysis_summary_report_template.qpt"
+            "resources", "qpt", "analysis_summary_report_template.qpt"
         )
         super().__init__(template_path, report_name)
 
@@ -83,7 +82,7 @@ class AnalysisReport(BaseReport):
 
         # Compute and add summary statistics for each layer on separate pages
         current_page = 1
-        page = self.make_page(
+        self.make_page(
             title="Processing Times",
             description_key="analysis_summary",
             current_page=current_page,
@@ -125,8 +124,6 @@ class AnalysisReport(BaseReport):
         with open(self.model_path, "r", encoding="utf-8") as f:
             model = json.load(f)
 
-        results = []
-
         for dimension in model.get("dimensions", []):
             dim_name = dimension.get("name", "")
             for factor in dimension.get("factors", []):
@@ -148,14 +145,17 @@ class AnalysisReport(BaseReport):
                         )
                     else:
                         duration = None
-
+                    log_message(
+                        f"Indicator '{indicator_name}' (factor: '{factor_name}', dimension: '{dim_name}') "  # noqa E231
+                        f"started at {start_str}, ended at {end_str}, duration: {duration} min"  # noqa E231
+                    )
                     # Create a new page for the indicator
-                    page = self.make_page(
+                    self.make_page(
                         title=f"Indicator: {indicator_name}",
                         description_key=factor_name,
                         current_page=current_page,
                     )
-                    layer_uri = indicator.get(f"result_file")
+                    layer_uri = indicator.get("result_file")
                     log_message(f"Adding {layer_uri} to map")
                     if layer_uri:
                         layer = QgsRasterLayer(layer_uri, indicator_name)
@@ -194,7 +194,7 @@ class AnalysisReport(BaseReport):
         r = int(fg[0] + (or_[0] - fg[0]) * rel)
         g = int(fg[1] + (or_[1] - fg[1]) * rel)
         b = int(fg[2] + (or_[2] - fg[2]) * rel)
-        return f"#{r:02x}{g:02x}{b:02x}"
+        return f"#{r:02x}{g:02x}{b:02x}"  # noqa E231
 
     def extract_execution_times_with_colors(self) -> List[Dict[str, Optional[str]]]:
         """

@@ -1,5 +1,3 @@
-import os
-
 from qgis.core import (
     Qgis,
     QgsFeedback,
@@ -89,7 +87,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         """
         area_features_count = area_features.featureCount()
         log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            f"Features layer for area {index + 1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -152,7 +150,8 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
                 max_out - min_out
             ) + min_out
             return result
-        except:
+        except Exception as e:
+            del e
             log_message(f"Invalid value, returning 0: {value}")
             return 0
 

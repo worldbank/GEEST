@@ -1,12 +1,10 @@
 import math
 
 from qgis.gui import QgsMapCanvasItem
-from qgis.PyQt.QtCore import QRectF, QSettings, Qt
+from qgis.PyQt.QtCore import QRectF, Qt
 from qgis.PyQt.QtGui import QColor, QFont, QImage, QPainter
 
 from geest.core.settings import setting
-
-from ...utilities import resources_path
 
 """
 A pie chart overlay item for the QGIS map canvas.
@@ -68,7 +66,7 @@ class PieChartItem(QgsMapCanvasItem):
         max_index = self.counts.index(max_count)
         # Draw drop shadow
         shadow_offset = 5
-        shadow_rect = QRectF(
+        _ = QRectF(  # shadow rectangle, not used further
             rect.x() + shadow_offset,
             rect.y() + shadow_offset,
             rect.width(),
@@ -135,14 +133,14 @@ class PieChartItem(QgsMapCanvasItem):
                 # Label at the end of exploded slice
                 radius = min(rect.width(), rect.height()) / 2
                 label_x = (
-                    rect.center().x()
-                    + explode_x
-                    + radius * math.cos(math.radians(-mid_angle))
+                    rect.center().x()  # noqa W503
+                    + explode_x  # noqa W503
+                    + radius * math.cos(math.radians(-mid_angle))  # noqa W503
                 )
                 label_y = (
-                    rect.center().y()
-                    + explode_y
-                    + radius * math.sin(math.radians(-mid_angle))
+                    rect.center().y()  # noqa W503
+                    + explode_y  # noqa W503
+                    + radius * math.sin(math.radians(-mid_angle))  # noqa W503
                 )
 
                 self.painter.setPen(Qt.black)

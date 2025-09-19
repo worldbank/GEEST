@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget
-from qgis.core import Qgis
+from qgis.core import Qgis  # noqa F401
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QFont
 
@@ -23,7 +23,7 @@ class CreditsPanel(FORM_CLASS, QWidget):
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message(f"Loading Credits panel")
+        log_message("Loading Credits panel")
         self.initUI()
 
     def initUI(self):
