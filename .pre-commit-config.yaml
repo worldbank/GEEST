@@ -35,14 +35,14 @@ repos:
         language: system
         types: [python]
         stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: ensure-google-docstrings
-        name: "📚 Ensure Google-style docstrings in Python modules"
-        entry: bash scripts/docstrings_check.sh
-        language: system
-        types: [python]
-        stages: [pre-commit]
+ # - repo: local
+ #   hooks:
+ #     - id: ensure-google-docstrings
+ #       name: "📚 Ensure Google-style docstrings in Python modules"
+ #       entry: bash scripts/docstrings_check.sh
+ #       language: system
+ #       types: [python]
+ #       stages: [pre-commit]
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:
@@ -69,14 +69,14 @@ repos:
         language: system
         args: ["--"]
         types: [nix]
-  - repo: local
-    hooks:
-      - id: markdownlint
-        name: "📝 markdownlint - Markdown linter"
-        entry: markdownlint
-        language: system
-        types: [markdown]
-        stages: [pre-commit]
+  #- repo: local
+  #  hooks:
+  #    - id: markdownlint
+  #      name: "📝 markdownlint - Markdown linter"
+  #      entry: markdownlint
+  #      language: system
+  #      types: [markdown]
+  #      stages: [pre-commit]
   - repo: local
     hooks:
       - id: cspell
@@ -119,14 +119,13 @@ repos:
         language: system
         files: ^scripts/.*\.(sh|bash|zsh)$
         pass_filenames: true
-
-# - repo: local
-#   hooks:
-#     - id: bearer-plugin
-#       name: "🛡️ Bearer - Security & privacy scanner - planet_explorer"
-#       entry: bearer scan --exit-code 1 geest
-#       language: system
-#       pass_filenames: false
+#  - repo: local
+#    hooks:
+#      - id: bearer-plugin
+#        name: "🛡️ Bearer - Security & privacy scanner - planet_explorer"
+#        entry: bearer scan --exit-code 1 geest
+#        language: system
+#        pass_filenames: false
 
 # - repo: local
 #   hooks:

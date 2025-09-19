@@ -5,6 +5,7 @@ certifi==2024.8.30
 charset-normalizer==3.3.2
 click==8.0.4
 colorama==0.4.6
+darglint
 debugpy==1.8.1
 defusedxml==0.7.1
 distlib==0.3.8

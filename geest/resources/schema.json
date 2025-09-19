@@ -59,9 +59,6 @@
                                             "index_score": {
                                                 "type": "integer"
                                             },
-                                            "index_score": {
-                                                "type": "integer"
-                                            },
                                             "use_index_score": {
                                                 "type": "integer"
                                             },

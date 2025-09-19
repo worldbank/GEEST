@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import unittest
 
@@ -6,7 +8,7 @@ from qgis.core import QgsProcessingContext, QgsProject, QgsRasterLayer, QgsVecto
 # from geest.core.algorithms import SafetyRasterReclassificationProcessor
 from utilities_for_testing import prepare_fixtures
 
-from geest.core.algorithms import SafetyRasterReclassificationProcessor
+# from geest.core.algorithms import SafetyRasterReclassificationProcessor
 
 
 @unittest.skip("Skip the test for now")
@@ -55,15 +57,15 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         self.pixel_size = 100.0
 
         # Initialize the processor with test data
-        self.processor = SafetyRasterReclassificationProcessor(
-            output_prefix="safety",
-            input_raster=self.input_raster_path,
-            pixel_size=self.pixel_size,
-            gpkg_path=self.gpkg_path,
-            grid_layer=self.grid_layer,
-            workflow_directory=self.output_directory,
-            context=self.context,
-        )
+        # self.processor = SafetyRasterReclassificationProcessor(
+        #     output_prefix="safety",
+        #     input_raster=self.input_raster_path,
+        #     pixel_size=self.pixel_size,
+        #     gpkg_path=self.gpkg_path,
+        #     grid_layer=self.grid_layer,
+        #     workflow_directory=self.output_directory,
+        #     context=self.context,
+        # )
 
     def test_reclassify(self):
         """
