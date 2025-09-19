@@ -10,7 +10,7 @@ Version Changed: 2025-01-24
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
 
-from geest.core.tasks import GridFromBbox, GridFromBboxTask
+from geest.core.tasks import GridFromBboxTask
 
 
 def example_bbox():
@@ -117,7 +117,9 @@ def test_crs_mismatch():
         assert "Invalid CRS provided" in str(e), f"Unexpected error message: {e}"
 
     mismatched_crs = QgsCoordinateReferenceSystem("EPSG:3857")
-    result = GridFromBbox(bbox=bbox, cell_width=10, cell_height=10, crs=mismatched_crs)
+    result = GridFromBboxTask(
+        bbox=bbox, cell_width=10, cell_height=10, crs=mismatched_crs
+    )
 
     assert result.isValid(), "Grid generation should handle CRS mismatches gracefully."
 
