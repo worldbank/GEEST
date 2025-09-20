@@ -87,7 +87,6 @@
       };
 
       devShells.${system}.default = pkgs.mkShell {
-        imports = [ ./scripts/neovim.nix ];
         packages = [
           pkgs.actionlint # for checking gh actions
           pkgs.bandit
@@ -121,7 +120,7 @@
           pkgs.qt5.qttools
           pkgs.shellcheck
           pkgs.shfmt
-          pkgs.vim
+          pkgs.neovim
           pkgs.virtualenv
           pkgs.vscode
           pkgs.yamlfmt
@@ -240,6 +239,10 @@
           pre-commit clean > /dev/null
           pre-commit install --install-hooks > /dev/null
           pre-commit run --all-files || true
+
+          echo "🎯 Neovim with GEEST configuration:"
+          echo "   nvim --cmd 'set rtp+=./.nvim'"
+          echo ""
         '';
       };
     };

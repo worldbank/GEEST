@@ -7,6 +7,7 @@ donjayamanne.python-environment-manager@1.2.7
 donjayamanne.python-extension-pack@1.7.0
 foxundermoon.shell-format@7.2.5
 GitHub.copilot@1.372.0
+GitHub.copilot-chat@0.29.1
 GitHub.copilot-chat@0.30.3
 github.vscode-github-actions@0.27.1
 GitHub.vscode-pull-request-github@0.108.0
@@ -23,7 +24,9 @@ ms-python.black-formatter@2025.2.0
 ms-python.debugpy@2025.8.0
 ms-python.python@2025.6.1
 ms-python.vscode-pylance@2025.4.1
+ms-python.vscode-python-envs@1.2.0
 ms-python.vscode-python-envs@1.6.0
+ms-python.vscode-python-envs@1.8.0
 ms-vscode.test-adapter-converter@0.2.1
 naumovs.color-highlight@2.8.0
 njpwerner.autodocstring@0.6.1
