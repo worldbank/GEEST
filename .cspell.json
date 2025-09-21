@@ -1,6 +1,6 @@
 {
     "version": "0.2",
-        "words": [
+    "words": [
         "colour",
         "colours",
         "docstrings",
@@ -96,6 +96,19 @@
         "Pyright",
         "pyrightconfig",
         "shfmt",
-        "Toggleable"
-   ]
+        "Toggleable",
+        "lspconfig",
+        "bashls",
+        "checkhealth",
+        "lspconfig",
+        "lspkind",
+        "luacheck",
+        "Magit",
+        "mypy",
+        "neogit",
+        "Neogit",
+        "neotest",
+        "shellcheck",
+        "stylua"
+    ]
 }

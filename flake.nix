@@ -121,6 +121,7 @@
           pkgs.shellcheck
           pkgs.shfmt
           pkgs.neovim
+          pkgs.nodejs_20 # needed for copilot in neovim
           pkgs.virtualenv
           pkgs.vscode
           pkgs.yamlfmt
