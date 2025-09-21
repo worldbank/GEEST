@@ -11,7 +11,7 @@ cd "$PROJECT_ROOT" || exit 1
 
 # Start Neovim with the custom config
 exec nvim \
-  --cmd "lua package.path = '$CONFIG_DIR/lua/?.lua;$CONFIG_DIR/lua/?/init.lua;' .. package.path" \
-  --cmd "lua vim.opt.rtp:prepend('$CONFIG_DIR')" \
-  --cmd "lua dofile('$CONFIG_DIR/init.lua')" \
-  "$@"
+    --cmd "lua package.path = '$CONFIG_DIR/lua/?.lua;$CONFIG_DIR/lua/?/init.lua;' .. package.path" \
+    --cmd "lua vim.opt.rtp:prepend('$CONFIG_DIR')" \
+    --cmd "lua dofile('$CONFIG_DIR/init.lua')" \
+    "$@"
