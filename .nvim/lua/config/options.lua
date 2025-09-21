@@ -1,5 +1,4 @@
 -- Basic Neovim options for Python development
-print("Loading options...")
 local opt = vim.opt
 
 -- Line numbers
@@ -63,5 +62,3 @@ opt.foldlevel = 99
 -- File encoding
 opt.encoding = "utf-8"
 opt.fileencoding = "utf-8"
-
-print("Loading options done.")

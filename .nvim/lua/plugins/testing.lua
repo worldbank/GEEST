@@ -3,7 +3,7 @@ return {
     {
         "vim-test/vim-test",
         keys = {
-            { "<leader>tn", ":TestNearest<CR>", desc = "Test nearest" },
+            { "<leader>tr", ":TestNearest<CR>", desc = "Test nearest" },
             { "<leader>tf", ":TestFile<CR>", desc = "Test file" },
             { "<leader>ta", ":TestSuite<CR>", desc = "Test suite" },
             { "<leader>tl", ":TestLast<CR>", desc = "Test last" },
@@ -20,7 +20,7 @@ return {
             vim.g["test#python#pytest#options"] = "-v"
 
             -- Custom test mappings
-            vim.keymap.set('n', '<leader>t.', ':TestNearest<CR>', { desc = 'Test nearest' })
+            vim.keymap.set('n', '<leader>tr', ':TestNearest<CR>', { desc = 'Test nearest' })
             vim.keymap.set('n', '<leader>tt', ':TestFile<CR>', { desc = 'Test current file' })
             vim.keymap.set('n', '<leader>ts', ':TestSuite<CR>', { desc = 'Test suite' })
             vim.keymap.set('n', '<leader>tg', ':TestVisit<CR>', { desc = 'Go to test file' })

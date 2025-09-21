@@ -66,26 +66,18 @@ return {
                     },
                     presets = {
                         operators = false,
-                        motions = true,
+                        motions = false, -- Disable to reduce conflicts
                         text_objects = true,
                         windows = true,
                         nav = true,
                         z = true,
-                        g = true,
+                        g = false, -- Disable g preset to avoid conflicts
                     },
                 },
-                operators = { gc = "Comments" },
-                key_labels = {},
-                icons = {
-                    breadcrumb = "»",
-                    separator = "➜",
-                    group = "+",
-                },
-                popup_mappings = {
-                    scroll_down = "<c-d>",
-                    scroll_up = "<c-u>",
-                },
-                window = {
+                show_help = true,
+                show_keys = true,
+                -- Use new win instead of window
+                win = {
                     border = "rounded",
                     position = "bottom",
                     margin = { 1, 0, 1, 0 },
@@ -98,30 +90,24 @@ return {
                     spacing = 3,
                     align = "left",
                 },
-                ignore_missing = true,
-                hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "call", "lua", "^:", "^ " },
-                show_help = true,
-                show_keys = true,
-                triggers = "auto",
-                triggers_blacklist = {
-                    i = { "j", "k" },
-                    v = { "j", "k" },
-                },
             })
 
-            -- Register key groups
-            wk.register({
-                ["<leader>c"] = { name = "+code/copilot" },
-                ["<leader>f"] = { name = "+file/find" },
-                ["<leader>g"] = { name = "+git" },
-                ["<leader>l"] = { name = "+lsp" },
-                ["<leader>n"] = { name = "+neotest" },
-                ["<leader>t"] = { name = "+test" },
-                ["<leader>w"] = { name = "+workspace" },
-                ["<leader>b"] = { name = "+buffer/format" },
-                ["<leader>d"] = { name = "+debug/diagnostics" },
-                ["<leader>s"] = { name = "+search" },
-                ["<leader>x"] = { name = "+trouble" },
+            -- Register key groups using new spec format
+            wk.add({
+                { "<leader>c", group = "Code/Copilot" },
+                { "<leader>f", group = "File/Find" },
+                { "<leader>g", group = "Git" },
+                { "<leader>l", group = "LSP/Location List" },
+                { "<leader>n", group = "Neotest" },
+                { "<leader>t", group = "Test" },
+                { "<leader>w", group = "Workspace" },
+                { "<leader>b", group = "Buffer/Format" },
+                { "<leader>d", group = "Debug/Diagnostics" },
+                { "<leader>s", group = "Search/Split" },
+                { "<leader>x", group = "Trouble" },
+                { "<leader>e", group = "Explorer" },
+                { "<leader>h", group = "Git Hunks" },
+                { "<leader>r", group = "Rename/Replace" },
             })
         end,
     },

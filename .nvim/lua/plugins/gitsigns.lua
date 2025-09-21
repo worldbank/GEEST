@@ -82,8 +82,8 @@ return {
         },
         cmd = "Neogit",
         keys = {
-            { "<leader>gn", ":Neogit<CR>", desc = "Open Neogit" },
-            { "<leader>gnc", ":Neogit commit<CR>", desc = "Neogit commit" },
+            { "<leader>gg", ":Neogit<CR>", desc = "Open Neogit" },
+            { "<leader>gc", ":Neogit commit<CR>", desc = "Neogit commit" },
         },
         config = function()
             require("neogit").setup({
