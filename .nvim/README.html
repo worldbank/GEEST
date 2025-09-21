@@ -1,0 +1,1163 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>GEEST Project Local Neovim Configuration</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '.nvim/README';</script>
+    <link rel="canonical" href="https://worldbank.github.io/GEEST/.nvim/README.html" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Sep 21, 2025"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../README.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt=" - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt=" - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../README.html">
+                    Welcome to GEEST
+                </a>
+            </li>
+        </ul>
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../docs/about.html">About GEEST</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../docs/user_guide.html">User Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../docs/userguide/install.html">Installing GEEST</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../docs/userguide/navigation.html">Navigation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../docs/userguide/contextual.html">Contextual</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../docs/userguide/accessibility.html">Accessibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../docs/userguide/placecharacterization.html">Place Characterization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../docs/userguide/insights.html">Insights</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../docs/userguide/datacollection.html">Data Collection</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../docs/background.html">Project ## 1. The Geospatial Women’s Employment Analytical Framework (GeoWEAF) Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docs/acknowledgements.html">Acknowledgements</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../docs/training.html">Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docs/media.html">Media</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://datacatalog.worldbank.org/search/collections/genderspatial">Data Gap Analysis</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/099121123091527675/p1792120dc820d04409928040a279022b42">Methodology Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://www.qgis.org/en/site/">QGIS</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://openrouteservice.org/">Open Route Service</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">License &amp; Citation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../docs/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docs/citation.html">Citation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/worldbank/GEEST" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/worldbank/GEEST/edit/main/.nvim/README.md" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/worldbank/GEEST/issues/new?title=Issue%20on%20page%20%2F.nvim/README.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/.nvim/README.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>GEEST Project Local Neovim Configuration</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start">Quick Start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#complete-feature-set">🚀 Complete Feature Set</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-development-tools">Core Development Tools</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-categories">Plugin Categories</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#lsp-completion-8-plugins">LSP &amp; Completion (8 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#formatting-linting-4-plugins">Formatting &amp; Linting (4 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ai-integration-2-plugins">AI Integration (2 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-3-plugins">Testing (3 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#git-workflow-4-plugins">Git Workflow (4 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-4-plugins">Debugging (4 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#project-management-2-plugins">Project Management (2 plugins)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-verification">🔍 Plugin Verification</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#count-all-plugins">Count All Plugins</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list-all-plugin-names">List All Plugin Names</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-specific-plugin">Check Specific Plugin</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-lsp-servers">Verify LSP Servers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-configuration-loading">Check Configuration Loading</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-setup">🔧 Initial Setup</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-mappings">📋 Key Mappings</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#leader-key-space-leader">Leader Key: Space (<code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;</span></code> = <code class="docutils literal notranslate"> </code>)</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-operations">File Operations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#code-development">Code Development</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ai-assistance-copilot">AI Assistance (Copilot)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing">Testing</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#git-operations">Git Operations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging">Debugging</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#navigation">Navigation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-development-optimized">🐍 Python Development Optimized</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration-structure">🏗️ Configuration Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">File Operations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#file-explorer">File Explorer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lsp">LSP</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#git">Git</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Configuration Structure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-setup">🛠️ Installation &amp; Setup</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#first-launch">First Launch</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language-server-installation">Language Server Installation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-the-configuration">🧪 Testing the Configuration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-functionality-test">Basic Functionality Test</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-development-test">Python Development Test</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#git-integration-test">Git Integration Test</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-resources">📚 Learning Resources</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-concepts">Key Concepts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">🐛 Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common-issues">Common Issues</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debug-mode">Debug Mode</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage-examples">🎯 Usage Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-development-workflow">Python Development Workflow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-language-support">Multi-Language Support</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#related-files">🔗 Related Files</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="geest-project-local-neovim-configuration">
+<h1>GEEST Project Local Neovim Configuration<a class="headerlink" href="#geest-project-local-neovim-configuration" title="Permalink to this heading">#</a></h1>
+<p>This directory contains a comprehensive Neovim configuration specifically tailored for the GEEST project development, featuring <strong>40+ plugins</strong> for a complete modern development environment.</p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this heading">#</a></h2>
+<p>To use this configuration with your GEEST project:</p>
+<ol class="arabic">
+<li><p>Make sure you have Neovim 0.10+ installed</p></li>
+<li><p>From the project root directory, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./.nvim/nvim-geest
+</pre></div>
+</div>
+</li>
+</ol>
+<p>Or create a Fish function in <code class="docutils literal notranslate"><span class="pre">~/.config/fish/functions/nvim-geest.fish</span></code>:</p>
+<div class="highlight-fish notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> nvim-geest
+    /home/timlinux/dev/python/GEEST/.nvim/nvim-geest <span class="nv">$argv</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Then you can simply run <code class="docutils literal notranslate"><span class="pre">nvim-geest</span></code> from anywhere.</p>
+</section>
+<section id="complete-feature-set">
+<h2>🚀 Complete Feature Set<a class="headerlink" href="#complete-feature-set" title="Permalink to this heading">#</a></h2>
+<section id="core-development-tools">
+<h3>Core Development Tools<a class="headerlink" href="#core-development-tools" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>LSP Integration</strong>: Mason.nvim manages language servers automatically</p>
+<ul>
+<li><p>Python (pylsp), Lua (lua_ls), Bash (bashls)</p></li>
+</ul>
+</li>
+<li><p><strong>AI Assistance</strong>: GitHub Copilot with interactive chat interface</p></li>
+<li><p><strong>Comprehensive Formatting</strong>: Auto-format on save for Python, Lua, Nix, Shell</p></li>
+<li><p><strong>Advanced Linting</strong>: Real-time linting with nvim-lint and null-ls</p></li>
+<li><p><strong>Testing Framework</strong>: Both vim-test and neotest for comprehensive testing</p></li>
+<li><p><strong>Debugging</strong>: Full DAP support with Python debugging capabilities</p></li>
+<li><p><strong>Git Workflow</strong>: Triple Git integration (gitsigns + fugitive + neogit)</p></li>
+</ul>
+</section>
+<section id="plugin-categories">
+<h3>Plugin Categories<a class="headerlink" href="#plugin-categories" title="Permalink to this heading">#</a></h3>
+<section id="lsp-completion-8-plugins">
+<h4>LSP &amp; Completion (8 plugins)<a class="headerlink" href="#lsp-completion-8-plugins" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p>nvim-lspconfig, mason.nvim, mason-lspconfig.nvim</p></li>
+<li><p>nvim-cmp, cmp-nvim-lsp, cmp-buffer, cmp-path, lspkind.nvim</p></li>
+</ul>
+</section>
+<section id="formatting-linting-4-plugins">
+<h4>Formatting &amp; Linting (4 plugins)<a class="headerlink" href="#formatting-linting-4-plugins" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p>formatter.nvim, black.nvim, nvim-lint, none-ls.nvim</p></li>
+</ul>
+</section>
+<section id="ai-integration-2-plugins">
+<h4>AI Integration (2 plugins)<a class="headerlink" href="#ai-integration-2-plugins" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p>copilot.lua, copilot-chat.nvim</p></li>
+</ul>
+</section>
+<section id="testing-3-plugins">
+<h4>Testing (3 plugins)<a class="headerlink" href="#testing-3-plugins" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p>vim-test, neotest, neotest-python</p></li>
+</ul>
+</section>
+<section id="git-workflow-4-plugins">
+<h4>Git Workflow (4 plugins)<a class="headerlink" href="#git-workflow-4-plugins" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p>gitsigns.nvim, vim-fugitive, neogit, diffview.nvim</p></li>
+</ul>
+</section>
+<section id="debugging-4-plugins">
+<h4>Debugging (4 plugins)<a class="headerlink" href="#debugging-4-plugins" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p>nvim-dap, nvim-dap-ui, nvim-dap-virtual-text, nvim-dap-python</p></li>
+</ul>
+</section>
+<section id="project-management-2-plugins">
+<h4>Project Management (2 plugins)<a class="headerlink" href="#project-management-2-plugins" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p>project.nvim, which-key.nvim</p></li>
+</ul>
+<p>Plus existing plugins: telescope.nvim, nvim-treesitter, lualine.nvim, tokyo-night.nvim, etc.</p>
+</section>
+</section>
+</section>
+<section id="plugin-verification">
+<h2>🔍 Plugin Verification<a class="headerlink" href="#plugin-verification" title="Permalink to this heading">#</a></h2>
+<section id="count-all-plugins">
+<h3>Count All Plugins<a class="headerlink" href="#count-all-plugins" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua local lazy = require(&#39;lazy&#39;); print(&#39;Total plugins loaded:&#39;, vim.tbl_count(lazy.plugins()))&quot;</span><span class="w"> </span>+q
+</pre></div>
+</div>
+</section>
+<section id="list-all-plugin-names">
+<h3>List All Plugin Names<a class="headerlink" href="#list-all-plugin-names" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua local lazy = require(&#39;lazy&#39;); for name, plugin in pairs(lazy.plugins()) do if plugin.name then print(plugin.name) end end&quot;</span><span class="w"> </span>+q
+</pre></div>
+</div>
+</section>
+<section id="check-specific-plugin">
+<h3>Check Specific Plugin<a class="headerlink" href="#check-specific-plugin" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua local lazy = require(&#39;lazy&#39;); for name, plugin in pairs(lazy.plugins()) do if plugin.name and plugin.name:match(&#39;copilot&#39;) then print(&#39;Found:&#39;, plugin.name) end end&quot;</span><span class="w"> </span>+q
+</pre></div>
+</div>
+</section>
+<section id="verify-lsp-servers">
+<h3>Verify LSP Servers<a class="headerlink" href="#verify-lsp-servers" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua print(&#39;LSP servers:&#39;, vim.tbl_keys(require(&#39;lspconfig.configs&#39;)))&quot;</span><span class="w"> </span>+q
+</pre></div>
+</div>
+</section>
+<section id="check-configuration-loading">
+<h3>Check Configuration Loading<a class="headerlink" href="#check-configuration-loading" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua require(&#39;lazy&#39;).setup({ import = &#39;plugins&#39; }); print(&#39;Configuration loaded successfully&#39;)&quot;</span><span class="w"> </span>+q
+</pre></div>
+</div>
+</section>
+<section id="initial-setup">
+<h3>🔧 Initial Setup<a class="headerlink" href="#initial-setup" title="Permalink to this heading">#</a></h3>
+<p>After first launch, install LSP servers and tools via Mason:</p>
+<div class="highlight-vim notranslate"><div class="highlight"><pre><span></span><span class="p">:</span>Mason
+</pre></div>
+</div>
+<p>Then install commonly used tools:</p>
+<ul class="simple">
+<li><p><strong>LSP Servers</strong>: <code class="docutils literal notranslate"><span class="pre">python-lsp-server</span></code>, <code class="docutils literal notranslate"><span class="pre">lua-language-server</span></code>, <code class="docutils literal notranslate"><span class="pre">bash-language-server</span></code></p></li>
+<li><p><strong>Formatters</strong>: <code class="docutils literal notranslate"><span class="pre">black</span></code>, <code class="docutils literal notranslate"><span class="pre">nixfmt</span></code>, <code class="docutils literal notranslate"><span class="pre">shfmt</span></code>, <code class="docutils literal notranslate"><span class="pre">prettier</span></code></p></li>
+<li><p><strong>Linters</strong>: <code class="docutils literal notranslate"><span class="pre">flake8</span></code>, <code class="docutils literal notranslate"><span class="pre">luacheck</span></code>, <code class="docutils literal notranslate"><span class="pre">shellcheck</span></code></p></li>
+</ul>
+<p>Or install via command line:</p>
+<div class="highlight-vim notranslate"><div class="highlight"><pre><span></span><span class="p">:</span>MasonInstall python<span class="p">-</span><span class="nb">lsp</span><span class="p">-</span>server <span class="k">lua</span><span class="p">-</span><span class="k">language</span><span class="p">-</span>server bash<span class="p">-</span><span class="k">language</span><span class="p">-</span>server black flake8 luacheck
+</pre></div>
+</div>
+</section>
+</section>
+<section id="key-mappings">
+<h2>📋 Key Mappings<a class="headerlink" href="#key-mappings" title="Permalink to this heading">#</a></h2>
+<section id="leader-key-space-leader">
+<h3>Leader Key: Space (<code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;</span></code> = <code class="docutils literal notranslate"> </code>)<a class="headerlink" href="#leader-key-space-leader" title="Permalink to this heading">#</a></h3>
+<section id="file-operations">
+<h4>File Operations<a class="headerlink" href="#file-operations" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ff</span></code> - Find files (Telescope)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;fg</span></code> - Live grep search</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;fb</span></code> - Browse buffers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;fr</span></code> - Recent files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;fp</span></code> - Find projects</p></li>
+</ul>
+</section>
+<section id="code-development">
+<h4>Code Development<a class="headerlink" href="#code-development" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ca</span></code> - Code actions (LSP)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;rn</span></code> - Rename symbol (LSP)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;bf</span></code> - Format file/selection</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;l</span></code> - Trigger linting</p></li>
+</ul>
+</section>
+<section id="ai-assistance-copilot">
+<h4>AI Assistance (Copilot)<a class="headerlink" href="#ai-assistance-copilot" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;cc</span></code> - Toggle Copilot Chat</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ce</span></code> - Explain selection</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;cr</span></code> - Review code selection</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;cf</span></code> - Fix code selection</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;cd</span></code> - Document selection</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ct</span></code> - Generate tests</p></li>
+</ul>
+</section>
+<section id="testing">
+<h4>Testing<a class="headerlink" href="#testing" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;tn</span></code> - Test nearest</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;tf</span></code> - Test file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ta</span></code> - Test suite</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;nr</span></code> - Run nearest (neotest)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ns</span></code> - Test summary (neotest)</p></li>
+</ul>
+</section>
+<section id="git-operations">
+<h4>Git Operations<a class="headerlink" href="#git-operations" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gg</span></code> - Git status (fugitive)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gn</span></code> - Open Neogit interface</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gc</span></code> - Git commit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gP</span></code> - Git push</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gs</span></code> - Stage hunk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gr</span></code> - Reset hunk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gp</span></code> - Preview hunk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gb</span></code> - Git blame</p></li>
+</ul>
+</section>
+<section id="debugging">
+<h4>Debugging<a class="headerlink" href="#debugging" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;db</span></code> - Toggle breakpoint</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;dc</span></code> - Debug continue</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;di</span></code> - Debug step into</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;do</span></code> - Debug step over</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;du</span></code> - Toggle debug UI</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;dt</span></code> - Terminate debug session</p></li>
+</ul>
+</section>
+<section id="navigation">
+<h4>Navigation<a class="headerlink" href="#navigation" title="Permalink to this heading">#</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">gd</span></code> - Go to definition</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gr</span></code> - Show references</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">K</span></code> - Hover documentation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">]c</span></code> / <code class="docutils literal notranslate"><span class="pre">[c</span></code> - Navigate git hunks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">]d</span></code> / <code class="docutils literal notranslate"><span class="pre">[d</span></code> - Navigate diagnostics</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="python-development-optimized">
+<h2>🐍 Python Development Optimized<a class="headerlink" href="#python-development-optimized" title="Permalink to this heading">#</a></h2>
+<p>This configuration provides enterprise-grade Python development with:</p>
+<ul class="simple">
+<li><p><strong>Language Server</strong>: Automatic pylsp installation via Mason</p></li>
+<li><p><strong>Formatting</strong>: Black formatter (88-character line length) with auto-format on save</p></li>
+<li><p><strong>Linting</strong>: Flake8, mypy integration with real-time feedback</p></li>
+<li><p><strong>Testing</strong>: Pytest integration with both vim-test and neotest</p></li>
+<li><p><strong>Debugging</strong>: Full Python debugging with breakpoints and variable inspection</p></li>
+<li><p><strong>Import Management</strong>: Automatic import sorting with isort</p></li>
+<li><p><strong>Code Intelligence</strong>: GitHub Copilot for AI-assisted development</p></li>
+</ul>
+</section>
+<section id="configuration-structure">
+<h2>🏗️ Configuration Structure<a class="headerlink" href="#configuration-structure" title="Permalink to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;w</span></code> - Save file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;q</span></code> - Quit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;h</span></code> - Clear search highlighting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;C-h/j/k/l&gt;</span></code> - Navigate splits</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;S-h/l&gt;</span></code> - Previous/Next buffer</p></li>
+</ul>
+<section id="id1">
+<h3>File Operations<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ff</span></code> - Find files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;fg</span></code> - Live grep</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;fb</span></code> - Browse buffers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;fr</span></code> - Recent files</p></li>
+</ul>
+</section>
+<section id="file-explorer">
+<h3>File Explorer<a class="headerlink" href="#file-explorer" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ee</span></code> - Toggle file explorer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ef</span></code> - Find current file in explorer</p></li>
+</ul>
+</section>
+<section id="lsp">
+<h3>LSP<a class="headerlink" href="#lsp" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">gd</span></code> - Go to definition</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gr</span></code> - Show references</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">K</span></code> - Hover documentation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ca</span></code> - Code actions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;rn</span></code> - Rename symbol</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[d</span></code> / <code class="docutils literal notranslate"><span class="pre">]d</span></code> - Navigate diagnostics</p></li>
+</ul>
+</section>
+<section id="git">
+<h3>Git<a class="headerlink" href="#git" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">]h</span></code> / <code class="docutils literal notranslate"><span class="pre">[h</span></code> - Navigate git hunks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;hs</span></code> - Stage hunk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;hr</span></code> - Reset hunk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;hp</span></code> - Preview hunk</p></li>
+</ul>
+</section>
+</section>
+<section id="id2">
+<h2>Configuration Structure<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>## 🏗️ Configuration Structure
+
+```text
+.nvim/
+├── init.lua                     # Main entry point
+├── nvim-geest                   # Wrapper script for easy launch
+└── lua/
+    ├── config/
+    │   ├── options.lua         # Neovim options
+    │   ├── keymaps.lua         # Key mappings
+    │   └── autocmds.lua        # Auto commands
+    └── plugins/
+        ├── colorscheme.lua     # Tokyo Night theme
+        ├── telescope.lua       # Fuzzy finder
+        ├── treesitter.lua      # Syntax highlighting
+        ├── lsp.lua            # Language servers + Mason
+        ├── completion.lua      # Auto-completion + lspkind
+        ├── formatter.lua       # Multi-language formatting
+        ├── linting.lua        # Linting configuration
+        ├── copilot.lua        # AI assistance
+        ├── testing.lua        # Test runners
+        ├── project.lua        # Project + which-key
+        ├── debug.lua          # DAP debugging
+        ├── gitsigns.lua       # Comprehensive Git
+        ├── nvim-tree.lua      # File explorer
+        ├── lualine.lua        # Status line
+        ├── autopairs.lua      # Auto-pairing
+        ├── dashboard.lua      # Alpha dashboard
+        └── utils.lua          # Utilities
+</pre></div>
+</div>
+</section>
+<section id="installation-setup">
+<h2>🛠️ Installation &amp; Setup<a class="headerlink" href="#installation-setup" title="Permalink to this heading">#</a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Neovim 0.10+</strong> (required for latest plugin features)</p></li>
+<li><p><strong>Git</strong> (for plugin management)</p></li>
+<li><p><strong>Python 3.8+</strong> with pip</p></li>
+<li><p><strong>Node.js</strong> (for Copilot functionality)</p></li>
+<li><p><strong>Ripgrep</strong> (optional, for faster search)</p></li>
+<li><p><strong>fd</strong> (optional, for faster file finding)</p></li>
+</ul>
+</section>
+<section id="first-launch">
+<h3>First Launch<a class="headerlink" href="#first-launch" title="Permalink to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>All plugins install automatically on first launch</p></li>
+<li><p>LSP servers install automatically via Mason</p></li>
+<li><p>Configuration loads without any manual setup</p></li>
+<li><p>GitHub Copilot requires <code class="docutils literal notranslate"><span class="pre">:Copilot</span> <span class="pre">auth</span></code> on first use</p></li>
+</ol>
+</section>
+<section id="language-server-installation">
+<h3>Language Server Installation<a class="headerlink" href="#language-server-installation" title="Permalink to this heading">#</a></h3>
+<p>Mason automatically installs these LSP servers:</p>
+<ul class="simple">
+<li><p><strong>pylsp</strong> (Python Language Server)</p></li>
+<li><p><strong>lua_ls</strong> (Lua Language Server)</p></li>
+<li><p><strong>bashls</strong> (Bash Language Server)</p></li>
+</ul>
+<p>Manual installation via Mason UI:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./.nvim/nvim-geest
+<span class="c1"># Then in Neovim: :Mason</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="testing-the-configuration">
+<h2>🧪 Testing the Configuration<a class="headerlink" href="#testing-the-configuration" title="Permalink to this heading">#</a></h2>
+<section id="basic-functionality-test">
+<h3>Basic Functionality Test<a class="headerlink" href="#basic-functionality-test" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test configuration loading</span>
+./.nvim/nvim-geest<span class="w"> </span>--version
+
+<span class="c1"># Test plugin loading (should show 40+ plugins)</span>
+./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua local lazy = require(&#39;lazy&#39;); print(&#39;Total plugins loaded:&#39;, vim.tbl_count(lazy.plugins()))&quot;</span><span class="w"> </span>+q
+</pre></div>
+</div>
+</section>
+<section id="python-development-test">
+<h3>Python Development Test<a class="headerlink" href="#python-development-test" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test Python LSP and formatting</span>
+./.nvim/nvim-geest<span class="w"> </span>test_format.py
+<span class="c1"># In Neovim: Try &lt;leader&gt;bf to format, gd to go to definition</span>
+</pre></div>
+</div>
+</section>
+<section id="git-integration-test">
+<h3>Git Integration Test<a class="headerlink" href="#git-integration-test" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test Git integration</span>
+./.nvim/nvim-geest
+<span class="c1"># In Neovim: Try &lt;leader&gt;gg for Git status, &lt;leader&gt;gn for Neogit</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="learning-resources">
+<h2>📚 Learning Resources<a class="headerlink" href="#learning-resources" title="Permalink to this heading">#</a></h2>
+<section id="key-concepts">
+<h3>Key Concepts<a class="headerlink" href="#key-concepts" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>LSP</strong>: Language Server Protocol provides code intelligence</p></li>
+<li><p><strong>DAP</strong>: Debug Adapter Protocol enables debugging capabilities</p></li>
+<li><p><strong>Treesitter</strong>: Provides advanced syntax highlighting</p></li>
+<li><p><strong>Lazy Loading</strong>: Plugins load only when needed for faster startup</p></li>
+</ul>
+</section>
+<section id="getting-help">
+<h3>Getting Help<a class="headerlink" href="#getting-help" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">:help</span> <span class="pre">&lt;plugin-name&gt;</span></code> - Plugin documentation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;</span></code> then wait - Which-key shows available bindings</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:Mason</span></code> - Manage language servers and tools</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:Lazy</span></code> - Plugin management interface</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:checkhealth</span></code> - Diagnose configuration issues</p></li>
+</ul>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>🐛 Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">#</a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Permalink to this heading">#</a></h3>
+<p><strong>Plugins not loading:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check plugin count</span>
+./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua print(&#39;Plugins:&#39;, vim.tbl_count(require(&#39;lazy&#39;).plugins()))&quot;</span><span class="w"> </span>+q
+</pre></div>
+</div>
+<p><strong>LSP not working:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check LSP servers</span>
+./.nvim/nvim-geest<span class="w"> </span>--headless<span class="w"> </span>+<span class="s2">&quot;lua print(&#39;LSP servers available&#39;)&quot;</span><span class="w"> </span>+q
+<span class="c1"># In Neovim: :LspInfo</span>
+</pre></div>
+</div>
+<p><strong>Copilot not working:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># In Neovim: :Copilot auth</span>
+</pre></div>
+</div>
+<p><strong>Formatting not working:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check formatters</span>
+<span class="c1"># In Neovim: :Mason (look for black, nixfmt, shfmt)</span>
+</pre></div>
+</div>
+</section>
+<section id="debug-mode">
+<h3>Debug Mode<a class="headerlink" href="#debug-mode" title="Permalink to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start with verbose logging</span>
+./.nvim/nvim-geest<span class="w"> </span>--cmd<span class="w"> </span><span class="s1">&#39;set verbose=9&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="usage-examples">
+<h2>🎯 Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this heading">#</a></h2>
+<section id="python-development-workflow">
+<h3>Python Development Workflow<a class="headerlink" href="#python-development-workflow" title="Permalink to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Open project: <code class="docutils literal notranslate"><span class="pre">./.nvim/nvim-geest</span></code></p></li>
+<li><p>Find files: <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;ff</span></code></p></li>
+<li><p>Code with LSP: Auto-completion, go to definition (<code class="docutils literal notranslate"><span class="pre">gd</span></code>)</p></li>
+<li><p>Format code: <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;bf</span></code> (auto-formats with black)</p></li>
+<li><p>Run tests: <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;tn</span></code> (test nearest function)</p></li>
+<li><p>Debug code: <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;db</span></code> (toggle breakpoint), <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;dc</span></code> (debug)</p></li>
+<li><p>Git workflow: <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gg</span></code> (status), <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;gn</span></code> (Neogit UI)</p></li>
+<li><p>AI assistance: <code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;cc</span></code> (Copilot chat)</p></li>
+</ol>
+</section>
+<section id="multi-language-support">
+<h3>Multi-Language Support<a class="headerlink" href="#multi-language-support" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Python</strong>: Full LSP + formatting + testing + debugging</p></li>
+<li><p><strong>Lua</strong>: LSP + formatting for Neovim configuration</p></li>
+<li><p><strong>Shell</strong>: LSP + formatting + linting for scripts</p></li>
+<li><p><strong>Nix</strong>: Formatting for Nix expressions</p></li>
+<li><p><strong>Markdown</strong>: Formatting + linting for documentation</p></li>
+</ul>
+</section>
+</section>
+<section id="related-files">
+<h2>🔗 Related Files<a class="headerlink" href="#related-files" title="Permalink to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PLUGIN-SUMMARY.md</span></code> - Complete plugin listing with descriptions</p></li>
+<li><p>Individual plugin configs in <code class="docutils literal notranslate"><span class="pre">lua/plugins/</span></code> directory</p></li>
+<li><p>Keybinding reference via which-key (<code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;</span></code> then wait)</p></li>
+</ul>
+<hr class="docutils" />
+<p>This configuration represents a complete, modern development environment comparable to VS Code or JetBrains IDEs, but with the efficiency and customizability of Neovim.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./.nvim"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quick-start">Quick Start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#complete-feature-set">🚀 Complete Feature Set</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#core-development-tools">Core Development Tools</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-categories">Plugin Categories</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#lsp-completion-8-plugins">LSP &amp; Completion (8 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#formatting-linting-4-plugins">Formatting &amp; Linting (4 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ai-integration-2-plugins">AI Integration (2 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-3-plugins">Testing (3 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#git-workflow-4-plugins">Git Workflow (4 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-4-plugins">Debugging (4 plugins)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#project-management-2-plugins">Project Management (2 plugins)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-verification">🔍 Plugin Verification</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#count-all-plugins">Count All Plugins</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#list-all-plugin-names">List All Plugin Names</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-specific-plugin">Check Specific Plugin</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verify-lsp-servers">Verify LSP Servers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-configuration-loading">Check Configuration Loading</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-setup">🔧 Initial Setup</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-mappings">📋 Key Mappings</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#leader-key-space-leader">Leader Key: Space (<code class="docutils literal notranslate"><span class="pre">&lt;leader&gt;</span></code> = <code class="docutils literal notranslate"> </code>)</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#file-operations">File Operations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#code-development">Code Development</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ai-assistance-copilot">AI Assistance (Copilot)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing">Testing</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#git-operations">Git Operations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging">Debugging</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#navigation">Navigation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-development-optimized">🐍 Python Development Optimized</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration-structure">🏗️ Configuration Structure</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">File Operations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#file-explorer">File Explorer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lsp">LSP</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#git">Git</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Configuration Structure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-setup">🛠️ Installation &amp; Setup</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#first-launch">First Launch</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#language-server-installation">Language Server Installation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-the-configuration">🧪 Testing the Configuration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-functionality-test">Basic Functionality Test</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-development-test">Python Development Test</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#git-integration-test">Git Integration Test</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#learning-resources">📚 Learning Resources</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-concepts">Key Concepts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">🐛 Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#common-issues">Common Issues</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debug-mode">Debug Mode</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage-examples">🎯 Usage Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python-development-workflow">Python Development Workflow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-language-support">Multi-Language Support</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#related-files">🔗 Related Files</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Development Data Group
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Sep 21, 2025.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  <div>
+ Country borders or names do not necessarily reflect the World Bank Group’s official position. All maps are for illustrative purposes and do not imply the expression of any opinion on the part of the World Bank, concerning the legal status of any country or territory or concerning the delimitation of frontiers or boundaries
+</div>
+    <b>All content (unless otherwise specified) is subject to the <a href="https://opensource.org/license/mit/">MIT License.</a></b>
+</div>
+
+</div>
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
