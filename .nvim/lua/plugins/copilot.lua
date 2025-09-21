@@ -26,7 +26,7 @@ return {
                     auto_trigger = true,
                     debounce = 75,
                     keymap = {
-                        accept = "<M-l>",
+                        accept = "<C-l>",
                         accept_word = false,
                         accept_line = false,
                         next = "<M-]>",
@@ -93,10 +93,7 @@ return {
                     -- Options below only apply to floating windows
                     relative = 'editor', -- 'editor', 'win', 'cursor', 'mouse'
                     border = 'single', -- 'none', single', 'double', 'rounded', 'solid', 'shadow'
-                    row = nil, -- row position of the window, default is centered
-                    col = nil, -- column position of the window, default is centered
                     title = 'Copilot Chat', -- title of chat window
-                    footer = nil, -- footer of chat window
                     zindex = 1, -- determines if window is on top or below other floating windows
                 },
             })
