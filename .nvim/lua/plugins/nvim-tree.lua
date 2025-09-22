@@ -39,7 +39,21 @@ return {
         },
       },
       filters = {
-        custom = { ".DS_Store" },
+        custom = {
+          ".DS_Store",
+          "__pycache__",
+          "*.pyc",
+          "*.pyo",
+          "*.pyd",
+          ".pytest_cache",
+          ".coverage",
+          "*.egg-info",
+          ".tox",
+          ".venv",
+          "venv",
+          ".mypy_cache",
+          ".ruff_cache"
+        },
         dotfiles = false,
       },
       git = {
