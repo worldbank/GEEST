@@ -140,6 +140,8 @@
             ps.pytest-qt
             ps.black
             ps.click # needed by black
+            ps.flake8
+            ps.mypy
             ps.jsonschema
             ps.pandas
             ps.odfpy
@@ -165,6 +167,8 @@
             ps.pytest-qt
             ps.black
             ps.click # needed by black
+            ps.flake8
+            ps.mypy
             ps.jsonschema
             ps.pandas
             ps.odfpy
@@ -242,8 +246,14 @@
           pre-commit run --all-files || true
 
           echo "🎯 Neovim with GEEST configuration:"
-          alias vim="./.nvim/nvim.sh"
           echo "./.nvim/nvim.sh"
+          echo ""
+
+          # Set up vim alias by prepending project .nvim directory to PATH
+          export PATH="$(pwd)/.nvim:$PATH"
+
+          echo "📝 'vim' command available -> ./.nvim/vim"
+          echo "    Also available: nvim-geest, ./.nvim/nvim.sh"
           echo ""
         '';
       };
