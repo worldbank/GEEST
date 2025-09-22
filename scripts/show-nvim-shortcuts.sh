@@ -32,17 +32,28 @@ nvim_dir="/home/timlinux/dev/python/GEEST/.nvim"
 
                 # Extract mode (first parameter after keymap.set)
                 local mode_match
-                mode_match=$(echo "$content" | grep -o '"[nvixstc]*"' | head -1 | tr -d '"')
+                mode_match=$(echo "$content" | sed -n 's/.*keymap\.set([[:space:]]*["\x27]\([^"\x27]*\)["\x27].*/\1/p')
                 if [[ -z "$mode_match" ]]; then
-                    mode_match=$(echo "$content" | grep -o "{ *\"[nvixstc]*\"" | head -1 | tr -d '{ "')
+                    # Alternative pattern
+                    mode_match=$(echo "$content" | sed -n 's/.*keymap\.set([[:space:]]*\"\([^\"]*\)\".*/\1/p')
+                fi
+                if [[ -z "$mode_match" ]]; then
+                    # Pattern for single quotes
+                    mode_match=$(echo "$content" | sed -n "s/.*keymap\.set([[:space:]]*'\([^']*\)'.*/\1/p")
                 fi
                 [[ -z "$mode_match" ]] && mode_match="n"
 
                 # Extract key combination (second parameter)
                 local key_match
-                key_match=$(echo "$content" | sed -n 's/.*keymap\.set([^"]*"\([^"]*\)".*/\1/p')
+                # Try multiple patterns to extract the key
+                key_match=$(echo "$content" | sed -n 's/.*keymap\.set([^,]*,[[:space:]]*["\x27]\([^"\x27]*\)["\x27].*/\1/p')
                 if [[ -z "$key_match" ]]; then
-                    key_match=$(echo "$content" | sed -n 's/.*keymap\.set([^"]*\([^"]*\)[",].*/\1/p')
+                    # Alternative pattern for different quote styles
+                    key_match=$(echo "$content" | sed -n 's/.*keymap\.set([^,]*,[[:space:]]*\"\([^\"]*\)\".*/\1/p')
+                fi
+                if [[ -z "$key_match" ]]; then
+                    # Pattern for single quotes
+                    key_match=$(echo "$content" | sed -n "s/.*keymap\.set([^,]*,[[:space:]]*'\([^']*\)'.*/\1/p")
                 fi
 
                 if [[ -n "$key_match" ]]; then
@@ -52,7 +63,11 @@ nvim_dir="/home/timlinux/dev/python/GEEST/.nvim"
                     local description=""
 
                     # Try to extract description from desc field or comments
-                    if [[ "$content" =~ desc.*[\"\']([^\"\']*) ]]; then
+                    if [[ "$content" =~ desc[[:space:]]*=[[:space:]]*[\"\']+([^\"\']*)[\"\'] ]]; then
+                        description="${BASH_REMATCH[1]}"
+                    elif [[ "$content" =~ desc[[:space:]]*=[[:space:]]*\"([^\"]*)\" ]]; then
+                        description="${BASH_REMATCH[1]}"
+                    elif [[ "$content" =~ desc[[:space:]]*=[[:space:]]*\'([^\']*)\' ]]; then
                         description="${BASH_REMATCH[1]}"
                     elif [[ "$content" =~ --[[:space:]]*(.+)$ ]]; then
                         description="${BASH_REMATCH[1]}"

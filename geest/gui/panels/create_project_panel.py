@@ -37,8 +37,10 @@ FORM_CLASS = get_ui_class("create_project_panel_base.ui")
 
 class CreateProjectPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
-    switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
-    working_directory_changed = pyqtSignal(str)  # Signal to set the working directory
+    # Signal to notify the parent to switch tabs
+    switch_to_previous_tab = pyqtSignal()
+    # Signal to set the working directory
+    working_directory_changed = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -484,5 +486,6 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 QgsProject.instance().addMapLayer(layer, False)
                 _ = geest_group.addLayer(layer)
                 log_message(
-                    f"Added layer: {layer.name()} to group: {geest_group.name()}"
+                    f"Added layer: {layer.name()} to group: {
+                        geest_group.name()}"
                 )

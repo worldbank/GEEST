@@ -96,6 +96,21 @@ return {
             vim.keymap.set('v', '<leader>co', ':CopilotChatOptimize<CR>', { desc = 'Optimize selection' })
             vim.keymap.set('v', '<leader>cd', ':CopilotChatDocs<CR>', { desc = 'Document selection' })
             vim.keymap.set('v', '<leader>ct', ':CopilotChatTests<CR>', { desc = 'Generate tests' })
+
+            -- Inline Copilot requests (like VS Code inline editing)
+            vim.keymap.set('n', '<leader>ci', function()
+                local input = vim.fn.input('Copilot request: ')
+                if input ~= '' then
+                    vim.cmd('CopilotChat ' .. input)
+                end
+            end, { desc = 'Inline Copilot request' })
+
+            vim.keymap.set('v', '<leader>ci', function()
+                local input = vim.fn.input('Copilot request for selection: ')
+                if input ~= '' then
+                    vim.cmd("'<,'>CopilotChat " .. input)
+                end
+            end, { desc = 'Inline Copilot request for selection' })
         end,
     },
 }
