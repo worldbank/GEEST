@@ -50,5 +50,25 @@ return {
     vim.keymap.set("n", "<leader>fc", builtin.commands, { desc = "Commands" })
     vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Find keymaps" })
     vim.keymap.set("n", "<leader>fs", builtin.grep_string, { desc = "Grep string" })
+
+    -- Python-specific file finder
+    vim.keymap.set("n", "<leader>fy", function()
+      builtin.find_files({
+        find_command = { "fd", "--type", "f", "--extension", "py" }
+      })
+    end, { desc = "Find Python files" })
+
+    -- Alternative Python finder using glob pattern (if fd is not available)
+    vim.keymap.set("n", "<leader>fY", function()
+      builtin.find_files({
+        prompt_title = "Find Python Files",
+        cwd = vim.fn.getcwd(),
+        search_dirs = { vim.fn.getcwd() },
+        file_ignore_patterns = { "node_modules", ".git", "__pycache__", "%.pyc" },
+        additional_args = function()
+          return { "--glob", "*.py" }
+        end
+      })
+    end, { desc = "Find Python files (glob)" })
   end,
 }

@@ -1,6 +1,35 @@
 -- Project Management and Key Discovery
 return {
     {
+        -- Session Management
+        "rmagatti/auto-session",
+        config = function()
+            require("auto-session").setup({
+                log_level = "error",
+                auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/"},
+                auto_session_use_git_branch = false,
+
+                -- Auto save session
+                auto_save_enabled = true,
+                auto_restore_enabled = true,
+
+                -- Session lens for browsing sessions
+                session_lens = {
+                    buftypes_to_ignore = {}, -- list of buffer types what should not be deleted from current session
+                    load_on_setup = true,
+                    theme_conf = { border = true },
+                    previewer = false,
+                },
+            })
+
+            -- Key mappings for session management
+            vim.keymap.set("n", "<leader>wr", "<cmd>SessionRestore<CR>", { desc = "Restore session for cwd" })
+            vim.keymap.set("n", "<leader>ws", "<cmd>SessionSave<CR>", { desc = "Save session for auto session root dir" })
+            vim.keymap.set("n", "<leader>wS", "<cmd>SessionSearch<CR>", { desc = "Search sessions" })
+            vim.keymap.set("n", "<leader>wd", "<cmd>SessionDelete<CR>", { desc = "Delete session for cwd" })
+        end,
+    },
+    {
         "ahmedkhalf/project.nvim",
         config = function()
             require("project_nvim").setup({
