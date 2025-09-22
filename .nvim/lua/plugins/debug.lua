@@ -1,4 +1,18 @@
 -- Debug Adapter Protocol (DAP) Configuration
+--
+-- Remote Debugging Setup:
+-- 1. Install debugpy in your remote environment: pip install debugpy
+-- 2. In your Python code, add: import debugpy; debugpy.listen(5678); debugpy.wait_for_client()
+-- 3. Run your Python script
+-- 4. In Neovim, use <leader>da to attach to the remote debugger
+--
+-- Key bindings:
+-- <leader>da - Attach to remote debugger (prompts for host/port)
+-- <leader>db - Toggle breakpoint at current line
+-- <leader>dx - Remove ALL breakpoints
+-- <leader>dX - Remove breakpoint on current line
+-- <leader>du - Toggle DAP UI
+-- <leader>de - Evaluate expression under cursor or selection
 return {
     {
         "mfussenegger/nvim-dap",
@@ -10,17 +24,45 @@ return {
             "mfussenegger/nvim-dap-python",
         },
         keys = {
+            -- Breakpoint management
             { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Toggle breakpoint" },
             { "<leader>dB", function() require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: ')) end, desc = "Conditional breakpoint" },
+            { "<leader>dx", function() require("dap").clear_breakpoints() end, desc = "Remove all breakpoints" },
+            { "<leader>dX", function()
+                local line = vim.fn.line('.')
+                require("dap").clear_breakpoints()
+                vim.notify("Cleared breakpoint on line " .. line)
+            end, desc = "Remove breakpoint on current line" },
+
+            -- Session control
             { "<leader>dc", function() require("dap").continue() end, desc = "Continue" },
             { "<leader>dC", function() require("dap").run_to_cursor() end, desc = "Run to cursor" },
+            { "<leader>da", function()
+                local host = vim.fn.input("Host (default localhost): ")
+                if host == "" then host = "localhost" end
+                local port = vim.fn.input("Port (default 5678): ")
+                if port == "" then port = "5678" end
+                require("dap").run({
+                    type = "python",
+                    request = "attach",
+                    name = "Remote Attach",
+                    connect = {
+                        host = host,
+                        port = tonumber(port)
+                    },
+                })
+            end, desc = "Attach to remote debugger" },
+
+            -- Navigation and execution
             { "<leader>dg", function() require("dap").goto_() end, desc = "Go to line (no execute)" },
             { "<leader>di", function() require("dap").step_into() end, desc = "Step into" },
-            { "<leader>dj", function() require("dap").down() end, desc = "Down" },
-            { "<leader>dk", function() require("dap").up() end, desc = "Up" },
-            { "<leader>dl", function() require("dap").run_last() end, desc = "Run last" },
             { "<leader>do", function() require("dap").step_over() end, desc = "Step over" },
             { "<leader>dO", function() require("dap").step_out() end, desc = "Step out" },
+            { "<leader>dj", function() require("dap").down() end, desc = "Down" },
+            { "<leader>dk", function() require("dap").up() end, desc = "Up" },
+
+            -- Session management
+            { "<leader>dl", function() require("dap").run_last() end, desc = "Run last" },
             { "<leader>dp", function() require("dap").pause() end, desc = "Pause" },
             { "<leader>dr", function() require("dap").repl.toggle() end, desc = "Toggle REPL" },
             { "<leader>ds", function() require("dap").session() end, desc = "Session" },
@@ -82,6 +124,23 @@ return {
                         return '/usr/bin/python'
                     end
                 end,
+            })
+
+            -- Remote debugging configuration
+            table.insert(dap.configurations.python, {
+                type = "python",
+                request = "attach",
+                name = "Remote Attach (localhost:5678)",
+                connect = {
+                    host = "localhost",
+                    port = 5678,
+                },
+                pathMappings = {
+                    {
+                        localRoot = "${workspaceFolder}",
+                        remoteRoot = ".",
+                    },
+                },
             })
         end,
     },

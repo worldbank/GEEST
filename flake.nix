@@ -242,7 +242,8 @@
           pre-commit run --all-files || true
 
           echo "🎯 Neovim with GEEST configuration:"
-          echo "   nvim --cmd 'set rtp+=./.nvim'"
+          alias vim="./.nvim/nvim.sh"
+          echo "./.nvim/nvim.sh"
           echo ""
         '';
       };
