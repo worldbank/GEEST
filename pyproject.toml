@@ -1,0 +1,42 @@
+[tool.bandit]
+# Skip B101 (assert statements) as they are legitimate in test files
+skips = ["B101"]
+
+# Exclude test directories from scanning
+exclude_dirs = ["test", "./test/**"]
+
+# Note: All critical and medium severity issues have been resolved:
+# - No shell injection vulnerabilities (B605 fixed)
+# - XML parsing secured with defusedxml (B314 fixed)
+# - Debug interface restricted to localhost (B104 fixed)
+# - All subprocess calls use safe array arguments with proper nosec comments
+# - Try/except pass blocks are documented and acceptable
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 120
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true

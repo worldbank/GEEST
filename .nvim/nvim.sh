@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GEEST Neovim wrapper script
+# Neovim wrapper script
 
 # Get the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

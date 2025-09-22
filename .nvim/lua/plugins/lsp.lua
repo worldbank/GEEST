@@ -15,6 +15,31 @@ return {
         end,
     },
     {
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
+        dependencies = { "williamboman/mason.nvim" },
+        config = function()
+            require("mason-tool-installer").setup({
+                ensure_installed = {
+                    -- LSP servers
+                    "pylsp",
+                    "lua-language-server",
+                    "bash-language-server",
+
+                    -- Linters and formatters
+                    "flake8",
+                    "mypy",
+                    "black",
+                    "isort",
+                    "shellcheck",
+                    "shfmt",
+                    "luacheck",
+                },
+                auto_update = false,
+                run_on_start = false, -- Don't install automatically since you have system tools
+            })
+        end,
+    },
+    {
         "williamboman/mason-lspconfig.nvim",
         dependencies = { "mason.nvim", "nvim-lspconfig" },
         config = function()
@@ -84,7 +109,7 @@ return {
 
                     local opts = { buffer = ev.buf }
                     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-                    vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+                    vim.keymap.set("n", "<M-Space>", vim.lsp.buf.definition, opts)
                     vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
                     vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
                     vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
