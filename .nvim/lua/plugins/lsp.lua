@@ -15,6 +15,31 @@ return {
         end,
     },
     {
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
+        dependencies = { "williamboman/mason.nvim" },
+        config = function()
+            require("mason-tool-installer").setup({
+                ensure_installed = {
+                    -- LSP servers
+                    "pylsp",
+                    "lua-language-server",
+                    "bash-language-server",
+
+                    -- Linters and formatters
+                    "flake8",
+                    "mypy",
+                    "black",
+                    "isort",
+                    "shellcheck",
+                    "shfmt",
+                    "luacheck",
+                },
+                auto_update = false,
+                run_on_start = false, -- Don't install automatically since you have system tools
+            })
+        end,
+    },
+    {
         "williamboman/mason-lspconfig.nvim",
         dependencies = { "mason.nvim", "nvim-lspconfig" },
         config = function()

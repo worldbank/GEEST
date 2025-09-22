@@ -215,21 +215,31 @@
           else
             echo "No requirements.txt found, skipping pip install."
           fi
+          if [ -f requirements-dev.txt ]; then
+            echo "Installing Python requirements from requirements-dev.txt..."
+            pip install -r requirements-dev.txt > .pip-install.log 2>&1
+            if [ $? -ne 0 ]; then
+              echo "❌ Pip install failed. See .pip-install.log for details."
+            fi
+          else
+            echo "No requirements-dev.txt found, skipping pip install."
+          fi
 
+          echo "Setting up and running pre-commit hooks..."
+          echo "-------------------------------------"
+          pre-commit clean > /dev/null
+          pre-commit install --install-hooks > /dev/null
+          pre-commit run --all-files || true
+
+          export PATH="$(pwd)/.nvim:$PATH"
+          echo ""
           echo "-----------------------"
           echo "🌈 Your Dev Environment is prepared."
           echo "To run QGIS with your profile, use one of these commands:"
           echo ""
-          echo "  nix run .#qgis"
-          echo "  nix run .#qgis-ltr"
-          echo "  nix run .#qgis-master"
-          echo ""
-          echo "  To check if the plugin is properly usable from"
-          echo "  qgis_process, you can do this:"
-          echo "  nix run .#qgis_process plugins enable geest2"
-          echo "  nix run .#qgis_process list"
-          echo ""
-          echo " The plugin must be in the default QGIS user profile."
+          echo "  scripts/run-qgis.sh"
+          echo "  scripts/run-qgis-ltr.sh"
+          echo "  scripts/run-qgis-master.sh"
           echo ""
           echo "📒 Note:"
           echo "-----------------------"
@@ -238,22 +248,11 @@
           echo "can start like this:"
           echo ""
           echo "./scripts/vscode.sh"
-          echo "-----------------------"
           echo ""
-
-          pre-commit clean > /dev/null
-          pre-commit install --install-hooks > /dev/null
-          pre-commit run --all-files || true
-
-          echo "🎯 Neovim with GEEST configuration:"
-          echo "./.nvim/nvim.sh"
+          echo "We also provide a ready to use neovim setup:"
           echo ""
-
-          # Set up vim alias by prepending project .nvim directory to PATH
-          export PATH="$(pwd)/.nvim:$PATH"
-
-          echo "📝 'vim' command available -> ./.nvim/vim"
-          echo "    Also available: nvim-geest, ./.nvim/nvim.sh"
+          echo "🎯 You can start Neovim with GEEST configuration:"
+          echo "📝 'vim' (which is an alias to) -> ./.nvim/vim"
           echo ""
         '';
       };
