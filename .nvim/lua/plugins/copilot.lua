@@ -57,17 +57,7 @@ return {
             { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
             { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
         },
-        cmd = {
-            "CopilotChat",
-            "CopilotChatOpen",
-            "CopilotChatToggle",
-            "CopilotChatExplain",
-            "CopilotChatReview",
-            "CopilotChatFix",
-            "CopilotChatOptimize",
-            "CopilotChatDocs",
-            "CopilotChatTests",
-        },
+        event = "VeryLazy",
         config = function()
             local chat = require("CopilotChat")
 
