@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 import platform
@@ -67,6 +68,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.folder_status_label.setPixmap(
             QPixmap(resources_path("resources", "icons", "failed.svg"))
         )
+        self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
+        self.national_scale.clicked.connect(
+            lambda: self.spatial_scale_changed("national")
+        )
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
 
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
@@ -122,6 +127,22 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.field_combo.clear()
             self.use_boundary_crs.setEnabled(False)
         self.crs_label.setText(self.crs().authid())
+
+    def spatial_scale_changed(self, value: str):
+        """Slot to be called when the spatial scale changes.
+
+        Args:
+            value (str): The new spatial scale value ("local" or "national").
+        """
+        log_message(f"Spatial scale changed: {value}")
+        if value == "local":
+            self.cell_size_spinbox.setValue(100)
+            self.cell_size_spinbox.setSingleStep(10)
+            self.cell_size_spinbox.setSuffix(" m")
+        elif value == "national":
+            self.cell_size_spinbox.setValue(1000)
+            self.cell_size_spinbox.setSingleStep(100)
+            self.cell_size_spinbox.setSuffix(" m")
 
     def update_crs(self):
         """Update the CRS label based on the checkbox state."""
@@ -217,6 +238,10 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             with open(model_path, "r") as f:
                 model = json.load(f)
                 model["analysis_cell_size_m"] = self.cell_size_spinbox.value()
+                if self.local_scale.isChecked():
+                    model["analysis_scale"] = "local"
+                else:
+                    model["analysis_scale"] = "national"
             with open(model_path, "w") as f:
                 json.dump(model, f)
 
@@ -296,7 +321,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def progress_updated(self, progress: float):
         """Slot to be called when the task progress is updated."""
-        log_message(f"\n\n\n\n\n\n\Progress: {progress}\n\n\n\n\n\n\n\n")
+        log_message(f"\n\n\n\n\n\nProgress: {progress}\n\n\n\n\n\n\n\n")
         self.progress_bar.setVisible(True)
         self.progress_bar.setEnabled(True)
         self.progress_bar.setValue(int(progress))

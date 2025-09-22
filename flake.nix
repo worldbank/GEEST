@@ -94,9 +94,9 @@
           pkgs.chafa
           pkgs.codeql
           pkgs.ffmpeg
-          pkgs.glogg
           pkgs.gdb
           pkgs.git
+          pkgs.glogg
           pkgs.glow # terminal markdown viewer
           pkgs.gource # Software version control visualization
           pkgs.gum
@@ -104,8 +104,11 @@
           pkgs.isort
           pkgs.jq
           pkgs.libsForQt5.kcachegrind
+          pkgs.luaPackages.luacheck
           pkgs.markdownlint-cli
+          pkgs.neovim
           pkgs.nixfmt-rfc-style
+          pkgs.nodejs_20 # needed for copilot in neovim
           pkgs.nodePackages.cspell
           pkgs.pre-commit
           pkgs.privoxy
@@ -118,46 +121,40 @@
           pkgs.qt5.qtquickcontrols2
           pkgs.qt5.qtsvg
           pkgs.qt5.qttools
+          pkgs.rpl
           pkgs.shellcheck
           pkgs.shfmt
-          pkgs.neovim
-          pkgs.nodejs_20 # needed for copilot in neovim
+          pkgs.stylua
           pkgs.virtualenv
           pkgs.vscode
           pkgs.yamlfmt
           pkgs.yamllint
-          pkgs.rpl
-          pkgs.actionlint # for checking gh actions
-          pkgs.bearer
           postgresWithPostGIS
           pkgs.nodePackages.cspell
           (pkgs.python3.withPackages (ps: [
-            ps.python
-            ps.pip
-            ps.setuptools
-            ps.wheel
-            ps.pytest
-            ps.pytest-qt
             ps.black
             ps.click # needed by black
-            ps.flake8
-            ps.mypy
-            ps.jsonschema
-            ps.pandas
-            ps.odfpy
-            ps.psutil
-            ps.httpx
-            ps.toml
-            ps.typer
-            ps.paver
-            # For autocompletion in vscode
-            ps.pyqt5-stubs
             ps.debugpy
-            ps.numpy
+            ps.flake8
             ps.gdal
+            ps.httpx
+            ps.jsonschema
+            ps.mypy
+            ps.numpy
+            ps.odfpy
+            ps.pandas
+            ps.paver # For autocompletion in vscode
+            ps.pip
+            ps.psutil
+            ps.pyqt5-stubs
+            ps.pytest
+            ps.pytest-qt
+            ps.python
+            ps.setuptools
+            ps.snakeviz # For visualising cprofiler outputs
             ps.toml
             ps.typer
-            ps.snakeviz # For visualising cprofiler outputs
+            ps.wheel
             # Add these for SQL linting/formatting:
             ps.sqlfmt
             ps.pip
@@ -175,7 +172,6 @@
             ps.psutil
             ps.httpx
             ps.toml
-            ps.typer
             # For autocompletion in vscode
             ps.pyqt5-stubs
 
@@ -185,10 +181,6 @@
             ps.virtualenv
             # Those are dependencies that we would like to use from nixpkgs, which will
             # add them to PYTHONPATH and thus make them accessible from within the venv.
-            ps.debugpy
-            ps.numpy
-            ps.gdal
-            ps.pip
             ps.pyqtwebengine
           ]))
 
