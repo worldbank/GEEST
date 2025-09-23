@@ -99,7 +99,6 @@
           pkgs.glogg
           pkgs.glow # terminal markdown viewer
           pkgs.gource # Software version control visualization
-          pkgs.gum
           pkgs.gum # UX for TUIs
           pkgs.isort
           pkgs.jq

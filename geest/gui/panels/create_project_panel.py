@@ -486,6 +486,5 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 QgsProject.instance().addMapLayer(layer, False)
                 _ = geest_group.addLayer(layer)
                 log_message(
-                    f"Added layer: {layer.name()} to group: {
-                        geest_group.name()}"
+                    f"Added layer: {layer.name()} to group: {geest_group.name()}"
                 )
