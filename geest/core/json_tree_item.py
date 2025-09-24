@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import traceback
 import uuid
 
@@ -34,24 +35,14 @@ class JsonTreeItem:
 
         if is_qgis_dark_theme_active():
             # Define icons for each role
-            self.dimension_icon = QIcon(
-                resources_path("resources", "icons", "dimension-light.svg")
-            )
-            self.factor_icon = QIcon(
-                resources_path("resources", "icons", "factor-light.svg")
-            )
-            self.indicator_icon = QIcon(
-                resources_path("resources", "icons", "indicator-light.svg")
-            )
+            self.dimension_icon = QIcon(resources_path("resources", "icons", "dimension-light.svg"))
+            self.factor_icon = QIcon(resources_path("resources", "icons", "factor-light.svg"))
+            self.indicator_icon = QIcon(resources_path("resources", "icons", "indicator-light.svg"))
         else:
             # Define icons for each role
-            self.dimension_icon = QIcon(
-                resources_path("resources", "icons", "dimension.svg")
-            )
+            self.dimension_icon = QIcon(resources_path("resources", "icons", "dimension.svg"))
             self.factor_icon = QIcon(resources_path("resources", "icons", "factor.svg"))
-            self.indicator_icon = QIcon(
-                resources_path("resources", "icons", "indicator.svg")
-            )
+            self.indicator_icon = QIcon(resources_path("resources", "icons", "indicator.svg"))
 
         # Define fonts for each role
         self.dimension_font = QFont()
@@ -181,31 +172,22 @@ class JsonTreeItem:
             data["analysis_weighting"] = data.get("default_analysis_weighting", 1.0)
         if self.isFactor():
             data["dimension_weighting"] = data.get("default_dimension_weighting", 1.0)
-            if (
-                self.parentItem  # noqa W503
-                and self.parentItem.getStatus() == "Excluded from analysis"  # noqa W503
-            ):
-                self.parentItem.attributes()["analysis_weighting"] = (
-                    self.parentItem.attribute("default_analysis_weighting")
+            if self.parentItem and self.parentItem.getStatus() == "Excluded from analysis":  # noqa W503  # noqa W503
+                self.parentItem.attributes()["analysis_weighting"] = self.parentItem.attribute(
+                    "default_analysis_weighting"
                 )
         if self.isIndicator():
             data["factor_weighting"] = data.get("default_factor_weighting", 1.0)
-            if (
-                self.parentItem  # noqa W503
-                and self.parentItem.getStatus() == "Excluded from analysis"  # noqa W503
-            ):
-                self.parentItem.attributes()["dimension_weighting"] = (
-                    self.parentItem.attribute("default_dimension_weighting")
+            if self.parentItem and self.parentItem.getStatus() == "Excluded from analysis":  # noqa W503  # noqa W503
+                self.parentItem.attributes()["dimension_weighting"] = self.parentItem.attribute(
+                    "default_dimension_weighting"
                 )
                 if (
                     self.parentItem.parentItem  # noqa W503
-                    and self.parentItem.parentItem.getStatus()  # noqa W503
-                    == "Excluded from analysis"  # noqa W503
+                    and self.parentItem.parentItem.getStatus() == "Excluded from analysis"  # noqa W503  # noqa W503
                 ):
                     self.parentItem.parentItem.attributes()["analysis_weighting"] = (
-                        self.parentItem.parentItem.attribute(
-                            "default_analysis_weighting"
-                        )
+                        self.parentItem.parentItem.attribute("default_analysis_weighting")
                     )
 
     def getIcon(self):
@@ -253,9 +235,7 @@ class JsonTreeItem:
         if status == "Completed successfully":
             return QIcon(resources_path("resources", "icons", "completed-success.svg"))
         elif status == "Required and not configured":
-            return QIcon(
-                resources_path("resources", "icons", "required-not-configured.svg")
-            )
+            return QIcon(resources_path("resources", "icons", "required-not-configured.svg"))
         elif status == "Not configured (optional)":
             return QIcon(resources_path("resources", "icons", "not-configured.svg"))
         elif status == "Configured, not run":
@@ -280,18 +260,14 @@ class JsonTreeItem:
             qgis_layer_shapefile_key = analysis_mode.replace("use_", "") + "_shapefile"
             qgis_layer_raster_key = analysis_mode.replace("use_", "") + "_raster"
 
-            if "Workflow Completed" in data.get("result", "") and data.get(
-                "result_file", ""
-            ):
+            if "Workflow Completed" in data.get("result", "") and data.get("result_file", ""):
                 return "Completed successfully"
 
             # First check if the item weighting is 0, or its parent factor is zero
             # If so, return "Excluded from analysis"
             if self.isIndicator():
                 required_by_parent = (
-                    float(self.parentItem.attributes().get("dimension_weighting", 0.0))
-                    if self.parentItem
-                    else 0.0
+                    float(self.parentItem.attributes().get("dimension_weighting", 0.0)) if self.parentItem else 0.0
                 )
                 required_by_self = float(data.get("factor_weighting", 0.0))
                 if not required_by_parent or not required_by_self:
@@ -299,18 +275,14 @@ class JsonTreeItem:
 
                 # Avoid infinite recursion by NOT using getStatus in the parent checks
                 # If the parent's dimension weighting is zero, return "Excluded from analysis"
-                if self.parentItem and not float(
-                    self.parentItem.attribute("dimension_weighting", 0.0)
-                ):
+                if self.parentItem and not float(self.parentItem.attribute("dimension_weighting", 0.0)):
                     return "Excluded from analysis"
                 # If the grandparent's analysis weighting is zero, return "Excluded from analysis"
                 if (
                     self.parentItem  # noqa W503
                     and self.parentItem.parentItem  # noqa W503
                     and not float(  # noqa W503
-                        self.parentItem.parentItem.attribute(
-                            "analysis_weighting", 0.0
-                        )  # noqa W503
+                        self.parentItem.parentItem.attribute("analysis_weighting", 0.0)  # noqa W503
                     )
                 ):
                     return "Excluded from analysis"
@@ -336,9 +308,7 @@ class JsonTreeItem:
                     return "Required and not configured"
 
                 # If the parent's analysis weighting is zero, return "Excluded from analysis"
-                if self.parentItem and not float(
-                    self.parentItem.attribute("analysis_weighting", 0.0)
-                ):
+                if self.parentItem and not float(self.parentItem.attribute("analysis_weighting", 0.0)):
                     return "Excluded from analysis"
 
                 # If any child indicator has a status of "Workflow failed", return "Workflow failed"
@@ -360,19 +330,13 @@ class JsonTreeItem:
                     return "Excluded from analysis"
 
                 # If the sum of the factor weightings is zero, return "Excluded from analysis"
-                weight_sum = sum(
-                    float(child.attribute("dimension_weighting", 0.0))
-                    for child in self.childItems
-                )
+                weight_sum = sum(float(child.attribute("dimension_weighting", 0.0)) for child in self.childItems)
                 if not weight_sum:
                     return "Excluded from analysis"
 
             if self.isAnalysis():
                 # If the sum of the dimension weightings is zero, return "Excluded from analysis"
-                weight_sum = sum(
-                    float(child.attribute("analysis_weighting", 0.0))
-                    for child in self.childItems
-                )
+                weight_sum = sum(float(child.attribute("analysis_weighting", 0.0)) for child in self.childItems)
                 if not weight_sum:
                     return "Excluded from analysis"
 
@@ -403,16 +367,12 @@ class JsonTreeItem:
                 "use_index_score",
                 "use_environmental_hazards",
             ]:
-                if not data.get(qgis_layer_source_key, False) and not data.get(
-                    qgis_layer_shapefile_key, False
-                ):
+                if not data.get(qgis_layer_source_key, False) and not data.get(qgis_layer_shapefile_key, False):
                     return "Not configured (optional)"
 
             # Test for algs requiring raster inputs
             if self.isIndicator() and analysis_mode in ["use_environmental_hazards"]:
-                if not data.get(qgis_layer_source_key, False) and not data.get(
-                    qgis_layer_raster_key, False
-                ):
+                if not data.get(qgis_layer_source_key, False) and not data.get(qgis_layer_raster_key, False):
                     return "Not configured (optional)"
 
             # Check if configured but not run
@@ -446,12 +406,7 @@ class JsonTreeItem:
         """
         path = []
         if self.isIndicator():
-            path.append(
-                self.parentItem.parentItem.attributes()
-                .get("id", "")
-                .lower()
-                .replace(" ", "_")
-            )
+            path.append(self.parentItem.parentItem.attributes().get("id", "").lower().replace(" ", "_"))
             path.append(self.parentItem.attribute("id", "").lower().replace(" ", "_"))
             path.append(self.attribute("id", "").lower().replace(" ", "_"))
         elif self.isFactor():
@@ -499,10 +454,7 @@ class JsonTreeItem:
 
         # Extract keys and values
         headers = ["Key", "Value"]
-        rows = [
-            (str(key), str(value).replace("\n", "  \n"))
-            for key, value in attributes.items()
-        ]
+        rows = [(str(key), str(value).replace("\n", "  \n")) for key, value in attributes.items()]
 
         # Calculate column widths
         col_widths = [
@@ -520,9 +472,7 @@ class JsonTreeItem:
 
         # Add rows
         for key, value in rows:
-            row_line = (
-                f"| {key:<{col_widths[0]}} | {value:<{col_widths[1]}} |"  # noqa E231
-            )
+            row_line = f"| {key:<{col_widths[0]}} | {value:<{col_widths[1]}} |"  # noqa E231
             table.append(row_line)
 
         return "\n" + "\n".join(table) + "\n"
@@ -541,17 +491,13 @@ class JsonTreeItem:
                 self.attributes()["analysis_mode"] = "factor_aggregation"
         if self.isIndicator():
             if self.attribute("analysis_mode", "") == "Do Not Use":
-                log_message(
-                    f"Analysis mode for {self.attribute('id')} is set to Do Not Use"
-                )
+                log_message(f"Analysis mode for {self.attribute('id')} is set to Do Not Use")
                 log_message("Updating it to the first valid analysis mode")
                 # Set the analysis mode to the first matching key below that is not zero
                 # Get a list of all attributes that start with 'use_'
                 for key in self.attributes().keys():
                     if key.startswith("use_"):
-                        log_message(
-                            f"Current key: {key} has value {self.attribute(key, 0)}"
-                        )
+                        log_message(f"Current key: {key} has value {self.attribute(key, 0)}")
                         if self.attribute(key, 0) == 1:
                             log_message(f"Setting analysis mode to {key}")
                             self.setAnalysisMode(key)
@@ -589,9 +535,7 @@ class JsonTreeItem:
                 if self.getStatus() != "Excluded from analysis" or include_disabled:
                     factors.append(self)
         for child in self.childItems:
-            factors.extend(
-                child.getDescendantFactors(include_completed, include_disabled)
-            )
+            factors.extend(child.getDescendantFactors(include_completed, include_disabled))
         return factors
 
     def getDescendantDimensions(self, include_completed=True, include_disabled=False):
@@ -610,9 +554,7 @@ class JsonTreeItem:
                 if self.getStatus() != "Excluded from analysis" or include_disabled:
                     dimensions.append(self)
         for child in self.childItems:
-            dimensions.extend(
-                child.getDescendantDimensions(include_completed, include_disabled)
-            )
+            dimensions.extend(child.getDescendantDimensions(include_completed, include_disabled))
         return dimensions
 
     def getDescendantAnalyses(self, include_completed=True):
@@ -674,9 +616,7 @@ class JsonTreeItem:
 
             # If found, update the weighting
             if indicator_item:
-                log_message(
-                    f"Updating weighting for {indicator_guid} to {new_weighting}"
-                )
+                log_message(f"Updating weighting for {indicator_guid} to {new_weighting}")
                 indicator_item.setData(2, f"{new_weighting:.2f}")  # noqa E231
                 # weighting references the level above (i.e. factor)
                 indicator_item.attributes()["factor_weighting"] = new_weighting

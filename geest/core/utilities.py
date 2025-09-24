@@ -67,18 +67,14 @@ class CoreUtils:
         """
         result = []
         # pylint: disable=W0141
-        extensions = [
-            _f for _f in os.environ.get("PATHEXT", "").split(os.pathsep) if _f
-        ]
+        extensions = [_f for _f in os.environ.get("PATHEXT", "").split(os.pathsep) if _f]
         # pylint: enable=W0141
         path = os.environ.get("PATH", None)
         # In c6c9b26 we removed this hard coding for issue #529 but I am
         # adding it back here in case the user's path does not include the
         # gdal binary dir on OSX but it is actually there. (TS)
         if sys.platform == "darwin":  # Mac OS X
-            gdal_prefix = (
-                "/Library/Frameworks/GDAL.framework/Versions/Current/Programs/"
-            )
+            gdal_prefix = "/Library/Frameworks/GDAL.framework/Versions/Current/Programs/"
             path = "%s:%s" % (path, gdal_prefix)
 
         if path is None:
@@ -137,12 +133,8 @@ def add_to_map(
         root = project.layerTreeRoot()
         geest_group = root.findGroup(group)
         if geest_group is None:
-            geest_group = root.insertGroup(
-                0, group
-            )  # Insert at the top of the layers panel
-            geest_group.setIsMutuallyExclusive(
-                True
-            )  # Make the group mutually exclusive
+            geest_group = root.insertGroup(0, group)  # Insert at the top of the layers panel
+            geest_group.setIsMutuallyExclusive(True)  # Make the group mutually exclusive
 
         # Traverse the tree view structure to determine the appropriate subgroup based on paths
         path_list = item.getPaths()
@@ -156,9 +148,7 @@ def add_to_map(
             sub_group = parent_group.findGroup(path)
             if sub_group is None:
                 sub_group = parent_group.addGroup(path)
-                sub_group.setIsMutuallyExclusive(
-                    True
-                )  # Make each subgroup mutually exclusive
+                sub_group.setIsMutuallyExclusive(True)  # Make each subgroup mutually exclusive
 
             parent_group = sub_group
 
@@ -187,9 +177,7 @@ def add_to_map(
             # Add the new layer to the appropriate subgroup
             QgsProject.instance().addMapLayer(layer, False)
             layer_tree_layer = parent_group.addLayer(layer)
-            layer_tree_layer.setExpanded(
-                False
-            )  # Collapse the legend for the layer by default
+            layer_tree_layer.setExpanded(False)  # Collapse the legend for the layer by default
             log_message(f"Added layer: {layer.name()} to group: {parent_group.name()}")
 
         # Ensure the layer and its parent groups are visible

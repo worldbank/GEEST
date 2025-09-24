@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import shutil
 import traceback
@@ -61,9 +62,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the analysis and opportunities mask processor
-        self.opportunity_masks_folder = os.path.join(
-            working_directory, "opportunity_masks"
-        )
+        self.opportunity_masks_folder = os.path.join(working_directory, "opportunity_masks")
         self.wee_folder = os.path.join(working_directory, "wee_score")
 
         self.force_clear = force_clear
@@ -93,9 +92,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             self.calculate_score()
             vrt_filepath = self.generate_vrt()
             self.item.setAttribute(self.result_file_key, vrt_filepath)
-            self.item.setAttribute(
-                self.result_key, "WEE Score by Opportunities Mask Created OK"
-            )
+            self.item.setAttribute(self.result_key, "WEE Score by Opportunities Mask Created OK")
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
@@ -123,9 +120,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         """
         log_message("Validating input rasters")
         log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")
-        log_message(
-            f"wee_score_raster raster  : {wee_score_raster.source()}"  # noqa: E203
-        )
+        log_message(f"wee_score_raster raster  : {wee_score_raster.source()}")  # noqa: E203
 
         if not opportunities_mask_raster.isValid() or not wee_score_raster.isValid():
             raise ValueError("One or both input rasters are invalid.")
@@ -157,17 +152,13 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             if self.isCanceled():
                 return
 
-            mask_path = os.path.join(
-                self.opportunity_masks_folder, f"opportunites_mask_{index}.tif"
-            )
+            mask_path = os.path.join(self.opportunity_masks_folder, f"opportunites_mask_{index}.tif")
             wee_score_path = os.path.join(self.wee_folder, f"wee_masked_{index}.tif")
             mask_layer = QgsRasterLayer(mask_path, "WEE")
             wee_score_layer = QgsRasterLayer(wee_score_path, "POP")
             self.validate_rasters(mask_layer, wee_score_layer, dimension_check=False)
 
-            output_path = os.path.join(
-                self.output_dir, f"wee_by_opportunities_mask_{index}.tif"
-            )
+            output_path = os.path.join(self.output_dir, f"wee_by_opportunities_mask_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
@@ -229,8 +220,6 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         Called when the task completes.
         """
         if result:
-            log_message(
-                "Opportunities mask by WEE SCORE calculation completed successfully."
-            )
+            log_message("Opportunities mask by WEE SCORE calculation completed successfully.")
         else:
             log_message("Opportunities mask by WEE SCORE calculation failed.")

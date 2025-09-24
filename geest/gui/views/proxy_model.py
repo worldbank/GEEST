@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from typing import Dict, List, Optional
 
@@ -21,15 +22,9 @@ class PromotionProxyModel(QAbstractProxyModel):
         self.source_model: Optional[QAbstractProxyModel] = None
         self.flattened_structure: List[str] = []  # Store guids instead of QModelIndex
         self.parent_mapping: Dict[str, Optional[str]] = {}  # Map guid to parent guid
-        self.guid_item_mapping: Dict[str, "JsonTreeItem"] = (
-            {}
-        )  # Map guid to JsonTreeItem
-        self.guid_index_mapping: Dict[str, QModelIndex] = (
-            {}
-        )  # Map guid to QModelIndex for easy lookups
-        self.promoted_mapping: Dict[str, str] = (
-            {}
-        )  # Map promoted child guid to its original parent's guid
+        self.guid_item_mapping: Dict[str, "JsonTreeItem"] = {}  # Map guid to JsonTreeItem
+        self.guid_index_mapping: Dict[str, QModelIndex] = {}  # Map guid to QModelIndex for easy lookups
+        self.promoted_mapping: Dict[str, str] = {}  # Map promoted child guid to its original parent's guid
 
     def setSourceModel(self, source_model: QAbstractProxyModel) -> None:
         if source_model is None:
@@ -81,22 +76,16 @@ class PromotionProxyModel(QAbstractProxyModel):
             else:
                 # Normal addition to the flattened structure
                 self.flattened_structure.append(child_guid)
-                self.parent_mapping[child_guid] = (
-                    parent_item.guid if parent_item is not None else None
-                )
+                self.parent_mapping[child_guid] = parent_item.guid if parent_item is not None else None
                 self.guid_item_mapping[child_guid] = child_item
                 # Create a QModelIndex for each child item and store it in guid_index_mapping
-                index = self.source_model.index(
-                    i, 0, self.guid_index_mapping.get(parent_item.guid, QModelIndex())
-                )
+                index = self.source_model.index(i, 0, self.guid_index_mapping.get(parent_item.guid, QModelIndex()))
                 if index.isValid():
                     self.guid_index_mapping[child_guid] = index
                 # Recursively traverse all child nodes
                 self._buildFlattenedStructure(child_item)
 
-    def index(
-        self, row: int, column: int, parent: QModelIndex = QModelIndex()
-    ) -> QModelIndex:
+    def index(self, row: int, column: int, parent: QModelIndex = QModelIndex()) -> QModelIndex:
         if (
             self.source_model is None  # noqa W503
             or row < 0  # noqa W503

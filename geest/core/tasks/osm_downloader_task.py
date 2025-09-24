@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import os
 import traceback
@@ -76,13 +77,9 @@ class OSMDownloaderTask(QgsTask):
                     os.remove(self.gpkg_path)
                     log_message(f"Removed existing GeoPackage: {self.gpkg_path}")
                 except Exception as e:
-                    log_message(
-                        f"Error removing existing GeoPackage: {e}", level="CRITICAL"
-                    )
+                    log_message(f"Error removing existing GeoPackage: {e}", level="CRITICAL")
             else:
-                log_message(
-                    f"GeoPackage already exists and delete_gpkg is False: {self.gpkg_path}"
-                )
+                log_message(f"GeoPackage already exists and delete_gpkg is False: {self.gpkg_path}")
         else:
             log_message(f"Writing to new GeoPackage: {self.gpkg_path}")
 

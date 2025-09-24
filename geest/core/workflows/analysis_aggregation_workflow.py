@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from qgis.core import QgsFeedback, QgsProcessingContext
@@ -33,14 +34,9 @@ class AnalysisAggregationWorkflow(AggregationWorkflowBase):
         super().__init__(
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.guids = (
-            self.item.getAnalysisDimensionGuids()
-        )  # get a list of the items to aggregate
+        self.guids = self.item.getAnalysisDimensionGuids()  # get a list of the items to aggregate
         self.id = (
-            self.item.attribute("analysis_name")
-            .lower()
-            .replace(" ", "_")
-            .replace("'", "")
+            self.item.attribute("analysis_name").lower().replace(" ", "_").replace("'", "")
         )  # should not be needed any more
         self.layer_id = "wee"
         self.weight_key = "analysis_weighting"

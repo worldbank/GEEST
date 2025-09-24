@@ -49,9 +49,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
         self.working_dir = ""
-        self.settings = (
-            QSettings()
-        )  # Initialize QSettings to store and retrieve settings
+        self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
         log_message("Loading setup panel")
@@ -67,13 +65,9 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.banner_label.deleteLater()
         parent_layout.update()
 
-        self.folder_status_label.setPixmap(
-            QPixmap(resources_path("resources", "icons", "failed.svg"))
-        )
+        self.folder_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "failed.svg")))
         self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
-        self.national_scale.clicked.connect(
-            lambda: self.spatial_scale_changed("national")
-        )
+        self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
 
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
@@ -83,17 +77,13 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.layer_combo.layerChanged.connect(self.layer_changed)
         self.field_combo.setLayer(self.layer_combo.currentLayer())
 
-        self.create_project_directory_button.clicked.connect(
-            self.create_new_project_folder
-        )
+        self.create_project_directory_button.clicked.connect(self.create_new_project_folder)
         self.project_crs = QgsProject.instance().crs()
         # We only allow the user to select a CRS based on the admin layer
         # if the admin CRS is not WGS84
         self.use_boundary_crs.setChecked(False)
         self.use_boundary_crs.setEnabled(False)
-        self.use_boundary_crs.toggled.connect(
-            self.update_crs
-        )  # Update the CRS label when the checkbox is toggled
+        self.use_boundary_crs.toggled.connect(self.update_crs)  # Update the CRS label when the checkbox is toggled
 
         self.next_button.clicked.connect(self.create_project)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
@@ -149,9 +139,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def update_crs(self):
         """Update the CRS label based on the checkbox state."""
         if self.use_boundary_crs.isChecked():
-            self.crs_label.setText(
-                f"CRS: {self.layer_combo.currentLayer().crs().authid()}"
-            )
+            self.crs_label.setText(f"CRS: {self.layer_combo.currentLayer().crs().authid()}")
         else:
             epsg = calculate_utm_zone_from_layer(self.layer_combo.currentLayer())
             self.crs_label.setText(f"CRS: EPSG:{epsg}")  # noqa E231
@@ -168,9 +156,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             file_path = file_dialog.selectedFiles()[0]
             layer = QgsVectorLayer(file_path, "Boundary", "ogr")
             if not layer.isValid():
-                QMessageBox.critical(
-                    self, "Error", "Could not load the boundary layer."
-                )
+                QMessageBox.critical(self, "Error", "Could not load the boundary layer.")
                 return
             # Load the layer in QGIS
             QgsProject.instance().addMapLayer(layer)
@@ -178,20 +164,14 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.field_combo.setLayer(layer)
 
     def create_new_project_folder(self):
-        directory = QFileDialog.getExistingDirectory(
-            self, "Create New Project Folder", self.working_dir
-        )
+        directory = QFileDialog.getExistingDirectory(self, "Create New Project Folder", self.working_dir)
         if directory:
             self.working_dir = directory
             self.update_recent_projects(directory)  # Update recent projects
-            self.settings.setValue(
-                "last_working_directory", directory
-            )  # Update last used project
+            self.settings.setValue("last_working_directory", directory)  # Update last used project
             self.project_path_label.setText(directory)
             self.create_project_directory_button.setText("📂 Change Project Folder")
-            self.folder_status_label.setPixmap(
-                QPixmap(resources_path("resources", "icons", "completed-success.svg"))
-            )
+            self.folder_status_label.setPixmap(QPixmap(resources_path("resources", "icons", "completed-success.svg")))
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
@@ -203,9 +183,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
-            self.settings.setValue(
-                "last_working_directory", self.working_dir
-            )  # Update last used project
+            self.settings.setValue("last_working_directory", self.working_dir)  # Update last used project
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
         else:
@@ -216,16 +194,12 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 return
 
             if not self.working_dir:
-                QMessageBox.critical(
-                    self, "Error", "Please select a working directory."
-                )
+                QMessageBox.critical(self, "Error", "Please select a working directory.")
                 return
 
             field_name = self.field_combo.currentField()
             if not field_name or field_name not in layer.fields().names():
-                QMessageBox.critical(
-                    self, "Error", f"Invalid area name field '{field_name}'."
-                )
+                QMessageBox.critical(self, "Error", f"Invalid area name field '{field_name}'.")
                 return
 
             # Copy default model.json if not present
@@ -249,9 +223,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
             # Create the processor instance and process the features
             debug_env = int(os.getenv("GEEST_DEBUG", 0))
-            feedback = (
-                QgsFeedback()
-            )  # Used to cancel tasks and measure subtask progress
+            feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
             try:
 
                 processor = StudyAreaProcessingTask(
@@ -276,9 +248,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                     self.queue_manager.start_processing()
             except Exception as e:
                 trace = traceback.format_exc()
-                QMessageBox.critical(
-                    self, "Error", f"Error processing study area: {e}\n{trace}"
-                )
+                QMessageBox.critical(self, "Error", f"Error processing study area: {e}\n{trace}")
                 self.enable_widgets()
                 return
             self.settings.setValue("last_working_directory", self.working_dir)
@@ -368,9 +338,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
-            os.startfile(
-                os.path.join(self.working_dir, "study_area_report.pdf")
-            )  # nosec B606
+            os.startfile(os.path.join(self.working_dir, "study_area_report.pdf"))  # nosec B606
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
@@ -388,9 +356,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         recent_projects = self.settings.value("recent_projects", [])
 
         if directory in recent_projects:
-            recent_projects.remove(
-                directory
-            )  # Remove if already in the list (to reorder)
+            recent_projects.remove(directory)  # Remove if already in the list (to reorder)
 
         recent_projects.insert(0, directory)  # Add to the top of the list
 
@@ -409,9 +375,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         # Scale the font size to fit the text in the available space
         # log_message(f"Description Label Width: {self.description.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
-        font_size = int(
-            linear_interpolation(self.description.rect().width(), 12, 16, 400, 600)
-        )
+        font_size = int(linear_interpolation(self.description.rect().width(), 12, 16, 400, 600))
 
         # log_message(f"Description Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))
@@ -441,9 +405,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         root = project.layerTreeRoot()
         geest_group = root.findGroup("Geest Study Area")
         if geest_group is None:
-            geest_group = root.insertGroup(
-                0, "Geest Study Area"
-            )  # Insert at the top of the layers panel
+            geest_group = root.insertGroup(0, "Geest Study Area")  # Insert at the top of the layers panel
 
         layers = [
             "study_area_bboxes",
@@ -485,6 +447,4 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)
                 _ = geest_group.addLayer(layer)
-                log_message(
-                    f"Added layer: {layer.name()} to group: {geest_group.name()}"
-                )
+                log_message(f"Added layer: {layer.name()} to group: {geest_group.name()}")

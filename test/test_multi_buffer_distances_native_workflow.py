@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import unittest
 
@@ -23,9 +24,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
         cls.feedback = QgsFeedback()
 
     def setUp(self):
-        self.study_area_gpkg_path = (
-            f"{self.working_directory}/study_area/study_area.gpkg",
-        )
+        self.study_area_gpkg_path = (f"{self.working_directory}/study_area/study_area.gpkg",)
         self.network_layer_path = os.path.join(
             os.path.dirname(__file__),
             "test_data",
@@ -39,15 +38,9 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
             "points.shp",
         )
 
-        self.analysis_item = JsonTreeItem(
-            {"id": "analysis_1"}, role="analysis", parent=None
-        )
-        self.dimension_item = JsonTreeItem(
-            {"id": "dimension_1"}, role="dimension", parent=self.analysis_item
-        )
-        self.factor_item = JsonTreeItem(
-            {"id": "factor_1"}, role="factor", parent=self.dimension_item
-        )
+        self.analysis_item = JsonTreeItem({"id": "analysis_1"}, role="analysis", parent=None)
+        self.dimension_item = JsonTreeItem({"id": "dimension_1"}, role="dimension", parent=self.analysis_item)
+        self.factor_item = JsonTreeItem({"id": "factor_1"}, role="factor", parent=self.dimension_item)
         self.test_data = [
             "Test Item TestMultiBufferDistancesNativeWorkflow",
             "Configured",

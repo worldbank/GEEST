@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -39,9 +40,7 @@ class AnalysisReport(BaseReport):
             ValueError: If the layer cannot be loaded from the given file path.
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
-        template_path = resources_path(
-            "resources", "qpt", "analysis_summary_report_template.qpt"
-        )
+        template_path = resources_path("resources", "qpt", "analysis_summary_report_template.qpt")
         super().__init__(template_path, report_name)
 
         self.report_name = report_name
@@ -75,9 +74,7 @@ class AnalysisReport(BaseReport):
         summary_label.setText(summary_text)
         summary_label.setFont(QFont("Arial", 12))
         summary_label.adjustSizeToText()
-        summary_label.attemptMove(
-            QgsLayoutPoint(80, 200, QgsUnitTypes.LayoutMillimeters), page=0
-        )
+        summary_label.attemptMove(QgsLayoutPoint(80, 200, QgsUnitTypes.LayoutMillimeters), page=0)
         self.layout.addLayoutItem(summary_label)
 
         # Compute and add summary statistics for each layer on separate pages
@@ -101,14 +98,10 @@ class AnalysisReport(BaseReport):
         # check if developer mode is enabled
         developer_mode = int(setting(key="developer_mode", default=0))
         if developer_mode:
-            log_message(
-                "Developer mode is enabled. Creating detail pages for each indicator."
-            )
+            log_message("Developer mode is enabled. Creating detail pages for each indicator.")
             self.create_detail_pages(current_page=current_page)
         else:
-            log_message(
-                "Developer mode is disabled. Skipping detail pages for each indicator."
-            )
+            log_message("Developer mode is disabled. Skipping detail pages for each indicator.")
             return
 
     def create_detail_pages(self, current_page: int = 1):
@@ -128,9 +121,7 @@ class AnalysisReport(BaseReport):
             dim_name = dimension.get("name", "")
             for factor in dimension.get("factors", []):
                 factor_name = factor.get("name", "")
-                self.page_descriptions[factor_name] = factor.get(
-                    "description", f"Analysis for factor: {factor_name}"
-                )
+                self.page_descriptions[factor_name] = factor.get("description", f"Analysis for factor: {factor_name}")
                 for indicator in factor.get("indicators", []):
                     indicator_name = indicator.get("indicator", "")
                     start_str = indicator.get("execution_start_time", "")
@@ -140,9 +131,7 @@ class AnalysisReport(BaseReport):
                     end_datetime = self.parse_iso_datetime(end_str)
 
                     if start_datetime and end_datetime:
-                        duration = round(
-                            (end_datetime - start_datetime).total_seconds() / 60, 2
-                        )
+                        duration = round((end_datetime - start_datetime).total_seconds() / 60, 2)
                     else:
                         duration = None
                     log_message(
@@ -249,18 +238,12 @@ class AnalysisReport(BaseReport):
                     )
 
         # Compute relative times
-        valid_times = [
-            r["execution_time_minutes"]
-            for r in results
-            if r["execution_time_minutes"] is not None
-        ]
+        valid_times = [r["execution_time_minutes"] for r in results if r["execution_time_minutes"] is not None]
 
         if valid_times:
             min_time = min(valid_times)
             max_time = max(valid_times)
-            range_time = (
-                max_time - min_time if max_time > min_time else 1.0
-            )  # avoid division by zero
+            range_time = max_time - min_time if max_time > min_time else 1.0  # avoid division by zero
 
             for r in results:
                 exec_time = r["execution_time_minutes"]
@@ -282,9 +265,7 @@ class AnalysisReport(BaseReport):
 
         return results
 
-    def create_execution_time_layout(
-        self, entries: list, max_bar_width_mm: float = 10.0, page: int = 1
-    ):
+    def create_execution_time_layout(self, entries: list, max_bar_width_mm: float = 10.0, page: int = 1):
         """
         Creates a QGIS layout showing execution times with colored bars and labels.
 
@@ -344,9 +325,7 @@ class AnalysisReport(BaseReport):
                 ),
                 page=page,
             )
-            bar.setFixedSize(
-                QgsLayoutSize(bar_width, row_height, QgsUnitTypes.LayoutMillimeters)
-            )
+            bar.setFixedSize(QgsLayoutSize(bar_width, row_height, QgsUnitTypes.LayoutMillimeters))
 
             color = QColor(color)
             symbol = QgsSimpleFillSymbolLayer(color=color)

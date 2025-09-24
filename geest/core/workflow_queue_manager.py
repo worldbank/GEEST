@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import Qgis, QgsProcessingContext, QgsProject, QgsTask
 
@@ -131,8 +132,6 @@ class WorkflowQueueManager(QObject):
         Handle when a task in the queue encounters an error.
         :param error_message: The error message from the failed task
         """
-        log_message(
-            f"Workflow error: {error_message}", tag="Geest", level=Qgis.Critical
-        )
+        log_message(f"Workflow error: {error_message}", tag="Geest", level=Qgis.Critical)
         # Forward the error through the manager's signal
         self.processing_error.emit(error_message)

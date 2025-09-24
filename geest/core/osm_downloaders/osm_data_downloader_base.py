@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     from defusedxml import ElementTree as ET
 except ImportError:
@@ -53,9 +54,7 @@ class OSMDataDownloaderBase(ABC):
         Args:
             QgsRectangle: A QgsRectangle object containing the bounding box coordinates.
         """
-        self.base_url = (
-            "https://overpass-api.de/api/interpreter?info=QgisQuickOSMPlugin"
-        )
+        self.base_url = "https://overpass-api.de/api/interpreter?info=QgisQuickOSMPlugin"
         self.network_manager = QgsNetworkAccessManager()
         self.osm_query = None  # The raw Overpass API query
         self.formatted_query = None  # The Overpass API query with bbox substituted
@@ -74,9 +73,7 @@ class OSMDataDownloaderBase(ABC):
         self.output_xml_path = output_path.replace(".gpkg", ".xml")
 
         if os.path.exists(self.output_xml_path) and not self.use_cache:
-            log_message(
-                "OSM xml file exists but use_cache is false: Deleting existing XML file..."
-            )
+            log_message("OSM xml file exists but use_cache is false: Deleting existing XML file...")
             os.remove(self.output_xml_path)
         if self.extents is None:
             raise ValueError("Bounding box extents not set.")
@@ -113,9 +110,7 @@ class OSMDataDownloaderBase(ABC):
             output_type (str): The type of output data ('point', 'line', 'polygon').
         """
         if output_type not in ["point", "line", "polygon"]:
-            raise ValueError(
-                "Invalid output type. Must be 'point', 'line', or 'polygon'."
-            )
+            raise ValueError("Invalid output type. Must be 'point', 'line', or 'polygon'.")
         self.output_type = output_type
 
     def submit_query(self) -> None:
@@ -134,20 +129,14 @@ class OSMDataDownloaderBase(ABC):
         request.setUrl(QUrl(self.base_url))
 
         if self.formatted_query is None:
-            raise ValueError(
-                "OSM query not set. Please set the query before submitting."
-            )
+            raise ValueError("OSM query not set. Please set the query before submitting.")
         if self.output_path is None:
-            raise ValueError(
-                "Output path not set. Please set the output path before submitting."
-            )
+            raise ValueError("Output path not set. Please set the output path before submitting.")
 
         # Send the request and connect the finished signal
         log_message("Sending request to Overpass API...")
         with open(self.output_xml_path, "wb") as output_file:
-            response = self.network_manager.blockingPost(
-                request, QByteArray(f"data={self.formatted_query}".encode())
-            )
+            response = self.network_manager.blockingPost(request, QByteArray(f"data={self.formatted_query}".encode()))
             output_file.write(response.content().data())
         log_message("Request sent. Response received...")
 
@@ -194,9 +183,7 @@ class OSMDataDownloaderBase(ABC):
             log_message("Processing polygon data...")
             self.process_polygon_response()
         else:
-            raise ValueError(
-                "Invalid output type. Must be 'point', 'line', or 'polygon'."
-            )
+            raise ValueError("Invalid output type. Must be 'point', 'line', or 'polygon'.")
 
     def process_line_response(self) -> None:
         """
@@ -247,9 +234,7 @@ class OSMDataDownloaderBase(ABC):
             output_data_source = gpkg_driver.CreateDataSource(self.output_path)
 
         if output_data_source is None:
-            raise RuntimeError(
-                f"Failed to create or open GeoPackage: {self.output_path}"
-            )
+            raise RuntimeError(f"Failed to create or open GeoPackage: {self.output_path}")
 
         self.feedback.setProgress(40)
 
@@ -292,12 +277,8 @@ class OSMDataDownloaderBase(ABC):
         self.feedback.setProgress(100)  # Set progress complete
 
         total_end = time.perf_counter()
-        log_message(
-            f"GeoPackage written to: {self.output_path} table: {self.filename}"  # noqa E231
-        )
-        log_message(
-            f"Total processing time: {total_end - total_start:.2f}s"  # noqa E231
-        )
+        log_message(f"GeoPackage written to: {self.output_path} table: {self.filename}")  # noqa E231
+        log_message(f"Total processing time: {total_end - total_start:.2f}s")  # noqa E231
 
     def process_point_response(self, response_data: str) -> None:
         """Process the OSM response and save it as a GeoPackage."""
@@ -320,9 +301,7 @@ class OSMDataDownloaderBase(ABC):
             features_added += 1
             if features_added % 1000 == 0:
                 log_message(f"Added {features_added} features to the layer...")
-        QgsVectorFileWriter.writeAsVectorFormat(
-            layer, self.output_path, "UTF-8", layer.crs(), "GPKG"
-        )
+        QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", layer.crs(), "GPKG")
         log_message(f"GeoPackage written to: {self.output_path}")
 
     def process_polygon_response(self, response_data: str) -> None:
@@ -355,7 +334,5 @@ class OSMDataDownloaderBase(ABC):
                 if features_added % 1000 == 0:
                     log_message(f"Added {features_added} features to the layer...")
 
-        QgsVectorFileWriter.writeAsVectorFormat(
-            layer, self.output_path, "UTF-8", layer.crs(), "GPKG"
-        )
+        QgsVectorFileWriter.writeAsVectorFormat(layer, self.output_path, "UTF-8", layer.crs(), "GPKG")
         log_message(f"GeoPackage written to: {self.output_path}")

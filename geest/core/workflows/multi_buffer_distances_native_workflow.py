@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import unquote
 
@@ -204,9 +205,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
         if total_features == 0:
             log_message(f"No features to process for area {area_index}.")
             return False
-        isochrone_layer_path = os.path.join(
-            self.workflow_directory, f"isochrones_area_{area_index}.gpkg"
-        )
+        isochrone_layer_path = os.path.join(self.workflow_directory, f"isochrones_area_{area_index}.gpkg")
         log_message(f"Creating isochrones for {total_features} points")
         log_message(f"Writing isochrones to {isochrone_layer_path}")
 
@@ -263,12 +262,8 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
 
         layer = QgsVectorLayer(isochrone_layer_path, "isochrones", "ogr")
         if not layer.isValid():
-            raise ValueError(
-                f"Failed to load isochrone layer from {isochrone_layer_path}"
-            )
-        output_path = os.path.join(
-            self.workflow_directory, f"final_isochrones_{index}.shp"
-        )
+            raise ValueError(f"Failed to load isochrone layer from {isochrone_layer_path}")
+        output_path = os.path.join(self.workflow_directory, f"final_isochrones_{index}.shp")
 
         ranges_field = "value"
         field_index = layer.fields().indexFromName(ranges_field)
@@ -336,9 +331,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             return None
 
         smallest_layer = range_layers[smallest_range]
-        smallest_layer.dataProvider().addAttributes(
-            [QgsField("distance", QVariant.Int)]
-        )
+        smallest_layer.dataProvider().addAttributes([QgsField("distance", QVariant.Int)])
         smallest_layer.updateFields()
         with edit(smallest_layer):
             for feat in smallest_layer.getFeatures():
@@ -351,9 +344,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             "CRS": self.target_crs,
             "OUTPUT": output_path,
         }
-        final_merge_result = processing.run(  # noqa F841
-            "native:mergevectorlayers", merge_bands_params
-        )
+        final_merge_result = processing.run("native:mergevectorlayers", merge_bands_params)  # noqa F841
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
         log_message(f"Multi-buffer layer created at {output_path}")
         return final_layer

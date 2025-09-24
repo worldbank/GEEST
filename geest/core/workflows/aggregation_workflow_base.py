@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
@@ -62,14 +63,10 @@ class AggregationWorkflowBase(WorkflowBase):
             return None
 
         # Load the layers
-        raster_layers = [
-            QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files.keys())
-        ]
+        raster_layers = [QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files.keys())]
 
         # Ensure all raster layers are valid and print filenames of invalid layers
-        invalid_layers = [
-            layer.source() for layer in raster_layers if not layer.isValid()
-        ]
+        invalid_layers = [layer.source() for layer in raster_layers if not layer.isValid()]
         if invalid_layers:
             log_message(
                 f"Invalid raster layers found: {', '.join(invalid_layers)}",
@@ -116,9 +113,7 @@ class AggregationWorkflowBase(WorkflowBase):
         # Wrap the weighted sum and divide by the sum of weights
         # expression = f"({expression}) / {layer_count}"
 
-        aggregation_output = os.path.join(
-            self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
-        )
+        aggregation_output = os.path.join(self.workflow_directory, f"{self.id}_aggregated_{index}.tif")
 
         log_message(
             f"Aggregating {len(input_files)} raster layers to {aggregation_output}",
@@ -205,9 +200,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 raise ValueError(f"{id} has no result file")
 
             layer_folder = os.path.dirname(item.attribute(self.result_file_key, ""))
-            path = os.path.join(
-                self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
-            )
+            path = os.path.join(self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif")
             if os.path.exists(path):
 
                 weight = item.attribute(self.weight_key, "")
@@ -256,9 +249,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            self.attributes[self.result_key] = (
-                f"{self.analysis_mode} Aggregation Workflow Failed"
-            )
+            self.attributes[self.result_key] = f"{self.analysis_mode} Aggregation Workflow Failed"
             self.attributes["error"] = error
 
         log_message(

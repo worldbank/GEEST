@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from functools import partial
 from typing import List
 
@@ -102,20 +103,14 @@ class WorkflowQueue(QObject):
 
             self.active_tasks[job.description()] = job
 
-            job.taskCompleted.connect(
-                partial(self.task_completed, job_name=job.description())
-            )
-            job.taskTerminated.connect(
-                partial(self.finalize_task, job_name=job.description())
-            )
+            job.taskCompleted.connect(partial(self.task_completed, job_name=job.description()))
+            job.taskTerminated.connect(partial(self.finalize_task, job_name=job.description()))
             # Connect to error signal - this assumes your WorkflowJob has an error_occurred signal
             if hasattr(job, "error_occurred"):
                 job.error_occurred.connect(self.handle_job_error)
             else:
                 log_message("######################################################")
-                log_message(
-                    f"Job {job.description()} does not have an error_occurred signal."
-                )
+                log_message(f"Job {job.description()} does not have an error_occurred signal.")
                 log_message("######################################################")
             QgsApplication.taskManager().addTask(job)
 
@@ -149,9 +144,7 @@ class WorkflowQueue(QObject):
             self.total_queue_size += 1
         else:
             # Job is already in the queue
-            self.status_message.emit(
-                f"Job {job.description()} is already in the queue. Skipping."
-            )
+            self.status_message.emit(f"Job {job.description()} is already in the queue. Skipping.")
             return
 
     def handle_job_error(self, error_message: str):

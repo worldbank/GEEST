@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from osgeo import ogr, osr
@@ -79,9 +80,7 @@ class GridChunkerTask:
         self.ymin = ymin
         self.ymax = ymax
         self.cell_size = cell_size  # size in map units of each cell (typically meters)
-        self.chunk_size = (
-            chunk_size  # number of cells in each chunk in both x and y directions
-        )
+        self.chunk_size = chunk_size  # number of cells in each chunk in both x and y directions
         # e.g. chunk size of 5 would mean 5x5 cells in each chunk
 
         self.x_range_count = int((xmax - xmin) / cell_size)
@@ -116,9 +115,7 @@ class GridChunkerTask:
         if self.geometry.GetGeometryType() != ogr.wkbPolygon:
             # Get the geomtery type name from the geometry type
             geom_type_name = ogr.GeometryTypeToName(self.geometry.GetGeometryType())
-            raise ValueError(
-                f"The geometry must be a polygon. Received a geometry of type {geom_type_name}"
-            )
+            raise ValueError(f"The geometry must be a polygon. Received a geometry of type {geom_type_name}")
 
         # check the geom is in the same projection as the grid by seeing if they intersect
         if not self.geometry.Intersects(self.geometry):
@@ -169,9 +166,7 @@ class GridChunkerTask:
         data_source = ogr.Open(gpkg_path, 1)
         layer = data_source.GetLayerByName(self.layer_name)
         if not layer:
-            raise RuntimeError(
-                f"Could not open target layer {self.layer_name} in {gpkg_path}"
-            )
+            raise RuntimeError(f"Could not open target layer {self.layer_name} in {gpkg_path}")
         # Create the feature and set values
         layer.StartTransaction()
 
@@ -206,9 +201,7 @@ class GridChunkerTask:
             x_end_coord = self.xmin + x_block_end * self.cell_size
 
             for y_block_start in y_blocks:
-                log_message(
-                    f"Processing chunk (y) {y_block_start} of {self.y_range_count}"
-                )
+                log_message(f"Processing chunk (y) {y_block_start} of {self.y_range_count}")
                 y_block_end = min(y_block_start + self.chunk_size, self.y_range_count)
 
                 y_start_coord = self.ymin + y_block_start * self.cell_size
@@ -263,8 +256,6 @@ class GridChunkerTask:
         Returns:
             int: The total number of chunks.
         """
-        count = int(self.x_range_count / self.chunk_size) * int(
-            self.y_range_count / self.chunk_size
-        )
+        count = int(self.x_range_count / self.chunk_size) * int(self.y_range_count / self.chunk_size)
         log_message(f"Total chunks: {count}")
         return count

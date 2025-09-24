@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import (
     QgsLayout,
     QgsLayoutItemLabel,
@@ -34,9 +35,7 @@ class StudyAreaReport(BaseReport):
             ValueError: If the layer cannot be loaded from the given file path.
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
-        template_path = resources_path(
-            "resources", "qpt", "study_area_report_template.qpt"
-        )
+        template_path = resources_path("resources", "qpt", "study_area_report_template.qpt")
         super().__init__(template_path, report_name)
 
         self.layers = None  # Will hold the loaded layers from the GeoPackage
@@ -49,9 +48,7 @@ class StudyAreaReport(BaseReport):
 
         self.report_name = report_name
         self.load_layers_from_gpkg()
-        self.template_path = resources_path(
-            "resources", "qpt", "study_area_report_template.qpt"
-        )
+        self.template_path = resources_path("resources", "qpt", "study_area_report_template.qpt")
         self.page_descriptions = {}
         self.page_descriptions[
             "study_area_bbox"
@@ -118,9 +115,7 @@ class StudyAreaReport(BaseReport):
                 del layer
                 log_message(f"Layer '{layer_name}' deleted.")
 
-    def compute_study_area_creation_statistics(
-        self, field_name="geom_total_duration_secs"
-    ):
+    def compute_study_area_creation_statistics(self, field_name="geom_total_duration_secs"):
         """
         Compute statistical summary for a given field in the layer.
 
@@ -183,9 +178,7 @@ class StudyAreaReport(BaseReport):
         summary_label.setText(summary_text)
         summary_label.setFont(QFont("Arial", 12))
         summary_label.adjustSizeToText()
-        summary_label.attemptMove(
-            QgsLayoutPoint(80, 200, QgsUnitTypes.LayoutMillimeters), page=0
-        )
+        summary_label.attemptMove(QgsLayoutPoint(80, 200, QgsUnitTypes.LayoutMillimeters), page=0)
         self.layout.addLayoutItem(summary_label)
 
         # Compute and add summary statistics for each layer on separate pages

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import QgsFeedback, QgsProcessingContext
 
 from geest.core import JsonTreeItem
@@ -31,11 +32,7 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
             item, cell_size_m, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
 
-        self.guids = (
-            self.item.getFactorIndicatorGuids()
-        )  # get a list of the items to aggregate
-        self.id = (
-            self.item.attribute("id").lower().replace(" ", "_")
-        )  # should not be needed any more
+        self.guids = self.item.getFactorIndicatorGuids()  # get a list of the items to aggregate
+        self.id = self.item.attribute("id").lower().replace(" ", "_")  # should not be needed any more
         self.weight_key = "factor_weighting"
         self.workflow_name = "factor_aggregation"

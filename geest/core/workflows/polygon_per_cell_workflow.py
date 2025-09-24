@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from qgis.core import (
@@ -62,9 +63,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
                 )
                 return False
 
-        self.features_layer = QgsVectorLayer(
-            layer_path, "polygon_per_cell_layer", "ogr"
-        )
+        self.features_layer = QgsVectorLayer(layer_path, "polygon_per_cell_layer", "ogr")
 
     def _process_features_for_area(
         self,
@@ -92,9 +91,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
         # Step 1: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
+        output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
         del output_path
         # Step 2: Assign reclassification values to polygons based on their perimeter
         polygon_areas = assign_reclassification_to_polygons(area_features)

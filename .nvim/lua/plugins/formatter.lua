@@ -12,6 +12,23 @@ return {
                 log_level = vim.log.levels.WARN,
                 filetype = {
                     python = {
+                        -- First run docformatter for docstrings
+                        function()
+                            return {
+                                exe = "docformatter",
+                                args = {
+                                    "--style", "google",
+                                    "--make-summary-multi-line",
+                                    "--pre-summary-newline",
+                                    "--force-wrap",
+                                    "--wrap-summaries", "88",
+                                    "--wrap-descriptions", "88",
+                                    "-"
+                                },
+                                stdin = true,
+                            }
+                        end,
+                        -- Then run black for code formatting
                         require("formatter.filetypes.python").black,
                     },
                     lua = {

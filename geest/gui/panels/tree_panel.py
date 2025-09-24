@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 import platform
@@ -73,9 +74,7 @@ class TreePanel(QWidget):
         self.queue_manager = WorkflowQueueManager(pool_size=pool_size)
         self.json_file = json_file
         self.tree_view_visible = True
-        self.run_only_incomplete = (
-            True  # saves time by not running models that have already been run
-        )
+        self.run_only_incomplete = True  # saves time by not running models that have already been run
         self.items_to_run = 0  # Count of items that need to be run
 
         layout = QVBoxLayout()
@@ -94,9 +93,7 @@ class TreePanel(QWidget):
         # Create a model for the QTreeView using custom JsonTreeModel
         self.model = JsonTreeModel(self.json_data)
         self.active_model = "default"  # or "promotion"
-        self.treeView.setModel(
-            self.model
-        )  # Simple model where we allow single childred
+        self.treeView.setModel(self.model)  # Simple model where we allow single childred
 
         # Connect signals to track changes in the model and save automatically
         self.model.dataChanged.connect(self.save_json_to_working_directory)
@@ -129,12 +126,8 @@ class TreePanel(QWidget):
         # Now hide the header
         self.treeView.header().hide()
         # Action fow when we double click an item
-        self.treeView.setExpandsOnDoubleClick(
-            False
-        )  # Prevent double-click from collapsing the tree view
-        self.treeView.doubleClicked.connect(
-            self.on_item_double_clicked
-        )  # Will show properties dialogs
+        self.treeView.setExpandsOnDoubleClick(False)  # Prevent double-click from collapsing the tree view
+        self.treeView.doubleClicked.connect(self.on_item_double_clicked)  # Will show properties dialogs
 
         # Show the item on the map if it is already generated and the
         # user clicks it
@@ -278,9 +271,7 @@ class TreePanel(QWidget):
                 if os.name == "nt":
                     os.startfile(self.working_directory)  # nosec B606
                 elif os.name == "posix":
-                    subprocess.run(
-                        ["xdg-open", self.working_directory], check=False
-                    )  # nosec B603 B607
+                    subprocess.run(["xdg-open", self.working_directory], check=False)  # nosec B603 B607
                 return
 
         if reply == QMessageBox.No or reply == QMessageBox.Rejected:
@@ -362,18 +353,14 @@ class TreePanel(QWidget):
                 # Use the last dir in the working directory path as the analysis name
                 if analysis_data.get("analysis_name", "Not Set"):
                     analysis_name = os.path.basename(self.working_directory)
-                    analysis_data["analysis_name"] = (
-                        f"Women's Economic Empowerment - {analysis_name}"
-                    )
+                    analysis_data["analysis_name"] = f"Women's Economic Empowerment - {analysis_name}"
                 # analysis_item.setData(0, analysis_data.get("analysis_name", "Analysis"))
                 analysis_item.setData(0, "WEE Score")
                 settings = QSettings()
                 # This is the top level folder for work files
                 settings.setValue("last_working_directory", self.working_directory)
                 # Use QGIS internal settings for the association between model path and QGIS project
-                set_setting(
-                    str(checksum), self.working_directory, store_in_project=True
-                )
+                set_setting(str(checksum), self.working_directory, store_in_project=True)
 
             except Exception as e:
                 log_message(
@@ -419,9 +406,7 @@ class TreePanel(QWidget):
             try:
                 analysis_item.setAttribute("network_layer_path", network_layer_path)
             except Exception as e:
-                log_message(
-                    f"Error setting network path: {str(e)}", level=Qgis.Critical
-                )
+                log_message(f"Error setting network path: {str(e)}", level=Qgis.Critical)
         else:
             log_message("No network layer path provided.")
 
@@ -481,9 +466,7 @@ class TreePanel(QWidget):
 
         item = index.internalPointer()
         show_json_attributes_action = QAction("Show Attributes", self)
-        show_json_attributes_action.triggered.connect(
-            lambda: self.show_attributes(item)
-        )
+        show_json_attributes_action.triggered.connect(lambda: self.show_attributes(item))
         # We disable items by setting their weight to 0
         if item.getStatus() == "Excluded from analysis":
             disable_action = QAction("Enable", self)
@@ -499,11 +482,7 @@ class TreePanel(QWidget):
 
         # If shift is pressed, change the text to "Rerun Item Workflow"
         def update_action_text():
-            text = (
-                "Rerun Item Workflow"
-                if QApplication.keyboardModifiers() & Qt.ShiftModifier
-                else "Run Item Workflow"
-            )
+            text = "Rerun Item Workflow" if QApplication.keyboardModifiers() & Qt.ShiftModifier else "Run Item Workflow"
             run_item_action.setText(text)
 
         # Update initially
@@ -526,20 +505,14 @@ class TreePanel(QWidget):
             )
         )
         open_working_directory_action = QAction("Open Working Directory", self)
-        open_working_directory_action.triggered.connect(
-            lambda: self.open_working_directory(item)
-        )
+        open_working_directory_action.triggered.connect(lambda: self.open_working_directory(item))
 
         if item.role == "analysis":
             menu = SolidMenu(self)
             edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
-            edit_analysis_action.triggered.connect(
-                lambda: self.edit_analysis_aggregation(item)
-            )  # Connect to method
+            edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))  # Connect to method
             set_road_network_layer_action = QAction("Set Road Network Layer")
-            set_road_network_layer_action.triggered.connect(
-                self.switch_to_road_network_tab
-            )  # Connect to method
+            set_road_network_layer_action.triggered.connect(self.switch_to_road_network_tab)  # Connect to method
             menu.addAction(edit_analysis_action)
             menu.addAction(set_road_network_layer_action)
             menu.addAction(show_json_attributes_action)
@@ -548,9 +521,7 @@ class TreePanel(QWidget):
             menu.addAction(run_item_action)
             add_wee_score = QAction("Add WEE Score to Map")
             add_wee_score.triggered.connect(
-                lambda: add_to_map(
-                    item, key="result_file", layer_name="WEE Score", group="WEE"
-                )
+                lambda: add_to_map(item, key="result_file", layer_name="WEE Score", group="WEE")
             )
             menu.addAction(add_wee_score)
 
@@ -566,15 +537,11 @@ class TreePanel(QWidget):
             menu.addAction(add_wee_by_population)
 
             add_wee_by_population_aggregate = QAction("Add WEE Aggregates to Map")
-            add_wee_by_population_aggregate.triggered.connect(
-                lambda: self.add_aggregates_to_map(item)
-            )
+            add_wee_by_population_aggregate.triggered.connect(lambda: self.add_aggregates_to_map(item))
             menu.addAction(add_wee_by_population_aggregate)
 
             add_masked_scores = QAction("Add Masked Scores to Map")
-            add_masked_scores.triggered.connect(
-                lambda: self.add_masked_scores_to_map(item)
-            )
+            add_masked_scores.triggered.connect(lambda: self.add_masked_scores_to_map(item))
             menu.addAction(add_masked_scores)
 
             add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
@@ -597,9 +564,7 @@ class TreePanel(QWidget):
             menu.addAction(add_analysis_report_action)
 
             add_study_area_report_action = QAction("Show Study Area Report", self)
-            add_study_area_report_action.triggered.connect(
-                self.generate_study_area_report
-            )
+            add_study_area_report_action.triggered.connect(self.generate_study_area_report)
             menu.addAction(add_study_area_report_action)
 
             open_log_file_action = QAction("Open Log File", self)
@@ -621,9 +586,7 @@ class TreePanel(QWidget):
 
             # Connect actions
             add_factor_action.triggered.connect(lambda: self.model.add_factor(item))
-            remove_dimension_action.triggered.connect(
-                lambda: self.model.remove_item(item)
-            )
+            remove_dimension_action.triggered.connect(lambda: self.model.remove_item(item))
             # Add actions to menu
             menu = SolidMenu(self)
             menu.addAction(edit_aggregation_action)
@@ -636,19 +599,13 @@ class TreePanel(QWidget):
 
         elif item.role == "factor":
             # Context menu for factors
-            edit_aggregation_action = QAction(
-                "🔘 Edit Weights", self
-            )  # New action for contextediting aggregation
+            edit_aggregation_action = QAction("🔘 Edit Weights", self)  # New action for contextediting aggregation
             add_indicator_action = QAction("Add Indicator", self)
             remove_factor_action = QAction("Remove Factor", self)
 
             # Connect actions
-            edit_aggregation_action.triggered.connect(
-                lambda: self.edit_factor_aggregation(item)
-            )  # Connect to method
-            add_indicator_action.triggered.connect(
-                lambda: self.model.add_indicator(item)
-            )
+            edit_aggregation_action.triggered.connect(lambda: self.edit_factor_aggregation(item))  # Connect to method
+            add_indicator_action.triggered.connect(lambda: self.model.add_indicator(item))
             remove_factor_action.triggered.connect(lambda: self.model.remove_item(item))
 
             # Add actions to menu
@@ -668,9 +625,7 @@ class TreePanel(QWidget):
             show_properties_action = QAction("🔘 Edit Weights", self)
 
             # Connect actions
-            show_properties_action.triggered.connect(
-                lambda: self.edit_factor_aggregation(item.parent())
-            )
+            show_properties_action.triggered.connect(lambda: self.edit_factor_aggregation(item.parent()))
             # Add actions to menu
             menu = SolidMenu(self)
             menu.addAction(show_properties_action)
@@ -693,9 +648,7 @@ class TreePanel(QWidget):
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
-            os.startfile(
-                os.path.join(self.working_directory, "analysis_report.pdf")
-            )  # nosec B606
+            os.startfile(os.path.join(self.working_directory, "analysis_report.pdf"))  # nosec B606
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
@@ -707,18 +660,14 @@ class TreePanel(QWidget):
 
     def generate_study_area_report(self):
         """Add a report showing population information for the study area."""
-        gpkg_path = os.path.join(
-            self.working_directory, "study_area", "study_area.gpkg"
-        )
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
         report.create_layout()
         report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
-            os.startfile(
-                os.path.join(self.working_directory, "study_area_report.pdf")
-            )  # nosec B606
+            os.startfile(os.path.join(self.working_directory, "study_area_report.pdf"))  # nosec B606
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
@@ -789,9 +738,7 @@ class TreePanel(QWidget):
         elif item.role == "analysis":
             working_directory = self.working_directory
         elif item.role == "dimension":
-            working_directory = os.path.join(
-                self.working_directory, item.data(0).lower()
-            )
+            working_directory = os.path.join(self.working_directory, item.data(0).lower())
         elif item.role == "factor":
             working_directory = os.path.join(
                 self.working_directory,
@@ -811,13 +758,9 @@ class TreePanel(QWidget):
                 os.startfile(working_directory)  # nosec B606
             elif os.name == "posix":
                 log_message("Using xdg-open to open the working directory.")
-                subprocess.run(
-                    ["xdg-open", working_directory], check=False
-                )  # nosec B603 B607
+                subprocess.run(["xdg-open", working_directory], check=False)  # nosec B603 B607
         else:
-            QMessageBox.warning(
-                self, "No Working Directory", "The working directory is not set."
-            )
+            QMessageBox.warning(self, "No Working Directory", "The working directory is not set.")
 
     def open_log_file(self):
         """Open the log file in the default text editor."""
@@ -828,13 +771,9 @@ class TreePanel(QWidget):
             if os.name == "nt":
                 os.startfile(log_file_path)  # nosec B606
             elif os.name == "posix":
-                subprocess.run(
-                    ["xdg-open", log_file_path], check=False
-                )  # nosec B603 B607
+                subprocess.run(["xdg-open", log_file_path], check=False)  # nosec B603 B607
         else:
-            QMessageBox.warning(
-                self, "Log File Not Found", "The log file does not exist."
-            )
+            QMessageBox.warning(self, "Log File Not Found", "The log file does not exist.")
 
     def disable_item(self, item):
         """Disable the item and its children."""
@@ -866,9 +805,7 @@ class TreePanel(QWidget):
         table.setRowCount(len(sorted_data))
         table.setColumnCount(2)
         table.setHorizontalHeaderLabels(["Key", "Value"])
-        table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.Stretch
-        )  # Only the second column stretches
+        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)  # Only the second column stretches
         # Track if "error_file" exists
         error_file_content = None
         # Populate the table with the sorted data
@@ -921,16 +858,12 @@ class TreePanel(QWidget):
         if error_file_content is not None:
             show_error_file_button = QPushButton("Show Error File")
             button_layout.addWidget(show_error_file_button)
-            show_error_file_button.clicked.connect(
-                lambda: self.show_error_file_popup(error_file_content)
-            )
+            show_error_file_button.clicked.connect(lambda: self.show_error_file_popup(error_file_content))
         layout.addLayout(button_layout)
 
         # Enable custom context menu for the table
         table.setContextMenuPolicy(Qt.CustomContextMenu)
-        table.customContextMenuRequested.connect(
-            lambda pos: self.show_context_menu(table, pos)
-        )
+        table.customContextMenuRequested.connect(lambda pos: self.show_context_menu(table, pos))
         log_message("----------------------")
         log_message("Showing descendant Dimensions.")
         log_message("----------------------")
@@ -959,9 +892,7 @@ class TreePanel(QWidget):
 
     def copy_to_clipboard_as_markdown(self, table: QTableWidget):
         """Copy the table content as Markdown to the clipboard."""
-        headers = [
-            table.horizontalHeaderItem(i).text() for i in range(table.columnCount())
-        ]
+        headers = [table.horizontalHeaderItem(i).text() for i in range(table.columnCount())]
         markdown_lines = ["| " + " | ".join(headers) + " |"]
         markdown_lines.append("| " + " | ".join("---" for _ in headers) + " |")
 
@@ -976,8 +907,7 @@ class TreePanel(QWidget):
                     cell_widget = table.cellWidget(row, col)
                     if isinstance(cell_widget, QTableWidget):
                         nested_headers = [
-                            cell_widget.horizontalHeaderItem(i).text()
-                            for i in range(cell_widget.columnCount())
+                            cell_widget.horizontalHeaderItem(i).text() for i in range(cell_widget.columnCount())
                         ]
                         nested_data = []
                         for nested_row in range(cell_widget.rowCount()):
@@ -986,9 +916,7 @@ class TreePanel(QWidget):
                                 for nested_col in range(cell_widget.columnCount())
                             ]
                             nested_data.append(", ".join(nested_row_data))
-                        row_data.append(
-                            f"Nested: {', '.join(nested_headers)} ({'; '.join(nested_data)})"
-                        )
+                        row_data.append(f"Nested: {', '.join(nested_headers)} ({'; '.join(nested_data)})")
                     else:
                         row_data.append("")
             markdown_lines.append("| " + " | ".join(row_data) + " |")
@@ -1016,9 +944,7 @@ class TreePanel(QWidget):
             nested_table.setItem(row, 0, key_item)
             nested_table.setItem(row, 1, value_item)
 
-        nested_table.setFixedHeight(
-            len(nested_data) * 25
-        )  # Adjust height based on the number of rows
+        nested_table.setFixedHeight(len(nested_data) * 25)  # Adjust height based on the number of rows
         nested_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         nested_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         nested_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -1054,18 +980,14 @@ class TreePanel(QWidget):
 
         Note that the area grid layer can be slow to draw!.
         """
-        gpkg_path = os.path.join(
-            self.working_directory, "study_area", "study_area.gpkg"
-        )
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         project = QgsProject.instance()
 
         # Check if 'Geest' group exists, otherwise create it
         root = project.layerTreeRoot()
         geest_group = root.findGroup("Geest Study Area")
         if geest_group is None:
-            geest_group = root.insertGroup(
-                0, "Geest Study Area"
-            )  # Insert at the top of the layers panel
+            geest_group = root.insertGroup(0, "Geest Study Area")  # Insert at the top of the layers panel
 
         layers = [
             "study_area_polygons",
@@ -1111,9 +1033,7 @@ class TreePanel(QWidget):
                 # Add the new layer to the appropriate subgroup
                 QgsProject.instance().addMapLayer(layer, False)
                 _ = geest_group.addLayer(layer)
-                log_message(
-                    f"Added layer: {layer.name()} to group: {geest_group.name()}"
-                )
+                log_message(f"Added layer: {layer.name()} to group: {geest_group.name()}")
 
     def edit_analysis_aggregation(self, analysis_item):
         """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
@@ -1132,9 +1052,7 @@ class TreePanel(QWidget):
         dimension_data = dimension_item.attributes()
         if not dimension_data:
             dimension_data = {}
-        dialog = DimensionAggregationDialog(
-            dimension_name, dimension_data, dimension_item, parent=self
-        )
+        dialog = DimensionAggregationDialog(dimension_name, dimension_data, dimension_item, parent=self)
         dialog.resize(
             int(QApplication.desktop().screenGeometry().width() * 0.9),
             int(QApplication.desktop().screenGeometry().height() * 0.9),
@@ -1149,9 +1067,7 @@ class TreePanel(QWidget):
         factor_data = factor_item.attributes()
         if not factor_data:
             factor_data = {}
-        dialog = FactorAggregationDialog(
-            factor_name, factor_data, factor_item, parent=self
-        )
+        dialog = FactorAggregationDialog(factor_name, factor_data, factor_item, parent=self)
         dialog.resize(
             int(QApplication.desktop().screenGeometry().width() * 0.9),
             int(QApplication.desktop().screenGeometry().height() * 0.9),
@@ -1205,11 +1121,7 @@ class TreePanel(QWidget):
 
     def cell_size_m(self):
         """Get the cell size in meters from the analysis item."""
-        cell_size_m = (
-            self.model.get_analysis_item()
-            .attributes()
-            .get("analysis_cell_size_m", 100.0)
-        )
+        cell_size_m = self.model.get_analysis_item().attributes().get("analysis_cell_size_m", 100.0)
         return cell_size_m
 
     def network_layer(self):
@@ -1258,9 +1170,7 @@ class TreePanel(QWidget):
         task.job_queued.connect(partial(self.on_workflow_created, item))
         task.job_started.connect(partial(self.on_workflow_started, item))
         task.job_canceled.connect(partial(self.on_workflow_completed, item, False))
-        task.job_finished.connect(
-            lambda success: self.on_workflow_completed(item, success)
-        )
+        task.job_finished.connect(lambda success: self.on_workflow_completed(item, success))
         # Hook up the QTask feedback signal to the progress bar
         task.progressChanged.connect(self.task_progress_updated)
 
@@ -1284,16 +1194,10 @@ class TreePanel(QWidget):
         indicators = item.getDescendantIndicators(
             include_completed=not self.run_only_incomplete, include_disabled=False
         )
-        factors = item.getDescendantFactors(
-            include_completed=not self.run_only_incomplete, include_disabled=False
-        )
-        dimensions = item.getDescendantDimensions(
-            include_completed=not self.run_only_incomplete
-        )
+        factors = item.getDescendantFactors(include_completed=not self.run_only_incomplete, include_disabled=False)
+        dimensions = item.getDescendantDimensions(include_completed=not self.run_only_incomplete)
         # Fix for issue #50 - we need to run the analysis last
-        analyses = item.getDescendantAnalyses(
-            include_completed=not self.run_only_incomplete
-        )
+        analyses = item.getDescendantAnalyses(include_completed=not self.run_only_incomplete)
         self.overall_progress_bar.setVisible(True)
         self.workflow_progress_bar.setVisible(True)
         self.help_button.setVisible(False)
@@ -1363,14 +1267,10 @@ class TreePanel(QWidget):
 
         # Scale movies
         self.child_movie.setScaledSize(
-            self.child_movie.currentPixmap()
-            .size()
-            .scaled(row_height, row_height, Qt.KeepAspectRatio)
+            self.child_movie.currentPixmap().size().scaled(row_height, row_height, Qt.KeepAspectRatio)
         )
         self.parent_movie.setScaledSize(
-            self.parent_movie.currentPixmap()
-            .size()
-            .scaled(row_height, row_height, Qt.KeepAspectRatio)
+            self.parent_movie.currentPixmap().size().scaled(row_height, row_height, Qt.KeepAspectRatio)
         )
 
         # Set animated icon for the child
@@ -1379,9 +1279,7 @@ class TreePanel(QWidget):
         self.child_movie.start()
 
         # Place child animation
-        second_column_index = self.model.index(
-            child_index.row(), 1, child_index.parent()
-        )
+        second_column_index = self.model.index(child_index.row(), 1, child_index.parent())
         self.treeView.setIndexWidget(second_column_index, child_label)
 
         # Always show parent animation if this is an indicator
@@ -1396,14 +1294,10 @@ class TreePanel(QWidget):
                     self.parent_movie.start()
 
                     # Get parent's second column index
-                    parent_second_column_index = self.model.index(
-                        parent_index.row(), 1, parent_index.parent()
-                    )
+                    parent_second_column_index = self.model.index(parent_index.row(), 1, parent_index.parent())
 
                     # Set parent animation and ensure it's visible
-                    self.treeView.setIndexWidget(
-                        parent_second_column_index, parent_label
-                    )
+                    self.treeView.setIndexWidget(parent_second_column_index, parent_label)
                     parent_label.show()
 
                     # Force immediate update
@@ -1443,9 +1337,7 @@ class TreePanel(QWidget):
         if item.role == "indicator":
             # Stop the animation on its parent too
             parent_index = node_index.parent()
-            parent_second_column_index = self.model.index(
-                parent_index.row(), 1, parent_index.parent()
-            )
+            parent_second_column_index = self.model.index(parent_index.row(), 1, parent_index.parent())
 
         self.child_movie.stop()
         self.parent_movie.stop()
@@ -1480,9 +1372,7 @@ class TreePanel(QWidget):
         log_message(item.attributesAsMarkdown())
         # Prepare the population data if provided
         population_data = item.attribute("population_layer_source", None)
-        gpkg_path = os.path.join(
-            self.working_directory, "study_area", "study_area.gpkg"
-        )
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         feedback = QgsFeedback()
         context = QgsProcessingContext()
         population_processor = PopulationRasterProcessingTask(

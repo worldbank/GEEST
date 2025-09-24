@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import csv
 import os
 
@@ -113,24 +114,18 @@ class AcledImpactWorkflow(WorkflowBase):
         Returns:
             QgsVectorLayer: The reprojected point layer created from the CSV.
         """
-        source_crs = QgsCoordinateReferenceSystem(
-            "EPSG:4326"
-        )  # Assuming the CSV uses WGS84
+        source_crs = QgsCoordinateReferenceSystem("EPSG:4326")  # Assuming the CSV uses WGS84
 
         # Set up a coordinate transform from WGS84 to the target CRS
         transform_context = self.context.project().transformContext()
-        coordinate_transform = QgsCoordinateTransform(
-            source_crs, self.target_crs, transform_context
-        )
+        coordinate_transform = QgsCoordinateTransform(source_crs, self.target_crs, transform_context)
 
         # Define fields for the point layer
         fields = QgsFields()
         fields.append(QgsField("event_type", QVariant.String))
 
         # Create an in-memory point layer in the target CRS
-        point_layer = QgsVectorLayer(
-            f"Point?crs={self.target_crs.authid()}", "acled_points", "memory"
-        )
+        point_layer = QgsVectorLayer(f"Point?crs={self.target_crs.authid()}", "acled_points", "memory")
         point_provider = point_layer.dataProvider()
         point_provider.addAttributes(fields)
         point_layer.updateFields()
@@ -159,18 +154,14 @@ class AcledImpactWorkflow(WorkflowBase):
         # Ensure the workflow directory exists
         if not os.path.exists(self.workflow_directory):
             os.makedirs(self.workflow_directory)
-        shapefile_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_acled_points.shp"
-        )
+        shapefile_path = os.path.join(self.workflow_directory, f"{self.layer_id}_acled_points.shp")
         log_message(f"Writing points to {shapefile_path}")
         error = QgsVectorFileWriter.writeAsVectorFormat(
             point_layer, shapefile_path, "utf-8", self.target_crs, "ESRI Shapefile"
         )
 
         if error[0] != 0:
-            raise QgsProcessingException(
-                f"Error saving point layer to disk: {error[1]}"
-            )
+            raise QgsProcessingException(f"Error saving point layer to disk: {error[1]}")
 
         log_message(
             f"Point layer created from CSV saved to {shapefile_path}",
@@ -181,9 +172,7 @@ class AcledImpactWorkflow(WorkflowBase):
         # Reload the saved shapefile as the final point layer to ensure consistency
         saved_layer = QgsVectorLayer(shapefile_path, "acled_points", "ogr")
         if not saved_layer.isValid():
-            raise QgsProcessingException(
-                f"Failed to reload saved point layer from {shapefile_path}"
-            )
+            raise QgsProcessingException(f"Failed to reload saved point layer from {shapefile_path}")
 
         return saved_layer
 
@@ -342,13 +331,9 @@ class AcledImpactWorkflow(WorkflowBase):
 
         for feature in union.getFeatures():
             geom = feature.geometry().asWkt()
-            attrs = (
-                feature.attributes()
-            )  # Use geometry as a key to identify unique areas
+            attrs = feature.attributes()  # Use geometry as a key to identify unique areas
             value_1 = attrs[input_layer.fields().indexFromName("value")]
-            value_2 = attrs[
-                input_layer.fields().indexFromName("value_2")
-            ]  # This comes from the unioned layer
+            value_2 = attrs[input_layer.fields().indexFromName("value_2")]  # This comes from the unioned layer
 
             # Assign the minimum value to the overlapping area
             min_value = min(value_1, value_2)
@@ -375,9 +360,7 @@ class AcledImpactWorkflow(WorkflowBase):
         for unique_feature in unique_geometries.values():
             provider.addFeature(unique_feature)
 
-        full_output_filepath = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_final.shp"
-        )
+        full_output_filepath = os.path.join(self.workflow_directory, f"{self.layer_id}_final.shp")
         # Step 7: Save the result layer to the specified output shapefile
         error = QgsVectorFileWriter.writeAsVectorFormat(
             result_layer,
@@ -394,9 +377,7 @@ class AcledImpactWorkflow(WorkflowBase):
                 level=Qgis.Info,
             )
         else:
-            raise QgsProcessingException(
-                f"Error saving dissolved layer to disk: {error[1]}"
-            )
+            raise QgsProcessingException(f"Error saving dissolved layer to disk: {error[1]}")
         return QgsVectorLayer(full_output_filepath, f"{self.layer_id}_final", "ogr")
 
     # Default implementation of the abstract method - not used in this workflow

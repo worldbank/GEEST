@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import traceback
 
@@ -41,9 +42,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.queue_manager.processing_error.connect(self.show_error_message)
 
         self.working_directory = ""
-        self.settings = (
-            QSettings()
-        )  # Initialize QSettings to store and retrieve settings
+        self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
         log_message("Loading setup panel")
@@ -101,9 +100,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
         self.road_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
-        self.download_road_layer_button.clicked.connect(
-            self.download_road_layer_button_clicked
-        )
+        self.download_road_layer_button.clicked.connect(self.download_road_layer_button_clicked)
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
@@ -137,9 +134,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             file_path = file_dialog.selectedFiles()[0]
             layer = QgsVectorLayer(file_path, "Road Network", "ogr")
             if not layer.isValid():
-                QMessageBox.critical(
-                    self, "Error", "Could not load the road network layer."
-                )
+                QMessageBox.critical(self, "Error", "Could not load the road network layer.")
                 return
             # Load the layer in QGIS
             QgsProject.instance().addMapLayer(layer)
@@ -202,16 +197,14 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
                 log_message("Processing started")
         except Exception as e:
             trace = traceback.format_exc()
-            QMessageBox.critical(
-                self, "Error", f"Error downloading network for study area: {e}\n{trace}"
-            )
+            QMessageBox.critical(self, "Error", f"Error downloading network for study area: {e}\n{trace}")
             self.enable_widgets()
             return
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def osm_download_progress_updated(self, progress: float):
         """Slot to be called when the download task progress is updated."""
-        log_message(f"\n\n\n\n\n\n\Progress: {progress}\n\n\n\n\n\n\n\n")
+        log_message(f"\n\n\n\n\n\nProgress: {progress}\n\n\n\n\n\n\n\n")
         self.progress_bar.setVisible(True)
         self.progress_bar.setEnabled(True)
         self.progress_bar.setValue(int(progress))
@@ -254,16 +247,12 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             tag="Geest",
             level=Qgis.Info,
         )
-        network_layer_path = os.path.join(
-            self.working_directory, "study_area", "road_network.gpkg"
-        )
+        network_layer_path = os.path.join(self.working_directory, "study_area", "road_network.gpkg")
         network_layer_path = f"{network_layer_path}|layername=road_network"
         log_message(f"Loading network layer from {network_layer_path}")
         layer = QgsVectorLayer(network_layer_path, "Road Network", "ogr")
         if not layer.isValid():
-            QMessageBox.critical(
-                self, "Error", "Could not load the road network layer."
-            )
+            QMessageBox.critical(self, "Error", "Could not load the road network layer.")
             return
         # Load the layer in QGIS
         QgsProject.instance().addMapLayer(layer)
@@ -280,9 +269,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         # Scale the font size to fit the text in the available space
         # log_message(f"Description Label Width: {self.description.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
-        font_size = int(
-            linear_interpolation(self.description.rect().width(), 12, 16, 400, 600)
-        )
+        font_size = int(linear_interpolation(self.description.rect().width(), 12, 16, 400, 600))
 
         # log_message(f"Description Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))

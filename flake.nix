@@ -134,6 +134,7 @@
             ps.black
             ps.click # needed by black
             ps.debugpy
+            ps.docformatter
             ps.flake8
             ps.gdal
             ps.httpx
@@ -163,6 +164,7 @@
             ps.pytest-qt
             ps.black
             ps.click # needed by black
+            ps.docformatter
             ps.flake8
             ps.mypy
             ps.jsonschema

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import shutil
 import traceback
@@ -187,16 +188,12 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
                 return
 
             wee_path = os.path.join(self.wee_folder, f"wee_masked_{index}.tif")
-            population_path = os.path.join(
-                self.population_folder, f"reclassified_{index}.tif"
-            )
+            population_path = os.path.join(self.population_folder, f"reclassified_{index}.tif")
             wee_layer = QgsRasterLayer(wee_path, "WEE")
             pop_layer = QgsRasterLayer(population_path, "POP")
             self.validate_rasters(wee_layer, pop_layer, dimension_check=False)
 
-            output_path = os.path.join(
-                self.output_dir, f"wee_by_population_score_{index}.tif"
-            )
+            output_path = os.path.join(self.output_dir, f"wee_by_population_score_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import unquote
 
@@ -34,14 +35,23 @@ class StreetLightsBufferWorkflow(WorkflowBase):
     ):
         """
         Initialize the workflow with attributes and feedback.
+
         :param attributes: Item containing workflow parameters.
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+
+        :param feedback: QgsFeedback object for progress reporting and
+            cancellation's.
+
+        :param context: QgsProcessingContext object for processing.
+            This can be used to pass objects to the thread. e.g. the
+            QgsProject Instance.
+
+        :param working_directory: Folder containing study_area.gpkg where
+            the outputs will be placed. If not set, the value will be taken
+            from QSettings.
         """
-        super().__init__(
-            item, cell_size_m, feedback, context, working_directory
-        )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+        # ⭐️ Item is a reference - whatever you change in
+        # this item will directly update the tree
+        super().__init__(item, cell_size_m, feedback, context, working_directory)
         self.workflow_name = "use_street_lights"
 
         layer_path = self.attributes.get("street_lights_shapefile", None)
@@ -100,16 +110,10 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         log_message(f"{self.workflow_name}  Processing Started")
 
         # Step 1: Buffer the selected features
-        buffered_layer = self._buffer_features(
-            area_features, f"{self.layer_id}_buffered_{index}"
-        )
+        buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
         # Step 2: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
-        area_grid = select_grid_cells(
-            self.grid_layer, area_features, output_path, self.feedback
-        )
+        output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
+        area_grid = select_grid_cells(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 3: Assign scores to the grid layer
         grid_layer = self._score_grid(area_grid, buffered_layer)
@@ -125,9 +129,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
 
         return raster_output
 
-    def _buffer_features(
-        self, layer: QgsVectorLayer, output_name: str
-    ) -> QgsVectorLayer:
+    def _buffer_features(self, layer: QgsVectorLayer, output_name: str) -> QgsVectorLayer:
         """
         Buffer the input features by the buffer_distance km.
 
@@ -187,9 +189,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         """
         pass
 
-    def _score_grid(
-        self, grid_layer: QgsVectorLayer, buffered_layer: QgsVectorLayer
-    ) -> QgsVectorLayer:
+    def _score_grid(self, grid_layer: QgsVectorLayer, buffered_layer: QgsVectorLayer) -> QgsVectorLayer:
         """
         Assign scores to a grid layer and rasterize it.
 

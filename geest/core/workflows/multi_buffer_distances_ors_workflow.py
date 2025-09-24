@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import traceback
 from urllib.parse import unquote
@@ -138,9 +139,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
         # Create the masked API key for logging
-        self.masked_api_key = (
-            self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
-        )
+        self.masked_api_key = self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
         self.temp_layers = []  # Store intermediate layers
         log_message(f"Using ORS API key: {self.masked_api_key}")
         log_message("Multi Buffer Distances Workflow initialized")
@@ -261,9 +260,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         target_crs = QgsCoordinateReferenceSystem("EPSG:4326")
 
         # Create a new memory layer with the target CRS (EPSG:4326)
-        subset_layer = QgsVectorLayer(
-            f"Point?crs={target_crs.authid()}", "subset", "memory"
-        )
+        subset_layer = QgsVectorLayer(f"Point?crs={target_crs.authid()}", "subset", "memory")
         subset_layer_data = subset_layer.dataProvider()
 
         # Add attributes (fields) from the point_layer
@@ -351,9 +348,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
             self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
             self.attributes[self.result_file_key] = ""
             self.attributes["error_file"] = error_path
-            self.attributes["error"] = (
-                f"Failed to generate isochrones for {self.workflow_name}: {e}"
-            )
+            self.attributes["error"] = f"Failed to generate isochrones for {self.workflow_name}: {e}"
             return False
         return json
 
@@ -364,9 +359,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         :param isochrone_data: JSON data returned from ORS.
         :return: A QgsVectorLayer containing the isochrones as polygons.
         """
-        isochrone_layer = QgsVectorLayer(
-            "Polygon?crs=EPSG:4326", "isochrones", "memory"
-        )
+        isochrone_layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "isochrones", "memory")
         provider = isochrone_layer.dataProvider()
 
         # Add the 'value' field to the layer's attribute table
@@ -399,18 +392,13 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
                 coordinates = geometry["coordinates"]
                 # Create QgsMultiPolygon from the coordinate array
                 qgs_geometry = QgsGeometry.fromMultiPolygonXY(
-                    [
-                        [[QgsPointXY(pt[0], pt[1]) for pt in ring] for ring in polygon]
-                        for polygon in coordinates
-                    ]
+                    [[[QgsPointXY(pt[0], pt[1]) for pt in ring] for ring in polygon] for polygon in coordinates]
                 )
             else:
                 raise ValueError(f"Unsupported geometry type: {geometry['type']}")
             feat = QgsFeature()
             feat.setGeometry(qgs_geometry)
-            feat.setAttributes(
-                [feature_data["properties"].get("value", 0)]
-            )  # Add attributes as needed
+            feat.setAttributes([feature_data["properties"].get("value", 0)])  # Add attributes as needed
             features.append(feat)
 
         provider.addFeatures(features)
@@ -426,9 +414,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
 
         :return: A QgsVectorLayer representing the merged isochrone layers.
         """
-        merge_output = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_merged_isochrones_{index}.shp"
-        )
+        merge_output = os.path.join(self.workflow_directory, f"{self.layer_id}_merged_isochrones_{index}.shp")
         merge_params = {
             "LAYERS": layers,
             "CRS": self.target_crs,
@@ -452,16 +438,12 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         Returns:
             QgsVectoryLayer: The final output QgsVectorLayer layer path containing the bands.
         """
-        output_path = os.path.join(
-            self.workflow_directory, f"final_isochrones_{index}.shp"
-        )
+        output_path = os.path.join(self.workflow_directory, f"final_isochrones_{index}.shp")
 
         ranges_field = "value"
         field_index = layer.fields().indexFromName(ranges_field)
         if field_index == -1:
-            raise KeyError(
-                f"Field '{ranges_field}' does not exist in the merged layer."  # noqa E713
-            )
+            raise KeyError(f"Field '{ranges_field}' does not exist in the merged layer.")  # noqa E713
 
         unique_ranges = sorted({feat[ranges_field] for feat in layer.getFeatures()})
 
@@ -518,9 +500,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
 
         smallest_range = sorted_ranges[-1]
         smallest_layer = range_layers[smallest_range]
-        smallest_layer.dataProvider().addAttributes(
-            [QgsField("distance", QVariant.Int)]
-        )
+        smallest_layer.dataProvider().addAttributes([QgsField("distance", QVariant.Int)])
         smallest_layer.updateFields()
         with edit(smallest_layer):
             for feat in smallest_layer.getFeatures():
@@ -533,9 +513,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
             "CRS": self.target_crs,
             "OUTPUT": output_path,
         }
-        final_merge_result = processing.run(
-            "native:mergevectorlayers", merge_bands_params
-        )
+        final_merge_result = processing.run("native:mergevectorlayers", merge_bands_params)
         del final_merge_result
         final_layer = QgsVectorLayer(output_path, "MultiBuffer", "ogr")
         log_message(f"Multi-buffer layer created at {output_path}")
@@ -603,9 +581,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
 
         # reproject the later to self.target_crs
         input_path = layer.source()
-        reprojected_layer_path = input_path.replace(
-            ".shp", f"_epsg{self.target_crs.postgisSrid()}.shp"
-        )
+        reprojected_layer_path = input_path.replace(".shp", f"_epsg{self.target_crs.postgisSrid()}.shp")
         transform_params = {
             "INPUT": layer,
             "TARGET_CRS": self.target_crs,
@@ -616,17 +592,11 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        reprojected_layer_result = processing.run(
-            "native:reprojectlayer", transform_params
-        )
-        reprojected_layer = QgsVectorLayer(
-            reprojected_layer_result["OUTPUT"], "reprojected_layer", "ogr"
-        )
+        reprojected_layer_result = processing.run("native:reprojectlayer", transform_params)
+        reprojected_layer = QgsVectorLayer(reprojected_layer_result["OUTPUT"], "reprojected_layer", "ogr")
 
         if not reprojected_layer.isValid():
-            raise ValueError(
-                f"Failed to reproject input layer to {self.target_crs.authid()}"
-            )
+            raise ValueError(f"Failed to reproject input layer to {self.target_crs.authid()}")
         return reprojected_layer
 
     # Default implementation of the abstract method - not used in this workflow

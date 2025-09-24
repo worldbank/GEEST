@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis, QgsFeedback, QgsProcessingContext
 
 from geest.core.workflows import (
@@ -65,9 +66,7 @@ class WorkflowFactory:
             elif analysis_mode == "Do Not Use":
                 return DontUseWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_multi_buffer_point":
-                return MultiBufferDistancesNativeWorkflow(
-                    item, cell_size_m, feedback, context
-                )
+                return MultiBufferDistancesNativeWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_single_buffer_point":
                 return SinglePointBufferWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_point_per_cell":
@@ -79,9 +78,7 @@ class WorkflowFactory:
             elif analysis_mode == "factor_aggregation":
                 return FactorAggregationWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "dimension_aggregation":
-                return DimensionAggregationWorkflow(
-                    item, cell_size_m, feedback, context
-                )
+                return DimensionAggregationWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "analysis_aggregation":
                 return AnalysisAggregationWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_csv_to_point_layer":
@@ -93,9 +90,7 @@ class WorkflowFactory:
             elif analysis_mode == "use_nighttime_lights":
                 return SafetyRasterWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_environmental_hazards":
-                return RasterReclassificationWorkflow(
-                    item, cell_size_m, feedback, context
-                )
+                return RasterReclassificationWorkflow(item, cell_size_m, feedback, context)
             elif analysis_mode == "use_street_lights":
                 return StreetLightsBufferWorkflow(item, cell_size_m, feedback, context)
             else:

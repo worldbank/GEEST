@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import QgsFeedback, QgsProcessingContext
 
 from geest.core import JsonTreeItem
@@ -34,8 +35,6 @@ class DimensionAggregationWorkflow(AggregationWorkflowBase):
 
         # get a list of the items to aggregate
         self.guids = self.item.getDimensionFactorGuids()
-        self.id = (
-            self.item.attribute("id").lower().replace(" ", "_")
-        )  # should not be needed any more
+        self.id = self.item.attribute("id").lower().replace(" ", "_")  # should not be needed any more
         self.weight_key = "dimension_weighting"
         self.workflow_name = "dimension_aggregation"

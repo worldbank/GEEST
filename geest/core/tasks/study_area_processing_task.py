@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import glob
 import os
@@ -93,9 +94,7 @@ class StudyAreaProcessingTask(QgsTask):
                 os.remove(self.gpkg_path)
                 log_message(f"Removed existing GeoPackage: {self.gpkg_path}")
             except Exception as e:
-                log_message(
-                    f"Error removing existing GeoPackage: {e}", level="CRITICAL"
-                )
+                log_message(f"Error removing existing GeoPackage: {e}", level="CRITICAL")
 
         # Open the source data using OGR
         self.source_ds = ogr.Open(self.input_vector_path, 0)  # 0 = read-only
@@ -129,9 +128,7 @@ class StudyAreaProcessingTask(QgsTask):
             else:
                 # Handle case where it's not an EPSG-based CRS
                 epsg_int = None
-                raise Exception(
-                    f"CRS Passed to function: {crs}. CRS is not an EPSG-based ID: {auth_id}"
-                )
+                raise Exception(f"CRS Passed to function: {crs}. CRS is not an EPSG-based ID: {auth_id}")
             self.epsg_code = epsg_int
 
         # Prepare OSR objects for source->target transformation
@@ -139,9 +136,7 @@ class StudyAreaProcessingTask(QgsTask):
         self.target_spatial_ref.ImportFromEPSG(self.epsg_code)
 
         if self.src_spatial_ref:
-            self.coord_transform = osr.CoordinateTransformation(
-                self.src_spatial_ref, self.target_spatial_ref
-            )
+            self.coord_transform = osr.CoordinateTransformation(self.src_spatial_ref, self.target_spatial_ref)
         else:
             self.coord_transform = None
 
@@ -150,9 +145,7 @@ class StudyAreaProcessingTask(QgsTask):
         # Create aligned bounding box in target CRS space
         # We interpret the layer bbox in source CRS (if it has one), transform, and align
         self.transformed_layer_bbox = self.transform_and_align_bbox(self.layer_bbox)
-        log_message(
-            f"Transformed layer bbox to target CRS and aligned to grid: {self.transformed_layer_bbox}"
-        )
+        log_message(f"Transformed layer bbox to target CRS and aligned to grid: {self.transformed_layer_bbox}")
         # Tracking table name
         self.status_table_name = "study_area_creation_status"
 
@@ -188,17 +181,11 @@ class StudyAreaProcessingTask(QgsTask):
         options.fileEncoding = "UTF-8"
 
         if layer.selectedFeatureCount() > 0:
-            options.actionOnExistingFile = (
-                QgsVectorFileWriter.CreateOrOverwriteFile
-            )  # or OverwriteExistingFile
+            options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteFile  # or OverwriteExistingFile
         else:
-            options.actionOnExistingFile = (
-                QgsVectorFileWriter.CreateOrOverwriteFile
-            )  # or OverwriteExistingFile
+            options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteFile  # or OverwriteExistingFile
 
-        err = QgsVectorFileWriter.writeAsVectorFormatV3(
-            layer, shapefile_path, transform_context, options
-        )
+        err = QgsVectorFileWriter.writeAsVectorFormatV3(layer, shapefile_path, transform_context, options)
 
         if err[0] != QgsVectorFileWriter.NoError:
             raise RuntimeError(f"Failed to export layer to Shapefile: {err[1]}")
@@ -242,9 +229,7 @@ class StudyAreaProcessingTask(QgsTask):
                 # Check validity
                 if not geom_ref.IsValid():
                     # Attempt a fix
-                    log_message(
-                        f"Feature {feature.GetFID()} has invalid geometry, attempting to fix."
-                    )
+                    log_message(f"Feature {feature.GetFID()} has invalid geometry, attempting to fix.")
                     # OGR >= 3.0 has MakeValid. If unavailable, Buffer(0) can fix many invalid polygons.
                     try:
                         geom_ref = geom_ref.MakeValid()
@@ -270,21 +255,15 @@ class StudyAreaProcessingTask(QgsTask):
                 geom_type = ogr.GT_Flatten(geom_ref.GetGeometryType())
                 if geom_type == ogr.wkbMultiPolygon:
                     log_message(f"Processing multipart geometry: {normalized_name}")
-                    self.process_multipart_geometry(
-                        geom_ref, normalized_name, area_name
-                    )
+                    self.process_multipart_geometry(geom_ref, normalized_name, area_name)
                 else:
                     log_message(f"Processing singlepart geometry: {normalized_name}")
-                    self.process_singlepart_geometry(
-                        geom_ref, normalized_name, area_name
-                    )
+                    self.process_singlepart_geometry(geom_ref, normalized_name, area_name)
             self.setProgress(100)  # Trigger the UI to update with completion value
             log_message(
                 f"Processing complete. Valid: {self.valid_feature_count}, Fixed: {fixed_feature_count}, Invalid: {invalid_feature_count}"
             )
-            log_message(
-                f"Areas that could not be processed due to errors: {self.error_count}"
-            )
+            log_message(f"Areas that could not be processed due to errors: {self.error_count}")
             log_message(f"Total cells generated: {self.total_cells}")
 
             # 4) Create a VRT of all generated raster masks
@@ -340,9 +319,7 @@ class StudyAreaProcessingTask(QgsTask):
             layer.CreateField(ogr.FieldDefn("grid_processed", ogr.OFTInteger))
             layer.CreateField(ogr.FieldDefn("mask_processed", ogr.OFTInteger))
             layer.CreateField(ogr.FieldDefn("grid_creation_duration_secs", ogr.OFTReal))
-            layer.CreateField(
-                ogr.FieldDefn("clip_geom_creation_duration_secs", ogr.OFTReal)
-            )
+            layer.CreateField(ogr.FieldDefn("clip_geom_creation_duration_secs", ogr.OFTReal))
             layer.CreateField(ogr.FieldDefn("geom_total_duration_secs", ogr.OFTReal))
 
             log_message(f"Table '{self.status_table_name}' created in GeoPackage.")
@@ -393,9 +370,7 @@ class StudyAreaProcessingTask(QgsTask):
             layer.SetFeature(feature)
         layer.ResetReading()
         ds = None
-        log_message(
-            f"Updated processing status flag for {field_name} for {area_name} to {value}."
-        )
+        log_message(f"Updated processing status flag for {field_name} for {area_name} to {value}.")
 
     ##########################################################################
     # Geometry processing
@@ -416,16 +391,12 @@ class StudyAreaProcessingTask(QgsTask):
         now = datetime.datetime.now()  # Get current datetime
         now_str = now.strftime("%Y-%m-%d %H:%M:%S")  # Format the datetime object
 
-        self.set_status_tracking_table_value(
-            normalized_name, "timestamp_start", now_str
-        )
+        self.set_status_tracking_table_value(normalized_name, "timestamp_start", now_str)
 
         #  Check we have a single part geom
         geom_type = ogr.GT_Flatten(geom.GetGeometryType())
         if geom_type != ogr.wkbPolygon:
-            log_message(
-                f"Skipping non-polygon geometry type {geom_type} for {normalized_name}."
-            )
+            log_message(f"Skipping non-polygon geometry type {geom_type} for {normalized_name}.")
             return
         # check it has only one part
         if geom.GetGeometryCount() > 1:
@@ -459,16 +430,12 @@ class StudyAreaProcessingTask(QgsTask):
         start_time = time.time()
         self.create_and_save_grid(normalized_name, geom, aligned_bbox)
         self.set_status_tracking_table_value(normalized_name, "grid_processed", 1)
-        self.set_status_tracking_table_value(
-            normalized_name, "grid_creation_duration_secs", time.time() - start_time
-        )
+        self.set_status_tracking_table_value(normalized_name, "grid_creation_duration_secs", time.time() - start_time)
         # Create clip polygon
         log_message(f"Creating clip polygon for {normalized_name}.")
         start_time = time.time()
         self.create_clip_polygon(geom, aligned_bbox, normalized_name)
-        self.set_status_tracking_table_value(
-            normalized_name, "clip_geometry_processed", 1
-        )
+        self.set_status_tracking_table_value(normalized_name, "clip_geometry_processed", 1)
         self.set_status_tracking_table_value(
             normalized_name,
             "clip_geom_creation_duration_secs",
@@ -588,9 +555,7 @@ class StudyAreaProcessingTask(QgsTask):
         ds = ogr.Open(self.gpkg_path, 1)
         layer = ds.GetLayerByName(layer_name)
         if not layer:
-            raise RuntimeError(
-                f"Could not open target layer {layer_name} in {self.gpkg_path}"
-            )
+            raise RuntimeError(f"Could not open target layer {layer_name} in {self.gpkg_path}")
 
         feat_defn = layer.GetLayerDefn()
         feature = ogr.Feature(feat_defn)
@@ -619,9 +584,7 @@ class StudyAreaProcessingTask(QgsTask):
             return  # Already exists
 
         # Create it
-        layer = ds.CreateLayer(
-            layer_name, self.target_spatial_ref, geom_type=ogr.wkbPolygon
-        )
+        layer = ds.CreateLayer(layer_name, self.target_spatial_ref, geom_type=ogr.wkbPolygon)
         # area_name field
         field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
         layer.CreateField(field_defn)
@@ -668,9 +631,7 @@ class StudyAreaProcessingTask(QgsTask):
         )
         chunker.write_chunks_to_gpkg(self.gpkg_path)
 
-        log_message(
-            f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}"
-        )
+        log_message(f"Creating grid for extents: xmin {xmin}, xmax {xmax}, ymin {ymin}, ymax {ymax}")
 
         # OGR geometry intersection can be slow for large grids.
         # If this area is huge, consider a more robust approach or indexing.
@@ -694,13 +655,9 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(f"Chunk size: {chunk_size}")
 
         self.feedback.setProgress(0)
-        counter = (
-            1  # We cant use the chunk index as it includes chunks outside the geometry
-        )
+        counter = 1  # We cant use the chunk index as it includes chunks outside the geometry
         for chunk in chunker.chunks():
-            start_time = (
-                time.time()
-            )  # used for both create chunk start and total chunk start
+            start_time = time.time()  # used for both create chunk start and total chunk start
             index = chunk["index"]
             relationship = chunk["type"]  # inside, edge or undefined
             if relationship != "undefined":
@@ -781,9 +738,7 @@ class StudyAreaProcessingTask(QgsTask):
                 feature = None
                 self.current_geom_actual_cell_count += 1
                 if self.current_geom_actual_cell_count % 20000 == 0:
-                    log_message(
-                        f"         Cell count: {self.current_geom_actual_cell_count}"
-                    )
+                    log_message(f"         Cell count: {self.current_geom_actual_cell_count}")
                     log_message(f"         Grid creation for part {normalized_name}")
                     # commit changes
                     layer.CommitTransaction()
@@ -809,9 +764,7 @@ class StudyAreaProcessingTask(QgsTask):
         ds = ogr.Open(self.gpkg_path, 1)
         layer = ds.GetLayerByName(layer_name)
         if layer is None:
-            layer = ds.CreateLayer(
-                layer_name, self.target_spatial_ref, geom_type=ogr.wkbPolygon
-            )
+            layer = ds.CreateLayer(layer_name, self.target_spatial_ref, geom_type=ogr.wkbPolygon)
             field_defn = ogr.FieldDefn("grid_id", ogr.OFTInteger)
             layer.CreateField(field_defn)
             field_defn = ogr.FieldDefn("area_name", ogr.OFTString)
@@ -874,9 +827,7 @@ class StudyAreaProcessingTask(QgsTask):
             dissolved_geom = dissolved_geom.Union(geom)
 
         # dissolved_geom is now the final clip polygon
-        self.save_geometry_to_geopackage(
-            "study_area_clip_polygons", dissolved_geom, normalized_name
-        )
+        self.save_geometry_to_geopackage("study_area_clip_polygons", dissolved_geom, normalized_name)
         log_message(f"Created clip polygon: {normalized_name}")
 
     ##########################################################################
@@ -912,9 +863,7 @@ class StudyAreaProcessingTask(QgsTask):
                 y_start_coord = ymin + y_block_start * cell_size
                 y_end_coord = ymin + y_block_end * cell_size
 
-                log_message(
-                    f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {ymin}, {ymax}"
-                )
+                log_message(f"Created Chunk bbox: {x_start_coord}, {x_end_coord}, {ymin}, {ymax}")
                 yield (x_start_coord, x_end_coord, y_start_coord, y_end_coord)
 
     ##########################################################################
@@ -928,9 +877,7 @@ class StudyAreaProcessingTask(QgsTask):
 
         driver_mem = ogr.GetDriverByName("Memory")
         mem_ds = driver_mem.CreateDataSource("temp")
-        mem_lyr = mem_ds.CreateLayer(
-            "temp_mask_layer", self.target_spatial_ref, geom_type=ogr.wkbPolygon
-        )
+        mem_lyr = mem_ds.CreateLayer("temp_mask_layer", self.target_spatial_ref, geom_type=ogr.wkbPolygon)
 
         # Create a field to burn
         field_def = ogr.FieldDefn("burnval", ogr.OFTInteger)

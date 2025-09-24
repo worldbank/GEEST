@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from qgis import processing  # QGIS processing toolbox
@@ -65,9 +66,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 )
                 return
 
-        self.raster_layer = QgsRasterLayer(
-            layer_name, "Environmental Hazards Raster", "gdal"
-        )
+        self.raster_layer = QgsRasterLayer(layer_name, "Environmental Hazards Raster", "gdal")
 
         if self.layer_id == "fire":
             self.reclassification_rules = [
@@ -223,9 +222,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         """
         bbox = bbox.boundingBox()
 
-        reclassified_raster_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif"
-        )
+        reclassified_raster_path = os.path.join(self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif")
 
         # Set up the reclassification using reclassifybytable
         params = {
@@ -238,9 +235,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         }
 
         # Perform the reclassification using the raster calculator
-        reclass = processing.run(
-            "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
-        )["OUTPUT"]
+        reclass = processing.run("native:reclassifybytable", params, feedback=QgsProcessingFeedback())["OUTPUT"]
 
         clip_params = {
             "INPUT": reclass,
@@ -253,9 +248,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "PROGRESS": self.feedback,
         }
 
-        processing.run(
-            "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
-        )
+        processing.run("gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback())
         log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster_path}",
             tag="Geest",

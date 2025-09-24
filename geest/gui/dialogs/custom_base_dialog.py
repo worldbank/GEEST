@@ -18,14 +18,10 @@ class CustomBaseDialog(QDialog):
     def paintEvent(self, event):
         with QPainter(self) as painter:
             # Scale the background image to match the dialog height
-            scaled_background = self.background_image.scaledToHeight(
-                self.height(), Qt.SmoothTransformation
-            )
+            scaled_background = self.background_image.scaledToHeight(self.height(), Qt.SmoothTransformation)
 
             # Draw the image anchored to the right
-            painter.drawPixmap(
-                self.width() - scaled_background.width(), 0, scaled_background
-            )
+            painter.drawPixmap(self.width() - scaled_background.width(), 0, scaled_background)
 
             # Fill the remaining area with the original background color
             painter.fillRect(

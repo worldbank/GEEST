@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import unquote
 
@@ -63,9 +64,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
                 )
                 return False
 
-        self.features_layer = QgsVectorLayer(
-            layer_path, "polyline_per_cell Layer", "ogr"
-        )
+        self.features_layer = QgsVectorLayer(layer_path, "polyline_per_cell Layer", "ogr")
 
     def _process_features_for_area(
         self,
@@ -93,12 +92,8 @@ class PolylinePerCellWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
         # Step 1: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
-        area_grid = select_grid_cells(
-            self.grid_layer, area_features, output_path, self.feedback
-        )
+        output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
+        area_grid = select_grid_cells(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 2: Assign values to grid cells
         grid = assign_values_to_grid(area_grid, feedback=self.feedback)

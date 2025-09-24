@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import unquote
 
@@ -60,9 +61,7 @@ class PointPerCellWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.features_layer = QgsVectorLayer(
-                layer_path, "point_per_cell_layer", "ogr"
-            )
+            self.features_layer = QgsVectorLayer(layer_path, "point_per_cell_layer", "ogr")
             if not self.features_layer.isValid():
                 error = f"Point per cell layer is not valid: {layer_path}"
                 self.attributes["error"] = error
@@ -79,9 +78,7 @@ class PointPerCellWorkflow(WorkflowBase):
             self.attributes["result"] = f"{self.workflow_name} Workflow Failed"
 
             raise Exception(error)
-        self.feedback.setProgress(
-            1.0
-        )  # We just use nominal intervals for progress updates
+        self.feedback.setProgress(1.0)  # We just use nominal intervals for progress updates
 
     def _process_features_for_area(
         self,
@@ -109,12 +106,8 @@ class PointPerCellWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
         # Step 1: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
-        area_grid = select_grid_cells(
-            self.grid_layer, area_features, output_path, self.feedback
-        )
+        output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
+        area_grid = select_grid_cells(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 2: Assign values to grid cells
         grid = assign_values_to_grid(area_grid, self.feedback)

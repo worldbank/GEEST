@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 
 from geest.core.settings import setting
@@ -19,9 +20,7 @@ class DataSourceWidgetFactory:
     """
 
     @staticmethod
-    def create_widget(
-        widget_key: str, value: int, attributes: dict
-    ) -> BaseDataSourceWidget:
+    def create_widget(widget_key: str, value: int, attributes: dict) -> BaseDataSourceWidget:
         """
         Factory method to create a datasource widget based on key-value pairs.
         """
@@ -40,57 +39,31 @@ class DataSourceWidgetFactory:
             if widget_key == "indicator_required" and value == 0:
                 return None
             if widget_key == "use_index_score" and value == 1:
-                return FixedValueDataSourceWidget(
-                    widget_key=widget_key, attributes=attributes
-                )
+                return FixedValueDataSourceWidget(widget_key=widget_key, attributes=attributes)
             if widget_key == "use_multi_buffer_point" and value == 1:
-                return VectorDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_single_buffer_point" and value == 1:
-                return VectorDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polygon_per_cell" and value == 1:
-                return VectorDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polyline_per_cell" and value == 1:
-                return VectorDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_point_per_cell" and value == 1:
-                return VectorDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_csv_point_per_cell" and value == 1:
-                return CsvDataSourceWidget(
-                    cleaned_key=widget_key, attributes=attributes
-                )
+                return CsvDataSourceWidget(cleaned_key=widget_key, attributes=attributes)
             if widget_key == "use_csv_to_point_layer" and value == 1:
-                return AcledCsvDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return AcledCsvDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_classify_polygon_into_classes" and value == 1:
-                return VectorAndFieldDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorAndFieldDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_classify_safety_polygon_into_classes" and value == 1:
-                return VectorAndFieldDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorAndFieldDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_nighttime_lights" and value == 1:
-                return RasterDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return RasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_environmental_hazards" and value == 1:
-                return RasterDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return RasterDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_street_lights" and value == 1:
-                return VectorDataSourceWidget(
-                    widget_key=cleaned_key, attributes=attributes
-                )
+                return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             else:
                 log_message(
                     "Datasource Factory did not match any widgets",

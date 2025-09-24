@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import unquote
 
@@ -49,9 +50,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         provider_type = "ogr"
         if not layer_source:
             layer_source = self.attributes.get("single_buffer_point_layer_source", None)
-            provider_type = self.attributes.get(
-                "single_buffer_point_layer_provider_type", "ogr"
-            )
+            provider_type = self.attributes.get("single_buffer_point_layer_provider_type", "ogr")
         if not layer_source:
             log_message(
                 "single_buffer_point_layer_shapefile not found",
@@ -64,14 +63,8 @@ class SinglePointBufferWorkflow(WorkflowBase):
             log_message("single_buffer_point_layer not valid", level=Qgis.Critical)
             log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
-        default_buffer_distance = int(
-            self.attributes.get("default_single_buffer_distance", "5000")
-        )
-        self.buffer_distance = int(
-            self.attributes.get(
-                "single_buffer_point_layer_distance", default_buffer_distance
-            )
-        )
+        default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "5000"))
+        self.buffer_distance = int(self.attributes.get("single_buffer_point_layer_distance", default_buffer_distance))
 
     def _process_features_for_area(
         self,
@@ -95,9 +88,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         log_message(f"{self.workflow_name}  Processing Started")
 
         # Step 1: Buffer the selected features
-        buffered_layer = self._buffer_features(
-            area_features, f"{self.layer_id}_buffered_{index}"
-        )
+        buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
 
         # Step 2: Assign values to the buffered polygons
         scored_layer = self._assign_scores(buffered_layer)
@@ -107,9 +98,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
         return raster_output
 
-    def _buffer_features(
-        self, layer: QgsVectorLayer, output_name: str
-    ) -> QgsVectorLayer:
+    def _buffer_features(self, layer: QgsVectorLayer, output_name: str) -> QgsVectorLayer:
         """
         Buffer the input features by the buffer_distance km.
 

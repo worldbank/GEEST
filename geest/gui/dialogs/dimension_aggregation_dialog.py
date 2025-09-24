@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap
@@ -37,9 +38,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         self.dimension_data = dimension_data
         self.tree_item = dimension_item  # Reference to the QTreeView item to update
 
-        self.setWindowTitle(
-            f"Edit Dimension Weightings for Dimension: {self.tree_item.data(0)}"
-        )
+        self.setWindowTitle(f"Edit Dimension Weightings for Dimension: {self.tree_item.data(0)}")
         # Need to be refactored...
         self.guids = self.tree_item.getDimensionFactorGuids()
         self.weightings = {}  # To store the temporary weightings
@@ -60,12 +59,8 @@ class DimensionAggregationDialog(CustomBaseDialog):
 
         # If both grandparent and parent exist, create the label
         if parent_item:
-            hierarchy_label = QLabel(
-                f"{parent_item.data(0)} :: {self.tree_item.data(0)}"  # noqa E203
-            )
-            hierarchy_label.setStyleSheet(
-                "font-size: 14px; font-weight: bold; color: gray;"
-            )
+            hierarchy_label = QLabel(f"{parent_item.data(0)} :: {self.tree_item.data(0)}")  # noqa E203
+            hierarchy_label.setStyleSheet("font-size: 14px; font-weight: bold; color: gray;")
             layout.addWidget(hierarchy_label, alignment=Qt.AlignTop)
 
         # Description label
@@ -78,27 +73,15 @@ class DimensionAggregationDialog(CustomBaseDialog):
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(
-            ["Factor", "Weight 0-1", "Use", "", "Guid"]
-        )
+        self.table.setHorizontalHeaderLabels(["Factor", "Weight 0-1", "Use", "", "Guid"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Adjust column widths
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.Stretch
-        )  # Factor column expands
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.Fixed
-        )  # Weight 0-1 column fixed
-        self.table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.Fixed
-        )  # Use column fixed
-        self.table.horizontalHeader().setSectionResizeMode(
-            3, QHeaderView.Fixed
-        )  # Reset column fixed
-        self.table.horizontalHeader().setSectionResizeMode(
-            4, QHeaderView.Fixed
-        )  # Guid column fixed
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)  # Factor column expands
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)  # Weight 0-1 column fixed
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)  # Use column fixed
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)  # Reset column fixed
+        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Fixed)  # Guid column fixed
 
         # Set fixed widths for the last three columns
         self.table.setColumnWidth(1, 100)  # Weight 0-1 column width
@@ -112,9 +95,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
             attributes = item.attributes()
             factor_id = attributes.get("name")
             dimension_weighting = float(attributes.get("dimension_weighting", 0.0))
-            default_dimension_weighting = attributes.get(
-                "default_dimension_weighting", 0
-            )
+            default_dimension_weighting = attributes.get("default_dimension_weighting", 0)
             name_item = QTableWidgetItem(factor_id)
             name_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(row, 0, name_item)
@@ -136,9 +117,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
             # Reset button
             reset_button = QPushButton("Reset")
             reset_button.clicked.connect(
-                lambda checked, item=weighting_item: item.setValue(
-                    default_dimension_weighting
-                )
+                lambda checked, item=weighting_item: item.setValue(default_dimension_weighting)
             )
             self.table.setCellWidget(row, 3, reset_button)
 
@@ -163,9 +142,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         layout.addWidget(self.table)
 
         help_layout = QHBoxLayout()
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
         self.help_icon = self.help_icon.scaledToWidth(20)
         self.help_label_icon = QLabel()
@@ -184,15 +161,11 @@ class DimensionAggregationDialog(CustomBaseDialog):
         layout.addWidget(self.help_label)
         self.help_label.linkActivated.connect(self.open_link_in_browser)
         help_layout.addWidget(self.help_label)
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout.addLayout(help_layout)
 
         # QDialogButtonBox for OK and Cancel
-        self.button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        )
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         auto_calculate_button = QPushButton("Balance Weights")
         self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
         self.button_box.accepted.connect(self.accept_changes)
@@ -206,9 +179,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
             self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
         toggle_guid_button.clicked.connect(self.toggle_guid_column)
         self.guid_column_visible = False  # Track GUID column visibility
-        self.table.setColumnHidden(
-            4, not self.guid_column_visible
-        )  # Hide GUID column by default
+        self.table.setColumnHidden(4, not self.guid_column_visible)  # Hide GUID column by default
 
         layout.addWidget(self.button_box)
 
@@ -234,9 +205,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
             checkbox.setChecked(True)  # Initially checked
         else:
             checkbox.setChecked(False)
-        checkbox.stateChanged.connect(
-            lambda state, r=row: self.toggle_row_widgets(r, state)
-        )
+        checkbox.stateChanged.connect(lambda state, r=row: self.toggle_row_widgets(r, state))
 
         # Create a container widget with a centered layout
         container = QWidget()
@@ -274,14 +243,8 @@ class DimensionAggregationDialog(CustomBaseDialog):
         """Calculate and set equal weighting for each enabled indicator."""
         log_message("Auto-calculating weightings")
         # Filter rows where the checkbox is checked
-        enabled_rows = [
-            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
-        ]
-        disabled_rows = [
-            row
-            for row in range(self.table.rowCount())
-            if not self.is_checkbox_checked(row)
-        ]
+        enabled_rows = [row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)]
+        disabled_rows = [row for row in range(self.table.rowCount()) if not self.is_checkbox_checked(row)]
         if not enabled_rows:
             log_message("No enabled rows found, skipping auto-calculation")
             return  # No enabled rows, avoid division by zero
@@ -289,9 +252,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         if len(enabled_rows) == 0:
             equal_weighting = 0.0
         else:
-            equal_weighting = 1.0 / len(
-                enabled_rows
-            )  # Divide equally among enabled rows
+            equal_weighting = 1.0 / len(enabled_rows)  # Divide equally among enabled rows
 
         # Set the weighting for each enabled row
         for row in enabled_rows:
@@ -321,9 +282,7 @@ class DimensionAggregationDialog(CustomBaseDialog):
         :param row: The row index to retrieve the checkbox from.
         :return: The QCheckBox widget, or None if not found.
         """
-        container = self.table.cellWidget(
-            row, 2
-        )  # Assuming the checkbox is in column 2
+        container = self.table.cellWidget(row, 2)  # Assuming the checkbox is in column 2
         if container and isinstance(container, QWidget):
             layout = container.layout()
             if layout and layout.count() > 0:
@@ -348,19 +307,13 @@ class DimensionAggregationDialog(CustomBaseDialog):
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
         try:
-            total_weighting = sum(
-                float(spin_box.value() or 0) for spin_box in self.weightings.values()
-            )
-            valid_sum = (
-                abs(total_weighting - 1.0) < 0.001
-            )  # Allow slight floating-point tolerance
+            total_weighting = sum(float(spin_box.value() or 0) for spin_box in self.weightings.values())
+            valid_sum = abs(total_weighting - 1.0) < 0.001  # Allow slight floating-point tolerance
         except ValueError:
             valid_sum = False
 
         # In the case that all rows are disabled, the sum is valid
-        enabled_rows = [
-            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
-        ]
+        enabled_rows = [row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)]
         enabled_rows_count = len(enabled_rows)
         if enabled_rows_count == 0:
             valid_sum = True
@@ -372,13 +325,9 @@ class DimensionAggregationDialog(CustomBaseDialog):
         # Update button state and cell highlighting
         for spin_box in self.weightings.values():
             if valid_sum:
-                spin_box.setStyleSheet(
-                    normal_color
-                )  # Reset font color to black if valid
+                spin_box.setStyleSheet(normal_color)  # Reset font color to black if valid
             else:
-                spin_box.setStyleSheet(
-                    "color: red;"
-                )  # Set font color to red if invalid
+                spin_box.setStyleSheet("color: red;")  # Set font color to red if invalid
 
         # Enable or disable the OK button based on validation result
         self.button_box.button(QDialogButtonBox.Ok).setEnabled(valid_sum)
