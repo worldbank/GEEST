@@ -77,6 +77,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
         self.workflow = MultiBufferDistancesNativeWorkflow(
             item=self.indicator_item,
             cell_size_m=10.0,
+            analysis_scale="local",
             feedback=self.feedback,
             context=self.context,
             working_directory=self.working_directory,
