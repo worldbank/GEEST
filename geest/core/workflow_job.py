@@ -175,6 +175,10 @@ class WorkflowJob(QgsTask):
         cls._combined_profiler.dump_stats(output_file)
 
         log_message(f"📊 WorkflowJob profiling stats saved to {output_file}", level=Qgis.Info)
+        log_message(
+            "You can analyze this file using tools like SnakeViz or RunSnakeRun.",
+            level=Qgis.Info,
+        )
         return output_file
 
     @classmethod
@@ -231,6 +235,7 @@ class WorkflowJob(QgsTask):
         context: QgsProcessingContext,
         item: JsonTreeItem,
         cell_size_m: float = 100.0,
+        analysis_scale: str = "local",  # or national
     ):
         """
         Initialize the workflow job.
@@ -240,11 +245,13 @@ class WorkflowJob(QgsTask):
         :param item: JsonTreeItem object representing the task - this is a reference
               so it will update the tree directly when modified
         :param cell_size_m: Cell size in meters for raster operations
+        :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national. Defaults to local.
         """
         super().__init__(description)
         self.context = context  # QgsProcessingContext object used to pass objects to the thread
         self._item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self._cell_size_m = cell_size_m  # Cell size in meters for raster operations
+        self._analysis_scale = analysis_scale  # Analysis scale string e.g. local, national
         self._feedback = QgsFeedback()  # Feedback object for progress and cancellation
 
         # Use cached factory
@@ -252,6 +259,7 @@ class WorkflowJob(QgsTask):
         self._workflow = workflow_factory.create_workflow(
             item=self._item,
             cell_size_m=self._cell_size_m,
+            analysis_scale=self._analysis_scale,
             feedback=self._feedback,
             context=self.context,
         )  # Create the workflow

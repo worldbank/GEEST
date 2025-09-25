@@ -145,7 +145,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             "native:buffer",
             {
                 "INPUT": layer,
-                "DISTANCE": self.buffer_distance,  # 20m buffer
+                "DISTANCE": self.buffer_distance,  # 20m buffer local, 565m for global
                 "SEGMENTS": 15,
                 "DISSOLVE": True,
                 "OUTPUT": output_path,

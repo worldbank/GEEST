@@ -1124,6 +1124,11 @@ class TreePanel(QWidget):
         cell_size_m = self.model.get_analysis_item().attributes().get("analysis_cell_size_m", 100.0)
         return cell_size_m
 
+    def analysis_scale(self):
+        """Get the analysis scale from the analysis item."""
+        analysis_scale = self.model.get_analysis_item().attributes().get("analysis_scale", "national")
+        return analysis_scale
+
     def network_layer(self):
         """Get the layer used for network analysis."""
         network_layer = QgsVectorLayer(
@@ -1162,7 +1167,7 @@ class TreePanel(QWidget):
             attributes["analysis_mode"] = "dimension_aggregation"
         if role == item.role and role == "analysis":
             attributes["analysis_mode"] = "analysis_aggregation"
-        task = self.queue_manager.add_workflow(item, self.cell_size_m())
+        task = self.queue_manager.add_workflow(item, self.cell_size_m(), self.analysis_scale())
         if task is None:
             return
 

@@ -53,13 +53,15 @@ class WorkflowQueueManager(QObject):
         log_message("Task added")
         return task
 
-    def add_workflow(self, item: JsonTreeItem, cell_size_m: float) -> None:
+    def add_workflow(self, item: JsonTreeItem, cell_size_m: float, analysis_scale: str) -> None:
         """
         Add a task to the WorkflowQueue for QgsProcessingContext using the item provided.
 
         Internally uses the WorkflowFactory to create the appropriate workflow.
 
         :param item: A reference to a JsonTreeItem object representing the task
+        :param cell_size_m: Cell size in meters for raster operations
+        :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national
         """
         # Create a new QgsProcessingContext so we can pass the QgsProject instance
         # to the threads in a thread safe manner
@@ -72,6 +74,7 @@ class WorkflowQueueManager(QObject):
             description="Geest Task",
             item=item,
             cell_size_m=cell_size_m,
+            analysis_scale=analysis_scale,
             context=context,
         )
         self.workflow_queue.add_job(task)

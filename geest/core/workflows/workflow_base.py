@@ -40,7 +40,8 @@ class WorkflowBase(QObject):
     def __init__(
         self,
         item: JsonTreeItem,
-        cell_size_m: 100.0,
+        cell_size_m: float,
+        analysis_scale: str,  # local or national
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
@@ -49,6 +50,7 @@ class WorkflowBase(QObject):
         Initialize the workflow with attributes and feedback.
         :param item: JsonTreeItem object representing the task.
         :param cell_size_m: The cell size in meters for the analysis.
+        :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
         :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
@@ -58,6 +60,7 @@ class WorkflowBase(QObject):
         # we will log the layer count again at then end of the workflow
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.cell_size_m = cell_size_m
+        self.analysis_scale = analysis_scale
         self.feedback = feedback  # we connect this to the QgsTask progressUpdated signal
         self.context = context  # QgsProcessingContext
         self.workflow_name = None  # This is set in the concrete class
