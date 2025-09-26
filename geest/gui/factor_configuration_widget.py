@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QButtonGroup, QVBoxLayout, QWidget
@@ -68,9 +69,7 @@ class FactorConfigurationWidget(QWidget):
                 # We pass a copy of the attributes dictionary to the widget factory
                 # so that we can update the attributes as needed
                 # The widget factory will update the attributes dictionary with new data
-                configuration_widget = ConfigurationWidgetFactory.create_widget(
-                    key, value, attributes.copy()
-                )
+                configuration_widget = ConfigurationWidgetFactory.create_widget(key, value, attributes.copy())
                 if configuration_widget:
                     self.widgets[key] = configuration_widget
                     widget_count += 1
@@ -142,13 +141,9 @@ class FactorConfigurationWidget(QWidget):
 
         # Log the changes that will be applied
         if changed_attributes:
-            log_message(
-                f"\n\n\n\n\nUpdating attributes with the following changes: {changed_attributes}\n\n\n\n\n"
-            )
+            log_message(f"\n\n\n\n\nUpdating attributes with the following changes: {changed_attributes}\n\n\n\n\n")
         else:
-            log_message(
-                "\n\n\n\n\n\nNo changes detected in the new data. No updates will be applied.\n\n\n\n\n"
-            )
+            log_message("\n\n\n\n\n\nNo changes detected in the new data. No updates will be applied.\n\n\n\n\n")
             return  # Exit early if there are no changes
 
         # Apply the changes to each indicator associated with the GUIDs

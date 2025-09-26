@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtCore import QObject, pyqtSignal
 from qgis.core import Qgis, QgsProcessingContext, QgsProject, QgsTask
 
@@ -52,13 +53,15 @@ class WorkflowQueueManager(QObject):
         log_message("Task added")
         return task
 
-    def add_workflow(self, item: JsonTreeItem, cell_size_m: float) -> None:
+    def add_workflow(self, item: JsonTreeItem, cell_size_m: float, analysis_scale: str) -> None:
         """
         Add a task to the WorkflowQueue for QgsProcessingContext using the item provided.
 
         Internally uses the WorkflowFactory to create the appropriate workflow.
 
         :param item: A reference to a JsonTreeItem object representing the task
+        :param cell_size_m: Cell size in meters for raster operations
+        :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national
         """
         # Create a new QgsProcessingContext so we can pass the QgsProject instance
         # to the threads in a thread safe manner
@@ -71,6 +74,7 @@ class WorkflowQueueManager(QObject):
             description="Geest Task",
             item=item,
             cell_size_m=cell_size_m,
+            analysis_scale=analysis_scale,
             context=context,
         )
         self.workflow_queue.add_job(task)
@@ -131,8 +135,6 @@ class WorkflowQueueManager(QObject):
         Handle when a task in the queue encounters an error.
         :param error_message: The error message from the failed task
         """
-        log_message(
-            f"Workflow error: {error_message}", tag="Geest", level=Qgis.Critical
-        )
+        log_message(f"Workflow error: {error_message}", tag="Geest", level=Qgis.Critical)
         # Forward the error through the manager's signal
         self.processing_error.emit(error_message)

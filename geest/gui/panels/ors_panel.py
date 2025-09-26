@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices, QFont, QPixmap
@@ -41,9 +42,7 @@ class OrsPanel(FORM_CLASS, QWidget):
         self.banner_label.deleteLater()
         parent_layout.update()
 
-        self.status_label.setPixmap(
-            QPixmap(resources_path("resources", "images", "ors-not-configured.png"))
-        )
+        self.status_label.setPixmap(QPixmap(resources_path("resources", "images", "ors-not-configured.png")))
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.next_button.setEnabled(False)
         # Connect the rich text label's linkActivated signal to open URLs in browser
@@ -72,15 +71,11 @@ class OrsPanel(FORM_CLASS, QWidget):
         """Handle the result of the ORS key check."""
         if result:
             # Get the icon from the resource_path
-            self.status_label.setPixmap(
-                QPixmap(resources_path("resources", "images", "ors-ok.png"))
-            )
+            self.status_label.setPixmap(QPixmap(resources_path("resources", "images", "ors-ok.png")))
             self.next_button.setEnabled(True)
 
         else:
-            self.status_label.setPixmap(
-                QPixmap(resources_path("resources", "images", "ors-error.png"))
-            )
+            self.status_label.setPixmap(QPixmap(resources_path("resources", "images", "ors-error.png")))
             self.next_button.setEnabled(False)
 
     def open_link_in_browser(self, url: str):
@@ -101,8 +96,6 @@ class OrsPanel(FORM_CLASS, QWidget):
         # Scale the font size to fit the text in the available space
         # log_message(f"Label Width: {self.description.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
-        font_size = int(
-            linear_interpolation(self.description.rect().width(), 12, 16, 400, 600)
-        )
+        font_size = int(linear_interpolation(self.description.rect().width(), 12, 16, 400, 600))
         # log_message(f"Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))

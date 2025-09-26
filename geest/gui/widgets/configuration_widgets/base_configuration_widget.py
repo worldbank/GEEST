@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from abc import abstractmethod
 
 from qgis.core import Qgis
@@ -48,9 +49,7 @@ class BaseConfigurationWidget(QWidget):
         # Internal container for the internal widgets
         self.internal_container: QWidget = QWidget(self)
         self.internal_container.setVisible(False)  # Initially hidden
-        self.internal_container.setSizePolicy(
-            QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        )
+        self.internal_container.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
         self.internal_layout: QVBoxLayout = QVBoxLayout(self.internal_container)
         self.internal_layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.internal_container)
@@ -59,9 +58,7 @@ class BaseConfigurationWidget(QWidget):
         self.radio_button.toggled.connect(self.on_toggled)
 
         # Log creation of widget
-        log_message(
-            f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'"
-        )
+        log_message(f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'")
 
         try:
             self.add_internal_widgets()
@@ -147,6 +144,4 @@ class BaseConfigurationWidget(QWidget):
         Enables or disables the internal widgets based on the radio button state.
         To be implemented by subclasses to manage their internal widgets.
         """
-        raise NotImplementedError(
-            "Subclasses must implement set_internal_widgets_enabled."
-        )
+        raise NotImplementedError("Subclasses must implement set_internal_widgets_enabled.")

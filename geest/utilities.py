@@ -46,13 +46,9 @@ from geest.core.settings import setting
 def theme_background_image() -> QPixmap:
     # Load the background image
     if is_qgis_dark_theme_active():
-        background_image = QPixmap(
-            resources_path("resources", "images", "background-dark.png")
-        )
+        background_image = QPixmap(resources_path("resources", "images", "background-dark.png"))
     else:
-        background_image = QPixmap(
-            resources_path("resources", "images", "background.png")
-        )
+        background_image = QPixmap(resources_path("resources", "images", "background.png"))
     return background_image
 
 
@@ -189,7 +185,7 @@ def log_window_geometry(geometry):
 
     """
     try:
-        if type(geometry) == QRect:
+        if type(geometry) is QRect:
             rect = geometry
         else:
             rect = geometry.rect()
@@ -294,7 +290,9 @@ def log_layer_count():
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Compose the log entry text
-    log_entry = f"""{timestamp} - Layer count: {layer_count} - Free memory: {free_memory_mb:.2f} MB\n"""  # noqa E501,E297,E222
+    log_entry = (
+        f"""{timestamp} - Layer count: {layer_count} - Free memory: {free_memory_mb:.2f} MB\n"""  # noqa E501,E297,E222
+    )
 
     # Send to QGIS log (optional)
     log_message(log_entry, level=Qgis.Info, tag="LayerCount")
@@ -366,9 +364,7 @@ def get_ui_class(ui_file):
     return uic.loadUiType(ui_file_path)[0]
 
 
-def log_message(
-    message: str, level: int = Qgis.Info, tag: str = "Geest", force: bool = False
-) -> None:
+def log_message(message: str, level: int = Qgis.Info, tag: str = "Geest", force: bool = False) -> None:
     """
     Logs a message to both QgsMessageLog and a text file,
     including the caller's class or module name and line number.
@@ -596,9 +592,7 @@ def calculate_utm_zone(bbox, source_epsg=None):
     # If there's no source SRS, we'll assume it's already lat/lon
     if not source_epsg:
         # fallback if no known EPSG
-        log_message(
-            "Source has no EPSG, defaulting to a naive assumption of WGS84 bounding box."
-        )
+        log_message("Source has no EPSG, defaulting to a naive assumption of WGS84 bounding box.")
         lon, lat = cx, cy
     else:
         # We have a known EPSG, so transform centroid to WGS84

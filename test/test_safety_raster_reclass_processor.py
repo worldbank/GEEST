@@ -31,27 +31,19 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
             os.makedirs(self.output_directory)
 
         # Define paths to test layers
-        self.input_raster_path = os.path.join(
-            self.test_data_directory, "rasters", "NTL.tif"
-        )
-        self.gpkg_path = os.path.join(
-            self.test_data_directory, "study_area", "study_area.gpkg"
-        )
+        self.input_raster_path = os.path.join(self.test_data_directory, "rasters", "NTL.tif")
+        self.gpkg_path = os.path.join(self.test_data_directory, "study_area", "study_area.gpkg")
 
         # Load the input raster and grid layer
         self.input_raster = QgsRasterLayer(self.input_raster_path, "Input Raster")
-        self.grid_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr"
-        )
+        self.grid_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_grid", "Grid Layer", "ogr")
 
         # Ensure the input layers are valid
         self.assertTrue(self.input_raster.isValid(), "Failed to load input raster.")
         self.assertTrue(self.grid_layer.isValid(), "Failed to load grid layer.")
 
         # Set the output VRT path
-        self.output_vrt = os.path.join(
-            self.output_directory, "safety_reclass_output.vrt"
-        )
+        self.output_vrt = os.path.join(self.output_directory, "safety_reclass_output.vrt")
 
         # Set the pixel size (example: 100 meters)
         self.pixel_size = 100.0
@@ -76,9 +68,7 @@ class TestRasterReclassificationProcessor(unittest.TestCase):
         self.processor.process_areas()
 
         # Check if the VRT output file was created
-        self.assertTrue(
-            os.path.exists(self.output_vrt), "The VRT output was not created."
-        )
+        self.assertTrue(os.path.exists(self.output_vrt), "The VRT output was not created.")
 
         # Verify the content of the output VRT (ensure it's a valid VRT)
         vrt_layer = QgsRasterLayer(self.output_vrt, "Reclassified VRT")

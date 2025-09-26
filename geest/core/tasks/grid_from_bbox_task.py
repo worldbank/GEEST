@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 
 from osgeo import ogr
@@ -45,21 +46,15 @@ class GridFromBboxTask(QgsTask):
 
         # If chunk bounding box is fully outside of the geometry, skip chunk
         if not self.geom.Intersects(chunk_bounds):
-            log_message(
-                f"Chunk {self.chunk_id} is completely outside geometry, skipping."
-            )
+            log_message(f"Chunk {self.chunk_id} is completely outside geometry, skipping.")
             return True
 
         # If the whole chunk is within the geometry, skip intersection check
         if self.geom.Contains(chunk_bounds):
-            log_message(
-                "Whole chunk is within the geometry, we will skip check intersection for each feature..."
-            )
+            log_message("Whole chunk is within the geometry, we will skip check intersection for each feature...")
             skip_intersection_check = True
         else:
-            log_message(
-                "Whole chunk is NOT within the geometry, we will check intersection for each feature..."
-            )
+            log_message("Whole chunk is NOT within the geometry, we will check intersection for each feature...")
 
         x = x_start
         while x < x_end:

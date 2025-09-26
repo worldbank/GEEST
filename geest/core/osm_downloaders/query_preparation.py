@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Query preparation step."""
 
 import re
@@ -138,10 +139,7 @@ class QueryPreparation:
 
         if area_is_too_big:
             log_message(
-                tr(
-                    "The area was overlapping the WGS84 limits ±90 / ±180 degrees. The query has "
-                    "been restricted."
-                )
+                tr("The area was overlapping the WGS84 limits ±90 / ±180 degrees. The query has " "been restricted.")
             )
 
         if self.is_oql_query():

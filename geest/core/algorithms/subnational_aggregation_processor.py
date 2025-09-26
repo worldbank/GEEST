@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import shutil
 import traceback
@@ -103,9 +104,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
             "ogr",
         )
         if not self.aggregation_layer.isValid():
-            raise Exception(
-                f"Invalid aggregation areas layer:\n{self.aggregation_areas_path}"  # noqa E231
-            )
+            raise Exception(f"Invalid aggregation areas layer:\n{self.aggregation_areas_path}")  # noqa E231
 
         self.output_dir = os.path.join(working_directory, "subnational_aggregation")
         os.makedirs(self.output_dir, exist_ok=True)
@@ -114,13 +113,9 @@ class SubnationalAggregationProcessingTask(QgsTask):
         self.wee_score_folder = os.path.join(working_directory, "wee_score")
 
         if not os.path.exists(self.wee_score_folder):
-            raise Exception(
-                f"WEE folder not found.\n{self.wee_score_folder}\nPlease run WEE raster processing first."
-            )
+            raise Exception(f"WEE folder not found.\n{self.wee_score_folder}\nPlease run WEE raster processing first.")
         # This folder is optional  - user needs to have configured population layer in analysis properties dialog
-        self.wee_by_population_folder = os.path.join(
-            working_directory, "wee_by_population_score"
-        )
+        self.wee_by_population_folder = os.path.join(working_directory, "wee_by_population_score")
 
         if not os.path.exists(self.wee_by_population_folder):
             log_message(
@@ -129,14 +124,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
             self.wee_by_population_folder = None
         # These two folders are optional - will only be set if user configured mask for
         # job opportunities in analysis properties dialog
-        self.opportunities_by_wee_score_folder = os.path.join(
-            working_directory, "opportunities_by_wee_score"
-        )
+        self.opportunities_by_wee_score_folder = os.path.join(working_directory, "opportunities_by_wee_score")
 
         if not os.path.exists(self.opportunities_by_wee_score_folder):
-            log_message(
-                f"WEE folder not found.\n{self.wee_score_folder}\nPlease run WEE raster processing first."
-            )
+            log_message(f"WEE folder not found.\n{self.wee_score_folder}\nPlease run WEE raster processing first.")
             self.opportunities_by_wee_score_folder = None
 
         self.opportunities_by_wee_by_population_folder = os.path.join(
@@ -162,9 +153,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
                 "ogr",
             )
             self.target_crs = layer.crs()
-            log_message(
-                f"Target CRS not set. Using CRS from study area clip polygon: {self.target_crs.authid()}"
-            )
+            log_message(f"Target CRS not set. Using CRS from study area clip polygon: {self.target_crs.authid()}")
             log_message(f"{self.study_area_gpkg_path}|ayername=study_area_clip_polygon")
             del layer
 
@@ -179,43 +168,31 @@ class SubnationalAggregationProcessingTask(QgsTask):
             if self.wee_score_folder:
                 log_message("Calculating WEE Score Aggregation")
                 layer_name = "wee_score_subnational_aggregation"
-                raster_layer_path = os.path.join(
-                    self.wee_score_folder, "WEE_Score_combined.vrt"
-                )
+                raster_layer_path = os.path.join(self.wee_score_folder, "WEE_Score_combined.vrt")
                 output = self.aggregate(
                     cleaned_aggregation_layer,
                     raster_layer_path,
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path(
-                        "resources", "qml", "wee_score_vector.qml"
-                    ),
+                    source_qml=resources_path("resources", "qml", "wee_score_vector.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
-                self.item.setAttribute(
-                    f"{layer_name}", f"{output}|layername={layer_name}"
-                )
+                self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
             if self.wee_by_population_folder:
                 log_message("Calculating WEE x Population Score Aggregation")
                 layer_name = "wee_by_population_subnational_aggregation"
-                raster_layer_path = os.path.join(
-                    self.wee_by_population_folder, "wee_by_population_score.vrt"
-                )
+                raster_layer_path = os.path.join(self.wee_by_population_folder, "wee_by_population_score.vrt")
                 output = self.aggregate(
                     cleaned_aggregation_layer,
                     raster_layer_path,
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path(
-                        "resources", "qml", "wee_by_population_vector_score.qml"
-                    ),
+                    source_qml=resources_path("resources", "qml", "wee_by_population_vector_score.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
-                self.item.setAttribute(
-                    f"{layer_name}", f"{output}|layername={layer_name}"
-                )
+                self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
             if self.opportunities_by_wee_score_folder:
                 log_message("Calculating Opportunities by WEE Score Aggregation")
                 layer_name = "opportunities_by_wee_score_subnational_aggregation"
@@ -229,21 +206,13 @@ class SubnationalAggregationProcessingTask(QgsTask):
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path(
-                        "resources", "qml", "wee_score_vector.qml"
-                    ),
+                    source_qml=resources_path("resources", "qml", "wee_score_vector.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
-                self.item.setAttribute(
-                    f"{layer_name}", f"{output}|layername={layer_name}"
-                )
+                self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
             if self.opportunities_by_wee_by_population_folder:
-                log_message(
-                    "Calculating Opportunities by WEE x Population Score Aggregation"
-                )
-                layer_name = (
-                    "opportunities_by_wee_score_by_population_subnational_aggregation"
-                )
+                log_message("Calculating Opportunities by WEE x Population Score Aggregation")
+                layer_name = "opportunities_by_wee_score_by_population_subnational_aggregation"
                 raster_layer_path = os.path.join(
                     self.opportunities_by_wee_by_population_folder,
                     "wee_by_opportunities_mask.vrt",
@@ -254,14 +223,10 @@ class SubnationalAggregationProcessingTask(QgsTask):
                     layer_name,
                 )
                 self.apply_qml_style(
-                    source_qml=resources_path(
-                        "resources", "qml", "wee_by_population_vector_score.qml"
-                    ),
+                    source_qml=resources_path("resources", "qml", "wee_by_population_vector_score.qml"),
                     qml_path=os.path.join(self.output_dir, f"{layer_name}.qml"),
                 )
-                self.item.setAttribute(
-                    f"{layer_name}", f"{output}|layername={layer_name}"
-                )
+                self.item.setAttribute(f"{layer_name}", f"{output}|layername={layer_name}")
             log_message(self.item.attributesAsMarkdown())
             return True
         except Exception as e:

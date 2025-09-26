@@ -56,6 +56,72 @@ return {
         theme = my_lualine_theme,
       },
       sections = {
+        lualine_a = { "mode" },
+        lualine_b = { "branch", "diff", "diagnostics" },
+        lualine_c = {
+          "filename",
+          -- Show current line diagnostic message
+          {
+            function()
+              local line = vim.fn.line(".") - 1
+              local col = vim.fn.col(".") - 1
+              local diagnostics = vim.diagnostic.get(0, { lnum = line })
+
+              if #diagnostics == 0 then
+                return ""
+              end
+
+              -- Get the most severe diagnostic for current line
+              local diagnostic = diagnostics[1]
+              for _, d in ipairs(diagnostics) do
+                if d.severity < diagnostic.severity then
+                  diagnostic = d
+                end
+              end
+
+              local icons = {
+                [vim.diagnostic.severity.ERROR] = " ",
+                [vim.diagnostic.severity.WARN] = " ",
+                [vim.diagnostic.severity.INFO] = " ",
+                [vim.diagnostic.severity.HINT] = " ",
+              }
+
+              local icon = icons[diagnostic.severity] or " "
+              local message = diagnostic.message:gsub("\n", " "):gsub("\r", "")
+
+              -- Truncate long messages
+              if #message > 80 then
+                message = message:sub(1, 77) .. "..."
+              end
+
+              return icon .. message
+            end,
+            color = function()
+              local line = vim.fn.line(".") - 1
+              local diagnostics = vim.diagnostic.get(0, { lnum = line })
+
+              if #diagnostics == 0 then
+                return { fg = colors.fg }
+              end
+
+              local diagnostic = diagnostics[1]
+              for _, d in ipairs(diagnostics) do
+                if d.severity < diagnostic.severity then
+                  diagnostic = d
+                end
+              end
+
+              local severity_colors = {
+                [vim.diagnostic.severity.ERROR] = { fg = colors.red },
+                [vim.diagnostic.severity.WARN] = { fg = colors.yellow },
+                [vim.diagnostic.severity.INFO] = { fg = colors.blue },
+                [vim.diagnostic.severity.HINT] = { fg = colors.green },
+              }
+
+              return severity_colors[diagnostic.severity] or { fg = colors.fg }
+            end,
+          },
+        },
         lualine_x = {
           {
             lazy_status.updates,

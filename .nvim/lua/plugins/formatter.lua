@@ -3,7 +3,7 @@ return {
     {
         -- Formatter plugin
         "mhartington/formatter.nvim",
-        cmd = { "Format", "FormatWrite" },
+        event = "VeryLazy", -- Load after startup instead of lazy-loading on command
         config = function()
             local formatter = require("formatter")
 
@@ -12,6 +12,23 @@ return {
                 log_level = vim.log.levels.WARN,
                 filetype = {
                     python = {
+                        -- First run docformatter for docstrings
+                        function()
+                            return {
+                                exe = "docformatter",
+                                args = {
+                                    "--style", "google",
+                                    "--make-summary-multi-line",
+                                    "--pre-summary-newline",
+                                    "--force-wrap",
+                                    "--wrap-summaries", "88",
+                                    "--wrap-descriptions", "88",
+                                    "-"
+                                },
+                                stdin = true,
+                            }
+                        end,
+                        -- Then run black for code formatting
                         require("formatter.filetypes.python").black,
                     },
                     lua = {
@@ -44,16 +61,25 @@ return {
                             }
                         end,
                     },
+                    json = {
+                        function()
+                            return {
+                                exe = "jq",
+                                args = { "--indent", "2", "." },
+                                stdin = true,
+                            }
+                        end,
+                    },
                 },
             })
 
-            -- Auto format on save
+                        -- Auto format on save
             local augroup = vim.api.nvim_create_augroup("FormatAutogroup", { clear = true })
-            vim.api.nvim_create_autocmd("BufWritePost", {
+            vim.api.nvim_create_autocmd("BufWritePre", {
                 group = augroup,
-                pattern = { "*.py", "*.lua", "*.nix", "*.sh" },
+                pattern = { "*.py", "*.lua", "*.nix", "*.sh", "*.json" },
                 callback = function()
-                    vim.cmd("FormatWrite")
+                    vim.cmd("Format")
                 end,
             })
 

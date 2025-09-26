@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import QgsFeedback, QgsProcessingContext
 
 from geest.core import JsonTreeItem
@@ -16,26 +17,25 @@ class FactorAggregationWorkflow(AggregationWorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters for rasterization.
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
 
-        self.guids = (
-            self.item.getFactorIndicatorGuids()
-        )  # get a list of the items to aggregate
-        self.id = (
-            self.item.attribute("id").lower().replace(" ", "_")
-        )  # should not be needed any more
+        self.guids = self.item.getFactorIndicatorGuids()  # get a list of the items to aggregate
+        self.id = self.item.attribute("id").lower().replace(" ", "_")  # should not be needed any more
         self.weight_key = "factor_weighting"
         self.workflow_name = "factor_aggregation"

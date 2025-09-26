@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import unittest
 
@@ -26,12 +27,8 @@ class TestPopulationRasterProcessingTask(unittest.TestCase):
             os.makedirs(self.output_directory)
 
         # Define paths to test layers
-        self.input_raster_path = os.path.join(
-            self.test_data_directory, "population", "population.tif"
-        )
-        self.gpkg_path = os.path.join(
-            self.test_data_directory, "study_area", "study_area.gpkg"
-        )
+        self.input_raster_path = os.path.join(self.test_data_directory, "population", "population.tif")
+        self.gpkg_path = os.path.join(self.test_data_directory, "study_area", "study_area.gpkg")
 
     @unittest.skip("Skip this test for now")
     def test_population_raster_processing(self):
@@ -59,9 +56,7 @@ class TestPopulationRasterProcessingTask(unittest.TestCase):
             any(f.startswith("reclassified_") for f in output_files),
             "Reclassified rasters not created.",
         )
-        self.assertTrue(
-            "clipped_population.vrt" in output_files, "Clipped VRT not created."
-        )
+        self.assertTrue("clipped_population.vrt" in output_files, "Clipped VRT not created.")
         self.assertTrue(
             "reclassified_population.vrt" in output_files,
             "Reclassified VRT not created.",

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import traceback
 from typing import List
@@ -35,9 +36,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         super().__init__("Native Network Analysis Processor", QgsTask.CanCancel)
         self.feedback = QgsFeedback()
         NativeNetworkAnalysisProcessor._instance_counter += 1  # Increment counter
-        self.instance_id = (
-            NativeNetworkAnalysisProcessor._instance_counter
-        )  # Assign unique ID to instance
+        self.instance_id = NativeNetworkAnalysisProcessor._instance_counter  # Assign unique ID to instance
         self.area_index = area_index
         self.working_directory = working_directory
         os.makedirs(self.working_directory, exist_ok=True)
@@ -65,25 +64,19 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         self.isochrone_layer_path = isochrone_layer_path
         self._initialize_isochrone_layer()
 
-        log_message(
-            f"Initialized Native Network Analysis Processing Task Instance: {self.instance_id}."
-        )
+        log_message(f"Initialized Native Network Analysis Processing Task Instance: {self.instance_id}.")
 
     def _initialize_isochrone_layer(self):
         driver = ogr.GetDriverByName("GPKG")
         if os.path.exists(self.isochrone_layer_path):
-            log_message(
-                f"Appending to existing GeoPackage: {self.isochrone_layer_path}"
-            )
+            log_message(f"Appending to existing GeoPackage: {self.isochrone_layer_path}")
             self.isochrone_ds = driver.Open(self.isochrone_layer_path, 1)
             self.isochrone_layer = self.isochrone_ds.GetLayerByName("isochrones")
         else:
             self.isochrone_ds = driver.CreateDataSource(self.isochrone_layer_path)
             srs = osr.SpatialReference()
             srs.ImportFromProj4(self.crs.toProj4())
-            self.isochrone_layer = self.isochrone_ds.CreateLayer(
-                "isochrones", srs, ogr.wkbPolygon
-            )
+            self.isochrone_layer = self.isochrone_ds.CreateLayer("isochrones", srs, ogr.wkbPolygon)
             field_defn = ogr.FieldDefn("value", ogr.OFTReal)
             self.isochrone_layer.CreateField(field_defn)
             log_message("Isochrone layer created successfully!")
@@ -99,9 +92,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
     def __del__(self):
         if hasattr(self, "isochrone_ds") and self.isochrone_ds:
             self.isochrone_ds = None
-        log_message(
-            f"Native Network Analysis Processor resources cleaned up instance {self.instance_id}."
-        )
+        log_message(f"Native Network Analysis Processor resources cleaned up instance {self.instance_id}.")
 
     def run(self) -> str:
         try:
@@ -157,9 +148,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         log_message(f"Constructed rectangle: {rect.toString()}")
         return rect
 
-    def _clip_network_layer(
-        self, rect: QgsRectangle, output_path: str
-    ) -> QgsVectorLayer:
+    def _clip_network_layer(self, rect: QgsRectangle, output_path: str) -> QgsVectorLayer:
         """Clip the network layer to the specified rectangle."""
         clipped_layer = processing.run(
             "native:extractbyextent",
@@ -184,9 +173,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
 
             self._process_service_area(service_area_layer, value)
 
-    def _calculate_service_area(
-        self, clipped_layer: QgsVectorLayer, value: int
-    ) -> QgsVectorLayer:
+    def _calculate_service_area(self, clipped_layer: QgsVectorLayer, value: int) -> QgsVectorLayer:
         """Calculate the service area for a given value."""
         service_area_layer = processing.run(
             "native:serviceareafrompoint",
@@ -211,9 +198,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         log_message("Service area layer created successfully.")
         return service_area_layer
 
-    def _process_service_area(
-        self, service_area_layer: QgsVectorLayer, value: int
-    ) -> None:
+    def _process_service_area(self, service_area_layer: QgsVectorLayer, value: int) -> None:
         """Process the service area layer and add features to the isochrone layer."""
         if not service_area_layer.isValid():
             log_message(f"Service area layer is invalid: {service_area_layer.source()}")
@@ -241,6 +226,4 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             new_feature.SetGeometry(concave_hull_geometry)
             new_feature.SetField("value", value)
             self.isochrone_layer.CreateFeature(new_feature)
-            log_message(
-                f"Added concave hull feature with value {value} to the GeoPackage."
-            )
+            log_message(f"Added concave hull feature with value {value} to the GeoPackage.")

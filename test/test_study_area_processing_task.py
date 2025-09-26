@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Test suite for study_area.py
 
@@ -28,9 +29,7 @@ class TestStudyAreaProcessor(unittest.TestCase):
         """
         cls.cell_size_m = 1000
         cls.test_data_directory = prepare_fixtures()
-        cls.input_admin_path = os.path.join(
-            cls.test_data_directory, "admin", "Admin0.shp"
-        )
+        cls.input_admin_path = os.path.join(cls.test_data_directory, "admin", "Admin0.shp")
         cls.layer = QgsVectorLayer(cls.input_admin_path, "Admin0", "ogr")
         cls.field_name = "Name"
         # Define working directories
@@ -190,9 +189,7 @@ class TestStudyAreaProcessor(unittest.TestCase):
         ds = ogr.Open(self.gpkg_path)
         layer = ds.GetLayerByName("study_area_clip_polygons")
         self.assertIsNotNone(layer, "Clip polygon layer was not created.")
-        self.assertGreater(
-            layer.GetFeatureCount(), 0, "Clip polygon layer has no features."
-        )
+        self.assertGreater(layer.GetFeatureCount(), 0, "Clip polygon layer has no features.")
 
 
 if __name__ == "__main__":

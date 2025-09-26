@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QSpinBox
 
@@ -25,9 +26,7 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
             self.buffer_distance_layout.addWidget(self.buffer_distance_label)
             self.buffer_distance_layout.addWidget(self.buffer_distance_input)
             default_distance = self.attributes.get("default_single_buffer_distance", 0)
-            buffer_distance = self.attributes.get(
-                "single_buffer_point_layer_distance", default_distance
-            )
+            buffer_distance = self.attributes.get("single_buffer_point_layer_distance", default_distance)
             if buffer_distance == 0:
                 buffer_distance = default_distance
             try:
@@ -52,9 +51,7 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
         if not self.isChecked():
             return None
 
-        self.attributes["single_buffer_point_layer_distance"] = (
-            self.buffer_distance_input.value()
-        )
+        self.attributes["single_buffer_point_layer_distance"] = self.buffer_distance_input.value()
 
         return self.attributes
 

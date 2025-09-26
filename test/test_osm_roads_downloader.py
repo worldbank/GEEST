@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 from unittest.mock import patch
 
@@ -12,29 +13,19 @@ class TestOSMRoadsDownloader(unittest.TestCase):
         self.mock_output_path = "test_osm_roads_output.gpkg"
 
     def test_initialization_without_canvas(self):
-        downloader = OSMRoadsDownloader(
-            extents=self.mock_extents, output_path=self.mock_output_path
-        )
+        downloader = OSMRoadsDownloader(extents=self.mock_extents, output_path=self.mock_output_path)
 
         self.assertEqual(downloader.extents, self.mock_extents)
         self.assertEqual(downloader.output_path, self.mock_output_path)
 
     def test_set_output_type_called(self):
-        downloader = OSMRoadsDownloader(
-            extents=self.mock_extents, output_path=self.mock_output_path
-        )
+        downloader = OSMRoadsDownloader(extents=self.mock_extents, output_path=self.mock_output_path)
         self.assertEqual(downloader.output_type, "line")
 
-    @patch(
-        "geest.core.osm_downloaders.osm_roads_downloader.OSMDataDownloaderBase.set_osm_query"
-    )
-    @patch(
-        "geest.core.osm_downloaders.osm_roads_downloader.OSMDataDownloaderBase.submit_query"
-    )
+    @patch("geest.core.osm_downloaders.osm_roads_downloader.OSMDataDownloaderBase.set_osm_query")
+    @patch("geest.core.osm_downloaders.osm_roads_downloader.OSMDataDownloaderBase.submit_query")
     def test_osm_query_and_submission(self, mock_submit_query, mock_set_osm_query):
-        _ = OSMRoadsDownloader(
-            extents=self.mock_extents, output_path=self.mock_output_path
-        )
+        _ = OSMRoadsDownloader(extents=self.mock_extents, output_path=self.mock_output_path)
 
         mock_set_osm_query.assert_called_once()
         mock_submit_query.assert_called_once()
@@ -45,9 +36,7 @@ class TestOSMRoadsDownloader(unittest.TestCase):
         OSMRoadsDownloader(extents=self.mock_extents, output_path=self.mock_output_path)
         expected_calls = [
             unittest.mock.call("OSMRoadsDownloader Initialized"),
-            unittest.mock.call(
-                "Now call process_response to convert from osm xml to gpkg"
-            ),
+            unittest.mock.call("Now call process_response to convert from osm xml to gpkg"),
         ]
         mock_log_message.assert_has_calls(expected_calls)
 

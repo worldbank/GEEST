@@ -73,67 +73,17 @@ return {
         },
     },
     {
-        -- Modern Git UI
-        "NeogitOrg/neogit",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "sindrets/diffview.nvim",
-            "nvim-telescope/telescope.nvim",
-        },
-        cmd = "Neogit",
+        -- Lazygit integration - terminal-based git UI
+        "kdheepak/lazygit.nvim",
+        cmd = "LazyGit",
         keys = {
-            { "<leader>gg", ":Neogit<CR>", desc = "Open Neogit" },
-            { "<leader>gc", ":Neogit commit<CR>", desc = "Neogit commit" },
+            { "<leader>gg", ":LazyGit<CR>", desc = "Open LazyGit" },
+            { "<leader>gl", ":LazyGit<CR>", desc = "Open LazyGit (full UI)" },
+            { "<leader>gc", ":LazyGitFilterCurrentFile<CR>", desc = "LazyGit current file" },
         },
         config = function()
-            require("neogit").setup({
-                disable_signs = false,
-                disable_hint = false,
-                disable_context_highlighting = false,
-                disable_commit_confirmation = false,
-                auto_refresh = true,
-                sort_branches = "-committerdate",
-                disable_builtin_notifications = false,
-                use_magit_keybindings = false,
-                commit_popup = {
-                    kind = "split",
-                },
-                popup = {
-                    kind = "split",
-                },
-                signs = {
-                    section = { ">", "v" },
-                    item = { ">", "v" },
-                    hunk = { "", "" },
-                },
-                integrations = {
-                    telescope = true,
-                    diffview = true,
-                },
-                sections = {
-                    untracked = {
-                        folded = false,
-                    },
-                    unstaged = {
-                        folded = false,
-                    },
-                    staged = {
-                        folded = false,
-                    },
-                    stashes = {
-                        folded = true,
-                    },
-                    unpulled = {
-                        folded = true,
-                    },
-                    unmerged = {
-                        folded = false,
-                    },
-                    recent = {
-                        folded = true,
-                    },
-                },
-            })
+            -- LazyGit configuration is handled by the external lazygit tool
+            -- No additional setup needed
         end,
     },
     {

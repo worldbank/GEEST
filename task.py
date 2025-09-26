@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 GEEST Plugin
 
@@ -45,9 +46,7 @@ class GEESTTask(QgsTask):
             # Simulate processing
             self.process_node()
             self.node["processed"] = True
-            QgsMessageLog.logMessage(
-                f"Processed {self.node['name']}", "Geest", Qgis.Info
-            )
+            QgsMessageLog.logMessage(f"Processed {self.node['name']}", "Geest", Qgis.Info)
             self.finished.emit(True)
             return True
         except Exception as e:
@@ -72,7 +71,5 @@ class GEESTTask(QgsTask):
         """
         Handles task cancellation.
         """
-        QgsMessageLog.logMessage(
-            f"{self.node['name']} task was cancelled", "GEEST", Qgis.Info
-        )
+        QgsMessageLog.logMessage(f"{self.node['name']} task was cancelled", "GEEST", Qgis.Info)
         super().cancel()

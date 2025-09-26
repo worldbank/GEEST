@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import unittest
 
@@ -18,12 +19,8 @@ class TestPolygonOpportunitiesMask(unittest.TestCase):
         cls.working_directory = os.path.join(prepare_fixtures(), "wee_score")
         cls.context = QgsProcessingContext()
         cls.feedback = QgsFeedback()
-        cls.mask_areas_path = os.path.join(
-            cls.working_directory, "masks", "polygon_mask.gpkg|layername=polygon_mask"
-        )
-        cls.study_area_gpkg_path = os.path.join(
-            cls.working_directory, "study_area", "study_area.gpkg"
-        )
+        cls.mask_areas_path = os.path.join(cls.working_directory, "masks", "polygon_mask.gpkg|layername=polygon_mask")
+        cls.study_area_gpkg_path = os.path.join(cls.working_directory, "study_area", "study_area.gpkg")
 
     def setUp(self):
         self.test_data = [
