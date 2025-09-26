@@ -245,7 +245,7 @@
           echo "We also provide a ready to use neovim setup:"
           echo ""
           echo "🎯 You can start Neovim with GEEST configuration:"
-          echo "📝 'vim' (which is an alias to) -> ./.nvim/vim"
+          echo "📝 'neovim' (which is an alias to) -> ./.nvim/neovim"
           echo ""
         '';
       };

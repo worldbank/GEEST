@@ -29,6 +29,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
@@ -36,7 +37,11 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         """
         Initialize the workflow with attributes and feedback.
 
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+
+        :param cell_size_m: Cell size in meters.
+
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
 
         :param feedback: QgsFeedback object for progress reporting and
             cancellation's.
@@ -51,7 +56,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         """
         # ⭐️ Item is a reference - whatever you change in
         # this item will directly update the tree
-        super().__init__(item, cell_size_m, feedback, context, working_directory)
+        super().__init__(item, cell_size_m, analysis_scale, feedback, context, working_directory)
         self.workflow_name = "use_street_lights"
 
         layer_path = self.attributes.get("street_lights_shapefile", None)
@@ -86,7 +91,12 @@ class StreetLightsBufferWorkflow(WorkflowBase):
             self.attributes["error"] = error
             raise Exception(error)
 
-        self.buffer_distance = 20  # 20m buffer
+        if analysis_scale == "local":
+            self.buffer_distance = 20  # 20m buffer
+
+            self.buffer_distance = 565  # 565m buffer for global
+        else:
+            raise
 
     def _process_features_for_area(
         self,
