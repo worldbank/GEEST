@@ -6,6 +6,7 @@
   inputs.geospatial.url = "github:imincik/geospatial-nix.repo";
   inputs.nixpkgs.follows = "geospatial/nixpkgs";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  # inputs.timvim.url = "github:timlinux/timvim";
 
   outputs =
     {
@@ -88,10 +89,14 @@
 
       devShells.${system}.default = pkgs.mkShell {
         packages = [
+
+          #timvim.packages.${pkgs.system}.default
+          qgisWithExtras
           pkgs.actionlint # for checking gh actions
           pkgs.bandit
           pkgs.bearer
           pkgs.chafa
+          pkgs.nixfmt-rfc-style
           pkgs.codeql
           pkgs.ffmpeg
           pkgs.gdb
@@ -105,7 +110,6 @@
           pkgs.libsForQt5.kcachegrind
           pkgs.luaPackages.luacheck
           pkgs.markdownlint-cli
-          pkgs.neovim
           pkgs.nixfmt-rfc-style
           pkgs.nodejs_20 # needed for copilot in neovim
           pkgs.nodePackages.cspell
@@ -113,7 +117,8 @@
           pkgs.privoxy
           pkgs.pyprof2calltree # needed to covert cprofile call trees into a format kcachegrind can read
           pkgs.python3
-          pkgs.qgis
+          # Python development essentials
+          pkgs.pyright
           pkgs.qt5.full # so we get designer
           pkgs.qt5.qtbase
           pkgs.qt5.qtlocation
@@ -187,66 +192,70 @@
 
         ];
         shellHook = ''
-          unset SOURCE_DATE_EPOCH
+            unset SOURCE_DATE_EPOCH
 
-          # Create a virtual environment in .venv if it doesn't exist
-           if [ ! -d ".venv" ]; then
-            python -m venv .venv
-          fi
-
-          # Activate the virtual environment
-          source .venv/bin/activate
-
-          # Upgrade pip and install packages from requirements.txt if it exists
-          pip install --upgrade pip > /dev/null
-          if [ -f requirements.txt ]; then
-            echo "Installing Python requirements from requirements.txt..."
-            pip install -r requirements.txt > .pip-install.log 2>&1
-            if [ $? -ne 0 ]; then
-              echo "❌ Pip install failed. See .pip-install.log for details."
+            # Create a virtual environment in .venv if it doesn't exist
+             if [ ! -d ".venv" ]; then
+              python -m venv .venv
             fi
-          else
-            echo "No requirements.txt found, skipping pip install."
-          fi
-          if [ -f requirements-dev.txt ]; then
-            echo "Installing Python requirements from requirements-dev.txt..."
-            pip install -r requirements-dev.txt > .pip-install.log 2>&1
-            if [ $? -ne 0 ]; then
-              echo "❌ Pip install failed. See .pip-install.log for details."
+
+            # Activate the virtual environment
+            source .venv/bin/activate
+
+            # Upgrade pip and install packages from requirements.txt if it exists
+            pip install --upgrade pip > /dev/null
+            if [ -f requirements.txt ]; then
+              echo "Installing Python requirements from requirements.txt..."
+              pip install -r requirements.txt > .pip-install.log 2>&1
+              if [ $? -ne 0 ]; then
+                echo "❌ Pip install failed. See .pip-install.log for details."
+              fi
+            else
+              echo "No requirements.txt found, skipping pip install."
             fi
-          else
-            echo "No requirements-dev.txt found, skipping pip install."
-          fi
+            if [ -f requirements-dev.txt ]; then
+              echo "Installing Python requirements from requirements-dev.txt..."
+              pip install -r requirements-dev.txt > .pip-install.log 2>&1
+              if [ $? -ne 0 ]; then
+                echo "❌ Pip install failed. See .pip-install.log for details."
+              fi
+            else
+              echo "No requirements-dev.txt found, skipping pip install."
+            fi
 
-          echo "Setting up and running pre-commit hooks..."
-          echo "-------------------------------------"
-          pre-commit clean > /dev/null
-          pre-commit install --install-hooks > /dev/null
-          pre-commit run --all-files || true
+            echo "Setting up and running pre-commit hooks..."
+            echo "-------------------------------------"
+            pre-commit clean > /dev/null
+            pre-commit install --install-hooks > /dev/null
+            pre-commit run --all-files || true
 
-          export PATH="$(pwd)/.nvim:$PATH"
-          echo ""
-          echo "-----------------------"
-          echo "🌈 Your Dev Environment is prepared."
-          echo "To run QGIS with your profile, use one of these commands:"
-          echo ""
-          echo "  scripts/run-qgis.sh"
-          echo "  scripts/run-qgis-ltr.sh"
-          echo "  scripts/run-qgis-master.sh"
-          echo ""
-          echo "📒 Note:"
-          echo "-----------------------"
-          echo "We provide a ready-to-use"
-          echo "VSCode environment which you"
-          echo "can start like this:"
-          echo ""
-          echo "./scripts/vscode.sh"
-          echo ""
-          echo "We also provide a ready to use neovim setup:"
-          echo ""
-          echo "🎯 You can start Neovim with GEEST configuration:"
-          echo "📝 'neovim' (which is an alias to) -> ./.nvim/neovim"
-          echo ""
+            export PATH="$(pwd)/.nvim:$PATH"
+          # Add PyQt and QGIS to python path for neovim
+          pythonWithPackages="${
+            pkgs.python3.withPackages (ps: [
+              ps.pyqt5-stubs
+              ps.pyqtwebengine
+            ])
+          }"
+          export PYTHONPATH="$pythonWithPackages/lib/python*/site-packages:${qgisWithExtras}/share/qgis/python:$PYTHONPATH"
+            echo ""
+            echo "-----------------------"
+            echo "🌈 Your Dev Environment is prepared."
+            echo "To run QGIS with your profile, use one of these commands:"
+            echo ""
+            echo "  scripts/run-qgis.sh"
+            echo "  scripts/run-qgis-ltr.sh"
+            echo "  scripts/run-qgis-master.sh"
+            echo ""
+            echo "📒 Note:"
+            echo "-----------------------"
+            echo "We provide a ready-to-use"
+            echo "VSCode environment which you"
+            echo "can start like this:"
+            echo ""
+            echo "./scripts/vscode.sh"
+            echo ""
+            echo ""
         '';
       };
     };
