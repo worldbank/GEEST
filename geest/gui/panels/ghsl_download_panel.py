@@ -14,7 +14,7 @@ from qgis.PyQt.QtGui import QFont
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
-from geest.core.tasks import OSMDownloaderTask
+from geest.core.tasks import GHSLDownloaderTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
     get_ui_class,
@@ -23,10 +23,10 @@ from geest.utilities import (
     resources_path,
 )
 
-FORM_CLASS = get_ui_class("road_network_panel_base.ui")
+FORM_CLASS = get_ui_class("ghsl_panel_base.ui")
 
 
-class RoadNetworkPanel(FORM_CLASS, QWidget):
+class GHSDownloadPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
@@ -97,10 +97,10 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         # self.folder_status_label.setPixmap(
         #     QPixmap(resources_path("resources", "icons", "failed.svg"))
         # )
-        self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
-        self.road_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
-        self.load_road_layer_button.clicked.connect(self.load_road_layer)
-        self.download_road_layer_button.clicked.connect(self.download_road_layer_button_clicked)
+        self.settlements_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.settlements_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
+        self.load_settlements_layer_button.clicked.connect(self.load_settlements_layer)
+        self.download_settlements_layer_button.clicked.connect(self.download_settlements_layer_button_clicked)
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
@@ -108,7 +108,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
 
     def emit_layer_change(self):
-        layer = self.road_layer_combo.currentLayer()
+        layer = self.settlements_layer_combo.currentLayer()
         if layer:
             self.network_layer_path_changed.emit(layer.source())
         else:
@@ -120,25 +120,25 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
 
-    def network_layer_path(self):
-        if self.road_layer_combo.currentLayer() is None:
+    def settlements_layer_path(self):
+        if self.settlements_layer_combo.currentLayer() is None:
             return None
-        return self.road_layer_combo.currentLayer().source()
+        return self.settlements_layer_combo.currentLayer().source()
 
-    def load_road_layer(self):
+    def load_settlements_layer(self):
         """Load a road network layer from a file."""
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)
         file_dialog.setNameFilter("Shapefile (*.shp);;GeoPackage (*.gpkg)")
         if file_dialog.exec_():
             file_path = file_dialog.selectedFiles()[0]
-            layer = QgsVectorLayer(file_path, "Road Network", "ogr")
+            layer = QgsVectorLayer(file_path, "Settlements Layer", "ogr")
             if not layer.isValid():
-                QMessageBox.critical(self, "Error", "Could not load the road network layer.")
+                QMessageBox.critical(self, "Error", "Could not load the settlements layer.")
                 return
             # Load the layer in QGIS
             QgsProject.instance().addMapLayer(layer)
-            self.road_layer_combo.setLayer(layer)
+            self.settlements_layer_combo.setLayer(layer)
 
     def disable_widgets(self):
         """Disable all widgets in the panel."""
@@ -150,8 +150,8 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         for widget in self.findChildren(QWidget):
             widget.setEnabled(True)
 
-    def download_road_layer_button_clicked(self):
-        """Triggered when the Download Road Layer button is pressed."""
+    def download_settlements_layer_button_clicked(self):
+        """Triggered when the settlements layer button is pressed."""
         if self._reference_layer is None:
             QMessageBox.critical(
                 self,
@@ -170,23 +170,23 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         debug_env = int(os.getenv("GEEST_DEBUG", 0))
         feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
         try:
-            log_message("Creating OSM Downloader Task")
-            processor = OSMDownloaderTask(
+            log_message("Creating GHSL Downloader Task")
+            processor = GHSLDownloaderTask(
                 reference_layer=self._reference_layer,
                 crs=self._crs,
                 working_dir=self.working_directory,
-                filename="road_network",
+                filename="settlements_layer.gpkg",
                 use_cache=True,
                 delete_gpkg=True,
                 feedback=feedback,
             )
-            log_message("OSM Downloader Task created, setting up call backs")
+            log_message("GHSL Downloader Task created, setting up call backs")
             # Hook up the QTask feedback signal to the progress bar
             # Measure overall task progress from the task object itself
-            processor.progressChanged.connect(self.osm_download_progress_updated)
+            processor.progressChanged.connect(self.ghsl_download_progress_updated)
             processor.taskCompleted.connect(self.download_done)
             # Measure subtask progress from the feedback object
-            feedback.progressChanged.connect(self.osm_extract_progress_updated)
+            feedback.progressChanged.connect(self.ghsl_extract_progress_updated)
             self.disable_widgets()
             if debug_env:
                 processor.run()
@@ -202,14 +202,14 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             return
 
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
-    def osm_download_progress_updated(self, progress: float):
+    def ghsl_download_progress_updated(self, progress: float):
         """Slot to be called when the download task progress is updated."""
         log_message(f"\n\n\n\n\n\nProgress: {progress}\n\n\n\n\n\n\n\n")
         self.progress_bar.setVisible(True)
         self.progress_bar.setEnabled(True)
         self.progress_bar.setValue(int(progress))
         if progress == 0:
-            self.progress_bar.setFormat("Fetching OSM data...")
+            self.progress_bar.setFormat("Fetching GHSL data...")
             self.progress_bar.setMinimum(0)  # makes it bounce indefinitely
             self.progress_bar.setMaximum(0)
         else:
@@ -219,15 +219,15 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             # This is a sneaky hack to show the exact progress in the label
             # since QProgressBar only takes ints. See Qt docs for more info.
             # Use the 'setFormat' method to display the exact float:
-            float_value_as_string = f"OSM download progress: {progress}%"
+            float_value_as_string = f"GHSL download progress: {progress}%"
             self.progress_bar.setFormat(float_value_as_string)
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress
-    def osm_extract_progress_updated(self, progress: float):
+    def ghsl_extract_progress_updated(self, progress: float):
         self.child_progress_bar.setVisible(True)
         self.child_progress_bar.setEnabled(True)
         if progress == 0:
-            self.progress_bar.setFormat("Extracting OSM data...")
+            self.progress_bar.setFormat("Extracting GHSL data...")
             self.progress_bar.setMinimum(0)  # makes it bounce indefinitely
             self.progress_bar.setMaximum(0)
         else:
@@ -237,13 +237,13 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             # This is a sneaky hack to show the exact progress in the label
             # since QProgressBar only takes ints. See Qt docs for more info.
             # Use the 'setFormat' method to display the exact float:
-            float_value_as_string = f"OSM extract progress: {progress}%"
+            float_value_as_string = f"GHSL extract progress: {progress}%"
             self.child_progress_bar.setFormat(float_value_as_string)
 
     def download_done(self):
         """Slot to be called when the download task completes successfully."""
         log_message(
-            "*** OSM download completed successfully. ***",
+            "*** GHSL download completed successfully. ***",
             tag="Geest",
             level=Qgis.Info,
         )
@@ -256,7 +256,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             return
         # Load the layer in QGIS
         QgsProject.instance().addMapLayer(layer)
-        self.road_layer_combo.setLayer(layer)
+        self.settlements_layer_combo.setLayer(layer)
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
         self.enable_widgets()
@@ -274,6 +274,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         # log_message(f"Description Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))
         self.description4.setFont(QFont("Arial", font_size))
-        self.road_layer_combo.setFont(QFont("Arial", font_size))
-        self.load_road_layer_button.setFont(QFont("Arial", font_size))
-        self.download_road_layer_button.setFont(QFont("Arial", font_size))
+        self.settlements_layer_combo.setFont(QFont("Arial", font_size))
+        self.load_settlements_layer_button.setFont(QFont("Arial", font_size))
+        self.download_settlements_layer_button.setFont(QFont("Arial", font_size))

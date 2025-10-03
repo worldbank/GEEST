@@ -147,6 +147,7 @@ class GeestPlugin:
             if self.iface.mainWindow().dockWidgetArea(dw) == dock_area
         ]
 
+        self.iface
         # Tabify the new dock before the first found dock widget, if available
         if existing_docks:
             self.iface.mainWindow().tabifyDockWidget(existing_docks[0], self.dock_widget)

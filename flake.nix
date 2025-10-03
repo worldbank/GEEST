@@ -111,9 +111,8 @@
           pkgs.luaPackages.luacheck
           pkgs.markdownlint-cli
           pkgs.nixfmt-rfc-style
-          pkgs.nodejs_20 # needed for copilot in neovim
-          pkgs.nodePackages.cspell
           pkgs.pre-commit
+          pkgs.nixfmt-rfc-style
           pkgs.privoxy
           pkgs.pyprof2calltree # needed to covert cprofile call trees into a format kcachegrind can read
           pkgs.python3
