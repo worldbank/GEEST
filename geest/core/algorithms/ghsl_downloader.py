@@ -19,7 +19,7 @@ from qgis.core import (
 )
 from qgis.utils import iface
 
-# from geest.utilities import resources_path
+from geest.utilities import resources_path
 
 
 class GHSLDownloader:
@@ -33,8 +33,10 @@ class GHSLDownloader:
         self.plugin_name = plugin_name
         self.layer = self._index_layer()
         self.crs_wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
-        self.crs_moll = QgsCoordinateReferenceSystem("ESRI:54009")
-        self.transform = QgsCoordinateTransform(self.crs_wgs84, self.crs_moll, QgsProject.instance().transformContext())
+        self.crs_mollweide = QgsCoordinateReferenceSystem("ESRI:54009")
+        self.transform = QgsCoordinateTransform(
+            self.crs_wgs84, self.crs_mollweide, QgsProject.instance().transformContext()
+        )
 
     # ---------------- Utilities ----------------
     def _cache_dir(self):
@@ -69,21 +71,20 @@ class GHSLDownloader:
         Returns:
             QgsVectorLayer: The index layer.
         """
-        # layer_path = resources_path("resources", "ghsl", "ghs-mod-2023-tile-scheme.parquet")
-        layer = QgsVectorLayer("MultiPolygon?crs=ESRI:54009", "tiles", "memory")
+        layer_path = resources_path("resources", "ghsl", "ghs-mod-2023-tile-scheme.parquet")
+        layer = QgsVectorLayer(layer_path, "tiles", "ogr")
 
         return layer
 
-    def tiles_intersecting_bbox(self, lon_min, lat_min, lon_max, lat_max):
-        p1 = self.transform.transform(lon_min, lat_min)
-        p2 = self.transform.transform(lon_max, lat_max)
-        rect = QgsRectangle(min(p1.x(), p2.x()), min(p1.y(), p2.y()), max(p1.x(), p2.x()), max(p1.y(), p2.y()))
-        bbox_geom = QgsGeometry.fromRect(rect)
-
+    def tiles_intersecting_bbox(self, bbox: QgsRectangle):
+        bbox_mollweiide = self.transform.transform(bbox)
+        # get the features that intersect the bbox
+        bbox_geom = QgsGeometry.fromRect(bbox_mollweiide)
+        # get the features that intersect the bbox
+        bbox_filter = self.layer.dataProvider().createSpatialFilter(bbox_geom)
         intersecting = []
-        for feat in self.layer.getFeatures():
-            if bbox_geom.intersects(feat.geometry()):
-                intersecting.append(feat["tile_id"])
+        for feat in self.layer.getFeatures(bbox_filter):
+            intersecting.append(feat["tile_id"])
         return intersecting
 
     def download_and_unpack_tile(self, tile_id):
