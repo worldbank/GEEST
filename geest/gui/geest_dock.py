@@ -11,6 +11,7 @@ from geest.core.settings import setting
 from geest.gui.panels import (
     CreateProjectPanel,
     CreditsPanel,
+    GHSLPanel,
     HelpPanel,
     IntroPanel,
     OpenProjectPanel,
@@ -31,8 +32,9 @@ SETUP_PANEL = 2
 OPEN_PROJECT_PANEL = 3
 CREATE_PROJECT_PANEL = 4
 ROAD_NETWORK_PANEL = 5
-TREE_PANEL = 6
-HELP_PANEL = 7
+GHSL_PANEL = 6
+TREE_PANEL = 7
+HELP_PANEL = 8
 
 
 class GeestDock(QDockWidget):
@@ -189,6 +191,31 @@ class GeestDock(QDockWidget):
             self.road_network_widget.network_layer_path_changed.connect(
                 lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
             )
+            # ROAD_NETWORK_PANEL = 5
+            # Create and add the "Road Network" panel
+            self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
+            road_network_panel: QWidget = QWidget()
+            road_network_layout: QVBoxLayout = QVBoxLayout(road_network_panel)
+            road_network_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
+            road_network_layout.addWidget(self.road_network_widget)
+            self.stacked_widget.addWidget(road_network_panel)
+
+            self.road_network_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                # 🚩 Note we set the back button and the forward
+                #    button both to the TREE_PANEL so that the
+                #    User can re-invoke the network panel any time
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
+            self.road_network_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
+            self.road_network_widget.network_layer_path_changed.connect(
+                lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
+            )
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(self.open_project_widget.working_dir)
@@ -204,10 +231,6 @@ class GeestDock(QDockWidget):
             self.tree_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(HELP_PANEL)
-            )
-            self.tree_widget.switch_to_previous_tab.connect(
-                # Switch to the previous tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
             self.tree_widget.switch_to_road_network_tab.connect(
                 # Switch to the road network tab when the button is clicked

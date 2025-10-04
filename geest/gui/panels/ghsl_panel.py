@@ -26,7 +26,7 @@ from geest.utilities import (
 FORM_CLASS = get_ui_class("ghsl_panel_base.ui")
 
 
-class GHSDownloadPanel(FORM_CLASS, QWidget):
+class GHSPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
