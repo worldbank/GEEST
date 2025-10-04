@@ -185,36 +185,36 @@ class GeestDock(QDockWidget):
 
             self.road_network_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+                lambda: self.stacked_widget.setCurrentIndex(GHSL_PANEL)
             )
 
             self.road_network_widget.network_layer_path_changed.connect(
                 lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
             )
-            # ROAD_NETWORK_PANEL = 5
-            # Create and add the "Road Network" panel
-            self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
-            road_network_panel: QWidget = QWidget()
-            road_network_layout: QVBoxLayout = QVBoxLayout(road_network_panel)
-            road_network_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
-            road_network_layout.addWidget(self.road_network_widget)
-            self.stacked_widget.addWidget(road_network_panel)
+            # GHSL_PANEL = 6
+            # Create and add the "GHSL" panel
+            self.ghsl_widget: GHSLPanel = GHSLPanel()
+            ghsl_panel: QWidget = QWidget()
+            ghsl_layout: QVBoxLayout = QVBoxLayout(road_network_panel)
+            ghsl_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
+            ghsl_layout.addWidget(self.road_network_widget)
+            self.stacked_widget.addWidget(ghsl_panel)
 
-            self.road_network_widget.switch_to_previous_tab.connect(
+            self.ghsl_widget.switch_to_previous_tab.connect(
                 # Switch to the next tab when the button is clicked
                 # 🚩 Note we set the back button and the forward
                 #    button both to the TREE_PANEL so that the
                 #    User can re-invoke the network panel any time
-                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+                lambda: self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL)
             )
 
-            self.road_network_widget.switch_to_next_tab.connect(
+            self.ghsl_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
 
-            self.road_network_widget.network_layer_path_changed.connect(
-                lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
+            self.ghsl_widget.layer_path_changed.connect(
+                lambda: self.tree_widget.set_network_layer_path(self.ghsl_widget.network_layer_path())
             )
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked

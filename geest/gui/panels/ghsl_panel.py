@@ -26,11 +26,11 @@ from geest.utilities import (
 FORM_CLASS = get_ui_class("ghsl_panel_base.ui")
 
 
-class GHSPanel(FORM_CLASS, QWidget):
+class GHSLPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
-    network_layer_path_changed = pyqtSignal(str)  # Signal to set the network layer path
+    ghsl_layer_path_changed = pyqtSignal(str)  # Signal to set the ghsl layer path
 
     def __init__(self):
         super().__init__()
@@ -97,10 +97,10 @@ class GHSPanel(FORM_CLASS, QWidget):
         # self.folder_status_label.setPixmap(
         #     QPixmap(resources_path("resources", "icons", "failed.svg"))
         # )
-        self.settlements_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        self.settlements_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
-        self.load_settlements_layer_button.clicked.connect(self.load_settlements_layer)
-        self.download_settlements_layer_button.clicked.connect(self.download_settlements_layer_button_clicked)
+        self.raster_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.raster_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
+        self.load_ghsl_layer_button.clicked.connect(self.load_settlements_layer)
+        # self.download_settlements_layer_button.clicked.connect(self.download_settlements_layer_button_clicked)
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
@@ -108,11 +108,11 @@ class GHSPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
 
     def emit_layer_change(self):
-        layer = self.settlements_layer_combo.currentLayer()
+        layer = self.raster_layer_combo.currentLayer()
         if layer:
-            self.network_layer_path_changed.emit(layer.source())
+            self.ghsl_layer_path_changed.emit(layer.source())
         else:
-            self.network_layer_path_changed.emit(None)
+            self.ghsl_layer_path_changed.emit(None)
 
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
@@ -121,12 +121,12 @@ class GHSPanel(FORM_CLASS, QWidget):
         self.switch_to_previous_tab.emit()
 
     def settlements_layer_path(self):
-        if self.settlements_layer_combo.currentLayer() is None:
+        if self.raster_layer_combo.currentLayer() is None:
             return None
-        return self.settlements_layer_combo.currentLayer().source()
+        return self.raster_layer_combo.currentLayer().source()
 
     def load_settlements_layer(self):
-        """Load a road network layer from a file."""
+        """Load a road ghsl layer from a file."""
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)
         file_dialog.setNameFilter("Shapefile (*.shp);;GeoPackage (*.gpkg)")
@@ -138,7 +138,7 @@ class GHSPanel(FORM_CLASS, QWidget):
                 return
             # Load the layer in QGIS
             QgsProject.instance().addMapLayer(layer)
-            self.settlements_layer_combo.setLayer(layer)
+            self.raster_layer_combo.setLayer(layer)
 
     def disable_widgets(self):
         """Disable all widgets in the panel."""
@@ -197,7 +197,7 @@ class GHSPanel(FORM_CLASS, QWidget):
                 log_message("Processing started")
         except Exception as e:
             trace = traceback.format_exc()
-            QMessageBox.critical(self, "Error", f"Error downloading network for study area: {e}\n{trace}")
+            QMessageBox.critical(self, "Error", f"Error downloading ghsl for study area: {e}\n{trace}")
             self.enable_widgets()
             return
 
@@ -247,16 +247,16 @@ class GHSPanel(FORM_CLASS, QWidget):
             tag="Geest",
             level=Qgis.Info,
         )
-        network_layer_path = os.path.join(self.working_directory, "study_area", "road_network.gpkg")
-        network_layer_path = f"{network_layer_path}|layername=road_network"
-        log_message(f"Loading network layer from {network_layer_path}")
-        layer = QgsVectorLayer(network_layer_path, "Road Network", "ogr")
+        ghsl_layer_path = os.path.join(self.working_directory, "study_area", "ghsl.gpkg")
+        ghsl_layer_path = f"{ghsl_layer_path}|layername=road_ghsl"
+        log_message(f"Loading ghsl layer from {ghsl_layer_path}")
+        layer = QgsVectorLayer(ghsl_layer_path, "GHSL Layer", "ogr")
         if not layer.isValid():
-            QMessageBox.critical(self, "Error", "Could not load the road network layer.")
+            QMessageBox.critical(self, "Error", "Could not load the road ghsl layer.")
             return
         # Load the layer in QGIS
         QgsProject.instance().addMapLayer(layer)
-        self.settlements_layer_combo.setLayer(layer)
+        self.raster_layer_combo.setLayer(layer)
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
         self.enable_widgets()
@@ -274,6 +274,6 @@ class GHSPanel(FORM_CLASS, QWidget):
         # log_message(f"Description Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))
         self.description4.setFont(QFont("Arial", font_size))
-        self.settlements_layer_combo.setFont(QFont("Arial", font_size))
-        self.load_settlements_layer_button.setFont(QFont("Arial", font_size))
-        self.download_settlements_layer_button.setFont(QFont("Arial", font_size))
+        self.raster_layer_combo.setFont(QFont("Arial", font_size))
+        self.download_ghsl_layer_button.setFont(QFont("Arial", font_size))
+        self.download_ghsl_layer_button.setFont(QFont("Arial", font_size))
