@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
@@ -24,19 +25,22 @@ class AggregationWorkflowBase(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters for rasterization.
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.guids = None  # This should be set by the child class - a list of guids of JSONTreeItems to aggregate
         self.id = None  # This should be set by the child class
@@ -62,14 +66,10 @@ class AggregationWorkflowBase(WorkflowBase):
             return None
 
         # Load the layers
-        raster_layers = [
-            QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files.keys())
-        ]
+        raster_layers = [QgsRasterLayer(vf, f"raster_{i}") for i, vf in enumerate(input_files.keys())]
 
         # Ensure all raster layers are valid and print filenames of invalid layers
-        invalid_layers = [
-            layer.source() for layer in raster_layers if not layer.isValid()
-        ]
+        invalid_layers = [layer.source() for layer in raster_layers if not layer.isValid()]
         if invalid_layers:
             log_message(
                 f"Invalid raster layers found: {', '.join(invalid_layers)}",
@@ -116,9 +116,7 @@ class AggregationWorkflowBase(WorkflowBase):
         # Wrap the weighted sum and divide by the sum of weights
         # expression = f"({expression}) / {layer_count}"
 
-        aggregation_output = os.path.join(
-            self.workflow_directory, f"{self.id}_aggregated_{index}.tif"
-        )
+        aggregation_output = os.path.join(self.workflow_directory, f"{self.id}_aggregated_{index}.tif")
 
         log_message(
             f"Aggregating {len(input_files)} raster layers to {aggregation_output}",
@@ -205,9 +203,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 raise ValueError(f"{id} has no result file")
 
             layer_folder = os.path.dirname(item.attribute(self.result_file_key, ""))
-            path = os.path.join(
-                self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif"
-            )
+            path = os.path.join(self.workflow_directory, layer_folder, f"{id}_masked_{index}.tif")
             if os.path.exists(path):
 
                 weight = item.attribute(self.weight_key, "")
@@ -256,9 +252,7 @@ class AggregationWorkflowBase(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            self.attributes[self.result_key] = (
-                f"{self.analysis_mode} Aggregation Workflow Failed"
-            )
+            self.attributes[self.result_key] = f"{self.analysis_mode} Aggregation Workflow Failed"
             self.attributes["error"] = error
 
         log_message(

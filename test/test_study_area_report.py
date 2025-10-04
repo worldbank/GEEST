@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import tempfile
 import unittest
@@ -63,9 +64,7 @@ class TestStudyAreaReport(unittest.TestCase):
         cls.layer.CreateField(ogr.FieldDefn("grid_processed", ogr.OFTInteger))
         cls.layer.CreateField(ogr.FieldDefn("mask_processed", ogr.OFTInteger))
         cls.layer.CreateField(ogr.FieldDefn("grid_creation_duration_secs", ogr.OFTReal))
-        cls.layer.CreateField(
-            ogr.FieldDefn("clip_geom_creation_duration_secs", ogr.OFTReal)
-        )
+        cls.layer.CreateField(ogr.FieldDefn("clip_geom_creation_duration_secs", ogr.OFTReal))
         cls.layer.CreateField(ogr.FieldDefn("geom_total_duration_secs", ogr.OFTReal))
 
         log_message(f"Table '{status_table_name}' created in GeoPackage.")
@@ -84,9 +83,7 @@ class TestStudyAreaReport(unittest.TestCase):
         cls.layer.dataProvider().addFeatures(features)
 
         # Save the layer to the GeoPackage
-        error = QgsVectorLayerExporter.exportLayer(
-            cls.layer, gpkg_path, "GPKG", cls.layer.crs(), False
-        )
+        error = QgsVectorLayerExporter.exportLayer(cls.layer, gpkg_path, "GPKG", cls.layer.crs(), False)
         if error[0] != QgsVectorLayerExporter.NoError:
             raise Exception(f"Failed to export layer to GeoPackage: {error[1]}")
         del cls.layer

@@ -13,13 +13,13 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import pyqtSignal
 
-from geest.core.osm_downloaders import OSMRoadsDownloader
+from geest.core.algorithms import GHSLDownloader
 from geest.utilities import log_message
 
 
-class OSMDownloaderTask(QgsTask):
+class GHSLDownloaderTask(QgsTask):
     """
-    A QgsTask subclass for downloading OSM data.
+    A QgsTask subclass for downloading Global Human Settlements data.
 
 
     Args:
@@ -103,10 +103,10 @@ class OSMDownloaderTask(QgsTask):
         """
         try:
             self.setProgress(1)  # Trigger the UI to update with a small value
-            log_message("Downloading roads starting....")
-            log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
+            log_message("Downloading GHSL starting....")
+            log_message(f"Using CRS: {self.output_crs.authid()} for download")
 
-            downloader = OSMRoadsDownloader(
+            downloader = GHSLDownloader(
                 extents=self.layer_extent,
                 output_path=self.gpkg_path,
                 output_crs=self.output_crs,
@@ -117,7 +117,7 @@ class OSMDownloaderTask(QgsTask):
             )
             self.setProgress(100)  # Trigger the UI to update with completion value
             downloader.process_response()
-            log_message(f"OSM Downloaded to {self.gpkg_path}.")
+            log_message(f"GHSL Downloaded to {self.gpkg_path}.")
 
         except Exception as e:
             log_message(f"Error in run(): {str(e)}")
@@ -125,7 +125,7 @@ class OSMDownloaderTask(QgsTask):
             with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
                 f.write(f"{datetime.datetime.now()}\n")
                 f.write(traceback.format_exc())
-            self.error_occurred.emit(f"Error in OSMDownloaderTask: {str(e)}")
+            self.error_occurred.emit(f"Error in GHSLDownloaderTask: {str(e)}")
         return True
 
     def create_study_area_directory(self, working_dir):

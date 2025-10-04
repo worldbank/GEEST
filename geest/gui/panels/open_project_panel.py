@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from PyQt5.QtCore import Qt
@@ -31,9 +32,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.queue_manager = WorkflowQueueManager(pool_size=1)
 
         self.working_dir = ""
-        self.settings = (
-            QSettings()
-        )  # Initialize QSettings to store and retrieve settings
+        self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
         log_message("Loading open project panel")
@@ -62,9 +61,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
 
         # Set the current project if a recent one is available
         if last_working_directory and last_working_directory in recent_projects:
-            self.previous_project_combo.setCurrentText(
-                self.elide_path(last_working_directory)
-            )
+            self.previous_project_combo.setCurrentText(self.elide_path(last_working_directory))
             self.load_project()  # Automatically load the last used project
         else:
             self.load_project(self.previous_project_combo.currentText())
@@ -72,12 +69,8 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         # Set tooltip on hover to show the full path
         self.previous_project_combo.setToolTip(self.working_dir)
         self.previous_project_combo.currentIndexChanged.connect(self.update_tooltip)
-        self.previous_project_combo.installEventFilter(
-            self
-        )  # handle resizes for eliding the combo text
-        self.previous_project_combo.setSizeAdjustPolicy(
-            QComboBox.AdjustToMinimumContentsLengthWithIcon
-        )
+        self.previous_project_combo.installEventFilter(self)  # handle resizes for eliding the combo text
+        self.previous_project_combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
         self.previous_project_combo.setMinimumContentsLength(10)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
@@ -118,15 +111,11 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.previous_project_combo.setToolTip(full_path)
 
     def select_directory(self):
-        directory = QFileDialog.getExistingDirectory(
-            self, "Select Working Directory", self.working_dir
-        )
+        directory = QFileDialog.getExistingDirectory(self, "Select Working Directory", self.working_dir)
         if directory:
             self.working_dir = directory
             self.update_recent_projects(directory)  # Update recent projects
-            self.settings.setValue(
-                "last_working_directory", directory
-            )  # Update last used project
+            self.settings.setValue("last_working_directory", directory)  # Update last used project
 
     def update_recent_projects(self, new_project: str):
         """Update the recent projects list in QSettings."""
@@ -151,9 +140,7 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             return
         model_path = os.path.join(self.working_dir, "model.json")
         if os.path.exists(model_path):
-            self.settings.setValue(
-                "last_working_directory", self.working_dir
-            )  # Update last used project
+            self.settings.setValue("last_working_directory", self.working_dir)  # Update last used project
             # Switch to the next tab if an existing project is found
             self.switch_to_next_tab.emit()
             self.set_working_directory.emit(self.working_dir)
@@ -171,8 +158,6 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         # Scale the font size to fit the text in the available space
         # log_message(f"Label Width: {self.label.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
-        font_size = int(
-            linear_interpolation(self.label.rect().width(), 12, 16, 400, 600)
-        )
+        font_size = int(linear_interpolation(self.label.rect().width(), 12, 16, 400, 600))
         # log_message(f"Label Font Size: {font_size}")
         self.label.setFont(QFont("Arial", font_size))

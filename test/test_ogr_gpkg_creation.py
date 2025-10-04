@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import unittest
 
@@ -18,9 +19,7 @@ class TestOGRGPKGCreation(unittest.TestCase):
 
             # Check if the file already exists
             if os.path.exists(gpkg_path):
-                print(
-                    f"Warning: '{gpkg_path}' already exists. Adding layer to existing GeoPackage."
-                )
+                print(f"Warning: '{gpkg_path}' already exists. Adding layer to existing GeoPackage.")
 
             # Open or create the GeoPackage
             driver = ogr.GetDriverByName("GPKG")

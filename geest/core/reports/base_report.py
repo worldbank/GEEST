@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import math
 from collections import defaultdict
 
@@ -123,21 +124,15 @@ class BaseReport:
             with open(self.template_path, "r") as template_file:
                 template_content = template_file.read()
         except IOError:
-            raise FileNotFoundError(
-                f"Template file '{self.template_path}' not found or cannot be read."
-            )
+            raise FileNotFoundError(f"Template file '{self.template_path}' not found or cannot be read.")
 
         document = QDomDocument()
         if not document.setContent(template_content):
-            raise ValueError(
-                f"Failed to parse the template content from '{self.template_path}'."
-            )
+            raise ValueError(f"Failed to parse the template content from '{self.template_path}'.")
 
         context = QgsReadWriteContext()
         if not self.layout.loadFromTemplate(document, context):
-            raise ValueError(
-                f"Failed to load the template into the layout from '{self.template_path}'."
-            )
+            raise ValueError(f"Failed to load the template into the layout from '{self.template_path}'.")
 
     def make_page(self, title: str, description_key: str, current_page: int):
         """
@@ -175,16 +170,12 @@ class BaseReport:
             QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters),
             page=current_page,
         )
-        description_label.setFixedSize(
-            QgsLayoutSize(100, 40, QgsUnitTypes.LayoutMillimeters)
-        )
+        description_label.setFixedSize(QgsLayoutSize(100, 40, QgsUnitTypes.LayoutMillimeters))
         description_label.setHAlign(Qt.AlignJustify)
         self.layout.addLayoutItem(description_label)
         return page
 
-    def make_text_table(
-        self, vector_layer: QgsVectorLayer, sort_column: str, current_page: int
-    ):
+    def make_text_table(self, vector_layer: QgsVectorLayer, sort_column: str, current_page: int):
         # I would have liked to just used a table here
         # but the table is not working - it crashes QGIS in 3.42
 
@@ -318,26 +309,14 @@ class BaseReport:
         grid.setIntervalX(interval_x)
         grid.setIntervalY(interval_y)
 
-        grid.setAnnotationDirection(
-            QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Bottom
-        )
-        grid.setAnnotationDirection(
-            QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Top
-        )
+        grid.setAnnotationDirection(QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Bottom)
+        grid.setAnnotationDirection(QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Top)
         # Set the bottom to show x/ lon  only
         # This prevents stray labels from lon rendering on the lat area and verce versa
-        grid.setAnnotationDisplay(
-            QgsLayoutItemMapGrid.DisplayMode.LongitudeOnly, QgsLayoutItemMapGrid.Bottom
-        )
-        grid.setAnnotationDisplay(
-            QgsLayoutItemMapGrid.DisplayMode.HideAll, QgsLayoutItemMapGrid.Top
-        )
-        grid.setAnnotationDisplay(
-            QgsLayoutItemMapGrid.DisplayMode.LatitudeOnly, QgsLayoutItemMapGrid.Left
-        )
-        grid.setAnnotationDisplay(
-            QgsLayoutItemMapGrid.DisplayMode.HideAll, QgsLayoutItemMapGrid.Right
-        )
+        grid.setAnnotationDisplay(QgsLayoutItemMapGrid.DisplayMode.LongitudeOnly, QgsLayoutItemMapGrid.Bottom)
+        grid.setAnnotationDisplay(QgsLayoutItemMapGrid.DisplayMode.HideAll, QgsLayoutItemMapGrid.Top)
+        grid.setAnnotationDisplay(QgsLayoutItemMapGrid.DisplayMode.LatitudeOnly, QgsLayoutItemMapGrid.Left)
+        grid.setAnnotationDisplay(QgsLayoutItemMapGrid.DisplayMode.HideAll, QgsLayoutItemMapGrid.Right)
 
         # (Optional) Enable and configure annotations for the grid lines
         grid.setAnnotationEnabled(True)
@@ -358,9 +337,7 @@ class BaseReport:
         # Set the new extent to the map item
         # Get the QgsProject CRS and set the extent in the map item
         project_crs = QgsProject.instance().crs()
-        project_transform = QgsCoordinateTransform(
-            crs, project_crs, QgsProject.instance()
-        )
+        project_transform = QgsCoordinateTransform(crs, project_crs, QgsProject.instance())
         map_extent = project_transform.transformBoundingBox(new_extent)
         log_message(
             f"Map extent in project CRS: {map_extent.xMinimum()}, {map_extent.yMinimum()}, "
@@ -405,15 +382,11 @@ class BaseReport:
         footer_label = QgsLayoutItemLabel(self.layout)
         footer_label.setText(footer_text)
         footer_label.setFont(QFont("Arial", 8))
-        footer_label.setFixedSize(
-            QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters)
-        )
+        footer_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
         # Use html mode
         footer_label.setMode(QgsLayoutItemLabel.ModeHtml)
         # Position the label on the current page
-        footer_label.attemptMove(
-            QgsLayoutPoint(20, 270, QgsUnitTypes.LayoutMillimeters), page=page_number
-        )
+        footer_label.attemptMove(QgsLayoutPoint(20, 270, QgsUnitTypes.LayoutMillimeters), page=page_number)
         footer_label.setHAlign(Qt.AlignJustify)
         self.layout.addLayoutItem(footer_label)
 
@@ -421,15 +394,11 @@ class BaseReport:
         credits_label = QgsLayoutItemLabel(self.layout)
         credits_label.setText(credits_text)
         credits_label.setFont(QFont("Arial", 8))
-        credits_label.setFixedSize(
-            QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters)
-        )
+        credits_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
         # Use html mode
         credits_label.setMode(QgsLayoutItemLabel.ModeHtml)
         # Position the label on the current page
-        credits_label.attemptMove(
-            QgsLayoutPoint(20, 288, QgsUnitTypes.LayoutMillimeters), page=page_number
-        )
+        credits_label.attemptMove(QgsLayoutPoint(20, 288, QgsUnitTypes.LayoutMillimeters), page=page_number)
         credits_label.setHAlign(Qt.AlignCenter)
         self.layout.addLayoutItem(credits_label)
 

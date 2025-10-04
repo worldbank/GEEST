@@ -50,9 +50,7 @@ class TestInit(unittest.TestCase):
             "author",
         ]
 
-        file_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), os.pardir, "metadata.txt")
-        )
+        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "metadata.txt"))
         LOGGER.info(file_path)
         metadata = []
         parser = configparser.ConfigParser()

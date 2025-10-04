@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cProfile
 import inspect
 import io
@@ -74,9 +75,7 @@ def cacheable(maxsize=128, typed=False):
                 # Check if result is in cache
                 if cache_key in wrapper.cache:
                     if developer_mode:
-                        log_message(
-                            f"🔄 Cache hit for {func.__name__}", level=Qgis.Info
-                        )
+                        log_message(f"🔄 Cache hit for {func.__name__}", level=Qgis.Info)
                     return wrapper.cache[cache_key]
 
                 # Not in cache, call function
@@ -167,20 +166,18 @@ class WorkflowJob(QgsTask):
             import datetime
             from pathlib import Path
 
-            profile_dir = (
-                Path(QgsApplication.qgisSettingsDirPath()) / "geest" / "profiles"
-            )
+            profile_dir = Path(QgsApplication.qgisSettingsDirPath()) / "geest" / "profiles"
             profile_dir.mkdir(parents=True, exist_ok=True)
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = str(
-                profile_dir / f"workflow_profile_{timestamp}.prof"
-            )  # Use .prof extension
+            output_file = str(profile_dir / f"workflow_profile_{timestamp}.prof")  # Use .prof extension
 
         # Save the stats in binary format
         cls._combined_profiler.dump_stats(output_file)
 
+        log_message(f"📊 WorkflowJob profiling stats saved to {output_file}", level=Qgis.Info)
         log_message(
-            f"📊 WorkflowJob profiling stats saved to {output_file}", level=Qgis.Info
+            "You can analyze this file using tools like SnakeViz or RunSnakeRun.",
+            level=Qgis.Info,
         )
         return output_file
 
@@ -200,9 +197,7 @@ class WorkflowJob(QgsTask):
 
         s = io.StringIO()
         cls._combined_profiler.sort_stats("cumulative")
-        cls._combined_profiler.print_stats(
-            20, 0.1, s
-        )  # Print top 20 functions, min 10% of total time
+        cls._combined_profiler.print_stats(20, 0.1, s)  # Print top 20 functions, min 10% of total time
         log_message(s.getvalue())
         log_message("=" * 50)
 
@@ -240,6 +235,7 @@ class WorkflowJob(QgsTask):
         context: QgsProcessingContext,
         item: JsonTreeItem,
         cell_size_m: float = 100.0,
+        analysis_scale: str = "local",  # or national
     ):
         """
         Initialize the workflow job.
@@ -249,13 +245,13 @@ class WorkflowJob(QgsTask):
         :param item: JsonTreeItem object representing the task - this is a reference
               so it will update the tree directly when modified
         :param cell_size_m: Cell size in meters for raster operations
+        :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national. Defaults to local.
         """
         super().__init__(description)
-        self.context = (
-            context  # QgsProcessingContext object used to pass objects to the thread
-        )
+        self.context = context  # QgsProcessingContext object used to pass objects to the thread
         self._item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self._cell_size_m = cell_size_m  # Cell size in meters for raster operations
+        self._analysis_scale = analysis_scale  # Analysis scale string e.g. local, national
         self._feedback = QgsFeedback()  # Feedback object for progress and cancellation
 
         # Use cached factory
@@ -263,6 +259,7 @@ class WorkflowJob(QgsTask):
         self._workflow = workflow_factory.create_workflow(
             item=self._item,
             cell_size_m=self._cell_size_m,
+            analysis_scale=self._analysis_scale,
             feedback=self._feedback,
             context=self.context,
         )  # Create the workflow
@@ -379,9 +376,7 @@ class WorkflowJob(QgsTask):
                     f"🔍 Profiling results for workflow: {self.description()}",
                     level=Qgis.Info,
                 )
-                log_message(
-                    f"Total jobs profiled so far: {self.__class__._jobs_profiled}"
-                )
+                log_message(f"Total jobs profiled so far: {self.__class__._jobs_profiled}")
                 # Only log detailed stats in verbose mode
                 verbose_mode = int(setting(key="verbose_mode", default=0))
                 if verbose_mode:

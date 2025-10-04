@@ -11,6 +11,7 @@ from geest.core.settings import setting
 from geest.gui.panels import (
     CreateProjectPanel,
     CreditsPanel,
+    GHSLPanel,
     HelpPanel,
     IntroPanel,
     OpenProjectPanel,
@@ -31,14 +32,13 @@ SETUP_PANEL = 2
 OPEN_PROJECT_PANEL = 3
 CREATE_PROJECT_PANEL = 4
 ROAD_NETWORK_PANEL = 5
-TREE_PANEL = 6
-HELP_PANEL = 7
+GHSL_PANEL = 6
+TREE_PANEL = 7
+HELP_PANEL = 8
 
 
 class GeestDock(QDockWidget):
-    def __init__(
-        self, parent: Optional[QWidget] = None, json_file: Optional[str] = None
-    ) -> None:
+    def __init__(self, parent: Optional[QWidget] = None, json_file: Optional[str] = None) -> None:
         """
         Initializes the GeestDock with a parent and an optional JSON file.
         Sets up the main widget and stacked panels.
@@ -50,9 +50,7 @@ class GeestDock(QDockWidget):
         # Get the plugin version from metadata.txt
         self.plugin_version = version()
 
-        self.setWindowTitle(
-            f"Women's Enablement Environments - {self.plugin_version}"
-        )  # Set the title of the dock
+        self.setWindowTitle(f"Women's Enablement Environments - {self.plugin_version}")  # Set the title of the dock
         self.json_file: Optional[str] = json_file
 
         # Initialize main widget and layout for the dock
@@ -137,9 +135,7 @@ class GeestDock(QDockWidget):
 
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
-                lambda: self.tree_widget.set_working_directory(
-                    self.open_project_widget.working_dir
-                )
+                lambda: self.tree_widget.set_working_directory(self.open_project_widget.working_dir)
             )
             # CREATE_PROJECT_PANEL = 4
             # Create and add the "Create Project" panel
@@ -159,12 +155,8 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: [
                     self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
-                    self.road_network_widget.set_working_directory(
-                        self.create_project_widget.working_dir
-                    ),
-                    self.road_network_widget.set_reference_layer(
-                        self.create_project_widget.reference_layer()
-                    ),
+                    self.road_network_widget.set_working_directory(self.create_project_widget.working_dir),
+                    self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer()),
                     self.road_network_widget.set_crs(self.create_project_widget.crs()),
                 ][
                     -1
@@ -172,9 +164,7 @@ class GeestDock(QDockWidget):
             )
 
             self.create_project_widget.working_directory_changed.connect(
-                lambda: self.tree_widget.set_working_directory(
-                    self.create_project_widget.working_dir
-                )
+                lambda: self.tree_widget.set_working_directory(self.create_project_widget.working_dir)
             )
             # ROAD_NETWORK_PANEL = 5
             # Create and add the "Road Network" panel
@@ -199,15 +189,36 @@ class GeestDock(QDockWidget):
             )
 
             self.road_network_widget.network_layer_path_changed.connect(
-                lambda: self.tree_widget.set_network_layer_path(
-                    self.road_network_widget.network_layer_path()
-                )
+                lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
+            )
+            # ROAD_NETWORK_PANEL = 5
+            # Create and add the "Road Network" panel
+            self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
+            road_network_panel: QWidget = QWidget()
+            road_network_layout: QVBoxLayout = QVBoxLayout(road_network_panel)
+            road_network_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
+            road_network_layout.addWidget(self.road_network_widget)
+            self.stacked_widget.addWidget(road_network_panel)
+
+            self.road_network_widget.switch_to_previous_tab.connect(
+                # Switch to the next tab when the button is clicked
+                # 🚩 Note we set the back button and the forward
+                #    button both to the TREE_PANEL so that the
+                #    User can re-invoke the network panel any time
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
+            self.road_network_widget.switch_to_next_tab.connect(
+                # Switch to the next tab when the button is clicked
+                lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
+            )
+
+            self.road_network_widget.network_layer_path_changed.connect(
+                lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
             )
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
-                lambda: self.tree_widget.set_working_directory(
-                    self.open_project_widget.working_dir
-                )
+                lambda: self.tree_widget.set_working_directory(self.open_project_widget.working_dir)
             )
             # TREE_PANEL = 6
             # Create and add the "Tree" panel (TreePanel)
@@ -220,10 +231,6 @@ class GeestDock(QDockWidget):
             self.tree_widget.switch_to_next_tab.connect(
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(HELP_PANEL)
-            )
-            self.tree_widget.switch_to_previous_tab.connect(
-                # Switch to the previous tab when the button is clicked
-                lambda: self.stacked_widget.setCurrentIndex(SETUP_PANEL)
             )
             self.tree_widget.switch_to_road_network_tab.connect(
                 # Switch to the road network tab when the button is clicked
@@ -257,9 +264,7 @@ class GeestDock(QDockWidget):
 
             # Customize allowed areas for docking
             self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-            self.setFeatures(
-                QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable
-            )
+            self.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
 
             # Connect panel change event if custom logic is needed when switching panels
             self.stacked_widget.currentChanged.connect(self.on_panel_changed)
@@ -283,9 +288,7 @@ class GeestDock(QDockWidget):
     def paintEvent(self, event):
         with QPainter(self) as painter:
             # Calculate the scaling and cropping offsets
-            scaled_background = self.background_image.scaled(
-                self.size(), Qt.KeepAspectRatioByExpanding
-            )
+            scaled_background = self.background_image.scaled(self.size(), Qt.KeepAspectRatioByExpanding)
 
             # Calculate the offset to crop from top and right to keep bottom left anchored
             x_offset = max(0, scaled_background.width() - self.width())
@@ -313,9 +316,7 @@ class GeestDock(QDockWidget):
                 tag="Geest",  # noqa E225
                 level=Qgis.Info,  # noqa E225
             )
-            if geest_project and os.path.exists(
-                os.path.join(geest_project, "model.json")
-            ):
+            if geest_project and os.path.exists(os.path.join(geest_project, "model.json")):
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
                 self.road_network_widget.set_working_directory(geest_project)
@@ -341,13 +342,9 @@ class GeestDock(QDockWidget):
             log_message("Switched to Create Project panel")
         elif index == ROAD_NETWORK_PANEL:
             working_directory = self.tree_widget.working_directory
-            log_message(
-                f"Setting road network panel working directory to: {working_directory}"
-            )
+            log_message(f"Setting road network panel working directory to: {working_directory}")
             self.road_network_widget.set_working_directory(working_directory)
-            self.road_network_widget.set_reference_layer(
-                self.create_project_widget.reference_layer()
-            )
+            self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer())
             self.road_network_widget.set_crs(self.create_project_widget.crs())
 
         elif index == TREE_PANEL:

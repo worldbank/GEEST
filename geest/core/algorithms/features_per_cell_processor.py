@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis import processing  # noqa: F401
 from qgis.core import (
     Qgis,
@@ -62,9 +63,7 @@ def select_grid_cells(
             intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
         else:
             # For line and polygon geometries, check actual geometry against grid cells
-            intersecting_ids = grid_index.intersects(
-                feature_geom.boundingBox()
-            )  # Initial rough filter
+            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
             log_message(
                 f"{len(intersecting_ids)} rough intersections found.",
                 tag="Geest",
@@ -88,9 +87,7 @@ def select_grid_cells(
             else:
                 grid_feature_counts[grid_id] = 1
         counter += 1
-        feedback.setProgress(
-            (counter / feature_count) * 100.0
-        )  # We just use nominal intervals for progress updates
+        feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
 
     log_message(f"{len(grid_feature_counts)} intersections found.")
 
@@ -134,9 +131,7 @@ def select_grid_cells(
         # Set the 'id' and 'intersecting_features' attributes
         new_feature.setFields(fields)
         new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
-        new_feature.setAttribute(
-            "intersecting_features", grid_feature_counts[grid_feature.id()]
-        )
+        new_feature.setAttribute("intersecting_features", grid_feature_counts[grid_feature.id()])
         new_feature.setAttribute("value", None)
 
         # Write the feature to the new layer
@@ -157,9 +152,7 @@ def select_grid_cells(
     )
 
 
-def assign_values_to_grid(
-    grid_layer: QgsVectorLayer, feedback: QgsFeedback = None
-) -> QgsVectorLayer:
+def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = None) -> QgsVectorLayer:
     """
     Assign values to grid cells based on the number of intersecting features.
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Exceptions definitions."""
 
 from qgis.core import Qgis
@@ -64,9 +65,7 @@ class OverpassManyRequestException(QuickOsmException):
 
     def __init__(self, message: str = None):
         if not message:
-            message = tr(
-                "OverpassAPI has received too many requests, try again later or a smaller query."
-            )
+            message = tr("OverpassAPI has received too many requests, try again later or a smaller query.")
         super().__init__(message)
 
 
@@ -74,12 +73,10 @@ class OverpassMemoryException(QuickOsmException):
     """Out of memory exception."""
 
     def __init__(self, amount_memory: int, unit: str):
-        message = tr(
-            "OverpassAPI is out of memory, try another query or a smaller area."
+        message = tr("OverpassAPI is out of memory, try another query or a smaller area.")
+        details = tr("The server would need more or less {number} {unit} of RAM.").format(
+            number=amount_memory, unit=unit
         )
-        details = tr(
-            "The server would need more or less {number} {unit} of RAM."
-        ).format(number=amount_memory, unit=unit)
         super().__init__(message, details)
 
 
@@ -118,9 +115,7 @@ class QueryNotSupported(QuickOsmException):
     """Query not supported exception."""
 
     def __init__(self, key: str):
-        message = tr(
-            "The query is not supported by the plugin because of : {key}"
-        ).format(key=key)
+        message = tr("The query is not supported by the plugin because of : {key}").format(key=key)
         super().__init__(message)
 
 
@@ -136,9 +131,7 @@ class NominatimBadRequest(QuickOsmException):
         :param query: Name of the place.
         :type query: basestring
         """
-        message = tr(
-            'Nominatim hasn\'t found any data for an area called "{place_name}".'
-        )
+        message = tr('Nominatim hasn\'t found any data for an area called "{place_name}".')
         message = message.format(place_name=query)
 
         super().__init__(message)
@@ -154,9 +147,7 @@ class NominatimAreaException(QuickOsmException):
         :type query: basestring
         """
         message = tr('No named area found for OSM {osm_type} called "{place_name}".')
-        message = message.format(
-            osm_type=OsmType.Relation.name.lower(), place_name=query
-        )
+        message = message.format(osm_type=OsmType.Relation.name.lower(), place_name=query)
 
         # No polygon has been found, we propose the "around" query.
         more_details = tr(
@@ -235,8 +226,7 @@ class NoSelectedFeatures(QuickOsmException):
 
     def __init__(self):
         message = tr(
-            "No selected features have been found in the layer."
-            " Please select some features or uncheck the option."
+            "No selected features have been found in the layer." " Please select some features or uncheck the option."
         )
         super().__init__(message)
 

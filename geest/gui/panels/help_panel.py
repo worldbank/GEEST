@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtGui import QDesktopServices
 from qgis.PyQt.QtCore import Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtWidgets import (
@@ -36,28 +37,20 @@ class HelpPanel(QWidget):
             # Center the content both vertically and horizontally when QWebEngineView is unavailable
 
             # Add vertical spacers for vertical centering
-            self.layout.addSpacerItem(
-                QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-            )
+            self.layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
             # Create label and button
-            self.label = QLabel(
-                "WebEngine not available. Click below to open the help in your browser."
-            )
+            self.label = QLabel("WebEngine not available. Click below to open the help in your browser.")
             self.label.setAlignment(Qt.AlignCenter)  # Center the label horizontally
             self.layout.addWidget(self.label)
 
             open_browser_button = QPushButton("Open in Browser")
             open_browser_button.clicked.connect(self.open_in_browser)
             open_browser_button.setFixedSize(150, 40)  # Set fixed size for the button
-            self.layout.addWidget(
-                open_browser_button, alignment=Qt.AlignCenter
-            )  # Center button horizontally
+            self.layout.addWidget(open_browser_button, alignment=Qt.AlignCenter)  # Center button horizontally
 
             # Add vertical spacers for vertical centering
-            self.layout.addSpacerItem(
-                QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-            )
+            self.layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Add back button (horizontally centered in both cases)
         back_button = QPushButton("Back")
