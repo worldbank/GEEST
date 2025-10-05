@@ -116,7 +116,7 @@ class GHSLDownloaderTask(QgsTask):
                 feedback=self.feedback,
             )
             self.setProgress(100)  # Trigger the UI to update with completion value
-            downloader.process_response()
+            # downloader.process_response()
             log_message(f"GHSL Downloaded to {self.gpkg_path}.")
 
         except Exception as e:

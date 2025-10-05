@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# ghsl_tile_manager.py
 
 import os
 import zipfile
@@ -10,9 +9,11 @@ from qgis.core import (
     QgsApplication,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
+    QgsFeedback,
     QgsFileDownloader,
     QgsGeometry,
     QgsMessageLog,
+    QgsNetworkAccessManager,
     QgsProject,
     QgsRectangle,
     QgsVectorLayer,
@@ -29,8 +30,29 @@ class GHSLDownloader:
         "V2-0/tiles/"
     )
 
-    def __init__(self, plugin_name="GHSLFetcher"):
-        self.plugin_name = plugin_name
+    def __init__(
+        self,
+        extents: QgsRectangle,
+        output_path: str = None,
+        output_crs: QgsCoordinateReferenceSystem = None,
+        filename: str = "",  # will also set the layer name in the gpkg
+        use_cache: bool = False,
+        delete_gpkg: bool = True,
+        feedback: QgsFeedback = None,
+    ):
+        # These are required
+        self.extents = extents  # The bounding box extents (S, E, N, W)
+        self.output_path = output_path  # The output path for the GeoPackage
+        self.output_crs = output_crs
+        self.filename = filename  # will also set the layer name in the gpkg
+        self.use_cache = use_cache
+        self.delete_gpkg = delete_gpkg
+        self.network_manager = QgsNetworkAccessManager()
+        self.feedback = feedback
+
+        self.base_url = self.BASE_URL
+
+        self.plugin_name = "ghsl_fetcher"
         self.layer = self._index_layer()
         self.crs_wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
         self.crs_mollweide = QgsCoordinateReferenceSystem("ESRI:54009")
