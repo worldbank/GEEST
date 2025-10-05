@@ -100,7 +100,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.raster_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.raster_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
         self.load_ghsl_layer_button.clicked.connect(self.load_settlements_layer)
-        # self.download_settlements_layer_button.clicked.connect(self.download_settlements_layer_button_clicked)
+        self.download_settlements_layer_button.clicked.connect(self.download_settlements_layer_button_clicked)
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
@@ -152,6 +152,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
 
     def download_settlements_layer_button_clicked(self):
         """Triggered when the settlements layer button is pressed."""
+        log_message("Download settlements layer button clicked")
         if self._reference_layer is None:
             QMessageBox.critical(
                 self,
