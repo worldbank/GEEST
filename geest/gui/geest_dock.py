@@ -188,6 +188,9 @@ class GeestDock(QDockWidget):
                 lambda: self.stacked_widget.setCurrentIndex(GHSL_PANEL)
             )
 
+            # See lower down for tree widget creation
+            # We need to create it here so we can connect signals
+            self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
             self.road_network_widget.network_layer_path_changed.connect(
                 lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
             )
@@ -222,7 +225,6 @@ class GeestDock(QDockWidget):
             )
             # TREE_PANEL = 7
             # Create and add the "Tree" panel (TreePanel)
-            self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
             tree_panel: QWidget = QWidget()
             tree_layout: QVBoxLayout = QVBoxLayout(tree_panel)
             tree_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
