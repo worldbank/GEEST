@@ -158,6 +158,9 @@ class GeestDock(QDockWidget):
                     self.road_network_widget.set_working_directory(self.create_project_widget.working_dir),
                     self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer()),
                     self.road_network_widget.set_crs(self.create_project_widget.crs()),
+                    self.ghsl_widget.set_working_directory(self.create_project_widget.working_dir),
+                    self.ghsl_widget.set_reference_layer(self.create_project_widget.reference_layer()),
+                    self.ghsl_widget.set_crs(self.create_project_widget.crs()),
                 ][
                     -1
                 ]  # The [-1] ensures the lambda returns the last value
@@ -335,6 +338,7 @@ class GeestDock(QDockWidget):
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
                 self.road_network_widget.set_working_directory(geest_project)
+                self.ghsl_widget.set_working_directory(geest_project)
 
     def on_panel_changed(self, index: int) -> None:
         """
@@ -361,6 +365,12 @@ class GeestDock(QDockWidget):
             self.road_network_widget.set_working_directory(working_directory)
             self.road_network_widget.set_reference_layer(self.create_project_widget.reference_layer())
             self.road_network_widget.set_crs(self.create_project_widget.crs())
+        elif index == GHSL_PANEL:
+            working_directory = self.tree_widget.working_directory
+            log_message(f"Setting ghsl panel working directory to: {working_directory}")
+            self.ghsl_widget.set_working_directory(working_directory)
+            self.ghsl_widget.set_reference_layer(self.create_project_widget.reference_layer())
+            self.ghsl_widget.set_crs(self.create_project_widget.crs())
 
         elif index == TREE_PANEL:
             log_message("Switched to Tree panel")
