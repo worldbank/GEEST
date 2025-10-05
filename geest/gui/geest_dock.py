@@ -195,9 +195,9 @@ class GeestDock(QDockWidget):
             # Create and add the "GHSL" panel
             self.ghsl_widget: GHSLPanel = GHSLPanel()
             ghsl_panel: QWidget = QWidget()
-            ghsl_layout: QVBoxLayout = QVBoxLayout(road_network_panel)
+            ghsl_layout: QVBoxLayout = QVBoxLayout(ghsl_panel)
             ghsl_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
-            ghsl_layout.addWidget(self.road_network_widget)
+            ghsl_layout.addWidget(self.ghsl_widget)
             self.stacked_widget.addWidget(ghsl_panel)
 
             self.ghsl_widget.switch_to_previous_tab.connect(

@@ -33,6 +33,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
     ghsl_layer_path_changed = pyqtSignal(str)  # Signal to set the ghsl layer path
 
     def __init__(self):
+        log_message("Loading GHSL panel")
         super().__init__()
         self.setWindowTitle("GEEST")
         # For running study area processing in a separate thread
@@ -45,7 +46,6 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.settings = QSettings()  # Initialize QSettings to store and retrieve settings
         # Dynamically load the .ui file
         self.setupUi(self)
-        log_message("Loading setup panel")
         self.initUI()
         self._reference_layer = None
         self._crs = None
