@@ -213,14 +213,14 @@ class GeestDock(QDockWidget):
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
 
-            self.ghsl_widget.layer_path_changed.connect(
-                lambda: self.tree_widget.set_network_layer_path(self.ghsl_widget.network_layer_path())
+            self.ghsl_widget.ghsl_layer_path_changed.connect(
+                lambda: self.tree_widget.set_ghsl_layer_path(self.ghsl_widget.ghsl_layer_path())
             )
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(self.open_project_widget.working_dir)
             )
-            # TREE_PANEL = 6
+            # TREE_PANEL = 7
             # Create and add the "Tree" panel (TreePanel)
             self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
             tree_panel: QWidget = QWidget()
@@ -239,8 +239,21 @@ class GeestDock(QDockWidget):
                     self.stacked_widget.setCurrentIndex(ROAD_NETWORK_PANEL),
                 ]
             )
+            self.tree_widget.switch_to_ghsl_tab.connect(
+                # Switch to the road network tab when the button is clicked
+                # This is also called from the context menu in the tree_panel
+                lambda: [
+                    self.stacked_widget.setCurrentIndex(GHSL_PANEL),
+                ]
+            )
+            self.tree_widget.switch_to_setup_tab.connect(
+                # Switch to the project tab when the button is clicked
+                lambda: [
+                    self.stacked_widget.setCurrentIndex(SETUP_PANEL),
+                ]
+            )
 
-            # HELP_PANEL = 7
+            # HELP_PANEL = 8
             # Create and add the "Help" panel (HelpPanel)
             help_widget: HelpPanel = HelpPanel()
             help_panel: QWidget = QWidget()

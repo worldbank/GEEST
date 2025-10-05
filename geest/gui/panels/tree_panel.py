@@ -62,9 +62,10 @@ from geest.utilities import log_message, resources_path, theme_stylesheet
 
 class TreePanel(QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
+    switch_to_setup_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_road_network_tab = pyqtSignal()  # Signal to open the road network tab
-    switch_to_ghsl_panel = pyqtSignal()  # Signal to open the ghsl tab
+    switch_to_ghsl_tab = pyqtSignal()  # Signal to open the ghsl tab
 
     def __init__(self, parent=None, json_file=None):
         super().__init__(parent)
@@ -167,7 +168,7 @@ class TreePanel(QWidget):
         button_bar.addWidget(self.prepare_analysis_button)
 
         self.project_button = QPushButton("Project")
-        self.project_button.clicked.connect(self.switch_to_previous_tab)
+        self.project_button.clicked.connect(self.switch_to_setup_tab)
         button_bar.addWidget(self.project_button)
 
         self.help_button = QPushButton("Help")
@@ -415,10 +416,10 @@ class TreePanel(QWidget):
     @pyqtSlot()
     def set_ghsl_layer_path(self, ghsl_layer_path: str):
         if ghsl_layer_path:
-            log_message(f"Setting ghsl_layer_path in model to {network_layer_path}")
+            log_message(f"Setting ghsl_layer_path in model to {ghsl_layer_path}")
             analysis_item = self.model.rootItem.child(0)
             try:
-                analysis_item.setAttribute("ghsl_layer_path", network_layer_path)
+                analysis_item.setAttribute("ghsl_layer_path", ghsl_layer_path)
             except Exception as e:
                 log_message(f"Error setting ghsl path: {str(e)}", level=Qgis.Critical)
         else:
@@ -531,6 +532,7 @@ class TreePanel(QWidget):
             set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to method
             menu.addAction(edit_analysis_action)
             menu.addAction(set_road_network_layer_action)
+            menu.addAction(set_ghsl_layer_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
