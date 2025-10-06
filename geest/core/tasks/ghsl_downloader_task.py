@@ -118,6 +118,12 @@ class GHSLDownloaderTask(QgsTask):
             log_message("Getting GHSL Tile List")
             tiles = downloader.tiles_intersecting_bbox()
             log_message(f"Tiles intersecting area: {tiles}")
+            tile_paths = []
+            for tile in tiles:
+                self.setProgress(int(tiles.index(tile) / len(tiles)))
+                log_message(f"Downloading tile {tile}...")
+                tile_paths.extend(downloader.download_and_unpack_tile(tile))
+            log_message("All tiles downloaded, finalizing...")
             self.setProgress(100)  # Trigger the UI to update with completion value
             # downloader.process_response()
             log_message(f"GHSL Downloaded to {self.gpkg_path}.")

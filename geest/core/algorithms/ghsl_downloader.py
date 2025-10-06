@@ -17,7 +17,7 @@ from qgis.core import (
     QgsRectangle,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QEventLoop
+from qgis.PyQt.QtCore import QEventLoop, QUrl
 from qgis.utils import iface
 
 from geest.utilities import log_message, resources_path
@@ -134,7 +134,7 @@ class GHSLDownloader:
                 self._notify(f"Download error {err_code}: {err_msg}", Qgis.Critical)
                 loop.quit()
 
-            downloader = QgsFileDownloader(url, zip_path, authcfg="", method=QgsFileDownloader.HttpGet)
+            downloader = QgsFileDownloader(QUrl(url), zip_path, authcfg="", httpMethod=Qgis.HttpMethod.Get)
             downloader.downloadCompleted.connect(on_finished)
             downloader.downloadError.connect(on_error)
 
