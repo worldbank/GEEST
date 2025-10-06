@@ -109,6 +109,9 @@
         "Neogit",
         "neotest",
         "shellcheck",
-        "stylua"
+        "stylua",
+        "GHSL",
+        "GDAL",
+        "polygonize"
     ]
 }
