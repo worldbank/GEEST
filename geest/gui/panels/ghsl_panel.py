@@ -220,7 +220,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
             # This is a sneaky hack to show the exact progress in the label
             # since QProgressBar only takes ints. See Qt docs for more info.
             # Use the 'setFormat' method to display the exact float:
-            float_value_as_string = f"GHSL download progress: {progress}%"
+            float_value_as_string = f"Download progress: {progress}%"
             self.progress_bar.setFormat(float_value_as_string)
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress
@@ -253,7 +253,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
         log_message(f"Loading ghsl layer from {ghsl_layer_path}")
         layer = QgsVectorLayer(ghsl_layer_path, "GHSL Layer", "ogr")
         if not layer.isValid():
-            QMessageBox.critical(self, "Error", "Could not load the road ghsl layer.")
+            QMessageBox.critical(self, "Error", "Could not load the ghsl layer.")
             return
         # Load the layer in QGIS
         QgsProject.instance().addMapLayer(layer)

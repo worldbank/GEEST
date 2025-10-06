@@ -52,7 +52,7 @@ class GHSLDownloaderTask(QgsTask):
         :param feedback: QgsFeedback object for reporting progress.
         :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
         """
-        super().__init__("Study Area Preparation", QgsTask.CanCancel)
+        super().__init__("GHSL Downloader", QgsTask.CanCancel)
 
         self.reference_layer = reference_layer  # used to determin bbox of download
         if working_dir is None or working_dir == "":
@@ -115,6 +115,9 @@ class GHSLDownloaderTask(QgsTask):
                 delete_gpkg=self.delete_gpkg,
                 feedback=self.feedback,
             )
+            log_message("Getting GHSL Tile List")
+            tiles = downloader.tiles_intersecting_bbox()
+            log_message(f"Tiles intersecting area: {tiles}")
             self.setProgress(100)  # Trigger the UI to update with completion value
             # downloader.process_response()
             log_message(f"GHSL Downloaded to {self.gpkg_path}.")

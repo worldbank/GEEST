@@ -3,24 +3,24 @@
 import os
 import zipfile
 
-from PyQt5.QtCore import QEventLoop
 from qgis.core import (
     Qgis,
     QgsApplication,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
+    QgsFeatureRequest,
     QgsFeedback,
     QgsFileDownloader,
-    QgsGeometry,
     QgsMessageLog,
     QgsNetworkAccessManager,
     QgsProject,
     QgsRectangle,
     QgsVectorLayer,
 )
+from qgis.PyQt.QtCore import QEventLoop
 from qgis.utils import iface
 
-from geest.utilities import resources_path
+from geest.utilities import log_message, resources_path
 
 
 class GHSLDownloader:
@@ -41,7 +41,7 @@ class GHSLDownloader:
         feedback: QgsFeedback = None,
     ):
         # These are required
-        self.extents = extents  # The bounding box extents (S, E, N, W)
+        self.extents = extents
         self.output_path = output_path  # The output path for the GeoPackage
         self.output_crs = output_crs
         self.filename = filename  # will also set the layer name in the gpkg
@@ -94,18 +94,23 @@ class GHSLDownloader:
             QgsVectorLayer: The index layer.
         """
         layer_path = resources_path("resources", "ghsl", "ghs-mod-2023-tile-scheme.parquet")
+        log_message(f"Loading tile index layer from {layer_path}")
         layer = QgsVectorLayer(layer_path, "tiles", "ogr")
+        # Set the layer crs to mollweide
+        layer.setCrs(QgsCoordinateReferenceSystem("ESRI:54009"))
 
         return layer
 
-    def tiles_intersecting_bbox(self, bbox: QgsRectangle):
-        bbox_mollweiide = self.transform.transform(bbox)
+    def tiles_intersecting_bbox(self):
+        log_message(f"Finding tiles intersecting bbox: {self.extents.toString()}")
+        bbox_mollweiide = self.transform.transform(self.extents)
+        log_message(f"\n Transformed to Mollweide: {bbox_mollweiide.toString()}")
+
         # get the features that intersect the bbox
-        bbox_geom = QgsGeometry.fromRect(bbox_mollweiide)
-        # get the features that intersect the bbox
-        bbox_filter = self.layer.dataProvider().createSpatialFilter(bbox_geom)
         intersecting = []
-        for feat in self.layer.getFeatures(bbox_filter):
+        request = QgsFeatureRequest().setFilterRect(bbox_mollweiide)
+        for feat in self.layer.getFeatures(request):
+            log_message(f"\n - {feat['tile_id']}")
             intersecting.append(feat["tile_id"])
         return intersecting
 

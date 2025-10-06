@@ -219,9 +219,9 @@ class GeestDock(QDockWidget):
                 lambda: self.stacked_widget.setCurrentIndex(TREE_PANEL)
             )
 
-            self.ghsl_widget.ghsl_layer_path_changed.connect(
-                lambda: self.tree_widget.set_ghsl_layer_path(self.ghsl_widget.ghsl_layer_path())
-            )
+            # self.ghsl_widget.ghsl_layer_path_changed.connect(
+            #    lambda: self.tree_widget.set_ghsl_layer_path(self.ghsl_widget.ghsl_layer_path())
+            # )
             self.open_project_widget.set_working_directory.connect(
                 # Switch to the previous tab when the button is clicked
                 lambda: self.tree_widget.set_working_directory(self.open_project_widget.working_dir)

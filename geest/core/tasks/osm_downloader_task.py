@@ -52,7 +52,7 @@ class OSMDownloaderTask(QgsTask):
         :param feedback: QgsFeedback object for reporting progress.
         :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
         """
-        super().__init__("Study Area Preparation", QgsTask.CanCancel)
+        super().__init__("OSM Downloader Task", QgsTask.CanCancel)
 
         self.reference_layer = reference_layer  # used to determin bbox of download
         if working_dir is None or working_dir == "":

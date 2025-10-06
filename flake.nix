@@ -108,6 +108,7 @@
           pkgs.isort
           pkgs.jq
           pkgs.libsForQt5.kcachegrind
+          pkgs.libsForQt5.qt5.qtpositioning
           pkgs.luaPackages.luacheck
           pkgs.markdownlint-cli
           pkgs.nixfmt-rfc-style

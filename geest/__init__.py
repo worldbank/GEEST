@@ -75,6 +75,7 @@ log_message(f"Geest Version: {version}")
 log_message(f"Logging output to: {log_file_path}", force=True)
 log_message(f"log_path_env: {log_path_env}", force=True)
 log_message("»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
+log_message("QGIS Version: {}".format(Qgis.QGIS_VERSION), force=True)
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
