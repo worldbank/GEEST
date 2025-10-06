@@ -115,6 +115,14 @@ class GHSLDownloader:
         return intersecting
 
     def download_and_unpack_tile(self, tile_id):
+        """Download and unpack a GHS tile.
+
+        Args:
+            tile_id (str): The ID of the tile to download.
+
+        Returns:
+            list: A list of paths to the unpacked files.
+        """
         cache_dir = self._cache_dir()
         zip_name = f"GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_{tile_id}.zip"
         zip_path = os.path.join(cache_dir, zip_name)
@@ -127,10 +135,12 @@ class GHSLDownloader:
             loop = QEventLoop()
 
             def on_finished():
+                log_message(f"Download finished: {zip_path}")
                 self._notify(f"Downloaded {zip_name} → {zip_path}", Qgis.Success)
                 loop.quit()
 
             def on_error(err_code, err_msg):
+                log_message(f"Download error {err_code}: {err_msg}")
                 self._notify(f"Download error {err_code}: {err_msg}", Qgis.Critical)
                 loop.quit()
 

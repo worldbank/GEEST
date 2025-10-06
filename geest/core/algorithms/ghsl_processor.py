@@ -35,7 +35,10 @@ class GHSLProcessor:
         joined_vector_path: Path to the spatial join result GeoPackage.
     """
 
-    def __init__(self, input_raster_layers: List[str]):
+    def __init__(
+        self,
+        input_raster_paths: List[str],
+    ):
         """
         Initialize the RasterProcessor with input raster layers.
 
@@ -45,17 +48,17 @@ class GHSLProcessor:
         Raises:
             ValueError: If input_raster_layers is empty or contains invalid paths.
         """
-        if not input_raster_layers:
+        if not input_raster_paths:
             raise ValueError("Input raster layers list cannot be empty")
 
-        self.input_raster_layers = input_raster_layers
+        self.input_raster_layers = input_raster_paths
         self.virtual_raster_path: Optional[str] = None
         self.reclassified_raster_path: Optional[str] = None
         self.polygonized_vector_path: Optional[str] = None
         self.joined_vector_path: Optional[str] = None
 
         # Verify all input files exist
-        for layer_path in input_raster_layers:
+        for layer_path in input_raster_paths:
             if not Path(layer_path).exists():
                 raise ValueError(f"Input raster layer does not exist: {layer_path}")
 
@@ -90,7 +93,7 @@ class GHSLProcessor:
         self.virtual_raster_path = output_path
         return output_path
 
-    def reclassify_raster(self, input_raster_path: str, output_raster_path: str) -> str:
+    def reclassify_rasters(self, suffix: str = "classified") -> list:
         """
         Reclassify raster values based on specified logic.
 
@@ -105,52 +108,54 @@ class GHSLProcessor:
             output_raster_path: Path for the output reclassified TIFF file.
 
         Returns:
-            The path to the created reclassified raster file.
+            The paths to the created reclassified raster files.
 
         Raises:
             RuntimeError: If reclassification fails or input raster cannot be opened.
         """
         # Open the input raster dataset
-        input_dataset = gdal.Open(input_raster_path, gdal.GA_ReadOnly)
-        if input_dataset is None:
-            raise RuntimeError(f"Failed to open input raster: {input_raster_path}")
+        for layer in self.input_raster_layers:
+            output_raster_path = str(Path(layer).with_suffix(f".{suffix}.tif"))
+            input_dataset = gdal.Open(layer, gdal.GA_ReadOnly)
+            if input_dataset is None:
+                raise RuntimeError(f"Failed to open input raster: {layer}")
 
-        # Get raster properties
-        raster_band = input_dataset.GetRasterBand(1)
-        x_size = input_dataset.RasterXSize
-        y_size = input_dataset.RasterYSize
-        geotransform = input_dataset.GetGeoTransform()
-        projection = input_dataset.GetProjection()
+            # Get raster properties
+            raster_band = input_dataset.GetRasterBand(1)
+            x_size = input_dataset.RasterXSize
+            y_size = input_dataset.RasterYSize
+            geotransform = input_dataset.GetGeoTransform()
+            projection = input_dataset.GetProjection()
 
-        # Read the raster data as numpy array
-        raster_array = raster_band.ReadAsArray()
+            # Read the raster data as numpy array
+            raster_array = raster_band.ReadAsArray()
 
-        # Apply reclassification logic
-        # Values 10 or 11 become 0, all others become 1
-        reclassified_array = np.where((raster_array == 10) | (raster_array == 11), 0, 1).astype(np.uint8)
+            # Apply reclassification logic
+            # Values 10 or 11 become 0, all others become 1
+            reclassified_array = np.where((raster_array == 10) | (raster_array == 11), 0, 1).astype(np.uint8)
 
-        # Create output raster
-        driver = gdal.GetDriverByName("GTiff")
-        output_dataset = driver.Create(output_raster_path, x_size, y_size, 1, gdal.GDT_Byte)
+            # Create output raster
+            driver = gdal.GetDriverByName("GTiff")
+            output_dataset = driver.Create(output_raster_path, x_size, y_size, 1, gdal.GDT_Byte)
 
-        if output_dataset is None:
-            raise RuntimeError(f"Failed to create output raster: {output_raster_path}")
+            if output_dataset is None:
+                raise RuntimeError(f"Failed to create output raster: {output_raster_path}")
 
-        # Set geotransform and projection
-        output_dataset.SetGeoTransform(geotransform)
-        output_dataset.SetProjection(projection)
+            # Set geotransform and projection
+            output_dataset.SetGeoTransform(geotransform)
+            output_dataset.SetProjection(projection)
 
-        # Write the reclassified data
-        output_band = output_dataset.GetRasterBand(1)
-        output_band.WriteArray(reclassified_array)
-        output_band.FlushCache()
+            # Write the reclassified data
+            output_band = output_dataset.GetRasterBand(1)
+            output_band.WriteArray(reclassified_array)
+            output_band.FlushCache()
 
-        # Close datasets
-        input_dataset = None
-        output_dataset = None
+            # Close datasets
+            input_dataset = None
+            output_dataset = None
 
-        self.reclassified_raster_path = output_raster_path
-        return output_raster_path
+            self.reclassified_raster_path = output_raster_path
+            return output_raster_path
 
     def polygonize_raster(
         self, input_raster_path: str, output_vector_path: str, class_field_name: str = "class"

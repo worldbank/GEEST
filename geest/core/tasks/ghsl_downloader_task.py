@@ -13,7 +13,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import pyqtSignal
 
-from geest.core.algorithms import GHSLDownloader
+from geest.core.algorithms import GHSLDownloader, GHSLProcessor
 from geest.utilities import log_message
 
 
@@ -60,7 +60,8 @@ class GHSLDownloaderTask(QgsTask):
         if not isinstance(reference_layer, QgsVectorLayer):
             raise ValueError("Reference layer must be a QgsVectorLayer")
         self.working_dir = working_dir
-        self.gpkg_path = os.path.join(working_dir, "study_area", f"{filename}.gpkg")
+        self.gpkg_path = os.path.join(working_dir, "study_area", f"ghsl_{filename}.gpkg")
+        self.vrt_path = os.path.join(working_dir, "study_area", f"ghsl_{filename}.vrt")
         log_message(f"GeoPackage path: {self.gpkg_path}")
         self.filename = filename
         self.use_cache = use_cache
@@ -124,6 +125,15 @@ class GHSLDownloaderTask(QgsTask):
                 log_message(f"Downloading tile {tile}...")
                 tile_paths.extend(downloader.download_and_unpack_tile(tile))
             log_message("All tiles downloaded, finalizing...")
+            log_message(f"Merging {len(tile_paths)} tiles into {self.gpkg_path}...")
+            log_message(f"Tile paths: {tile_paths}")
+            tifs = self.filter_tif_files(tile_paths)
+            log_message(f"Filtered to {len(tifs)} .tif files.")
+            if len(tifs) == 0:
+                raise ValueError("No .tif files found to merge.")
+            processor = GHSLProcessor(input_raster_paths=tifs)
+            reclassified_layers = processor.reclassify_rasters(suffix="reclass")
+
             self.setProgress(100)  # Trigger the UI to update with completion value
             # downloader.process_response()
             log_message(f"GHSL Downloaded to {self.gpkg_path}.")
@@ -145,3 +155,15 @@ class GHSLDownloaderTask(QgsTask):
         if not os.path.exists(study_area_dir):
             os.makedirs(study_area_dir)
             log_message(f"Created directory {study_area_dir}")
+
+    def filter_tif_files(self, file_list):
+        """
+        Filter a list of files to only include .tif files.
+
+        Args:
+            file_list (list): List of file paths.
+
+        Returns:
+            list: Filtered list containing only .tif files.
+        """
+        return [f for f in file_list if f.lower().endswith(".tif")]

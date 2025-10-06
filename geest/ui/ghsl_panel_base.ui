@@ -286,7 +286,7 @@
           </font>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A human settlements layer is needed to identify areas where areas of no / very low population exist. You can select your own raster layer and population threshold, or automatically fetch the data from the &lt;a href=&quot;https://human-settlement.emergency.copernicus.eu/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Global Human Settlement Layer (GHSL)&lt;/span&gt;&lt;/a&gt; project.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A human settlements layer is needed to identify areas where areas of no / very low population exist. You can select your own raster layer and population threshold, or automatically fetch the data from the &lt;a href=&quot;https://human-settlement.emergency.copernicus.eu/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Global Human Settlement Layer (GHSL)&lt;/span&gt;&lt;/a&gt; project.&lt;br/&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Pesaresi, Martino; Politis, Panagiotis (2023): GHS-BUILT-S R2023A - GHS built-up surface grid, derived from Sentinel2 composite and Landsat, multitemporal (1975-2030). European Commission, Joint Research Centre (JRC) [Dataset] doi: 10.2905/9F06F36F-4B11-47EC-ABB0-4F8B7B1D72EA PID: http://data.europa.eu/89h/9f06f36f-4b11-47ec-abb0-4f8b7b1d72ea &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
