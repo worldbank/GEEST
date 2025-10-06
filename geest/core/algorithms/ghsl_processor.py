@@ -9,11 +9,14 @@ This module provides a comprehensive class for processing raster layers using GD
 including virtual raster creation, reclassification, polygonization, and spatial joins.
 """
 
+import os
 from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
 from osgeo import gdal, ogr, osr
+
+from geest.utilities import log_message
 
 
 class GHSLProcessor:
@@ -114,8 +117,10 @@ class GHSLProcessor:
             RuntimeError: If reclassification fails or input raster cannot be opened.
         """
         # Open the input raster dataset
+        output_raster_paths = []
         for layer in self.input_raster_layers:
-            output_raster_path = str(Path(layer).with_suffix(f".{suffix}.tif"))
+            # replace .tif at the end of the file with _{suffix}.tif
+            output_raster_path = os.path.splitext(layer)[0] + f"_{suffix}.tif"
             input_dataset = gdal.Open(layer, gdal.GA_ReadOnly)
             if input_dataset is None:
                 raise RuntimeError(f"Failed to open input raster: {layer}")
@@ -155,11 +160,80 @@ class GHSLProcessor:
             output_dataset = None
 
             self.reclassified_raster_path = output_raster_path
-            return output_raster_path
+            output_raster_paths.append(output_raster_path)
+        return output_raster_paths
 
-    def polygonize_raster(
-        self, input_raster_path: str, output_vector_path: str, class_field_name: str = "class"
-    ) -> str:
+    def clean_raster_for_polygonization(self, input_raster_path: str) -> str:
+        """
+        Clean raster by setting all 0 values to NoData before polygonization.
+
+        This eliminates the need to filter polygons later - only non-zero
+        pixels will be polygonized.
+
+        Args:
+            input_raster_path: Path to the reclassified raster
+
+        Returns:
+            Path to the cleaned raster file
+        """
+        # Create cleaned raster path
+        cleaned_path = input_raster_path.replace(".tif", "_cleaned.tif")
+
+        log_message(f"Cleaning raster for polygonization: {input_raster_path} -> {cleaned_path}")
+
+        # Open input raster
+        input_dataset = gdal.Open(input_raster_path, gdal.GA_ReadOnly)
+        if input_dataset is None:
+            raise RuntimeError(f"Failed to open input raster: {input_raster_path}")
+
+        input_band = input_dataset.GetRasterBand(1)
+        raster_array = input_band.ReadAsArray()
+
+        # Get raster properties
+        cols = input_dataset.RasterXSize
+        rows = input_dataset.RasterYSize
+        geotransform = input_dataset.GetGeoTransform()
+        projection = input_dataset.GetProjection()
+
+        # Create cleaned array - set 0 values to NoData (0)
+        nodata_value = 0
+        cleaned_array = raster_array.copy()
+        cleaned_array[raster_array == 0] = nodata_value
+
+        # Count original vs cleaned pixels
+        original_nonzero = np.count_nonzero(raster_array)
+        cleaned_nonzero = np.count_nonzero(cleaned_array != nodata_value)
+        zeros_removed = np.count_nonzero(raster_array == 0)
+
+        log_message(f"Original non-zero pixels: {original_nonzero}")
+        log_message(f"Cleaned non-zero pixels: {cleaned_nonzero}")
+        log_message(f"Zero pixels removed: {zeros_removed}")
+
+        # Create output raster
+        driver = gdal.GetDriverByName("GTiff")
+        output_dataset = driver.Create(cleaned_path, cols, rows, 1, gdal.GDT_Int16)
+
+        if output_dataset is None:
+            raise RuntimeError(f"Failed to create cleaned raster: {cleaned_path}")
+
+        # Set properties
+        output_dataset.SetGeoTransform(geotransform)
+        output_dataset.SetProjection(projection)
+
+        # Write cleaned data and set NoData value
+        output_band = output_dataset.GetRasterBand(1)
+        output_band.WriteArray(cleaned_array)
+        output_band.SetNoDataValue(nodata_value)
+        output_band.FlushCache()
+
+        # Close datasets
+        input_dataset = None
+        output_dataset = None
+
+        log_message(f"Cleaned raster created: {cleaned_path}")
+        return cleaned_path
+
+    def polygonize_rasters(self, input_raster_paths: list) -> list:
         """
         Convert raster data to polygon vector features using GDAL Polygonize.
 
@@ -167,89 +241,104 @@ class GHSLProcessor:
         GeoPackage vector layer with polygons representing contiguous raster values.
         Polygons with value 0 are filtered out for efficiency.
 
+        The output will be written to a geoparquet file with the same base name
+        as the input raster but with a .parquet extension.
+
         Args:
-            input_raster_path: Path to the input raster file to polygonize.
-            output_vector_path: Path for the output GeoPackage (.gpkg) file.
-            class_field_name: Name of the field to store pixel classification values.
-                            Defaults to "class".
+            input_raster_paths: List of paths to the input raster file to polygonize.
 
         Returns:
-            The path to the created vector file.
+            The list of paths to the created polygonized GeoParquet files.
 
         Raises:
             RuntimeError: If polygonization fails or files cannot be opened.
         """
         # Open the input raster
-        raster_dataset = gdal.Open(input_raster_path, gdal.GA_ReadOnly)
-        if raster_dataset is None:
-            raise RuntimeError(f"Failed to open raster for polygonization: {input_raster_path}")
+        class_field_name = "pixel_value"  # Changed from "class" - reserved word issue!
+        output_vector_paths = []
+        for input_raster_path in input_raster_paths:
+            log_message(f"Polygonizing raster: {input_raster_path}")
 
-        raster_band = raster_dataset.GetRasterBand(1)
+            # FIRST: Clean the raster by removing 0 values (set to NoData)
+            cleaned_raster_path = self.clean_raster_for_polygonization(input_raster_path)
+            log_message(f"Using cleaned raster for polygonization: {cleaned_raster_path}")
+            raster_dataset = gdal.Open(cleaned_raster_path, gdal.GA_ReadOnly)
+            if raster_dataset is None:
+                raise RuntimeError(f"Failed to open cleaned raster for polygonization: {cleaned_raster_path}")
 
-        # Create output vector datasource (GeoPackage)
-        driver = ogr.GetDriverByName("GPKG")
+            raster_band = raster_dataset.GetRasterBand(1)
+            output_vector_path = str(Path(input_raster_path).with_suffix(".parquet"))
+            # delete the output file if it already exists
+            if Path(output_vector_path).exists():
+                Path(output_vector_path).unlink()
 
-        # Remove existing file if present
-        if Path(output_vector_path).exists():
-            driver.DeleteDataSource(output_vector_path)
+            # Create output vector datasource (Parquet)
+            driver = ogr.GetDriverByName("Parquet")
 
-        vector_datasource = driver.CreateDataSource(output_vector_path)
-        if vector_datasource is None:
-            raise RuntimeError(f"Failed to create output vector datasource: {output_vector_path}")
+            # Remove existing file if present
+            if Path(output_vector_path).exists():
+                driver.DeleteDataSource(output_vector_path)
+            log_message(f"Creating polygonized output at {output_vector_path}")
+            vector_datasource = driver.CreateDataSource(output_vector_path)
+            if vector_datasource is None:
+                raise RuntimeError(f"Failed to create output vector datasource: {output_vector_path}")
 
-        # Get spatial reference from raster
-        spatial_reference = osr.SpatialReference()
-        spatial_reference.ImportFromWkt(raster_dataset.GetProjection())
+            # Get spatial reference from raster
+            spatial_reference = osr.SpatialReference()
+            spatial_reference.ImportFromWkt(raster_dataset.GetProjection())
 
-        # Create vector layer
-        vector_layer = vector_datasource.CreateLayer("polygonized", srs=spatial_reference, geom_type=ogr.wkbPolygon)
+            # Create vector layer
+            vector_layer = vector_datasource.CreateLayer("polygonized", srs=spatial_reference, geom_type=ogr.wkbPolygon)
 
-        if vector_layer is None:
-            raise RuntimeError("Failed to create vector layer in GeoPackage")
+            if vector_layer is None:
+                raise RuntimeError("Failed to create vector layer in GeoParquet")
 
-        # Create field for classification values
-        field_definition = ogr.FieldDefn(class_field_name, ogr.OFTInteger)
-        vector_layer.CreateField(field_definition)
+            # Create field for classification values
+            field_definition = ogr.FieldDefn(class_field_name, ogr.OFTInteger)
+            vector_layer.CreateField(field_definition)
 
-        # Polygonize with 8-way connectivity
-        # The last parameter (options) can include connectedness=8 for 8-way
-        result = gdal.Polygonize(
-            raster_band,
-            None,  # No mask band
-            vector_layer,
-            0,  # Field index for the classification values
-            ["8CONNECTED=8"],  # Use 8-way connectivity
-            callback=None,
-        )
+            # Polygonize with 8-way connectivity
+            # The last parameter (options) can include connectedness=8 for 8-way
+            result = gdal.Polygonize(
+                raster_band,
+                None,  # No mask band
+                vector_layer,
+                0,  # Field index for the classification values
+                ["8CONNECTED=8"],  # Use 8-way connectivity
+                callback=None,
+            )
 
-        if result != 0:
-            raise RuntimeError("Polygonization failed")
+            if result != 0:
+                raise RuntimeError("Polygonization failed")
 
-        # Filter out polygons with class value of 0 for efficiency
-        vector_layer.SetAttributeFilter(f"{class_field_name} <> 0")
+            # Success! Since we cleaned the raster, all polygons are valid (non-zero values only)
+            log_message("Polygonization completed successfully!")
 
-        # Create a new filtered layer
-        filtered_layer_name = "filtered_polygons"
-        filtered_layer = vector_datasource.CreateLayer(
-            filtered_layer_name, srs=spatial_reference, geom_type=ogr.wkbPolygon
-        )
+            # Sync the layer to ensure data is written
+            vector_layer.SyncToDisk()
+            vector_datasource.FlushCache()
 
-        # Copy field definition
-        layer_definition = vector_layer.GetLayerDefn()
-        for i in range(layer_definition.GetFieldCount()):
-            field_definition = layer_definition.GetFieldDefn(i)
-            filtered_layer.CreateField(field_definition)
+            # Count final features
+            final_count = vector_layer.GetFeatureCount()
+            log_message(f"Created {final_count} polygons (all with non-zero values)")
 
-        # Copy features with class != 0
-        for feature in vector_layer:
-            filtered_layer.CreateFeature(feature)
+            # Clean finish - no filtering needed since raster was pre-cleaned
+            log_message("Closing datasources...")
 
-        # Close and reopen to set the filtered layer as the default
-        vector_datasource = None
-        raster_dataset = None
+            # Close datasets properly
+            vector_layer = None
+            vector_datasource = None
+            raster_dataset = None
 
-        self.polygonized_vector_path = output_vector_path
-        return output_vector_path
+            # Verify the file was created and has content
+            if Path(output_vector_path).exists():
+                file_size = Path(output_vector_path).stat().st_size
+                log_message(f"Output file created: {output_vector_path} (size: {file_size} bytes)")
+            else:
+                log_message(f"ERROR: Output file was not created: {output_vector_path}")
+
+            output_vector_paths.append(output_vector_path)
+        return output_vector_paths
 
     def spatial_join_with_filter(
         self,

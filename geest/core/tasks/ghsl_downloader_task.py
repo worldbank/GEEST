@@ -133,6 +133,9 @@ class GHSLDownloaderTask(QgsTask):
                 raise ValueError("No .tif files found to merge.")
             processor = GHSLProcessor(input_raster_paths=tifs)
             reclassified_layers = processor.reclassify_rasters(suffix="reclass")
+            log_message(f"Reclassified layers: {reclassified_layers}")
+            polygonized_paths = processor.polygonize_rasters(reclassified_layers)
+            log_message(f"Polygonized layers: {polygonized_paths}")
 
             self.setProgress(100)  # Trigger the UI to update with completion value
             # downloader.process_response()
