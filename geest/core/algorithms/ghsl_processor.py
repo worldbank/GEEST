@@ -15,6 +15,7 @@ from typing import List, Optional
 
 import numpy as np
 from osgeo import gdal, ogr, osr
+from qgis.core import QgsRectangle
 
 from geest.utilities import log_message
 
@@ -339,6 +340,94 @@ class GHSLProcessor:
 
             output_vector_paths.append(output_vector_path)
         return output_vector_paths
+
+    def combine_vectors(self, input_vector_paths: list, output_vector_path: str, extents: QgsRectangle) -> str:
+        """
+        Combine multiple vector layers into a single GeoPackage.
+
+        Args:
+            input_vector_paths: List of paths to the input vector files to combine.
+            output_vector_path: Path for the output combined GeoPackage file.
+
+        Returns:
+            bool: True if combination was successful.
+
+        Raises:
+            RuntimeError: If combination fails or files cannot be opened.
+        """
+        # convert the QGIS extents to an ogr geometry
+        if extents:
+            min_x = extents.xMinimum()
+            min_y = extents.yMinimum()
+            max_x = extents.xMaximum()
+            max_y = extents.yMaximum()
+            ring = ogr.Geometry(ogr.wkbLinearRing)
+            ring.AddPoint(min_x, min_y)
+            ring.AddPoint(max_x, min_y)
+            ring.AddPoint(max_x, max_y)
+            ring.AddPoint(min_x, max_y)
+            ring.CloseRings()
+            log_message(f"filtering geometry using extents: {extents.toString()}")
+
+        driver = ogr.GetDriverByName("Parquet")
+        # Remove existing file if present
+        if Path(output_vector_path).exists():
+            driver.DeleteDataSource(output_vector_path)
+        log_message(f"Creating combined output at {output_vector_path}")
+        output_datasource = driver.CreateDataSource(output_vector_path)
+        if output_datasource is None:
+            raise RuntimeError(f"Failed to create output vector datasource: {output_vector_path}")
+
+        combined_layer = None
+
+        for input_vector_path in input_vector_paths:
+            log_message(f"Adding layer from {input_vector_path} to combined dataset")
+            input_datasource = ogr.Open(input_vector_path, gdal.GA_ReadOnly)
+            if input_datasource is None:
+                raise RuntimeError(f"Failed to open input vector: {input_vector_path}")
+
+            input_layer = input_datasource.GetLayer(0)
+
+            # Create combined layer if not already created
+            if combined_layer is None:
+                spatial_reference = input_layer.GetSpatialRef()
+                geom_type = input_layer.GetGeomType()
+                combined_layer = output_datasource.CreateLayer("combined", srs=spatial_reference, geom_type=geom_type)
+                if combined_layer is None:
+                    raise RuntimeError("Failed to create combined layer in GeoPackage")
+
+                # Copy field definitions from the first layer
+                input_layer_definition = input_layer.GetLayerDefn()
+                for i in range(input_layer_definition.GetFieldCount()):
+                    field_definition = input_layer_definition.GetFieldDefn(i)
+                    combined_layer.CreateField(field_definition)
+
+            # Copy features from input layer to combined layer
+            input_layer.ResetReading()
+            for feature in input_layer:
+                combined_feature = ogr.Feature(combined_layer.GetLayerDefn())
+                combined_feature.SetGeometry(feature.GetGeometryRef())
+
+                # Copy all attributes
+                for i in range(feature.GetFieldCount()):
+                    combined_feature.SetField(i, feature.GetField(i))
+                if extents:
+                    # if the feature touches the extents, clip it to the extents
+                    if feature.GetGeometryRef().Touches(ring):
+                        combined_feature.SetGeometry(feature.GetGeometryRef().Intersection(ring))
+                    # if the feature intersects with the extents, add it
+                    if feature.GetGeometryRef().Intersects(ring):
+                        combined_layer.CreateFeature(combined_feature)
+                else:
+                    combined_layer.CreateFeature(combined_feature)
+                combined_feature = None
+
+            # Close input datasource
+            input_datasource = None
+        # Close output datasource
+        combined_layer = None
+        output_datasource = None
+        return True
 
     def spatial_join_with_filter(
         self,

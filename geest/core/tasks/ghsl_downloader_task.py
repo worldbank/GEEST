@@ -40,7 +40,7 @@ class GHSLDownloaderTask(QgsTask):
         working_dir,
         filename,
         use_cache=True,
-        delete_gpkg=True,
+        delete_existing=True,
         feedback: QgsFeedback = None,
         crs: QgsCoordinateReferenceSystem = None,
     ):
@@ -49,6 +49,7 @@ class GHSLDownloaderTask(QgsTask):
         :param working_dir: Directory path where outputs will be saved.
         :param filename: Name of the output file.
         :param use_cache: If True, use cached data if available.
+        :param delete_existing: If True, delete existing output files before downloading.
         :param feedback: QgsFeedback object for reporting progress.
         :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
         """
@@ -60,29 +61,29 @@ class GHSLDownloaderTask(QgsTask):
         if not isinstance(reference_layer, QgsVectorLayer):
             raise ValueError("Reference layer must be a QgsVectorLayer")
         self.working_dir = working_dir
-        self.gpkg_path = os.path.join(working_dir, "study_area", f"ghsl_{filename}.gpkg")
+        self.ghsl_result_path = os.path.join(working_dir, "study_area", f"ghsl_{filename}.parquet")
         self.vrt_path = os.path.join(working_dir, "study_area", f"ghsl_{filename}.vrt")
-        log_message(f"GeoPackage path: {self.gpkg_path}")
+        log_message(f"GeoPackage path: {self.ghsl_result_path}")
         self.filename = filename
         self.use_cache = use_cache
-        self.delete_gpkg = delete_gpkg
+        self.delete_existing = delete_existing
         self.feedback = feedback
         # Make sure output directory exists
         self.create_study_area_directory(self.working_dir)
 
         # If GPKG already exists, remove it to start fresh
         # I think this is redundant as the downloader base class has similar logic
-        if os.path.exists(self.gpkg_path):
-            if self.delete_gpkg:
+        if os.path.exists(self.ghsl_result_path):
+            if self.delete_existing:
                 try:
-                    os.remove(self.gpkg_path)
-                    log_message(f"Removed existing GeoPackage: {self.gpkg_path}")
+                    os.remove(self.ghsl_result_path)
+                    log_message(f"Removed existing GeoPackage: {self.ghsl_result_path}")
                 except Exception as e:
                     log_message(f"Error removing existing GeoPackage: {e}", level="CRITICAL")
             else:
-                log_message(f"GeoPackage already exists and delete_gpkg is False: {self.gpkg_path}")
+                log_message(f"GeoPackage already exists and delete_gpkg is False: {self.ghsl_result_path}")
         else:
-            log_message(f"Writing to new GeoPackage: {self.gpkg_path}")
+            log_message(f"Writing to new GeoPackage: {self.ghsl_result_path}")
 
         # Compute bounding box from entire layer
         # (OGR Envelope: (xmin, xmax, ymin, ymax))
@@ -109,11 +110,11 @@ class GHSLDownloaderTask(QgsTask):
 
             downloader = GHSLDownloader(
                 extents=self.layer_extent,
-                output_path=self.gpkg_path,
+                output_path=self.ghsl_result_path,
                 output_crs=self.output_crs,
                 filename=self.filename,  # will also set the layer name in the gpkg
                 use_cache=self.use_cache,
-                delete_gpkg=self.delete_gpkg,
+                delete_existing=self.delete_existing,
                 feedback=self.feedback,
             )
             log_message("Getting GHSL Tile List")
@@ -125,7 +126,7 @@ class GHSLDownloaderTask(QgsTask):
                 log_message(f"Downloading tile {tile}...")
                 tile_paths.extend(downloader.download_and_unpack_tile(tile))
             log_message("All tiles downloaded, finalizing...")
-            log_message(f"Merging {len(tile_paths)} tiles into {self.gpkg_path}...")
+            log_message(f"Merging {len(tile_paths)} tiles into {self.ghsl_result_path}...")
             log_message(f"Tile paths: {tile_paths}")
             tifs = self.filter_tif_files(tile_paths)
             log_message(f"Filtered to {len(tifs)} .tif files.")
@@ -137,9 +138,19 @@ class GHSLDownloaderTask(QgsTask):
             polygonized_paths = processor.polygonize_rasters(reclassified_layers)
             log_message(f"Polygonized layers: {polygonized_paths}")
 
+            # Transform the extent to EPSG:4326
+            transform = QgsCoordinateTransform(
+                self.reference_layer.crs(),
+                QgsCoordinateReferenceSystem("EPSG:54009"),  # World Mollweide - GHSL data ships in this CRS
+                QgsProject.instance(),
+            )
+            extent = transform.transformBoundingBox(self.layer_extent)
+            combined_vector_path = processor.combine_vectors(
+                polygonized_paths, output_vector_path=self.ghsl_result_path, extents=None
+            )
             self.setProgress(100)  # Trigger the UI to update with completion value
             # downloader.process_response()
-            log_message(f"GHSL Downloaded to {self.gpkg_path}.")
+            log_message(f"GHSL Downloaded to {self.ghsl_result_path}.")
 
         except Exception as e:
             log_message(f"Error in run(): {str(e)}")
