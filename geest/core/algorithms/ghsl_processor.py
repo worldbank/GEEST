@@ -301,7 +301,7 @@ class GHSLProcessor:
             # The last parameter (options) can include connectedness=8 for 8-way
             result = gdal.Polygonize(
                 raster_band,
-                None,  # No mask band
+                raster_band,  # use the raster with nodata assigned to self mask
                 vector_layer,
                 0,  # Field index for the classification values
                 ["8CONNECTED=8"],  # Use 8-way connectivity
