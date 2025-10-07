@@ -37,7 +37,7 @@ class GHSLDownloader:
         output_crs: QgsCoordinateReferenceSystem = None,
         filename: str = "",  # will also set the layer name in the gpkg
         use_cache: bool = False,
-        delete_gpkg: bool = True,
+        delete_existing: bool = True,
         feedback: QgsFeedback = None,
     ):
         # These are required
@@ -46,7 +46,7 @@ class GHSLDownloader:
         self.output_crs = output_crs
         self.filename = filename  # will also set the layer name in the gpkg
         self.use_cache = use_cache
-        self.delete_gpkg = delete_gpkg
+        self.delete_existing = delete_existing
         self.network_manager = QgsNetworkAccessManager()
         self.feedback = feedback
 
@@ -130,18 +130,22 @@ class GHSLDownloader:
         # 1. Cache check
         if not os.path.exists(zip_path):
             url = self.BASE_URL + zip_name
-            self._notify(f"Downloading {url} …", Qgis.Info)
+            log_message(f"Downloading {url} to {zip_path}...")
+            # Not threadsafe
+            # self._notify(f"Downloading {url} …", Qgis.Info)
 
             loop = QEventLoop()
 
             def on_finished():
                 log_message(f"Download finished: {zip_path}")
-                self._notify(f"Downloaded {zip_name} → {zip_path}", Qgis.Success)
+                # Not threadsafe
+                # self._notify(f"Downloaded {zip_name} → {zip_path}", Qgis.Success)
                 loop.quit()
 
             def on_error(err_code, err_msg):
                 log_message(f"Download error {err_code}: {err_msg}")
-                self._notify(f"Download error {err_code}: {err_msg}", Qgis.Critical)
+                # Not threadsafe
+                # self._notify(f"Download error {err_code}: {err_msg}", Qgis.Critical)
                 loop.quit()
 
             downloader = QgsFileDownloader(QUrl(url), zip_path, authcfg="", httpMethod=Qgis.HttpMethod.Get)
@@ -150,7 +154,9 @@ class GHSLDownloader:
 
             loop.exec_()
         else:
-            self._notify(f"Using cached zip: {zip_path}", Qgis.Info)
+            log_message(f"Using cached zip: {zip_path}")
+            # Not threadsafe
+            # self._notify(f"Using cached zip: {zip_path}", Qgis.Info)
 
         # 2. Unpack
         extracted_dir = os.path.join(cache_dir, tile_id)
@@ -159,8 +165,12 @@ class GHSLDownloader:
         with zipfile.ZipFile(zip_path, "r") as zf:
             if not all(os.path.exists(os.path.join(extracted_dir, f)) for f in zf.namelist()):
                 zf.extractall(path=extracted_dir)
-                self._notify(f"Extracted {tile_id} → {extracted_dir}", Qgis.Success)
+                log_message(f"Extracted {tile_id} to {extracted_dir}")
+                # Not threadsafe
+                # self._notify(f"Extracted {tile_id} → {extracted_dir}", Qgis.Success)
             else:
-                self._notify(f"{tile_id} already unpacked in {extracted_dir}", Qgis.Info)
+                log_message(f"{tile_id} already unpacked in {extracted_dir}")
+                # Not threadsafe
+                # self._notify(f"{tile_id} already unpacked in {extracted_dir}", Qgis.Info)
 
             return [os.path.join(extracted_dir, f) for f in zf.namelist()]
