@@ -178,7 +178,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
                 working_dir=self.working_directory,
                 filename="settlements_layer.gpkg",
                 use_cache=True,
-                delete_gpkg=True,
+                delete_existing=True,
                 feedback=feedback,
             )
             log_message("GHSL Downloader Task created, setting up call backs")
