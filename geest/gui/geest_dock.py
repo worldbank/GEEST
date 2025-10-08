@@ -61,6 +61,7 @@ class GeestDock(QDockWidget):
 
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
+        self.study_area_bbox = None
 
         try:
             # INTRO_PANEL = 0
@@ -335,6 +336,7 @@ class GeestDock(QDockWidget):
                 level=Qgis.Info,  # noqa E225
             )
             if geest_project and os.path.exists(os.path.join(geest_project, "model.json")):
+
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
                 self.road_network_widget.set_working_directory(geest_project)
@@ -369,8 +371,6 @@ class GeestDock(QDockWidget):
             working_directory = self.tree_widget.working_directory
             log_message(f"Setting ghsl panel working directory to: {working_directory}")
             self.ghsl_widget.set_working_directory(working_directory)
-            self.ghsl_widget.set_reference_layer(self.create_project_widget.reference_layer())
-            self.ghsl_widget.set_crs(self.create_project_widget.crs())
 
         elif index == TREE_PANEL:
             log_message("Switched to Tree panel")

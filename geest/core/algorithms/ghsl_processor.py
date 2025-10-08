@@ -341,13 +341,14 @@ class GHSLProcessor:
             output_vector_paths.append(output_vector_path)
         return output_vector_paths
 
-    def combine_vectors(self, input_vector_paths: list, output_vector_path: str, extents: QgsRectangle) -> str:
+    def combine_vectors(self, input_vector_paths: list, output_vector_path: str, extent: QgsRectangle) -> str:
         """
         Combine multiple vector layers into a single GeoPackage.
 
         Args:
             input_vector_paths: List of paths to the input vector files to combine.
             output_vector_path: Path for the output combined GeoPackage file.
+            extent: Optional QgsRectangle to filter features by extent. It is assumed the extent is in Mollweide projection (ESRI:54009).
 
         Returns:
             bool: True if combination was successful.
@@ -356,18 +357,18 @@ class GHSLProcessor:
             RuntimeError: If combination fails or files cannot be opened.
         """
         # convert the QGIS extents to an ogr geometry
-        if extents:
-            min_x = extents.xMinimum()
-            min_y = extents.yMinimum()
-            max_x = extents.xMaximum()
-            max_y = extents.yMaximum()
+        if extent:
+            min_x = extent.xMinimum()
+            min_y = extent.yMinimum()
+            max_x = extent.xMaximum()
+            max_y = extent.yMaximum()
             ring = ogr.Geometry(ogr.wkbLinearRing)
             ring.AddPoint(min_x, min_y)
             ring.AddPoint(max_x, min_y)
             ring.AddPoint(max_x, max_y)
             ring.AddPoint(min_x, max_y)
             ring.CloseRings()
-            log_message(f"filtering geometry using extents: {extents.toString()}")
+            log_message(f"filtering geometry using extents: {extent.toString()}")
 
         driver = ogr.GetDriverByName("Parquet")
         # Remove existing file if present
@@ -379,17 +380,42 @@ class GHSLProcessor:
             raise RuntimeError(f"Failed to create output vector datasource: {output_vector_path}")
 
         combined_layer = None
+        counter = 0
 
         for input_vector_path in input_vector_paths:
             log_message(f"Adding layer from {input_vector_path} to combined dataset")
+
             input_datasource = ogr.Open(input_vector_path, gdal.GA_ReadOnly)
             if input_datasource is None:
                 raise RuntimeError(f"Failed to open input vector: {input_vector_path}")
 
             input_layer = input_datasource.GetLayer(0)
+            if extent:
+                log_message("Checking intersection with extents...")
+                log_message(f"Input layer extent: {input_layer.GetExtent()}")
+                log_message(f"Filtering extent: {ring.ExportToWkt()}")
+                # Confirm that the input vector intersects with the extents
+                crs = input_layer.GetSpatialRef()
 
+                log_message(f"Input layer CRS EPSG: {crs.GetAttrValue('AUTHORITY', 1)}")
+
+                input_extent = input_layer.GetExtent()  # returns (minX, maxX, minY, maxY)
+                ring_envelope = ring.GetEnvelope()  # returns (minX, maxX, minY, maxY)
+                # Check for intersection between two envelopes
+                intersects = not (
+                    input_extent[1] < ring_envelope[0]  # input maxX < ring minX # noqa W503
+                    or input_extent[0] > ring_envelope[1]  # input minX > ring maxX # noqa W503
+                    or input_extent[3] < ring_envelope[2]  # input maxY < ring minY # noqa W503
+                    or input_extent[2] > ring_envelope[3]  # input minY > ring maxY # noqa W503
+                )
+                if not intersects:
+                    log_message("Input vector layer does not intersect with extents.")
+                    continue
+                else:
+                    log_message("Input vector layer intersects with extents, processing...")
             # Create combined layer if not already created
             if combined_layer is None:
+                log_message("Creating combined layer...")
                 spatial_reference = input_layer.GetSpatialRef()
                 geom_type = input_layer.GetGeomType()
                 combined_layer = output_datasource.CreateLayer("combined", srs=spatial_reference, geom_type=geom_type)
@@ -403,30 +429,54 @@ class GHSLProcessor:
                     combined_layer.CreateField(field_definition)
 
             # Copy features from input layer to combined layer
+
             input_layer.ResetReading()
             for feature in input_layer:
                 combined_feature = ogr.Feature(combined_layer.GetLayerDefn())
                 combined_feature.SetGeometry(feature.GetGeometryRef())
 
+                if counter % 1000 == 0 and counter > 0:
+                    log_message(f"Processed {counter} features...")
                 # Copy all attributes
                 for i in range(feature.GetFieldCount()):
                     combined_feature.SetField(i, feature.GetField(i))
-                if extents:
-                    # if the feature touches the extents, clip it to the extents
-                    if feature.GetGeometryRef().Touches(ring):
-                        combined_feature.SetGeometry(feature.GetGeometryRef().Intersection(ring))
-                    # if the feature intersects with the extents, add it
-                    if feature.GetGeometryRef().Intersects(ring):
-                        combined_layer.CreateFeature(combined_feature)
-                else:
-                    combined_layer.CreateFeature(combined_feature)
-                combined_feature = None
 
+                if extent:
+                    # if the feature intersects with the extents, add it
+                    feature_geom = feature.GetGeometryRef()
+
+                    feature_envelope = feature_geom.GetEnvelope()  # (minX, maxX, minY, maxY)
+                    ring_envelope = ring.GetEnvelope()
+                    feature_intersects = not (
+                        feature_envelope[1] < ring_envelope[0]  # feature maxX < ring minX # noqa W503
+                        or feature_envelope[0] > ring_envelope[1]  # feature minX > ring maxX # noqa W503
+                        or feature_envelope[3] < ring_envelope[2]  # feature maxY < ring minY # noqa W503
+                        or feature_envelope[2] > ring_envelope[3]  # feature minY > ring maxY # noqa W503
+                    )
+                    if feature_intersects:
+                        combined_layer.CreateFeature(combined_feature)
+                        # log_message(f"Attribute {field_name}: {field_value}")
+                        counter += 1
+                    else:
+                        # log_message("Feature does not intersect with extents, skipping...")
+                        pass
+                else:
+                    # Calling function did not constrain by extent, add all features
+
+                    combined_layer.CreateFeature(combined_feature)
+                    counter += 1
+                combined_feature = None
+            log_message(f"Finished adding features from {input_vector_path}")
+            # Sync to disk
+            combined_layer.SyncToDisk()
+            output_datasource.FlushCache()
+            log_message(f"Combined layer now has {combined_layer.GetFeatureCount()} features")
             # Close input datasource
             input_datasource = None
         # Close output datasource
         combined_layer = None
         output_datasource = None
+        log_message(f"Finished combining vectors. Total features: {counter}")
         return True
 
     def spatial_join_with_filter(

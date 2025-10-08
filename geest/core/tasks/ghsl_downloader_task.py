@@ -8,8 +8,8 @@ from qgis.core import (
     QgsCoordinateTransform,
     QgsFeedback,
     QgsProject,
+    QgsRectangle,
     QgsTask,
-    QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import pyqtSignal
 
@@ -26,7 +26,6 @@ class GHSLDownloaderTask(QgsTask):
         layer (QgsVectorLayer): The input vector layer that determines the download extents.
         working_dir (str): The directory path where outputs will be saved.
         feedback (QgsFeedback): A feedback object to report progress.
-        crs (Optional[QgsCoordinateReferenceSystem]): The target CRS. OSM Data will be reprojected to this CRS:.
 
     Returns:
         _type_: _description_
@@ -36,13 +35,12 @@ class GHSLDownloaderTask(QgsTask):
 
     def __init__(
         self,
-        reference_layer: QgsVectorLayer,
         working_dir,
         filename,
         use_cache=True,
         delete_existing=True,
         feedback: QgsFeedback = None,
-        crs: QgsCoordinateReferenceSystem = None,
+        extent_mollweide: QgsRectangle = None,
     ):
         """
         :param input_vector_path: Path to an OGR-readable vector file (e.g. .gpkg or .shp).
@@ -51,19 +49,16 @@ class GHSLDownloaderTask(QgsTask):
         :param use_cache: If True, use cached data if available.
         :param delete_existing: If True, delete existing output files before downloading.
         :param feedback: QgsFeedback object for reporting progress.
-        :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
+        :param extent_mollweide: QgsRectangle defining the area to download (in Mollweide ESRI:54009).
         """
         super().__init__("GHSL Downloader", QgsTask.CanCancel)
 
-        self.reference_layer = reference_layer  # used to determin bbox of download
         if working_dir is None or working_dir == "":
             raise ValueError("Working directory cannot be None")
-        if not isinstance(reference_layer, QgsVectorLayer):
-            raise ValueError("Reference layer must be a QgsVectorLayer")
         self.working_dir = working_dir
         self.ghsl_result_path = os.path.join(working_dir, "study_area", f"ghsl_{filename}.parquet")
         self.vrt_path = os.path.join(working_dir, "study_area", f"ghsl_{filename}.vrt")
-        log_message(f"GeoPackage path: {self.ghsl_result_path}")
+        log_message(f"GHSL output path: {self.ghsl_result_path}")
         self.filename = filename
         self.use_cache = use_cache
         self.delete_existing = delete_existing
@@ -77,27 +72,22 @@ class GHSLDownloaderTask(QgsTask):
             if self.delete_existing:
                 try:
                     os.remove(self.ghsl_result_path)
-                    log_message(f"Removed existing GeoPackage: {self.ghsl_result_path}")
+                    log_message(f"Removed existing GHSL dataset: {self.ghsl_result_path}")
                 except Exception as e:
-                    log_message(f"Error removing existing GeoPackage: {e}", level="CRITICAL")
+                    log_message(f"Error removing existing GHSL dataset: {e}", level="CRITICAL")
             else:
-                log_message(f"GeoPackage already exists and delete_gpkg is False: {self.ghsl_result_path}")
+                log_message(f"GHSL dataset already exists and delete_existing is False: {self.ghsl_result_path}")
         else:
             log_message(f"Writing to new GeoPackage: {self.ghsl_result_path}")
 
-        # Compute bounding box from entire layer
-        # (OGR Envelope: (xmin, xmax, ymin, ymax))
-        self.layer_extent = self.reference_layer.extent()
-        # Convert to EPSG:4326 if needed
-        if self.reference_layer.crs().authid() != "EPSG:4326":
-            # Transform the extent to EPSG:4326
-            transform = QgsCoordinateTransform(
-                self.reference_layer.crs(),
-                QgsCoordinateReferenceSystem("EPSG:4326"),
-                QgsProject.instance(),
-            )
-            self.layer_extent = transform.transformBoundingBox(self.layer_extent)
-        self.output_crs = crs
+        self.extent_mollweide = extent_mollweide
+        # Compute bounding box in EPSG:4326
+        transform = QgsCoordinateTransform(
+            QgsCoordinateReferenceSystem("EPSG:54009"),  # Mollweide
+            QgsCoordinateReferenceSystem("EPSG:4326"),
+            QgsProject.instance(),
+        )
+        self.extent_4326 = transform.transformBoundingBox(self.extent_mollweide)
 
     def run(self):
         """
@@ -106,12 +96,10 @@ class GHSLDownloaderTask(QgsTask):
         try:
             self.setProgress(1)  # Trigger the UI to update with a small value
             log_message("Downloading GHSL starting....")
-            log_message(f"Using CRS: {self.output_crs.authid()} for download")
 
             downloader = GHSLDownloader(
-                extents=self.layer_extent,
+                extents=self.extent_4326,
                 output_path=self.ghsl_result_path,
-                output_crs=self.output_crs,
                 filename=self.filename,  # will also set the layer name in the gpkg
                 use_cache=self.use_cache,
                 delete_existing=self.delete_existing,
@@ -127,26 +115,27 @@ class GHSLDownloaderTask(QgsTask):
                 tile_paths.extend(downloader.download_and_unpack_tile(tile))
             log_message("All tiles downloaded, finalizing...")
             log_message(f"Merging {len(tile_paths)} tiles into {self.ghsl_result_path}...")
-            log_message(f"Tile paths: {tile_paths}")
+
+            for path in tile_paths:
+                log_message(f"Tile path: {path}")
+
             tifs = self.filter_tif_files(tile_paths)
             log_message(f"Filtered to {len(tifs)} .tif files.")
             if len(tifs) == 0:
                 raise ValueError("No .tif files found to merge.")
             processor = GHSLProcessor(input_raster_paths=tifs)
-            reclassified_layers = processor.reclassify_rasters(suffix="reclass")
-            log_message(f"Reclassified layers: {reclassified_layers}")
-            polygonized_paths = processor.polygonize_rasters(reclassified_layers)
-            log_message(f"Polygonized layers: {polygonized_paths}")
 
-            # Transform the extent to EPSG:4326
-            transform = QgsCoordinateTransform(
-                self.reference_layer.crs(),
-                QgsCoordinateReferenceSystem("EPSG:54009"),  # World Mollweide - GHSL data ships in this CRS
-                QgsProject.instance(),
-            )
-            extent = transform.transformBoundingBox(self.layer_extent)
-            combined_vector_path = processor.combine_vectors(
-                polygonized_paths, output_vector_path=self.ghsl_result_path, extents=None
+            reclassified_layers = processor.reclassify_rasters(suffix="reclass")
+            for path in reclassified_layers:
+                log_message(f"Reclassified layer: {path}")
+
+            polygonized_paths = processor.polygonize_rasters(reclassified_layers)
+            for path in polygonized_paths:
+                log_message(f"Polygonized layer: {path}")
+
+            # Combine all polygonized layers into a single GeoParquet layer
+            processor.combine_vectors(
+                polygonized_paths, output_vector_path=self.ghsl_result_path, extent=self.extent_mollweide
             )
             self.setProgress(100)  # Trigger the UI to update with completion value
             # downloader.process_response()
