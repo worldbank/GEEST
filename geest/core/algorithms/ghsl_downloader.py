@@ -7,18 +7,14 @@ from qgis.core import (
     Qgis,
     QgsApplication,
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeatureRequest,
     QgsFeedback,
     QgsFileDownloader,
-    QgsMessageLog,
     QgsNetworkAccessManager,
-    QgsProject,
     QgsRectangle,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QEventLoop, QUrl
-from qgis.utils import iface
 
 from geest.utilities import log_message, resources_path
 
@@ -34,51 +30,60 @@ class GHSLDownloader:
         self,
         extents: QgsRectangle,
         output_path: str = None,
-        output_crs: QgsCoordinateReferenceSystem = None,
         filename: str = "",  # will also set the layer name in the gpkg
         use_cache: bool = False,
         delete_existing: bool = True,
         feedback: QgsFeedback = None,
     ):
+        """
+        Initializes the GHSLDownloader with the specified parameters.
+
+        Args:
+            extents (QgsRectangle): The spatial extents for the download, must be in Mollweide ESRI:54009 projection.
+            output_path (str, optional): The output path for the GeoPackage. Defaults to None.
+            filename (str, optional): The filename for the output, also used as the layer name in the GeoPackage. Defaults to "".
+            use_cache (bool, optional): Whether to use cached data if available. Defaults to False.
+            delete_existing (bool, optional): Whether to delete existing files at the output path. Defaults to True.
+            feedback (QgsFeedback, optional): Feedback object for progress reporting and cancellation. Defaults to None.
+
+        Attributes:
+            extents (QgsRectangle): The spatial extents for the download.
+            output_path (str): The output path for the GeoPackage.
+            filename (str): The filename and layer name for the output.
+            use_cache (bool): Indicates if cache should be used.
+            delete_existing (bool): Indicates if existing files should be deleted.
+            network_manager (QgsNetworkAccessManager): Network manager for handling requests.
+            feedback (QgsFeedback): Feedback object for progress and cancellation.
+            layer: The indexed layer for processing.
+            base_url (str): The base URL for data download.
+        """
         # These are required
-        self.extents = extents
+        self.extents = extents  # must be specified in the Mollweide ESRI:54009 projection
         self.output_path = output_path  # The output path for the GeoPackage
-        self.output_crs = output_crs
         self.filename = filename  # will also set the layer name in the gpkg
         self.use_cache = use_cache
         self.delete_existing = delete_existing
         self.network_manager = QgsNetworkAccessManager()
         self.feedback = feedback
-
-        self.base_url = self.BASE_URL
-
-        self.plugin_name = "ghsl_fetcher"
         self.layer = self._index_layer()
-        self.crs_wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
-        self.crs_mollweide = QgsCoordinateReferenceSystem("ESRI:54009")
-        self.transform = QgsCoordinateTransform(
-            self.crs_wgs84, self.crs_mollweide, QgsProject.instance().transformContext()
-        )
+        self.base_url = self.BASE_URL
 
     # ---------------- Utilities ----------------
     def _cache_dir(self):
+        """
+        Returns the directory path used for caching GHSL data, creating it if it does not exist.
+        The cache directory is located within the QGIS settings directory under
+        'python/plugins/ghsl_cache/cache'. If the directory does not already exist,
+        it will be created.
+
+        Returns:
+            str: The absolute path to the GHSL cache directory.
+        """
+
         base = QgsApplication.qgisSettingsDirPath()
-        cache_dir = os.path.join(base, "python", "plugins", self.plugin_name, "cache")
+        cache_dir = os.path.join(base, "python", "plugins", "ghsl_cache", "cache")
         os.makedirs(cache_dir, exist_ok=True)
         return cache_dir
-
-    def _notify(self, msg, level=Qgis.Info, tag="GHSLFetcher"):
-        QgsMessageLog.logMessage(msg, tag, level)
-        if not iface:
-            return
-        if level == Qgis.Critical:
-            iface.messageBar().pushCritical(tag, msg)
-        elif level == Qgis.Warning:
-            iface.messageBar().pushWarning(tag, msg)
-        elif level == Qgis.Success:
-            iface.messageBar().pushSuccess(tag, msg)
-        else:
-            iface.messageBar().pushMessage(tag, msg, level=Qgis.Info, duration=5)
 
     # ---------------- Tile grid ----------------
     def _index_layer(self) -> QgsVectorLayer:
@@ -102,13 +107,21 @@ class GHSLDownloader:
         return layer
 
     def tiles_intersecting_bbox(self):
+        """
+        Finds and returns the IDs of tiles that intersect with the current bounding box.
+        This method queries the associated layer for features whose geometries intersect
+        with the bounding box defined by `self.extents`. The IDs of the intersecting tiles
+        are collected and returned as a list.
+
+        Returns:
+            list: A list of tile IDs (as found in the 'tile_id' attribute) that intersect with the bounding box.
+        """
+
         log_message(f"Finding tiles intersecting bbox: {self.extents.toString()}")
-        bbox_mollweiide = self.transform.transform(self.extents)
-        log_message(f"\n Transformed to Mollweide: {bbox_mollweiide.toString()}")
 
         # get the features that intersect the bbox
         intersecting = []
-        request = QgsFeatureRequest().setFilterRect(bbox_mollweiide)
+        request = QgsFeatureRequest().setFilterRect(self.extents)
         for feat in self.layer.getFeatures(request):
             log_message(f"\n - {feat['tile_id']}")
             intersecting.append(feat["tile_id"])
@@ -131,21 +144,15 @@ class GHSLDownloader:
         if not os.path.exists(zip_path):
             url = self.BASE_URL + zip_name
             log_message(f"Downloading {url} to {zip_path}...")
-            # Not threadsafe
-            # self._notify(f"Downloading {url} …", Qgis.Info)
 
             loop = QEventLoop()
 
             def on_finished():
                 log_message(f"Download finished: {zip_path}")
-                # Not threadsafe
-                # self._notify(f"Downloaded {zip_name} → {zip_path}", Qgis.Success)
                 loop.quit()
 
             def on_error(err_code, err_msg):
                 log_message(f"Download error {err_code}: {err_msg}")
-                # Not threadsafe
-                # self._notify(f"Download error {err_code}: {err_msg}", Qgis.Critical)
                 loop.quit()
 
             downloader = QgsFileDownloader(QUrl(url), zip_path, authcfg="", httpMethod=Qgis.HttpMethod.Get)
@@ -155,8 +162,6 @@ class GHSLDownloader:
             loop.exec_()
         else:
             log_message(f"Using cached zip: {zip_path}")
-            # Not threadsafe
-            # self._notify(f"Using cached zip: {zip_path}", Qgis.Info)
 
         # 2. Unpack
         extracted_dir = os.path.join(cache_dir, tile_id)
@@ -166,11 +171,7 @@ class GHSLDownloader:
             if not all(os.path.exists(os.path.join(extracted_dir, f)) for f in zf.namelist()):
                 zf.extractall(path=extracted_dir)
                 log_message(f"Extracted {tile_id} to {extracted_dir}")
-                # Not threadsafe
-                # self._notify(f"Extracted {tile_id} → {extracted_dir}", Qgis.Success)
             else:
                 log_message(f"{tile_id} already unpacked in {extracted_dir}")
-                # Not threadsafe
-                # self._notify(f"{tile_id} already unpacked in {extracted_dir}", Qgis.Info)
 
             return [os.path.join(extracted_dir, f) for f in zf.namelist()]
