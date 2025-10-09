@@ -177,6 +177,14 @@ class OpportunitiesMaskProcessor(QgsTask):
                 log_message(f"{self.mask_mode} parquet file not valid", level=Qgis.Critical)
                 log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
                 raise Exception(f"{self.mask_mode} parquet file not valid")
+                # Check the crs of the layer, if it is not in the target crs, reproject it
+            if self.features_layer.crs() != self.target_crs:
+                log_message("Reprojecting features layer to match target crs")
+                # Note that the layer returned will be a memory layer
+                # which may be inefficiecy here.
+                log_message(f"Layer CRS: {self.features_layer.crs().authid()}")
+                log_message(f"Target CRS: {self.target_crs.authid()}")
+                self.features_layer = check_and_reproject_layer(self.features_layer, self.target_crs)
 
         # Workflow directory is the subdir under working_directory
         self.workflow_directory = os.path.join(working_directory, "opportunity_masks")
@@ -202,6 +210,10 @@ class OpportunitiesMaskProcessor(QgsTask):
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
         log_message(f"Working_directory: {self.working_directory}")
         log_message(f"Workflow directory: {self.workflow_directory}")
+        log_message(f"Mask mode: {self.mask_mode}")
+        log_message(
+            f"Layer path: {self.features_layer.source() if self.mask_mode in ['point', 'polygon', 'ghsl'] else self.raster_layer.source()}"
+        )  # noqa E501
         log_message(f"Cell size: {self.cell_size_m}")
         log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
         log_message(f"Force clear: {self.force_clear}")

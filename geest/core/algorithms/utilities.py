@@ -133,7 +133,6 @@ def check_and_reproject_layer(features_layer: QgsVectorLayer, target_crs: QgsCoo
     Returns:
         QgsVectorLayer: The input layer, either reprojected or unchanged.
 
-    Note: Also updates self.features_layer to point to the reprojected layer.
     """
     # check if the layer has a valid CRS
     if not features_layer.crs().isValid():
