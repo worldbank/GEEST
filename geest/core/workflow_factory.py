@@ -103,4 +103,4 @@ class WorkflowFactory:
             import traceback
 
             log_message(traceback.format_exc(), level=Qgis.Critical)
-            return DontUseWorkflow(item, cell_size_m, feedback, context)
+            return DontUseWorkflow(item, cell_size_m, analysis_scale, feedback, context)

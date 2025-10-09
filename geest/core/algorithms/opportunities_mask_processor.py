@@ -158,6 +158,26 @@ class OpportunitiesMaskProcessor(QgsTask):
                 log_message("No valid raster layer provided for mask", level=Qgis.Critical)
                 log_message(f"Raster Source: {self.raster_layer.source()}", level=Qgis.Critical)
                 raise Exception("No valid raster layer provided for mask")
+        elif self.mask_mode == "ghsl":
+            # Use the global human settlements layer defined in the project settings
+            log_message("Loading global human settlements layer for mask")
+            layer_source = self.workflow_directory = os.path.join(
+                working_directory, "study_area", "ghsl_settlements_layer.parquet"
+            )
+            provider_type = "ogr"
+            if not layer_source:
+                log_message(
+                    f"{self.mask_mode} parquet file not found",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+                raise Exception(f"{self.mask_mode} parquet file not found")
+            self.features_layer = QgsVectorLayer(layer_source, self.mask_mode, provider_type)
+            if not self.features_layer.isValid():
+                log_message(f"{self.mask_mode} parquet file not valid", level=Qgis.Critical)
+                log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
+                raise Exception(f"{self.mask_mode} parquet file not valid")
+
         # Workflow directory is the subdir under working_directory
         self.workflow_directory = os.path.join(working_directory, "opportunity_masks")
         os.makedirs(self.workflow_directory, exist_ok=True)
@@ -269,7 +289,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
             log_message(f"Mask layer saved to {mask_layer}")
             return mask_layer
-        elif self.mask_mode == "polygon":
+        elif self.mask_mode in ["polygon", "ghsl"]:
             # Step 1: clip the selected features to the current area's clip area
             log_message("Clipping features to the current area's clip area")
             clipped_layer = self._clip_features(area_features, clip_area, index)

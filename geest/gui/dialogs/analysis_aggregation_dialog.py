@@ -164,6 +164,8 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.polygon_radio_button.setChecked(True)
         elif mask_mode == "raster":
             self.raster_radio_button.setChecked(True)
+        else:  # ghsl - use the global human settlements layer configured during project setup
+            self.ghsl_radio_button.setChecked(True)
 
         buffer_distance = self.tree_item.attribute("buffer_distance_m", 0)
         self.buffer_distance_m.setValue(int(buffer_distance))
@@ -550,6 +552,8 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.tree_item.setAttribute("mask_mode", "polygon")
         elif self.raster_radio_button.isChecked():
             self.tree_item.setAttribute("mask_mode", "raster")
+        elif self.ghsl_radio_button.isChecked():
+            self.tree_item.setAttribute("mask_mode", "ghsl")  # gloabl human settlements layer
 
         self.tree_item.setAttribute("buffer_distance_m", self.buffer_distance_m.value())
         # Save the dialog geometry
