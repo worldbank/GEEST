@@ -1,26 +1,19 @@
 {
     "version": "0.2.0",
+
     "configurations": [
         {
             "name": "QGIS Plugin Debug",
             "type": "debugpy",
             "request": "launch",
-            "program": "/usr/bin/qgis", // QGIS executable path
-            "args": [
-                "--project",
-                "${workspaceFolder}/GEEST.qgs"
-            ], // Optional QGIS project
+
+            "program": "", // Set the QGIS executable path from an environment variable
+            //"program": "/usr/bin/qgis", // Replace with the actual QGIS executable path
+            "args": ["--project", "/GEEST.qgs"], // Optional QGIS project
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/geest"
-            },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "${workspaceFolder}"
-                }
-            ]
+                "PYTHONPATH": "/planet_explorer"
+            }
         },
         {
             "name": "Python: Remote Attach 9000",
@@ -32,11 +25,10 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/",
-                    "remoteRoot": "/home/timlinux/.local/share/QGIS/QGIS3/profiles/GEEST2/python/plugins/"
+                    "localRoot": "/planet_explorer", // Local path on your machine
+                    "remoteRoot": "/.local/share/QGIS/QGIS3/profiles/PLANET/python/plugins/planet_explorer" // Uses /home/timlinux instead of hardcoding username
                 }
-            ],
-            "justMyCode": false
+            ]
         }
     ]
 }

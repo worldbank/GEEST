@@ -7,7 +7,6 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
     QgsFeedback,
-    QgsMapLayerProxyModel,
     QgsProject,
     QgsVectorLayer,
 )
@@ -88,12 +87,6 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.banner_label.deleteLater()
         parent_layout.update()
 
-        # self.folder_status_label.setPixmap(
-        #     QPixmap(resources_path("resources", "icons", "failed.svg"))
-        # )
-        self.raster_layer_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        self.raster_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
-        self.load_ghsl_layer_button.clicked.connect(self.load_settlements_layer)
         self.download_ghsl_layer_button.clicked.connect(self.download_ghsl_layer_button_clicked)
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
@@ -102,11 +95,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
 
     def emit_layer_change(self):
-        layer = self.raster_layer_combo.currentLayer()
-        if layer:
-            self.ghsl_layer_path_changed.emit(layer.source())
-        else:
-            self.ghsl_layer_path_changed.emit(None)
+        self.ghsl_layer_path_changed.emit(self.layer.source())
 
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
@@ -115,9 +104,9 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.switch_to_previous_tab.emit()
 
     def settlements_layer_path(self):
-        if self.raster_layer_combo.currentLayer() is None:
-            return None
-        return self.raster_layer_combo.currentLayer().source()
+        if self.ghsl_layer:
+            return self.ghsl_layer.source()
+        return None
 
     def load_settlements_layer(self):
         """Load a road ghsl layer from a file."""
@@ -270,9 +259,10 @@ class GHSLPanel(FORM_CLASS, QWidget):
             return
         # Load the layer in QGIS
         QgsProject.instance().addMapLayer(layer)
-        self.raster_layer_combo.setLayer(layer)
+        self.ghsl_layer = layer
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
+        self.emit_layer_change()
         self.enable_widgets()
 
     def resizeEvent(self, event):
@@ -288,6 +278,6 @@ class GHSLPanel(FORM_CLASS, QWidget):
         # log_message(f"Description Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))
         self.description4.setFont(QFont("Arial", font_size))
-        self.raster_layer_combo.setFont(QFont("Arial", font_size))
+
         self.download_ghsl_layer_button.setFont(QFont("Arial", font_size))
         self.download_ghsl_layer_button.setFont(QFont("Arial", font_size))

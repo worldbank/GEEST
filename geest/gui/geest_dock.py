@@ -46,6 +46,7 @@ class GeestDock(QDockWidget):
         :param parent: The parent widget for the dock.
         :param json_file: Path to a JSON file used for the TreePanel.
         """
+        self.initialised = False
         super().__init__(parent)
         # Get the plugin version from metadata.txt
         self.plugin_version = version()
@@ -63,10 +64,20 @@ class GeestDock(QDockWidget):
         self.stacked_widget: QStackedWidget = QStackedWidget()
         self.study_area_bbox = None
 
+        # Create the widgets early to be ready for connections
+        self.intro_widget: IntroPanel = IntroPanel()
+        self.credits_widget: CreditsPanel = CreditsPanel()
+        self.setup_widget: SetupPanel = SetupPanel()
+        self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
+        self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
+        self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
+        self.ghsl_widget: GHSLPanel = GHSLPanel()
+        self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
+        help_widget: HelpPanel = HelpPanel()
+
         try:
             # INTRO_PANEL = 0
             # Create and add the "Intro" panel (IntroPanel)
-            self.intro_widget: IntroPanel = IntroPanel()
             intro_panel: QWidget = QWidget()
             intro_layout: QVBoxLayout = QVBoxLayout(intro_panel)
             intro_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
@@ -78,7 +89,7 @@ class GeestDock(QDockWidget):
             )
             # CREDITS_PANEL = 1
             # Create and add the "Credits" panel (CreditsPanel)
-            self.credits_widget: CreditsPanel = CreditsPanel()
+
             credits_panel: QWidget = QWidget()
             credits_layout: QVBoxLayout = QVBoxLayout(credits_panel)
             credits_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
@@ -94,7 +105,7 @@ class GeestDock(QDockWidget):
             )
             # SETUP_PANEL = 2
             # Create and add the "Project" panel (SetupPanel)
-            self.setup_widget: SetupPanel = SetupPanel()
+
             setup_panel: QWidget = QWidget()
             setup_layout: QVBoxLayout = QVBoxLayout(setup_panel)
             setup_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
@@ -117,7 +128,7 @@ class GeestDock(QDockWidget):
             )
             # OPEN_PROJECT_PANEL = 3
             # Create and add the "Open Project" panel
-            self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
+
             open_project_panel: QWidget = QWidget()
             open_project_layout: QVBoxLayout = QVBoxLayout(open_project_panel)
             open_project_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
@@ -140,7 +151,7 @@ class GeestDock(QDockWidget):
             )
             # CREATE_PROJECT_PANEL = 4
             # Create and add the "Create Project" panel
-            self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
+
             create_project_panel: QWidget = QWidget()
             create_project_layout: QVBoxLayout = QVBoxLayout(create_project_panel)
             create_project_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
@@ -172,7 +183,7 @@ class GeestDock(QDockWidget):
             )
             # ROAD_NETWORK_PANEL = 5
             # Create and add the "Road Network" panel
-            self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
+
             road_network_panel: QWidget = QWidget()
             road_network_layout: QVBoxLayout = QVBoxLayout(road_network_panel)
             road_network_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
@@ -191,16 +202,12 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(GHSL_PANEL)
             )
-
-            # See lower down for tree widget creation
-            # We need to create it here so we can connect signals
-            self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
             self.road_network_widget.network_layer_path_changed.connect(
                 lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
             )
             # GHSL_PANEL = 6
             # Create and add the "GHSL" panel
-            self.ghsl_widget: GHSLPanel = GHSLPanel()
+
             ghsl_panel: QWidget = QWidget()
             ghsl_layout: QVBoxLayout = QVBoxLayout(ghsl_panel)
             ghsl_layout.setContentsMargins(10, 10, 10, 10)  # Minimize padding
@@ -261,7 +268,6 @@ class GeestDock(QDockWidget):
 
             # HELP_PANEL = 8
             # Create and add the "Help" panel (HelpPanel)
-            help_widget: HelpPanel = HelpPanel()
             help_panel: QWidget = QWidget()
             help_layout: QVBoxLayout = QVBoxLayout(help_panel)
             help_layout.setContentsMargins(0, 0, 0, 0)  # Minimize padding
@@ -303,6 +309,7 @@ class GeestDock(QDockWidget):
         # do this last so it applies to all the widgets
         self.background_image = theme_background_image()
         main_widget.setStyleSheet(theme_stylesheet())
+        self.initialised = True
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
@@ -336,7 +343,6 @@ class GeestDock(QDockWidget):
                 level=Qgis.Info,  # noqa E225
             )
             if geest_project and os.path.exists(os.path.join(geest_project, "model.json")):
-
                 self.tree_widget.set_working_directory(geest_project)
                 self.stacked_widget.setCurrentIndex(TREE_PANEL)  # Tree tab
                 self.road_network_widget.set_working_directory(geest_project)

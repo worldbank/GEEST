@@ -215,7 +215,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
                 layer_name = "opportunities_by_wee_score_by_population_subnational_aggregation"
                 raster_layer_path = os.path.join(
                     self.opportunities_by_wee_by_population_folder,
-                    "wee_by_opportunities_mask.vrt",
+                    "wee_by_population_by_opportunities_mask.vrt",
                 )
                 output = self.aggregate(
                     cleaned_aggregation_layer,

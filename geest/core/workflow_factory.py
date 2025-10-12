@@ -68,6 +68,7 @@ class WorkflowFactory:
             elif analysis_mode == "Do Not Use":
                 return DontUseWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_multi_buffer_point":
+                log_message("Using Multi Buffer Distances Native Workflow")
                 return MultiBufferDistancesNativeWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_single_buffer_point":
                 return SinglePointBufferWorkflow(item, cell_size_m, analysis_scale, feedback, context)

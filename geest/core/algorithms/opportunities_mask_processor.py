@@ -12,6 +12,7 @@ from qgis.core import (
     QgsProcessingContext,
     QgsProcessingFeedback,
     QgsRasterLayer,
+    QgsRectangle,
     QgsTask,
     QgsVectorLayer,
 )
@@ -109,7 +110,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         self.workflow_name = f"opportunities_{self.mask_mode}_mask"
         # In normal workflows this comes from the item, but this workflow is a bit different
         # so we set it manually.
-        self.layer_id = "Opportunities_Mask"
+        self.layer_id = "opportunities_mask"
         if self.mask_mode == "point":
             self.buffer_distance_m = self.item.attribute("buffer_distance_m", 1000)
         if self.mask_mode in ["point", "polygon"]:
@@ -190,7 +191,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         self.workflow_directory = os.path.join(working_directory, "opportunity_masks")
         os.makedirs(self.workflow_directory, exist_ok=True)
 
-        self.output_filename = "Opportunities_Mask"
+        self.output_filename = "opportunities_mask"
         # And customise which key we will write the result file to:
         self.result_file_key = "opportunities_mask_result_file"
         self.result_key = "opportunities_mask_result"
@@ -413,7 +414,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         :return: The path to the reprojected and clipped raster.
         """
         # Convert the bbox to QgsRectangle
-        bbox = bbox.boundingBox()
+        bbox: QgsRectangle = bbox.boundingBox()
 
         reprojected_raster_path = os.path.join(
             self.workflow_directory,
@@ -430,8 +431,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
         }
 
-        aoi = processing.run("gdal:warpreproject", params, feedback=QgsProcessingFeedback())["OUTPUT"]
-        del aoi
+        processing.run("gdal:warpreproject", params, feedback=QgsProcessingFeedback())
         return reprojected_raster_path
 
     def _process_raster_for_area(
