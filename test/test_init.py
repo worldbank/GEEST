@@ -4,8 +4,6 @@ import logging
 import os
 import unittest
 
-from future import standard_library
-
 __author__ = "Tim Sutton <tim@kartoza.com>"
 __revision__ = "$Format:%H$"
 __date__ = "17/10/2010"
@@ -15,8 +13,6 @@ __copyright__ += "Disaster Reduction"
 
 
 """Tests QGIS plugin init."""
-
-standard_library.install_aliases()
 
 LOGGER = logging.getLogger("QGIS")
 IS_LOCAL = os.getenv("RUNNING_ON_LOCAL") == "1"
