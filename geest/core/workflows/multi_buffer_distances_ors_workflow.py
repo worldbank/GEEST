@@ -142,10 +142,32 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         self.ors_client = ORSClient("https://api.openrouteservice.org/v2/isochrones")
         self.api_key = self.ors_client.check_api_key()
         # Create the masked API key for logging
-        self.masked_api_key = self.api_key[:4] + "*" * (len(self.api_key) - 8) + self.api_key[-4:]
+        self.masked_api_key = self._mask_api_key(self.api_key)
         self.temp_layers = []  # Store intermediate layers
+        # codeql[python/clear-text-logging-sensitive-data] - API key is properly masked before logging
         log_message(f"Using ORS API key: {self.masked_api_key}")
         log_message("Multi Buffer Distances Workflow initialized")
+
+    def _mask_api_key(self, api_key: str) -> str:
+        """
+        Safely mask an API key for logging purposes.
+
+        Args:
+            api_key (str): The API key to mask
+
+        Returns:
+            str: The masked API key
+        """
+        if not api_key:
+            return "****"
+
+        key_len = len(api_key)
+        if key_len <= 8:
+            # For short keys, show only asterisks
+            return "*" * key_len
+        else:
+            # For longer keys, show first 4 and last 4 characters
+            return api_key[:4] + "*" * (key_len - 8) + api_key[-4:]
 
     def _process_features_for_area(
         self,
@@ -204,6 +226,7 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
         :param index: Index of the current area being processed.
         :return: QgsVectorLayer containing the buffers as polygons.
         """
+        # codeql[python/clear-text-logging-sensitive-data] - API key is properly masked before logging
         log_message(f"Using ORS API key: {self.masked_api_key}")
 
         # Collect intermediate layers from ORS API

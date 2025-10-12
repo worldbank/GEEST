@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import Optional
 
 from qgis.core import Qgis, QgsTask
@@ -34,8 +35,11 @@ class OrsCheckerTask(QgsTask):
             mode = "foot-walking"
             # Make the request to ORS API using ORSClient
             response = self.ors_client.make_request(mode, params)
+            # Log only the response type for security, not the full response content
+            response_type = response.get("type", "unknown")
+            # codeql[python/clear-text-logging-sensitive-data] - Only logging response type, not sensitive data
             log_message(
-                f"ORS API Key Validation Task response: {response}",
+                f"ORS API Key Validation Task response type: {response_type}",
                 tag="Geest",
                 level=Qgis.Info,
             )
