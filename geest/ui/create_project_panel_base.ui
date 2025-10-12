@@ -64,18 +64,31 @@
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
            <widget class="QRadioButton" name="local_scale">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Local Scale</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
            <widget class="QRadioButton" name="national_scale">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>National Scale</string>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>

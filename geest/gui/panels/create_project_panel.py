@@ -69,6 +69,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.local_scale.clicked.connect(lambda: self.spatial_scale_changed("local"))
         self.national_scale.clicked.connect(lambda: self.spatial_scale_changed("national"))
         self.layer_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
+        if not experimental_features:
+            # For now these are experimental
+            self.local_scale.hide()
+            self.national_scale.hide()
 
         # self.field_combo = QgsFieldComboBox()  # QgsFieldComboBox for selecting fields
         self.field_combo.setFilters(QgsFieldProxyModel.String)

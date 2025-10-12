@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) 2025. All rights reserved.
-Original Author: [Your Name]
+Original Author: Tim Sutton
+
+Currently these tests do not pass on githhub due to it not having a recent gdal version.
 
 Comprehensive Unit Tests for GHSLProcessor Class
 """
