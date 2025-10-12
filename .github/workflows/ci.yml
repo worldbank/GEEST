@@ -35,7 +35,7 @@ jobs:
           - release-3_40
           - release-3_42
           - release-3_44
-        os: [ubuntu-24.04]
+        os: [ubuntu-22.04]
 
     steps:
 
