@@ -392,6 +392,7 @@ def log_message(message: str, level: int = Qgis.Info, tag: str = "Geest", force:
         QgsMessageLog.logMessage(full_message, tag=tag, level=level)
 
     # Log to the file with appropriate logging level
+    # codeql[python/clear-text-logging-sensitive-data] - General logging utility; callers responsible for masking sensitive data
     if level == Qgis.Info:
         logging.info(full_message)
     elif level == Qgis.Warning:
