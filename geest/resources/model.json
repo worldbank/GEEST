@@ -266,7 +266,7 @@
                             "factor_weighting": 1.0,
                             "index_score": 0,
                             "use_index_score": 0,
-                            "default_multi_buffer_distances": "250, 500, 750, 1000, 1250",
+                            "default_multi_buffer_distances": "250, 500, 750, 1000, 1500",
                             "use_multi_buffer_point": 1,
                             "default_single_buffer_distance": 0,
                             "use_single_buffer_point": 0,
