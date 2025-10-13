@@ -27,15 +27,16 @@ jobs:
       fail-fast: false
       matrix:
         qgis_version_tag:
-          #- release-3_30
-          #- release-3_32
-          #- release-3_34
-          #- release-3_36
-          - "3.38"
-          - "3.40"
-          - "3.42"
-          - "3.44"
-        os: [ubuntu-24.04]
+          - release-3_30
+          - release-3_32
+          - release-3_34
+          - release-3_36
+          #- "3.38"
+          #- "3.40"
+          #- "3.42"
+          #- "3.44"
+        #os: [ubuntu-24.04]
+        os: [ubuntu-22.04]
 
     steps:
 
@@ -60,7 +61,8 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          #python-version: '3.12'
+          python-version: '3.10'
           cache: pip
 
       - name: Install plugin dependencies
