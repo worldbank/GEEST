@@ -17,10 +17,7 @@ from qgis.core import QgsRectangle
 from geest.core.algorithms.ghsl_processor import GHSLProcessor
 
 
-@unittest.skipIf(
-    os.environ.get("GITHUB_ACTIONS") == "true",
-    "Skipping tests on GitHub Actions due to old GDAL version lacking Parquet support",
-)
+@unittest.expectedFailure  # Works locally but not in CI due to GDAL version
 class TestGHSLProcessor(unittest.TestCase):
     def setUp(self):
         # Initialize any required variables or objects here
