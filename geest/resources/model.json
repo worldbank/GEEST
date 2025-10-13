@@ -786,7 +786,7 @@
                             "use_index_score": 0,
                             "default_multi_buffer_distances": "0,0,0",
                             "use_multi_buffer_point": 0,
-                            "default_single_buffer_distance": 1000,
+                            "default_single_buffer_distance": 3000,
                             "use_single_buffer_point": 1,
                             "use_classify_polygon_into_classes": 0,
                             "use_classify_safety_polygon_into_classes": 0,

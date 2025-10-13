@@ -66,7 +66,10 @@ class SinglePointBufferWorkflow(WorkflowBase):
             log_message("single_buffer_point_layer not valid", level=Qgis.Critical)
             log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
-        default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "5000"))
+        if analysis_scale == "local":
+            default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "1000"))
+        else:
+            default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "3000"))
         self.buffer_distance = int(self.attributes.get("single_buffer_point_layer_distance", default_buffer_distance))
 
     def _process_features_for_area(
@@ -117,7 +120,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
             "native:buffer",
             {
                 "INPUT": layer,
-                "DISTANCE": self.buffer_distance,  # 5 km buffer
+                "DISTANCE": self.buffer_distance,
                 "SEGMENTS": 15,
                 "DISSOLVE": True,
                 "OUTPUT": output_path,
