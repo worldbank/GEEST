@@ -17,7 +17,7 @@ from qgis.core import QgsRectangle
 from geest.core.algorithms.ghsl_processor import GHSLProcessor
 
 
-@unittest.expectedFailureIf(
+@unittest.skipIf(
     os.environ.get("GITHUB_ACTIONS") == "true",
     "Skipping tests on GitHub Actions due to old GDAL version lacking Parquet support",
 )
