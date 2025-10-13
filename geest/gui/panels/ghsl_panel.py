@@ -95,7 +95,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
 
     def emit_layer_change(self):
-        self.ghsl_layer_path_changed.emit(self.layer.source())
+        self.ghsl_layer_path_changed.emit(self.ghsl_layer.source())
 
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
@@ -277,7 +277,5 @@ class GHSLPanel(FORM_CLASS, QWidget):
 
         # log_message(f"Description Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))
-        self.description4.setFont(QFont("Arial", font_size))
 
-        self.download_ghsl_layer_button.setFont(QFont("Arial", font_size))
         self.download_ghsl_layer_button.setFont(QFont("Arial", font_size))
