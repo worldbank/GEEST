@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 
@@ -7,7 +8,7 @@ from .base_configuration_widget import BaseConfigurationWidget
 
 
 #
-# This combines the point per cell, polyline per cell and polygon per cell
+# This combines the point per cell, polyline per cell, osm_transport_polyline_per_cell and polygon per cell
 # widgets that are in combined widgets. The reason for this is that
 # when working at the factor level, it can have indicators requiring different
 # spatial data types, but the user should only select one configuration type.

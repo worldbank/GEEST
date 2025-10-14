@@ -202,6 +202,11 @@ class SpreadsheetToJsonParser:
                 "use_polyline_per_cell": (
                     row["Use Polyline per Cell"] if not pd.isna(row["Use Polyline per Cell"]) else ""
                 ),
+                "use_osm_transport_polyline_per_cell": (
+                    row["Use OSM Transport Polyline per Cell"]
+                    if not pd.isna(row["Use OSM Transport Polyline per Cell"])
+                    else ""
+                ),
                 "use_point_per_cell": (row["Use Point per Cell"] if not pd.isna(row["Use Point per Cell"]) else ""),
                 "use_nighttime_lights": (
                     row["Use Nighttime Lights"] if not pd.isna(row["Use Nighttime Lights"]) else ""

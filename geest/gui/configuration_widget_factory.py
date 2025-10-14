@@ -54,6 +54,8 @@ class ConfigurationWidgetFactory:
                 return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_polyline_per_cell" and value == 1:
                 return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
+            if key == "use_osm_transport_polyline_per_cell" and value == 1:
+                return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_point_per_cell" and value == 1:
                 return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_csv_to_point_layer" and value == 1:

@@ -15,7 +15,7 @@ from utilities_for_testing import prepare_fixtures
 
 from geest.core.algorithms.features_per_cell_processor import (
     assign_values_to_grid,
-    select_grid_cells,
+    select_grid_cells_and_count_features,
 )
 
 
@@ -84,7 +84,7 @@ class TestSpatialProcessing(unittest.TestCase):
         Test the select_grid_cells function.
         """
         feedback = QgsFeedback()
-        output_layer = select_grid_cells(
+        output_layer = select_grid_cells_and_count_features(
             grid_layer=self.grid_layer,
             features_layer=self.features_layer,
             output_path=self.output_path,
@@ -111,7 +111,7 @@ class TestSpatialProcessing(unittest.TestCase):
         """
         feedback = QgsFeedback()
         # First, generate the intersecting feature counts
-        output_layer = select_grid_cells(
+        output_layer = select_grid_cells_and_count_features(
             grid_layer=self.grid_layer,
             features_layer=self.features_layer,
             output_path=self.output_path,

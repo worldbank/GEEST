@@ -14,7 +14,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 
 from geest.core import JsonTreeItem
-from geest.core.algorithms.features_per_cell_processor import select_grid_cells
+from geest.core.algorithms.features_per_cell_processor import select_grid_cells_and_count_features
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -123,7 +123,7 @@ class StreetLightsBufferWorkflow(WorkflowBase):
         buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
         # Step 2: Select grid cells that intersect with features
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
-        area_grid = select_grid_cells(self.grid_layer, area_features, output_path, self.feedback)
+        area_grid = select_grid_cells_and_count_features(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 3: Assign scores to the grid layer
         grid_layer = self._score_grid(area_grid, buffered_layer)

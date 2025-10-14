@@ -10,6 +10,7 @@ from geest.core.workflows import (
     DontUseWorkflow,
     FactorAggregationWorkflow,
     MultiBufferDistancesNativeWorkflow,
+    OsmTransportPolylinePerCellWorkflow,
     PointPerCellWorkflow,
     PolygonPerCellWorkflow,
     PolylinePerCellWorkflow,
@@ -76,6 +77,8 @@ class WorkflowFactory:
                 return PointPerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_polyline_per_cell":
                 return PolylinePerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_osm_transport_polyline_per_cell":
+                return OsmTransportPolylinePerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_polygon_per_cell":
                 return PolygonPerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "factor_aggregation":

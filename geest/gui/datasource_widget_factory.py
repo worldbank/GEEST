@@ -48,6 +48,8 @@ class DataSourceWidgetFactory:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_polyline_per_cell" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
+            if widget_key == "use_osm_transport_polyline_per_cell" and value == 1:
+                return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_point_per_cell" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_csv_point_per_cell" and value == 1:

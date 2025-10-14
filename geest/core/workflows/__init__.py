@@ -14,6 +14,7 @@ from .multi_buffer_distances_ors_workflow import MultiBufferDistancesORSWorkflow
 from .point_per_cell_workflow import PointPerCellWorkflow
 from .polygon_per_cell_workflow import PolygonPerCellWorkflow
 from .polyline_per_cell_workflow import PolylinePerCellWorkflow
+from .osm_transport_polyline_per_cell_workflow import OsmTransportPolylinePerCellWorkflow
 from .raster_reclassification_workflow import RasterReclassificationWorkflow
 from .safety_polygon_workflow import SafetyPolygonWorkflow
 from .safety_raster_workflow import SafetyRasterWorkflow

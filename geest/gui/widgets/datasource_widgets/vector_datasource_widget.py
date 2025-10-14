@@ -39,6 +39,8 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
                 filter = QgsMapLayerProxyModel.PointLayer
             elif self.attributes.get("use_polyline_per_cell", 0):
                 filter = QgsMapLayerProxyModel.LineLayer
+            elif self.attributes.get("use_osm_transport_polyline_per_cell", 0):
+                filter = QgsMapLayerProxyModel.LineLayer
             else:
                 filter = QgsMapLayerProxyModel.PolygonLayer
             self.layer_combo = QgsMapLayerComboBox()

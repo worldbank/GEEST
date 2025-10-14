@@ -13,7 +13,7 @@ from qgis.core import (
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import (
     assign_values_to_grid,
-    select_grid_cells,
+    select_grid_cells_and_count_features,
 )
 from geest.utilities import log_message
 
@@ -96,7 +96,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
         )
         # Step 1: Select grid cells that intersect with features
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
-        area_grid = select_grid_cells(self.grid_layer, area_features, output_path, self.feedback)
+        area_grid = select_grid_cells_and_count_features(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 2: Assign values to grid cells
         grid = assign_values_to_grid(area_grid, feedback=self.feedback)
