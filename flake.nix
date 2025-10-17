@@ -101,6 +101,7 @@
           pkgs.ffmpeg
           pkgs.gdb
           pkgs.git
+          pkgs.minio-client # for grabbing ookla data
           pkgs.glogg
           pkgs.glow # terminal markdown viewer
           pkgs.gource # Software version control visualization
@@ -136,6 +137,7 @@
           postgresWithPostGIS
           pkgs.nodePackages.cspell
           (pkgs.python3.withPackages (ps: [
+            # Add these for SQL linting/formatting:
             ps.black
             ps.click # needed by black
             ps.debugpy
@@ -148,36 +150,20 @@
             ps.numpy
             ps.odfpy
             ps.pandas
-            ps.paver # For autocompletion in vscode
+            ps.paver
             ps.pip
             ps.psutil
             ps.pyqt5-stubs
             ps.pytest
             ps.pytest-qt
             ps.python
+            ps.rich
             ps.setuptools
             ps.snakeviz # For visualising cprofiler outputs
+            ps.sqlfmt
             ps.toml
             ps.typer
             ps.wheel
-            # Add these for SQL linting/formatting:
-            ps.sqlfmt
-            ps.pip
-            ps.setuptools
-            ps.wheel
-            ps.pytest
-            ps.pytest-qt
-            ps.black
-            ps.click # needed by black
-            ps.docformatter
-            ps.flake8
-            ps.mypy
-            ps.jsonschema
-            ps.pandas
-            ps.odfpy
-            ps.psutil
-            ps.httpx
-            ps.toml
             # For autocompletion in vscode
             ps.pyqt5-stubs
 

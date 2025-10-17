@@ -1,5 +1,4 @@
-# coding=utf-8
-
+# -*- coding: utf-8 -*-
 """Init for Geest."""
 
 __copyright__ = "Copyright 2024, Tim Sutton"
