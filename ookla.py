@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import timeit
 
 from osgeo import gdal, ogr
 from rich.console import Console
@@ -27,7 +28,8 @@ gdal.SetConfigOption("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
 gdal.SetConfigOption("CPL_VSIL_CURL_ALLOWED_EXTENSIONS", "parquet")
 
 # Construct VSI S3 path
-path = "/vsis3/ookla-open-data/parquet/performance/type=fixed/year=2025/quarter=3/2025-07-01_performance_fixed_tiles.parquet"
+path_fixed_internet = "/vsis3/ookla-open-data/parquet/performance/type=fixed/year=2025/quarter=3/2025-07-01_performance_fixed_tiles.parquet"
+path_mobile_internet = "/vsis3/ookla-open-data/parquet/performance/type=mobile/year=2025/quarter=3/2025-07-01_performance_mobile_tiles.parquet"
 
 
 def print_bbox_diagram(bbox, title="BBOX Diagram"):
@@ -86,7 +88,7 @@ def print_bbox_table(bbox):
     console.print(table)
 
 
-def filter_ookla_data(input_file, output_file, bbox):
+def extract_ookla_data(input_file, output_file, bbox):
     # Example row from the Parquet file:
     # OGRFeature(ookla):349644
     # quadkey (String) = 0230131221113313
@@ -102,6 +104,7 @@ def filter_ookla_data(input_file, output_file, bbox):
     # devices (Integer64) = 1
 
     found_bbox = (0, 0, 0, 0)  # As we iterate over the features, we'll find the actual bbox
+    start_time = timeit.default_timer()
     progress_bar = Progress(
         # left label — styled task description
         TextColumn(f"[bold {PALETTE['primary']}]\u25b6 {{task.description}}[/]", justify="right"),
@@ -197,12 +200,32 @@ def filter_ookla_data(input_file, output_file, bbox):
     print_bbox_diagram(found_bbox)
     print_bbox_diagram(bbox, title="Extent of Processed Data")
     console.print(
-        Panel.fit(
+        Panel(
             f"[bold {PALETTE['primary']}]✅ Filtering complete![/bold {PALETTE['primary']}]\n"
             f"[{PALETTE['neutral']}]Kept {kept_count} of {feature_count} features.[/]\n"
             f"[{PALETTE['neutral']}]Filtered data saved to:[/] [bold]{output_file}[/bold]",
             border_style=PALETTE["accent"],
             title=f"[white on {PALETTE['primary']}] Done [/white on {PALETTE['primary']}]",
+            width=panel_width,
+        )
+    )
+    print_timings(start_time, title="Parquet file generation", message=f"Wrote {kept_count} features to {output_file}.")
+
+
+def print_timings(start_time, title, message):
+    # print the time as hours, minutes, seconds etc.
+    run_time = timeit.default_timer() - start_time
+    hours = int(run_time // 3600)
+    minutes = int((run_time % 3600) // 60)
+    seconds = run_time % 60
+    console.print(
+        Panel(
+            f"[bold {PALETTE['neutral']}]{message}[/bold {PALETTE['neutral']}]\n"
+            f"[bold {PALETTE['primary']}]⏱️ Hours:[/bold {PALETTE['primary']}] {hours}hrs"
+            f"[bold {PALETTE['primary']}] Minutes:[/bold {PALETTE['primary']}] {minutes}mins"
+            f"[bold {PALETTE['primary']}] Seconds:[/bold {PALETTE['primary']}] {seconds:.2f}s",
+            title=f"[bold {PALETTE['accent']}]{title}[/bold {PALETTE['accent']}]",
+            border_style=PALETTE["accent"],
             width=panel_width,
         )
     )
@@ -213,6 +236,7 @@ def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
     # with the specified pixel size.
     # gdal_rasterize -l ookla_filtered -burn 1.0 -tr 0.001 0.001 -init 0.0 -a_nodata 0.0 -ot Byte -of GTiff -co COMPRESS=DEFLATE -co PREDICTOR=2 -co ZLEVEL=9 /home/timlinux/dev/python/GEEST/data/ookla_filtered.parquet OUTPUT.tif
     # from osgeo import gdal
+    start_time = timeit.default_timer()
     NoData_value = 0
     gdal.Rasterize(
         output_raster,
@@ -231,21 +255,59 @@ def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
         allTouched=True,
         burnValues=1,
     )
+    print_timings(start_time, title="Rasterization complete.", message=f"Raster saved to {output_raster}.")
+
+
+def combine_vectors(input_files, output_file):
+    # This function combines multiple vector files into a single output file.
+    start_time = timeit.default_timer()
+    driver = ogr.GetDriverByName("Parquet")
+    out_dataset = driver.CreateDataSource(output_file)
+    out_layer = out_dataset.CreateLayer("combined_data", geom_type=ogr.wkbPolygon)
+
+    out_layer_defn = out_layer.GetLayerDefn()
+
+    for input_file in input_files:
+        dataset = driver.Open(input_file, 0)
+        layer = dataset.GetLayer()
+
+        for feature in layer:
+            geom = feature.GetGeometryRef()
+            out_feature = ogr.Feature(out_layer_defn)
+            out_feature.SetGeometry(geom.Clone())
+            out_layer.CreateFeature(out_feature)
+            out_feature.Destroy()
+
+        dataset = None
+
+    out_dataset = None
+    print_timings(start_time, title="Vector Combination Complete", message=f"Combined vector saved to {output_file}.")
 
 
 if __name__ == "__main__":
     # prompt the user if they wish to use a local copy of the Ookla data or the S3 path
     console.print("[bold]Select Data Source:[/bold]")
-    console.print("1. Use local copy of Ookla data (data/ookla.parquet)")
+    console.print("1. Use local copy of Ookla data (data/ookla-fixed.parquet and data/ookla-mobile.parquet)")
     console.print("2. Use Ookla data from S3")
     choice = console.input("Enter choice (1-2): ")
     if choice == "1":
-        input_file = "data/ookla.parquet"
-    else:
-        input_file = path
+        console.print("[bold]Using local copy of Ookla data.[/bold]")
+        console.print("Make sure you have downloaded the data from S3 first!")
+        console.print("and placed it in the data/ folder as ookla-fixed.parquet")
+        console.print("and ookla-mobile.parquet.")
 
-    output_file = "data/ookla_filtered.parquet"
-    output_raster = "data/ookla_filtered.tif"
+        input_file_fixed = "data/ookla-fixed.parquet"
+        input_file_mobile = "data/ookla-mobile.parquet"
+    else:
+        input_file_fixed = path_fixed_internet
+        input_file_mobile = path_mobile_internet
+
+    output_vector_fixed = "data/ookla-fixed-filtered.parquet"
+    output_vector_mobile = "data/ooklak-mobile-filtered.parquet"
+    output_vector_combined = "data/ooklak-combined-filtered.parquet"
+    output_raster_fixed = "data/ookla-fixed-filtered.tif"
+    output_raster_mobile = "data/ookla-mobile-filtered.tif"
+    output_raster_combined = "data/ookla-combined-filtered.tif"
     # Use rich to prompt the user whether they want to test with the
     # bbox of st lucia (small area), portugal (medium area), or usa (large area)
     console.print("[bold]Select Bounding Box Area:[/bold]")
@@ -266,5 +328,9 @@ if __name__ == "__main__":
     print_analysis_intro()
     print_bbox_diagram(bbox, title="Extent of Interest")
     print_bbox_table(bbox)
-    filter_ookla_data(input_file, output_file, bbox)
-    rasterize_filtered_data(output_file, output_raster, pixel_size=0.0001)
+    extract_ookla_data(input_file_fixed, output_vector_fixed, bbox)
+    extract_ookla_data(input_file_mobile, output_vector_mobile, bbox)
+    combine_vectors([output_vector_fixed, output_vector_mobile], output_vector_combined)
+    rasterize_filtered_data(output_vector_fixed, output_raster_fixed, pixel_size=0.0001)
+    rasterize_filtered_data(output_vector_mobile, output_raster_mobile, pixel_size=0.0001)
+    rasterize_filtered_data(output_vector_combined, output_raster_combined, pixel_size=0.0001)
