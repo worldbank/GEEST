@@ -21,6 +21,13 @@ minimum_upload_kbps = 10000
 minimum_download_kbps = 20000
 
 ogr.UseExceptions()
+gdal.SetConfigOption("AWS_NO_SIGN_REQUEST", "YES")  # no credentials needed for public S3 access
+gdal.SetConfigOption("AWS_REGION", "eu-west-1")
+gdal.SetConfigOption("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
+gdal.SetConfigOption("CPL_VSIL_CURL_ALLOWED_EXTENSIONS", "parquet")
+
+# Construct VSI S3 path
+path = "/vsis3/ookla-open-data/parquet/performance/type=fixed/year=2025/quarter=3/2025-07-01_performance_fixed_tiles.parquet"
 
 
 def print_bbox_diagram(bbox, title="BBOX Diagram"):
@@ -227,7 +234,16 @@ def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
 
 
 if __name__ == "__main__":
-    input_file = "data/ookla.parquet"
+    # prompt the user if they wish to use a local copy of the Ookla data or the S3 path
+    console.print("[bold]Select Data Source:[/bold]")
+    console.print("1. Use local copy of Ookla data (data/ookla.parquet)")
+    console.print("2. Use Ookla data from S3")
+    choice = console.input("Enter choice (1-2): ")
+    if choice == "1":
+        input_file = "data/ookla.parquet"
+    else:
+        input_file = path
+
     output_file = "data/ookla_filtered.parquet"
     output_raster = "data/ookla_filtered.tif"
     # Use rich to prompt the user whether they want to test with the
