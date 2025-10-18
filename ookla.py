@@ -251,4 +251,4 @@ if __name__ == "__main__":
     print_bbox_diagram(bbox, title="Extent of Interest")
     print_bbox_table(bbox)
     filter_ookla_data(input_file, output_file, bbox)
-    rasterize_filtered_data(output_file, output_raster, pixel_size=0.01)
+    rasterize_filtered_data(output_file, output_raster, pixel_size=0.0001)
