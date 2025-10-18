@@ -6,7 +6,7 @@ import sys
 from osgeo import gdal, ogr
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import Progress
+from rich.progress import BarColumn, Progress, TextColumn, TimeRemainingColumn
 from rich.table import Table
 
 # Global console and color palette
@@ -46,14 +46,15 @@ def print_bbox_diagram(bbox, title="BBOX Diagram"):
 
 
 def print_analysis_intro():
+    title = "Spatial Filter"
     console.print(
-        Panel.fit(
+        Panel(
             f"[bold {PALETTE['accent']}]Filtering Records by Bounding Box[/bold {PALETTE['accent']}]\n"
             f"[{PALETTE['neutral']}]We’re narrowing the dataset from the Parquet file[/]\n"
             f"[{PALETTE['neutral']}]to only those geometries intersecting the bounding box below.[/]\n"
             f"Mimimum Upload Speed: [bold]{minimum_upload_kbps} kbps[/bold]\n"
             f"Minimum Download Speed: [bold]{minimum_download_kbps} kbps[/bold]\n",
-            title=f"[white on {PALETTE['primary']}] Spatial Filter [/white on {PALETTE['primary']}]",
+            title=f"[bold {PALETTE['accent']}]{title}[/bold {PALETTE['accent']}]",
             border_style=PALETTE["primary"],
             width=panel_width,
         )
@@ -61,11 +62,12 @@ def print_analysis_intro():
 
 
 def print_bbox_table(bbox):
+    title = "Bounding Box Coordinates"
     table = Table(
-        title=f"[bold white on {PALETTE['primary']}]Bounding Box Coordinates[/bold white on {PALETTE['primary']}]",
+        title=f"[bold {PALETTE['accent']}]{title}[/bold {PALETTE['accent']}]",
         show_lines=True,
         width=panel_width,
-        border_style=PALETTE["neutral"],
+        border_style=PALETTE["accent"],
     )
     table.add_column("Corner", justify="center", style=f"bold {PALETTE['accent']}")
     table.add_column("X", justify="right", style=PALETTE["neutral"])
@@ -93,7 +95,22 @@ def filter_ookla_data(input_file, output_file, bbox):
     # devices (Integer64) = 1
 
     found_bbox = (0, 0, 0, 0)  # As we iterate over the features, we'll find the actual bbox
-    progress_bar = Progress()
+    progress_bar = Progress(
+        # left label — styled task description
+        TextColumn(f"[bold {PALETTE['primary']}]\u25b6 {{task.description}}[/]", justify="right"),
+        # custom bar with brand colors
+        BarColumn(
+            bar_width=panel_width - 29,
+            complete_style=PALETTE["accent"],
+            finished_style=PALETTE["neutral"],
+            pulse_style=PALETTE["primary"],
+        ),
+        # middle label — percentage with custom color
+        TextColumn(f"[{PALETTE['accent']}]{'{task.percentage:>5.1f}'}%[/]"),
+        # right label — time remaining, styled grey
+        TimeRemainingColumn(compact=True),
+        console=console,
+    )
     # Open the input Parquet file
     driver = ogr.GetDriverByName("Parquet")
     if driver is None:
@@ -123,42 +140,44 @@ def filter_ookla_data(input_file, output_file, bbox):
     min_x, min_y, max_x, max_y = bbox
 
     feature_count = layer.GetFeatureCount()
-    process_task = progress_bar.add_task(
-        description=f"[bold{PALETTE['primary']}]Processing...[/bold]", total=feature_count
-    )
+    process_task = progress_bar.add_task(description=f"[{PALETTE['primary']}]Processing...", total=feature_count)
     # Set the progress bar color
     progress_bar.columns[1].bar_style = PALETTE["primary"]
     count = 0
     kept_count = 0
     progress_bar.start()
     # Filter and copy features within the bounding box
+    count = 0
+    kept_count = 0
+    min_x, min_y, max_x, max_y = bbox
+    found_min_x, found_min_y, found_max_x, found_max_y = found_bbox
+
     for feature in layer:
-        # avg_d_kbps (Integer64) = 29684
-        # avg_u_kbps (Integer64) = 3512
-        # Don't keep cells with low download or upload speeds
         upload = feature.GetField("avg_u_kbps")
         download = feature.GetField("avg_d_kbps")
         quadkey = feature.GetField("quadkey")
+
+        # Skip cells with low speeds
         if upload < minimum_upload_kbps or download < minimum_download_kbps:
             count += 1
-            progress_bar.update(process_task, total=feature_count, completed=count)
             continue
-        # get the x from the tilw_x field and y from the tile_y field
-        x = float(feature.GetField("tile_x"))
-        y = float(feature.GetField("tile_y"))
-        # Update found_bbox
-        if x < found_bbox[0] or found_bbox[0] == 0:
-            found_bbox = (x, found_bbox[1], found_bbox[2], found_bbox[3])
-        if y < found_bbox[1] or found_bbox[1] == 0:
-            found_bbox = (found_bbox[0], y, found_bbox[2], found_bbox[3])
-        if x > found_bbox[2]:
-            found_bbox = (found_bbox[0], found_bbox[1], x, found_bbox[3])
-        if y > found_bbox[3]:
-            found_bbox = (found_bbox[0], found_bbox[1], found_bbox[2], y)
+
+        x = feature.GetField("tile_x")
+        y = feature.GetField("tile_y")
+
+        # Update bounding box
+        if found_min_x == 0 or x < found_min_x:
+            found_min_x = x
+        if found_min_y == 0 or y < found_min_y:
+            found_min_y = y
+        if x > found_max_x:
+            found_max_x = x
+        if y > found_max_y:
+            found_max_y = y
+
         # Check if the point is within the bounding box
         if min_x <= x <= max_x and min_y <= y <= max_y:
             kept_count += 1
-            # read the geometry as test WKT from the tile field
             geom = ogr.CreateGeometryFromWkt(feature.GetField("tile"))
             out_feature = ogr.Feature(out_layer_defn)
             out_feature.SetGeometry(geom.Clone())
@@ -167,11 +186,14 @@ def filter_ookla_data(input_file, output_file, bbox):
             out_feature.Destroy()
 
         count += 1
-        # use rich progress bar to show progress
-        progress_bar.update(process_task, total=feature_count, completed=count)
         if count % 1000 == 0:
+            progress_bar.update(process_task, total=feature_count, completed=count)
             progress_bar.refresh()
 
+    # Final progress bar update
+    progress_bar.update(process_task, total=feature_count, completed=count)
+    progress_bar.refresh()
+    found_bbox = (found_min_x, found_min_y, found_max_x, found_max_y)
     progress_bar.remove_task(process_task)
     progress_bar.stop()
 
