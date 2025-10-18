@@ -3,7 +3,7 @@
 
 import sys
 
-from osgeo import ogr
+from osgeo import gdal, ogr
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress
@@ -17,6 +17,8 @@ PALETTE = {
     "primary": "#57A0C7",  # blue
 }
 panel_width = 78
+minimum_upload_kbps = 10000
+minimum_download_kbps = 20000
 
 ogr.UseExceptions()
 
@@ -48,7 +50,9 @@ def print_analysis_intro():
         Panel.fit(
             f"[bold {PALETTE['accent']}]Filtering Records by Bounding Box[/bold {PALETTE['accent']}]\n"
             f"[{PALETTE['neutral']}]We’re narrowing the dataset from the Parquet file[/]\n"
-            f"[{PALETTE['neutral']}]to only those geometries intersecting the bounding box below.[/]",
+            f"[{PALETTE['neutral']}]to only those geometries intersecting the bounding box below.[/]\n"
+            f"Mimimum Upload Speed: [bold]{minimum_upload_kbps} kbps[/bold]\n"
+            f"Minimum Download Speed: [bold]{minimum_download_kbps} kbps[/bold]\n",
             title=f"[white on {PALETTE['primary']}] Spatial Filter [/white on {PALETTE['primary']}]",
             border_style=PALETTE["primary"],
             width=panel_width,
@@ -106,8 +110,8 @@ def filter_ookla_data(input_file, output_file, bbox):
     out_layer = out_dataset.CreateLayer("filtered_data", geom_type=ogr.wkbPolygon)
 
     # Copy fields
-    for i in range(layer.GetLayerDefn().GetFieldCount()):
-        out_layer.CreateField(layer.GetLayerDefn().GetFieldDefn(i))
+    # We only will keep the quadkey field and discard the rest
+    out_layer.CreateField(ogr.FieldDefn("quadkey", ogr.OFTString))
 
     min_x, min_y, max_x, max_y = bbox
     feature_count = layer.GetFeatureCount()
@@ -119,12 +123,26 @@ def filter_ookla_data(input_file, output_file, bbox):
     min_x, min_y, max_x, max_y = bbox
 
     feature_count = layer.GetFeatureCount()
-    process_task = progress_bar.add_task(f"[bold{PALETTE['primary']}]Processing...", total=feature_count)
+    process_task = progress_bar.add_task(
+        description=f"[bold{PALETTE['primary']}]Processing...[/bold]", total=feature_count
+    )
+    # Set the progress bar color
+    progress_bar.columns[1].bar_style = PALETTE["primary"]
     count = 0
     kept_count = 0
     progress_bar.start()
     # Filter and copy features within the bounding box
     for feature in layer:
+        # avg_d_kbps (Integer64) = 29684
+        # avg_u_kbps (Integer64) = 3512
+        # Don't keep cells with low download or upload speeds
+        upload = feature.GetField("avg_u_kbps")
+        download = feature.GetField("avg_d_kbps")
+        quadkey = feature.GetField("quadkey")
+        if upload < minimum_upload_kbps or download < minimum_download_kbps:
+            count += 1
+            progress_bar.update(process_task, total=feature_count, completed=count)
+            continue
         # get the x from the tilw_x field and y from the tile_y field
         x = float(feature.GetField("tile_x"))
         y = float(feature.GetField("tile_y"))
@@ -144,8 +162,7 @@ def filter_ookla_data(input_file, output_file, bbox):
             geom = ogr.CreateGeometryFromWkt(feature.GetField("tile"))
             out_feature = ogr.Feature(out_layer_defn)
             out_feature.SetGeometry(geom.Clone())
-            for i in range(out_layer_defn.GetFieldCount()):
-                out_feature.SetField(out_layer_defn.GetFieldDefn(i).GetNameRef(), feature.GetField(i))
+            out_feature.SetField("quadkey", quadkey)
             out_layer.CreateFeature(out_feature)
             out_feature.Destroy()
 
@@ -176,12 +193,56 @@ def filter_ookla_data(input_file, output_file, bbox):
     )
 
 
+def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
+    # This function rasterizes the filtered Parquet data into a GeoTIFF
+    # with the specified pixel size.
+    # gdal_rasterize -l ookla_filtered -burn 1.0 -tr 0.001 0.001 -init 0.0 -a_nodata 0.0 -ot Byte -of GTiff -co COMPRESS=DEFLATE -co PREDICTOR=2 -co ZLEVEL=9 /home/timlinux/dev/python/GEEST/data/ookla_filtered.parquet OUTPUT.tif
+    # from osgeo import gdal
+    NoData_value = 0
+    gdal.Rasterize(
+        output_raster,
+        input_file,
+        format="GTIFF",
+        outputType=gdal.GDT_Byte,
+        creationOptions=[
+            "COMPRESS=DEFLATE",
+            "PREDICTOR=2",
+            "ZLEVEL=9",
+            "INIT=0",
+            "A_NODATA=0",
+        ],
+        noData=NoData_value,
+        initValues=NoData_value,
+        xRes=pixel_size,
+        yRes=-pixel_size,
+        allTouched=True,
+        burnValues=1,
+    )
+
+
 if __name__ == "__main__":
     input_file = "data/ookla.parquet"
     output_file = "data/ookla_filtered.parquet"
-    bbox = (-125.0, 24.0, -66.0, 49.0)  # Example USA
+    output_raster = "data/ookla_filtered.tif"
+    # Use rich to prompt the user whether they want to test with the
+    # bbox of st lucia (small area), portugal (medium area), or usa (large area)
+    console.print("[bold]Select Bounding Box Area:[/bold]")
+    console.print("1. St. Lucia (Small Area)")
+    console.print("2. Portugal (Medium Area)")
+    console.print("3. USA (Large Area)")
+    console.print("4. Global (Very Large Area) [Not Recommended]")
+    choice = console.input("Enter choice (1-4): ")
+    if choice == "1":
+        bbox = (-61.0, 13.7, -60.8, 14.1)  # Example St. Lucia
+    elif choice == "2":
+        bbox = (-9.5, 36.9, -6.2, 42.2)  # Example Portugal
+    elif choice == "3":
+        bbox = (-125.0, 24.0, -66.0, 49.0)  # Example USA
+    else:
+        bbox = (-180.0, -90.0, 180.0, 90.0)
 
     print_analysis_intro()
     print_bbox_diagram(bbox, title="Extent of Interest")
     print_bbox_table(bbox)
     filter_ookla_data(input_file, output_file, bbox)
+    rasterize_filtered_data(output_file, output_raster, pixel_size=0.01)
