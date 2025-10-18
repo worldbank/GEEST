@@ -111,6 +111,7 @@ def filter_ookla_data(input_file, output_file, bbox):
         TimeRemainingColumn(compact=True),
         console=console,
     )
+    progress_bar.columns[1].bar_style = PALETTE["primary"]
     # Open the input Parquet file
     driver = ogr.GetDriverByName("Parquet")
     if driver is None:
@@ -131,59 +132,46 @@ def filter_ookla_data(input_file, output_file, bbox):
     out_layer.CreateField(ogr.FieldDefn("quadkey", ogr.OFTString))
 
     min_x, min_y, max_x, max_y = bbox
-    feature_count = layer.GetFeatureCount()
+    count = 0
     kept_count = 0
+    min_x, min_y, max_x, max_y = bbox
 
+    # Apply attribute filter for speed and extent directly at the layer level
+    filter_expr = (
+        f"avg_u_kbps >= {minimum_upload_kbps} AND "
+        f"avg_d_kbps >= {minimum_download_kbps} AND "
+        f"tile_x >= {min_x} AND tile_x <= {max_x} AND "
+        f"tile_y >= {min_y} AND tile_y <= {max_y}"
+    )
+    layer.SetAttributeFilter(filter_expr)
+    feature_count = layer.GetFeatureCount()
     out_layer_defn = out_layer.GetLayerDefn()
-
-    # Define the bounding box
-    min_x, min_y, max_x, max_y = bbox
-
-    feature_count = layer.GetFeatureCount()
     process_task = progress_bar.add_task(description=f"[{PALETTE['primary']}]Processing...", total=feature_count)
-    # Set the progress bar color
-    progress_bar.columns[1].bar_style = PALETTE["primary"]
-    count = 0
-    kept_count = 0
     progress_bar.start()
-    # Filter and copy features within the bounding box
-    count = 0
-    kept_count = 0
-    min_x, min_y, max_x, max_y = bbox
-    found_min_x, found_min_y, found_max_x, found_max_y = found_bbox
+
+    found_min_x = found_min_y = found_max_x = found_max_y = None
 
     for feature in layer:
-        upload = feature.GetField("avg_u_kbps")
-        download = feature.GetField("avg_d_kbps")
-        quadkey = feature.GetField("quadkey")
-
-        # Skip cells with low speeds
-        if upload < minimum_upload_kbps or download < minimum_download_kbps:
-            count += 1
-            continue
-
         x = feature.GetField("tile_x")
         y = feature.GetField("tile_y")
 
-        # Update bounding box
-        if found_min_x == 0 or x < found_min_x:
+        # Update found_bbox
+        if found_min_x is None or x < found_min_x:
             found_min_x = x
-        if found_min_y == 0 or y < found_min_y:
+        if found_min_y is None or y < found_min_y:
             found_min_y = y
-        if x > found_max_x:
+        if found_max_x is None or x > found_max_x:
             found_max_x = x
-        if y > found_max_y:
+        if found_max_y is None or y > found_max_y:
             found_max_y = y
 
-        # Check if the point is within the bounding box
-        if min_x <= x <= max_x and min_y <= y <= max_y:
-            kept_count += 1
-            geom = ogr.CreateGeometryFromWkt(feature.GetField("tile"))
-            out_feature = ogr.Feature(out_layer_defn)
-            out_feature.SetGeometry(geom.Clone())
-            out_feature.SetField("quadkey", quadkey)
-            out_layer.CreateFeature(out_feature)
-            out_feature.Destroy()
+        kept_count += 1
+        geom = ogr.CreateGeometryFromWkt(feature.GetField("tile"))
+        out_feature = ogr.Feature(out_layer_defn)
+        out_feature.SetGeometry(geom.Clone())
+        out_feature.SetField("quadkey", feature.GetField("quadkey"))
+        out_layer.CreateFeature(out_feature)
+        out_feature.Destroy()
 
         count += 1
         if count % 1000 == 0:
@@ -191,9 +179,6 @@ def filter_ookla_data(input_file, output_file, bbox):
             progress_bar.refresh()
 
     # Final progress bar update
-    progress_bar.update(process_task, total=feature_count, completed=count)
-    progress_bar.refresh()
-    found_bbox = (found_min_x, found_min_y, found_max_x, found_max_y)
     progress_bar.remove_task(process_task)
     progress_bar.stop()
 
@@ -201,6 +186,7 @@ def filter_ookla_data(input_file, output_file, bbox):
     dataset = None
     out_dataset = None
 
+    found_bbox = (found_min_x, found_min_y, found_max_x, found_max_y)
     print_bbox_diagram(found_bbox)
     print_bbox_diagram(bbox, title="Extent of Processed Data")
     console.print(
@@ -230,8 +216,6 @@ def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
             "COMPRESS=DEFLATE",
             "PREDICTOR=2",
             "ZLEVEL=9",
-            "INIT=0",
-            "A_NODATA=0",
         ],
         noData=NoData_value,
         initValues=NoData_value,
