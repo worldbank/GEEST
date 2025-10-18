@@ -67,7 +67,7 @@ def print_bbox_table(bbox):
         title=f"[bold {PALETTE['accent']}]{title}[/bold {PALETTE['accent']}]",
         show_lines=True,
         width=panel_width,
-        border_style=PALETTE["accent"],
+        border_style=PALETTE["primary"],
     )
     table.add_column("Corner", justify="center", style=f"bold {PALETTE['accent']}")
     table.add_column("X", justify="right", style=PALETTE["neutral"])
@@ -236,7 +236,7 @@ def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
         noData=NoData_value,
         initValues=NoData_value,
         xRes=pixel_size,
-        yRes=-pixel_size,
+        yRes=pixel_size,
         allTouched=True,
         burnValues=1,
     )
