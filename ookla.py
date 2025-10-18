@@ -261,9 +261,12 @@ def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
 def combine_vectors(input_files, output_file):
     # This function combines multiple vector files into a single output file.
     start_time = timeit.default_timer()
+    quadkey_set = set()
+    duplicate_count = 0
     driver = ogr.GetDriverByName("Parquet")
     out_dataset = driver.CreateDataSource(output_file)
     out_layer = out_dataset.CreateLayer("combined_data", geom_type=ogr.wkbPolygon)
+    out_layer.CreateField(ogr.FieldDefn("quadkey", ogr.OFTString))
 
     out_layer_defn = out_layer.GetLayerDefn()
 
@@ -272,16 +275,29 @@ def combine_vectors(input_files, output_file):
         layer = dataset.GetLayer()
 
         for feature in layer:
+            quadkey = feature.GetField("quadkey")
+            if quadkey in quadkey_set:
+                duplicate_count += 1
+                continue
+            else:
+                quadkey_set.add(quadkey)
             geom = feature.GetGeometryRef()
             out_feature = ogr.Feature(out_layer_defn)
             out_feature.SetGeometry(geom.Clone())
+            out_feature.SetField("quadkey", quadkey)
             out_layer.CreateFeature(out_feature)
             out_feature.Destroy()
 
         dataset = None
 
     out_dataset = None
-    print_timings(start_time, title="Vector Combination Complete", message=f"Combined vector saved to {output_file}.")
+    dataset = None
+    quadkey_set = None
+    print_timings(
+        start_time,
+        title="Vector Combination Complete",
+        message=f"Combined vector saved to {output_file} with {duplicate_count} duplicates found.",
+    )
 
 
 if __name__ == "__main__":
