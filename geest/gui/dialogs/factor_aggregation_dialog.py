@@ -18,6 +18,7 @@ from qgis.PyQt.QtWidgets import (
     QWidget,
 )
 
+from geest.core.json_tree_item import JsonTreeItem as tree_item
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
     is_qgis_dark_theme_active,
@@ -39,7 +40,7 @@ class FactorAggregationDialog(CustomBaseDialog):
         self.setWindowTitle(factor_name)
         self.factor_name = factor_name
         self.factor_data = factor_data
-        self.tree_item = factor_item  # Reference to the QTreeView item to update
+        self.tree_item: tree_item = factor_item  # Reference to the QTreeView item to update
 
         # Initialize dictionaries
         self.guids = self.tree_item.getFactorIndicatorGuids()

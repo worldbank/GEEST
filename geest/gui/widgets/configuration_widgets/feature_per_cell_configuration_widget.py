@@ -52,7 +52,7 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
 
         return None  # Important to return None in this case as we dont want to assign
         # different analysis modes to the indicators because this config widget is a
-        # special case where it caters for 3 different analysis modes.
+        # special case where it caters for 4 different analysis modes.
 
     def set_internal_widgets_enabled(self, enabled: bool) -> None:
         """

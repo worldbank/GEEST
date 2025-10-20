@@ -43,28 +43,28 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.workflow_name = "use_polyline_per_cell"
+        self.workflow_name = "use_osm_transport_polyline_per_cell"
 
-        layer_path = self.attributes.get("polyline_per_cell_shapefile", None)
+        layer_path = self.attributes.get("osm_transport_polygon_per_cell_shapefile", None)
         if layer_path:
             layer_path = unquote(layer_path)
 
         if not layer_path:
             log_message(
-                "Nothing found in polyline_per_cell_shapefile, trying polygline_per_cell_layer_source.",
+                "Nothing found in osm_transport_polyline_per_cell_shapefile, trying osm_transport_polyline_per_cell_layer_source.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get("polyline_per_cell_layer_source", None)
+            layer_path = self.attributes.get("osm_transport_polyline_per_cell_layer_source", None)
             if not layer_path:
                 log_message(
-                    "No points layer found in polyline_per_cell_layer_source.",
+                    "No points layer found in osm_transport_polyline_per_cell_layer_source.",
                     tag="Geest",
                     level=Qgis.Warning,
                 )
                 return False
 
-        self.features_layer = QgsVectorLayer(layer_path, "polyline_per_cell Layer", "ogr")
+        self.features_layer = QgsVectorLayer(layer_path, "OSM Transport Layer", "ogr")
 
     def _process_features_for_area(
         self,

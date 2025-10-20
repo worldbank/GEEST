@@ -16,7 +16,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QVariant
 
-from geest.utilities import log_message
+from geest.utilities import log_message, setting
 
 
 def select_grid_cells_and_count_features(
@@ -238,6 +238,7 @@ def select_grid_cells_and_assign_transport_score(
     Returns:
         QgsVectorLayer: A new layer with grid cells containing a highest score from the intersecting features.
     """
+
     log_message(
         "Selecting grid cells that intersect with features and assigning a score.",
         tag="Geest",
@@ -288,6 +289,7 @@ def select_grid_cells_and_assign_transport_score(
     grid_most_beneficial_road_scores = {}
     counter = 0
     feature_count = features_layer.featureCount()
+    verbose_mode = int(setting(key="verbose_mode", default=0))
     # Iterate over each feature and use the spatial index to find the intersecting grid cells
     for feature in features_layer.getFeatures():
         feature_geom = feature.geometry()
@@ -299,21 +301,24 @@ def select_grid_cells_and_assign_transport_score(
 
         # Check actual geometry against grid cells
         intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
-        log_message(
-            f"{len(intersecting_ids)} rough intersections found.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+
+        if verbose_mode:
+            log_message(
+                f"{len(intersecting_ids)} rough intersections found.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
         intersecting_ids = [
             grid_id
             for grid_id in intersecting_ids
             if grid_layer.getFeature(grid_id).geometry().intersects(feature_geom)
         ]
-        log_message(
-            f"{len(intersecting_ids)} refined intersections found.",
-            tag="Geest",
-            level=Qgis.Info,
-        )
+        if verbose_mode:
+            log_message(
+                f"{len(intersecting_ids)} refined intersections found.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
 
         # Iterate over the intersecting grid cell IDs and count intersections
         for grid_id in intersecting_ids:
@@ -359,7 +364,7 @@ def select_grid_cells_and_assign_transport_score(
     )
 
     for grid_feature in grid_layer.getFeatures(request):
-        log_message(f"Writing Feature #{counter}")
+        # log_message(f"Writing Feature #{counter}")
         counter += 1
         new_feature = QgsFeature()
         new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
@@ -375,7 +380,7 @@ def select_grid_cells_and_assign_transport_score(
     del writer  # Finalize the writer and close the file
 
     log_message(
-        f"Grid cells with feature counts saved to {output_path}",
+        f"Grid cells with OSM feature scores saved to {output_path}",
         tag="Geest",
         level=Qgis.Info,
     )

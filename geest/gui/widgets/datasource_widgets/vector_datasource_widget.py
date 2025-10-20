@@ -29,25 +29,35 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             # check the attributes to decide what feature types to
             # filter for.
             filter = None
+            tooltip = ""
             if self.attributes.get("use_single_buffer_point", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+                tooltip = "A point layer that will be buffered with a single buffer."
             elif self.attributes.get("use_point_per_cell", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+                tooltip = "A point layer whose points will be counted per cell."
             elif self.attributes.get("use_multi_buffer_point", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+                tooltip = "A point layer whose points will buffered with multiple buffers."
             elif self.attributes.get("use_street_lights", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+            elif self.attributes.get("use_osm_transport_polyline_per_cell", 0):
+                # Putting this before use polyline layer means that
+                # it will be used with priority over a simple line layer
+                filter = QgsMapLayerProxyModel.LineLayer
+                tooltip = "An OSM line layer whose features will be classified and the most beneficial category assigned to the cell."
             elif self.attributes.get("use_polyline_per_cell", 0):
                 filter = QgsMapLayerProxyModel.LineLayer
-            elif self.attributes.get("use_osm_transport_polyline_per_cell", 0):
-                filter = QgsMapLayerProxyModel.LineLayer
+                tooltip = "A line layer whose features will be counted per cell."
             else:
                 filter = QgsMapLayerProxyModel.PolygonLayer
+                tooltip = "A polygon layer whose features will be counted per cell."
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setAllowEmptyLayer(True)
             # Insert placeholder text at the top (only visually, not as a selectable item)
             self.layer_combo.setCurrentIndex(-1)  # Ensure no selection initially
             self.layer_combo.setEditable(True)  # Make editable temporarily for placeholder
+            self.layer_combo.setToolTip(tooltip)
             self.layer_combo.lineEdit().setPlaceholderText("Select item")  # Add placeholder text
 
             # Disable editing after setting placeholder (ensures only layer names are selectable)
