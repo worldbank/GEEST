@@ -470,6 +470,7 @@ class WorkflowBase(QObject):
         if not input_layer or not input_layer.isValid():
             return False
         log_message("--- Rasterizing geometry")
+        log_message(f"--- input_layer {input_layer.source()}")
         log_message(f"--- bbox {bbox}")
         log_message(f"--- index {index}")
 

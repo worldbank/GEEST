@@ -295,7 +295,6 @@ def select_grid_cells_and_assign_transport_score(
         feature_geom = feature.geometry()
         road_type = feature["highway"]
         road_score = lookup_table.get(road_type, 0)  # Default to
-        # Use bounding box only for point geometries; otherwise, use the actual geometry for intersection checks
         if feature_geom.isEmpty():
             continue
 
@@ -303,6 +302,11 @@ def select_grid_cells_and_assign_transport_score(
         intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
 
         if verbose_mode:
+            log_message(
+                f"Finding intersections for road type '{road_type}' with score {road_score}.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
             log_message(
                 f"{len(intersecting_ids)} rough intersections found.",
                 tag="Geest",
@@ -325,9 +329,25 @@ def select_grid_cells_and_assign_transport_score(
             if grid_id in grid_most_beneficial_road_scores:
                 # Only update if the new road score is higher than the existing one
                 if road_score > grid_most_beneficial_road_scores[grid_id]:
+                    if verbose_mode:
+                        log_message(f"Promoting score {road_score} to grid ID {grid_id}.", tag="Geest", level=Qgis.Info)
                     grid_most_beneficial_road_scores[grid_id] = road_score
+                else:
+                    if verbose_mode:
+                        log_message(
+                            f"Existing score {grid_most_beneficial_road_scores[grid_id]} for grid ID {grid_id} is higher than or equal to new score {road_score}, not updating.",
+                            tag="Geest",
+                            level=Qgis.Info,
+                        )
             else:
-                grid_most_beneficial_road_scores[grid_id] = 1
+                if verbose_mode:
+                    log_message(
+                        "Grid cell not found in list of most beneficial scores, assigning new score.",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                    log_message(f"Assigning score {road_score} to grid ID {grid_id}.", tag="Geest", level=Qgis.Info)
+                grid_most_beneficial_road_scores[grid_id] = road_score
         counter += 1
         feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
 
