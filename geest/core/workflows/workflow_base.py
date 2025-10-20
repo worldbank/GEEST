@@ -467,12 +467,13 @@ class WorkflowBase(QObject):
         Returns:
             str: The file path to the rasterized output.
         """
-        if not input_layer or not input_layer.isValid():
-            return False
         log_message("--- Rasterizing geometry")
-        log_message(f"--- input_layer {input_layer.source()}")
         log_message(f"--- bbox {bbox}")
         log_message(f"--- index {index}")
+        if not input_layer or not input_layer.isValid():
+            log_message("--- ERROR: Feature layer is not valid!")
+            return ""
+        log_message(f"--- input_layer {input_layer.source()}")
 
         output_path = os.path.join(
             self.workflow_directory,
@@ -480,7 +481,7 @@ class WorkflowBase(QObject):
         )
         if not input_layer.isValid():
             log_message(f"Layer failed to load! {input_layer}")
-            return
+            return ""
         else:
             log_message(f"Rasterizing {input_layer}")
 

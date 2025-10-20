@@ -406,7 +406,9 @@ def select_grid_cells_and_assign_transport_score(
     )
 
     return QgsVectorLayer(
-        f"{output_path}|layername=grid_with_feature_scores",
+        # Note the output is a Parquet file, not a geopackage
+        # so there is nothing like |layername=...
+        f"{output_path}",
         "grid_with_feature_scores",
         "ogr",
     )

@@ -95,6 +95,13 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
         grid = select_grid_cells_and_assign_transport_score(self.grid_layer, area_features, output_path, self.feedback)
 
+        log_message(
+            "OSM Transport Polyline per Cell - Selected grid cells and assigned transport scores.",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        log_message(f"Grid cells with transport scores saved to: {output_path}", tag="Geest", level=Qgis.Info)
+
         # Step 2: Rasterize the grid layer using the assigned values
         # Create a scored boundary layer
         raster_output = self._rasterize(
