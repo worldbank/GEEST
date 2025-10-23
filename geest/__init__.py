@@ -436,10 +436,22 @@ for module_name in list(sys.modules.keys()):
 
         # Check if the selected test is broken (has import error)
         if selected_test.startswith("❌"):
+            # Try to import the test to get the specific error message
+            test_name = selected_test[2:].split(" (")[0]  # Remove icon and status
+            try:
+                __import__(test_name.rsplit(".", 1)[0])  # Import module part only
+            except Exception as import_error:
+                log_message(f"Import error for selected test {test_name}: {import_error}")
+                self.display_information_message_box(
+                    title="Import Error",
+                    message=f"Import error details for test {test_name}:\n\n{import_error}",
+                )
+                return
             self.display_information_message_box(
                 title="Cannot Run Broken Test",
-                message="This test has import errors and cannot be run.\n\nPlease fix the import issues in the test file first.",
+                message=f"This test has import errors and cannot be run.\n\nTest: {selected_test}\n\nPlease fix the import issues in the test file first.",
             )
+
             return
 
         # Remove the status indicator (✅) from the test name
