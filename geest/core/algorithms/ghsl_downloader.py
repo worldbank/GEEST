@@ -81,7 +81,7 @@ class GHSLDownloader:
         """
 
         base = QgsApplication.qgisSettingsDirPath()
-        cache_dir = os.path.join(base, "python", "plugins", "ghsl_cache", "cache")
+        cache_dir = os.path.join(base, "python", "ghsl_cache", "cache")
         os.makedirs(cache_dir, exist_ok=True)
         return cache_dir
 
