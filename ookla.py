@@ -304,7 +304,8 @@ if __name__ == "__main__":
     # prompt the user if they wish to use a local copy of the Ookla data or the S3 path
     console.print("[bold]Select Data Source:[/bold]")
     console.print("1. Use local copy of Ookla data (data/ookla-fixed.parquet and data/ookla-mobile.parquet)")
-    console.print("2. Use Ookla data from S3")
+    console.print("2. Use local unit test data for Ookla data (test/test_data/ookla/)")
+    console.print("3. Use Ookla data from S3")
     choice = console.input("Enter choice (1-2): ")
     if choice == "1":
         console.print("[bold]Using local copy of Ookla data.[/bold]")
@@ -314,13 +315,18 @@ if __name__ == "__main__":
 
         input_file_fixed = "data/ookla-fixed.parquet"
         input_file_mobile = "data/ookla-mobile.parquet"
+    if choice == "2":
+        console.print("[bold]Using unit test Ookla data.[/bold]")
+
+        input_file_fixed = "test/test_data/ookla/ookla_fixed_random_subset.parquet"
+        input_file_mobile = "test/test_data/ookla/ookla_mobile_random_subset.parquet"
     else:
         input_file_fixed = path_fixed_internet
         input_file_mobile = path_mobile_internet
 
     output_vector_fixed = "data/ookla-fixed-filtered.parquet"
-    output_vector_mobile = "data/ooklak-mobile-filtered.parquet"
-    output_vector_combined = "data/ooklak-combined-filtered.parquet"
+    output_vector_mobile = "data/ookla-mobile-filtered.parquet"
+    output_vector_combined = "data/ookla-combined-filtered.parquet"
     output_raster_fixed = "data/ookla-fixed-filtered.tif"
     output_raster_mobile = "data/ookla-mobile-filtered.tif"
     output_raster_combined = "data/ookla-combined-filtered.tif"
