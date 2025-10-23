@@ -16,6 +16,7 @@ esac
 
 # Running on local used to skip tests that will not work in a local dev env
 GEEST_LOG=$HOME/GEEST2.log
+GEEST_TEST_DIR="$(pwd)/test" # Set test directory relative to project root
 rm -f "$GEEST_LOG"
 #nix-shell -p \
 #  This is the old way using default nix packages with overrides
@@ -27,5 +28,6 @@ rm -f "$GEEST_LOG"
 GEEST_LOG=${GEEST_LOG} \
     GEEST_DEBUG=${developer_mode} \
     GEEST_EXPERIMENTAL=${GEEST_EXPERIMENTAL} \
+    GEEST_TEST_DIR=${GEEST_TEST_DIR} \
     RUNNING_ON_LOCAL=1 \
     nix run .#default -- --profile GEEST2
