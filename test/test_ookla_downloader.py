@@ -3,6 +3,7 @@ import os
 import tempfile
 import unittest
 
+from osgeo import ogr
 from qgis.core import QgsFeedback, QgsRectangle
 
 from geest.core.algorithms.ookla_downloader import OoklaDownloader, OoklaException
@@ -53,30 +54,55 @@ class TestOoklaDownloader(unittest.TestCase):
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
         downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="fixed_test")
         output_file = os.path.join(self.output_dir, "fixed_test_filtered.parquet")
-        downloader.extract_ookla_data(self.fixed_parquet, output_file, (-180, -90, 180, 90))
+        downloader.extract_ookla_data(self.fixed_parquet, output_file, (-9.50, 36.90, -6.20, 42.20))
         self.assertTrue(os.path.exists(output_file))
         # Check file is not empty
         self.assertGreater(os.path.getsize(output_file), 0)
+        # count the features in the output file  and confirm there are 100
+        # using ogr
+        driver = ogr.GetDriverByName("Parquet")
+        dataset = driver.Open(output_file, 0)
+        layer = dataset.GetLayer()
+        feature_count = layer.GetFeatureCount()
+        self.assertEqual(feature_count, 4)
 
     def test_extract_ookla_data_mobile(self):
         """Test extraction of mobile internet data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
         downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="mobile_test")
         output_file = os.path.join(self.output_dir, "mobile_test_filtered.parquet")
-        downloader.extract_ookla_data(self.mobile_parquet, output_file, (-180, -90, 180, 90))
+        downloader.extract_ookla_data(self.mobile_parquet, output_file, (-9.50, 36.90, -6.20, 42.20))
         self.assertTrue(os.path.exists(output_file))
         self.assertGreater(os.path.getsize(output_file), 0)
+        # count the features in the output file  and confirm there are 100
+        # using ogr
+        driver = ogr.GetDriverByName("Parquet")
+        dataset = driver.Open(output_file, 0)
+        layer = dataset.GetLayer()
+        feature_count = layer.GetFeatureCount()
+        self.assertEqual(feature_count, 4)
 
     def test_combine_vectors(self):
         """Test combining fixed and mobile vector data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
         downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="combined_test")
-        fixed_out = os.path.join(self.output_dir, "fixed_test_filtered.parquet")
-        mobile_out = os.path.join(self.output_dir, "mobile_test_filtered.parquet")
-        combined_out = os.path.join(self.output_dir, "combined_test.parquet")
-        downloader.combine_vectors([fixed_out, mobile_out], combined_out)
-        self.assertTrue(os.path.exists(combined_out))
-        self.assertGreater(os.path.getsize(combined_out), 0)
+        fixed_output_file = os.path.join(self.output_dir, "fixed_test_filtered.parquet")
+        mobile_output_file = os.path.join(self.output_dir, "mobile_test_filtered.parquet")
+        combined_output_file = os.path.join(self.output_dir, "combined_test.parquet")
+
+        downloader.extract_ookla_data(self.fixed_parquet, fixed_output_file, (-9.50, 36.90, -6.20, 42.20))
+        downloader.extract_ookla_data(self.mobile_parquet, mobile_output_file, (-9.50, 36.90, -6.20, 42.20))
+
+        downloader.combine_vectors([fixed_output_file, mobile_output_file], combined_output_file)
+        self.assertTrue(os.path.exists(combined_output_file))
+        self.assertGreater(os.path.getsize(combined_output_file), 0)
+        # count the features in the output file  and confirm there are 100
+        # using ogr
+        driver = ogr.GetDriverByName("Parquet")
+        dataset = driver.Open(combined_output_file, 0)
+        layer = dataset.GetLayer()
+        feature_count = layer.GetFeatureCount()
+        self.assertEqual(feature_count, 8)
 
     def test_analysis_intro(self):
         """Test that analysis intro returns correct title and body."""

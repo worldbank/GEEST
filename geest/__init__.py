@@ -275,30 +275,19 @@ class GeestPlugin:
 
                     if widget_class_name == "PythonConsole":
                         log_message("Running tests in the Python console")
+                        # widget_members = dir(widget.console)
+                        # for member in widget_members:
+                        #    log_message(f'Member: {member}, Type: {type(getattr(widget, member))}')
                         shell = widget.console.shell
-
-                        # Get test directory with error handling
+                        test_dir = "/home/timlinux/dev/python/GEEST/test"
                         shell.runCommand("")
-                        shell.runCommand("import os")
-                        shell.runCommand("try:")
-                        shell.runCommand("    from geest import GeestPlugin")
-                        shell.runCommand("    plugin = GeestPlugin(None)")
-                        shell.runCommand("    test_dir = plugin.get_test_directory()")
-                        shell.runCommand("    print(f'Using test directory: {test_dir}')")
-                        shell.runCommand("    import unittest")
-                        shell.runCommand("    test_loader = unittest.TestLoader()")
+                        shell.runCommand("import unittest")
+                        shell.runCommand("test_loader = unittest.TestLoader()")
                         shell.runCommand(
-                            "    test_suite = test_loader.discover(start_dir=test_dir, pattern='test_*.py')"
+                            f'test_suite = test_loader.discover(start_dir="{test_dir}", pattern="test_*.py")'
                         )
-                        shell.runCommand("    test_runner = unittest.TextTestRunner(verbosity=2)")
-                        shell.runCommand("    test_runner.run(test_suite)")
-                        shell.runCommand("except ValueError as e:")
-                        shell.runCommand("    print(f'Test directory error: {e}')")
-                        shell.runCommand("    print('Please ensure QGIS was started with scripts/start_qgis.sh')")
-                        shell.runCommand("except ImportError as e:")
-                        shell.runCommand("    print(f'Error discovering tests: {e}')")
-                        shell.runCommand("except Exception as e:")
-                        shell.runCommand("    print(f'Unexpected error running tests: {e}')")
+                        shell.runCommand("test_runner = unittest.TextTestRunner(verbosity=2)")
+                        shell.runCommand("test_runner.run(test_suite)")
                         # Unload test modules
                         shell.runCommand(
                             """
