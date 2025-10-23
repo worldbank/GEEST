@@ -22,3 +22,4 @@ from .utilities import (
 from .wee_by_population_score_processor import WEEByPopulationScoreProcessingTask
 from .ghsl_downloader import GHSLDownloader
 from .ghsl_processor import GHSLProcessor
+from .ookla_downloader import OoklaDownloader, OoklaException
