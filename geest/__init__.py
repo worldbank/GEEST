@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Init for Geest."""
+from __future__ import annotations
 
 __copyright__ = "Copyright 2024, Tim Sutton"
 __license__ = "GPL version 3"
@@ -16,7 +17,6 @@ __revision__ = "$Format:%H$"
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # ---------------------------------------------------------------------
-
 import cProfile
 import datetime
 import io
@@ -39,6 +39,7 @@ from qgis.PyQt.QtWidgets import (
     QDialog,
     QDockWidget,
     QFileDialog,
+    QLabel,
     QMessageBox,
     QPushButton,
     QVBoxLayout,
@@ -83,15 +84,33 @@ def classFactory(iface):  # pylint: disable=missing-function-docstring
 
 class GeestPlugin:
     """
-    GEEST 2 plugin interface
+    GEEST 2 plugin interface.
+
+    This class provides the main interface for the GEEST (Gender Enabling Environments Spatial Tool)
+    plugin for QGIS. It handles the plugin initialization, GUI setup, debugging capabilities,
+    profiling tools, and various development utilities.
+
+    Attributes:
+        iface: The QGIS interface object
+        run_action: Main plugin action for showing/hiding the dock widget
+        debug_action: Action for entering debug mode (developer mode only)
+        options_factory: Factory for plugin options
+        dock_widget: Main plugin dock widget
+        profiler: cProfile profiler instance
+        profiler_action: Action for starting/stopping profiling
+        save_profile_action: Action for saving profiling results
+        is_profiling: Boolean flag indicating if profiling is active
     """
 
     project_changed = pyqtSignal()
 
+    # Class constants
+    DEBUG_PORT = 9000  # Port for debugpy connection
+
     def __init__(self, iface):
         self.iface = iface
-        self.run_action = None  # type: Optional[QAction]
-        self.debug_action = None  # type: Optional[QAction]
+        self.run_action = None
+        self.debug_action = None
         self.options_factory = None
         self.dock_widget = None
         # Initialize profiler attributes
@@ -99,6 +118,52 @@ class GeestPlugin:
         self.profiler_action = None
         self.save_profile_action = None
         self.is_profiling = False
+
+    def get_test_directory(self):
+        """
+        Get the test directory path from GEEST_TEST_DIR environment variable.
+
+        This method exclusively uses the GEEST_TEST_DIR environment variable
+        (set by scripts/start_qgis.sh) to locate the test directory.
+
+        Returns:
+            str: Path to the test directory from environment variable
+
+        Raises:
+            ValueError: If GEEST_TEST_DIR is not set or points to invalid directory
+        """
+        import sys
+
+        # Get test directory from environment variable
+        env_test_dir = os.getenv("GEEST_TEST_DIR")
+
+        if not env_test_dir:
+            raise ValueError(
+                "GEEST_TEST_DIR environment variable is not set. "
+                "Please run QGIS using scripts/start_qgis.sh or scripts/start_qgis_ltr.sh"
+            )
+
+        if not os.path.exists(env_test_dir):
+            raise ValueError(f"Test directory does not exist: {env_test_dir}")
+
+        if not os.path.isdir(env_test_dir):
+            raise ValueError(f"GEEST_TEST_DIR is not a directory: {env_test_dir}")
+
+        # Verify it contains test files
+        try:
+            test_files = [f for f in os.listdir(env_test_dir) if f.startswith("test_") and f.endswith(".py")]
+            if not test_files:
+                raise ValueError(f"No test files found in {env_test_dir}")
+        except (OSError, PermissionError) as e:
+            raise ValueError(f"Cannot access test directory {env_test_dir}: {e}")
+
+        # Ensure it's in Python path for imports
+        if env_test_dir not in sys.path:
+            sys.path.insert(0, env_test_dir)
+            log_message(f"Added test directory to Python path: {env_test_dir}")
+
+        log_message(f"Using test directory: {env_test_dir}")
+        return env_test_dir
 
     def initGui(self):  # pylint: disable=missing-function-docstring
         """
@@ -147,7 +212,6 @@ class GeestPlugin:
             if self.iface.mainWindow().dockWidgetArea(dw) == dock_area
         ]
 
-        self.iface
         # Tabify the new dock before the first found dock widget, if available
         if existing_docks:
             self.iface.mainWindow().tabifyDockWidget(existing_docks[0], self.dock_widget)
@@ -211,19 +275,30 @@ class GeestPlugin:
 
                     if widget_class_name == "PythonConsole":
                         log_message("Running tests in the Python console")
-                        # widget_members = dir(widget.console)
-                        # for member in widget_members:
-                        #    log_message(f'Member: {member}, Type: {type(getattr(widget, member))}')
                         shell = widget.console.shell
-                        test_dir = "/home/timlinux/dev/python/GEEST/test"
+
+                        # Get test directory with error handling
                         shell.runCommand("")
-                        shell.runCommand("import unittest")
-                        shell.runCommand("test_loader = unittest.TestLoader()")
+                        shell.runCommand("import os")
+                        shell.runCommand("try:")
+                        shell.runCommand("    from geest import GeestPlugin")
+                        shell.runCommand("    plugin = GeestPlugin(None)")
+                        shell.runCommand("    test_dir = plugin.get_test_directory()")
+                        shell.runCommand("    print(f'Using test directory: {test_dir}')")
+                        shell.runCommand("    import unittest")
+                        shell.runCommand("    test_loader = unittest.TestLoader()")
                         shell.runCommand(
-                            f'test_suite = test_loader.discover(start_dir="{test_dir}", pattern="test_*.py")'
+                            "    test_suite = test_loader.discover(start_dir=test_dir, pattern='test_*.py')"
                         )
-                        shell.runCommand("test_runner = unittest.TextTestRunner(verbosity=2)")
-                        shell.runCommand("test_runner.run(test_suite)")
+                        shell.runCommand("    test_runner = unittest.TextTestRunner(verbosity=2)")
+                        shell.runCommand("    test_runner.run(test_suite)")
+                        shell.runCommand("except ValueError as e:")
+                        shell.runCommand("    print(f'Test directory error: {e}')")
+                        shell.runCommand("    print('Please ensure QGIS was started with scripts/start_qgis.sh')")
+                        shell.runCommand("except ImportError as e:")
+                        shell.runCommand("    print(f'Error discovering tests: {e}')")
+                        shell.runCommand("except Exception as e:")
+                        shell.runCommand("    print(f'Unexpected error running tests: {e}')")
                         # Unload test modules
                         shell.runCommand(
                             """
@@ -244,46 +319,108 @@ for module_name in list(sys.modules.keys()):
             self.pie_overlay = PieChartItem(self.iface.mapCanvas())
 
     def remove_map_canvas_items(self):
+        """Remove map canvas overlay items safely."""
         try:
             if self.label_overlay:
                 self.label_overlay.setCanvas(None)
                 self.label_overlay.deleteLater()
                 self.label_overlay = None
-        except Exception as e:  # nosec B110
-            del e
-            pass  # Cleanup code - acceptable to ignore exceptions
+        except (RuntimeError, AttributeError) as e:
+            # Handle cases where Qt objects may have been deleted
+            log_message(f"Warning during label overlay cleanup: {e}")
+            self.label_overlay = None
+
         try:
             if self.pie_overlay:
                 self.pie_overlay.setCanvas(None)
                 self.pie_overlay.deleteLater()
                 self.pie_overlay = None
-        except Exception as e:  # nosec B110
-            del e
-            pass  # Cleanup code - acceptable to ignore exceptions
+        except (RuntimeError, AttributeError) as e:
+            # Handle cases where Qt objects may have been deleted
+            log_message(f"Warning during pie overlay cleanup: {e}")
+            self.pie_overlay = None
 
     def run_single_test(self):
         """Prompt user to select a single test to run in the Python console."""
 
-        # Step 1: Discover all test cases
-        test_dir = "/home/timlinux/dev/python/GEEST/test"
-        loader = unittest.TestLoader()
-        suite = loader.discover(start_dir=test_dir, pattern="test_*.py")
+        # Step 1: Get test directory and discover test cases
+        try:
+            test_dir = self.get_test_directory()
+        except ValueError as e:
+            log_message(f"Test directory error: {e}")
+            self.display_information_message_box(title="Test Directory Error", message=str(e))
+            return
 
+        loader = unittest.TestLoader()
         test_names = []
-        for test_group in suite:
-            for test_case in test_group:
-                for test in test_case:
-                    test_names.append(test.id())  # e.g., test_module.ClassName.test_method
+        broken_tests = []
+
+        try:
+            suite = loader.discover(start_dir=test_dir, pattern="test_*.py")
+
+            for test_group in suite:
+                for test_case in test_group:
+                    try:
+                        # Try to iterate through the test case
+                        for test in test_case:
+                            test_names.append(test.id())  # e.g., test_module.ClassName.test_method
+                    except TypeError as te:
+                        _ = te  # Ignore
+                        # This happens when test_case is a _FailedTest (not iterable)
+                        if hasattr(test_case, "id"):
+                            broken_test_id = test_case.id()
+                            broken_tests.append(broken_test_id)
+                            log_message(f"Failed test case (import error): {broken_test_id}")
+                        else:
+                            broken_test_name = f"Unknown test: {test_case}"
+                            broken_tests.append(broken_test_name)
+                            log_message(f"Failed test case (import error): {broken_test_name}")
+                        # Continue to see if other tests can be loaded
+                        continue
+
+        except (ImportError, AttributeError) as e:
+            log_message(f"Error discovering tests with unittest loader: {e}")
+            self.display_information_message_box(
+                title="Test Discovery Error",
+                message=f"Could not discover tests in {test_dir}.\n\nError: {e}\n\nThis usually means there are import errors in the test files.",
+            )
+            return
+
+        # Combine working and broken tests for display
+        all_test_options = []
+
+        # Add working tests
+        for test_name in test_names:
+            all_test_options.append(f"✅ {test_name}")
+
+        # Add broken tests
+        for broken_test in broken_tests:
+            all_test_options.append(f"❌ {broken_test} (Import Error)")
+
+        if not all_test_options:
+            self.display_information_message_box(
+                title="No Tests Found",
+                message=f"No test cases found in {test_dir}.\n\nPlease ensure test files follow the pattern 'test_*.py' and contain TestCase classes.",
+            )
+            return
 
         # Step 2: Create and show dialog
         class TestPickerDialog(QDialog):
             def __init__(self, tests, parent=None):
                 super().__init__(parent)
                 self.setWindowTitle("Select Test to Run")
+                self.setMinimumWidth(500)  # Make dialog wider to accommodate status icons
                 layout = QVBoxLayout(self)
+
+                # Add info label
+                info_label = QLabel("✅ = Working tests, ❌ = Tests with import errors")
+                info_label.setStyleSheet("color: #666; font-style: italic; padding: 5px;")
+                layout.addWidget(info_label)
+
                 self.combo = QComboBox()
                 self.combo.addItems(tests)
                 layout.addWidget(self.combo)
+
                 run_button = QPushButton("Run Test")
                 layout.addWidget(run_button)
                 run_button.clicked.connect(self.accept)
@@ -291,11 +428,23 @@ for module_name in list(sys.modules.keys()):
             def selected_test(self):
                 return self.combo.currentText()
 
-        dialog = TestPickerDialog(test_names, self.iface.mainWindow())
+        dialog = TestPickerDialog(all_test_options, self.iface.mainWindow())
         if not dialog.exec_():
             return  # Cancelled
 
         selected_test = dialog.selected_test()
+
+        # Check if the selected test is broken (has import error)
+        if selected_test.startswith("❌"):
+            self.display_information_message_box(
+                title="Cannot Run Broken Test",
+                message="This test has import errors and cannot be run.\n\nPlease fix the import issues in the test file first.",
+            )
+            return
+
+        # Remove the status indicator (✅) from the test name
+        if selected_test.startswith("✅ "):
+            selected_test = selected_test[2:]  # Remove "✅ " prefix
 
         # Step 3: Open Python console and inject run command
         main_window = self.iface.mainWindow()
@@ -514,11 +663,10 @@ for module_name in list(sys.modules.keys()):
 
         # Disconnect the project changed signal
         try:
-            # This was giving an error on Carlina's mac
             QgsProject.instance().readProject.disconnect(self.dock_widget.qgis_project_changed)
-        except Exception as e:  # nosec B110
-            del e
-            pass  # Cleanup code - acceptable to ignore exceptions
+        except (TypeError, RuntimeError) as e:
+            # Handle cases where signal may already be disconnected or Qt objects deleted
+            log_message(f"Warning during signal disconnection: {e}")
 
         # Remove toolbar icons and clean up
         if self.run_action:
@@ -585,7 +733,7 @@ for module_name in list(sys.modules.keys()):
 
             # Look for connections in any state, not just LISTEN
             for conn in psutil.net_connections(kind="tcp"):
-                if conn.laddr.port == 9000:
+                if conn.laddr.port == self.DEBUG_PORT:
                     try:
                         process = psutil.Process(conn.pid)
                         log_message(f"Killing debug process {conn.pid}")
@@ -630,11 +778,11 @@ for module_name in list(sys.modules.keys()):
         if multiprocessing.current_process().pid > 1:
             import debugpy  # pylint: disable=import-outside-toplevel
 
-            debugpy.listen(("127.0.0.1", 9000))  # nosec B104 - localhost only for debug
+            debugpy.listen(("127.0.0.1", self.DEBUG_PORT))  # nosec B104 - localhost only for debug
             debugpy.wait_for_client()
             self.display_information_message_bar(
                 title="GEEST",
-                message="Visual Studio Code debugger is now attached on port 9000",
+                message=f"Visual Studio Code debugger is now attached on port {self.DEBUG_PORT}",
             )
             self.debug_action.setEnabled(False)  # prevent user starting it twice
             self.debug_running = True
