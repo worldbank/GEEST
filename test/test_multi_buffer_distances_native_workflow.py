@@ -25,7 +25,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
 
     def setUp(self):
         self.study_area_gpkg_path = (f"{self.working_directory}/study_area/study_area.gpkg",)
-        self.network_layer_path = os.path.join(
+        self.road_network_layer_path = os.path.join(
             os.path.dirname(__file__),
             "test_data",
             "network_analysis",
@@ -60,7 +60,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
                 "multi_buffer_point_shapefile": self.points_layer_path,
                 "multi_buffer_travel_mode": "Walking",
                 "multi_buffer_travel_units": "Distance",
-                "network_layer_path": self.network_layer_path,
+                "road_network_layer_path": self.road_network_layer_path,
             },
         ]
         self.indicator_item = JsonTreeItem(

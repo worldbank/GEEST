@@ -121,14 +121,15 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             self.mode = "distance"
         else:  # Driving
             self.mode = "time"
-        self.network_layer_path = self.attributes.get("network_layer_path", None)
-        log_message(f"Using network layer at {self.network_layer_path}")
-        if not self.network_layer_path:
+        self.road_network_layer_path = self.attributes.get("road_network_layer_path", None)
+        log_message(f"Using network layer at {self.road_network_layer_path}")
+        if not self.road_network_layer_path:
             log_message(
-                f"Invalid network layer found in {self.network_layer_path}.",
+                f"Invalid network layer found in {self.road_network_layer_path}.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
+            log_message(self.attributes)
             raise Exception("Invalid network layer found.")
         log_message("Multi Buffer Distances Native Workflow initialized")
 
@@ -222,7 +223,7 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
             log_message(f"Processing point {i + 1} of {total_features}")
             # Parse the features from the networking analysis response
             processor = NativeNetworkAnalysisProcessor(
-                network_layer_path=self.network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
+                network_layer_path=self.road_network_layer_path,  # network_layer_path (str): Path to the GeoPackage containing the network_layer_path.
                 isochrone_layer_path=isochrone_layer_path,  # isochrone_layer_path: Path to the output GeoPackage for the isochrones.
                 point_feature=point_feature,  # feature: The feature to use as the origin for the network analysis.
                 area_index=area_index,  # area_id: The ID of the area being processed.

@@ -1168,13 +1168,21 @@ class TreePanel(QWidget):
         )
         return network_layer
 
-    def network_layer_path(self):
+    def road_network_layer_path(self):
         """Get the layer used for network analysis."""
         analysis_item = self.model.get_analysis_item()
         log_message(analysis_item.attributesAsMarkdown())
-        network_layer_path = analysis_item.attributes().get("network_layer_path", "")
-        log_message(f"Network layer path: {network_layer_path}")
-        return network_layer_path
+        road_network_layer_path = analysis_item.attributes().get("road_network_layer_path", "")
+        log_message(f"Road Network layer path: {road_network_layer_path}")
+        return road_network_layer_path
+
+    def cycle_network_layer_path(self):
+        """Get the layer used for network analysis."""
+        analysis_item = self.model.get_analysis_item()
+        log_message(analysis_item.attributesAsMarkdown())
+        cycle_network_layer_path = analysis_item.attributes().get("cycle_network_layer_path", "")
+        log_message(f"Cycle Network layer path: {cycle_network_layer_path}")
+        return cycle_network_layer_path
 
     def ghsl_layer(self):
         """Get the layer used for ghsl analysis."""
@@ -1203,8 +1211,9 @@ class TreePanel(QWidget):
 
         attributes = item.attributes()
 
-        # Include the network layer in the attributes by default
-        attributes["network_layer_path"] = self.network_layer_path()
+        # Include the network layers in the attributes by default
+        attributes["road_network_layer_path"] = self.road_network_layer_path()
+        attributes["cycle_network_layer_path"] = self.cycle_network_layer_path()
         # Include the GHSL layer in the attributes by default
         attributes["ghsl_layer_path"] = self.ghsl_layer_path()
 

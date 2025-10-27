@@ -13,6 +13,7 @@ from qgis.core import (
 
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import select_grid_cells_and_assign_transport_score
+from geest.core.osm_downloaders import OSMDownloadType
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
@@ -47,6 +48,17 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_osm_transport_polyline_per_cell"
+
+        # For now we will use the id attribute to determine if we should
+        # use the roads or cycleways lookup table
+        # This logic is specific to this workflow
+        id = self.attributes.get("id", None)
+        if id == "Cycle_Paths_Location":
+            self.osm_processing_type = OSMDownloadType.CYCLE
+        elif id == "Footpaths_Location":
+            self.osm_processing_type = OSMDownloadType.ROAD
+        else:
+            raise ValueError(f"Unsupported id for OSM Transport Polyline Per Cell Workflow: {id}")
 
         layer_path = self.attributes.get("osm_transport_polygon_per_cell_shapefile", None)
         if layer_path:
@@ -96,7 +108,9 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         )
         # Step 1: Select grid cells that intersect with features and assign road scores
         output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
-        grid = select_grid_cells_and_assign_transport_score(self.grid_layer, area_features, output_path, self.feedback)
+        grid = select_grid_cells_and_assign_transport_score(
+            self.osm_processing_type, self.grid_layer, area_features, output_path, self.feedback
+        )
 
         log_message(
             "OSM Transport Polyline per Cell - Selected grid cells and assigned transport scores.",
