@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from typing import Optional
 from urllib.parse import unquote
 
 from qgis.core import (
@@ -29,16 +30,18 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
-        working_directory: str = None,
+        working_directory: Optional[str],
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
-        :param cell_size_m: Cell size in meters
-        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+
+        Args:
+            :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+            :param cell_size_m: Cell size in meters
+            :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
+            :param feedback: QgsFeedback object for progress reporting and cancellation.
+            :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+            :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory

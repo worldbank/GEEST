@@ -16,6 +16,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QVariant
 
+from geest.core.osm_downloaders import OSMDownloadType
 from geest.utilities import log_message, setting
 
 
@@ -182,6 +183,7 @@ def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = No
 
 
 def select_grid_cells_and_assign_transport_score(
+    osm_transport_type: OSMDownloadType,
     grid_layer: QgsVectorLayer,
     features_layer: QgsVectorLayer,
     output_path: str,
@@ -191,46 +193,9 @@ def select_grid_cells_and_assign_transport_score(
     Select grid cells that intersect with features, and assign a value
     based on the most beneficial road type intersecting the cell.
 
-    The following scoring system is used:
-
-    key                 value
-    residential         5
-    living_street       5
-    pedestrian          5
-    footway             5
-    steps               5
-    tertiary            4
-    tertiary_link       4
-    cycleway            4
-    path                4
-    lane                4
-    shared_lane         4
-    share_busway        4
-    track (cycleway)    4
-    separate            4
-    crossing            4
-    shoulder            4
-    link (cycleway)     4
-    secondary           3
-    unclassified        3
-    service             3
-    road                3
-    bridleway           3
-    secondary_link      3
-    track               2
-    primary             2
-    primary_link        2
-    motorway            1
-    trunk               1
-    motorway_link       1
-    trunk_link          1
-    bus_guideway        0
-    escape              0
-    raceway             0
-    construction        0
-    proposed            0
 
     Args:
+        osm_transport_type (OSMDownloadType): The type of OSM transport data to use for scoring.
         grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
         features_layer (QgsVectorLayer): The input OSM Roads layer containing features (e.g., lines).
         output_path (str): The output path for the new grid layer with feature counts.
@@ -245,7 +210,7 @@ def select_grid_cells_and_assign_transport_score(
         level=Qgis.Info,
     )
 
-    lookup_table = {
+    highway_lookup_table = {
         "residential": 5,
         "living_street": 5,
         "pedestrian": 5,
@@ -255,14 +220,6 @@ def select_grid_cells_and_assign_transport_score(
         "tertiary_link": 4,
         "cycleway": 4,
         "path": 4,
-        "lane": 4,
-        "shared_lane": 4,
-        "share_busway": 4,
-        "track (cycleway)": 4,
-        "separate": 4,
-        "crossing": 4,
-        "shoulder": 4,
-        "link (cycleway)": 4,
         "secondary": 3,
         "unclassified": 3,
         "service": 3,
@@ -282,6 +239,24 @@ def select_grid_cells_and_assign_transport_score(
         "construction": 0,
         "proposed": 0,
     }
+    cycleway_lookup_table = {
+        "lane": 4,
+        "shared_lane": 4,
+        "share_busway": 4,
+        "track": 4,
+        "separate": 4,
+        "crossing": 4,
+        "shoulder": 4,
+        "link": 4,
+    }
+
+    if osm_transport_type == OSMDownloadType.CYCLEWAYS:
+        lookup_table = cycleway_lookup_table
+    elif osm_transport_type == OSMDownloadType.ROADS:
+        lookup_table = highway_lookup_table
+    else:
+        raise ValueError(f"Unsupported OSM transport type: {osm_transport_type}")
+
     # Create a spatial index for the grid layer to optimize intersection queries
     grid_index = QgsSpatialIndex(grid_layer.getFeatures())
 

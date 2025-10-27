@@ -3,6 +3,7 @@ import datetime
 import os
 import traceback
 from abc import abstractmethod
+from typing import Optional
 
 from qgis import processing
 from qgis.core import (
@@ -44,16 +45,18 @@ class WorkflowBase(QObject):
         analysis_scale: str,  # local or national
         feedback: QgsFeedback,
         context: QgsProcessingContext,
-        working_directory: str = None,
+        working_directory: Optional[str],
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param item: JsonTreeItem object representing the task.
-        :param cell_size_m: The cell size in meters for the analysis.
-        :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national.
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+
+        Args:
+            :param item: JsonTreeItem object representing the task.
+            :param cell_size_m: The cell size in meters for the analysis.
+            :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national.
+            :param feedback: QgsFeedback object for progress reporting and cancellation.
+            :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+            :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__()
         log_layer_count()  # For performance tuning, write the number of open layers to a log file
