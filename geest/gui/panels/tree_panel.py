@@ -402,16 +402,28 @@ class TreePanel(QWidget):
             self.working_directory_changed(working_directory)
 
     @pyqtSlot()
-    def set_network_layer_path(self, network_layer_path):
+    def set_road_network_layer_path(self, network_layer_path):
         if network_layer_path:
-            log_message(f"Setting network_layer_path in model to {network_layer_path}")
+            log_message(f"Setting road_network_layer_path in model to {network_layer_path}")
             analysis_item = self.model.rootItem.child(0)
             try:
-                analysis_item.setAttribute("network_layer_path", network_layer_path)
+                analysis_item.setAttribute("road_network_layer_path", network_layer_path)
             except Exception as e:
-                log_message(f"Error setting network path: {str(e)}", level=Qgis.Critical)
+                log_message(f"Error setting road network path: {str(e)}", level=Qgis.Critical)
         else:
-            log_message("No network layer path provided.")
+            log_message("No road network layer path provided.")
+
+    @pyqtSlot()
+    def set_cycle_network_layer_path(self, network_layer_path):
+        if network_layer_path:
+            log_message(f"Setting cycle_network_layer_path in model to {network_layer_path}")
+            analysis_item = self.model.rootItem.child(0)
+            try:
+                analysis_item.setAttribute("cycle_network_layer_path", network_layer_path)
+            except Exception as e:
+                log_message(f"Error setting cycle network path: {str(e)}", level=Qgis.Critical)
+        else:
+            log_message("No cycle network layer path provided.")
 
     @pyqtSlot()
     def set_ghsl_layer_path(self, ghsl_layer_path: str):

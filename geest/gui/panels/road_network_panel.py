@@ -14,6 +14,7 @@ from qgis.PyQt.QtGui import QFont
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
+from geest.core.osm_downloaders.osm_download_type import OSMDownloadType
 from geest.core.tasks import OSMDownloaderTask
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
@@ -106,7 +107,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.cycle_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
         self.cycle_layer_combo.currentIndexChanged.connect(self.emit_cycle_layer_change)
         self.load_cycle_layer_button.clicked.connect(self.load_road_layer)
-        self.download_cycle_layer_button.clicked.connect(self.download_road_layer_button_clicked)
+        self.download_cycle_layer_button.clicked.connect(self.download_cycle_layer_button_clicked)
 
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
@@ -114,7 +115,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
 
-    def emit__change(self):
+    def emit_road_layer_change(self):
         road_layer = self.road_layer_combo.currentLayer()
         if road_layer:
             self.road_network_layer_path_changed.emit(road_layer.source())
@@ -207,6 +208,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             log_message("Creating OSM Downloader Task")
             processor = OSMDownloaderTask(
                 reference_layer=self._reference_layer,
+                osm_download_type=OSMDownloadType.ROAD,
                 crs=self._crs,
                 working_dir=self.working_directory,
                 filename="road_network",
@@ -218,7 +220,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             # Hook up the QTask feedback signal to the progress bar
             # Measure overall task progress from the task object itself
             processor.progressChanged.connect(self.osm_download_progress_updated)
-            processor.taskCompleted.connect(self.download_done)
+            processor.taskCompleted.connect(self.road_download_done)
             # Measure subtask progress from the feedback object
             feedback.progressChanged.connect(self.osm_extract_progress_updated)
             self.disable_widgets()
@@ -258,6 +260,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             log_message("Creating OSM Downloader Task")
             processor = OSMDownloaderTask(
                 reference_layer=self._reference_layer,
+                osm_download_type=OSMDownloadType.CYCLE,
                 crs=self._crs,
                 working_dir=self.working_directory,
                 filename="cycle_network",
@@ -269,7 +272,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             # Hook up the QTask feedback signal to the progress bar
             # Measure overall task progress from the task object itself
             processor.progressChanged.connect(self.osm_download_progress_updated)
-            processor.taskCompleted.connect(self.download_done)
+            processor.taskCompleted.connect(self.cycle_download_done)
             # Measure subtask progress from the feedback object
             feedback.progressChanged.connect(self.osm_extract_progress_updated)
             self.disable_widgets()
@@ -325,8 +328,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             float_value_as_string = f"OSM extract progress: {progress}%"
             self.child_progress_bar.setFormat(float_value_as_string)
 
-    def download_done(self):
-        """Slot to be called when the download task completes successfully."""
+    def road_download_done(self):
         log_message(
             "*** OSM download completed successfully. ***",
             tag="Geest",
@@ -346,6 +348,26 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
         self.enable_widgets()
 
+    def cycle_download_done(self):
+        log_message(
+            "*** OSM download completed successfully. ***",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        network_layer_path = os.path.join(self.working_directory, "study_area", "cycle_network.gpkg")
+        network_layer_path = f"{network_layer_path}|layername=cycle_network"
+        log_message(f"Loading network layer from {network_layer_path}")
+        layer = QgsVectorLayer(network_layer_path, "Cycle Network", "ogr")
+        if not layer.isValid():
+            QMessageBox.critical(self, "Error", "Could not load the cycle network layer.")
+            return
+        # Load the layer in QGIS
+        QgsProject.instance().addMapLayer(layer)
+        self.cycle_layer_combo.setLayer(layer)
+        self.progress_bar.setVisible(False)
+        self.child_progress_bar.setVisible(False)
+        self.enable_widgets()
+
     def resizeEvent(self, event):
         self.set_font_size()
         super().resizeEvent(event)
@@ -359,6 +381,10 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         # log_message(f"Description Label Font Size: {font_size}")
         self.description.setFont(QFont("Arial", font_size))
         self.description4.setFont(QFont("Arial", font_size))
+        self.description5.setFont(QFont("Arial", font_size))
         self.road_layer_combo.setFont(QFont("Arial", font_size))
+        self.cycle_layer_combo.setFont(QFont("Arial", font_size))
         self.load_road_layer_button.setFont(QFont("Arial", font_size))
+        self.load_cycle_layer_button.setFont(QFont("Arial", font_size))
         self.download_road_layer_button.setFont(QFont("Arial", font_size))
+        self.download_cycle_layer_button.setFont(QFont("Arial", font_size))

@@ -200,8 +200,13 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(GHSL_PANEL)
             )
-            self.road_network_widget.network_layer_path_changed.connect(
-                lambda: self.tree_widget.set_network_layer_path(self.road_network_widget.network_layer_path())
+            self.road_network_widget.road_network_layer_path_changed.connect(
+                lambda: self.tree_widget.set_road_network_layer_path(self.road_network_widget.road_network_layer_path())
+            )
+            self.road_network_widget.cycle_network_layer_path_changed.connect(
+                lambda: self.tree_widget.set_cycle_network_layer_path(
+                    self.road_network_widget.cycle_network_layer_path()
+                )
             )
             # GHSL_PANEL = 6
             # Create and add the "GHSL" panel

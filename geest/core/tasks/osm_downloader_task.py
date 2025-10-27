@@ -110,7 +110,7 @@ class OSMDownloaderTask(QgsTask):
             log_message("Downloading roads starting....")
             log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
 
-            downloader = OSMDownloaderFactory(
+            downloader = OSMDownloaderFactory.get_osm_downloader(
                 extents=self.layer_extent,
                 download_type=self.osm_download_type,
                 output_path=self.gpkg_path,

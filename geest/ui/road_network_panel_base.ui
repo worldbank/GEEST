@@ -267,7 +267,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Select a road network layer for the study area.</string>
+          <string>Select a cycle network layer for the study area.</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>

@@ -57,7 +57,10 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_description = json_data.get("description", "No Description")
         analysis_scale = json_data.get("analysis_scale", "local")
         analysis_cell_size_m = json_data.get("analysis_cell_size_m", 100.0)
-        network_layer_path = json_data.get("network_layer_path", "")
+        # START I don't love that this list of layer paths is hardcoded here
+        road_network_layer_path = json_data.get("road_network_layer_path", "")
+        cycle_network_layer_path = json_data.get("cycle_network_layer_path", "")
+        # END
         working_folder = json_data.get("working_folder", "Not Set")
         guid = json_data.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         analysis_result = json_data.get("result", "")
@@ -95,7 +98,8 @@ class JsonTreeModel(QAbstractItemModel):
             "working_folder": working_folder,
             "analysis_cell_size_m": analysis_cell_size_m,
             "analysis_scale": analysis_scale,
-            "network_layer_path": network_layer_path,
+            "road_network_layer_path": road_network_layer_path,
+            "cycle_network_layer_path": cycle_network_layer_path,
             "result": analysis_result,
             "result_file": analysis_result_file,
             "execution_start_time": analysis_execution_start_time,
