@@ -13,7 +13,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import pyqtSignal
 
-from geest.core.osm_downloaders import OSMRoadsDownloader
+from geest.core.osm_downloaders import OSMDownloaderFactory, OSMDownloadType
 from geest.utilities import log_message
 
 
@@ -37,6 +37,7 @@ class OSMDownloaderTask(QgsTask):
     def __init__(
         self,
         reference_layer: QgsVectorLayer,
+        osm_download_type: OSMDownloadType,
         working_dir,
         filename,
         use_cache=True,
@@ -45,6 +46,8 @@ class OSMDownloaderTask(QgsTask):
         crs: QgsCoordinateReferenceSystem = None,
     ):
         """
+        :param reference_layer: QgsVectorLayer used to determine the bounding box for the OSM download.
+        :param osm_download_type: Type of OSM data to download (e.g. roads, cycleways).
         :param input_vector_path: Path to an OGR-readable vector file (e.g. .gpkg or .shp).
         :param working_dir: Directory path where outputs will be saved.
         :param filename: Name of the output file.
@@ -52,9 +55,10 @@ class OSMDownloaderTask(QgsTask):
         :param feedback: QgsFeedback object for reporting progress.
         :param crs_epsg: EPSG code for target CRS. If None, a UTM zone will be computed.
         """
-        super().__init__("OSM Downloader Task", QgsTask.CanCancel)
+        super().__init__("OSM Downloader Task ", QgsTask.CanCancel)
 
         self.reference_layer = reference_layer  # used to determin bbox of download
+        self.osm_download_type = osm_download_type
         if working_dir is None or working_dir == "":
             raise ValueError("Working directory cannot be None")
         if not isinstance(reference_layer, QgsVectorLayer):
@@ -106,8 +110,9 @@ class OSMDownloaderTask(QgsTask):
             log_message("Downloading roads starting....")
             log_message(f"Using CRS: {self.output_crs.authid()} for OSM download")
 
-            downloader = OSMRoadsDownloader(
+            downloader = OSMDownloaderFactory(
                 extents=self.layer_extent,
+                download_type=self.osm_download_type,
                 output_path=self.gpkg_path,
                 output_crs=self.output_crs,
                 filename=self.filename,  # will also set the layer name in the gpkg

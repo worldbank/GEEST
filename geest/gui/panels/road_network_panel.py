@@ -30,7 +30,8 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
-    network_layer_path_changed = pyqtSignal(str)  # Signal to set the network layer path
+    road_network_layer_path_changed = pyqtSignal(str)
+    cycle_network_layer_path_changed = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -98,21 +99,34 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         #     QPixmap(resources_path("resources", "icons", "failed.svg"))
         # )
         self.road_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
-        self.road_layer_combo.currentIndexChanged.connect(self.emit_layer_change)
+        self.road_layer_combo.currentIndexChanged.connect(self.emit_road_layer_change)
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
         self.download_road_layer_button.clicked.connect(self.download_road_layer_button_clicked)
+
+        self.cycle_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
+        self.cycle_layer_combo.currentIndexChanged.connect(self.emit_cycle_layer_change)
+        self.load_cycle_layer_button.clicked.connect(self.load_road_layer)
+        self.download_cycle_layer_button.clicked.connect(self.download_road_layer_button_clicked)
+
         self.next_button.clicked.connect(self.on_next_button_clicked)
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
 
-    def emit_layer_change(self):
-        layer = self.road_layer_combo.currentLayer()
-        if layer:
-            self.network_layer_path_changed.emit(layer.source())
+    def emit__change(self):
+        road_layer = self.road_layer_combo.currentLayer()
+        if road_layer:
+            self.road_network_layer_path_changed.emit(road_layer.source())
         else:
-            self.network_layer_path_changed.emit(None)
+            self.road_network_layer_path_changed.emit(None)
+
+    def emit_cycle_layer_change(self):
+        cycle_layer = self.cycle_layer_combo.currentLayer()
+        if cycle_layer:
+            self.cycle_network_layer_path_changed.emit(cycle_layer.source())
+        else:
+            self.cycle_network_layer_path_changed.emit(None)
 
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
@@ -120,10 +134,15 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
     def on_previous_button_clicked(self):
         self.switch_to_previous_tab.emit()
 
-    def network_layer_path(self):
+    def road_network_layer_path(self):
         if self.road_layer_combo.currentLayer() is None:
             return None
         return self.road_layer_combo.currentLayer().source()
+
+    def cycle_network_layer_path(self):
+        if self.cycle_layer_combo.currentLayer() is None:
+            return None
+        return self.cycle_layer_combo.currentLayer().source()
 
     def load_road_layer(self):
         """Load a road network layer from a file."""
@@ -139,6 +158,21 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             # Load the layer in QGIS
             QgsProject.instance().addMapLayer(layer)
             self.road_layer_combo.setLayer(layer)
+
+    def load_cycle_layer(self):
+        """Load a cycle network layer from a file."""
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Shapefile (*.shp);;GeoPackage (*.gpkg)")
+        if file_dialog.exec_():
+            file_path = file_dialog.selectedFiles()[0]
+            layer = QgsVectorLayer(file_path, "Cycle Network", "ogr")
+            if not layer.isValid():
+                QMessageBox.critical(self, "Error", "Could not load the road network layer.")
+                return
+            # Load the layer in QGIS
+            QgsProject.instance().addMapLayer(layer)
+            self.cycle_layer_combo.setLayer(layer)
 
     def disable_widgets(self):
         """Disable all widgets in the panel."""
@@ -176,6 +210,57 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
                 crs=self._crs,
                 working_dir=self.working_directory,
                 filename="road_network",
+                use_cache=True,
+                delete_gpkg=True,
+                feedback=feedback,
+            )
+            log_message("OSM Downloader Task created, setting up call backs")
+            # Hook up the QTask feedback signal to the progress bar
+            # Measure overall task progress from the task object itself
+            processor.progressChanged.connect(self.osm_download_progress_updated)
+            processor.taskCompleted.connect(self.download_done)
+            # Measure subtask progress from the feedback object
+            feedback.progressChanged.connect(self.osm_extract_progress_updated)
+            self.disable_widgets()
+            if debug_env:
+                processor.run()
+            else:
+                log_message("Adding task to queue manager")
+                self.queue_manager.add_task(processor)
+                self.queue_manager.start_processing()
+                log_message("Processing started")
+        except Exception as e:
+            trace = traceback.format_exc()
+            QMessageBox.critical(self, "Error", f"Error downloading network for study area: {e}\n{trace}")
+            self.enable_widgets()
+            return
+
+    def download_cycle_layer_button_clicked(self):
+        """Triggered when the Download Cycle Layer button is pressed."""
+        if self._reference_layer is None:
+            QMessageBox.critical(
+                self,
+                "Error",
+                "No boundary (reference) layer is set, unable to continue.",
+            )
+            return
+        if self._crs is None:
+            QMessageBox.critical(self, "Error", "No CRS is set, unable to continue.")
+            return
+        if self.working_directory is None or self.working_directory == "":
+            QMessageBox.critical(self, "Error", "Working directory is not set")
+            return
+
+        # Create the processor instance and process the features
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
+        try:
+            log_message("Creating OSM Downloader Task")
+            processor = OSMDownloaderTask(
+                reference_layer=self._reference_layer,
+                crs=self._crs,
+                working_dir=self.working_directory,
+                filename="cycle_network",
                 use_cache=True,
                 delete_gpkg=True,
                 feedback=feedback,
