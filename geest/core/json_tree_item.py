@@ -365,6 +365,7 @@ class JsonTreeItem:
             # Test for algs requiring vector inputs
             if self.isIndicator() and analysis_mode not in [
                 "use_index_score",
+                "use_index_score_with_ookla",
                 "use_environmental_hazards",
             ]:
                 if not data.get(qgis_layer_source_key, False) and not data.get(qgis_layer_shapefile_key, False):
