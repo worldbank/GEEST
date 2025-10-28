@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from qgis.core import (
     Qgis,
     QgsFeedback,
@@ -25,6 +26,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,  # national or local
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
@@ -37,7 +39,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_polygon_into_classes"
         layer_path = self.attributes.get("classify_polygon_into_classes_shapefile", None)

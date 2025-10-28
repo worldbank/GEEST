@@ -31,7 +31,7 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
-        working_directory: Optional[str],
+        working_directory: Optional[str] = None,
     ):
         """
         Initialize the workflow with attributes and feedback.

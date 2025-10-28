@@ -129,7 +129,6 @@ class MultiBufferDistancesNativeWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            log_message(self.attributes)
             raise Exception("Invalid network layer found.")
         log_message("Multi Buffer Distances Native Workflow initialized")
 
