@@ -24,7 +24,7 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
 
     def add_internal_widgets(self) -> None:
         """
-        Adds the internal widgets required for selecting the CSV firadiole and validating its format.
+        Adds the internal widgets required for selecting the CSV and validating its format.
         This method is called during the widget initialization and sets up the layout for the UI components.
         """
         log_message("Adding internal widgets for ACLED CSV Layer Widget")
@@ -56,7 +56,7 @@ class CsvDataSourceWidget(BaseDataSourceWidget):
         self.layout.addWidget(self.csv_file_line_edit)
         self.layout.addWidget(self.csv_file_button)
 
-        # If there is a pre-existing file path in the attributes, set it in the line edit
+        # If there is a preexisting file path in the attributes, set it in the line edit
         csv_file_path = self.attributes.get(f"{self.widget_key}_csv_file", None)
         if csv_file_path:
             self.csv_file_line_edit.setText(csv_file_path)

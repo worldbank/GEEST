@@ -121,6 +121,7 @@ class JsonTreeModel(QAbstractItemModel):
             "wee_by_population_by_opportunities_mask_result_file": wee_by_population_by_opportunities_mask_result_file,
             "wee_by_population_by_opportunities_mask_result": wee_by_population_by_opportunities_mask_result,
         }
+
         for prefix in [
             "aggregation",
             "population",

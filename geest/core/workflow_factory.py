@@ -9,6 +9,7 @@ from geest.core.workflows import (
     DimensionAggregationWorkflow,
     DontUseWorkflow,
     FactorAggregationWorkflow,
+    IndexScoreWithOoklaWorkflow,
     MultiBufferDistancesNativeWorkflow,
     OsmTransportPolylinePerCellWorkflow,
     PointPerCellWorkflow,
@@ -66,6 +67,8 @@ class WorkflowFactory:
 
             if analysis_mode == "use_index_score":
                 return DefaultIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_index_score_with_ookla":
+                return IndexScoreWithOoklaWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "Do Not Use":
                 return DontUseWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_multi_buffer_point":

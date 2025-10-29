@@ -39,7 +39,7 @@ class OoklaDownloader:
         self,
         extents: QgsRectangle,
         output_path: str = "",
-        filename: str = "",
+        filename_prefix: str = "",
         use_cache: bool = False,
         delete_existing: bool = True,
         feedback: Optional[QgsFeedback] = None,
@@ -58,7 +58,8 @@ class OoklaDownloader:
         Attributes:
             extents (QgsRectangle): The spatial extents for the download.
             output_path (str): The output path for the GeoPackage.
-            filename (str): The filename and layer name for the output.
+            filename_prefix (str): The filename and layer name for the output.
+                It will have "fixed", "mobile" or "combined" appended to it.
             use_cache (bool): Indicates if cache should be used.
             delete_existing (bool): Indicates if existing files should be deleted.
             NOT USED network_manager (QgsNetworkAccessManager): Network manager for handling requests.
@@ -68,7 +69,7 @@ class OoklaDownloader:
         # These are required
         self.extents = extents  # must be specified in the EPSG:4326 projection
         self.output_path = output_path  # The output path for the parquet file
-        self.filename = filename  # parquet filename
+        self.filename_prefix = filename_prefix  # parquet filename
         self.use_cache = use_cache
         self.delete_existing = delete_existing
         # Unfortunately we are using gdal's built in S3 support,
@@ -108,9 +109,9 @@ class OoklaDownloader:
         )
 
         # Prepare output file paths
-        fixed_output_file = os.path.join(self.output_path, f"{self.filename}_fixed.parquet")
-        mobile_output_file = os.path.join(self.output_path, f"{self.filename}_mobile.parquet")
-        combined_output_file = os.path.join(self.output_path, f"{self.filename}_combined.parquet")
+        fixed_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_fixed.parquet")
+        mobile_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_mobile.parquet")
+        combined_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_combined.parquet")
 
         # Extract fixed internet data
         log_message("Starting extraction of fixed internet data...")

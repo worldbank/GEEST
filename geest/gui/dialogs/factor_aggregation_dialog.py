@@ -245,7 +245,7 @@ class FactorAggregationDialog(CustomBaseDialog):
                 weighting_item.valueChanged.connect(self.validate_weightings)
                 self.table.setCellWidget(row, 2, weighting_item)
                 self.weightings[guid] = weighting_item
-                # Use (Checkbox)
+                # Use (Check box)
                 checkbox_widget = self.create_checkbox_widget(row, weighting_value)
             else:
                 checkbox_widget = self.create_checkbox_widget(row, 1)

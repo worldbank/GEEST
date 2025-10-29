@@ -13,6 +13,7 @@ from qgis.core import (
     QgsProcessingContext,
     QgsProcessingException,
     QgsProcessingFeedback,
+    QgsRectangle,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QObject, QSettings, pyqtSignal
@@ -83,6 +84,7 @@ class WorkflowBase(QObject):
         self.gpkg_path: str = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         if not os.path.exists(self.gpkg_path):
             raise ValueError(f"Study area geopackage not found at {self.gpkg_path}.")
+        self.bbox_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_bbox", "study_area_bbox", "ogr")
         self.bboxes_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr")
         self.areas_layer = QgsVectorLayer(
             f"{self.gpkg_path}|layername=study_area_polygons",
@@ -114,6 +116,17 @@ class WorkflowBase(QObject):
         self.updateProgress(0.0)
         self.output_filename = self.attributes.get("output_filename", "")
         self.feedback.progressChanged.connect(self.updateProgress)
+
+    def _get_study_area_bbox(self) -> QgsRectangle:
+        """
+        Get the study area bounding box geometry.
+
+        :return: The bounding box QgsRectangle.
+        """
+
+        bbox = self.bbox_layer.getExtent()
+
+        return bbox
 
     def updateProgress(self, progress: float):
         """
@@ -520,20 +533,20 @@ class WorkflowBase(QObject):
         log_message(f"Created raster: {output_path}")
         return output_path
 
-    def _mask_raster(self, raster_path: str, area_geometry: QgsGeometry, index: int) -> str:
+    def _mask_raster(self, raster_path: str, area_geometry: QgsGeometry, index: int) -> Optional[str]:
         """
         Multiply the raster by the area geometry to mask the raster to the area.
 
         Args:
-            raster_path (str): The path to the raster file.
-            area_geometry (QgsGeometry): The geometry to use as a mask.
-            index (int): The index of the current area.
+            Raster_path (str): The path to the raster file.
+            Area_geometry (QgsGeometry): The geometry to use as a mask.
+            Index (int): The index of the current area.
 
         Returns:
-            str: The path to the masked raster.
+            str: The path to the masked raster or None if there is an error.
         """
         if not raster_path:
-            return False
+            return None
         output_name = f"{self.layer_id}_masked_{index}.tif"
         output_path = os.path.join(self.workflow_directory, output_name)
         log_message(

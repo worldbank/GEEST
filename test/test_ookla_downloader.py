@@ -44,7 +44,7 @@ class TestOoklaDownloader(unittest.TestCase):
         """Test that cache directory is created correctly."""
         # Portugal
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
-        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="test")
+        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename_prefix="test")
         cache_dir = downloader._cache_dir()
         self.assertTrue(os.path.exists(cache_dir))
         self.assertTrue(cache_dir.endswith("ookla_cache/cache"))
@@ -52,7 +52,7 @@ class TestOoklaDownloader(unittest.TestCase):
     def test_extract_ookla_data_fixed(self):
         """Test extraction of fixed internet data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
-        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="fixed_test")
+        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename_prefix="fixed_test")
         output_file = os.path.join(self.output_dir, "fixed_test_filtered.parquet")
         downloader.extract_ookla_data(self.fixed_parquet, output_file, (-9.50, 36.90, -6.20, 42.20))
         self.assertTrue(os.path.exists(output_file))
@@ -69,7 +69,7 @@ class TestOoklaDownloader(unittest.TestCase):
     def test_extract_ookla_data_mobile(self):
         """Test extraction of mobile internet data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
-        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="mobile_test")
+        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename_prefix="mobile_test")
         output_file = os.path.join(self.output_dir, "mobile_test_filtered.parquet")
         downloader.extract_ookla_data(self.mobile_parquet, output_file, (-9.50, 36.90, -6.20, 42.20))
         self.assertTrue(os.path.exists(output_file))
@@ -85,7 +85,7 @@ class TestOoklaDownloader(unittest.TestCase):
     def test_combine_vectors(self):
         """Test combining fixed and mobile vector data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
-        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="combined_test")
+        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename_prefix="combined_test")
         fixed_output_file = os.path.join(self.output_dir, "fixed_test_filtered.parquet")
         mobile_output_file = os.path.join(self.output_dir, "mobile_test_filtered.parquet")
         combined_output_file = os.path.join(self.output_dir, "combined_test.parquet")
@@ -107,7 +107,7 @@ class TestOoklaDownloader(unittest.TestCase):
     def test_analysis_intro(self):
         """Test that analysis intro returns correct title and body."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
-        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename="test")
+        downloader = OoklaDownloader(extents, output_path=self.output_dir, filename_prefix="test")
         title, body = downloader.analysis_intro()
         self.assertIn("Spatial Filter", title)
         self.assertIn("Bounding Box Coordinates", body)

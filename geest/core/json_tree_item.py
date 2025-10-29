@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import traceback
 import uuid
+from typing import Optional
 
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt
@@ -599,7 +600,7 @@ class JsonTreeItem:
         return guids
         # attributes["analysis_mode"] = "dimension_aggregation"
 
-    def getItemByGuid(self, guid):
+    def getItemByGuid(self, guid) -> Optional["JsonTreeItem"]:
         """Return the item with the specified guid."""
         if self.guid == guid:
             return self
