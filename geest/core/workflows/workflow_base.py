@@ -8,11 +8,14 @@ from typing import Optional
 from qgis import processing
 from qgis.core import (
     Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeedback,
     QgsGeometry,
     QgsProcessingContext,
     QgsProcessingException,
     QgsProcessingFeedback,
+    QgsProject,
     QgsRectangle,
     QgsVectorLayer,
 )
@@ -117,15 +120,30 @@ class WorkflowBase(QObject):
         self.output_filename = self.attributes.get("output_filename", "")
         self.feedback.progressChanged.connect(self.updateProgress)
 
-    def _get_study_area_bbox(self) -> QgsRectangle:
+    def _study_area_bbox(self) -> QgsRectangle:
         """
         Get the study area bounding box geometry.
 
         :return: The bounding box QgsRectangle.
         """
 
-        bbox = self.bbox_layer.getExtent()
+        bbox = self.bbox_layer.extent()
 
+        return bbox
+
+    def _study_area_bbox_4326(self) -> QgsRectangle:
+        """
+        Get the study area bounding box geometry in EPSG:4326.
+
+        :return: The bounding box QgsRectangle.
+        """
+        transform = QgsCoordinateTransform(
+            self.bbox_layer.crs(),
+            QgsCoordinateReferenceSystem("EPSG:4326"),
+            QgsProject.instance(),
+        )
+        bbox = self.bbox_layer.extent()
+        bbox = QgsCoordinateTransform.transformBoundingBox(transform, bbox)
         return bbox
 
     def updateProgress(self, progress: float):
