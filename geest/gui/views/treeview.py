@@ -57,9 +57,8 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_description = json_data.get("description", "No Description")
         analysis_scale = json_data.get("analysis_scale", "local")
         analysis_cell_size_m = json_data.get("analysis_cell_size_m", 100.0)
-        # START I don't love that this list of layer paths is hardcoded here
+        # START I don't love that this list of layer paths is hard coded here
         road_network_layer_path = json_data.get("road_network_layer_path", "")
-        cycle_network_layer_path = json_data.get("cycle_network_layer_path", "")
         # END
         working_folder = json_data.get("working_folder", "Not Set")
         guid = json_data.get("guid", str(uuid.uuid4()))  # Deserialize UUID
@@ -99,7 +98,6 @@ class JsonTreeModel(QAbstractItemModel):
             "analysis_cell_size_m": analysis_cell_size_m,
             "analysis_scale": analysis_scale,
             "road_network_layer_path": road_network_layer_path,
-            "cycle_network_layer_path": cycle_network_layer_path,
             "result": analysis_result,
             "result_file": analysis_result_file,
             "execution_start_time": analysis_execution_start_time,
@@ -433,6 +431,9 @@ class JsonTreeModel(QAbstractItemModel):
 
         def recurse_tree(item):
             # Serialize each item, including UUID
+            # Note we store the road paths but not the cycle paths
+            # because the roads are used for native routing analysis
+            # by some of the algorithms
             if item.role == "analysis":
                 json_data = {
                     "analysis_name": item.attribute("analysis_name"),
@@ -440,7 +441,7 @@ class JsonTreeModel(QAbstractItemModel):
                     "working_folder": item.attribute("working_folder"),
                     "analysis_cell_size_m": item.attribute("analysis_cell_size_m"),
                     "analysis_scale": item.attribute("analysis_scale"),
-                    "network_layer_path": item.attribute("network_layer_path"),
+                    "road_network_layer_path": item.attribute("road_network_layer_path"),
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }
@@ -481,7 +482,7 @@ class JsonTreeModel(QAbstractItemModel):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            # Show the traceback tpp
+            # Show the trace back too
             log_message(f"{traceback.format_exc()}", level=Qgis.Critical)
             raise e
 

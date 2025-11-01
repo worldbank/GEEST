@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import timeit
 from typing import Optional
 
-from osgeo import gdal, ogr
+from osgeo import gdal, ogr, osr
 from qgis.core import (
     QgsApplication,
+    QgsCoordinateReferenceSystem,
     QgsFeedback,
     QgsRectangle,
 )
@@ -62,7 +62,6 @@ class OoklaDownloader:
                 It will have "fixed", "mobile" or "combined" appended to it.
             use_cache (bool): Indicates if cache should be used.
             delete_existing (bool): Indicates if existing files should be deleted.
-            NOT USED network_manager (QgsNetworkAccessManager): Network manager for handling requests.
             feedback (QgsFeedback): Feedback object for progress and cancellation.
             layer: The indexed layer for processing.
         """
@@ -93,14 +92,20 @@ class OoklaDownloader:
         os.makedirs(cache_dir, exist_ok=True)
         return cache_dir
 
-    def extract_data(self):
+    def extract_data(self, output_crs: QgsCoordinateReferenceSystem):
         """
         Main method to extract OOKLA data based on the specified extents and save it to the output path.
         This method handles both fixed and mobile internet data extraction, filtering, and saving.
 
+        Args:
+            output_crs (QgsCoordinateReferenceSystem): The coordinate reference system for the output data.
+
         Raises:
             OoklaException: If there is an error opening the input Parquet files.
         """
+        if not self.output_path:
+            raise OoklaException("Output path must be specified and non-empty.")
+        # Note: All Ookla data and extents must be specified in EPSG:4326 (WGS 84) projection.
         bbox = (
             self.extents.xMinimum(),
             self.extents.yMinimum(),
@@ -116,21 +121,21 @@ class OoklaDownloader:
         # Extract fixed internet data
         log_message("Starting extraction of fixed internet data...")
         try:
-            self.extract_ookla_data(self.FIXED_INTERNET_URL, fixed_output_file, bbox)
+            self.extract_ookla_data(self.FIXED_INTERNET_URL, fixed_output_file, bbox, output_crs)
         except Exception as e:
             raise OoklaException(f"Error extracting fixed internet data: {e}")
 
         # Extract mobile internet data
         log_message("Starting extraction of mobile internet data...")
         try:
-            self.extract_ookla_data(self.MOBILE_INTERNET_URL, mobile_output_file, bbox)
+            self.extract_ookla_data(self.MOBILE_INTERNET_URL, mobile_output_file, bbox, output_crs)
         except Exception as e:
             raise OoklaException(f"Error extracting mobile internet data: {e}")
 
         # Combine fixed and mobile data
         log_message("Combining fixed and mobile internet data...")
         try:
-            self.combine_vectors([fixed_output_file, mobile_output_file], combined_output_file)
+            self.combine_vectors([fixed_output_file, mobile_output_file], combined_output_file, output_crs)
         except Exception as e:
             raise OoklaException(f"Error combining data: {e}")
 
@@ -142,14 +147,14 @@ class OoklaDownloader:
             f"Filtering Records by Bounding Box\n"
             f"We’re narrowing the dataset from the Parquet file\n"
             f"to only those geometries intersecting the bounding box below.\n"
-            f"Mimimum Upload Speed: [bold]{minimum_upload_kbps} kbps\n"
+            f"Minimum Upload Speed: [bold]{minimum_upload_kbps} kbps\n"
             f"Minimum Download Speed: [bold]{minimum_download_kbps} kbps\n"
             f"Bounding Box Coordinates:\n"
             f"  Min X: {self.extents.xMinimum()}\n"
         )
         return (title, body)
 
-    def extract_ookla_data(self, input_uri, output_file, bbox):
+    def extract_ookla_data(self, input_uri, output_file, bbox_4326, output_crs: QgsCoordinateReferenceSystem):
         """
         This is the core logic for extracting data from OOKLA. The data
         can either be downloaded from S3 or read from a local Parquet file.
@@ -158,13 +163,14 @@ class OoklaDownloader:
         below for the structure). So to process it, we download the data using attribute  filters
         to only fetch records within our bbox and with sufficient upload and download speeds.
 
-        Because it is a parquet file, GDAL will still efficeintly featch only the required row groups
-        using an http range requests.
+        Because it is a parquet file, GDAL will still efficiently fetch only the required row groups
+        using an HTTP range requests.
 
         Args:
             input_uri (str): The URI of the input Parquet file (can be a local path or S3 path).
             output_file (str): The path to the output Parquet file where filtered data will be saved.
-            bbox (tuple): A tuple representing the bounding box (min_x, min_y, max_x, max_y) for filtering.
+            bbox_4326 (tuple): A tuple representing the bounding box (min_x, min_y, max_x, max_y) for filtering.
+            output_crs (QgsCoordinateReferenceSystem): The coordinate reference system for the output data.
         """
         # Example row from the Parquet file:
         # OGRFeature(ookla):349644
@@ -183,28 +189,48 @@ class OoklaDownloader:
         found_bbox = (0, 0, 0, 0)  # As we iterate over the features, we'll find the actual bbox
         start_time = timeit.default_timer()
         # Open the input Parquet file
+
         driver = ogr.GetDriverByName("Parquet")
         if driver is None:
             log_message("❌ Parquet driver not available.")
-            sys.exit(1)
+            raise OoklaException("Parquet driver not available.")
 
         dataset = driver.Open(input_uri, 0)
         if dataset is None:
             log_message(f"❌ Failed to open file: {input_uri}")
-            sys.exit(1)
+            raise OoklaException(f"Failed to open file: {input_uri}")
+
+        # transform to output CRS
+        transform = None
+
+        target_spatial_reference = osr.SpatialReference()
+        target_spatial_reference.ImportFromEPSG(4326)
+        if output_crs.authid() != "EPSG:4326":
+            source_spatial_reference = osr.SpatialReference()
+            source_spatial_reference.ImportFromEPSG(4326)
+            target_spatial_reference = osr.SpatialReference()
+            target_spatial_reference.ImportFromEPSG(int(output_crs.authid().split(":")[1]))
+            # Force traditional GIS axis order for both source and target
+            if hasattr(source_spatial_reference, "SetAxisMappingStrategy"):
+                source_spatial_reference.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+            if hasattr(target_spatial_reference, "SetAxisMappingStrategy"):
+                target_spatial_reference.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+            transform = osr.CoordinateTransformation(source_spatial_reference, target_spatial_reference)
+            log_message(f"Transforming output to {output_crs.authid()}")
+        else:
+            log_message("Writing results to EPSG:4326")
 
         layer = dataset.GetLayer()
         out_dataset = driver.CreateDataSource(output_file)
-        out_layer = out_dataset.CreateLayer("filtered_data", geom_type=ogr.wkbPolygon)
+        out_layer = out_dataset.CreateLayer("filtered_data", target_spatial_reference, geom_type=ogr.wkbPolygon)
 
         # Copy fields
         # We only will keep the quadkey field and discard the rest
         out_layer.CreateField(ogr.FieldDefn("quadkey", ogr.OFTString))
 
-        min_x, min_y, max_x, max_y = bbox
+        min_x, min_y, max_x, max_y = bbox_4326
         count = 0
         kept_count = 0
-        min_x, min_y, max_x, max_y = bbox
 
         # Apply attribute filter for speed and extent directly at the layer level
         filter_expr = (
@@ -218,7 +244,6 @@ class OoklaDownloader:
         out_layer_defn = out_layer.GetLayerDefn()
 
         found_min_x = found_min_y = found_max_x = found_max_y = None
-
         for feature in layer:
             x = feature.GetField("tile_x")
             y = feature.GetField("tile_y")
@@ -235,6 +260,10 @@ class OoklaDownloader:
 
             kept_count += 1
             geom = ogr.CreateGeometryFromWkt(feature.GetField("tile"))
+            if transform:
+                result = geom.Transform(transform)
+                if result != 0:
+                    log_message(f"Geometry transformation failed for feature {feature.GetField('quadkey')}")
             out_feature = ogr.Feature(out_layer_defn)
             out_feature.SetGeometry(geom.Clone())
             out_feature.SetField("quadkey", feature.GetField("quadkey"))
@@ -245,9 +274,10 @@ class OoklaDownloader:
             if count % 1000 == 0:
                 log_message(f"Processed {count} of {feature_count} features...")
                 log_message(f"Kept {kept_count} features so far...")
-                progress = int((count / feature_count) * 100)
-                if self.feedback is not None:
-                    self.feedback.setProgress(progress)
+                if feature_count > 0:
+                    progress = int((count / feature_count) * 100)
+                    if self.feedback is not None:
+                        self.feedback.setProgress(progress)
 
         # Clean up
         dataset = None
@@ -317,20 +347,26 @@ class OoklaDownloader:
         )
         self.print_timings(start_time, title="Rasterization complete.", message=f"Raster saved to {output_raster}.")
 
-    def combine_vectors(self, input_files, output_file):
+    def combine_vectors(self, input_files, output_file, output_crs: QgsCoordinateReferenceSystem):
         """
         This function combines multiple vector files into a single output file.
 
         Args:
             input_files (list): A list of input vector file paths to be combined.
             output_file (str): The path to the output combined vector file.
+            output_crs (QgsCoordinateReferenceSystem): The coordinate reference system for the output data.
         """
         start_time = timeit.default_timer()
         quadkey_set = set()
         duplicate_count = 0
+        target_spatial_reference = osr.SpatialReference()
+        target_spatial_reference.ImportFromEPSG(4326)
+        if output_crs.authid() != "EPSG:4326":
+            target_spatial_reference.ImportFromEPSG(int(output_crs.authid().split(":")[1]))
+
         driver = ogr.GetDriverByName("Parquet")
         out_dataset = driver.CreateDataSource(output_file)
-        out_layer = out_dataset.CreateLayer("combined_data", geom_type=ogr.wkbPolygon)
+        out_layer = out_dataset.CreateLayer("filtered_data", target_spatial_reference, geom_type=ogr.wkbPolygon)
         out_layer.CreateField(ogr.FieldDefn("quadkey", ogr.OFTString))
 
         out_layer_defn = out_layer.GetLayerDefn()

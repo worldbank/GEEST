@@ -64,7 +64,7 @@ class TreePanel(QWidget):
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_setup_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
-    switch_to_road_network_tab = pyqtSignal()  # Signal to open the road network tab
+    switch_to_network_tab = pyqtSignal()  # Signal to open the road network tab
     switch_to_ghsl_tab = pyqtSignal()  # Signal to open the ghsl tab
 
     def __init__(self, parent=None, json_file=None):
@@ -408,22 +408,11 @@ class TreePanel(QWidget):
             analysis_item = self.model.rootItem.child(0)
             try:
                 analysis_item.setAttribute("road_network_layer_path", network_layer_path)
+                self.save_json_to_working_directory()
             except Exception as e:
                 log_message(f"Error setting road network path: {str(e)}", level=Qgis.Critical)
         else:
             log_message("No road network layer path provided.")
-
-    @pyqtSlot()
-    def set_cycle_network_layer_path(self, network_layer_path):
-        if network_layer_path:
-            log_message(f"Setting cycle_network_layer_path in model to {network_layer_path}")
-            analysis_item = self.model.rootItem.child(0)
-            try:
-                analysis_item.setAttribute("cycle_network_layer_path", network_layer_path)
-            except Exception as e:
-                log_message(f"Error setting cycle network path: {str(e)}", level=Qgis.Critical)
-        else:
-            log_message("No cycle network layer path provided.")
 
     @pyqtSlot()
     def set_ghsl_layer_path(self, ghsl_layer_path: str):
@@ -538,12 +527,12 @@ class TreePanel(QWidget):
             menu = SolidMenu(self)
             edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
             edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))  # Connect to method
-            set_road_network_layer_action = QAction("Set Road Network Layer")
-            set_road_network_layer_action.triggered.connect(self.switch_to_road_network_tab)  # Connect to method
+            set_network_layers_action = QAction("Set Network Layers")
+            set_network_layers_action.triggered.connect(self.switch_to_network_tab)  # Connect to method
             set_ghsl_layer_action = QAction("Set GHSL Layer")
             set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to method
             menu.addAction(edit_analysis_action)
-            menu.addAction(set_road_network_layer_action)
+            menu.addAction(set_network_layers_action)
             menu.addAction(set_ghsl_layer_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
@@ -1159,15 +1148,6 @@ class TreePanel(QWidget):
         analysis_scale = self.model.get_analysis_item().attributes().get("analysis_scale", "national")
         return analysis_scale
 
-    def network_layer(self):
-        """Get the layer used for network analysis."""
-        network_layer = QgsVectorLayer(
-            self.model.get_analysis_item().attributes().get("network_layer", ""),
-            "Network Layer",
-            "ogr",
-        )
-        return network_layer
-
     def road_network_layer_path(self):
         """Get the layer used for network analysis."""
         analysis_item = self.model.get_analysis_item()
@@ -1175,14 +1155,6 @@ class TreePanel(QWidget):
         road_network_layer_path = analysis_item.attributes().get("road_network_layer_path", "")
         log_message(f"Road Network layer path: {road_network_layer_path}")
         return road_network_layer_path
-
-    def cycle_network_layer_path(self):
-        """Get the layer used for network analysis."""
-        analysis_item = self.model.get_analysis_item()
-        log_message(analysis_item.attributesAsMarkdown())
-        cycle_network_layer_path = analysis_item.attributes().get("cycle_network_layer_path", "")
-        log_message(f"Cycle Network layer path: {cycle_network_layer_path}")
-        return cycle_network_layer_path
 
     def ghsl_layer(self):
         """Get the layer used for ghsl analysis."""
@@ -1213,7 +1185,6 @@ class TreePanel(QWidget):
 
         # Include the network layers in the attributes by default
         attributes["road_network_layer_path"] = self.road_network_layer_path()
-        attributes["cycle_network_layer_path"] = self.cycle_network_layer_path()
         # Include the GHSL layer in the attributes by default
         attributes["ghsl_layer_path"] = self.ghsl_layer_path()
 

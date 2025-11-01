@@ -161,7 +161,7 @@
        <string notr="true"/>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
+       <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="description">
          <property name="font">
           <font>
@@ -198,7 +198,7 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="2" column="0" colspan="2">
         <widget class="QLabel" name="description4">
          <property name="font">
           <font>
@@ -219,7 +219,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="3" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="spacing">
           <number>6</number>
@@ -247,7 +247,7 @@
          </item>
         </layout>
        </item>
-       <item row="4" column="0">
+       <item row="4" column="0" colspan="2">
         <widget class="QPushButton" name="download_road_layer_button">
          <property name="font">
           <font>
@@ -259,7 +259,7 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="5" column="0" colspan="2">
         <widget class="QLabel" name="description5">
          <property name="font">
           <font>
@@ -267,7 +267,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Select a cycle network layer for the study area.</string>
+          <string>Optionally, download a cycle network layer for the study area.</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
@@ -280,35 +280,7 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <property name="spacing">
-          <number>6</number>
-         </property>
-         <item>
-          <widget class="QgsMapLayerComboBox" name="cycle_layer_combo">
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="load_cycle_layer_button">
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="7" column="0">
+       <item row="6" column="0" colspan="2">
         <widget class="QPushButton" name="download_cycle_layer_button">
          <property name="font">
           <font>
@@ -320,7 +292,7 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
+       <item row="7" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -351,8 +323,6 @@
   <tabstop>road_layer_combo</tabstop>
   <tabstop>load_road_layer_button</tabstop>
   <tabstop>download_road_layer_button</tabstop>
-  <tabstop>cycle_layer_combo</tabstop>
-  <tabstop>load_cycle_layer_button</tabstop>
   <tabstop>download_cycle_layer_button</tabstop>
   <tabstop>previous_button</tabstop>
   <tabstop>next_button</tabstop>

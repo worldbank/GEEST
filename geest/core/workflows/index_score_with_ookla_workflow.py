@@ -77,7 +77,7 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
             delete_existing=True,
             feedback=self.feedback,
         )
-        downloader.extract_data()
+        downloader.extract_data(output_crs=self.target_crs)
         self.ookla_layer_path = os.path.join(ookla_layer_path, "ookla_combined.parquet")
 
     def _process_features_for_area(
@@ -112,6 +112,29 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         )
         self.progressChanged.emit(30.0)  # We just use nominal intervals for progress updates
         # Now mask with Ookla coverage layer
+        # First select the features from the Ookla layer that intersect our current area
+        ookla_layer = QgsVectorLayer(self.ookla_layer_path, "ookla_layer", "ogr")
+        # Select features in ookla_layer that intersect current_area
+        expr = f"intersects($geometry, geom_from_wkt('{current_area.asWkt()}'))"
+        ookla_layer.selectByExpression(expr, QgsVectorLayer.SetSelection)
+        # Now only keep the parts of the geometry of the current area that intersect with the ookla_layer
+        ookla_features = ookla_layer.selectedFeatures()
+        final_geom: QgsGeometry = None
+        if ookla_features:
+            ookla_union_geom = QgsGeometry.unaryUnion([feat.geometry() for feat in ookla_features])
+            # Intersect with the clip_area to get the final geometry to use
+            final_geom = clip_area.intersection(ookla_union_geom)
+        else:
+            log_message(f"No Ookla coverage in area {index}, skipping ookla masking.")
+
+        if final_geom.isEmpty():
+            log_message(f"No Ookla coverage in area {index} after intersection, skipping rasterization.")
+        else:
+            scored_layer = self.create_scored_boundary_layer(
+                clip_area=final_geom,
+                index=index,
+            )
+        self.progressChanged.emit(60.0)  # We just use nominal intervals for progress
 
         # Create a scored boundary layer
         raster_output = self._rasterize(

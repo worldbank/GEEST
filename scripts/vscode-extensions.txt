@@ -7,6 +7,7 @@ donjayamanne.python-environment-manager@1.2.7
 donjayamanne.python-extension-pack@1.7.0
 foxundermoon.shell-format@7.2.5
 GitHub.copilot@1.372.0
+GitHub.copilot@1.387.0
 GitHub.copilot-chat@0.29.1
 GitHub.copilot-chat@0.30.3
 github.vscode-github-actions@0.27.1

@@ -32,7 +32,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
     road_network_layer_path_changed = pyqtSignal(str)
-    cycle_network_layer_path_changed = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -104,9 +103,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
         self.download_road_layer_button.clicked.connect(self.download_road_layer_button_clicked)
 
-        self.cycle_layer_combo.setFilters(QgsMapLayerProxyModel.LineLayer)
-        self.cycle_layer_combo.currentIndexChanged.connect(self.emit_cycle_layer_change)
-        self.load_cycle_layer_button.clicked.connect(self.load_road_layer)
         self.download_cycle_layer_button.clicked.connect(self.download_cycle_layer_button_clicked)
 
         self.next_button.clicked.connect(self.on_next_button_clicked)
@@ -122,13 +118,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         else:
             self.road_network_layer_path_changed.emit(None)
 
-    def emit_cycle_layer_change(self):
-        cycle_layer = self.cycle_layer_combo.currentLayer()
-        if cycle_layer:
-            self.cycle_network_layer_path_changed.emit(cycle_layer.source())
-        else:
-            self.cycle_network_layer_path_changed.emit(None)
-
     def on_next_button_clicked(self):
         self.switch_to_next_tab.emit()
 
@@ -139,11 +128,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         if self.road_layer_combo.currentLayer() is None:
             return None
         return self.road_layer_combo.currentLayer().source()
-
-    def cycle_network_layer_path(self):
-        if self.cycle_layer_combo.currentLayer() is None:
-            return None
-        return self.cycle_layer_combo.currentLayer().source()
 
     def load_road_layer(self):
         """Load a road network layer from a file."""
@@ -159,21 +143,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             # Load the layer in QGIS
             QgsProject.instance().addMapLayer(layer)
             self.road_layer_combo.setLayer(layer)
-
-    def load_cycle_layer(self):
-        """Load a cycle network layer from a file."""
-        file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
-        file_dialog.setNameFilter("Shapefile (*.shp);;GeoPackage (*.gpkg)")
-        if file_dialog.exec_():
-            file_path = file_dialog.selectedFiles()[0]
-            layer = QgsVectorLayer(file_path, "Cycle Network", "ogr")
-            if not layer.isValid():
-                QMessageBox.critical(self, "Error", "Could not load the road network layer.")
-                return
-            # Load the layer in QGIS
-            QgsProject.instance().addMapLayer(layer)
-            self.cycle_layer_combo.setLayer(layer)
 
     def disable_widgets(self):
         """Disable all widgets in the panel."""
@@ -349,6 +318,9 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.enable_widgets()
 
     def cycle_download_done(self):
+        # Just load the layer into the project - we dont need to store
+        # it as part of the model like we do for road networks which are
+        # using in our native routing analysis
         log_message(
             "*** OSM download completed successfully. ***",
             tag="Geest",
@@ -363,7 +335,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             return
         # Load the layer in QGIS
         QgsProject.instance().addMapLayer(layer)
-        self.cycle_layer_combo.setLayer(layer)
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
         self.enable_widgets()
@@ -383,8 +354,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.description4.setFont(QFont("Arial", font_size))
         self.description5.setFont(QFont("Arial", font_size))
         self.road_layer_combo.setFont(QFont("Arial", font_size))
-        self.cycle_layer_combo.setFont(QFont("Arial", font_size))
         self.load_road_layer_button.setFont(QFont("Arial", font_size))
-        self.load_cycle_layer_button.setFont(QFont("Arial", font_size))
         self.download_road_layer_button.setFont(QFont("Arial", font_size))
         self.download_cycle_layer_button.setFont(QFont("Arial", font_size))

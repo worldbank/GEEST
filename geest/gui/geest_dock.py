@@ -200,13 +200,11 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(GHSL_PANEL)
             )
+            # We are only interested in storing the network layer path
+            # (and not the cycle path) as it is used for the native
+            # network analysis algorithms internally
             self.road_network_widget.road_network_layer_path_changed.connect(
                 lambda: self.tree_widget.set_road_network_layer_path(self.road_network_widget.road_network_layer_path())
-            )
-            self.road_network_widget.cycle_network_layer_path_changed.connect(
-                lambda: self.tree_widget.set_cycle_network_layer_path(
-                    self.road_network_widget.cycle_network_layer_path()
-                )
             )
             # GHSL_PANEL = 6
             # Create and add the "GHSL" panel
@@ -248,7 +246,7 @@ class GeestDock(QDockWidget):
                 # Switch to the next tab when the button is clicked
                 lambda: self.stacked_widget.setCurrentIndex(HELP_PANEL)
             )
-            self.tree_widget.switch_to_road_network_tab.connect(
+            self.tree_widget.switch_to_network_tab.connect(
                 # Switch to the road network tab when the button is clicked
                 # This is also called from the context menu in the tree_panel
                 lambda: [
