@@ -118,8 +118,13 @@ class OoklaDownloader:
         mobile_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_mobile.parquet")
         combined_output_file = os.path.join(self.output_path, f"{self.filename_prefix}_combined.parquet")
 
-        # Extract fixed internet data
-        log_message("Starting extraction of fixed internet data...")
+        # Check if use cache is enabled and files exist
+        if self.use_cache and os.path.exists(combined_output_file):
+            log_message(f"Using cached Ookla data at: {combined_output_file}")
+            return
+
+        # Combine fixed and mobile data
+        log_message("Combining fixed and mobile internet data...")
         try:
             self.extract_ookla_data(self.FIXED_INTERNET_URL, fixed_output_file, bbox, output_crs)
         except Exception as e:
