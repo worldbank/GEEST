@@ -10,6 +10,7 @@ from .dont_use_workflow import DontUseWorkflow
 from .factor_aggregation_workflow import FactorAggregationWorkflow
 from .index_score_workflow import DefaultIndexScoreWorkflow
 from .index_score_with_ookla_workflow import IndexScoreWithOoklaWorkflow
+from .index_score_with_ghsl_workflow import IndexScoreWithGHSLWorkflow
 from .multi_buffer_distances_native_workflow import MultiBufferDistancesNativeWorkflow
 from .multi_buffer_distances_ors_workflow import MultiBufferDistancesORSWorkflow
 from .point_per_cell_workflow import PointPerCellWorkflow

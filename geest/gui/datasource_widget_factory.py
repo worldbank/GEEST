@@ -45,6 +45,9 @@ class DataSourceWidgetFactory:
             if widget_key == "use_index_score_with_ookla" and value == 1:
                 # Uses the same datasource widget as index score for now ...
                 return FixedValueDataSourceWidget(widget_key=widget_key, attributes=attributes)
+            if widget_key == "use_index_score_with_ghsl" and value == 1:
+                # Uses the same datasource widget as index score for now ...
+                return FixedValueDataSourceWidget(widget_key=widget_key, attributes=attributes)
             if widget_key == "use_multi_buffer_point" and value == 1:
                 return VectorDataSourceWidget(widget_key=cleaned_key, attributes=attributes)
             if widget_key == "use_single_buffer_point" and value == 1:
