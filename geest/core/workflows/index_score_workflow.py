@@ -46,7 +46,12 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.index_score = float((self.attributes.get("index_score", 0) / 100) * 5)
+
+        index_score = self.attributes.get("index_score", 0)
+        log_message(f"Index score before rescaling to likert scale: {index_score}")
+        self.index_score = (float(index_score) / 100) * 5
+        log_message(f"Index score after rescaling to likert scale: {self.index_score}")
+
         self.features_layer = (
             True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
         )
