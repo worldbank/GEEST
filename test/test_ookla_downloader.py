@@ -54,7 +54,10 @@ class TestOoklaDownloader(unittest.TestCase):
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
         downloader = OoklaDownloader(extents, output_path=self.output_dir, filename_prefix="fixed_test")
         output_file = os.path.join(self.output_dir, "fixed_test_filtered.parquet")
-        downloader.extract_ookla_data(self.fixed_parquet, output_file, (-9.50, 36.90, -6.20, 42.20))
+        output_crs = "EPSG:3857"
+        downloader.extract_ookla_data(
+            self.fixed_parquet, output_file, (-9.50, 36.90, -6.20, 42.20), output_crs=output_crs
+        )
         self.assertTrue(os.path.exists(output_file))
         # Check file is not empty
         self.assertGreater(os.path.getsize(output_file), 0)
@@ -71,7 +74,10 @@ class TestOoklaDownloader(unittest.TestCase):
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
         downloader = OoklaDownloader(extents, output_path=self.output_dir, filename_prefix="mobile_test")
         output_file = os.path.join(self.output_dir, "mobile_test_filtered.parquet")
-        downloader.extract_ookla_data(self.mobile_parquet, output_file, (-9.50, 36.90, -6.20, 42.20))
+        output_crs = "EPSG:3857"
+        downloader.extract_ookla_data(
+            self.mobile_parquet, output_file, (-9.50, 36.90, -6.20, 42.20), output_crs=output_crs
+        )
         self.assertTrue(os.path.exists(output_file))
         self.assertGreater(os.path.getsize(output_file), 0)
         # count the features in the output file  and confirm there are 100
@@ -89,9 +95,13 @@ class TestOoklaDownloader(unittest.TestCase):
         fixed_output_file = os.path.join(self.output_dir, "fixed_test_filtered.parquet")
         mobile_output_file = os.path.join(self.output_dir, "mobile_test_filtered.parquet")
         combined_output_file = os.path.join(self.output_dir, "combined_test.parquet")
-
-        downloader.extract_ookla_data(self.fixed_parquet, fixed_output_file, (-9.50, 36.90, -6.20, 42.20))
-        downloader.extract_ookla_data(self.mobile_parquet, mobile_output_file, (-9.50, 36.90, -6.20, 42.20))
+        output_crs = "EPSG:3857"
+        downloader.extract_ookla_data(
+            self.fixed_parquet, fixed_output_file, (-9.50, 36.90, -6.20, 42.20), output_crs=output_crs
+        )
+        downloader.extract_ookla_data(
+            self.mobile_parquet, mobile_output_file, (-9.50, 36.90, -6.20, 42.20), output_crs=output_crs
+        )
 
         downloader.combine_vectors([fixed_output_file, mobile_output_file], combined_output_file)
         self.assertTrue(os.path.exists(combined_output_file))
