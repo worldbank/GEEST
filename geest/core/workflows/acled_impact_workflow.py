@@ -84,17 +84,19 @@ class AcledImpactWorkflow(WorkflowBase):
         :return: Raster file path of the output.
         """
 
-        # Step 1: Buffer the selected features by 5 km
+        # Step 1: Buffer the selected features by relevant
+        #         distance for each event type and assign values
+        #         to the buffer layer
         buffered_layer = self._buffer_features(area_features)
         self.feedback.setProgress(10.0)
 
         # Step 2: Assign values based on event_type
-        scored_layer = self._assign_scores(buffered_layer)
+        # scored_layer = self._assign_scores(buffered_layer)
         self.feedback.setProgress(40.0)
 
         # Step 3: Dissolve and remove overlapping areas, keeping areas with the lowest value
-        dissolved_layer = self._overlay_analysis(scored_layer)
-        self.feedback.setProgress(600.0)
+        dissolved_layer = self._overlay_analysis(buffered_layer)
+        self.feedback.setProgress(60.0)
 
         # Step 4: Rasterize the dissolved layer
         raster_output = self._rasterize(
@@ -118,6 +120,23 @@ class AcledImpactWorkflow(WorkflowBase):
             QgsVectorLayer: The reprojected point layer created from the CSV.
         """
         source_crs = QgsCoordinateReferenceSystem("EPSG:4326")  # Assuming the CSV uses WGS84
+        # Define scoring categories based on event_type
+        # See https://github.com/worldbank/GEEST/issues/71
+        # For where these lookups are specified
+        event_scores = {
+            "Battles": 0,
+            "Explosions/Remote violence": 1,
+            "Violence against civilians": 2,
+            "Protests": 4,
+            "Riots": 4,
+        }
+        buffer_distances = {
+            "Battles": 5000,
+            "Explosions/Remote violence": 5000,
+            "Violence against civilians": 2000,
+            "Protests": 1000,
+            "Riots": 2000,
+        }
 
         # Set up a coordinate transform from WGS84 to the target CRS
         transform_context = self.context.project().transformContext()
@@ -126,11 +145,14 @@ class AcledImpactWorkflow(WorkflowBase):
         # Define fields for the point layer
         fields = QgsFields()
         fields.append(QgsField("event_type", QVariant.String))
+        fields.append(QgsField("value", QVariant.Int))
+        fields.append(QgsField("buffer_m", QVariant.Int))
+        fields.append(QgsField("score", QVariant.Int))
 
         # Create an in-memory point layer in the target CRS
         point_layer = QgsVectorLayer(f"Point?crs={self.target_crs.authid()}", "acled_points", "memory")
         point_provider = point_layer.dataProvider()
-        point_provider.addAttributes(fields)
+        point_provider.addAttributes(fields)  # type: ignore
         point_layer.updateFields()
 
         # Read the CSV and add reprojected points to the layer
@@ -148,10 +170,13 @@ class AcledImpactWorkflow(WorkflowBase):
 
                 feature = QgsFeature()
                 feature.setGeometry(QgsGeometry.fromPointXY(point_transformed))
-                feature.setAttributes([event_type])
+                value = event_scores.get(event_type, 5)
+                buffer_m = buffer_distances.get(event_type, 0)
+                score = 0  # this will be replaced later with the lowest overlapping score
+                feature.setAttributes([event_type, value, buffer_m, score])
                 features.append(feature)
 
-            point_provider.addFeatures(features)
+            point_provider.addFeatures(features)  # type: ignore
             log_message(f"Loaded {len(features)} points from CSV")
         # Save the layer to disk as a shapefile
         # Ensure the workflow directory exists
@@ -184,24 +209,60 @@ class AcledImpactWorkflow(WorkflowBase):
         Buffer the input features by 5 km.
 
         Args:
-            layer (QgsVectorLayer): The input feature layer.
+            layer (QgsVectorLayer): The input feature layer. This layer should be a point
+               layer with two columns: value and buffer_m representing the geest score for
+               the event and the distance to buffer in m.
 
         Returns:
             QgsVectorLayer: The buffered features layer.
         """
+        # get a list of unique values for buffer_m in the input layer
+        buffer_distances = layer.uniqueValues(layer.fields().indexFromName("buffer_m"))
+        # Iterate the unique distances and buffer each set of features separately
+        log_message(f"Buffering features in {layer.name()}")
+        for distance in buffer_distances:
+            log_message(f"Buffering features with buffer_m = {distance}")
+            subset_expression = f'"buffer_m" = {distance}'
+            subset_layer = processing.run(  # type: ignore[index]
+                "native:extractbyexpression",
+                {
+                    "INPUT": layer,
+                    "EXPRESSION": subset_expression,
+                    "OUTPUT": "memory:",
+                },
+            )["OUTPUT"]
+            buffered_subset = processing.run(  # type: ignore[index]
+                "native:buffer",
+                {
+                    "INPUT": subset_layer,
+                    "DISTANCE": distance,
+                    "SEGMENTS": 5,
+                    "DISSOLVE": False,
+                    "OUTPUT": "memory:",
+                },
+            )["OUTPUT"]
+            # Append the buffered subset back to the main layer
+            layer = processing.run(  # type: ignore[index]
+                "native:mergevectorlayers",
+                {
+                    "LAYERS": [layer, buffered_subset],
+                    "OUTPUT": "memory:",
+                },
+            )["OUTPUT"]
+            del subset_layer
+
         output_name = f"{self.layer_id}_buffered"
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
-        buffered_layer = processing.run(
-            "native:buffer",
-            {
-                "INPUT": layer,
-                "DISTANCE": 5000,  # 5 km buffer
-                "SEGMENTS": 5,
-                "DISSOLVE": False,
-                "OUTPUT": output_path,
-            },
-        )["OUTPUT"]
-        del buffered_layer  # Free memory
+        log_message(f"Writing buffered layer to {output_path}")
+        error = QgsVectorFileWriter.writeAsVectorFormat(
+            layer,
+            output_path,
+            "UTF-8",
+            layer.crs(),
+            "ESRI Shapefile",
+        )
+        log_message(f"Buffer result: {error}")
+        del layer  # Free memory
         return QgsVectorLayer(output_path, output_name, "ogr")
 
     def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
@@ -217,6 +278,8 @@ class AcledImpactWorkflow(WorkflowBase):
 
         log_message(f"Assigning scores to {layer.name()}")
         # Define scoring categories based on event_type
+        # See https://github.com/worldbank/GEEST/issues/71
+        # For where these lookups are specified
         event_scores = {
             "Battles": 0,
             "Explosions/Remote violence": 1,
@@ -224,17 +287,27 @@ class AcledImpactWorkflow(WorkflowBase):
             "Protests": 4,
             "Riots": 4,
         }
+        buffer_distances = {
+            "Battles": 5000,
+            "Explosions/Remote violence": 5000,
+            "Violence against civilians": 2000,
+            "Protests": 1000,
+            "Riots": 2000,
+        }
 
         # Create a new field in the layer for the scores
         layer.startEditing()
         layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
+        layer.dataProvider().addAttributes([QgsField("buffer_m", QVariant.Int)])
         layer.updateFields()
 
         # Assign scores based on event_type
-        for feature in layer.getFeatures():
+        for feature in layer.getFeatures():  # type: ignore
             event_type = feature["event_type"]
             score = event_scores.get(event_type, 5)
+            buffer_m = buffer_distances.get(event_type, 0)
             feature.setAttribute("value", score)
+            feature.setAttribute("buffer_m", buffer_m)
             layer.updateFeature(feature)
 
         layer.commitChanges()
@@ -306,7 +379,7 @@ class AcledImpactWorkflow(WorkflowBase):
         provider.addAttributes([QgsField("min_value", QVariant.Int)])
         result_layer.updateFields()
         # Step 4: Perform the dissolve operation to separate disjoint polygons
-        dissolve = processing.run(
+        dissolve = processing.run(  # type: ignore[index]
             "native:dissolve",
             {
                 "INPUT": input_layer,
@@ -321,7 +394,7 @@ class AcledImpactWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
         # Step 5: Perform the union to get all overlapping areas
-        union = processing.run(
+        union = processing.run(  # type: ignore[index]
             "qgis:union",
             {
                 "INPUT": dissolve,
