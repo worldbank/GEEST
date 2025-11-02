@@ -424,3 +424,20 @@ class BaseReport:
         self.layout.saveAsTemplate(qpt_path, context)
         log_message(f"Saved layout as template: {qpt_path}")
         return result == QgsLayoutExporter.Success
+
+    def export_qpt(self, output_path):
+        """
+        Export the current layout as a QGIS Print Template (.qpt) file.
+
+        Parameters:
+            output_path (str): The full file path (including filename) for the output QPT.
+
+        Returns:
+            bool: True if the export was successful, False otherwise.
+        """
+        if self.layout is None:
+            self.create_layout()
+        context = QgsReadWriteContext()
+        result = self.layout.saveAsTemplate(output_path, context)
+        log_message(f"Saved layout as QPT template: {output_path}")
+        return result

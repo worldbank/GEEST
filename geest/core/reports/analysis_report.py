@@ -45,6 +45,7 @@ class AnalysisReport(BaseReport):
 
         self.report_name = report_name
         self.model_path = model_path
+        self.temp_layers = []  # Track layers added to project for cleanup
         self.page_descriptions[
             "analysis_summary"
         ] = """
@@ -55,7 +56,11 @@ class AnalysisReport(BaseReport):
         """
         Destructor to clean up layers from the QGIS project.
         """
-        pass
+        # Remove temporary layers added for rendering
+        for layer in self.temp_layers:
+            if layer:
+                QgsProject.instance().removeMapLayer(layer.id())
+                log_message(f"Removed temporary layer '{layer.name()}' from project.")
 
     def create_layout(self):
         """
@@ -153,6 +158,10 @@ class AnalysisReport(BaseReport):
                                 f"Layer {layer_uri} is invalid and cannot be added.",
                                 tag="Geest",
                             )
+                        else:
+                            # Add the layer to the project temporarily for rendering
+                            QgsProject.instance().addMapLayer(layer, False)
+                            self.temp_layers.append(layer)
                         layers = [layer]
                         crs = layer.crs()
                         self.make_map(

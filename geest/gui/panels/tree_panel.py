@@ -670,6 +670,8 @@ class TreePanel(QWidget):
         report = AnalysisReport(model_path=model_path, report_name="Study Area Summary")
         report.create_layout()
         report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
+        report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
+
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
