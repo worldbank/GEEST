@@ -4,8 +4,6 @@ from typing import Optional
 
 from qgis import processing  # noqa: F401 # QGIS processing toolbox
 from qgis.core import (  # noqa: F401
-    Qgis,
-    QgsDataProvider,
     QgsFeature,
     QgsFeedback,
     QgsField,
@@ -83,6 +81,26 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
             log_message("ERROR: GHSL coverage layer not found ...")
             raise IndexScoreWithGHSLException("GHSL coverage layer not found.")
 
+        # Ensure the GHSL layer is in the target CRS
+        ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
+        if ghsl_layer.crs() != self.target_crs:
+            log_message("Reprojecting GHSL layer to target CRS ...")
+            reprojected_ghsl_path = os.path.join(ghsl_layer_path, "ghsl_settlements_layer_4326.parquet")
+            if os.path.exists(reprojected_ghsl_path):
+                os.remove(reprojected_ghsl_path)
+
+            processing.run(
+                "native:reprojectlayer",
+                {
+                    "INPUT": ghsl_layer,
+                    "TARGET_CRS": self.target_crs,
+                    "OUTPUT": reprojected_ghsl_path,
+                },
+                context=self.context,
+            )
+            self.ghsl_layer_path = reprojected_ghsl_path
+            log_message("GHSL layer reprojected.")
+
     def _process_features_for_area(
         self,
         current_area: QgsGeometry,
@@ -117,6 +135,7 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         # Now mask with GHSL coverage layer
         # First select the features from the GHSL layer that intersect our current area
         ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
+
         # Select features in ghsl_layer that intersect current_area
         expr = f"intersects($geometry, geom_from_wkt('{current_area.asWkt()}'))"
         ghsl_layer.selectByExpression(expr, QgsVectorLayer.SetSelection)

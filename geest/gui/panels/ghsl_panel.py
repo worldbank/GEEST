@@ -4,8 +4,6 @@ import traceback
 
 from qgis.core import (
     Qgis,
-    QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeedback,
     QgsProject,
     QgsVectorLayer,
@@ -16,6 +14,7 @@ from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from geest.core import WorkflowQueueManager
 from geest.core.tasks import GHSLDownloaderTask
+from geest.core.utilities import extent_mollweide
 from geest.gui.widgets import CustomBannerLabel
 from geest.utilities import (
     get_ui_class,
@@ -133,36 +132,6 @@ class GHSLPanel(FORM_CLASS, QWidget):
         for widget in self.findChildren(QWidget):
             widget.setEnabled(True)
 
-    def extent_mollweide(self):
-        # Get the study area bbox study_area_bbox from the project
-        # working directory study_area.gpkg and compute the extent
-        # then reproject to Mollweide (ESRI:54009) and pass to the
-        # ghsl panel
-
-        try:
-            study_area_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
-            log_message(f"Looking for study area layer: {study_area_path}")
-            if os.path.exists(study_area_path):
-                log_message(f"Found study area layer: {study_area_path}")
-                layer = QgsVectorLayer(study_area_path, "study_area", "ogr")
-                if layer.isValid():
-                    log_message("Study area layer is valid")
-                else:
-                    log_message("Study area layer is NOT valid", level=Qgis.Critical)
-                log_message(f"Study area layer has {layer.featureCount()} features")
-                if layer.isValid() and layer.featureCount() > 0:
-                    extent = layer.extent()
-                    log_message(f"Study area bbox in layer CRS: {extent.toString()}")
-                    src_crs = layer.crs()
-                    log_message(f"Study area layer CRS: {src_crs.authid()}")
-                    dst_crs = QgsCoordinateReferenceSystem("ESRI:54009")  # Mollweide needed for ghsl
-                    transform = QgsCoordinateTransform(src_crs, dst_crs, QgsProject.instance())
-                    extent_mollweide = transform.transformBoundingBox(extent)
-                    log_message(f"Study area bbox in Mollweide: {extent_mollweide}")
-        except Exception as e:
-            log_message(f"Failed to compute/reproject study area bbox: {e}", tag="Geest", level=Qgis.Warning)
-        return extent_mollweide
-
     def download_ghsl_layer_button_clicked(self):
         """Triggered when the settlements layer button is pressed."""
         log_message("Download settlements layer button clicked")
@@ -177,7 +146,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
         try:
             log_message("Creating GHSL Downloader Task")
             downloader = GHSLDownloaderTask(
-                extent_mollweide=self.extent_mollweide(),  # bbox must be in Mollweide ESRI:54009
+                extent_mollweide=extent_mollweide(),  # bbox must be in Mollweide ESRI:54009
                 working_dir=self.working_directory,
                 filename="settlements_layer",
                 use_cache=True,
