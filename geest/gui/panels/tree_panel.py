@@ -5,6 +5,7 @@ import platform
 import shutil
 import subprocess  # nosec B404
 import traceback
+from functools import partial
 from logging import getLogger
 
 from qgis.core import (
@@ -525,22 +526,24 @@ class TreePanel(QWidget):
         if item.role == "analysis":
             menu = SolidMenu(self)
             edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
-            edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))
+            edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))  # Connect to method
             set_network_layers_action = QAction("Set Network Layers")
-            set_network_layers_action.triggered.connect(self.switch_to_network_tab)
+            set_network_layers_action.triggered.connect(self.switch_to_network_tab)  # Connect to method
             set_ghsl_layer_action = QAction("Set GHSL Layer")
-            set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)
+            set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to method
             menu.addAction(edit_analysis_action)
             menu.addAction(set_network_layers_action)
             menu.addAction(set_ghsl_layer_action)
-            # Add Animate Results action
-            animate_results_action = QAction("Animate results", self)
-            animate_results_action.triggered.connect(self.animate_results)
-            menu.addAction(animate_results_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
+
+            # Add Animate Results action
+            animate_results_action = QAction("Animate results", self)
+            animate_results_action.triggered.connect(self.animate_results)
+            menu.addAction(animate_results_action)
+
             add_wee_score = QAction("Add WEE Score to Map")
             add_wee_score.triggered.connect(
                 lambda: add_to_map(item, key="result_file", layer_name="WEE Score", group="WEE")
@@ -1176,70 +1179,14 @@ class TreePanel(QWidget):
         log_message(f"GHSL layer path: {ghsl_layer_path}")
         return ghsl_layer_path
 
-    def animate_results(self):
-        """
-        Animate the selection of tree items sequentially with a 2s pause on each.
-        """
-        from qgis.PyQt.QtCore import QTimer
-
-        # If already animating, do nothing
-        if getattr(self, "_is_animating", False):
-            return
-        self._is_animating = True
-
-        # Get all items in the tree in a flat list (preorder traversal)
-        def collect_items(item, items):
-            items.append(item)
-            for i in range(item.childCount()):
-                collect_items(item.child(i), items)
-
-        items = []
-        collect_items(self.model.rootItem, items)
-        # Remove the root item if you don't want to animate it
-        if len(items) > 1:
-            items = items[1:]
-
-        self._animate_items = items
-        self._animate_index = 0
-
-        if hasattr(self, "_animate_timer") and self._animate_timer is not None:
-            self._animate_timer.stop()
-
-        self._animate_timer = QTimer(self)
-        self._animate_timer.setInterval(1000)  # 1s
-        self._animate_timer.timeout.connect(self._animate_next_item)
-        self._animate_next_item()  # Start immediately
-        self._animate_timer.start()
-
-    def stop_animation(self):
-        """Stop the animation if running."""
-        if hasattr(self, "_animate_timer") and self._animate_timer is not None:
-            self._animate_timer.stop()
-        self._is_animating = False
-        self._animate_items = []
-        self._animate_index = 0
-
-    def _animate_next_item(self):
-        if not hasattr(self, "_animate_items") or self._animate_index >= len(self._animate_items):
-            if hasattr(self, "_animate_timer"):
-                self._animate_timer.stop()
-            self._is_animating = False
-            return
-        item = self._animate_items[self._animate_index]
-        index = self.model.itemIndex(item)
-        if index.isValid():
-            self.treeView.setCurrentIndex(index)
-            self.treeView.scrollTo(index)
-            # Call the item clicked logic for each item as it is selected
-            self.on_item_clicked(index)
-        self._animate_index += 1
-
     def queue_workflow_task(self, item, role):
         """Queue a workflow task based on the role of the item.
 
         ⭐️ These calls all pass a reference of the item to the workflow task.
             The task directly modifies the item's properties to update the tree.
         """
+        task = None
+
         attributes = item.attributes()
 
         # Include the network layers in the attributes by default
@@ -1248,112 +1195,79 @@ class TreePanel(QWidget):
         attributes["ghsl_layer_path"] = self.ghsl_layer_path()
 
         if attributes.get("result_file", None) and self.run_only_incomplete:
-            if item.role == "analysis":
-                # Ensure all actions are defined before menu logic
-                menu = SolidMenu(self)
-                edit_analysis_action = QAction("🔘 Edit Weights and Settings", self)
-                edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))
-                set_network_layers_action = QAction("Set Network Layers")
-                set_network_layers_action.triggered.connect(self.switch_to_network_tab)
-                set_ghsl_layer_action = QAction("Set GHSL Layer")
-                set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)
-                show_json_attributes_action = QAction("Show Attributes", self)
-                show_json_attributes_action.triggered.connect(lambda: self.show_attributes(item))
-                clear_item_action = QAction("Clear Item", self)
-                clear_item_action.triggered.connect(self.clear_item)
-                clear_results_action = QAction("Clear Results", self)
-                clear_results_action.triggered.connect(self.clear_workflows)
-                run_item_action = QAction("Run Item Workflow", self)
+            return
+        if role == item.role and role == "factor":
+            attributes["analysis_mode"] = "factor_aggregation"
+        if role == item.role and role == "dimension":
+            attributes["analysis_mode"] = "dimension_aggregation"
+        if role == item.role and role == "analysis":
+            attributes["analysis_mode"] = "analysis_aggregation"
+        task = self.queue_manager.add_workflow(item, self.cell_size_m(), self.analysis_scale())
+        if task is None:
+            return
 
-                def update_action_text():
-                    text = (
-                        "Rerun Item Workflow"
-                        if QApplication.keyboardModifiers() & Qt.ShiftModifier
-                        else "Run Item Workflow"
-                    )
-                    run_item_action.setText(text)
+        # Connect workflow signals to TreePanel slots
+        task.job_queued.connect(partial(self.on_workflow_created, item))
+        task.job_started.connect(partial(self.on_workflow_started, item))
+        task.job_canceled.connect(partial(self.on_workflow_completed, item, False))
+        task.job_finished.connect(lambda success: self.on_workflow_completed(item, success))
+        # Hook up the QTask feedback signal to the progress bar
+        task.progressChanged.connect(self.task_progress_updated)
 
-                update_action_text()
-                run_item_action.triggered.connect(
-                    lambda: self.run_item(
-                        item,
-                        shift_pressed=QApplication.keyboardModifiers() & Qt.ShiftModifier,
-                    )
-                )
-                open_working_directory_action = QAction("Open Working Directory", self)
-                open_working_directory_action.triggered.connect(lambda: self.open_working_directory(item))
+    def run_item(self, item, shift_pressed):
+        """Run the item and the ones below it.
 
-                menu.addAction(edit_analysis_action)
-                menu.addAction(set_network_layers_action)
-                menu.addAction(set_ghsl_layer_action)
-                # Animate/Stop animation action
-                if getattr(self, "_is_animating", False):
-                    stop_animation_action = QAction("Stop animation", self)
-                    stop_animation_action.triggered.connect(self.stop_animation)
-                    menu.addAction(stop_animation_action)
-                else:
-                    animate_results_action = QAction("Animate results", self)
-                    animate_results_action.triggered.connect(self.animate_results)
-                    menu.addAction(animate_results_action)
-                menu.addAction(show_json_attributes_action)
-                menu.addAction(clear_item_action)
-                menu.addAction(clear_results_action)
-                menu.addAction(run_item_action)
-                add_wee_score = QAction("Add WEE Score to Map")
-                add_wee_score.triggered.connect(
-                    lambda: add_to_map(item, key="result_file", layer_name="WEE Score", group="WEE")
-                )
-                menu.addAction(add_wee_score)
+        If the user holds shift whilst running the item, it will force the
+        recalculation of all workflows under the item, regardless of their status.
 
-                add_wee_by_population = QAction("Add WEE by Pop to Map")
-                add_wee_by_population.triggered.connect(
-                    lambda: add_to_map(
-                        item,
-                        key="wee_by_population",
-                        layer_name="WEE by Population",
-                        group="WEE",
-                    )
-                )
-                menu.addAction(add_wee_by_population)
+        Args:
+            item (TreeItem): The item to run.
+            shift_pressed (bool): Whether the shift key is pressed.
 
-                add_wee_by_population_aggregate = QAction("Add WEE Aggregates to Map")
-                add_wee_by_population_aggregate.triggered.connect(lambda: self.add_aggregates_to_map(item))
-                menu.addAction(add_wee_by_population_aggregate)
+        """
+        self.items_to_run = 0
+        if shift_pressed:
+            self.run_only_incomplete = False
+        else:
+            self.run_only_incomplete = True
 
-                add_masked_scores = QAction("Add Masked Scores to Map")
-                add_masked_scores.triggered.connect(lambda: self.add_masked_scores_to_map(item))
-                menu.addAction(add_masked_scores)
+        indicators = item.getDescendantIndicators(
+            include_completed=not self.run_only_incomplete, include_disabled=False
+        )
+        factors = item.getDescendantFactors(include_completed=not self.run_only_incomplete, include_disabled=False)
+        dimensions = item.getDescendantDimensions(include_completed=not self.run_only_incomplete)
+        # Fix for issue #50 - we need to run the analysis last
+        analyses = item.getDescendantAnalyses(include_completed=not self.run_only_incomplete)
+        self.overall_progress_bar.setVisible(True)
+        self.workflow_progress_bar.setVisible(True)
+        self.help_button.setVisible(False)
+        self.project_button.setVisible(False)
+        self.overall_progress_bar.setValue(0)
+        self.overall_progress_bar.setMaximum(self.items_to_run)
+        self.workflow_progress_bar.setValue(0)
 
-                add_job_opportunities_mask = QAction("Add Job Opportunities Mask to Map")
-                add_job_opportunities_mask.triggered.connect(
-                    lambda: add_to_map(
-                        item,
-                        key="opportunities_mask_result_file",
-                        layer_name="Opportunities Mask",
-                        group="WEE",
-                    )
-                )
-                menu.addAction(add_job_opportunities_mask)
+        for indicator in indicators:
+            self.queue_workflow_task(indicator, indicator.role)
+        for factor in factors:
+            self.queue_workflow_task(factor, factor.role)
+        for dimension in dimensions:
+            self.queue_workflow_task(dimension, dimension.role)
+        # Fix for issue #50 - we need to run the analysis last
+        for analysis in analyses:
+            self.queue_workflow_task(analysis, analysis.role)
+        # Commented out see issue #50 - causes double execution of indicator
+        # self.queue_workflow_task(item, item.role)
+        self.items_to_run = len(indicators) + len(factors) + len(dimensions) + 1
+        log_message(f"Total workflows to run: {self.items_to_run}")
+        self.overall_progress_bar.setMaximum(self.items_to_run)
 
-                add_study_area_layers_action = QAction("Add Study Area to Map", self)
-                add_study_area_layers_action.triggered.connect(self.add_study_area_to_map)
-                menu.addAction(add_study_area_layers_action)
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        if debug_env:
+            self.queue_manager.start_processing_in_foreground()
+        else:
+            self.queue_manager.start_processing()
 
-                add_analysis_report_action = QAction("Show Analysis Report", self)
-                add_analysis_report_action.triggered.connect(self.generate_analysis_report)
-                menu.addAction(add_analysis_report_action)
-
-                add_study_area_report_action = QAction("Show Study Area Report", self)
-                add_study_area_report_action.triggered.connect(self.generate_study_area_report)
-                menu.addAction(add_study_area_report_action)
-
-                open_log_file_action = QAction("Open Log File", self)
-                open_log_file_action.triggered.connect(self.open_log_file)
-                menu.addAction(open_log_file_action)
-                open_log_file_action.triggered.connect(self.open_log_file)
-                menu.addAction(open_log_file_action)
-                menu.addAction(open_working_directory_action)
-
+    @pyqtSlot()
     def on_workflow_created(self, item):
         """
         Slot for handling when a workflow is created.
@@ -1672,3 +1586,61 @@ class TreePanel(QWidget):
         """Enable all widgets in the panel."""
         for widget in self.findChildren(QWidget):
             widget.setEnabled(True)
+
+    def animate_results(self):
+        """
+        Animate the selection of tree items sequentially with a 2s pause on each.
+        """
+        from qgis.PyQt.QtCore import QTimer
+
+        # If already animating, do nothing
+        if getattr(self, "_is_animating", False):
+            return
+        self._is_animating = True
+
+        # Get all items in the tree in a flat list (preorder traversal)
+        def collect_items(item, items):
+            items.append(item)
+            for i in range(item.childCount()):
+                collect_items(item.child(i), items)
+
+        items = []
+        collect_items(self.model.rootItem, items)
+        # Remove the root item if you don't want to animate it
+        if len(items) > 1:
+            items = items[1:]
+
+        self._animate_items = items
+        self._animate_index = 0
+
+        if hasattr(self, "_animate_timer") and self._animate_timer is not None:
+            self._animate_timer.stop()
+
+        self._animate_timer = QTimer(self)
+        self._animate_timer.setInterval(1000)  # 1s
+        self._animate_timer.timeout.connect(self._animate_next_item)
+        self._animate_next_item()  # Start immediately
+        self._animate_timer.start()
+
+    def stop_animation(self):
+        """Stop the animation if running."""
+        if hasattr(self, "_animate_timer") and self._animate_timer is not None:
+            self._animate_timer.stop()
+        self._is_animating = False
+        self._animate_items = []
+        self._animate_index = 0
+
+    def _animate_next_item(self):
+        if not hasattr(self, "_animate_items") or self._animate_index >= len(self._animate_items):
+            if hasattr(self, "_animate_timer"):
+                self._animate_timer.stop()
+            self._is_animating = False
+            return
+        item = self._animate_items[self._animate_index]
+        index = self.model.itemIndex(item)
+        if index.isValid():
+            self.treeView.setCurrentIndex(index)
+            self.treeView.scrollTo(index)
+            # Call the item clicked logic for each item as it is selected
+            self.on_item_clicked(index)
+        self._animate_index += 1
