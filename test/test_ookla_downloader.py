@@ -3,11 +3,17 @@ import os
 import tempfile
 import unittest
 
-import pytest
 from osgeo import ogr
 from qgis.core import QgsFeedback, QgsRectangle
 
 from geest.core.algorithms.ookla_downloader import OoklaDownloader, OoklaException
+
+
+def skipIfGitHubActions(test_func):
+    """Decorator to mark tests as expected to fail on GitHub Actions."""
+    return unittest.skipIf(os.getenv("GITHUB_ACTIONS") == "true", "GDAL in GitHub CI does not have parquet support")(
+        test_func
+    )
 
 
 class DummyFeedback(QgsFeedback):
@@ -50,11 +56,7 @@ class TestOoklaDownloader(unittest.TestCase):
         self.assertTrue(os.path.exists(cache_dir))
         self.assertTrue(cache_dir.endswith("ookla_cache/cache"))
 
-    @pytest.mark.xfail(
-        condition=os.getenv("GITHUB_ACTIONS") == "true",
-        reason="GDAL in GitHub CI does not have parquet support",
-        strict=False,
-    )
+    @skipIfGitHubActions
     def test_extract_ookla_data_fixed(self):
         """Test extraction of fixed internet data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
@@ -75,11 +77,7 @@ class TestOoklaDownloader(unittest.TestCase):
         feature_count = layer.GetFeatureCount()
         self.assertEqual(feature_count, 4)
 
-    @pytest.mark.xfail(
-        condition=os.getenv("GITHUB_ACTIONS") == "true",
-        reason="GDAL in GitHub CI does not have parquet support",
-        strict=False,
-    )
+    @skipIfGitHubActions
     def test_extract_ookla_data_mobile(self):
         """Test extraction of mobile internet data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
@@ -99,11 +97,7 @@ class TestOoklaDownloader(unittest.TestCase):
         feature_count = layer.GetFeatureCount()
         self.assertEqual(feature_count, 4)
 
-    @pytest.mark.xfail(
-        condition=os.getenv("GITHUB_ACTIONS") == "true",
-        reason="GDAL in GitHub CI does not have parquet support",
-        strict=False,
-    )
+    @skipIfGitHubActions
     def test_combine_vectors(self):
         """Test combining fixed and mobile vector data."""
         extents = QgsRectangle(-9.50, 36.90, -6.20, 42.20)
