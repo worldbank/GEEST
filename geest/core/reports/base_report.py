@@ -151,7 +151,7 @@ class BaseReport:
         title_label = QgsLayoutItemLabel(self.layout)
         title_label.setText(title)
         title_label.setFont(QFont("Arial", 20))
-        title_label.setFixedSize(QgsLayoutSize(200, 40, QgsUnitTypes.LayoutMillimeters))
+        title_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
         title_label.attemptMove(
             QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters),
             page=current_page,
@@ -161,8 +161,8 @@ class BaseReport:
         # Add description label to the current page
         description_label = QgsLayoutItemLabel(self.layout)
         description_label.setText(description_text)
-        description_label.setFont(QFont("Arial", 12))
-        description_label.adjustSizeToText()
+        description_label.setFont(QFont("Arial", 10))
+
         description_label.setMode(QgsLayoutItemLabel.ModeHtml)
 
         # Position the label on the current page
@@ -170,7 +170,8 @@ class BaseReport:
             QgsLayoutPoint(20, 40, QgsUnitTypes.LayoutMillimeters),
             page=current_page,
         )
-        description_label.setFixedSize(QgsLayoutSize(100, 40, QgsUnitTypes.LayoutMillimeters))
+        # description_label.adjustSizeToText()
+        description_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
         description_label.setHAlign(Qt.AlignJustify)
         self.layout.addLayoutItem(description_label)
         return page
@@ -320,6 +321,15 @@ class BaseReport:
 
         # (Optional) Enable and configure annotations for the grid lines
         grid.setAnnotationEnabled(True)
+
+        # Set the GridStyle to cross
+        grid.setStyle(QgsLayoutItemMapGrid.GridStyle.Cross)
+        grid.setCrossLength(0.5)  # Length of the cross arms in mm
+        # Set the grid line color to gray
+        grid.setGridLineColor(QColor(128, 128, 128))
+        grid.setGridLineWidth(0.2)  # Width of the grid lines in mm
+        grid.setAnnotationFont(QFont("Arial", 8))
+        grid.setFramePenSize(0.2)
         # Example format: degrees and minutes (you can customize this format as needed)
         # grid.setAnnotationFormat("dd° mm'")
 

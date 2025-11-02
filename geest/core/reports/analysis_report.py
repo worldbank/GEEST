@@ -17,7 +17,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtGui import QColor, QFont
 
-from geest.utilities import log_message, resources_path, setting
+from geest.utilities import log_message, resources_path
 
 from .base_report import BaseReport
 
@@ -87,6 +87,8 @@ class AnalysisReport(BaseReport):
             layer = QgsVectorLayer(uri, f"Study Area ({layer_name})", "ogr")
             if layer.isValid():
                 self.study_area_layer = layer
+                source_qml = resources_path("resources", "qml", "study_area_polygons.qml")
+                layer.loadNamedStyle(source_qml)
                 # Add to project temporarily for rendering
                 QgsProject.instance().addMapLayer(layer, False)
                 self.temp_layers.append(layer)
@@ -133,14 +135,7 @@ class AnalysisReport(BaseReport):
         current_page += 1
 
         # Add pages for each indicator
-        # check if developer mode is enabled
-        developer_mode = int(setting(key="developer_mode", default=0))
-        if developer_mode:
-            log_message("Developer mode is enabled. Creating detail pages for each indicator.")
-            self.create_detail_pages(current_page=current_page)
-        else:
-            log_message("Developer mode is disabled. Skipping detail pages for each indicator.")
-            return
+        self.create_detail_pages(current_page=current_page)
 
     def create_detail_pages(self, current_page: int = 1):
         """
@@ -154,6 +149,48 @@ class AnalysisReport(BaseReport):
 
         with open(self.model_path, "r", encoding="utf-8") as f:
             model = json.load(f)
+
+        # Print the analysis wee, wee by population etc maps first
+        # wee_by_opportunities_mask_result_file
+        self.page_descriptions["wee_by_opportunities"] = "WEE By Opportunities Analysis Map"
+        start_str = model.get("execution_start_time", "")
+        end_str = model.get("execution_end_time", "")
+        # Create a new page for the indicator
+        title = "WEE by Opportunities Mask"
+        self.make_page(
+            title=title,
+            description_key="wee_by_opportunities",
+            current_page=current_page,
+        )
+        layer_uri = model.get("wee_by_opportunities_mask_result_file")
+        log_message(f"Adding {layer_uri} to map")
+        if layer_uri:
+            layer = QgsRasterLayer(layer_uri, title)
+
+            if not layer.isValid():
+                log_message(
+                    f"Layer {layer_uri} is invalid and cannot be added.",
+                    tag="Geest",
+                )
+            else:
+                # Add the layer to the project temporarily for rendering
+                QgsProject.instance().addMapLayer(layer, False)
+                self.temp_layers.append(layer)
+            # Build layers list: raster layer + study area outline (if available)
+            layers = [layer]
+            if self.study_area_layer:
+                layers.append(self.study_area_layer)
+            crs = layer.crs()
+            self.make_map(
+                layers=layers,
+                current_page=current_page,
+                crs=crs,
+            )
+        # Add footer for the indicator page
+        self.add_header_and_footer(page_number=current_page)
+
+        # Increment the page counter
+        current_page += 1
 
         for dimension in model.get("dimensions", []):
             dim_name = dimension.get("name", "")
