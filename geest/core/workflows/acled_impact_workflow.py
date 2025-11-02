@@ -325,22 +325,15 @@ class AcledImpactWorkflow(WorkflowBase):
             log_message("Layer failed to load!")
             return
 
-        # Step 2: Create a memory layer to store the result
-        result_layer = QgsVectorLayer("Polygon", "result_layer", "memory")
-        result_layer.setCrs(self.target_crs)
-        provider = result_layer.dataProvider()
-
-        # Step 3: Add a field to store the minimum value (lower number = higher rank)
-        provider.addAttributes([QgsField("min_value", QVariant.Int)])
-        result_layer.updateFields()
-        # Step 4: Perform the dissolve operation to separate disjoint polygons
+        # Step 2: Perform the dissolve operation to separate disjoint polygons
+        dissolve_output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_dissolve.shp")
         dissolve = processing.run(  # type: ignore[index]
             "native:dissolve",
             {
                 "INPUT": input_layer,
                 "FIELD": ["value"],
                 "SEPARATE_DISJOINT": True,
-                "OUTPUT": "TEMPORARY_OUTPUT",
+                "OUTPUT": dissolve_output_path,
             },
         )["OUTPUT"]
         log_message(
@@ -348,53 +341,60 @@ class AcledImpactWorkflow(WorkflowBase):
             tag="Geest",
             level=Qgis.Info,
         )
-        # Step 5: Perform the union to get all overlapping areas
+        # Step 3: Perform the union to get all overlapping areas
+        union_output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_union.shp")
         union = processing.run(  # type: ignore[index]
             "qgis:union",
             {
-                "INPUT": dissolve,
-                "OUTPUT": "memory:",
+                "INPUT": dissolve_output_path,
+                "OUTPUT": union_output_path,
             },
         )["OUTPUT"]
-        log_message(f"Input layer fields: {[field.name() for field in input_layer.fields()]}")
+        log_message(f"Processing returned an object of type: {type(union)}")
+        if type(union) is str:
+            log_message(f"Union output is a file path: {union}")
+            union = QgsVectorLayer(union, "union_layer", "ogr")
+        log_message(f"Input layer fields: {[field.name() for field in union.fields()]}")
         # Also print the field types
-        log_message(f"Input layer field types: {[field.typeName() for field in input_layer.fields()]}")
-        # Step 6: Iterate through the unioned features to assign the minimum value in overlapping areas
+        log_message(f"Input layer field types: {[field.typeName() for field in union.fields()]}")
+        # Step 4: Iterate through the unioned features to assign the minimum value in overlapping areas
         unique_geometries = {}
 
         for feature in union.getFeatures():
             geom = feature.geometry().asWkt()
             attrs = feature.attributes()  # Use geometry as a key to identify unique areas
-            value_1 = attrs[input_layer.fields().indexFromName("value")]
-            value_2 = attrs[input_layer.fields().indexFromName("value_2")]  # This comes from the unioned layer
-
-            # Assign the minimum value to the overlapping area
-            min_value = min(value_1, value_2)
+            value = attrs[union.fields().indexFromName("value")]
 
             log_message(
-                f"Processing feature with min value: {min_value}",
-                tag="Geest",
-                level=Qgis.Info,
+                f"Processing feature with min value: {value}",
             )
 
             # Check if this geometry is already in the dictionary
             if geom in unique_geometries:
                 # If it exists, update only if the new min_value is lower
-                if min_value < unique_geometries[geom].attributes()[0]:
-                    unique_geometries[geom].setAttribute(0, min_value)
+                if value < unique_geometries[geom].attributes()[0]:
+                    unique_geometries[geom].setAttribute(0, value)
             else:
                 # Add new unique geometry with the min_value attribute
                 new_feature = QgsFeature()
                 new_feature.setGeometry(feature.geometry())
-                new_feature.setAttributes([min_value])
+                new_feature.setAttributes([value])
                 unique_geometries[geom] = new_feature
 
-        # Add the filtered features to the result layer
+        # Step 5: Create a memory layer to store the result
+        result_layer = QgsVectorLayer("Polygon", "result_layer", "memory")
+        result_layer.setCrs(self.target_crs)
+        provider = result_layer.dataProvider()
+
+        # Step 6: Add a field to store the minimum value (lower number = higher rank)
+        provider.addAttributes([QgsField("min_value", QVariant.Int)])
+        result_layer.updateFields()
+        # Step 7: Add the filtered features to the result layer
         for unique_feature in unique_geometries.values():
             provider.addFeature(unique_feature)
 
         full_output_filepath = os.path.join(self.workflow_directory, f"{self.layer_id}_final.shp")
-        # Step 7: Save the result layer to the specified output shapefile
+        # Step 8: Save the result layer to the specified output shapefile
         error = QgsVectorFileWriter.writeAsVectorFormat(
             result_layer,
             full_output_filepath,
