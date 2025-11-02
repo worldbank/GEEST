@@ -13,6 +13,7 @@ from qgis.core import (
     QgsRasterLayer,
     QgsSimpleFillSymbolLayer,
     QgsUnitTypes,
+    QgsVectorLayer,
 )
 from qgis.PyQt.QtGui import QColor, QFont
 
@@ -27,13 +28,13 @@ class AnalysisReport(BaseReport):
 
     """
 
-    def __init__(self, model_path: str, report_name="Geest Analysis Report"):
+    def __init__(self, model_path: str, working_directory: str = None, report_name="Geest Analysis Report"):
         """
         Initialize the report.
 
         Parameters:
-            layer_input (str): A file path to the GeoPackage (from which the
-                layer "study_area_creation_status" and other layers will be loaded).
+            model_path (str): Path to the model JSON file.
+            working_directory (str): Path to the working directory containing the study area GeoPackage.
             report_name (str): The title to use for the report.
 
         Raises:
@@ -45,7 +46,14 @@ class AnalysisReport(BaseReport):
 
         self.report_name = report_name
         self.model_path = model_path
+        self.working_directory = working_directory
         self.temp_layers = []  # Track layers added to project for cleanup
+        self.study_area_layer = None  # Will hold the study area outline layer
+
+        # Load the study area outline layer if working_directory is provided
+        if working_directory:
+            self._load_study_area_layer()
+
         self.page_descriptions[
             "analysis_summary"
         ] = """
@@ -61,6 +69,31 @@ class AnalysisReport(BaseReport):
             if layer:
                 QgsProject.instance().removeMapLayer(layer.id())
                 log_message(f"Removed temporary layer '{layer.name()}' from project.")
+
+    def _load_study_area_layer(self):
+        """
+        Load the study area outline layer from the GeoPackage.
+        """
+        import os
+
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        if not os.path.exists(gpkg_path):
+            log_message(f"Study area GeoPackage not found at {gpkg_path}")
+            return
+
+        # Try to load study_area_clip_polygons first, fall back to study_area_polygons
+        for layer_name in ["study_area_clip_polygons", "study_area_polygons"]:
+            uri = f"{gpkg_path}|layername={layer_name}"
+            layer = QgsVectorLayer(uri, f"Study Area ({layer_name})", "ogr")
+            if layer.isValid():
+                self.study_area_layer = layer
+                # Add to project temporarily for rendering
+                QgsProject.instance().addMapLayer(layer, False)
+                self.temp_layers.append(layer)
+                log_message(f"Loaded study area outline from {layer_name}")
+                break
+            else:
+                log_message(f"Could not load study area layer: {layer_name}")
 
     def create_layout(self):
         """
@@ -162,7 +195,10 @@ class AnalysisReport(BaseReport):
                             # Add the layer to the project temporarily for rendering
                             QgsProject.instance().addMapLayer(layer, False)
                             self.temp_layers.append(layer)
+                        # Build layers list: raster layer + study area outline (if available)
                         layers = [layer]
+                        if self.study_area_layer:
+                            layers.append(self.study_area_layer)
                         crs = layer.crs()
                         self.make_map(
                             layers=layers,
