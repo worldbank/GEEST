@@ -220,6 +220,7 @@ class AcledImpactWorkflow(WorkflowBase):
         buffer_distances = layer.uniqueValues(layer.fields().indexFromName("buffer_m"))
         # Iterate the unique distances and buffer each set of features separately
         log_message(f"Buffering features in {layer.name()}")
+        output_layer = None
         for distance in buffer_distances:
             log_message(f"Buffering features with buffer_m = {distance}")
             subset_expression = f'"buffer_m" = {distance}'
@@ -241,11 +242,14 @@ class AcledImpactWorkflow(WorkflowBase):
                     "OUTPUT": "memory:",
                 },
             )["OUTPUT"]
+            if output_layer is None:
+                output_layer = buffered_subset
+                continue
             # Append the buffered subset back to the main layer
-            layer = processing.run(  # type: ignore[index]
+            output_layer = processing.run(  # type: ignore[index]
                 "native:mergevectorlayers",
                 {
-                    "LAYERS": [layer, buffered_subset],
+                    "LAYERS": [output_layer, buffered_subset],
                     "OUTPUT": "memory:",
                 },
             )["OUTPUT"]
@@ -255,64 +259,15 @@ class AcledImpactWorkflow(WorkflowBase):
         output_path = os.path.join(self.workflow_directory, f"{output_name}.shp")
         log_message(f"Writing buffered layer to {output_path}")
         error = QgsVectorFileWriter.writeAsVectorFormat(
-            layer,
+            output_layer,
             output_path,
             "UTF-8",
             layer.crs(),
             "ESRI Shapefile",
         )
         log_message(f"Buffer result: {error}")
-        del layer  # Free memory
+        del output_layer  # Free memory
         return QgsVectorLayer(output_path, output_name, "ogr")
-
-    def _assign_scores(self, layer: QgsVectorLayer) -> QgsVectorLayer:
-        """
-        Assign values to buffered polygons based on their event_type.
-
-        Args:
-            layer_path (str): The buffered features layer.
-
-        Returns:
-            QgsVectorLayer: A new layer with a "value" field containing the assigned scores.
-        """
-
-        log_message(f"Assigning scores to {layer.name()}")
-        # Define scoring categories based on event_type
-        # See https://github.com/worldbank/GEEST/issues/71
-        # For where these lookups are specified
-        event_scores = {
-            "Battles": 0,
-            "Explosions/Remote violence": 1,
-            "Violence against civilians": 2,
-            "Protests": 4,
-            "Riots": 4,
-        }
-        buffer_distances = {
-            "Battles": 5000,
-            "Explosions/Remote violence": 5000,
-            "Violence against civilians": 2000,
-            "Protests": 1000,
-            "Riots": 2000,
-        }
-
-        # Create a new field in the layer for the scores
-        layer.startEditing()
-        layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
-        layer.dataProvider().addAttributes([QgsField("buffer_m", QVariant.Int)])
-        layer.updateFields()
-
-        # Assign scores based on event_type
-        for feature in layer.getFeatures():  # type: ignore
-            event_type = feature["event_type"]
-            score = event_scores.get(event_type, 5)
-            buffer_m = buffer_distances.get(event_type, 0)
-            feature.setAttribute("value", score)
-            feature.setAttribute("buffer_m", buffer_m)
-            layer.updateFeature(feature)
-
-        layer.commitChanges()
-
-        return layer
 
     def _overlay_analysis(self, input_layer):
         """
@@ -401,7 +356,9 @@ class AcledImpactWorkflow(WorkflowBase):
                 "OUTPUT": "memory:",
             },
         )["OUTPUT"]
-        log_message(f"Unioned areas have {len(dissolve)} features")
+        log_message(f"Input layer fields: {[field.name() for field in input_layer.fields()]}")
+        # Also print the field types
+        log_message(f"Input layer field types: {[field.typeName() for field in input_layer.fields()]}")
         # Step 6: Iterate through the unioned features to assign the minimum value in overlapping areas
         unique_geometries = {}
 
