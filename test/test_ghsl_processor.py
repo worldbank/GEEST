@@ -74,7 +74,6 @@ class TestGHSLProcessor(unittest.TestCase):
             self.assertTrue(os.path.exists(output_path))
             self.assertTrue(output_path.endswith("_test_classified.tif"))
 
-    @unittest.expectedFailure  # Works locally but not in CI due to GDAL version
     def test_clean_raster_for_polygonization(self):
         # Test raster cleaning for polygonization
         if not self.processor:
