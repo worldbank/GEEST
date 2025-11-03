@@ -6,6 +6,7 @@
   inputs.geospatial.url = "github:imincik/geospatial-nix.repo";
   inputs.nixpkgs.follows = "geospatial/nixpkgs";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  # inputs.timvim.url = "github:timlinux/timvim";
 
   outputs =
     {
@@ -88,94 +89,81 @@
 
       devShells.${system}.default = pkgs.mkShell {
         packages = [
+
+          #timvim.packages.${pkgs.system}.default
+          qgisWithExtras
           pkgs.actionlint # for checking gh actions
           pkgs.bandit
           pkgs.bearer
           pkgs.chafa
+          pkgs.nixfmt-rfc-style
           pkgs.codeql
           pkgs.ffmpeg
-          pkgs.glogg
           pkgs.gdb
           pkgs.git
+          pkgs.minio-client # for grabbing ookla data
+          pkgs.glogg
           pkgs.glow # terminal markdown viewer
           pkgs.gource # Software version control visualization
-          pkgs.gum
           pkgs.gum # UX for TUIs
           pkgs.isort
           pkgs.jq
           pkgs.libsForQt5.kcachegrind
+          pkgs.libsForQt5.qt5.qtpositioning
+          pkgs.luaPackages.luacheck
           pkgs.markdownlint-cli
           pkgs.nixfmt-rfc-style
-          pkgs.nodePackages.cspell
           pkgs.pre-commit
+          pkgs.nixfmt-rfc-style
           pkgs.privoxy
           pkgs.pyprof2calltree # needed to covert cprofile call trees into a format kcachegrind can read
           pkgs.python3
-          pkgs.qgis
+          # Python development essentials
+          pkgs.pyright
           pkgs.qt5.full # so we get designer
           pkgs.qt5.qtbase
           pkgs.qt5.qtlocation
           pkgs.qt5.qtquickcontrols2
           pkgs.qt5.qtsvg
           pkgs.qt5.qttools
+          pkgs.rpl
           pkgs.shellcheck
           pkgs.shfmt
-          pkgs.neovim
-          pkgs.nodejs_20 # needed for copilot in neovim
+          pkgs.stylua
           pkgs.virtualenv
           pkgs.vscode
           pkgs.yamlfmt
           pkgs.yamllint
-          pkgs.rpl
-          pkgs.actionlint # for checking gh actions
-          pkgs.bearer
           postgresWithPostGIS
           pkgs.nodePackages.cspell
           (pkgs.python3.withPackages (ps: [
-            ps.python
-            ps.pip
-            ps.setuptools
-            ps.wheel
-            ps.pytest
-            ps.pytest-qt
-            ps.black
-            ps.click # needed by black
-            ps.flake8
-            ps.mypy
-            ps.jsonschema
-            ps.pandas
-            ps.odfpy
-            ps.psutil
-            ps.httpx
-            ps.toml
-            ps.typer
-            ps.paver
-            # For autocompletion in vscode
-            ps.pyqt5-stubs
-            ps.debugpy
-            ps.numpy
-            ps.gdal
-            ps.toml
-            ps.typer
-            ps.snakeviz # For visualising cprofiler outputs
             # Add these for SQL linting/formatting:
-            ps.sqlfmt
-            ps.pip
-            ps.setuptools
-            ps.wheel
-            ps.pytest
-            ps.pytest-qt
             ps.black
             ps.click # needed by black
+            ps.debugpy
+            ps.docformatter
             ps.flake8
-            ps.mypy
-            ps.jsonschema
-            ps.pandas
-            ps.odfpy
-            ps.psutil
+            ps.gdal
             ps.httpx
+            ps.jsonschema
+            ps.mypy
+            ps.numpy
+            ps.odfpy
+            ps.pandas
+            ps.paver
+            ps.pip
+            ps.psutil
+            ps.pyqt5-stubs
+            ps.pytest
+            ps.pytest-qt
+            ps.python
+            ps.rich
+            ps.setuptools
+            ps.snakeviz # For visualising cprofiler outputs
+            ps.sqlfmt
             ps.toml
             ps.typer
+            ps.wheel
             # For autocompletion in vscode
             ps.pyqt5-stubs
 
@@ -185,75 +173,75 @@
             ps.virtualenv
             # Those are dependencies that we would like to use from nixpkgs, which will
             # add them to PYTHONPATH and thus make them accessible from within the venv.
-            ps.debugpy
-            ps.numpy
-            ps.gdal
-            ps.pip
             ps.pyqtwebengine
           ]))
 
         ];
         shellHook = ''
-          unset SOURCE_DATE_EPOCH
+            unset SOURCE_DATE_EPOCH
 
-          # Create a virtual environment in .venv if it doesn't exist
-           if [ ! -d ".venv" ]; then
-            python -m venv .venv
-          fi
-
-          # Activate the virtual environment
-          source .venv/bin/activate
-
-          # Upgrade pip and install packages from requirements.txt if it exists
-          pip install --upgrade pip > /dev/null
-          if [ -f requirements.txt ]; then
-            echo "Installing Python requirements from requirements.txt..."
-            pip install -r requirements.txt > .pip-install.log 2>&1
-            if [ $? -ne 0 ]; then
-              echo "❌ Pip install failed. See .pip-install.log for details."
+            # Create a virtual environment in .venv if it doesn't exist
+             if [ ! -d ".venv" ]; then
+              python -m venv .venv
             fi
-          else
-            echo "No requirements.txt found, skipping pip install."
-          fi
-          if [ -f requirements-dev.txt ]; then
-            echo "Installing Python requirements from requirements-dev.txt..."
-            pip install -r requirements-dev.txt > .pip-install.log 2>&1
-            if [ $? -ne 0 ]; then
-              echo "❌ Pip install failed. See .pip-install.log for details."
+
+            # Activate the virtual environment
+            source .venv/bin/activate
+
+            # Upgrade pip and install packages from requirements.txt if it exists
+            pip install --upgrade pip > /dev/null
+            if [ -f requirements.txt ]; then
+              echo "Installing Python requirements from requirements.txt..."
+              pip install -r requirements.txt > .pip-install.log 2>&1
+              if [ $? -ne 0 ]; then
+                echo "❌ Pip install failed. See .pip-install.log for details."
+              fi
+            else
+              echo "No requirements.txt found, skipping pip install."
             fi
-          else
-            echo "No requirements-dev.txt found, skipping pip install."
-          fi
+            if [ -f requirements-dev.txt ]; then
+              echo "Installing Python requirements from requirements-dev.txt..."
+              pip install -r requirements-dev.txt > .pip-install.log 2>&1
+              if [ $? -ne 0 ]; then
+                echo "❌ Pip install failed. See .pip-install.log for details."
+              fi
+            else
+              echo "No requirements-dev.txt found, skipping pip install."
+            fi
 
-          echo "Setting up and running pre-commit hooks..."
-          echo "-------------------------------------"
-          pre-commit clean > /dev/null
-          pre-commit install --install-hooks > /dev/null
-          pre-commit run --all-files || true
+            echo "Setting up and running pre-commit hooks..."
+            echo "-------------------------------------"
+            pre-commit clean > /dev/null
+            pre-commit install --install-hooks > /dev/null
+            pre-commit run --all-files || true
 
-          export PATH="$(pwd)/.nvim:$PATH"
-          echo ""
-          echo "-----------------------"
-          echo "🌈 Your Dev Environment is prepared."
-          echo "To run QGIS with your profile, use one of these commands:"
-          echo ""
-          echo "  scripts/run-qgis.sh"
-          echo "  scripts/run-qgis-ltr.sh"
-          echo "  scripts/run-qgis-master.sh"
-          echo ""
-          echo "📒 Note:"
-          echo "-----------------------"
-          echo "We provide a ready-to-use"
-          echo "VSCode environment which you"
-          echo "can start like this:"
-          echo ""
-          echo "./scripts/vscode.sh"
-          echo ""
-          echo "We also provide a ready to use neovim setup:"
-          echo ""
-          echo "🎯 You can start Neovim with GEEST configuration:"
-          echo "📝 'vim' (which is an alias to) -> ./.nvim/vim"
-          echo ""
+            export PATH="$(pwd)/.nvim:$PATH"
+          # Add PyQt and QGIS to python path for neovim
+          pythonWithPackages="${
+            pkgs.python3.withPackages (ps: [
+              ps.pyqt5-stubs
+              ps.pyqtwebengine
+            ])
+          }"
+          export PYTHONPATH="$pythonWithPackages/lib/python*/site-packages:${qgisWithExtras}/share/qgis/python:$PYTHONPATH"
+            echo ""
+            echo "-----------------------"
+            echo "🌈 Your Dev Environment is prepared."
+            echo "To run QGIS with your profile, use one of these commands:"
+            echo ""
+            echo "  scripts/run-qgis.sh"
+            echo "  scripts/run-qgis-ltr.sh"
+            echo "  scripts/run-qgis-master.sh"
+            echo ""
+            echo "📒 Note:"
+            echo "-----------------------"
+            echo "We provide a ready-to-use"
+            echo "VSCode environment which you"
+            echo "can start like this:"
+            echo ""
+            echo "./scripts/vscode.sh"
+            echo ""
+            echo ""
         '';
       };
     };

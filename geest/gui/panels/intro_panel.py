@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget
 from qgis.core import Qgis  # noqa F401
 from qgis.PyQt.QtCore import pyqtSignal
@@ -49,8 +50,6 @@ class IntroPanel(FORM_CLASS, QWidget):
         # Scale the font size to fit the text in the available space
         # log_message(f"Intro Label Width: {self.intro_label.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases
-        font_size = int(
-            linear_interpolation(self.intro_label.rect().width(), 12, 16, 400, 600)
-        )
+        font_size = int(linear_interpolation(self.intro_label.rect().width(), 12, 16, 400, 600))
         # log_message(f"Intro Label Font Size: {font_size}")
         self.intro_label.setFont(QFont("Arial", font_size))

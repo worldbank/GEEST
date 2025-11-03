@@ -19,6 +19,11 @@
   "python.linting.pylintEnabled": true,
   "python.editor.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/geest"
+  ],
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
   "[nix]": {
     "editor.defaultFormatter": "brettm12345.nixfmt",
     "editor.formatOnSave": true

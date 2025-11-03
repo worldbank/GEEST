@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import tempfile
 import unittest
@@ -19,9 +20,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         # Mock QgsFeature
         # Create an actual QgsFeature
         self.feature = QgsFeature()
-        self.feature.setGeometry(
-            QgsFeature().geometry().fromPointXY(QgsPointXY(643067.042, 3955294.999))
-        )
+        self.feature.setGeometry(QgsFeature().geometry().fromPointXY(QgsPointXY(643067.042, 3955294.999)))
 
         # Create an actual CRS
         self.crs = QgsCoordinateReferenceSystem("EPSG:32632")
@@ -36,9 +35,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
         self.mode = "distance"
         self.values = [1000, 2000, 3000]  # Distances in meters
         self.working_directory = tempfile.mkdtemp()
-        self.isochrone_layer_path = os.path.join(
-            self.working_directory, "isochrone_layer.gpkg"
-        )
+        self.isochrone_layer_path = os.path.join(self.working_directory, "isochrone_layer.gpkg")
         # self.addCleanup(lambda: os.rmdir(self.working_directory))
         print(f"Native Network Analysis Working directory: {self.working_directory}")
         # Create an instance of the processor
@@ -99,7 +96,7 @@ class TestNativeNetworkAnalysisProcessor(unittest.TestCase):
                 working_directory=self.working_directory,
             )
 
-    @unittest.expectedFailure  # works on my local, fails on GH actions
+    @unittest.expectedFailure  # Works locally but not in CI
     def test_calculate_network(self):
         # Ensure the network layer exists
         self.assertTrue(os.path.exists(self.network_layer_path))

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import unquote
 
@@ -27,19 +28,22 @@ class SinglePointBufferWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_single_buffer_point"
 
@@ -49,9 +53,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         provider_type = "ogr"
         if not layer_source:
             layer_source = self.attributes.get("single_buffer_point_layer_source", None)
-            provider_type = self.attributes.get(
-                "single_buffer_point_layer_provider_type", "ogr"
-            )
+            provider_type = self.attributes.get("single_buffer_point_layer_provider_type", "ogr")
         if not layer_source:
             log_message(
                 "single_buffer_point_layer_shapefile not found",
@@ -64,14 +66,11 @@ class SinglePointBufferWorkflow(WorkflowBase):
             log_message("single_buffer_point_layer not valid", level=Qgis.Critical)
             log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
             return False
-        default_buffer_distance = int(
-            self.attributes.get("default_single_buffer_distance", "5000")
-        )
-        self.buffer_distance = int(
-            self.attributes.get(
-                "single_buffer_point_layer_distance", default_buffer_distance
-            )
-        )
+        if analysis_scale == "local":
+            default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "1000"))
+        else:
+            default_buffer_distance = int(self.attributes.get("default_single_buffer_distance", "3000"))
+        self.buffer_distance = int(self.attributes.get("single_buffer_point_layer_distance", default_buffer_distance))
 
     def _process_features_for_area(
         self,
@@ -95,9 +94,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
         log_message(f"{self.workflow_name}  Processing Started")
 
         # Step 1: Buffer the selected features
-        buffered_layer = self._buffer_features(
-            area_features, f"{self.layer_id}_buffered_{index}"
-        )
+        buffered_layer = self._buffer_features(area_features, f"{self.layer_id}_buffered_{index}")
 
         # Step 2: Assign values to the buffered polygons
         scored_layer = self._assign_scores(buffered_layer)
@@ -107,9 +104,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
 
         return raster_output
 
-    def _buffer_features(
-        self, layer: QgsVectorLayer, output_name: str
-    ) -> QgsVectorLayer:
+    def _buffer_features(self, layer: QgsVectorLayer, output_name: str) -> QgsVectorLayer:
         """
         Buffer the input features by the buffer_distance km.
 
@@ -125,7 +120,7 @@ class SinglePointBufferWorkflow(WorkflowBase):
             "native:buffer",
             {
                 "INPUT": layer,
-                "DISTANCE": self.buffer_distance,  # 5 km buffer
+                "DISTANCE": self.buffer_distance,
                 "SEGMENTS": 15,
                 "DISSOLVE": True,
                 "OUTPUT": output_path,

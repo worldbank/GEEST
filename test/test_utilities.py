@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Test suite for utilities.py
 
@@ -76,9 +77,7 @@ class TestUtilities(unittest.TestCase):
             mock_text_color.lightness.return_value = 90  # Light
             mock_palette.Window = 0
             mock_palette.WindowText = 1
-            mock_palette.color.side_effect = lambda index: (
-                mock_window_color if index == 0 else mock_text_color
-            )
+            mock_palette.color.side_effect = lambda index: (mock_window_color if index == 0 else mock_text_color)
             mock_app_instance.palette.return_value = mock_palette
             self.assertTrue(is_qgis_dark_theme_active())
 
@@ -282,9 +281,7 @@ class TestUtilities(unittest.TestCase):
     @patch("geest.utilities.get_free_memory_mb")
     @patch("geest.utilities.log_message")
     @patch("datetime.datetime")
-    def test_log_layer_count(
-        self, mock_datetime, mock_log_message, mock_free_memory, mock_project
-    ):
+    def test_log_layer_count(self, mock_datetime, mock_log_message, mock_free_memory, mock_project):
         """Test log_layer_count function."""
         # Setup mocks
         mock_project.instance.return_value.mapLayers.return_value = {
@@ -297,12 +294,8 @@ class TestUtilities(unittest.TestCase):
         # Test logging
         with patch("builtins.open", unittest.mock.mock_open()) as mock_file:
             log_layer_count()
-            expected_log = (
-                "2023-01-01 12:00:00 - Layer count: 2 - Free memory: 100.00 MB\n"
-            )
-            mock_log_message.assert_called_once_with(
-                expected_log, level=Qgis.Info, tag="LayerCount"
-            )
+            expected_log = "2023-01-01 12:00:00 - Layer count: 2 - Free memory: 100.00 MB\n"
+            mock_log_message.assert_called_once_with(expected_log, level=Qgis.Info, tag="LayerCount")
             mock_file().write.assert_called_once_with(expected_log)
 
     @patch("qgis.PyQt.uic.loadUiType")
@@ -373,9 +366,7 @@ class TestUtilities(unittest.TestCase):
     @patch("geest.utilities.is_qgis_dark_theme_active")
     @patch("geest.utilities.resources_path")
     @patch("qgis.PyQt.QtGui.QPixmap")
-    def test_theme_background_image(
-        self, mock_qpixmap, mock_resources_path, mock_is_dark
-    ):
+    def test_theme_background_image(self, mock_qpixmap, mock_resources_path, mock_is_dark):
         """Test theme_background_image function."""
         # Test dark theme
         mock_is_dark.return_value = True

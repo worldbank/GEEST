@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QLineEdit, QRadioButton
 
@@ -51,13 +52,9 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             self.travel_increments_layout.addWidget(self.increments_label)
             self.travel_increments_layout.addWidget(self.increments_input)
             if self.attributes.get("multi_buffer_travel_distances", False):
-                self.increments_input.setText(
-                    self.attributes["multi_buffer_travel_distances"]
-                )
+                self.increments_input.setText(self.attributes["multi_buffer_travel_distances"])
             else:
-                self.increments_input.setText(
-                    self.attributes.get("default_multi_buffer_distances", "")
-                )
+                self.increments_input.setText(self.attributes.get("default_multi_buffer_distances", ""))
 
             # Add all layouts to the main layout
             self.internal_layout.addWidget(self.travel_mode_group)
@@ -96,9 +93,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
         self.increments_input.setStyleSheet("")
 
         if not input_text:
-            tooltip_text = (
-                "Input cannot be empty. Please enter a comma-separated list of numbers."
-            )
+            tooltip_text = "Input cannot be empty. Please enter a comma-separated list of numbers."
             self.increments_input.setToolTip(tooltip_text)
             self.increments_input.setStyleSheet("border: 1px solid red")
             return False
@@ -123,9 +118,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
 
             # Check for values greater than 60 mins (3600s) if in time mode
             if self.time_radio.isChecked() and any(value > 60 for value in values):
-                tooltip_text = (
-                    "Values greater than 60 minutes are not allowed for time units."
-                )
+                tooltip_text = "Values greater than 60 minutes are not allowed for time units."
                 self.increments_input.setToolTip(tooltip_text)
                 self.increments_input.setStyleSheet("border: 1px solid red")
                 return False
@@ -136,9 +129,7 @@ class MultiBufferConfigurationWidget(BaseConfigurationWidget):
             return True
 
         except ValueError:
-            tooltip_text = (
-                "Invalid entry. Please enter a comma-separated list of numbers."
-            )
+            tooltip_text = "Invalid entry. Please enter a comma-separated list of numbers."
             self.increments_input.setToolTip(tooltip_text)
             self.increments_input.setStyleSheet("border: 1px solid red")
             return False

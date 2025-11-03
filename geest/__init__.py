@@ -1,6 +1,6 @@
-# coding=utf-8
-
+# -*- coding: utf-8 -*-
 """Init for Geest."""
+from __future__ import annotations
 
 __copyright__ = "Copyright 2024, Tim Sutton"
 __license__ = "GPL version 3"
@@ -17,7 +17,6 @@ __revision__ = "$Format:%H$"
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # ---------------------------------------------------------------------
-
 import cProfile
 import datetime
 import io
@@ -40,6 +39,7 @@ from qgis.PyQt.QtWidgets import (
     QDialog,
     QDockWidget,
     QFileDialog,
+    QLabel,
     QMessageBox,
     QPushButton,
     QVBoxLayout,
@@ -75,6 +75,7 @@ log_message(f"Geest Version: {version}")
 log_message(f"Logging output to: {log_file_path}", force=True)
 log_message(f"log_path_env: {log_path_env}", force=True)
 log_message("»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»", force=True)
+log_message("QGIS Version: {}".format(Qgis.QGIS_VERSION), force=True)
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
@@ -83,15 +84,33 @@ def classFactory(iface):  # pylint: disable=missing-function-docstring
 
 class GeestPlugin:
     """
-    GEEST 2 plugin interface
+    GEEST 2 plugin interface.
+
+    This class provides the main interface for the GEEST (Gender Enabling Environments Spatial Tool)
+    plugin for QGIS. It handles the plugin initialization, GUI setup, debugging capabilities,
+    profiling tools, and various development utilities.
+
+    Attributes:
+        iface: The QGIS interface object
+        run_action: Main plugin action for showing/hiding the dock widget
+        debug_action: Action for entering debug mode (developer mode only)
+        options_factory: Factory for plugin options
+        dock_widget: Main plugin dock widget
+        profiler: cProfile profiler instance
+        profiler_action: Action for starting/stopping profiling
+        save_profile_action: Action for saving profiling results
+        is_profiling: Boolean flag indicating if profiling is active
     """
 
     project_changed = pyqtSignal()
 
+    # Class constants
+    DEBUG_PORT = 9000  # Port for debugpy connection
+
     def __init__(self, iface):
         self.iface = iface
-        self.run_action = None  # type: Optional[QAction]
-        self.debug_action = None  # type: Optional[QAction]
+        self.run_action = None
+        self.debug_action = None
         self.options_factory = None
         self.dock_widget = None
         # Initialize profiler attributes
@@ -99,6 +118,52 @@ class GeestPlugin:
         self.profiler_action = None
         self.save_profile_action = None
         self.is_profiling = False
+
+    def get_test_directory(self):
+        """
+        Get the test directory path from GEEST_TEST_DIR environment variable.
+
+        This method exclusively uses the GEEST_TEST_DIR environment variable
+        (set by scripts/start_qgis.sh) to locate the test directory.
+
+        Returns:
+            str: Path to the test directory from environment variable
+
+        Raises:
+            ValueError: If GEEST_TEST_DIR is not set or points to invalid directory
+        """
+        import sys
+
+        # Get test directory from environment variable
+        env_test_dir = os.getenv("GEEST_TEST_DIR")
+
+        if not env_test_dir:
+            raise ValueError(
+                "GEEST_TEST_DIR environment variable is not set. "
+                "Please run QGIS using scripts/start_qgis.sh or scripts/start_qgis_ltr.sh"
+            )
+
+        if not os.path.exists(env_test_dir):
+            raise ValueError(f"Test directory does not exist: {env_test_dir}")
+
+        if not os.path.isdir(env_test_dir):
+            raise ValueError(f"GEEST_TEST_DIR is not a directory: {env_test_dir}")
+
+        # Verify it contains test files
+        try:
+            test_files = [f for f in os.listdir(env_test_dir) if f.startswith("test_") and f.endswith(".py")]
+            if not test_files:
+                raise ValueError(f"No test files found in {env_test_dir}")
+        except (OSError, PermissionError) as e:
+            raise ValueError(f"Cannot access test directory {env_test_dir}: {e}")
+
+        # Ensure it's in Python path for imports
+        if env_test_dir not in sys.path:
+            sys.path.insert(0, env_test_dir)
+            log_message(f"Added test directory to Python path: {env_test_dir}")
+
+        log_message(f"Using test directory: {env_test_dir}")
+        return env_test_dir
 
     def initGui(self):  # pylint: disable=missing-function-docstring
         """
@@ -149,9 +214,7 @@ class GeestPlugin:
 
         # Tabify the new dock before the first found dock widget, if available
         if existing_docks:
-            self.iface.mainWindow().tabifyDockWidget(
-                existing_docks[0], self.dock_widget
-            )
+            self.iface.mainWindow().tabifyDockWidget(existing_docks[0], self.dock_widget)
         else:
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
             legend_tab = self.iface.mainWindow().findChild(QApplication, "Legend")
@@ -163,23 +226,17 @@ class GeestPlugin:
         developer_mode = int(setting(key="developer_mode", default=0))
         if developer_mode:
             debug_icon = QIcon(resources_path("resources", "geest-debug.svg"))
-            self.debug_action = QAction(
-                debug_icon, "GEEST Debug Mode", self.iface.mainWindow()
-            )
+            self.debug_action = QAction(debug_icon, "GEEST Debug Mode", self.iface.mainWindow())
             self.debug_action.triggered.connect(self.debug)
             self.iface.addToolBarIcon(self.debug_action)
 
             tests_icon = QIcon(resources_path("resources", "run-tests.svg"))
-            self.tests_action = QAction(
-                tests_icon, "Run Tests", self.iface.mainWindow()
-            )
+            self.tests_action = QAction(tests_icon, "Run Tests", self.iface.mainWindow())
             self.tests_action.triggered.connect(self.run_tests)
             self.iface.addToolBarIcon(self.tests_action)
 
             single_test_icon = QIcon(resources_path("resources", "run-single-test.svg"))
-            self.single_test_action = QAction(
-                single_test_icon, "Run Single Test", self.iface.mainWindow()
-            )
+            self.single_test_action = QAction(single_test_icon, "Run Single Test", self.iface.mainWindow())
             self.single_test_action.triggered.connect(self.run_single_test)
             self.iface.addToolBarIcon(self.single_test_action)
 
@@ -229,9 +286,7 @@ class GeestPlugin:
                         shell.runCommand(
                             f'test_suite = test_loader.discover(start_dir="{test_dir}", pattern="test_*.py")'
                         )
-                        shell.runCommand(
-                            "test_runner = unittest.TextTestRunner(verbosity=2)"
-                        )
+                        shell.runCommand("test_runner = unittest.TextTestRunner(verbosity=2)")
                         shell.runCommand("test_runner.run(test_suite)")
                         # Unload test modules
                         shell.runCommand(
@@ -253,48 +308,108 @@ for module_name in list(sys.modules.keys()):
             self.pie_overlay = PieChartItem(self.iface.mapCanvas())
 
     def remove_map_canvas_items(self):
+        """Remove map canvas overlay items safely."""
         try:
             if self.label_overlay:
                 self.label_overlay.setCanvas(None)
                 self.label_overlay.deleteLater()
                 self.label_overlay = None
-        except Exception as e:  # nosec B110
-            del e
-            pass  # Cleanup code - acceptable to ignore exceptions
+        except (RuntimeError, AttributeError) as e:
+            # Handle cases where Qt objects may have been deleted
+            log_message(f"Warning during label overlay cleanup: {e}")
+            self.label_overlay = None
+
         try:
             if self.pie_overlay:
                 self.pie_overlay.setCanvas(None)
                 self.pie_overlay.deleteLater()
                 self.pie_overlay = None
-        except Exception as e:  # nosec B110
-            del e
-            pass  # Cleanup code - acceptable to ignore exceptions
+        except (RuntimeError, AttributeError) as e:
+            # Handle cases where Qt objects may have been deleted
+            log_message(f"Warning during pie overlay cleanup: {e}")
+            self.pie_overlay = None
 
     def run_single_test(self):
         """Prompt user to select a single test to run in the Python console."""
 
-        # Step 1: Discover all test cases
-        test_dir = "/home/timlinux/dev/python/GEEST/test"
-        loader = unittest.TestLoader()
-        suite = loader.discover(start_dir=test_dir, pattern="test_*.py")
+        # Step 1: Get test directory and discover test cases
+        try:
+            test_dir = self.get_test_directory()
+        except ValueError as e:
+            log_message(f"Test directory error: {e}")
+            self.display_information_message_box(title="Test Directory Error", message=str(e))
+            return
 
+        loader = unittest.TestLoader()
         test_names = []
-        for test_group in suite:
-            for test_case in test_group:
-                for test in test_case:
-                    test_names.append(
-                        test.id()
-                    )  # e.g., test_module.ClassName.test_method
+        broken_tests = []
+
+        try:
+            suite = loader.discover(start_dir=test_dir, pattern="test_*.py")
+
+            for test_group in suite:
+                for test_case in test_group:
+                    try:
+                        # Try to iterate through the test case
+                        for test in test_case:
+                            test_names.append(test.id())  # e.g., test_module.ClassName.test_method
+                    except TypeError as te:
+                        _ = te  # Ignore
+                        # This happens when test_case is a _FailedTest (not iterable)
+                        if hasattr(test_case, "id"):
+                            broken_test_id = test_case.id()
+                            broken_tests.append(broken_test_id)
+                            log_message(f"Failed test case (import error): {broken_test_id}")
+                        else:
+                            broken_test_name = f"Unknown test: {test_case}"
+                            broken_tests.append(broken_test_name)
+                            log_message(f"Failed test case (import error): {broken_test_name}")
+                        # Continue to see if other tests can be loaded
+                        continue
+
+        except (ImportError, AttributeError) as e:
+            log_message(f"Error discovering tests with unittest loader: {e}")
+            self.display_information_message_box(
+                title="Test Discovery Error",
+                message=f"Could not discover tests in {test_dir}.\n\nError: {e}\n\nThis usually means there are import errors in the test files.",
+            )
+            return
+
+        # Combine working and broken tests for display
+        all_test_options = []
+
+        # Add working tests
+        for test_name in test_names:
+            all_test_options.append(f"✅ {test_name}")
+
+        # Add broken tests
+        for broken_test in broken_tests:
+            all_test_options.append(f"❌ {broken_test} (Import Error)")
+
+        if not all_test_options:
+            self.display_information_message_box(
+                title="No Tests Found",
+                message=f"No test cases found in {test_dir}.\n\nPlease ensure test files follow the pattern 'test_*.py' and contain TestCase classes.",
+            )
+            return
 
         # Step 2: Create and show dialog
         class TestPickerDialog(QDialog):
             def __init__(self, tests, parent=None):
                 super().__init__(parent)
                 self.setWindowTitle("Select Test to Run")
+                self.setMinimumWidth(500)  # Make dialog wider to accommodate status icons
                 layout = QVBoxLayout(self)
+
+                # Add info label
+                info_label = QLabel("✅ = Working tests, ❌ = Tests with import errors")
+                info_label.setStyleSheet("color: #666; font-style: italic; padding: 5px;")
+                layout.addWidget(info_label)
+
                 self.combo = QComboBox()
                 self.combo.addItems(tests)
                 layout.addWidget(self.combo)
+
                 run_button = QPushButton("Run Test")
                 layout.addWidget(run_button)
                 run_button.clicked.connect(self.accept)
@@ -302,11 +417,35 @@ for module_name in list(sys.modules.keys()):
             def selected_test(self):
                 return self.combo.currentText()
 
-        dialog = TestPickerDialog(test_names, self.iface.mainWindow())
+        dialog = TestPickerDialog(all_test_options, self.iface.mainWindow())
         if not dialog.exec_():
             return  # Cancelled
 
         selected_test = dialog.selected_test()
+
+        # Check if the selected test is broken (has import error)
+        if selected_test.startswith("❌"):
+            # Try to import the test to get the specific error message
+            test_name = selected_test[2:].split(" (")[0]  # Remove icon and status
+            try:
+                __import__(test_name.rsplit(".", 1)[0])  # Import module part only
+            except Exception as import_error:
+                log_message(f"Import error for selected test {test_name}: {import_error}")
+                self.display_information_message_box(
+                    title="Import Error",
+                    message=f"Import error details for test {test_name}:\n\n{import_error}",
+                )
+                return
+            self.display_information_message_box(
+                title="Cannot Run Broken Test",
+                message=f"This test has import errors and cannot be run.\n\nTest: {selected_test}\n\nPlease fix the import issues in the test file first.",
+            )
+
+            return
+
+        # Remove the status indicator (✅) from the test name
+        if selected_test.startswith("✅ "):
+            selected_test = selected_test[2:]  # Remove "✅ " prefix
 
         # Step 3: Open Python console and inject run command
         main_window = self.iface.mainWindow()
@@ -322,12 +461,8 @@ for module_name in list(sys.modules.keys()):
                         shell.runCommand("")
                         shell.runCommand("import unittest, sys")
                         shell.runCommand(f"test_name = '{selected_test}'")
-                        shell.runCommand(
-                            "test_case = unittest.defaultTestLoader.loadTestsFromName(test_name)"
-                        )
-                        shell.runCommand(
-                            "runner = unittest.TextTestRunner(verbosity=2)"
-                        )
+                        shell.runCommand("test_case = unittest.defaultTestLoader.loadTestsFromName(test_name)")
+                        shell.runCommand("runner = unittest.TextTestRunner(verbosity=2)")
                         shell.runCommand("runner.run(test_case)")
                         shell.runCommand(
                             """
@@ -373,17 +508,13 @@ for module_name in list(sys.modules.keys()):
         """Set up cProfiler actions for developer mode."""
         # Create profiler start/stop action
         profile_icon = QIcon(resources_path("resources", "geest-start-profile.svg"))
-        self.profiler_action = QAction(
-            profile_icon, "Start Profiling", self.iface.mainWindow()
-        )
+        self.profiler_action = QAction(profile_icon, "Start Profiling", self.iface.mainWindow())
         self.profiler_action.triggered.connect(self.toggle_profiler)
         self.iface.addToolBarIcon(self.profiler_action)
 
         # Create save profile results action (initially disabled)
         save_icon = QIcon(resources_path("resources", "geest-save-profile.svg"))
-        self.save_profile_action = QAction(
-            save_icon, "Save Profile Results", self.iface.mainWindow()
-        )
+        self.save_profile_action = QAction(save_icon, "Save Profile Results", self.iface.mainWindow())
         self.save_profile_action.triggered.connect(self.save_profile_results)
         self.save_profile_action.setEnabled(False)
         self.iface.addToolBarIcon(self.save_profile_action)
@@ -437,9 +568,7 @@ for module_name in list(sys.modules.keys()):
         file_dialog = QFileDialog()
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
         file_dialog.setDefaultSuffix("prof")
-        file_dialog.setNameFilter(
-            "Profile Data (*.prof);;Stats Text (*.txt);;All Files (*.*)"
-        )
+        file_dialog.setNameFilter("Profile Data (*.prof);;Stats Text (*.txt);;All Files (*.*)")
 
         if file_dialog.exec_():
             selected_file = file_dialog.selectedFiles()[0]
@@ -459,12 +588,8 @@ for module_name in list(sys.modules.keys()):
                         stats.print_stats()
                     message = f"Profile stats saved to {selected_file}"
 
-                self.display_information_message_box(
-                    title="Profile Saved", message=message
-                )
-                log_message(
-                    f"💾 Profile data saved to {selected_file}", level=Qgis.Info
-                )
+                self.display_information_message_box(title="Profile Saved", message=message)
+                log_message(f"💾 Profile data saved to {selected_file}", level=Qgis.Info)
             except Exception as e:
                 self.display_information_message_box(
                     title="Error Saving Profile",
@@ -494,9 +619,7 @@ for module_name in list(sys.modules.keys()):
                         ],
                         check=False,
                     )  # nosec B603 B607
-                    log_message(
-                        f"Call tree data saved to {kcachegrind_file}", level=Qgis.Info
-                    )
+                    log_message(f"Call tree data saved to {kcachegrind_file}", level=Qgis.Info)
                 except Exception as e:
                     log_message(
                         f"Error converting profile to call tree: {e}",
@@ -510,12 +633,8 @@ for module_name in list(sys.modules.keys()):
             # Check if kcachegrind is available in the system path
             if which("kcachegrind"):
                 try:
-                    subprocess.Popen(
-                        ["kcachegrind", f"{selected_file}.calltree"]
-                    )  # nosec B603 B607
-                    log_message(
-                        "Opening call tree data in kcachegrind", level=Qgis.Info
-                    )
+                    subprocess.Popen(["kcachegrind", f"{selected_file}.calltree"])  # nosec B603 B607
+                    log_message("Opening call tree data in kcachegrind", level=Qgis.Info)
                 except Exception as e:
                     log_message(f"Error opening kcachegrind: {e}", level=Qgis.Critical)
             else:
@@ -545,13 +664,10 @@ for module_name in list(sys.modules.keys()):
 
         # Disconnect the project changed signal
         try:
-            # This was giving an error on Carlina's mac
-            QgsProject.instance().readProject.disconnect(
-                self.dock_widget.qgis_project_changed
-            )
-        except Exception as e:  # nosec B110
-            del e
-            pass  # Cleanup code - acceptable to ignore exceptions
+            QgsProject.instance().readProject.disconnect(self.dock_widget.qgis_project_changed)
+        except (TypeError, RuntimeError) as e:
+            # Handle cases where signal may already be disconnected or Qt objects deleted
+            log_message(f"Warning during signal disconnection: {e}")
 
         # Remove toolbar icons and clean up
         if self.run_action:
@@ -603,10 +719,7 @@ for module_name in list(sys.modules.keys()):
             try:
                 import debugpy
 
-                if (
-                    hasattr(debugpy, "is_client_connected")  # noqa F841
-                    and debugpy.is_client_connected()  # noqa F841
-                ):
+                if hasattr(debugpy, "is_client_connected") and debugpy.is_client_connected():  # noqa F841  # noqa F841
                     log_message("Closing debugpy connection via API")
                     debugpy.disconnect()
             except (ImportError, AttributeError) as e:
@@ -621,7 +734,7 @@ for module_name in list(sys.modules.keys()):
 
             # Look for connections in any state, not just LISTEN
             for conn in psutil.net_connections(kind="tcp"):
-                if conn.laddr.port == 9000:
+                if conn.laddr.port == self.DEBUG_PORT:
                     try:
                         process = psutil.Process(conn.pid)
                         log_message(f"Killing debug process {conn.pid}")
@@ -666,11 +779,11 @@ for module_name in list(sys.modules.keys()):
         if multiprocessing.current_process().pid > 1:
             import debugpy  # pylint: disable=import-outside-toplevel
 
-            debugpy.listen(("127.0.0.1", 9000))  # nosec B104 - localhost only for debug
+            debugpy.listen(("127.0.0.1", self.DEBUG_PORT))  # nosec B104 - localhost only for debug
             debugpy.wait_for_client()
             self.display_information_message_bar(
                 title="GEEST",
-                message="Visual Studio Code debugger is now attached on port 9000",
+                message=f"Visual Studio Code debugger is now attached on port {self.DEBUG_PORT}",
             )
             self.debug_action.setEnabled(False)  # prevent user starting it twice
             self.debug_running = True
@@ -709,11 +822,7 @@ for module_name in list(sys.modules.keys()):
         if more_details:
             button = QPushButton(widget)
             button.setText(button_text)
-            button.pressed.connect(
-                lambda: self.display_information_message_box(
-                    title=title, message=more_details
-                )
-            )
+            button.pressed.connect(lambda: self.display_information_message_box(title=title, message=more_details))
             widget.layout().addWidget(button)
 
         self.iface.messageBar().pushWidget(widget, Qgis.Info, duration)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import quote, unquote
 
@@ -57,22 +58,14 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         self.raster_layer_combo.setAllowEmptyLayer(True)
         # Insert placeholder text at the top (only visually, not as a selectable item)
         self.raster_layer_combo.setCurrentIndex(-1)  # Ensure no selection initially
-        self.raster_layer_combo.setEditable(
-            True
-        )  # Make editable temporarily for placeholder
-        self.raster_layer_combo.lineEdit().setPlaceholderText(
-            "Select item"
-        )  # Add placeholder text
+        self.raster_layer_combo.setEditable(True)  # Make editable temporarily for placeholder
+        self.raster_layer_combo.lineEdit().setPlaceholderText("Select item")  # Add placeholder text
 
         # Disable editing after setting placeholder (ensures only layer names are selectable)
         self.raster_layer_combo.lineEdit().setReadOnly(True)
-        self.raster_layer_combo.setEditable(
-            False
-        )  # Lock back to non-editable after setting placeholder
+        self.raster_layer_combo.setEditable(False)  # Lock back to non-editable after setting placeholder
 
-        self.raster_layer_combo.setToolTip(
-            "Raster chosen from file system will have preference"
-        )
+        self.raster_layer_combo.setToolTip("Raster chosen from file system will have preference")
         self.layout.addWidget(self.raster_layer_combo)
 
         # Restore previously selected raster layer
@@ -96,9 +89,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         self.clear_button.clicked.connect(self.clear_raster)
         self.clear_button.setVisible(False)
 
-        self.raster_line_edit.textChanged.connect(
-            lambda text: self.clear_button.setVisible(bool(text))
-        )
+        self.raster_line_edit.textChanged.connect(lambda text: self.clear_button.setVisible(bool(text)))
         self.raster_line_edit.textChanged.connect(self.resize_clear_button)
 
         # File chooser button for Raster Layer
@@ -107,9 +98,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         self.raster_button.clicked.connect(self.select_raster)
 
         if self.attributes.get(f"{self.widget_key}_raster", False):
-            self.raster_line_edit.setText(
-                unquote(self.attributes[f"{self.widget_key}_raster"])
-            )
+            self.raster_line_edit.setText(unquote(self.attributes[f"{self.widget_key}_raster"]))
             self.raster_line_edit.setVisible(True)
             self.raster_layer_combo.setVisible(False)
         else:
@@ -118,9 +107,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         self.resize_clear_button()
 
         self.layout.addWidget(self.raster_button)
-        self.raster_button.setToolTip(
-            "Raster chosen from file system will have preference"
-        )
+        self.raster_button.setToolTip("Raster chosen from file system will have preference")
 
     def resizeEvent(self, event):
         """
@@ -136,16 +123,12 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         """Reposition the clear button when the line edit is resized."""
         log_message("Resizing clear button")
         # Position the clear button inside the line edit
-        frame_width = self.raster_line_edit.style().pixelMetric(
-            self.raster_line_edit.style().PM_DefaultFrameWidth
-        )
+        frame_width = self.raster_line_edit.style().pixelMetric(self.raster_line_edit.style().PM_DefaultFrameWidth)
         self.raster_line_edit.setStyleSheet(
             f"QLineEdit {{ padding-right: {self.clear_button.sizeHint().width() + frame_width}px; }}"  # noqa E702,E202,E201
         )
         sz = self.clear_button.sizeHint()
-        self.clear_button.move(
-            self.raster_line_edit.width() - sz.width() - frame_width - 5, 6
-        )
+        self.clear_button.move(self.raster_line_edit.width() - sz.width() - frame_width - 5, 6)
 
     def select_raster(self) -> None:
         """
@@ -167,9 +150,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
                 # Trigger resize event explicitly
                 self.resizeEvent(None)
                 # Save the directory of the selected file to QSettings
-                self.settings.setValue(
-                    "Geest/lastRasterDir", os.path.dirname(file_path)
-                )
+                self.settings.setValue("Geest/lastRasterDir", os.path.dirname(file_path))
 
         except Exception as e:
             log_message(f"Error selecting raster: {e}", level=Qgis.Critical)
@@ -201,13 +182,7 @@ class RasterDataSourceWidget(BaseDataSourceWidget):
         if raster_layer:
             self.attributes[f"{self.widget_key}_layer_name"] = raster_layer.name()
             self.attributes[f"{self.widget_key}_layer_source"] = raster_layer.source()
-            self.attributes[f"{self.widget_key}_layer_provider_type"] = (
-                raster_layer.providerType()
-            )
-            self.attributes[f"{self.widget_key}_layer_crs"] = (
-                raster_layer.crs().authid()
-            )
+            self.attributes[f"{self.widget_key}_layer_provider_type"] = raster_layer.providerType()
+            self.attributes[f"{self.widget_key}_layer_crs"] = raster_layer.crs().authid()
             self.attributes[f"{self.widget_key}_layer_id"] = raster_layer.id()
-        self.attributes[f"{self.widget_key}_raster"] = quote(
-            self.raster_line_edit.text()
-        )
+        self.attributes[f"{self.widget_key}_raster"] = quote(self.raster_line_edit.text())

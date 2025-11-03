@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis import processing  # noqa: F401
 from qgis.core import (
     Qgis,
@@ -15,10 +16,11 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QVariant
 
-from geest.utilities import log_message
+from geest.core.osm_downloaders import OSMDownloadType
+from geest.utilities import log_message, setting
 
 
-def select_grid_cells(
+def select_grid_cells_and_count_features(
     grid_layer: QgsVectorLayer,
     features_layer: QgsVectorLayer,
     output_path: str,
@@ -62,9 +64,7 @@ def select_grid_cells(
             intersecting_ids = grid_index.intersects(feature_geom.boundingBox())
         else:
             # For line and polygon geometries, check actual geometry against grid cells
-            intersecting_ids = grid_index.intersects(
-                feature_geom.boundingBox()
-            )  # Initial rough filter
+            intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
             log_message(
                 f"{len(intersecting_ids)} rough intersections found.",
                 tag="Geest",
@@ -88,9 +88,7 @@ def select_grid_cells(
             else:
                 grid_feature_counts[grid_id] = 1
         counter += 1
-        feedback.setProgress(
-            (counter / feature_count) * 100.0
-        )  # We just use nominal intervals for progress updates
+        feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
 
     log_message(f"{len(grid_feature_counts)} intersections found.")
 
@@ -134,9 +132,7 @@ def select_grid_cells(
         # Set the 'id' and 'intersecting_features' attributes
         new_feature.setFields(fields)
         new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
-        new_feature.setAttribute(
-            "intersecting_features", grid_feature_counts[grid_feature.id()]
-        )
+        new_feature.setAttribute("intersecting_features", grid_feature_counts[grid_feature.id()])
         new_feature.setAttribute("value", None)
 
         # Write the feature to the new layer
@@ -157,9 +153,7 @@ def select_grid_cells(
     )
 
 
-def assign_values_to_grid(
-    grid_layer: QgsVectorLayer, feedback: QgsFeedback = None
-) -> QgsVectorLayer:
+def assign_values_to_grid(grid_layer: QgsVectorLayer, feedback: QgsFeedback = None) -> QgsVectorLayer:
     """
     Assign values to grid cells based on the number of intersecting features.
 
@@ -186,3 +180,210 @@ def assign_values_to_grid(
             if feedback:
                 feedback.setProgress((counter / feature_count) * 100.0)
     return grid_layer
+
+
+def select_grid_cells_and_assign_transport_score(
+    osm_transport_type: OSMDownloadType,
+    grid_layer: QgsVectorLayer,
+    features_layer: QgsVectorLayer,
+    output_path: str,
+    feedback: QgsFeedback = None,
+) -> QgsVectorLayer:
+    """
+    Select grid cells that intersect with features, and assign a value
+    based on the most beneficial road type intersecting the cell.
+
+
+    Args:
+        osm_transport_type (OSMDownloadType): The type of OSM transport data to use for scoring.
+        grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
+        features_layer (QgsVectorLayer): The input OSM Roads layer containing features (e.g., lines).
+        output_path (str): The output path for the new grid layer with feature counts.
+
+    Returns:
+        QgsVectorLayer: A new layer with grid cells containing a highest score from the intersecting features.
+    """
+
+    log_message(
+        "Selecting grid cells that intersect with features and assigning a score.",
+        tag="Geest",
+        level=Qgis.Info,
+    )
+
+    highway_lookup_table = {
+        "residential": 5,
+        "living_street": 5,
+        "pedestrian": 5,
+        "footway": 5,
+        "steps": 5,
+        "tertiary": 4,
+        "tertiary_link": 4,
+        "cycleway": 4,
+        "path": 4,
+        "secondary": 3,
+        "unclassified": 3,
+        "service": 3,
+        "road": 3,
+        "bridleway": 3,
+        "secondary_link": 3,
+        "track": 2,
+        "primary": 2,
+        "primary_link": 2,
+        "motorway": 1,
+        "trunk": 1,
+        "motorway_link": 1,
+        "trunk_link": 1,
+        "bus_guideway": 0,
+        "escape": 0,
+        "raceway": 0,
+        "construction": 0,
+        "proposed": 0,
+    }
+    cycleway_lookup_table = {
+        "lane": 4,
+        "shared_lane": 4,
+        "share_busway": 4,
+        "track": 4,
+        "separate": 4,
+        "crossing": 4,
+        "shoulder": 4,
+        "link": 4,
+    }
+
+    if osm_transport_type == OSMDownloadType.CYCLEWAYS:
+        lookup_table = cycleway_lookup_table
+    elif osm_transport_type == OSMDownloadType.ROADS:
+        lookup_table = highway_lookup_table
+    else:
+        raise ValueError(f"Unsupported OSM transport type: {osm_transport_type}")
+
+    # Create a spatial index for the grid layer to optimize intersection queries
+    grid_index = QgsSpatialIndex(grid_layer.getFeatures())
+
+    # Create a dictionary to hold the count of intersecting features for each grid cell ID
+    grid_most_beneficial_road_scores = {}
+    counter = 0
+    feature_count = features_layer.featureCount()
+    verbose_mode = int(setting(key="verbose_mode", default=0))
+    # Iterate over each feature and use the spatial index to find the intersecting grid cells
+    for feature in features_layer.getFeatures():
+        feature_geom = feature.geometry()
+        road_type = feature["highway"]
+        road_score = lookup_table.get(road_type, 0)  # Default to
+        if feature_geom.isEmpty():
+            continue
+
+        # Check actual geometry against grid cells
+        intersecting_ids = grid_index.intersects(feature_geom.boundingBox())  # Initial rough filter
+
+        if verbose_mode:
+            log_message(
+                f"Finding intersections for road type '{road_type}' with score {road_score}.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+            log_message(
+                f"{len(intersecting_ids)} rough intersections found.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+        intersecting_ids = [
+            grid_id
+            for grid_id in intersecting_ids
+            if grid_layer.getFeature(grid_id).geometry().intersects(feature_geom)
+        ]
+        if verbose_mode:
+            log_message(
+                f"{len(intersecting_ids)} refined intersections found.",
+                tag="Geest",
+                level=Qgis.Info,
+            )
+
+        # Iterate over the intersecting grid cell IDs and count intersections
+        for grid_id in intersecting_ids:
+            if grid_id in grid_most_beneficial_road_scores:
+                # Only update if the new road score is higher than the existing one
+                if road_score > grid_most_beneficial_road_scores[grid_id]:
+                    if verbose_mode:
+                        log_message(f"Promoting score {road_score} to grid ID {grid_id}.", tag="Geest", level=Qgis.Info)
+                    grid_most_beneficial_road_scores[grid_id] = road_score
+                else:
+                    if verbose_mode:
+                        log_message(
+                            f"Existing score {grid_most_beneficial_road_scores[grid_id]} for grid ID {grid_id} is higher than or equal to new score {road_score}, not updating.",
+                            tag="Geest",
+                            level=Qgis.Info,
+                        )
+            else:
+                if verbose_mode:
+                    log_message(
+                        "Grid cell not found in list of most beneficial scores, assigning new score.",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
+                    log_message(f"Assigning score {road_score} to grid ID {grid_id}.", tag="Geest", level=Qgis.Info)
+                grid_most_beneficial_road_scores[grid_id] = road_score
+        counter += 1
+        feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
+
+    log_message(f"{len(grid_most_beneficial_road_scores)} intersections found.")
+
+    options = QgsVectorFileWriter.SaveVectorOptions()
+    options.driverName = "GPKG"
+    options.fileEncoding = "UTF-8"
+    options.layerName = "grid_with_feature_counts"
+
+    # Define fields for the new layer: only 'id' and 'intersecting_features'
+    fields = QgsFields()
+    fields.append(QgsField("id", QVariant.Int))
+    # Will be used to hold the scaled value from 0-5
+    fields.append(QgsField("value", QVariant.Int))
+
+    writer = QgsVectorFileWriter.create(
+        fileName=output_path,
+        fields=fields,
+        geometryType=grid_layer.wkbType(),
+        srs=grid_layer.crs(),
+        transformContext=QgsCoordinateTransformContext(),
+        options=options,
+    )
+    if writer.hasError() != QgsVectorFileWriter.NoError:
+        raise Exception(f"Failed to create output layer: {writer.errorMessage()}")
+
+    # Select only grid cells based on the keys (grid IDs) in the grid_feature_counts dictionary
+    request = QgsFeatureRequest().setFilterFids(list(grid_most_beneficial_road_scores.keys()))
+    log_message(
+        f"Looping over {len(grid_most_beneficial_road_scores.keys())} grid polygons",
+        tag="Geest",
+        level=Qgis.Info,
+    )
+
+    for grid_feature in grid_layer.getFeatures(request):
+        # log_message(f"Writing Feature #{counter}")
+        counter += 1
+        new_feature = QgsFeature()
+        new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
+
+        # Set the 'id' and 'intersecting_features' attributes
+        new_feature.setFields(fields)
+        new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
+        new_feature.setAttribute("value", grid_most_beneficial_road_scores[grid_feature.id()])
+
+        # Write the feature to the new layer
+        writer.addFeature(new_feature)
+
+    del writer  # Finalize the writer and close the file
+
+    log_message(
+        f"Grid cells with OSM feature scores saved to {output_path}",
+        tag="Geest",
+        level=Qgis.Info,
+    )
+
+    return QgsVectorLayer(
+        # Note the output is a Parquet file, not a geopackage
+        # so there is nothing like |layername=...
+        f"{output_path}",
+        "grid_with_feature_scores",
+        "ogr",
+    )

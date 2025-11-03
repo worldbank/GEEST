@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import math
 
 from qgis.gui import QgsMapCanvasItem
@@ -118,17 +119,13 @@ class PieChartItem(QgsMapCanvasItem):
                 self.painter.setBrush(Qt.gray)
                 self.painter.setPen(Qt.NoPen)
                 self.painter.setOpacity(0.3)
-                self.painter.drawPie(
-                    shadow_exploded_rect, int(start_angle * 16), int(angle_span * 16)
-                )
+                self.painter.drawPie(shadow_exploded_rect, int(start_angle * 16), int(angle_span * 16))
                 self.painter.setOpacity(1.0)
 
                 # Draw the exploded slice
                 self.painter.setBrush(self.colors[i % len(self.colors)])
                 self.painter.setPen(Qt.NoPen)
-                self.painter.drawPie(
-                    exploded_rect, int(start_angle * 16), int(angle_span * 16)
-                )
+                self.painter.drawPie(exploded_rect, int(start_angle * 16), int(angle_span * 16))
 
                 # Label at the end of exploded slice
                 radius = min(rect.width(), rect.height()) / 2

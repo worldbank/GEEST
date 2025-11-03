@@ -29,9 +29,7 @@ def test_create_grid_from_bbox_standard():
     crs = example_crs()
 
     for cell_width, cell_height in [(10, 10), (5, 5), (20, 20)]:
-        grid = GridFromBboxTask(
-            bbox=bbox, cell_width=cell_width, cell_height=cell_height, crs=crs
-        )
+        grid = GridFromBboxTask(bbox=bbox, cell_width=cell_width, cell_height=cell_height, crs=crs)
 
         assert grid is not None, "Grid creation failed to return a valid result."
         assert grid.isValid(), "Generated grid is not valid."
@@ -53,9 +51,7 @@ def test_create_grid_from_bbox_edge_cases():
         GridFromBboxTask(bbox=inverted_bbox, cell_width=10, cell_height=10, crs=crs)
         assert False, "Expected ValueError for inverted bbox, but none was raised."
     except ValueError as e:
-        assert "Invalid bounding box dimensions" in str(
-            e
-        ), f"Unexpected error message: {e}"
+        assert "Invalid bounding box dimensions" in str(e), f"Unexpected error message: {e}"
 
 
 def test_invalid_cell_dimensions():
@@ -66,32 +62,22 @@ def test_invalid_cell_dimensions():
     # Negative cell dimensions
     try:
         GridFromBboxTask(bbox=bbox, cell_width=-10, cell_height=10, crs=crs)
-        assert (
-            False
-        ), "Expected ValueError for negative cell width, but none was raised."
+        assert False, "Expected ValueError for negative cell width, but none was raised."
     except ValueError as e:
-        assert "Cell dimensions must be positive" in str(
-            e
-        ), f"Unexpected error message: {e}"
+        assert "Cell dimensions must be positive" in str(e), f"Unexpected error message: {e}"
 
     try:
         GridFromBboxTask(bbox=bbox, cell_width=10, cell_height=-10, crs=crs)
-        assert (
-            False
-        ), "Expected ValueError for negative cell height, but none was raised."
+        assert False, "Expected ValueError for negative cell height, but none was raised."
     except ValueError as e:
-        assert "Cell dimensions must be positive" in str(
-            e
-        ), f"Unexpected error message: {e}"
+        assert "Cell dimensions must be positive" in str(e), f"Unexpected error message: {e}"
 
     # Zero cell dimensions
     try:
         GridFromBboxTask(bbox=bbox, cell_width=0, cell_height=10, crs=crs)
         assert False, "Expected ValueError for zero cell width, but none was raised."
     except ValueError as e:
-        assert "Cell dimensions must be positive" in str(
-            e
-        ), f"Unexpected error message: {e}"
+        assert "Cell dimensions must be positive" in str(e), f"Unexpected error message: {e}"
 
 
 def test_large_bbox():
@@ -100,9 +86,7 @@ def test_large_bbox():
     large_bbox = QgsRectangle(-180, -90, 180, 90)
     grid = GridFromBboxTask(bbox=large_bbox, cell_width=1, cell_height=1, crs=crs)
 
-    assert (
-        grid.featureCount() > 10000
-    ), "Large bounding box should generate a substantial number of features."
+    assert grid.featureCount() > 10000, "Large bounding box should generate a substantial number of features."
 
 
 def test_crs_mismatch():
@@ -117,9 +101,7 @@ def test_crs_mismatch():
         assert "Invalid CRS provided" in str(e), f"Unexpected error message: {e}"
 
     mismatched_crs = QgsCoordinateReferenceSystem("EPSG:3857")
-    result = GridFromBboxTask(
-        bbox=bbox, cell_width=10, cell_height=10, crs=mismatched_crs
-    )
+    result = GridFromBboxTask(bbox=bbox, cell_width=10, cell_height=10, crs=mismatched_crs)
 
     assert result.isValid(), "Grid generation should handle CRS mismatches gracefully."
 

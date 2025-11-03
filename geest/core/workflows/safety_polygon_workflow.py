@@ -27,24 +27,25 @@ class SafetyPolygonWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_safety_polygon_into_classes"
-        layer_path = unquote(
-            self.attributes.get("classify_safety_polygon_into_classes_shapefile", "")
-        )
+        layer_path = unquote(self.attributes.get("classify_safety_polygon_into_classes_shapefile", ""))
 
         if not layer_path:
             log_message(
@@ -52,9 +53,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get(
-                "classify_safety_polygon_into_classes_layer_source", None
-            )
+            layer_path = self.attributes.get("classify_safety_polygon_into_classes_layer_source", None)
             if not layer_path:
                 log_message(
                     "No layer found in classify_safety_polygon_into_classes_layer_source.",
@@ -65,14 +64,10 @@ class SafetyPolygonWorkflow(WorkflowBase):
 
         self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
 
-        self.selected_field = self.attributes.get(
-            "classify_safety_polygon_into_classes_selected_field", ""
-        )
+        self.selected_field = self.attributes.get("classify_safety_polygon_into_classes_selected_field", "")
         # This is a dict with keys being unique values from the selected field
         # and values from the aggregation dialog configuration table
-        self.safety_mapping_table = self.attributes.get(
-            "classify_safety_polygon_into_classes_unique_values", None
-        )
+        self.safety_mapping_table = self.attributes.get("classify_safety_polygon_into_classes_unique_values", None)
         if not isinstance(self.safety_mapping_table, dict):
             raise Exception("Safety scoring table not configured.")
 
@@ -114,9 +109,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
         )
         return raster_output
 
-    def _assign_reclassification_to_safety(
-        self, layer: QgsVectorLayer
-    ) -> QgsVectorLayer:
+    def _assign_reclassification_to_safety(self, layer: QgsVectorLayer) -> QgsVectorLayer:
         """
         Assign reclassification values to polygons based on perceived safety.
         """
@@ -136,9 +129,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
                 layer.updateFeature(feature)
                 counter += 1
                 if self.feedback.isCanceled():
-                    log_message(
-                        "Workflow cancelled by user.", tag="Geest", level=Qgis.Warning
-                    )
+                    log_message("Workflow cancelled by user.", tag="Geest", level=Qgis.Warning)
                     return layer
                 self.feedback.setProgress(int(counter / feature_count * 100))
         return layer
@@ -148,9 +139,7 @@ class SafetyPolygonWorkflow(WorkflowBase):
         Scale value from input range (min_in, max_in) to output range (min_out, max_out).
         """
         try:
-            result = (value - min_in) / (max_in - min_in) * (
-                max_out - min_out
-            ) + min_out
+            result = (value - min_in) / (max_in - min_in) * (max_out - min_out) + min_out
             return result
         except Exception as e:
             _ = e

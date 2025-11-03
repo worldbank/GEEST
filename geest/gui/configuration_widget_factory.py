@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 
 from geest.core.settings import setting
@@ -30,9 +31,7 @@ class ConfigurationWidgetFactory:
     """
 
     @staticmethod
-    def create_widget(
-        key: str, value: int, attributes: dict
-    ) -> BaseConfigurationWidget:
+    def create_widget(key: str, value: int, attributes: dict) -> BaseConfigurationWidget:
         """
         Factory method to create a radio button based on key-value pairs.
         """
@@ -41,61 +40,43 @@ class ConfigurationWidgetFactory:
             log_message(f"Key: {key} Value: {value}")
         try:
             if key == "indicator_required" and value == 0:
-                return DontUseConfigurationWidget(
-                    analysis_mode="Do Not Use", attributes=attributes
-                )
+                return DontUseConfigurationWidget(analysis_mode="Do Not Use", attributes=attributes)
             if key == "use_index_score" and value == 1:
-                return IndexScoreConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+            if key == "use_index_score_with_ookla" and value == 1:
+                # Uses the same config widget as index score for now ...
+                return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+            if key == "use_index_score_with_ghsl" and value == 1:
+                # Uses the same config widget as index score for now ...
+                return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_multi_buffer_point" and value == 1:
-                return MultiBufferConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return MultiBufferConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_single_buffer_point" and value == 1:
-                return SingleBufferConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return SingleBufferConfigurationWidget(analysis_mode=key, attributes=attributes)
             # ------------------------------------------------
             # These three all use the same configuration widgets
             # but will have different datasource widgets generated as appropriate
             if key == "use_polygon_per_cell" and value == 1:  # poly = polygon
-                return FeaturePerCellConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_polyline_per_cell" and value == 1:
-                return FeaturePerCellConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
+            if key == "use_osm_transport_polyline_per_cell" and value == 1:
+                return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_point_per_cell" and value == 1:
-                return FeaturePerCellConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_csv_to_point_layer" and value == 1:
-                return AcledCsvConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return AcledCsvConfigurationWidget(analysis_mode=key, attributes=attributes)
             # ------------------------------------------------
             if key == "use_classify_polygon_into_classes" and value == 1:
-                return ClassifiedPolygonConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return ClassifiedPolygonConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_classify_safety_polygon_into_classes" and value == 1:
-                return SafetyPolygonConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return SafetyPolygonConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_nighttime_lights" and value == 1:
-                return SafetyRasterConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return SafetyRasterConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_environmental_hazards" and value == 1:
-                return RasterReclassificationConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return RasterReclassificationConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_street_lights" and value == 1:
-                return StreetLightsConfigurationWidget(
-                    analysis_mode=key, attributes=attributes
-                )
+                return StreetLightsConfigurationWidget(analysis_mode=key, attributes=attributes)
             else:
                 log_message(
                     f"Factory did not match any widgets for key: {key}",

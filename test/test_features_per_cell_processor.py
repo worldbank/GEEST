@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import unittest
 
@@ -14,7 +15,7 @@ from utilities_for_testing import prepare_fixtures
 
 from geest.core.algorithms.features_per_cell_processor import (
     assign_values_to_grid,
-    select_grid_cells,
+    select_grid_cells_and_count_features,
 )
 
 
@@ -34,9 +35,7 @@ class TestSpatialProcessing(unittest.TestCase):
         self.output_path = os.path.join(self.output_directory, "test_grid.gpkg")
 
         # Create an in-memory grid layer
-        self.grid_layer = QgsVectorLayer(
-            "Polygon?crs=EPSG:4326", "Grid Layer", "memory"
-        )
+        self.grid_layer = QgsVectorLayer("Polygon?crs=EPSG:4326", "Grid Layer", "memory")
         grid_provider = self.grid_layer.dataProvider()
         grid_fields = QgsFields()
         grid_fields.append(QgsField("id", QVariant.Int))
@@ -62,9 +61,7 @@ class TestSpatialProcessing(unittest.TestCase):
         grid_provider.addFeatures(grid_features)
 
         # Create an in-memory features layer
-        self.features_layer = QgsVectorLayer(
-            "Point?crs=EPSG:4326", "Features Layer", "memory"
-        )
+        self.features_layer = QgsVectorLayer("Point?crs=EPSG:4326", "Features Layer", "memory")
         features_provider = self.features_layer.dataProvider()
         features_provider.addAttributes([QgsField("name", QVariant.String)])
         self.features_layer.updateFields()
@@ -87,7 +84,7 @@ class TestSpatialProcessing(unittest.TestCase):
         Test the select_grid_cells function.
         """
         feedback = QgsFeedback()
-        output_layer = select_grid_cells(
+        output_layer = select_grid_cells_and_count_features(
             grid_layer=self.grid_layer,
             features_layer=self.features_layer,
             output_path=self.output_path,
@@ -102,21 +99,11 @@ class TestSpatialProcessing(unittest.TestCase):
         )
 
         # Verify that the 'intersecting_features' field is populated correctly
-        output_features = {
-            f["id"]: f["intersecting_features"] for f in output_layer.getFeatures()
-        }
-        self.assertEqual(
-            output_features[1], 1, "Cell 1 should have 1 intersecting feature."
-        )
-        self.assertEqual(
-            output_features[2], 1, "Cell 2 should have 1 intersecting feature."
-        )
-        self.assertEqual(
-            output_features[3], 1, "Cell 3 should have 1 intersecting feature."
-        )
-        self.assertEqual(
-            output_features[4], 1, "Cell 4 should have 1 intersecting feature."
-        )
+        output_features = {f["id"]: f["intersecting_features"] for f in output_layer.getFeatures()}
+        self.assertEqual(output_features[1], 1, "Cell 1 should have 1 intersecting feature.")
+        self.assertEqual(output_features[2], 1, "Cell 2 should have 1 intersecting feature.")
+        self.assertEqual(output_features[3], 1, "Cell 3 should have 1 intersecting feature.")
+        self.assertEqual(output_features[4], 1, "Cell 4 should have 1 intersecting feature.")
 
     def test_assign_values_to_grid(self):
         """
@@ -124,7 +111,7 @@ class TestSpatialProcessing(unittest.TestCase):
         """
         feedback = QgsFeedback()
         # First, generate the intersecting feature counts
-        output_layer = select_grid_cells(
+        output_layer = select_grid_cells_and_count_features(
             grid_layer=self.grid_layer,
             features_layer=self.features_layer,
             output_path=self.output_path,

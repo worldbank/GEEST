@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Manage Overpass API connexion."""
 
 import logging
@@ -38,13 +39,9 @@ class ConnexionOAPI(Downloader):
         super().__init__(url)
 
         if convert:
-            temporary = QTemporaryFile(
-                os.path.join(QDir.tempPath(), "request-XXXXXX.txt")
-            )
+            temporary = QTemporaryFile(os.path.join(QDir.tempPath(), "request-XXXXXX.txt"))
         else:
-            temporary = QTemporaryFile(
-                os.path.join(QDir.tempPath(), "request-XXXXXX.osm")
-            )
+            temporary = QTemporaryFile(os.path.join(QDir.tempPath(), "request-XXXXXX.osm"))
         temporary.open()
         self.result_path = temporary.fileName()
         temporary.close()
@@ -128,8 +125,7 @@ class ConnexionOAPI(Downloader):
 
         # Check if we can use the static method below
         timeout = (
-            '<remark> runtime error: Query timed out in "[a-z]+" at line '
-            r"[\d]+ after ([\d]+) seconds. </remark>"
+            '<remark> runtime error: Query timed out in "[a-z]+" at line ' r"[\d]+ after ([\d]+) seconds. </remark>"
         )
         if re.search(timeout, "".join(lines)):
             raise OverpassTimeoutException

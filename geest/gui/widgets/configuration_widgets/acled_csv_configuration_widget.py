@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QSpinBox
 
@@ -34,12 +35,8 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
             self.buffer_distance_layout.addWidget(self.buffer_distance_label)
             self.buffer_distance_layout.addWidget(self.buffer_distance_input)
             # I dont think this is defined in the spreadsheet yet.
-            default_distance = self.attributes.get(
-                "{self.widget_key}_distance_default", 5000
-            )
-            buffer_distance = self.attributes.get(
-                "{self.widget_key}_distance", default_distance
-            )
+            default_distance = self.attributes.get("{self.widget_key}_distance_default", 5000)
+            buffer_distance = self.attributes.get("{self.widget_key}_distance", default_distance)
             if buffer_distance == 0:
                 buffer_distance = default_distance
             try:
@@ -64,9 +61,7 @@ class AcledCsvConfigurationWidget(BaseConfigurationWidget):
         if not self.isChecked():
             return None
 
-        self.attributes[f"{self.widget_key}_distance"] = (
-            self.buffer_distance_input.value()
-        )
+        self.attributes[f"{self.widget_key}_distance"] = self.buffer_distance_input.value()
 
         return self.attributes
 

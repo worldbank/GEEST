@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -12,10 +13,11 @@ from qgis.core import (
     QgsRasterLayer,
     QgsSimpleFillSymbolLayer,
     QgsUnitTypes,
+    QgsVectorLayer,
 )
 from qgis.PyQt.QtGui import QColor, QFont
 
-from geest.utilities import log_message, resources_path, setting
+from geest.utilities import log_message, resources_path
 
 from .base_report import BaseReport
 
@@ -26,26 +28,32 @@ class AnalysisReport(BaseReport):
 
     """
 
-    def __init__(self, model_path: str, report_name="Geest Analysis Report"):
+    def __init__(self, model_path: str, working_directory: str = None, report_name="Geest Analysis Report"):
         """
         Initialize the report.
 
         Parameters:
-            layer_input (str): A file path to the GeoPackage (from which the
-                layer "study_area_creation_status" and other layers will be loaded).
+            model_path (str): Path to the model JSON file.
+            working_directory (str): Path to the working directory containing the study area GeoPackage.
             report_name (str): The title to use for the report.
 
         Raises:
             ValueError: If the layer cannot be loaded from the given file path.
             TypeError: If layer_input is neither a string nor a QgsVectorLayer.
         """
-        template_path = resources_path(
-            "resources", "qpt", "analysis_summary_report_template.qpt"
-        )
+        template_path = resources_path("resources", "qpt", "analysis_summary_report_template.qpt")
         super().__init__(template_path, report_name)
 
         self.report_name = report_name
         self.model_path = model_path
+        self.working_directory = working_directory
+        self.temp_layers = []  # Track layers added to project for cleanup
+        self.study_area_layer = None  # Will hold the study area outline layer
+
+        # Load the study area outline layer if working_directory is provided
+        if working_directory:
+            self._load_study_area_layer()
+
         self.page_descriptions[
             "analysis_summary"
         ] = """
@@ -56,7 +64,38 @@ class AnalysisReport(BaseReport):
         """
         Destructor to clean up layers from the QGIS project.
         """
-        pass
+        # Remove temporary layers added for rendering
+        for layer in self.temp_layers:
+            if layer:
+                QgsProject.instance().removeMapLayer(layer.id())
+                log_message(f"Removed temporary layer '{layer.name()}' from project.")
+
+    def _load_study_area_layer(self):
+        """
+        Load the study area outline layer from the GeoPackage.
+        """
+        import os
+
+        gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+        if not os.path.exists(gpkg_path):
+            log_message(f"Study area GeoPackage not found at {gpkg_path}")
+            return
+
+        # Try to load study_area_clip_polygons first, fall back to study_area_polygons
+        for layer_name in ["study_area_clip_polygons", "study_area_polygons"]:
+            uri = f"{gpkg_path}|layername={layer_name}"
+            layer = QgsVectorLayer(uri, f"Study Area ({layer_name})", "ogr")
+            if layer.isValid():
+                self.study_area_layer = layer
+                source_qml = resources_path("resources", "qml", "study_area_polygons.qml")
+                layer.loadNamedStyle(source_qml)
+                # Add to project temporarily for rendering
+                QgsProject.instance().addMapLayer(layer, False)
+                self.temp_layers.append(layer)
+                log_message(f"Loaded study area outline from {layer_name}")
+                break
+            else:
+                log_message(f"Could not load study area layer: {layer_name}")
 
     def create_layout(self):
         """
@@ -75,9 +114,7 @@ class AnalysisReport(BaseReport):
         summary_label.setText(summary_text)
         summary_label.setFont(QFont("Arial", 12))
         summary_label.adjustSizeToText()
-        summary_label.attemptMove(
-            QgsLayoutPoint(80, 200, QgsUnitTypes.LayoutMillimeters), page=0
-        )
+        summary_label.attemptMove(QgsLayoutPoint(80, 200, QgsUnitTypes.LayoutMillimeters), page=0)
         self.layout.addLayoutItem(summary_label)
 
         # Compute and add summary statistics for each layer on separate pages
@@ -98,18 +135,7 @@ class AnalysisReport(BaseReport):
         current_page += 1
 
         # Add pages for each indicator
-        # check if developer mode is enabled
-        developer_mode = int(setting(key="developer_mode", default=0))
-        if developer_mode:
-            log_message(
-                "Developer mode is enabled. Creating detail pages for each indicator."
-            )
-            self.create_detail_pages(current_page=current_page)
-        else:
-            log_message(
-                "Developer mode is disabled. Skipping detail pages for each indicator."
-            )
-            return
+        self.create_detail_pages(current_page=current_page)
 
     def create_detail_pages(self, current_page: int = 1):
         """
@@ -124,13 +150,53 @@ class AnalysisReport(BaseReport):
         with open(self.model_path, "r", encoding="utf-8") as f:
             model = json.load(f)
 
+        # Print the analysis wee, wee by population etc maps first
+        # wee_by_opportunities_mask_result_file
+        self.page_descriptions["wee_by_opportunities"] = "WEE By Opportunities Analysis Map"
+        start_str = model.get("execution_start_time", "")
+        end_str = model.get("execution_end_time", "")
+        # Create a new page for the indicator
+        title = "WEE by Opportunities Mask"
+        self.make_page(
+            title=title,
+            description_key="wee_by_opportunities",
+            current_page=current_page,
+        )
+        layer_uri = model.get("wee_by_opportunities_mask_result_file")
+        log_message(f"Adding {layer_uri} to map")
+        if layer_uri:
+            layer = QgsRasterLayer(layer_uri, title)
+
+            if not layer.isValid():
+                log_message(
+                    f"Layer {layer_uri} is invalid and cannot be added.",
+                    tag="Geest",
+                )
+            else:
+                # Add the layer to the project temporarily for rendering
+                QgsProject.instance().addMapLayer(layer, False)
+                self.temp_layers.append(layer)
+            # Build layers list: raster layer + study area outline (if available)
+            layers = [layer]
+            if self.study_area_layer:
+                layers.append(self.study_area_layer)
+            crs = layer.crs()
+            self.make_map(
+                layers=layers,
+                current_page=current_page,
+                crs=crs,
+            )
+        # Add footer for the indicator page
+        self.add_header_and_footer(page_number=current_page)
+
+        # Increment the page counter
+        current_page += 1
+
         for dimension in model.get("dimensions", []):
             dim_name = dimension.get("name", "")
             for factor in dimension.get("factors", []):
                 factor_name = factor.get("name", "")
-                self.page_descriptions[factor_name] = factor.get(
-                    "description", f"Analysis for factor: {factor_name}"
-                )
+                self.page_descriptions[factor_name] = factor.get("description", f"Analysis for factor: {factor_name}")
                 for indicator in factor.get("indicators", []):
                     indicator_name = indicator.get("indicator", "")
                     start_str = indicator.get("execution_start_time", "")
@@ -140,9 +206,7 @@ class AnalysisReport(BaseReport):
                     end_datetime = self.parse_iso_datetime(end_str)
 
                     if start_datetime and end_datetime:
-                        duration = round(
-                            (end_datetime - start_datetime).total_seconds() / 60, 2
-                        )
+                        duration = round((end_datetime - start_datetime).total_seconds() / 60, 2)
                     else:
                         duration = None
                     log_message(
@@ -164,7 +228,14 @@ class AnalysisReport(BaseReport):
                                 f"Layer {layer_uri} is invalid and cannot be added.",
                                 tag="Geest",
                             )
+                        else:
+                            # Add the layer to the project temporarily for rendering
+                            QgsProject.instance().addMapLayer(layer, False)
+                            self.temp_layers.append(layer)
+                        # Build layers list: raster layer + study area outline (if available)
                         layers = [layer]
+                        if self.study_area_layer:
+                            layers.append(self.study_area_layer)
                         crs = layer.crs()
                         self.make_map(
                             layers=layers,
@@ -249,18 +320,12 @@ class AnalysisReport(BaseReport):
                     )
 
         # Compute relative times
-        valid_times = [
-            r["execution_time_minutes"]
-            for r in results
-            if r["execution_time_minutes"] is not None
-        ]
+        valid_times = [r["execution_time_minutes"] for r in results if r["execution_time_minutes"] is not None]
 
         if valid_times:
             min_time = min(valid_times)
             max_time = max(valid_times)
-            range_time = (
-                max_time - min_time if max_time > min_time else 1.0
-            )  # avoid division by zero
+            range_time = max_time - min_time if max_time > min_time else 1.0  # avoid division by zero
 
             for r in results:
                 exec_time = r["execution_time_minutes"]
@@ -282,9 +347,7 @@ class AnalysisReport(BaseReport):
 
         return results
 
-    def create_execution_time_layout(
-        self, entries: list, max_bar_width_mm: float = 10.0, page: int = 1
-    ):
+    def create_execution_time_layout(self, entries: list, max_bar_width_mm: float = 10.0, page: int = 1):
         """
         Creates a QGIS layout showing execution times with colored bars and labels.
 
@@ -344,9 +407,7 @@ class AnalysisReport(BaseReport):
                 ),
                 page=page,
             )
-            bar.setFixedSize(
-                QgsLayoutSize(bar_width, row_height, QgsUnitTypes.LayoutMillimeters)
-            )
+            bar.setFixedSize(QgsLayoutSize(bar_width, row_height, QgsUnitTypes.LayoutMillimeters))
 
             color = QColor(color)
             symbol = QgsSimpleFillSymbolLayer(color=color)

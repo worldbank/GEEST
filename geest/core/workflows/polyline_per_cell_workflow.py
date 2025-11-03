@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from urllib.parse import unquote
 
@@ -12,7 +13,7 @@ from qgis.core import (
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import (
     assign_values_to_grid,
-    select_grid_cells,
+    select_grid_cells_and_count_features,
 )
 from geest.utilities import log_message
 
@@ -28,19 +29,22 @@ class PolylinePerCellWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_polyline_per_cell"
 
@@ -63,9 +67,7 @@ class PolylinePerCellWorkflow(WorkflowBase):
                 )
                 return False
 
-        self.features_layer = QgsVectorLayer(
-            layer_path, "polyline_per_cell Layer", "ogr"
-        )
+        self.features_layer = QgsVectorLayer(layer_path, "polyline_per_cell Layer", "ogr")
 
     def _process_features_for_area(
         self,
@@ -93,12 +95,8 @@ class PolylinePerCellWorkflow(WorkflowBase):
             level=Qgis.Info,
         )
         # Step 1: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
-        area_grid = select_grid_cells(
-            self.grid_layer, area_features, output_path, self.feedback
-        )
+        output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
+        area_grid = select_grid_cells_and_count_features(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 2: Assign values to grid cells
         grid = assign_values_to_grid(area_grid, feedback=self.feedback)

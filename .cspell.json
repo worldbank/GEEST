@@ -91,6 +91,7 @@
         "nixfmt",
         "nvim",
         "Octo",
+        "OOKLA",
         "Powerline",
         "pylsp",
         "Pyright",
@@ -109,6 +110,9 @@
         "Neogit",
         "neotest",
         "shellcheck",
-        "stylua"
+        "stylua",
+        "GHSL",
+        "GDAL",
+        "polygonize"
     ]
 }

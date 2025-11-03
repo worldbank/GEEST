@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from typing import Optional
+
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsFeedback,
@@ -13,12 +16,12 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
     def __init__(
         self,
         extents: QgsRectangle,
-        output_path: str = None,
-        output_crs: QgsCoordinateReferenceSystem = None,
-        filename: str = None,  # will also set the layer name in the gpkg
+        output_path: str = "",
+        output_crs: Optional[QgsCoordinateReferenceSystem] = None,
+        filename: str = "",  # will also set the layer name in the gpkg
         use_cache: bool = False,
         delete_gpkg: bool = True,
-        feedback: QgsFeedback = None,
+        feedback: Optional[QgsFeedback] = None,
     ):
         """
         Initialize the OSMRoadsDownloader class.

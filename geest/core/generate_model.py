@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import json
 
@@ -146,11 +147,7 @@ class SpreadsheetToJsonParser:
                     # Initialise the weighting to the default value
                     "dimension_weighting": default_factor_dimension_weighting,
                     "indicators": [],
-                    "description": (
-                        row["Factor Description"]
-                        if not pd.isna(row["Factor Description"])
-                        else ""
-                    ),
+                    "description": (row["Factor Description"] if not pd.isna(row["Factor Description"]) else ""),
                 }
                 analysis_model[dimension]["factors"].append(new_factor)
                 factor_map[factor] = new_factor
@@ -166,41 +163,25 @@ class SpreadsheetToJsonParser:
                 "indicator": row["Indicator"] if not pd.isna(row["Indicator"]) else "",
                 "id": row["ID"] if not pd.isna(row["ID"]) else "",
                 "output_filename": (
-                    row["Naming convention for outputs"]
-                    if not pd.isna(row["Naming convention for outputs"])
-                    else ""
+                    row["Naming convention for outputs"] if not pd.isna(row["Naming convention for outputs"]) else ""
                 ),
                 "description": "",
                 "default_factor_weighting": default_factor_weighting,
                 # Initialise the weighting to the default value
                 "factor_weighting": default_factor_weighting,
-                "index_score": (
-                    row["Index Score"] if not pd.isna(row["Index Score"]) else ""
-                ),
-                "use_index_score": (
-                    row["Use Index Score"]
-                    if not pd.isna(row["Use Index Score"])
-                    else ""
-                ),
+                "index_score": (row["Index Score"] if not pd.isna(row["Index Score"]) else ""),
+                "use_index_score": (row["Use Index Score"] if not pd.isna(row["Use Index Score"]) else ""),
                 "default_multi_buffer_distances": (
-                    row["Default Multi Buffer Distances"]
-                    if not pd.isna(row["Default Multi Buffer Distances"])
-                    else ""
+                    row["Default Multi Buffer Distances"] if not pd.isna(row["Default Multi Buffer Distances"]) else ""
                 ),
                 "use_multi_buffer_point": (
-                    row["Use Multi Buffer Point"]
-                    if not pd.isna(row["Use Multi Buffer Point"])
-                    else ""
+                    row["Use Multi Buffer Point"] if not pd.isna(row["Use Multi Buffer Point"]) else ""
                 ),
                 "default_single_buffer_distance": (
-                    row["Default Single Buffer Distance"]
-                    if not pd.isna(row["Default Single Buffer Distance"])
-                    else ""
+                    row["Default Single Buffer Distance"] if not pd.isna(row["Default Single Buffer Distance"]) else ""
                 ),
                 "use_single_buffer_point": (
-                    row["Use Single Buffer Point"]
-                    if not pd.isna(row["Use Single Buffer Point"])
-                    else ""
+                    row["Use Single Buffer Point"] if not pd.isna(row["Use Single Buffer Point"]) else ""
                 ),
                 "use_classify_polygon_into_classes": (
                     row["Use Classify Polygon into Classes"]
@@ -213,40 +194,27 @@ class SpreadsheetToJsonParser:
                     else ""
                 ),
                 "use_csv_to_point_layer": (
-                    row["Use CSV to Point Layer"]
-                    if not pd.isna(row["Use CSV to Point Layer"])
-                    else ""
+                    row["Use CSV to Point Layer"] if not pd.isna(row["Use CSV to Point Layer"]) else ""
                 ),
                 "use_polygon_per_cell": (
-                    row["Use Polygon per Cell"]
-                    if not pd.isna(row["Use Polygon per Cell"])
-                    else ""
+                    row["Use Polygon per Cell"] if not pd.isna(row["Use Polygon per Cell"]) else ""
                 ),
                 "use_polyline_per_cell": (
-                    row["Use Polyline per Cell"]
-                    if not pd.isna(row["Use Polyline per Cell"])
+                    row["Use Polyline per Cell"] if not pd.isna(row["Use Polyline per Cell"]) else ""
+                ),
+                "use_osm_transport_polyline_per_cell": (
+                    row["Use OSM Transport Polyline per Cell"]
+                    if not pd.isna(row["Use OSM Transport Polyline per Cell"])
                     else ""
                 ),
-                "use_point_per_cell": (
-                    row["Use Point per Cell"]
-                    if not pd.isna(row["Use Point per Cell"])
-                    else ""
-                ),
+                "use_point_per_cell": (row["Use Point per Cell"] if not pd.isna(row["Use Point per Cell"]) else ""),
                 "use_nighttime_lights": (
-                    row["Use Nighttime Lights"]
-                    if not pd.isna(row["Use Nighttime Lights"])
-                    else ""
+                    row["Use Nighttime Lights"] if not pd.isna(row["Use Nighttime Lights"]) else ""
                 ),
                 "use_environmental_hazards": (
-                    row["Use Environmental Hazards"]
-                    if not pd.isna(row["Use Environmental Hazards"])
-                    else ""
+                    row["Use Environmental Hazards"] if not pd.isna(row["Use Environmental Hazards"]) else ""
                 ),
-                "use_street_lights": (
-                    row["Use Street Lights"]
-                    if not pd.isna(row["Use Street Lights"])
-                    else ""
-                ),
+                "use_street_lights": (row["Use Street Lights"] if not pd.isna(row["Use Street Lights"]) else ""),
                 "analysis_mode": "Do Not Use",
             }
 

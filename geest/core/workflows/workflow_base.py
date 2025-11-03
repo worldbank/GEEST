@@ -1,16 +1,22 @@
+# -*- coding: utf-8 -*-
 import datetime
 import os
 import traceback
 from abc import abstractmethod
+from typing import Optional
 
 from qgis import processing
 from qgis.core import (
     Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeedback,
     QgsGeometry,
     QgsProcessingContext,
     QgsProcessingException,
     QgsProcessingFeedback,
+    QgsProject,
+    QgsRectangle,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QObject, QSettings, pyqtSignal
@@ -39,27 +45,30 @@ class WorkflowBase(QObject):
     def __init__(
         self,
         item: JsonTreeItem,
-        cell_size_m: 100.0,
+        cell_size_m: float,
+        analysis_scale: str,  # local or national
         feedback: QgsFeedback,
         context: QgsProcessingContext,
-        working_directory: str = None,
+        working_directory: Optional[str],
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param item: JsonTreeItem object representing the task.
-        :param cell_size_m: The cell size in meters for the analysis.
-        :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+
+        Args:
+            :param item: JsonTreeItem object representing the task.
+            :param cell_size_m: The cell size in meters for the analysis.
+            :param analysis_scale: Analysis scale string to determine the workflow e.g. local, national.
+            :param feedback: QgsFeedback object for progress reporting and cancellation.
+            :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+            :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__()
         log_layer_count()  # For performance tuning, write the number of open layers to a log file
         # we will log the layer count again at then end of the workflow
         self.item = item  # ⭐️ This is a reference - whatever you change in this item will directly update the tree
         self.cell_size_m = cell_size_m
-        self.feedback = (
-            feedback  # we connect this to the QgsTask progressUpdated signal
-        )
+        self.analysis_scale = analysis_scale
+        self.feedback = feedback  # we connect this to the QgsTask progressUpdated signal
         self.context = context  # QgsProcessingContext
         self.workflow_name = None  # This is set in the concrete class
         # This is set in the setup panel
@@ -69,22 +78,17 @@ class WorkflowBase(QObject):
             log_message(f"Working directory set to {working_directory}")
             self.working_directory = working_directory
         else:
-            log_message(
-                "Working directory not set. Using last working directory from settings."
-            )
+            log_message("Working directory not set. Using last working directory from settings.")
             self.working_directory = self.settings.value("last_working_directory", "")
         if not self.working_directory:
             raise ValueError("Working directory not set.")
         # This is the lower level directory for this workflow's outputs
         self.workflow_directory = self._create_workflow_directory()
-        self.gpkg_path: str = os.path.join(
-            self.working_directory, "study_area", "study_area.gpkg"
-        )
+        self.gpkg_path: str = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         if not os.path.exists(self.gpkg_path):
             raise ValueError(f"Study area geopackage not found at {self.gpkg_path}.")
-        self.bboxes_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr"
-        )
+        self.bbox_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_bbox", "study_area_bbox", "ogr")
+        self.bboxes_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_bboxes", "study_area_bboxes", "ogr")
         self.areas_layer = QgsVectorLayer(
             f"{self.gpkg_path}|layername=study_area_polygons",
             "study_area_polygons",
@@ -95,9 +99,7 @@ class WorkflowBase(QObject):
             "study_area_clip_polygons",
             "ogr",
         )
-        self.grid_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_grid", "study_area_grid", "ogr"
-        )
+        self.grid_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_grid", "study_area_grid", "ogr")
         self.features_layer = None  # set in concrete class if needed
         self.raster_layer = None  # set in concrete class if needed
         self.target_crs = self.bboxes_layer.crs()
@@ -117,6 +119,32 @@ class WorkflowBase(QObject):
         self.updateProgress(0.0)
         self.output_filename = self.attributes.get("output_filename", "")
         self.feedback.progressChanged.connect(self.updateProgress)
+
+    def _study_area_bbox(self) -> QgsRectangle:
+        """
+        Get the study area bounding box geometry.
+
+        :return: The bounding box QgsRectangle.
+        """
+
+        bbox = self.bbox_layer.extent()
+
+        return bbox
+
+    def _study_area_bbox_4326(self) -> QgsRectangle:
+        """
+        Get the study area bounding box geometry in EPSG:4326.
+
+        :return: The bounding box QgsRectangle.
+        """
+        transform = QgsCoordinateTransform(
+            self.bbox_layer.crs(),
+            QgsCoordinateReferenceSystem("EPSG:4326"),
+            QgsProject.instance(),
+        )
+        bbox = self.bbox_layer.extent()
+        bbox = QgsCoordinateTransform.transformBoundingBox(transform, bbox)
+        return bbox
 
     def updateProgress(self, progress: float):
         """
@@ -230,13 +258,9 @@ class WorkflowBase(QObject):
         output_rasters = []
 
         try:
-            if self.features_layer and type(self.features_layer) == QgsVectorLayer:
-                log_message(
-                    f"Features layer for {self.workflow_name} is {self.features_layer.source()}"
-                )
-                self.features_layer = check_and_reproject_layer(
-                    self.features_layer, self.target_crs
-                )
+            if self.features_layer and type(self.features_layer) is QgsVectorLayer:
+                log_message(f"Features layer for {self.workflow_name} is {self.features_layer.source()}")
+                self.features_layer = check_and_reproject_layer(self.features_layer, self.target_crs)
         except Exception as e:
             error_file = os.path.join(self.workflow_directory, "error.txt")
             if os.path.exists(error_file):
@@ -260,17 +284,13 @@ class WorkflowBase(QObject):
             self.attributes[self.result_key] = f"{self.workflow_name} Workflow Error"
             self.attributes[self.result_file_key] = ""
             self.attributes["error_file"] = error_path
-            self.attributes["error"] = (
-                f"Failed to reproject features layer for {self.workflow_name}: {e}"
-            )
+            self.attributes["error"] = f"Failed to reproject features layer for {self.workflow_name}: {e}"
             return False
 
         area_iterator = AreaIterator(self.gpkg_path)
         log_layer_count()  # For performance tuning, write the number of open layers to a log file
         try:
-            for index, (current_area, clip_area, current_bbox, progress) in enumerate(
-                area_iterator
-            ):
+            for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
                 message = f"{self.workflow_name} Processing area {index} with progress {progress:.2f}%"  # noqa E231
                 feedback.pushInfo(message)
                 log_message(message)
@@ -310,9 +330,7 @@ class WorkflowBase(QObject):
                         index=index,
                     )
                 elif not self.aggregation:  # assumes we are processing a raster input
-                    area_raster = self._subset_raster_layer(
-                        bbox=current_bbox, index=index
-                    )
+                    area_raster = self._subset_raster_layer(bbox=current_bbox, index=index)
                     raster_output = self._process_raster_for_area(
                         current_area=current_area,
                         clip_area=clip_area,
@@ -340,9 +358,7 @@ class WorkflowBase(QObject):
             # Combine all area rasters into a VRT
             vrt_filepath = self._combine_rasters_to_vrt(output_rasters)
             self.attributes[self.result_file_key] = vrt_filepath
-            self.attributes[self.result_key] = (
-                f"{self.workflow_name} Workflow Completed"
-            )
+            self.attributes[self.result_key] = f"{self.workflow_name} Workflow Completed"
 
             log_message(
                 f"{self.workflow_name} Completed. Output VRT: {vrt_filepath}",
@@ -398,9 +414,7 @@ class WorkflowBase(QObject):
 
         return directory
 
-    def _subset_vector_layer(
-        self, area_geom: QgsGeometry, output_prefix: str
-    ) -> QgsVectorLayer:
+    def _subset_vector_layer(self, area_geom: QgsGeometry, output_prefix: str) -> QgsVectorLayer:
         """
         Select features from the features layer that intersect with the given area geometry.
 
@@ -411,16 +425,14 @@ class WorkflowBase(QObject):
         Returns:
             QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
         """
-        if type(self.features_layer) != QgsVectorLayer:
+        if type(self.features_layer) is not QgsVectorLayer:
             return None
         log_message(
             f"{self.workflow_name} Select Features Started",
             tag="Geest",
             level=Qgis.Info,
         )
-        layer = subset_vector_layer(
-            self.workflow_directory, self.features_layer, area_geom, output_prefix
-        )
+        layer = subset_vector_layer(self.workflow_directory, self.features_layer, area_geom, output_prefix)
         return layer
 
     def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
@@ -450,9 +462,7 @@ class WorkflowBase(QObject):
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
         }
 
-        aoi = processing.run(
-            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
-        )["OUTPUT"]
+        aoi = processing.run("gdal:warpreproject", params, feedback=QgsProcessingFeedback())["OUTPUT"]
 
         params = {
             "INPUT": aoi,
@@ -491,11 +501,13 @@ class WorkflowBase(QObject):
         Returns:
             str: The file path to the rasterized output.
         """
-        if not input_layer or not input_layer.isValid():
-            return False
         log_message("--- Rasterizing geometry")
         log_message(f"--- bbox {bbox}")
         log_message(f"--- index {index}")
+        if not input_layer or not input_layer.isValid():
+            log_message("--- ERROR: Feature layer is not valid!")
+            return ""
+        log_message(f"--- input_layer {input_layer.source()}")
 
         output_path = os.path.join(
             self.workflow_directory,
@@ -503,7 +515,7 @@ class WorkflowBase(QObject):
         )
         if not input_layer.isValid():
             log_message(f"Layer failed to load! {input_layer}")
-            return
+            return ""
         else:
             log_message(f"Rasterizing {input_layer}")
 
@@ -539,22 +551,20 @@ class WorkflowBase(QObject):
         log_message(f"Created raster: {output_path}")
         return output_path
 
-    def _mask_raster(
-        self, raster_path: str, area_geometry: QgsGeometry, index: int
-    ) -> str:
+    def _mask_raster(self, raster_path: str, area_geometry: QgsGeometry, index: int) -> Optional[str]:
         """
         Multiply the raster by the area geometry to mask the raster to the area.
 
         Args:
-            raster_path (str): The path to the raster file.
-            area_geometry (QgsGeometry): The geometry to use as a mask.
-            index (int): The index of the current area.
+            Raster_path (str): The path to the raster file.
+            Area_geometry (QgsGeometry): The geometry to use as a mask.
+            Index (int): The index of the current area.
 
         Returns:
-            str: The path to the masked raster.
+            str: The path to the masked raster or None if there is an error.
         """
         if not raster_path:
-            return False
+            return None
         output_name = f"{self.layer_id}_masked_{index}.tif"
         output_path = os.path.join(self.workflow_directory, output_name)
         log_message(
@@ -572,9 +582,7 @@ class WorkflowBase(QObject):
             raise QgsProcessingException(f"Raster file not found at {raster_path}")
         # Convert the geometry to a memory layer in the self.target_crs
         log_message(f"Creating mask layer for area from polygon {index}")
-        mask_layer = geometry_to_memory_layer(
-            area_geometry, self.target_crs, f"mask_layer_{index}"
-        )
+        mask_layer = geometry_to_memory_layer(area_geometry, self.target_crs, f"mask_layer_{index}")
         log_message(f"Mask layer created: {mask_layer}")
         # Clip the raster by the mask layer
         params = {
@@ -617,14 +625,10 @@ class WorkflowBase(QObject):
         )
         role = self.item.role
         source_qml = resources_path("resources", "qml", f"{role}.qml")
-        vrt_filepath = combine_rasters_to_vrt(
-            rasters, self.target_crs, vrt_filepath, source_qml
-        )
+        vrt_filepath = combine_rasters_to_vrt(rasters, self.target_crs, vrt_filepath, source_qml)
         # if debug mode is off, remove all files except the VRT and the rasters it refers to
         if not int(setting(key="developer_mode", default=0)):
-            log_message(
-                "Debug mode is off. Removing all files except the VRT and the rasters it refers to."
-            )
+            log_message("Debug mode is off. Removing all files except the VRT and the rasters it refers to.")
             # Compile a list of all of the files in the workflow directory - recursively
 
             all_files = os.listdir(self.workflow_directory)
@@ -654,8 +658,6 @@ class WorkflowBase(QObject):
                         )
                         continue
         else:
-            log_message(
-                "Debug mode is on. Keeping all files in the workflow directory."
-            )
+            log_message("Debug mode is on. Keeping all files in the workflow directory.")
 
         return vrt_filepath

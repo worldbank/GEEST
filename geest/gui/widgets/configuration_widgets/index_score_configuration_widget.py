@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 
@@ -19,9 +20,7 @@ class IndexScoreConfigurationWidget(BaseConfigurationWidget):
             self.info_label: QLabel = QLabel("Fill each polygon with a fixed value")
             self.internal_layout.addWidget(self.info_label)
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical)
 
     def get_data(self) -> dict:
         """

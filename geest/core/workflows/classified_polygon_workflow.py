@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from qgis.core import (
     Qgis,
     QgsFeedback,
@@ -24,6 +26,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,  # national or local
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
@@ -36,12 +39,10 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_polygon_into_classes"
-        layer_path = self.attributes.get(
-            "classify_polygon_into_classes_shapefile", None
-        )
+        layer_path = self.attributes.get("classify_polygon_into_classes_shapefile", None)
 
         if not layer_path:
             log_message(
@@ -49,9 +50,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Warning,
             )
-            layer_path = self.attributes.get(
-                "classify_polygon_into_classes_layer_source", None
-            )
+            layer_path = self.attributes.get("classify_polygon_into_classes_layer_source", None)
             if not layer_path:
                 log_message(
                     "No layer found in use_classify_polygon_into_classes_layer_source.",
@@ -62,9 +61,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
 
         self.features_layer = QgsVectorLayer(layer_path, "features_layer", "ogr")
 
-        self.selected_field = self.attributes.get(
-            "classify_polygon_into_classes_selected_field", ""
-        )
+        self.selected_field = self.attributes.get("classify_polygon_into_classes_selected_field", "")
 
     def _process_features_for_area(
         self,
@@ -104,23 +101,15 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         )
         return raster_output
 
-    def _assign_reclassification_to_safety(
-        self, layer: QgsVectorLayer
-    ) -> QgsVectorLayer:
+    def _assign_reclassification_to_safety(self, layer: QgsVectorLayer) -> QgsVectorLayer:
         """
         Assign reclassification values to polygons based on thresholds.
         """
         with edit(layer):
             # Remove all other columns except the selected field and the new 'value' field
             fields_to_keep = {self.selected_field, "value"}
-            fields_to_remove = [
-                field.name()
-                for field in layer.fields()
-                if field.name() not in fields_to_keep
-            ]
-            layer.dataProvider().deleteAttributes(
-                [layer.fields().indexFromName(field) for field in fields_to_remove]
-            )
+            fields_to_remove = [field.name() for field in layer.fields() if field.name() not in fields_to_keep]
+            layer.dataProvider().deleteAttributes([layer.fields().indexFromName(field) for field in fields_to_remove])
             layer.updateFields()
             if layer.fields().indexFromName("value") == -1:
                 layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
@@ -146,9 +135,7 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         Scale value from input range (min_in, max_in) to output range (min_out, max_out).
         """
         try:
-            result = (value - min_in) / (max_in - min_in) * (
-                max_out - min_out
-            ) + min_out
+            result = (value - min_in) / (max_in - min_in) * (max_out - min_out) + min_out
             return result
         except Exception as e:
             del e

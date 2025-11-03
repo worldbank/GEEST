@@ -36,9 +36,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         # during rendering. Probably setting to the same number
         # of CPU cores you have would be a good conservative approach
         # You could probably run 100 or more on a decently specced machine
-        self.spin_thread_pool_size.setValue(
-            int(setting(key="concurrent_tasks", default=1))
-        )
+        self.spin_thread_pool_size.setValue(int(setting(key="concurrent_tasks", default=1)))
 
         # This provides more verbose logging output
         # and keeps intermediate working files around
@@ -69,9 +67,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         show_pie_overlay = setting(key="show_pie_overlay", default=False)
         self.show_pie_overlay.setChecked(bool(show_pie_overlay))
         experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
-        log_message(
-            f"GEEST_EXPERIMENTAL environment variable is set to: {experimental_features}"
-        )
+        log_message(f"GEEST_EXPERIMENTAL environment variable is set to: {experimental_features}")
         self.show_pie_overlay.hide()
 
         if experimental_features:
@@ -101,12 +97,8 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
             set_setting(key="verbose_mode", value=0)
 
         set_setting(key="chunk_size", value=self.chunk_size.value())
-        set_setting(
-            key="default_raster_to_0", value=self.default_raster_to_0.isChecked()
-        )
-        set_setting(
-            key="show_layer_on_click", value=self.show_layer_on_click.isChecked()
-        )
+        set_setting(key="default_raster_to_0", value=self.default_raster_to_0.isChecked())
+        set_setting(key="show_layer_on_click", value=self.show_layer_on_click.isChecked())
         set_setting(key="show_overlay", value=self.show_overlay.isChecked())
         set_setting(key="show_pie_overlay", value=self.show_pie_overlay.isChecked())
 

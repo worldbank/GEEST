@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import unittest
 
@@ -23,10 +24,8 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
         cls.feedback = QgsFeedback()
 
     def setUp(self):
-        self.study_area_gpkg_path = (
-            f"{self.working_directory}/study_area/study_area.gpkg",
-        )
-        self.network_layer_path = os.path.join(
+        self.study_area_gpkg_path = (f"{self.working_directory}/study_area/study_area.gpkg",)
+        self.road_network_layer_path = os.path.join(
             os.path.dirname(__file__),
             "test_data",
             "network_analysis",
@@ -39,15 +38,9 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
             "points.shp",
         )
 
-        self.analysis_item = JsonTreeItem(
-            {"id": "analysis_1"}, role="analysis", parent=None
-        )
-        self.dimension_item = JsonTreeItem(
-            {"id": "dimension_1"}, role="dimension", parent=self.analysis_item
-        )
-        self.factor_item = JsonTreeItem(
-            {"id": "factor_1"}, role="factor", parent=self.dimension_item
-        )
+        self.analysis_item = JsonTreeItem({"id": "analysis_1"}, role="analysis", parent=None)
+        self.dimension_item = JsonTreeItem({"id": "dimension_1"}, role="dimension", parent=self.analysis_item)
+        self.factor_item = JsonTreeItem({"id": "factor_1"}, role="factor", parent=self.dimension_item)
         self.test_data = [
             "Test Item TestMultiBufferDistancesNativeWorkflow",
             "Configured",
@@ -67,7 +60,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
                 "multi_buffer_point_shapefile": self.points_layer_path,
                 "multi_buffer_travel_mode": "Walking",
                 "multi_buffer_travel_units": "Distance",
-                "network_layer_path": self.network_layer_path,
+                "road_network_layer_path": self.road_network_layer_path,
             },
         ]
         self.indicator_item = JsonTreeItem(
@@ -84,6 +77,7 @@ class TestMultiBufferDistancesNativeWorkflow(unittest.TestCase):
         self.workflow = MultiBufferDistancesNativeWorkflow(
             item=self.indicator_item,
             cell_size_m=10.0,
+            analysis_scale="local",
             feedback=self.feedback,
             context=self.context,
             working_directory=self.working_directory,

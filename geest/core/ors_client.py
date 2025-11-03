@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 
@@ -90,6 +91,7 @@ class ORSClient(QObject):
             raise RuntimeError(f"Failed to parse JSON response: {e}")
 
         if verbose_mode:
+            # codeql[python/clear-text-logging-sensitive-data] - ORS response contains only geographical data (FeatureCollection), no sensitive information
             log_message(f"Response JSON: {response_json}")
 
         return response_json

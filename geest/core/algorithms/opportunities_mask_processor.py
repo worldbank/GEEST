@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import traceback
 from typing import Optional
@@ -11,6 +12,7 @@ from qgis.core import (
     QgsProcessingContext,
     QgsProcessingFeedback,
     QgsRasterLayer,
+    QgsRectangle,
     QgsTask,
     QgsVectorLayer,
 )
@@ -101,16 +103,14 @@ class OpportunitiesMaskProcessor(QgsTask):
         self.feedback = feedback
         self.clipped_rasters = []
         self.item = item
-        self.mask_mode = self.item.attribute(
-            "mask_mode", None
-        )  # if set,  will be "point", "polygon" or "raster"
+        self.mask_mode = self.item.attribute("mask_mode", None)  # if set,  will be "point", "polygon" or "raster"
         if not self.mask_mode:
             raise Exception("Mask mode not set in the analysis.")
 
         self.workflow_name = f"opportunities_{self.mask_mode}_mask"
         # In normal workflows this comes from the item, but this workflow is a bit different
         # so we set it manually.
-        self.layer_id = "Opportunities_Mask"
+        self.layer_id = "opportunities_mask"
         if self.mask_mode == "point":
             self.buffer_distance_m = self.item.attribute("buffer_distance_m", 1000)
         if self.mask_mode in ["point", "polygon"]:
@@ -123,12 +123,8 @@ class OpportunitiesMaskProcessor(QgsTask):
             provider_type = "ogr"
             if not layer_source:
                 # Fall back to the QgsMapLayerComboBox source
-                layer_source = self.item.attribute(
-                    f"{self.mask_mode}_mask_layer_source", None
-                )
-                provider_type = self.item.attribute(
-                    f"{self.mask_mode}_mask_layer_provider_type", "ogr"
-                )
+                layer_source = self.item.attribute(f"{self.mask_mode}_mask_layer_source", None)
+                provider_type = self.item.attribute(f"{self.mask_mode}_mask_layer_provider_type", "ogr")
             if not layer_source:
                 log_message(
                     f"{self.mask_mode}_mask_shapefile not found",
@@ -136,20 +132,14 @@ class OpportunitiesMaskProcessor(QgsTask):
                     level=Qgis.Critical,
                 )
                 raise Exception(f"{self.mask_mode}_mask_shapefile not found")
-            self.features_layer = QgsVectorLayer(
-                layer_source, self.mask_mode, provider_type
-            )
+            self.features_layer = QgsVectorLayer(layer_source, self.mask_mode, provider_type)
             if not self.features_layer.isValid():
-                log_message(
-                    f"{self.mask_mode}_mask_shapefile not valid", level=Qgis.Critical
-                )
+                log_message(f"{self.mask_mode}_mask_shapefile not valid", level=Qgis.Critical)
                 log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
                 raise Exception(f"{self.mask_mode}_mask_shapefile not valid")
 
             # Check the geometries and reproject if necessary
-            self.features_layer = check_and_reproject_layer(
-                self.features_layer, self.target_crs
-            )
+            self.features_layer = check_and_reproject_layer(self.features_layer, self.target_crs)
 
         elif self.mask_mode == "raster":
             # Check the input raster is ok. The raster itself does not need to be a mask
@@ -157,9 +147,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             # Then the _process_raster_for_area method is where we turn it into a mask
             log_message("Loading source raster mask layer")
             # First try the one defined in the line edit
-            self.raster_layer = QgsRasterLayer(
-                unquote(self.item.attribute("raster_mask_raster")), "Raster Mask", "ogr"
-            )
+            self.raster_layer = QgsRasterLayer(unquote(self.item.attribute("raster_mask_raster")), "Raster Mask", "ogr")
             if not self.raster_layer.isValid():
                 # Then fall back to the QgsMapLayerComboBox source
                 self.raster_layer = QgsRasterLayer(
@@ -168,18 +156,42 @@ class OpportunitiesMaskProcessor(QgsTask):
                     self.item.attribute("raster_mask_layer_provider_type"),
                 )
             if not self.raster_layer.isValid():
-                log_message(
-                    "No valid raster layer provided for mask", level=Qgis.Critical
-                )
-                log_message(
-                    f"Raster Source: {self.raster_layer.source()}", level=Qgis.Critical
-                )
+                log_message("No valid raster layer provided for mask", level=Qgis.Critical)
+                log_message(f"Raster Source: {self.raster_layer.source()}", level=Qgis.Critical)
                 raise Exception("No valid raster layer provided for mask")
+        elif self.mask_mode == "ghsl":
+            # Use the global human settlements layer defined in the project settings
+            log_message("Loading global human settlements layer for mask")
+            layer_source = self.workflow_directory = os.path.join(
+                working_directory, "study_area", "ghsl_settlements_layer.parquet"
+            )
+            provider_type = "ogr"
+            if not layer_source:
+                log_message(
+                    f"{self.mask_mode} parquet file not found",
+                    tag="Geest",
+                    level=Qgis.Critical,
+                )
+                raise Exception(f"{self.mask_mode} parquet file not found")
+            self.features_layer = QgsVectorLayer(layer_source, self.mask_mode, provider_type)
+            if not self.features_layer.isValid():
+                log_message(f"{self.mask_mode} parquet file not valid", level=Qgis.Critical)
+                log_message(f"Layer Source: {layer_source}", level=Qgis.Critical)
+                raise Exception(f"{self.mask_mode} parquet file not valid")
+                # Check the crs of the layer, if it is not in the target crs, reproject it
+            if self.features_layer.crs() != self.target_crs:
+                log_message("Reprojecting features layer to match target crs")
+                # Note that the layer returned will be a memory layer
+                # which may be inefficiecy here.
+                log_message(f"Layer CRS: {self.features_layer.crs().authid()}")
+                log_message(f"Target CRS: {self.target_crs.authid()}")
+                self.features_layer = check_and_reproject_layer(self.features_layer, self.target_crs)
+
         # Workflow directory is the subdir under working_directory
         self.workflow_directory = os.path.join(working_directory, "opportunity_masks")
         os.makedirs(self.workflow_directory, exist_ok=True)
 
-        self.output_filename = "Opportunities_Mask"
+        self.output_filename = "opportunities_mask"
         # And customise which key we will write the result file to:
         self.result_file_key = "opportunities_mask_result_file"
         self.result_key = "opportunities_mask_result"
@@ -199,6 +211,10 @@ class OpportunitiesMaskProcessor(QgsTask):
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
         log_message(f"Working_directory: {self.working_directory}")
         log_message(f"Workflow directory: {self.workflow_directory}")
+        log_message(f"Mask mode: {self.mask_mode}")
+        log_message(
+            f"Layer path: {self.features_layer.source() if self.mask_mode in ['point', 'polygon', 'ghsl'] else self.raster_layer.source()}"
+        )  # noqa E501
         log_message(f"Cell size: {self.cell_size_m}")
         log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
         log_message(f"Force clear: {self.force_clear}")
@@ -210,9 +226,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         """
         try:
             area_iterator = AreaIterator(self.study_area_gpkg_path)
-            for index, (current_area, clip_area, current_bbox, progress) in enumerate(
-                area_iterator
-            ):
+            for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
                 if self.feedback and self.feedback.isCanceled():
                     return False
                 if self.mask_mode == "raster":
@@ -238,9 +252,7 @@ class OpportunitiesMaskProcessor(QgsTask):
                 f"{self.output_filename}_combined.vrt",
             )
             source_qml = resources_path("resources", "qml", "mask.qml")
-            vrt_filepath = combine_rasters_to_vrt(
-                self.mask_list, self.target_crs, vrt_filepath, source_qml
-            )
+            vrt_filepath = combine_rasters_to_vrt(self.mask_list, self.target_crs, vrt_filepath, source_qml)
             self.item.setAttribute(self.result_file_key, vrt_filepath)
             self.item.setAttribute(self.result_key, "Opportunities Mask Created OK")
         except Exception as e:
@@ -290,7 +302,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             mask_layer = self.generate_mask_layer(clipped_layer, current_bbox, index)
             log_message(f"Mask layer saved to {mask_layer}")
             return mask_layer
-        elif self.mask_mode == "polygon":
+        elif self.mask_mode in ["polygon", "ghsl"]:
             # Step 1: clip the selected features to the current area's clip area
             log_message("Clipping features to the current area's clip area")
             clipped_layer = self._clip_features(area_features, clip_area, index)
@@ -330,9 +342,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         buffered_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return buffered_layer
 
-    def _clip_features(
-        self, layer: QgsVectorLayer, clip_area: QgsGeometry, index: int
-    ) -> QgsVectorLayer:
+    def _clip_features(self, layer: QgsVectorLayer, clip_area: QgsGeometry, index: int) -> QgsVectorLayer:
         """
         Clip the input features by the clip area.
 
@@ -353,9 +363,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         clipped_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return clipped_layer
 
-    def generate_mask_layer(
-        self, clipped_layer: QgsVectorLayer, current_bbox: QgsGeometry, index: int
-    ) -> None:
+    def generate_mask_layer(self, clipped_layer: QgsVectorLayer, current_bbox: QgsGeometry, index: int) -> None:
         """Generate the mask layer.
 
         This will be used to create a mask by rasterizing the input polygon layer.
@@ -369,9 +377,7 @@ class OpportunitiesMaskProcessor(QgsTask):
 
         """
 
-        rasterized_polygons_path = os.path.join(
-            self.workflow_directory, f"opportunites_mask_{index}.tif"
-        )
+        rasterized_polygons_path = os.path.join(self.workflow_directory, f"opportunites_mask_{index}.tif")
 
         params = {
             "INPUT": clipped_layer,
@@ -408,7 +414,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         :return: The path to the reprojected and clipped raster.
         """
         # Convert the bbox to QgsRectangle
-        bbox = bbox.boundingBox()
+        bbox: QgsRectangle = bbox.boundingBox()
 
         reprojected_raster_path = os.path.join(
             self.workflow_directory,
@@ -425,10 +431,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
         }
 
-        aoi = processing.run(
-            "gdal:warpreproject", params, feedback=QgsProcessingFeedback()
-        )["OUTPUT"]
-        del aoi
+        processing.run("gdal:warpreproject", params, feedback=QgsProcessingFeedback())
         return reprojected_raster_path
 
     def _process_raster_for_area(
@@ -455,9 +458,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         :return: Path to the reclassified raster.
         """
         log_message(f"{self.workflow_name}  Processing Raster Started for area {index}")
-        opportunities_mask_path = os.path.join(
-            self.workflow_directory, f"opportunities_mask_{index}.tif"
-        )
+        opportunities_mask_path = os.path.join(self.workflow_directory, f"opportunities_mask_{index}.tif")
         # 📒 NOTE: Explanation for the formula logic:
         #
         # (A!=A) identifies NoData cells (since NaN != NaN is True for NoData cells) and sets them to 0.

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import urllib.parse  # Add this import
 
@@ -28,34 +29,40 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             # check the attributes to decide what feature types to
             # filter for.
             filter = None
+            tooltip = ""
             if self.attributes.get("use_single_buffer_point", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+                tooltip = "A point layer that will be buffered with a single buffer."
             elif self.attributes.get("use_point_per_cell", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+                tooltip = "A point layer whose points will be counted per cell."
             elif self.attributes.get("use_multi_buffer_point", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+                tooltip = "A point layer whose points will buffered with multiple buffers."
             elif self.attributes.get("use_street_lights", 0):
                 filter = QgsMapLayerProxyModel.PointLayer
+            elif self.attributes.get("use_osm_transport_polyline_per_cell", 0):
+                # Putting this before use polyline layer means that
+                # it will be used with priority over a simple line layer
+                filter = QgsMapLayerProxyModel.LineLayer
+                tooltip = "An OSM line layer whose features will be classified and the most beneficial category assigned to the cell."
             elif self.attributes.get("use_polyline_per_cell", 0):
                 filter = QgsMapLayerProxyModel.LineLayer
+                tooltip = "A line layer whose features will be counted per cell."
             else:
                 filter = QgsMapLayerProxyModel.PolygonLayer
+                tooltip = "A polygon layer whose features will be counted per cell."
             self.layer_combo = QgsMapLayerComboBox()
             self.layer_combo.setAllowEmptyLayer(True)
             # Insert placeholder text at the top (only visually, not as a selectable item)
             self.layer_combo.setCurrentIndex(-1)  # Ensure no selection initially
-            self.layer_combo.setEditable(
-                True
-            )  # Make editable temporarily for placeholder
-            self.layer_combo.lineEdit().setPlaceholderText(
-                "Select item"
-            )  # Add placeholder text
+            self.layer_combo.setEditable(True)  # Make editable temporarily for placeholder
+            self.layer_combo.setToolTip(tooltip)
+            self.layer_combo.lineEdit().setPlaceholderText("Select item")  # Add placeholder text
 
             # Disable editing after setting placeholder (ensures only layer names are selectable)
             self.layer_combo.lineEdit().setReadOnly(True)
-            self.layer_combo.setEditable(
-                False
-            )  # Lock back to non-editable after setting placeholder
+            self.layer_combo.setEditable(False)  # Lock back to non-editable after setting placeholder
 
             self.layer_combo.setFilters(filter)
             self.layout.addWidget(self.layer_combo)
@@ -80,9 +87,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.clear_button.clicked.connect(self.clear_shapefile)
             self.clear_button.setVisible(False)
 
-            self.shapefile_line_edit.textChanged.connect(
-                lambda text: self.clear_button.setVisible(bool(text))
-            )
+            self.shapefile_line_edit.textChanged.connect(lambda text: self.clear_button.setVisible(bool(text)))
             self.shapefile_line_edit.textChanged.connect(self.resize_clear_button)
             # Add a button to select a shapefile
             self.shapefile_button = QToolButton()
@@ -90,11 +95,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             self.shapefile_button.clicked.connect(self.select_shapefile)
 
             if self.attributes.get(f"{self.widget_key}_shapefile", False):
-                self.shapefile_line_edit.setText(
-                    urllib.parse.unquote(
-                        self.attributes[f"{self.widget_key}_shapefile"]
-                    )
-                )
+                self.shapefile_line_edit.setText(urllib.parse.unquote(self.attributes[f"{self.widget_key}_shapefile"]))
                 self.shapefile_line_edit.setVisible(True)
                 self.layer_combo.setVisible(False)
             else:
@@ -149,9 +150,7 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
             last_dir = settings.value("Geest/lastShapefileDir", "")
 
             # Open file dialog to select a shapefile
-            file_path, _ = QFileDialog.getOpenFileName(
-                self, "Select Shapefile", last_dir, "Shapefiles (*.shp)"
-            )
+            file_path, _ = QFileDialog.getOpenFileName(self, "Select Shapefile", last_dir, "Shapefiles (*.shp)")
 
             if file_path:
                 # Update the line edit with the selected file path
@@ -193,21 +192,13 @@ class VectorDataSourceWidget(BaseDataSourceWidget):
         else:
             self.attributes[f"{self.widget_key}_layer_name"] = layer.name()
             self.attributes[f"{self.widget_key}_layer_source"] = layer.source()
-            self.attributes[f"{self.widget_key}_layer_provider_type"] = (
-                layer.providerType()
-            )
-            self.attributes[f"{self.widget_key}_layer_crs"] = (
-                layer.crs().authid()
-            )  # Coordinate Reference System
+            self.attributes[f"{self.widget_key}_layer_provider_type"] = layer.providerType()
+            self.attributes[f"{self.widget_key}_layer_crs"] = layer.crs().authid()  # Coordinate Reference System
             self.attributes[f"{self.widget_key}_layer_wkb_type"] = (
                 layer.wkbType()
             )  # Geometry type (e.g., Point, Polygon)
-            self.attributes[f"{self.widget_key}_layer_id"] = (
-                layer.id()
-            )  # Unique ID of the layer
+            self.attributes[f"{self.widget_key}_layer_id"] = layer.id()  # Unique ID of the layer
 
         # Encode the shapefile path to handle spaces and special characters
         shapefile_path = self.shapefile_line_edit.text()
-        self.attributes[f"{self.widget_key}_shapefile"] = urllib.parse.quote(
-            shapefile_path
-        )
+        self.attributes[f"{self.widget_key}_shapefile"] = urllib.parse.quote(shapefile_path)

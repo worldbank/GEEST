@@ -21,9 +21,7 @@ class ToggleSwitch(QWidget):
 
         # Background color based on state
         if self.checked:
-            painter.setBrush(
-                QColor("#fffdcf")
-            )  # Active state color (blue) from WB Style Guide
+            painter.setBrush(QColor("#fffdcf"))  # Active state color (blue) from WB Style Guide
         else:
             painter.setBrush(QColor("#fffdcf"))  # Inactive state color (gray)
 

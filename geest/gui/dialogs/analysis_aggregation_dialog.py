@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from urllib.parse import unquote
 
 from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
@@ -75,12 +76,8 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.aggregation_combo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
         self.aggregation_combo.currentIndexChanged.connect(self.aggregation_selected)
         self.aggregation_toolbutton.clicked.connect(self.aggregation_toolbutton_clicked)
-        self.aggregation_lineedit.textChanged.connect(
-            self.aggregation_lineedit_text_changed
-        )
-        self.load_combo_from_model(
-            self.aggregation_combo, self.aggregation_lineedit, "aggregation"
-        )
+        self.aggregation_lineedit.textChanged.connect(self.aggregation_lineedit_text_changed)
+        self.load_combo_from_model(self.aggregation_combo, self.aggregation_lineedit, "aggregation")
 
         # Set up the population raster widgets
         self.population_combo.setAllowEmptyLayer(True)
@@ -88,12 +85,8 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.population_combo.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.population_combo.currentIndexChanged.connect(self.population_selected)
         self.population_toolbutton.clicked.connect(self.population_toolbutton_clicked)
-        self.population_lineedit.textChanged.connect(
-            self.population_lineedit_text_changed
-        )
-        self.load_combo_from_model(
-            self.population_combo, self.population_lineedit, "population"
-        )
+        self.population_lineedit.textChanged.connect(self.population_lineedit_text_changed)
+        self.load_combo_from_model(self.population_combo, self.population_lineedit, "population")
 
         # Set up the point layer widgets
         self.point_combo.setAllowEmptyLayer(True)
@@ -111,9 +104,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.polygon_combo.currentIndexChanged.connect(self.polygon_selected)
         self.polygon_toolbutton.clicked.connect(self.polygon_toolbutton_clicked)
         self.polygon_lineedit.textChanged.connect(self.polygon_lineedit_text_changed)
-        self.load_combo_from_model(
-            self.polygon_combo, self.polygon_lineedit, "polygon_mask"
-        )
+        self.load_combo_from_model(self.polygon_combo, self.polygon_lineedit, "polygon_mask")
 
         # Set up the raster layer widgets
         self.raster_combo.setAllowEmptyLayer(True)
@@ -122,14 +113,10 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.raster_combo.currentIndexChanged.connect(self.raster_selected)
         self.raster_toolbutton.clicked.connect(self.raster_toolbutton_clicked)
         self.raster_lineedit.textChanged.connect(self.raster_lineedit_text_changed)
-        self.load_combo_from_model(
-            self.raster_combo, self.raster_lineedit, "raster_mask"
-        )
+        self.load_combo_from_model(self.raster_combo, self.raster_lineedit, "raster_mask")
 
         help_layout = QHBoxLayout()
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
         self.help_icon = self.help_icon.scaledToWidth(20)
         self.help_label_icon = QLabel()
@@ -148,9 +135,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
 
         self.help_label.linkActivated.connect(self.open_link_in_browser)
         help_layout.addWidget(self.help_label)
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.help_widget.setLayout(help_layout)
 
         auto_calculate_button = QPushButton("Balance Weights")
@@ -166,9 +151,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
         toggle_guid_button.clicked.connect(self.toggle_guid_column)
         self.guid_column_visible = False  # Track GUID column visibility
-        self.table.setColumnHidden(
-            4, not self.guid_column_visible
-        )  # Hide GUID column by default
+        self.table.setColumnHidden(4, not self.guid_column_visible)  # Hide GUID column by default
 
         # Initial validation check
         self.validate_weightings()
@@ -181,6 +164,8 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.polygon_radio_button.setChecked(True)
         elif mask_mode == "raster":
             self.raster_radio_button.setChecked(True)
+        else:  # ghsl - use the global human settlements layer configured during project setup
+            self.ghsl_radio_button.setChecked(True)
 
         buffer_distance = self.tree_item.attribute("buffer_distance_m", 0)
         self.buffer_distance_m.setValue(int(buffer_distance))
@@ -201,18 +186,12 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             try:
                 self.restoreGeometry(geometry)
             except Exception:
-                log_message(
-                    "Restoring geometry failed", tag="Geest", level=Qgis.Warning
-                )
+                log_message("Restoring geometry failed", tag="Geest", level=Qgis.Warning)
                 pass
         else:
             log_message("No saved geometry found, resizing dialog")
             # Resize the dialog to be almost as large as the main window
-            main_window = (
-                self.parent().window()
-                if self.parent()
-                else self.screen().availableGeometry()
-            )
+            main_window = self.parent().window() if self.parent() else self.screen().availableGeometry()
             self.resize(int(main_window.width() * 0.9), int(main_window.height() * 0.9))
 
     def save_geometry(self):
@@ -238,27 +217,15 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(
-            ["Dimension", "Weight 0-1", "Use", "", "Guid"]
-        )
+        self.table.setHorizontalHeaderLabels(["Dimension", "Weight 0-1", "Use", "", "Guid"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Adjust column widths
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.Stretch
-        )  # dimension column expands
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.Fixed
-        )  # Weight 0-1 column fixed
-        self.table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.Fixed
-        )  # Use column fixed
-        self.table.horizontalHeader().setSectionResizeMode(
-            3, QHeaderView.Fixed
-        )  # Reset column fixed
-        self.table.horizontalHeader().setSectionResizeMode(
-            4, QHeaderView.Fixed
-        )  # Guid column fixed
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)  # dimension column expands
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)  # Weight 0-1 column fixed
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)  # Use column fixed
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)  # Reset column fixed
+        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Fixed)  # Guid column fixed
 
         # Set fixed widths for the last three columns
         self.table.setColumnWidth(1, 100)  # Weight 0-1 column width
@@ -294,11 +261,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
 
             # Reset button
             reset_button = QPushButton("Reset")
-            reset_button.clicked.connect(
-                lambda checked, item=weighting_item: item.setValue(
-                    default_analysis_weighting
-                )
-            )
+            reset_button.clicked.connect(lambda checked, item=weighting_item: item.setValue(default_analysis_weighting))
             self.table.setCellWidget(row, 3, reset_button)
 
             # Guid column
@@ -447,9 +410,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             checkbox.setChecked(True)  # Initially checked
         else:
             checkbox.setChecked(False)
-        checkbox.stateChanged.connect(
-            lambda state, r=row: self.toggle_row_widgets(r, state)
-        )
+        checkbox.stateChanged.connect(lambda state, r=row: self.toggle_row_widgets(r, state))
         checkbox.setEnabled(True)  # Enable by default
         # Create a container widget with a centered layout
         container = QWidget()
@@ -487,14 +448,8 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         """Calculate and set equal weighting for each enabled indicator."""
         log_message("Auto-calculating weightings")
         # Filter rows where the checkbox is checked
-        enabled_rows = [
-            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
-        ]
-        disabled_rows = [
-            row
-            for row in range(self.table.rowCount())
-            if not self.is_checkbox_checked(row)
-        ]
+        enabled_rows = [row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)]
+        disabled_rows = [row for row in range(self.table.rowCount()) if not self.is_checkbox_checked(row)]
         if not enabled_rows:
             log_message("No enabled rows found, skipping auto-calculation")
             return  # No enabled rows, avoid division by zero
@@ -502,9 +457,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         if len(enabled_rows) == 0:
             equal_weighting = 0.0
         else:
-            equal_weighting = 1.0 / len(
-                enabled_rows
-            )  # Divide equally among enabled rows
+            equal_weighting = 1.0 / len(enabled_rows)  # Divide equally among enabled rows
 
         # Set the weighting for each enabled row
         for row in enabled_rows:
@@ -534,9 +487,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         :param row: The row index to retrieve the checkbox from.
         :return: The QCheckBox widget, or None if not found.
         """
-        container = self.table.cellWidget(
-            row, 2
-        )  # Assuming the checkbox is in column 2
+        container = self.table.cellWidget(row, 2)  # Assuming the checkbox is in column 2
         if container and isinstance(container, QWidget):
             layout = container.layout()
             if layout and layout.count() > 0:
@@ -561,19 +512,13 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
         try:
-            total_weighting = sum(
-                float(spin_box.value() or 0) for spin_box in self.weightings.values()
-            )
-            valid_sum = (
-                abs(total_weighting - 1.0) < 0.001
-            )  # Allow slight floating-point tolerance
+            total_weighting = sum(float(spin_box.value() or 0) for spin_box in self.weightings.values())
+            valid_sum = abs(total_weighting - 1.0) < 0.001  # Allow slight floating-point tolerance
         except ValueError:
             valid_sum = False
 
         # In the case that all rows are disabled, the sum is valid
-        enabled_rows = [
-            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
-        ]
+        enabled_rows = [row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)]
         enabled_rows_count = len(enabled_rows)
         if enabled_rows_count == 0:
             valid_sum = True
@@ -585,13 +530,9 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         # Update button state and cell highlighting
         for spin_box in self.weightings.values():
             if valid_sum:
-                spin_box.setStyleSheet(
-                    normal_color
-                )  # Reset font color to black if valid
+                spin_box.setStyleSheet(normal_color)  # Reset font color to black if valid
             else:
-                spin_box.setStyleSheet(
-                    "color: red;"
-                )  # Set font color to red if invalid
+                spin_box.setStyleSheet("color: red;")  # Set font color to red if invalid
 
         # Enable or disable the OK button based on validation result
         self.button_box.button(QDialogButtonBox.Ok).setEnabled(valid_sum)
@@ -599,16 +540,10 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
     def accept_changes(self):
         """Handle the OK button by applying changes and closing the dialog."""
         self.saveWeightingsToModel()  # Assign weightings when changes are accepted
-        self.save_combo_to_model(
-            self.aggregation_combo, self.aggregation_lineedit, "aggregation"
-        )
-        self.save_combo_to_model(
-            self.population_combo, self.population_lineedit, "population"
-        )
+        self.save_combo_to_model(self.aggregation_combo, self.aggregation_lineedit, "aggregation")
+        self.save_combo_to_model(self.population_combo, self.population_lineedit, "population")
         self.save_combo_to_model(self.point_combo, self.point_lineedit, "point_mask")
-        self.save_combo_to_model(
-            self.polygon_combo, self.polygon_lineedit, "polygon_mask"
-        )
+        self.save_combo_to_model(self.polygon_combo, self.polygon_lineedit, "polygon_mask")
         self.save_combo_to_model(self.raster_combo, self.raster_lineedit, "raster_mask")
         # Save the radio button state
         if self.point_radio_button.isChecked():
@@ -617,15 +552,15 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.tree_item.setAttribute("mask_mode", "polygon")
         elif self.raster_radio_button.isChecked():
             self.tree_item.setAttribute("mask_mode", "raster")
+        elif self.ghsl_radio_button.isChecked():
+            self.tree_item.setAttribute("mask_mode", "ghsl")  # gloabl human settlements layer
 
         self.tree_item.setAttribute("buffer_distance_m", self.buffer_distance_m.value())
         # Save the dialog geometry
         self.save_geometry()
         self.accept()
 
-    def save_combo_to_model(
-        self, combo: QgsMapLayerComboBox, lineedit: QLineEdit, prefix: str
-    ):
+    def save_combo_to_model(self, combo: QgsMapLayerComboBox, lineedit: QLineEdit, prefix: str):
         """Save the state of a QgsMapLayerComboBox to the json tree item.
 
         Args:
@@ -648,9 +583,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         else:
             item.setAttribute(f"{prefix}_shapefile", lineedit.text())
 
-    def load_combo_from_model(
-        self, combo: QgsMapLayerComboBox, lineedit: QLineEdit, prefix: str
-    ):
+    def load_combo_from_model(self, combo: QgsMapLayerComboBox, lineedit: QLineEdit, prefix: str):
         """Load the state of a QgsMapLayerComboBox from the json tree item.
 
         Args:

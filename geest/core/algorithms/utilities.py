@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import shutil
 
@@ -17,9 +18,7 @@ from geest.utilities import log_message
 
 
 # Call QGIS process to assign a CRS to a layer
-def assign_crs_to_raster_layer(
-    layer: QgsRasterLayer, crs: QgsCoordinateReferenceSystem
-) -> QgsVectorLayer:
+def assign_crs_to_raster_layer(layer: QgsRasterLayer, crs: QgsCoordinateReferenceSystem) -> QgsVectorLayer:
     """
     Assigns a CRS to a layer and returns the layer.
 
@@ -34,9 +33,7 @@ def assign_crs_to_raster_layer(
     return layer
 
 
-def assign_crs_to_vector_layer(
-    layer: QgsVectorLayer, crs: QgsCoordinateReferenceSystem
-) -> QgsVectorLayer:
+def assign_crs_to_vector_layer(layer: QgsVectorLayer, crs: QgsCoordinateReferenceSystem) -> QgsVectorLayer:
     """
     Assigns a CRS to a layer and returns the layer.
 
@@ -71,7 +68,7 @@ def subset_vector_layer(
     Returns:
         QgsVectorLayer: A new temporary layer containing features that intersect with the given area geometry.
     """
-    if type(features_layer) != QgsVectorLayer:
+    if type(features_layer) is not QgsVectorLayer:
         return None
     log_message("subset_vector_layer Select Features Started")
     output_path = os.path.join(workflow_directory, f"{output_prefix}.shp")
@@ -100,9 +97,7 @@ def subset_vector_layer(
     return QgsVectorLayer(result["OUTPUT"], output_prefix, "ogr")
 
 
-def geometry_to_memory_layer(
-    geometry: QgsGeometry, target_crs: QgsCoordinateReferenceSystem, layer_name: str
-):
+def geometry_to_memory_layer(geometry: QgsGeometry, target_crs: QgsCoordinateReferenceSystem, layer_name: str):
     """
     Convert a QgsGeometry to a memory layer.
 
@@ -123,9 +118,7 @@ def geometry_to_memory_layer(
     return memory_layer
 
 
-def check_and_reproject_layer(
-    features_layer: QgsVectorLayer, target_crs: QgsCoordinateReferenceSystem
-):
+def check_and_reproject_layer(features_layer: QgsVectorLayer, target_crs: QgsCoordinateReferenceSystem):
     """
     Checks if the features layer has valid geometries and the expected CRS.
 
@@ -140,7 +133,6 @@ def check_and_reproject_layer(
     Returns:
         QgsVectorLayer: The input layer, either reprojected or unchanged.
 
-    Note: Also updates self.features_layer to point to the reprojected layer.
     """
     # check if the layer has a valid CRS
     if not features_layer.crs().isValid():

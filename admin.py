@@ -71,9 +71,7 @@ def install(context: typer.Context, build_src: bool = True):
     uninstall(context)
     _log("Building...", context=context)
 
-    built_directory = (
-        build(context, clean=True) if build_src else LOCAL_ROOT_DIR / "build" / SRC_NAME
-    )
+    built_directory = build(context, clean=True) if build_src else LOCAL_ROOT_DIR / "build" / SRC_NAME
 
     # For windows root dir in in AppData
     if os.name == "nt":
@@ -89,10 +87,7 @@ def install(context: typer.Context, build_src: bool = True):
         )
         root_directory = os.environ["USERPROFILE"] + "\\" + plugin_path
     else:
-        root_directory = (
-            Path.home() / f".local/share/QGIS/QGIS3/profiles/"
-            f"{context.obj['qgis_profile']}"
-        )
+        root_directory = Path.home() / f".local/share/QGIS/QGIS3/profiles/" f"{context.obj['qgis_profile']}"
 
     base_target_directory = os.path.join(root_directory, "python/plugins", SRC_NAME)
     _log(f"Copying built plugin to {base_target_directory}...", context=context)
@@ -113,10 +108,7 @@ def symlink(context: typer.Context):
 
     build_path = LOCAL_ROOT_DIR / "build" / SRC_NAME
 
-    root_directory = (
-        Path.home() / f".local/share/QGIS/QGIS3/profiles/"
-        f"{context.obj['qgis_profile']}"
-    )
+    root_directory = Path.home() / f".local/share/QGIS/QGIS3/profiles/" f"{context.obj['qgis_profile']}"
 
     destination_path = root_directory / "python/plugins" / SRC_NAME
 
@@ -133,10 +125,7 @@ def uninstall(context: typer.Context):
     :param context: Application context
     :type context: typer.Context
     """
-    root_directory = (
-        Path.home() / f".local/share/QGIS/QGIS3/profiles/"
-        f"{context.obj['qgis_profile']}"
-    )
+    root_directory = Path.home() / f".local/share/QGIS/QGIS3/profiles/" f"{context.obj['qgis_profile']}"
     base_target_directory = root_directory / "python/plugins" / SRC_NAME
     shutil.rmtree(str(base_target_directory), ignore_errors=True)
     _log(f"Removed {str(base_target_directory)!r}", context=context)
@@ -167,10 +156,7 @@ def generate_zip(
     zip_path = output_directory / f"{SRC_NAME}.{plugin_version}.zip"
     with zipfile.ZipFile(zip_path, "w") as fh:
         _add_to_zip(build_dir, fh, arc_path_base=build_dir.parent)
-    typer.echo(
-        f"zip generated at {str(zip_path)!r} "
-        f"on {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}"
-    )
+    typer.echo(f"zip generated at {str(zip_path)!r} " f"on {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}")
     return zip_path
 
 
@@ -285,9 +271,7 @@ def compile_resources(
     target_path = output_directory / "resources.py"
     target_path.parent.mkdir(parents=True, exist_ok=True)
     _log(f"compile_resources target_path: {target_path}", context=context)
-    subprocess.run(
-        shlex.split(f"pyrcc5 -o {target_path} {resources_path}")
-    )  # nosec B603
+    subprocess.run(shlex.split(f"pyrcc5 -o {target_path} {resources_path}"))  # nosec B603
 
 
 @app.command()
@@ -501,9 +485,7 @@ def _get_existing_releases(
                         pre_release=release.get("prerelease", True),
                         tag_name=release.get("tag_name"),
                         url=zip_download_url,
-                        published_at=dt.datetime.strptime(
-                            release["published_at"], "%Y-%m-%dT%H:%M:%SZ"
-                        ),
+                        published_at=dt.datetime.strptime(release["published_at"], "%Y-%m-%dT%H:%M:%SZ"),
                     )
                 )
     return result
