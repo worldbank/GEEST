@@ -17,7 +17,6 @@ from qgis.core import QgsRectangle
 from geest.core.algorithms.ghsl_processor import GHSLProcessor
 
 
-@unittest.expectedFailure  # Works locally but not in CI due to GDAL version
 class TestGHSLProcessor(unittest.TestCase):
     def setUp(self):
         # Initialize any required variables or objects here
@@ -75,6 +74,7 @@ class TestGHSLProcessor(unittest.TestCase):
             self.assertTrue(os.path.exists(output_path))
             self.assertTrue(output_path.endswith("_test_classified.tif"))
 
+    @unittest.expectedFailure  # Works locally but not in CI due to GDAL version
     def test_clean_raster_for_polygonization(self):
         # Test raster cleaning for polygonization
         if not self.processor:
@@ -90,6 +90,7 @@ class TestGHSLProcessor(unittest.TestCase):
         self.assertTrue(result.endswith("_cleaned.tif"))
         self.assertTrue(os.path.exists(result))
 
+    @unittest.expectedFailure  # Works locally but not in CI due to GDAL version
     def test_polygonize_rasters(self):
         # Test raster polygonization with real data
         if not self.processor:
@@ -109,6 +110,7 @@ class TestGHSLProcessor(unittest.TestCase):
             self.assertTrue(os.path.exists(output_path))
             self.assertTrue(output_path.endswith(".parquet"))
 
+    @unittest.expectedFailure  # Works locally but not in CI due to GDAL version
     def test_combine_vectors(self):
         # Test vector combination with real data
         if not self.processor:
@@ -127,6 +129,7 @@ class TestGHSLProcessor(unittest.TestCase):
         self.assertTrue(result)
         self.assertTrue(os.path.exists(output_vector))
 
+    @unittest.expectedFailure  # Works locally but not in CI due to GDAL version
     def test_combine_vectors_with_extent(self):
         # Test vector combination with extent filtering
         if not self.processor:
@@ -146,6 +149,7 @@ class TestGHSLProcessor(unittest.TestCase):
         self.assertTrue(result)
         self.assertTrue(os.path.exists(output_vector))
 
+    @unittest.expectedFailure  # Works locally but not in CI due to GDAL version
     def test_workflow_integration(self):
         # Test a complete workflow using real methods
         if not self.processor:
