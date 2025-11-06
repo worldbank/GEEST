@@ -1,12 +1,24 @@
+# -*- coding: utf-8 -*-
 """Definitions for OSM concepts."""
-
-from enum import Enum, unique
-
-from geest.core.i18n import tr
 
 __copyright__ = "Copyright 2021, 3Liz"
 __license__ = "GPL version 3"
 __email__ = "info@3liz.org"
+
+# -----------------------------------------------------------
+# Copyright (C) 2021 3Liz
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
+
+from enum import Enum, unique
+
+from geest.core.i18n import tr
 
 
 # Wait for python 3.6 minimum version

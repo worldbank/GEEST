@@ -7,6 +7,9 @@ click==8.0.4
 colorama==0.4.6
 darglint
 debugpy==1.8.1
+flake8==6.0.0
+flake8-docstrings==1.7.0
+pydocstyle==6.3.0
 defusedxml==0.7.1
 distlib==0.3.8
 filelock==3.13.4
