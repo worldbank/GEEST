@@ -166,6 +166,7 @@ class TransformCache:
 ## Benchmarking Template
 
 ```python
+import time
 import timeit
 import statistics
 
