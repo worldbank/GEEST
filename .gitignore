@@ -97,3 +97,7 @@ test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C20_integrati
 test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C19_test*
 test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C20_test*
 test_osm_roads_output.xml
+
+# Presentation build artifacts
+docs/presentations/*.html
+docs/presentations/*.pdf
