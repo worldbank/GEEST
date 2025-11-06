@@ -173,7 +173,11 @@ class StudyAreaProcessingTask(QgsTask):
         Exports a QgsVectorLayer to a Shapefile in output_dir.
         Returns the full path to the .shp (main file).
         """
-        shapefile_path = os.path.join(output_dir, "boundaries.shp")
+        # ensure the study area directory exists
+        if not os.path.exists(os.path.join(output_dir, "study_area")):
+            os.makedirs(os.path.join(output_dir, "study_area"))
+
+        shapefile_path = os.path.join(output_dir, "study_area", "boundaries.shp")
         # Get the project's transform context (required for file writing)
         transform_context = QgsProject.instance().transformContext()
         options = QgsVectorFileWriter.SaveVectorOptions()

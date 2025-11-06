@@ -146,7 +146,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
         try:
             log_message("Creating GHSL Downloader Task")
             downloader = GHSLDownloaderTask(
-                extent_mollweide=extent_mollweide(),  # bbox must be in Mollweide ESRI:54009
+                extent_mollweide=extent_mollweide(self.working_directory),  # bbox must be in Mollweide ESRI:54009
                 working_dir=self.working_directory,
                 filename="settlements_layer",
                 use_cache=True,

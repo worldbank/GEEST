@@ -412,7 +412,6 @@ class BaseReport:
         page_title.setVAlign(Qt.AlignCenter)
         page_title.setHAlign(Qt.AlignLeft)
         # wrap the text if too long
-        page_title.setWordWrap(True)
         page_title.setFixedSize(QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters))
         # Position the label on the current page
         page_title.attemptMove(
