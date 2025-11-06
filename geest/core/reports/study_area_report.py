@@ -186,9 +186,7 @@ class StudyAreaReport(BaseReport):
         for page_number, (layer_name, layer) in enumerate(self.layers.items()):
             # Add a new page for each layer
             page = self.make_page(
-                title=layer_name,
-                description_key=layer_name,
-                current_page=current_page,
+                title=layer_name, description_key=layer_name, current_page=current_page, show_header_and_footer=True
             )
             del page
 
@@ -218,6 +216,4 @@ class StudyAreaReport(BaseReport):
                     current_page=current_page,
                     crs=crs,
                 )
-            # Add the page footer
-            self.add_header_and_footer(page_number=current_page)
             current_page += 1
