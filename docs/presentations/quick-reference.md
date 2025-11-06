@@ -234,7 +234,7 @@ def process_in_batches(layer, batch_size=1000):
         batch.append(feature)
         if len(batch) >= batch_size:
             yield process_batch(batch)
-            batch.clear()  # Free memory
+            batch.clear()  # Clear batch for next iteration
     
     # Process remaining
     if batch:
@@ -253,9 +253,9 @@ def process_layer():
         results = process(layer)
         return results
     finally:
-        # Explicit cleanup
+        # Explicit cleanup (use sparingly for large layers)
         layer = None
-        gc.collect()
+        gc.collect()  # Force collection if needed
 ```
 
 ## Performance Monitoring Class
