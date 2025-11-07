@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Population Processor module.
+
+This module contains functionality for population processor.
+"""
 import os
 import platform
 import shutil

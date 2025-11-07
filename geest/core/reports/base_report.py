@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Base Report module.
+
+This module contains functionality for base report.
+"""
 import math
 from collections import defaultdict
 

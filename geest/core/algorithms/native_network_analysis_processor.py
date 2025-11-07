@@ -107,6 +107,11 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             log_message("Isochrone layer created successfully!")
 
     def isochrone_feature_count(self) -> int:
+        """🔄 Get isochrone feature count.
+        
+        Returns:
+            The result of the operation.
+        """
         if self.isochrone_layer is None:
             raise ValueError("Isochrone layer is not initialized.")
         if not self.isochrone_layer:
@@ -120,6 +125,11 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         log_message(f"Native Network Analysis Processor resources cleaned up instance {self.instance_id}.")
 
     def run(self) -> str:
+        """🔄 Run.
+        
+        Returns:
+            The result of the operation.
+        """
         try:
             self.calculate_network()
             return True
@@ -129,6 +139,7 @@ class NativeNetworkAnalysisProcessor(QgsTask):
             return False
 
     def calculate_network(self) -> None:
+        """🔄 Calculate network."""
         self.feedback.setProgress(1)
         log_message(
             f"Calculating Network for feature {self.feature.id()} using {self.mode} with these values: {self.values}..."

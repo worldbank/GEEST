@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Opportunities By Wee Score Population Processor module.
+
+This module contains functionality for opportunities by wee score population processor.
+"""
 import os
 import shutil
 import traceback
