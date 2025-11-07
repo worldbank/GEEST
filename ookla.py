@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""📦 Ookla module.
+
+This module contains functionality for ookla.
+"""
 import sys
 import timeit
 
@@ -33,6 +37,12 @@ path_mobile_internet = "/vsis3/ookla-open-data/parquet/performance/type=mobile/y
 
 
 def print_bbox_diagram(bbox, title="BBOX Diagram"):
+    """🔄 Print bbox diagram.
+    
+    Args:
+        bbox: Bbox.
+        title: Title.
+    """
     console = Console()
     # Pretty ASCII-art diagram
     bbox_diagram = f"""[{PALETTE['neutral']}]
@@ -55,6 +65,8 @@ def print_bbox_diagram(bbox, title="BBOX Diagram"):
 
 
 def print_analysis_intro():
+    """🔄 Print analysis intro.
+    """
     title = "Spatial Filter"
     console.print(
         Panel(
@@ -71,6 +83,11 @@ def print_analysis_intro():
 
 
 def print_bbox_table(bbox):
+    """🔄 Print bbox table.
+    
+    Args:
+        bbox: Bbox.
+    """
     title = "Bounding Box Coordinates"
     table = Table(
         title=f"[bold {PALETTE['accent']}]{title}[/bold {PALETTE['accent']}]",
@@ -89,6 +106,13 @@ def print_bbox_table(bbox):
 
 
 def extract_ookla_data(input_file, output_file, bbox):
+    """🔄 Extract ookla data.
+    
+    Args:
+        input_file: Input file.
+        output_file: Output file.
+        bbox: Bbox.
+    """
     # Example row from the Parquet file:
     # OGRFeature(ookla):349644
     # quadkey (String) = 0230131221113313
@@ -213,6 +237,13 @@ def extract_ookla_data(input_file, output_file, bbox):
 
 
 def print_timings(start_time, title, message):
+    """🔄 Print timings.
+    
+    Args:
+        start_time: Start time.
+        title: Title.
+        message: Message.
+    """
     # print the time as hours, minutes, seconds etc.
     run_time = timeit.default_timer() - start_time
     hours = int(run_time // 3600)
@@ -232,6 +263,13 @@ def print_timings(start_time, title, message):
 
 
 def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
+    """🔄 Rasterize filtered data.
+    
+    Args:
+        input_file: Input file.
+        output_raster: Output raster.
+        pixel_size: Pixel size.
+    """
     # This function rasterizes the filtered Parquet data into a GeoTIFF
     # with the specified pixel size.
     # gdal_rasterize -l ookla_filtered -burn 1.0 -tr 0.001 0.001 -init 0.0 -a_nodata 0.0 -ot Byte -of GTiff -co COMPRESS=DEFLATE -co PREDICTOR=2 -co ZLEVEL=9 /home/timlinux/dev/python/GEEST/data/ookla_filtered.parquet OUTPUT.tif
@@ -259,6 +297,12 @@ def rasterize_filtered_data(input_file, output_raster, pixel_size=0.01):
 
 
 def combine_vectors(input_files, output_file):
+    """🔄 Combine vectors.
+    
+    Args:
+        input_files: Input files.
+        output_file: Output file.
+    """
     # This function combines multiple vector files into a single output file.
     start_time = timeit.default_timer()
     quadkey_set = set()

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Utilities module.
+
+This module contains functionality for utilities.
+"""
 import os
 import shutil
 

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Road Network Panel module.
+
+This module contains functionality for road network panel.
+"""
 import os
 import traceback
 
@@ -28,12 +32,21 @@ FORM_CLASS = get_ui_class("road_network_panel_base.ui")
 
 
 class RoadNetworkPanel(FORM_CLASS, QWidget):
+    """🎯 Road Network Panel.
+    
+    Attributes:
+        queue_manager: Queue manager.
+        settings: Settings.
+        working_directory: Working directory.
+    """
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
     road_network_layer_path_changed = pyqtSignal(str)
 
     def __init__(self):
+        """🏗️ Initialize the instance.
+        """
         super().__init__()
         self.setWindowTitle("GEEST")
         # For running study area processing in a separate thread
@@ -80,12 +93,24 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.working_directory = working_directory
 
     def set_reference_layer(self, layer):
+        """⚙️ Set reference layer.
+        
+        Args:
+            layer: Layer.
+        """
         self._reference_layer = layer
 
     def set_crs(self, crs):
+        """⚙️ Set crs.
+        
+        Args:
+            crs: Crs.
+        """
         self._crs = crs
 
     def initUI(self):
+        """⚙️ Initui.
+        """
         self.custom_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
             resources_path("resources", "geest-banner.png"),
@@ -112,6 +137,8 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
 
     def emit_road_layer_change(self):
+        """⚙️ Emit road layer change.
+        """
         road_layer = self.road_layer_combo.currentLayer()
         if road_layer:
             self.road_network_layer_path_changed.emit(road_layer.source())
@@ -119,12 +146,21 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             self.road_network_layer_path_changed.emit(None)
 
     def on_next_button_clicked(self):
+        """⚙️ On next button clicked.
+        """
         self.switch_to_next_tab.emit()
 
     def on_previous_button_clicked(self):
+        """⚙️ On previous button clicked.
+        """
         self.switch_to_previous_tab.emit()
 
     def road_network_layer_path(self):
+        """⚙️ Road network layer path.
+        
+        Returns:
+            The result of the operation.
+        """
         if self.road_layer_combo.currentLayer() is None:
             return None
         return self.road_layer_combo.currentLayer().source()
@@ -281,6 +317,11 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress
     def osm_extract_progress_updated(self, progress: float):
+        """⚙️ Osm extract progress updated.
+        
+        Args:
+            progress: Progress.
+        """
         self.child_progress_bar.setVisible(True)
         self.child_progress_bar.setEnabled(True)
         if progress == 0:
@@ -298,6 +339,8 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             self.child_progress_bar.setFormat(float_value_as_string)
 
     def road_download_done(self):
+        """⚙️ Road download done.
+        """
         log_message(
             "*** OSM download completed successfully. ***",
             tag="Geest",
@@ -318,6 +361,8 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.enable_widgets()
 
     def cycle_download_done(self):
+        """⚙️ Cycle download done.
+        """
         # Just load the layer into the project - we dont need to store
         # it as part of the model like we do for road networks which are
         # using in our native routing analysis
@@ -340,10 +385,17 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.enable_widgets()
 
     def resizeEvent(self, event):
+        """⚙️ Resizeevent.
+        
+        Args:
+            event: Event.
+        """
         self.set_font_size()
         super().resizeEvent(event)
 
     def set_font_size(self):
+        """⚙️ Set font size.
+        """
         # Scale the font size to fit the text in the available space
         # log_message(f"Description Label Width: {self.description.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases

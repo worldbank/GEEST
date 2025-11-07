@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Osm Roads Downloader module.
+
+This module contains functionality for osm roads downloader.
+"""
 from typing import Optional
 
 from qgis.core import (
@@ -13,6 +17,8 @@ from .osm_data_downloader_base import OSMDataDownloaderBase
 
 
 class OSMRoadsDownloader(OSMDataDownloaderBase):
+    """🎯 O S M Roads Downloader.
+    """
     def __init__(
         self,
         extents: QgsRectangle,

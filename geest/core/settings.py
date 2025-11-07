@@ -221,6 +221,14 @@ def export_setting(file_path, qsettings=None):
         settings[key] = setting(key, qsettings=qsettings)
 
     def custom_default(obj):
+        """🔄 Custom default.
+        
+        Args:
+            obj: Obj.
+        
+        Returns:
+            The result of the operation.
+        """
         if obj is None or (hasattr(obj, "isNull") and obj.isNull()):
             return ""
         raise TypeError

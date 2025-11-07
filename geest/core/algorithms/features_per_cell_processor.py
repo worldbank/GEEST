@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Features Per Cell Processor module.
+
+This module contains functionality for features per cell processor.
+"""
 from qgis import processing  # noqa: F401
 from qgis.core import (
     Qgis,

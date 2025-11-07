@@ -2,6 +2,10 @@
 # flake8: noqa
 # isort: skip_file
 # black: skip-file
+"""📦 Tasks module.
+
+This module contains functionality for tasks.
+"""
 from .grid_from_bbox_task import GridFromBboxTask
 from .ors_checker_task import OrsCheckerTask
 from .osm_downloader_task import OSMDownloaderTask

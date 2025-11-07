@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Osm Data Downloader Base module.
+
+This module contains functionality for osm data downloader base.
+"""
 try:
     from defusedxml import ElementTree as ET
 except ImportError:
@@ -38,6 +42,15 @@ from .query_preparation import QueryPreparation
 
 
 class OSMDataDownloaderBase(ABC):
+    """🎯 O S M Data Downloader Base.
+    
+    Attributes:
+        base_url: Base url.
+        delete_gpkg: Delete gpkg.
+        extents: Extents.
+        feedback: Feedback.
+        filename: Filename.
+    """
     def __init__(
         self,
         extents: QgsRectangle,

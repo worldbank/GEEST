@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Credits Panel module.
+
+This module contains functionality for credits panel.
+"""
 from PyQt5.QtWidgets import QWidget
 from qgis.core import Qgis  # noqa F401
 from qgis.PyQt.QtCore import QUrl, pyqtSignal
@@ -16,10 +20,14 @@ FORM_CLASS = get_ui_class("credits_panel_base.ui")
 
 
 class CreditsPanel(FORM_CLASS, QWidget):
+    """🎯 Credits Panel.
+    """
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
     def __init__(self):
+        """🏗️ Initialize the instance.
+        """
         super().__init__()
         self.setWindowTitle("GEEST")
         # Dynamically load the .ui file
@@ -28,6 +36,8 @@ class CreditsPanel(FORM_CLASS, QWidget):
         self.initUI()
 
     def initUI(self):
+        """⚙️ Initui.
+        """
         self.custom_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
             resources_path("resources", "geest-banner.png"),
@@ -43,9 +53,13 @@ class CreditsPanel(FORM_CLASS, QWidget):
         self.set_font_size()
 
     def on_next_button_clicked(self):
+        """⚙️ On next button clicked.
+        """
         self.switch_to_next_tab.emit()
 
     def on_previous_button_clicked(self):
+        """⚙️ On previous button clicked.
+        """
         self.switch_to_previous_tab.emit()
 
     def open_link_in_browser(self, url: str):
@@ -53,14 +67,23 @@ class CreditsPanel(FORM_CLASS, QWidget):
         QDesktopServices.openUrl(QUrl(url))
 
     def repaint(self):
+        """⚙️ Repaint.
+        """
         self.set_font_size()
         super().repaint()
 
     def resizeEvent(self, event):
+        """⚙️ Resizeevent.
+        
+        Args:
+            event: Event.
+        """
         self.set_font_size()
         super().resizeEvent(event)
 
     def set_font_size(self):
+        """⚙️ Set font size.
+        """
         # Scale the font size to fit the text in the available space
         # log_message(f"Label Width: {self.description.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases

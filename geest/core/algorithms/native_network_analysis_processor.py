@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Native Network Analysis Processor module.
+
+This module contains functionality for native network analysis processor.
+"""
 import os
 import traceback
 from typing import List
@@ -20,6 +24,15 @@ from geest.utilities import log_message
 
 
 class NativeNetworkAnalysisProcessor(QgsTask):
+    """🎯 Native Network Analysis Processor.
+    
+    Attributes:
+        area_index: Area index.
+        crs: Crs.
+        feature: Feature.
+        feedback: Feedback.
+        instance_id: Instance id.
+    """
     _instance_counter = 0  # Class variable to keep track of instances
 
     def __init__(
@@ -33,6 +46,18 @@ class NativeNetworkAnalysisProcessor(QgsTask):
         values: List[int],
         working_directory: str,
     ):
+        """🏗️ Initialize the instance.
+        
+        Args:
+            network_layer_path: Network layer path.
+            isochrone_layer_path: Isochrone layer path.
+            area_index: Area index.
+            point_feature: Point feature.
+            crs: Crs.
+            mode: Mode.
+            values: Values.
+            working_directory: Working directory.
+        """
         super().__init__("Native Network Analysis Processor", QgsTask.CanCancel)
         self.feedback = QgsFeedback()
         NativeNetworkAnalysisProcessor._instance_counter += 1  # Increment counter

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Acled Csv Configuration Widget module.
+
+This module contains functionality for acled csv configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QSpinBox
 

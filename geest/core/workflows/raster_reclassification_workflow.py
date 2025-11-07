@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Raster Reclassification Workflow module.
+
+This module contains functionality for raster reclassification workflow.
+"""
 import os
 
 from qgis import processing  # QGIS processing toolbox

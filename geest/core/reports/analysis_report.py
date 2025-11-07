@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Analysis Report module.
+
+This module contains functionality for analysis report.
+"""
 import json
 from datetime import datetime
 from typing import Dict, List, Optional

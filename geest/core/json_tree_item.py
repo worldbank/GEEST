@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Json Tree Item module.
+
+This module contains functionality for json tree item.
+"""
 import traceback
 import uuid
 from typing import Optional
@@ -23,6 +27,14 @@ class JsonTreeItem:
     """
 
     def __init__(self, data, role, guid=None, parent=None):
+        """🏗️ Initialize the instance.
+        
+        Args:
+            data: Data.
+            role: Role.
+            guid: Guid.
+            parent: Parent.
+        """
         self.parentItem = parent
         self.itemData = data  # name, status, weighting, attributes(dict)
         self.childItems = []
@@ -73,9 +85,22 @@ class JsonTreeItem:
         return self.guid
 
     def appendChild(self, item):
+        """⚙️ Appendchild.
+        
+        Args:
+            item: Item.
+        """
         self.childItems.append(item)
 
     def child(self, row):
+        """⚙️ Child.
+        
+        Args:
+            row: Row.
+        
+        Returns:
+            The result of the operation.
+        """
         return self.childItems[row]
 
     def childCount(self, recursive=False):
@@ -98,40 +123,97 @@ class JsonTreeItem:
             return count
 
     def columnCount(self):
+        """⚙️ Columncount.
+        
+        Returns:
+            The result of the operation.
+        """
         return len(self.itemData)
 
     def data(self, column):
+        """⚙️ Data.
+        
+        Args:
+            column: Column.
+        
+        Returns:
+            The result of the operation.
+        """
         if column < len(self.itemData):
             return self.itemData[column]
         return None
 
     def setData(self, column, value):
+        """⚙️ Setdata.
+        
+        Args:
+            column: Column.
+            value: Value.
+        
+        Returns:
+            The result of the operation.
+        """
         if column < len(self.itemData):
             self.itemData[column] = value
             return True
         return False
 
     def parent(self):
+        """⚙️ Parent.
+        
+        Returns:
+            The result of the operation.
+        """
         return self.parentItem
 
     def row(self):
+        """⚙️ Row.
+        
+        Returns:
+            The result of the operation.
+        """
         if self.parentItem:
             return self.parentItem.childItems.index(self)
         return 0
 
     def name(self):
+        """⚙️ Name.
+        
+        Returns:
+            The result of the operation.
+        """
         return self.data(0)
 
     def isIndicator(self):
+        """⚙️ Isindicator.
+        
+        Returns:
+            The result of the operation.
+        """
         return self.role == "indicator"
 
     def isFactor(self):
+        """⚙️ Isfactor.
+        
+        Returns:
+            The result of the operation.
+        """
         return self.role == "factor"
 
     def isDimension(self):
+        """⚙️ Isdimension.
+        
+        Returns:
+            The result of the operation.
+        """
         return self.role == "dimension"
 
     def isAnalysis(self):
+        """⚙️ Isanalysis.
+        
+        Returns:
+            The result of the operation.
+        """
         return self.role == "analysis"
 
     def clear(self, recursive=False):

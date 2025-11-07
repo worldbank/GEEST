@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Point Per Cell Workflow module.
+
+This module contains functionality for point per cell workflow.
+"""
 import os
 from urllib.parse import unquote
 

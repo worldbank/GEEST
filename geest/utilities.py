@@ -44,6 +44,11 @@ from geest.core.settings import setting
 
 
 def theme_background_image() -> QPixmap:
+    """🔄 Theme background image.
+    
+    Returns:
+        The result of the operation.
+    """
     # Load the background image
     if is_qgis_dark_theme_active():
         background_image = QPixmap(resources_path("resources", "images", "background-dark.png"))
@@ -225,6 +230,8 @@ def get_free_memory_mb():
             import ctypes.wintypes
 
             class MEMORYSTATUSEX(ctypes.Structure):
+                """🎯 M E M O R Y S T A T U S E X.
+                """
                 _fields_ = [
                     ("dwLength", ctypes.wintypes.DWORD),
                     ("dwMemoryLoad", ctypes.wintypes.DWORD),
@@ -428,6 +435,14 @@ def geest_layer_ids():
 
     # Recursively collect IDs of all layers in the "Geest" group
     def collect_layer_ids(group: QgsLayerTreeGroup) -> set:
+        """🔄 Collect layer ids.
+        
+        Args:
+            group: Group.
+        
+        Returns:
+            The result of the operation.
+        """
         layer_ids = set()
         for child in group.children():
             if isinstance(child, QgsLayerTreeGroup):

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Street Lights Buffer Workflow module.
+
+This module contains functionality for street lights buffer workflow.
+"""
 import os
 from urllib.parse import unquote
 

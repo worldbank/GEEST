@@ -24,11 +24,20 @@ from geest.utilities import is_qgis_dark_theme_active, theme_stylesheet
 
 
 class SolidMenu(QMenu):
+    """🎯 Solid Menu.
+    """
     def __init__(self, *args, **kwargs):
+        """🏗️ Initialize the instance.
+        """
         super().__init__(*args, **kwargs)
         self.setStyleSheet(theme_stylesheet())
 
     def paintEvent(self, event):
+        """⚙️ Paintevent.
+        
+        Args:
+            event: Event.
+        """
         painter = QStylePainter(self)
         opt = QStyleOptionMenuItem()
         opt.initFrom(self)

@@ -109,11 +109,26 @@ class GeestOptionsFactory(QgsOptionsWidgetFactory):
     """
 
     def __init__(self):  # pylint: disable=useless-super-delegation
+        """🏗️ Initialize the instance.
+        """
         super().__init__()
         self.setTitle("Geest")
 
     def icon(self):  # pylint: disable=missing-function-docstring
+        """⚙️ Icon.
+        
+        Returns:
+            The result of the operation.
+        """
         return QIcon(resources_path("resources", "geest-settings.svg"))
 
     def createWidget(self, parent):  # pylint: disable=missing-function-docstring
+        """⚙️ Createwidget.
+        
+        Args:
+            parent: Parent.
+        
+        Returns:
+            The result of the operation.
+        """
         return GeestSettings(parent)

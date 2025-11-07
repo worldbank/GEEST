@@ -25,6 +25,12 @@ class GEESTTask(QgsTask):
     error = pyqtSignal()
 
     def __init__(self, description, node):
+        """🏗️ Initialize the instance.
+        
+        Args:
+            description: Description.
+            node: Node.
+        """
         super().__init__(description)
         self.node = node
 

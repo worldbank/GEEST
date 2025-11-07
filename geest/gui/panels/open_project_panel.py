@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Open Project Panel module.
+
+This module contains functionality for open project panel.
+"""
 import os
 
 from PyQt5.QtCore import Qt
@@ -21,11 +25,20 @@ FORM_CLASS = get_ui_class("open_project_panel_base.ui")
 
 
 class OpenProjectPanel(FORM_CLASS, QWidget):
+    """🎯 Open Project Panel.
+    
+    Attributes:
+        queue_manager: Queue manager.
+        settings: Settings.
+        working_dir: Working dir.
+    """
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     set_working_directory = pyqtSignal(str)  # Signal to set the working directory
 
     def __init__(self):
+        """🏗️ Initialize the instance.
+        """
         super().__init__()
         self.setWindowTitle("GEEST")
         # For running study area processing in a separate thread
@@ -39,6 +52,8 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.initUI()
 
     def initUI(self):
+        """⚙️ Initui.
+        """
         self.custom_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
             resources_path("resources", "geest-banner.png"),
@@ -75,6 +90,8 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.previous_button.clicked.connect(self.on_previous_button_clicked)
 
     def on_previous_button_clicked(self):
+        """⚙️ On previous button clicked.
+        """
         self.switch_to_previous_tab.emit()
 
     def add_project_to_combo(self, project_path: str):
@@ -95,6 +112,15 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         return elided_text
 
     def eventFilter(self, obj, event):
+        """⚙️ Eventfilter.
+        
+        Args:
+            obj: Obj.
+            event: Event.
+        
+        Returns:
+            The result of the operation.
+        """
         if obj == self.previous_project_combo and event.type() == event.Resize:
             # Reapply elision for all items in the combo box on resize
             for index in range(self.previous_project_combo.count()):
@@ -111,6 +137,8 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
         self.previous_project_combo.setToolTip(full_path)
 
     def select_directory(self):
+        """⚙️ Select directory.
+        """
         directory = QFileDialog.getExistingDirectory(self, "Select Working Directory", self.working_dir)
         if directory:
             self.working_dir = directory
@@ -151,10 +179,17 @@ class OpenProjectPanel(FORM_CLASS, QWidget):
             # )
 
     def resizeEvent(self, event):
+        """⚙️ Resizeevent.
+        
+        Args:
+            event: Event.
+        """
         self.set_font_size()
         super().resizeEvent(event)
 
     def set_font_size(self):
+        """⚙️ Set font size.
+        """
         # Scale the font size to fit the text in the available space
         # log_message(f"Label Width: {self.label.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases

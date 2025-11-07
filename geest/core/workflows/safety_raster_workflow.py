@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Safety Raster Workflow module.
+
+This module contains functionality for safety raster workflow.
+"""
 import os
 from urllib.parse import unquote
 

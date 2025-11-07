@@ -79,6 +79,14 @@ log_message("QGIS Version: {}".format(Qgis.QGIS_VERSION), force=True)
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
+    """🔄 Classfactory.
+    
+    Args:
+        iface: Iface.
+    
+    Returns:
+        The result of the operation.
+    """
     return GeestPlugin(iface)
 
 
@@ -108,6 +116,11 @@ class GeestPlugin:
     DEBUG_PORT = 9000  # Port for debugpy connection
 
     def __init__(self, iface):
+        """🏗️ Initialize the instance.
+        
+        Args:
+            iface: Iface.
+        """
         self.iface = iface
         self.run_action = None
         self.debug_action = None
@@ -302,6 +315,8 @@ for module_name in list(sys.modules.keys()):
                         break
 
     def setup_map_canvas_items(self):
+        """⚙️ Setup map canvas items.
+        """
         self.label_overlay = LayerDescriptionItem(self.iface.mapCanvas())
         experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
         if experimental_features:
@@ -395,7 +410,18 @@ for module_name in list(sys.modules.keys()):
 
         # Step 2: Create and show dialog
         class TestPickerDialog(QDialog):
+            """🎯 Test Picker Dialog.
+            
+            Attributes:
+                combo: Combo.
+            """
             def __init__(self, tests, parent=None):
+                """🏗️ Initialize the instance.
+                
+                Args:
+                    tests: Tests.
+                    parent: Parent.
+                """
                 super().__init__(parent)
                 self.setWindowTitle("Select Test to Run")
                 self.setMinimumWidth(500)  # Make dialog wider to accommodate status icons
@@ -415,6 +441,11 @@ for module_name in list(sys.modules.keys()):
                 run_button.clicked.connect(self.accept)
 
             def selected_test(self):
+                """⚙️ Selected test.
+                
+                Returns:
+                    The result of the operation.
+                """
                 return self.combo.currentText()
 
         dialog = TestPickerDialog(all_test_options, self.iface.mainWindow())

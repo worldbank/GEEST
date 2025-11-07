@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Raster Datasource Widget module.
+
+This module contains functionality for raster datasource widget.
+"""
 import os
 from urllib.parse import quote, unquote
 
