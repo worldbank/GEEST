@@ -10,6 +10,8 @@ from geest.gui.widgets.configuration_widgets import (
     DontUseConfigurationWidget,
     FeaturePerCellConfigurationWidget,
     IndexScoreConfigurationWidget,
+    IndexScoreWithGHSLConfigurationWidget,
+    IndexScoreWithOOKLAConfigurationWidget,
     MultiBufferConfigurationWidget,
     OsmTransportConfigurationWidget,
     RasterReclassificationConfigurationWidget,
@@ -49,10 +51,10 @@ class ConfigurationWidgetFactory:
                 return ContextualIndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_index_score_with_ookla" and value == 1:
                 # Uses the same config widget as index score for now ...
-                return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+                return IndexScoreWithOOKLAConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_index_score_with_ghsl" and value == 1:
                 # Uses the same config widget as index score for now ...
-                return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+                return IndexScoreWithGHSLConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_multi_buffer_point" and value == 1:
                 return MultiBufferConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_single_buffer_point" and value == 1:
