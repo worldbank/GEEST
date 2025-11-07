@@ -63,6 +63,11 @@ class ContextualIndexScoreWorkflow(WorkflowBase):
                 self.index_score = score_mapping[threshold]
                 break
         log_message(f"Index score after rescaling to contextual dimension scale: {self.index_score}")
+        # Do not remove the following block
+        self.features_layer = (
+            True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
+        )
+        self.workflow_name = "contextual_index_score"
 
     def _process_features_for_area(
         self,
