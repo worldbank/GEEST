@@ -530,7 +530,9 @@ class TreePanel(QWidget):
             set_network_layers_action = QAction("Set Network Layers")
             set_network_layers_action.triggered.connect(self.switch_to_network_tab)  # Connect to method
             set_ghsl_layer_action = QAction("Set GHSL Layer")
-            set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to method
+            set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to metho
+            remove_unused_layers_action = QAction("Clean Unused Layers from Project")
+            remove_unused_layers_action.triggered.connect(self.clean_unused_layers)
             menu.addAction(edit_analysis_action)
             menu.addAction(set_network_layers_action)
             menu.addAction(set_ghsl_layer_action)
@@ -538,6 +540,8 @@ class TreePanel(QWidget):
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
+            menu.addAction(open_working_directory_action)
+            menu.addAction(remove_unused_layers_action)
 
             # Add Animate Results action
             animate_results_action = QAction("Animate results", self)
@@ -1005,6 +1009,34 @@ class TreePanel(QWidget):
             # If "Copy" was selected, copy the cell's content to the clipboard
             clipboard = QApplication.clipboard()
             clipboard.setText(item.text())
+
+    def clean_unused_layers(self):
+        # Remove any layers from the project that are not in the QGIS legend
+        from qgis.core import QgsLayerTreeGroup, QgsLayerTreeLayer
+
+        project = QgsProject.instance()
+        root = project.layerTreeRoot()
+        removed_count = 0
+
+        def collect_layer_ids(node):
+            ids = set()
+            if isinstance(node, QgsLayerTreeLayer):
+                layer = node.layer()
+                if layer:
+                    ids.add(layer.id())
+            elif isinstance(node, QgsLayerTreeGroup):
+                for child in node.children():
+                    ids.update(collect_layer_ids(child))
+            return ids
+
+        layers_in_legend = collect_layer_ids(root)
+        for layer in project.mapLayers().values():
+            if layer.id() not in layers_in_legend:
+                log_message(f"Removing unused layer: {layer.name()}")
+                project.removeMapLayer(layer.id())
+                removed_count += 1
+        # Show a message box to confirm completion and how many layers were removed
+        QMessageBox.information(self, "Clean Unused Layers", f"Unused layers have been removed: {removed_count}")
 
     def add_study_area_to_map(self):
         """Add the study area layers to the map.

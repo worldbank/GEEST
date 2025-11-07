@@ -40,6 +40,7 @@ trond-snekvik.simple-rst@1.5.4
 useblocks.sphinx-needs-vscode@0.3.2
 VisualStudioExptTeam.intellicode-api-usage-examples@0.2.9
 VisualStudioExptTeam.vscodeintellicode@1.3.2
+vscodevim.vim@1.31.0
 waderyan.gitblame@11.1.3
 wholroyd.jinja@0.0.8
 yzhang.markdown-all-in-one@3.6.3

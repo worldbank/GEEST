@@ -9,6 +9,7 @@ from .dimension_aggregation_workflow import DimensionAggregationWorkflow
 from .dont_use_workflow import DontUseWorkflow
 from .factor_aggregation_workflow import FactorAggregationWorkflow
 from .index_score_workflow import DefaultIndexScoreWorkflow
+from .contextual_index_score_workflow import ContextualIndexScoreWorkflow
 from .index_score_with_ookla_workflow import IndexScoreWithOoklaWorkflow
 from .index_score_with_ghsl_workflow import IndexScoreWithGHSLWorkflow
 from .multi_buffer_distances_native_workflow import MultiBufferDistancesNativeWorkflow

@@ -415,7 +415,7 @@ class BaseReport:
         page_title.setFixedSize(QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters))
         # Position the label on the current page
         page_title.attemptMove(
-            QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters),
+            QgsLayoutPoint(10, 1, QgsUnitTypes.LayoutMillimeters),
             page=current_page,
         )
         self.layout.addLayoutItem(page_title)
