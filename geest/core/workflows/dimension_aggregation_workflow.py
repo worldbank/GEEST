@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Dimension Aggregation Workflow module.
+
+This module contains functionality for dimension aggregation workflow.
+"""
 from qgis.core import QgsFeedback, QgsProcessingContext
 
 from geest.core import JsonTreeItem

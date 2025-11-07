@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Index Score Workflow module.
+
+This module contains functionality for index score workflow.
+"""
 import os
 
 from qgis import processing  # noqa: F401 # QGIS processing toolbox

@@ -58,4 +58,13 @@ def setup_translation(file_pattern="{}.qm", folder=None):
 
 
 def tr(text, context="@default"):
+    """🔄 Tr.
+    
+    Args:
+        text: Text.
+        context: Context.
+    
+    Returns:
+        The result of the operation.
+    """
     return QApplication.translate(context, text)

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Toggle Switch module.
+
+This module contains functionality for toggle switch.
+"""
 from qgis.PyQt.QtCore import QRect, QSize, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QPainter
 from qgis.PyQt.QtWidgets import QWidget
@@ -10,6 +14,12 @@ class ToggleSwitch(QWidget):
     toggled = pyqtSignal(bool)
 
     def __init__(self, initial_value=False, parent=None):
+        """🏗️ Initialize the instance.
+        
+        Args:
+            initial_value: Initial value.
+            parent: Parent.
+        """
         super().__init__(parent)
         self.setFixedSize(QSize(60, 26))  # Size of the toggle switch
         self.checked = initial_value

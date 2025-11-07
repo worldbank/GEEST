@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""📦 Classified Polygon Workflow module.
+
+This module contains functionality for classified polygon workflow.
+"""
 from qgis.core import (
     Qgis,
     QgsFeedback,

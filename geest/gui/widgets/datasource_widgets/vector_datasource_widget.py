@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Vector Datasource Widget module.
+
+This module contains functionality for vector datasource widget.
+"""
 import os
 import urllib.parse  # Add this import
 

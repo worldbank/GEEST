@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Polygon Per Cell Processor module.
+
+This module contains functionality for polygon per cell processor.
+"""
 from qgis.core import Qgis, QgsField, QgsVectorLayer, edit
 from qgis.PyQt.QtCore import QVariant
 

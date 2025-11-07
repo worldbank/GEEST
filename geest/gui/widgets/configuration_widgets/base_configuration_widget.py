@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Base Configuration Widget module.
+
+This module contains functionality for base configuration widget.
+"""
 from abc import abstractmethod
 
 from qgis.core import Qgis

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Opportunities By Wee Score Processor module.
+
+This module contains functionality for opportunities by wee score processor.
+"""
 import os
 import shutil
 import traceback

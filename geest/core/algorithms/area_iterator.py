@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""📦 Area Iterator module.
+
+This module contains functionality for area iterator.
+"""
 from typing import Iterator, Tuple
 
 from qgis.core import Qgis, QgsFeatureRequest, QgsGeometry, QgsVectorLayer

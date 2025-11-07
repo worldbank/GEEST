@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Acled Impact Workflow module.
+
+This module contains functionality for acled impact workflow.
+"""
 import csv
 import os
 

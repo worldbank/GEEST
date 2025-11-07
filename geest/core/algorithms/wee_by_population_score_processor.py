@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Wee By Population Score Processor module.
+
+This module contains functionality for wee by population score processor.
+"""
 import os
 import shutil
 import traceback

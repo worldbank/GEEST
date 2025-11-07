@@ -2,6 +2,10 @@
 # flake8: noqa
 # isort: skip_file
 # black: skip-file
+"""📦 Configuration Widgets module.
+
+This module contains functionality for configuration widgets.
+"""
 from .acled_csv_configuration_widget import AcledCsvConfigurationWidget
 from .base_configuration_widget import BaseConfigurationWidget
 from .classified_polygon_configuration_widget import (

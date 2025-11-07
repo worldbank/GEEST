@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Help Panel module.
+
+This module contains functionality for help panel.
+"""
 from PyQt5.QtGui import QDesktopServices
 from qgis.PyQt.QtCore import Qt, QUrl, pyqtSignal
 from qgis.PyQt.QtWidgets import (
@@ -19,9 +23,18 @@ except ImportError:
 
 
 class HelpPanel(QWidget):
+    """🎯 Help Panel.
+    
+    Attributes:
+        label: Label.
+        layout: Layout.
+        web_view: Web view.
+    """
     switch_to_previous_tab = pyqtSignal()
 
     def __init__(self):
+        """🏗️ Initialize the instance.
+        """
         super().__init__()
 
         # Set up the layout
@@ -61,5 +74,7 @@ class HelpPanel(QWidget):
         self.setLayout(self.layout)
 
     def open_in_browser(self):
+        """⚙️ Open in browser.
+        """
         # Open the URL in the default web browser
         QDesktopServices.openUrl(QUrl("https://worldbank.github.io/GEEST/README.html"))

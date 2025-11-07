@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Vector And Field Datasource Widget module.
+
+This module contains functionality for vector and field datasource widget.
+"""
 import os
 from urllib.parse import quote, unquote
 

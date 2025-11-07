@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Classified Polygon Configuration Widget module.
+
+This module contains functionality for classified polygon configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 

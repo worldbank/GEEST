@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Tree Panel module.
+
+This module contains functionality for tree panel.
+"""
 import json
 import os
 import platform
@@ -61,6 +65,15 @@ from geest.utilities import log_message, resources_path, theme_stylesheet
 
 
 class TreePanel(QWidget):
+    """🎯 Tree Panel.
+    
+    Attributes:
+        active_model: Active model.
+        help_button: Help button.
+        items_to_run: Items to run.
+        json_data: Json data.
+        json_file: Json file.
+    """
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_setup_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
@@ -68,6 +81,12 @@ class TreePanel(QWidget):
     switch_to_ghsl_tab = pyqtSignal()  # Signal to open the ghsl tab
 
     def __init__(self, parent=None, json_file=None):
+        """🏗️ Initialize the instance.
+        
+        Args:
+            parent: Parent.
+            json_file: Json file.
+        """
         super().__init__(parent)
 
         # Initialize the QueueManager
@@ -206,6 +225,11 @@ class TreePanel(QWidget):
         self.queue_manager.processing_completed.connect(self.run_next_workflow_queue)
 
     def on_item_double_clicked(self, index):
+        """⚙️ On item double clicked.
+        
+        Args:
+            index: Index.
+        """
         # Action to trigger on double-click
         item = index.internalPointer()
         if item.role == "indicator":
@@ -235,9 +259,13 @@ class TreePanel(QWidget):
             QSettings().setValue("geest/pie_data", item.data(0))
 
     def on_previous_button_clicked(self):
+        """⚙️ On previous button clicked.
+        """
         self.switch_to_previous_tab.emit()
 
     def on_next_button_clicked(self):
+        """⚙️ On next button clicked.
+        """
         self.switch_to_next_tab.emit()
 
     def clear_item(self):
@@ -397,12 +425,22 @@ class TreePanel(QWidget):
 
     @pyqtSlot()
     def set_working_directory(self, working_directory):
+        """⚙️ Set working directory.
+        
+        Args:
+            working_directory: Working directory.
+        """
         if working_directory:
             self.working_directory = working_directory
             self.working_directory_changed(working_directory)
 
     @pyqtSlot()
     def set_road_network_layer_path(self, network_layer_path):
+        """⚙️ Set road network layer path.
+        
+        Args:
+            network_layer_path: Network layer path.
+        """
         if network_layer_path:
             log_message(f"Setting road_network_layer_path in model to {network_layer_path}")
             analysis_item = self.model.rootItem.child(0)
@@ -416,6 +454,11 @@ class TreePanel(QWidget):
 
     @pyqtSlot()
     def set_ghsl_layer_path(self, ghsl_layer_path: str):
+        """⚙️ Set ghsl layer path.
+        
+        Args:
+            ghsl_layer_path: Ghsl layer path.
+        """
         if ghsl_layer_path:
             log_message(f"Setting ghsl_layer_path in model to {ghsl_layer_path}")
             analysis_item = self.model.rootItem.child(0)
@@ -498,6 +541,8 @@ class TreePanel(QWidget):
 
         # If shift is pressed, change the text to "Rerun Item Workflow"
         def update_action_text():
+            """🔄 Update action text.
+            """
             text = "Rerun Item Workflow" if QApplication.keyboardModifiers() & Qt.ShiftModifier else "Run Item Workflow"
             run_item_action.setText(text)
 
@@ -1606,6 +1651,12 @@ class TreePanel(QWidget):
 
         # Get all items in the tree in a flat list (preorder traversal)
         def collect_items(item, items):
+            """🔄 Collect items.
+            
+            Args:
+                item: Item.
+                items: Items.
+            """
             items.append(item)
             for i in range(item.childCount()):
                 collect_items(item.child(i), items)

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Csv Datasource Widget module.
+
+This module contains functionality for csv datasource widget.
+"""
 import os
 
 from qgis.core import Qgis

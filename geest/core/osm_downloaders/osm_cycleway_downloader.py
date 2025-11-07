@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # Add optional typing
+"""📦 Osm Cycleway Downloader module.
+
+This module contains functionality for osm cycleway downloader.
+"""
 from typing import Optional
 
 from qgis.core import (
@@ -15,6 +19,8 @@ from .osm_data_downloader_base import OSMDataDownloaderBase
 
 
 class OSMCyclewayDownloader(OSMDataDownloaderBase):
+    """🎯 O S M Cycleway Downloader.
+    """
     def __init__(
         self,
         extents: QgsRectangle,

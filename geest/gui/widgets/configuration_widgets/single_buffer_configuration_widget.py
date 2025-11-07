@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Single Buffer Configuration Widget module.
+
+This module contains functionality for single buffer configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QSpinBox
 

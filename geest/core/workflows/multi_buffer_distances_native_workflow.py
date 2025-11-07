@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Multi Buffer Distances Native Workflow module.
+
+This module contains functionality for multi buffer distances native workflow.
+"""
 import os
 from urllib.parse import unquote
 

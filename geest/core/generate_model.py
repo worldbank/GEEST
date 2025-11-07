@@ -1,12 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""📦 Generate Model module.
+
+This module contains functionality for generate model.
+"""
 import json
 
 import pandas as pd
 
 
 class SpreadsheetToJsonParser:
+    """🎯 Spreadsheet To Json Parser.
+    
+    Attributes:
+        aggregate_output_filenames: Aggregate output filenames.
+        dataframe: Dataframe.
+        result: Result.
+        spreadsheet_path: Spreadsheet path.
+    """
     def __init__(self, spreadsheet_path):
         """
         Constructor for SpreadsheetToJsonParser class.

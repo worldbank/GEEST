@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Subnational Aggregation Processor module.
+
+This module contains functionality for subnational aggregation processor.
+"""
 import os
 import shutil
 import traceback

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Factor Aggregation Dialog module.
+
+This module contains functionality for factor aggregation dialog.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap
@@ -33,8 +37,25 @@ from .custom_base_dialog import CustomBaseDialog
 
 
 class FactorAggregationDialog(CustomBaseDialog):
+    """🎯 Factor Aggregation Dialog.
+    
+    Attributes:
+        banner_label: Banner label.
+        button_box: Button box.
+        configuration_widget: Configuration widget.
+        data_sources: Data sources.
+        factor_data: Factor data.
+    """
 
     def __init__(self, factor_name, factor_data, factor_item, parent=None):
+        """🏗️ Initialize the instance.
+        
+        Args:
+            factor_name: Factor name.
+            factor_data: Factor data.
+            factor_item: Factor item.
+            parent: Parent.
+        """
         super().__init__(parent)
 
         self.setWindowTitle(factor_name)
@@ -182,6 +203,15 @@ class FactorAggregationDialog(CustomBaseDialog):
         self.configuration_widget.refresh_radio_buttons(attributes)
 
     def create_checkbox_widget(self, row: int, weighting_value: float) -> QWidget:
+        """⚙️ Create checkbox widget.
+        
+        Args:
+            row: Row.
+            weighting_value: Weighting value.
+        
+        Returns:
+            The result of the operation.
+        """
         checkbox = QCheckBox()
         if weighting_value > 0:
             checkbox.setChecked(True)
@@ -198,6 +228,12 @@ class FactorAggregationDialog(CustomBaseDialog):
         return container
 
     def toggle_row_widgets(self, row: int, state: int):
+        """⚙️ Toggle row widgets.
+        
+        Args:
+            row: Row.
+            state: State.
+        """
         is_enabled = state == Qt.Checked
         for col in range(self.table.columnCount()):
             if col in (3, 5):  # Skip Use (checkbox) and Reset columns
@@ -212,6 +248,8 @@ class FactorAggregationDialog(CustomBaseDialog):
         self.validate_weightings()
 
     def populate_table(self):
+        """⚙️ Populate table.
+        """
         self.table.setRowCount(len(self.guids))
         for row, guid in enumerate(self.guids):
             item = self.tree_item.getItemByGuid(guid)
@@ -291,6 +329,8 @@ class FactorAggregationDialog(CustomBaseDialog):
                 widget.setVisible(True)  # Explicitly show the widget
 
     def auto_calculate_weightings(self):
+        """⚙️ Auto calculate weightings.
+        """
         enabled_rows = [row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)]
         if not enabled_rows:
             equal_weighting = 0.0
@@ -307,10 +347,26 @@ class FactorAggregationDialog(CustomBaseDialog):
         self.validate_weightings()
 
     def is_checkbox_checked(self, row: int) -> bool:
+        """⚙️ Check if checkbox checked.
+        
+        Args:
+            row: Row.
+        
+        Returns:
+            The result of the operation.
+        """
         checkbox = self.get_checkbox_in_row(row)
         return checkbox.isChecked() if checkbox else False
 
     def get_checkbox_in_row(self, row: int) -> QCheckBox:
+        """⚙️ Get checkbox in row.
+        
+        Args:
+            row: Row.
+        
+        Returns:
+            The result of the operation.
+        """
         container = self.table.cellWidget(row, 3)  # Use (Checkbox) column
         if container and isinstance(container, QWidget):
             layout = container.layout()

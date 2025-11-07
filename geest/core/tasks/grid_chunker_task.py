@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Grid Chunker Task module.
+
+This module contains functionality for grid chunker task.
+"""
 import os
 
 from osgeo import ogr, osr

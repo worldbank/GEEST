@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Acled Csv Datasource Widget module.
+
+This module contains functionality for acled csv datasource widget.
+"""
 import os
 
 from qgis.core import Qgis

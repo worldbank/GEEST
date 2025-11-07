@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Osm Downloader Task module.
+
+This module contains functionality for osm downloader task.
+"""
 import datetime
 import os
 import traceback

@@ -31,6 +31,11 @@ class StreetLightsConfigurationWidget(BaseConfigurationWidget):
     """
 
     def add_internal_widgets(self) -> None:
+        """⚙️ Add internal widgets.
+        
+        Returns:
+            The result of the operation.
+        """
         try:
             self.info_label = QLabel("Point locations representing street lights")
             self.internal_layout.addWidget(self.info_label)
