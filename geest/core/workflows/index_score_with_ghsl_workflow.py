@@ -149,7 +149,7 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         else:
             log_message(f"No GHSL coverage in area {index}, skipping ghsl masking.")
 
-        if final_geom.isEmpty():
+        if not final_geom or final_geom.isEmpty():
             log_message(f"No GHSL coverage in area {index} after intersection, skipping rasterization.")
         else:
             scored_layer = self.create_scored_boundary_layer(
