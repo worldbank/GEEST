@@ -676,9 +676,14 @@ class TreePanel(QWidget):
             working_directory=self.working_directory,
             report_name="Study Area Summary",
         )
+        self.overall_progress_bar.setVisible(True)
+        self.overall_progress_bar.setProgress(10)
         report.create_layout()
+        self.overall_progress_bar.setProgress(30)
         report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
+        self.overall_progress_bar.setProgress(60)
         report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
+        self.overall_progress_bar.setProgress(90)
 
         # open the pdf using the system PDF viewer
         # Windows
@@ -692,13 +697,19 @@ class TreePanel(QWidget):
             else:  # Linux
                 pdf_path = os.path.join(self.working_directory, "analysis_report.pdf")
                 subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
+        self.overall_progress_bar.setProgress(100)
+        self.overall_progress_bar.setVisible(False)
 
     def generate_study_area_report(self):
         """Add a report showing population information for the study area."""
         gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
+        self.overall_progress_bar.setVisible(True)
+        self.overall_progress_bar.setProgress(10)
         report.create_layout()
+        self.overall_progress_bar.setProgress(30)
         report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
+        self.overall_progress_bar.setProgress(90)
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
@@ -711,6 +722,8 @@ class TreePanel(QWidget):
             else:  # Linux
                 pdf_path = os.path.join(self.working_directory, "study_area_report.pdf")
                 subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
+        self.overall_progress_bar.setProgress(100)
+        self.overall_progress_bar.setVisible(False)
 
     def add_masked_scores_to_map(self, item):
         """Add the masked scores to the map."""
