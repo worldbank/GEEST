@@ -74,12 +74,7 @@ The screenshot above shows the Workplace Discrimination dialog where input field
 
 
 
-<video width="800" controls>
-  <source src="./videos/01-geest-contextual-dimension-testing.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-*Video 01: Contextual Dimension Testing*
+[📹 Video 01: Contextual Dimension Testing](./videos/01-geest-contextual-dimension-testing.mp4)
 - Shows successful execution of all three contextual factors
 - Demonstrates index score workflow completing without file path loading
 - Provides baseline for comparison with failed workflows
@@ -131,12 +126,7 @@ Configuration shows "Use Index Score" with value 12.00 for uniform polygon filli
 
 
 
-<video width="800" controls>
-  <source src="./videos/02-geest-accessibility-dimension-testing.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-*Video 02: Accessibility Dimension Testing*
+[📹 Video 02: Accessibility Dimension Testing](./videos/02-geest-accessibility-dimension-testing.mp4)
 - **CRITICAL EVIDENCE**: Documents file path loading failures for all accessibility factors
 - Shows shapefile selection from file browser
 - Captures "Workflow Completed" messages with no output files
@@ -306,12 +296,7 @@ Shows QGIS layer properties for `fake_DIG_percent` layer, displaying polygon fea
 
 
 
-<video width="800" controls>
-  <source src="./videos/06-geest-digital-inclusion-crs-error.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-*Video 06: Digital Inclusion - CRS Error*
+[📹 Video 06: Digital Inclusion - CRS Error](./videos/06-geest-digital-inclusion-crs-error.mp4)
 - Shows layer properties inspection revealing CRS issue
 - Documents "Layer has no CRS" error message
 - Evidence that file path loading doesn't properly read .prj file (Issue #2, related to Issue #1)
@@ -348,21 +333,11 @@ Shows configuration with 5 hazard types (fire, flood, landslide, cyclone, drough
 
 **Fire Hazards:**
 
-<video width="800" controls>
-  <source src="./videos/03-geest-environmental-hazards-fire.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-*Video 03: Environmental Hazards - Fire*
+[📹 Video 03: Environmental Hazards - Fire](./videos/03-geest-environmental-hazards-fire.mp4)
 
 **Cyclone Hazards:**
 
-<video width="800" controls>
-  <source src="./videos/04-geest-environmental-hazards-cyclone.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-*Video 04: Environmental Hazards - Cyclone*
+[📹 Video 04: Environmental Hazards - Cyclone](./videos/04-geest-environmental-hazards-cyclone.mp4)
 
 - Shows raster file selection and processing algorithm failures
 - Captures "temp file not found" errors
@@ -410,12 +385,7 @@ Shows "Use Single Buffer Point" mode with 3000m buffer distance for fake_water_w
 
 
 
-<video width="800" controls>
-  <source src="./videos/05-geest-water-sanitation-testing.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-*Video 05: Water Sanitation Testing*
+[📹 Video 05: Water Sanitation Testing](./videos/05-geest-water-sanitation-testing.mp4)
 - Documents shapefile selection and single buffer configuration
 - Shows workflow completion with null output
 - Another instance of Issue #1: File path loading failure
