@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from urllib.parse import unquote
 
 from qgis import processing  # QGIS processing toolbox
 from qgis.core import (
@@ -53,6 +54,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
             self.range_boundaries = 0  # default value for range boundaries
 
         layer_name = self.attributes.get("environmental_hazards_raster", None)
+        if layer_name:
+            layer_name = unquote(layer_name)
 
         if not layer_name:
             log_message(

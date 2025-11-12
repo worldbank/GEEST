@@ -93,12 +93,12 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
             )
             raise Exception("Invalid travel distances provided.")
 
-        layer_path = self.attributes.get("multi_buffer_shapefile", None)
+        layer_path = self.attributes.get("multi_buffer_point_shapefile", None)
         if layer_path:
             layer_path = unquote(layer_path)
         if not layer_path:
             log_message(
-                "Invalid points layer found in multi_buffer_shapefile, trying Multi Buffer Point_layer_name.",
+                "Invalid points layer found in multi_buffer_point_shapefile, trying Multi Buffer Point_layer_name.",
                 tag="Geest",
                 level=Qgis.Warning,
             )
