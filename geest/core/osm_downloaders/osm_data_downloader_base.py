@@ -75,10 +75,29 @@ class OSMDataDownloaderBase(ABC):
         if os.path.exists(self.output_xml_path) and not self.use_cache:
             log_message("OSM xml file exists but use_cache is false: Deleting existing XML file...")
             os.remove(self.output_xml_path)
+        # if the xml exists but contains the strin 'busy' then delete it and re-query
+        if os.path.exists(self.output_xml_path):
+            # delete the cache if it is not a valid response
+            if not self.check_results():
+                log_message("OSM xml file exists but contains error messages: Deleting existing XML file...")
+                os.remove(self.output_xml_path)
         if self.extents is None:
             raise ValueError("Bounding box extents not set.")
         if self.output_path is None:
             raise ValueError("Output path not set.")
+
+    def check_results(self) -> bool:
+        """Check if the xml contains busy or error messages."""
+        # Stream the file in case it is large
+        with open(self.output_xml_path, "r", encoding="utf-8") as xml_file:
+            for line in xml_file:
+                if "busy" in line:
+                    log_message("OSM xml file indicates server busy...")
+                    return False
+                if "error" in line:
+                    log_message("OSM xml file indicates an error...")
+                    return False
+        return True  # No issues found
 
     def set_osm_query(self, query: str) -> None:
         """Set the Overpass API query.

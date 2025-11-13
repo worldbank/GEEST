@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from qgis.core import Qgis
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QLabel
 
+from geest.core.algorithms.features_per_cell_processor import osm_mapping_table
+from geest.core.osm_downloaders.osm_download_type import OSMDownloadType
 from geest.utilities import log_message
 
 from .base_configuration_widget import BaseConfigurationWidget
@@ -15,7 +18,7 @@ from .base_configuration_widget import BaseConfigurationWidget
 # The logic for whether to accept point, line or polygons will be implemented in the
 # datasource widget.
 #
-class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
+class OsmTransportConfigurationWidget(BaseConfigurationWidget):
     """
     A widget to define inputs counting features per cell.
     """
@@ -23,7 +26,7 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
     # Normally we dont need to reimplement the __init__ method, but in this case we need to
     # change the label text next to the radio button
     def __init__(self, analysis_mode: str, attributes: dict) -> None:
-        humanised_label = "Features per cell"
+        humanised_label = "OSM transport feature"
         super().__init__(
             humanised_label=humanised_label,  # In this special case we override the label
             analysis_mode=analysis_mode,
@@ -36,9 +39,31 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.info_label = QLabel(
-                "Count features per cell. Use this if your data is not categorised according to OSM road types. Cells will be scored based on the number of line features intersecting each cell."
+                "Rank cells based on most beneficial OSM transport features in the cell according to the following ranking tables."
             )
+            self.info_label.setWordWrap(True)
             self.internal_layout.addWidget(self.info_label)
+            # make a label as an html table showing the road types and their scores
+            self.html_table_label = QLabel()
+            self.html_table_label.setWordWrap(True)
+            self.html_table_label.setTextFormat(Qt.RichText)
+            # create a table of 2x2 cells showing the OSM road types and their scores
+            road_types_html = osm_mapping_table(OSMDownloadType.ROAD)
+            cycle_types_html = osm_mapping_table(OSMDownloadType.CYCLE)
+            combined_table_html = f"""
+            <table border="1" cellpadding="4" cellspacing="0">
+                <tr>
+                    <th>OSM Road Scores</th>
+                    <th>OSM Cycleway Scores</th>
+                </tr>
+                <tr>
+                    <td>{road_types_html}</td>
+                    <td>{cycle_types_html}</td>
+                </tr>
+            </table>
+            """
+            self.html_table_label.setText(combined_table_html)
+            self.internal_layout.addWidget(self.html_table_label)
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)
             import traceback
@@ -62,6 +87,7 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.info_label.setEnabled(enabled)
+            self.html_table_label.setEnabled(enabled)
         except Exception as e:
             log_message(
                 f"Error in set_internal_widgets_enabled: {e}",

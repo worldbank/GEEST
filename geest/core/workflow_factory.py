@@ -5,6 +5,7 @@ from geest.core.workflows import (
     AcledImpactWorkflow,
     AnalysisAggregationWorkflow,
     ClassifiedPolygonWorkflow,
+    ContextualIndexScoreWorkflow,
     DefaultIndexScoreWorkflow,
     DimensionAggregationWorkflow,
     DontUseWorkflow,
@@ -68,6 +69,8 @@ class WorkflowFactory:
 
             if analysis_mode == "use_index_score":
                 return DefaultIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_contextual_index_score":
+                return ContextualIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_index_score_with_ookla":
                 return IndexScoreWithOoklaWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_index_score_with_ghsl":

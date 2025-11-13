@@ -109,7 +109,7 @@ class AnalysisReport(BaseReport):
         self.load_template()
 
         # Add a summary page
-        summary_text = "Analysis Summary\n"
+        summary_text = ""  # set in template
         summary_label = QgsLayoutItemLabel(self.layout)
         summary_label.setText(summary_text)
         summary_label.setFont(QFont("Arial", 12))
@@ -123,6 +123,7 @@ class AnalysisReport(BaseReport):
             title="Processing Times",
             description_key="analysis_summary",
             current_page=current_page,
+            show_header_and_footer=True,
         )
         self.create_execution_time_layout(
             entries=self.extract_execution_times_with_colors(),
@@ -130,8 +131,6 @@ class AnalysisReport(BaseReport):
             page=current_page,
         )
 
-        # Add footer for the summary page
-        self.add_header_and_footer(page_number=current_page)
         current_page += 1
 
         # Add pages for each indicator
@@ -158,9 +157,7 @@ class AnalysisReport(BaseReport):
         # Create a new page for the indicator
         title = "WEE by Opportunities Mask"
         self.make_page(
-            title=title,
-            description_key="wee_by_opportunities",
-            current_page=current_page,
+            title=title, description_key="wee_by_opportunities", current_page=current_page, show_header_and_footer=True
         )
         layer_uri = model.get("wee_by_opportunities_mask_result_file")
         log_message(f"Adding {layer_uri} to map")
@@ -186,8 +183,6 @@ class AnalysisReport(BaseReport):
                 current_page=current_page,
                 crs=crs,
             )
-        # Add footer for the indicator page
-        self.add_header_and_footer(page_number=current_page)
 
         # Increment the page counter
         current_page += 1
@@ -218,6 +213,7 @@ class AnalysisReport(BaseReport):
                         title=f"Indicator: {indicator_name}",
                         description_key=factor_name,
                         current_page=current_page,
+                        show_header_and_footer=True,
                     )
                     layer_uri = indicator.get("result_file")
                     log_message(f"Adding {layer_uri} to map")
@@ -242,8 +238,6 @@ class AnalysisReport(BaseReport):
                             current_page=current_page,
                             crs=crs,
                         )
-                    # Add footer for the indicator page
-                    self.add_header_and_footer(page_number=current_page)
 
                     # Increment the page counter
                     current_page += 1

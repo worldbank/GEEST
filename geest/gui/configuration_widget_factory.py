@@ -6,10 +6,14 @@ from geest.gui.widgets.configuration_widgets import (
     AcledCsvConfigurationWidget,
     BaseConfigurationWidget,
     ClassifiedPolygonConfigurationWidget,
+    ContextualIndexScoreConfigurationWidget,
     DontUseConfigurationWidget,
     FeaturePerCellConfigurationWidget,
     IndexScoreConfigurationWidget,
+    IndexScoreWithGHSLConfigurationWidget,
+    IndexScoreWithOOKLAConfigurationWidget,
     MultiBufferConfigurationWidget,
+    OsmTransportConfigurationWidget,
     RasterReclassificationConfigurationWidget,
     SafetyPolygonConfigurationWidget,
     SafetyRasterConfigurationWidget,
@@ -43,12 +47,14 @@ class ConfigurationWidgetFactory:
                 return DontUseConfigurationWidget(analysis_mode="Do Not Use", attributes=attributes)
             if key == "use_index_score" and value == 1:
                 return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+            if key == "use_contextual_index_score" and value == 1:
+                return ContextualIndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_index_score_with_ookla" and value == 1:
                 # Uses the same config widget as index score for now ...
-                return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+                return IndexScoreWithOOKLAConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_index_score_with_ghsl" and value == 1:
                 # Uses the same config widget as index score for now ...
-                return IndexScoreConfigurationWidget(analysis_mode=key, attributes=attributes)
+                return IndexScoreWithGHSLConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_multi_buffer_point" and value == 1:
                 return MultiBufferConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_single_buffer_point" and value == 1:
@@ -61,7 +67,7 @@ class ConfigurationWidgetFactory:
             if key == "use_polyline_per_cell" and value == 1:
                 return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_osm_transport_polyline_per_cell" and value == 1:
-                return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
+                return OsmTransportConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_point_per_cell" and value == 1:
                 return FeaturePerCellConfigurationWidget(analysis_mode=key, attributes=attributes)
             if key == "use_csv_to_point_layer" and value == 1:

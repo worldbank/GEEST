@@ -1,36 +1,34 @@
 # -*- coding: utf-8 -*-
+
+"""
+Specialised index score workflow for use in contextual dimensions.
+"""
+
 import os
-from typing import Optional
 
 from qgis import processing  # noqa: F401 # QGIS processing toolbox
 from qgis.core import (  # noqa: F401
     Qgis,
-    QgsDataProvider,
     QgsFeature,
     QgsFeedback,
     QgsField,
     QgsGeometry,
     QgsProcessingContext,
-    QgsVectorDataProvider,
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
 
-from geest.core import JsonTreeItem
-from geest.core.algorithms.ookla_downloader import OoklaDownloader
+from geest.core import JsonTreeItem  # noqa: unused F401
 from geest.utilities import log_message
 
+from .contextual_index_score_mappings import score_mapping
 from .workflow_base import WorkflowBase
 
 
-class IndexScoreWithOoklaWorkflow(WorkflowBase):
+class ContextualIndexScoreWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'use_index_score_with_ookla' workflow.
-
-    This follows the same logic as the index score workflow but additionally
-    masks the result using the Ookla coverage layer to ensure that only areas
-    that have Ookla data are included in the final output.
+    Concrete implementation of a 'use_contextual_index_score' workflow.
     """
 
     def __init__(
@@ -40,7 +38,7 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
-        working_directory: Optional[str] = None,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
@@ -51,37 +49,25 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
-        log_message("\n\n\n\n")
-        log_message("--------------------------------------------")
-        log_message("Initializing Index Score with Ookla Workflow")
-        log_message("--------------------------------------------")
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+
         index_score = self.attributes.get("index_score", 0)
-        log_message(f"Index score before rescaling to likert scale: {index_score}")
-        self.index_score = (float(index_score) / 100) * 5
-        log_message(f"Index score after rescaling to likert scale: {self.index_score}")
+        log_message(f"Index score before rescaling to contextual scale: {index_score}")
+        # Define mapping rules as (min_score, output_score) pairs
+
+        # Find the highest threshold less than or equal to index_score
+        for threshold in sorted(score_mapping.keys(), reverse=True):
+            if index_score >= threshold:
+                self.index_score = score_mapping[threshold]
+                break
+        log_message(f"Index score after rescaling to contextual dimension scale: {self.index_score}")
+        # Do not remove the following block
         self.features_layer = (
             True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
         )
-        self.workflow_name = "index_score"
-        # Get the analysis extents
-        self.study_area_bbox = self._study_area_bbox_4326()
-
-        # Prepare Ookla coverage layer - adds a minute or two to the workflow
-        # and requires internet access
-        ookla_layer_path = os.path.join(self.working_directory, "study_area")
-        downloader = OoklaDownloader(
-            extents=self.study_area_bbox,
-            output_path=ookla_layer_path,
-            filename_prefix="ookla",
-            use_cache=True,
-            delete_existing=True,
-            feedback=self.feedback,
-        )
-        downloader.extract_data(output_crs=self.target_crs)
-        self.ookla_layer_path = os.path.join(ookla_layer_path, "ookla_combined.parquet")
+        self.workflow_name = "contextual_index_score"
 
     def _process_features_for_area(
         self,
@@ -93,7 +79,7 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
     ) -> str:
         """
         Executes the actual workflow logic for a single area
-        Must be implemented by sub classes.
+        Must be implemented by subclasses.
 
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
@@ -114,31 +100,6 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
             index=index,
         )
         self.progressChanged.emit(30.0)  # We just use nominal intervals for progress updates
-        # Now mask with Ookla coverage layer
-        # First select the features from the Ookla layer that intersect our current area
-        ookla_layer = QgsVectorLayer(self.ookla_layer_path, "ookla_layer", "ogr")
-        # Select features in ookla_layer that intersect current_area
-        expr = f"intersects($geometry, geom_from_wkt('{current_area.asWkt()}'))"
-        ookla_layer.selectByExpression(expr, QgsVectorLayer.SetSelection)
-        # Now only keep the parts of the geometry of the current area that intersect with the ookla_layer
-        ookla_features = ookla_layer.selectedFeatures()
-        final_geom: QgsGeometry = None
-        if ookla_features:
-            ookla_union_geom = QgsGeometry.unaryUnion([feat.geometry() for feat in ookla_features])
-            # Intersect with the clip_area to get the final geometry to use
-            final_geom = clip_area.intersection(ookla_union_geom)
-        else:
-            log_message(f"No Ookla coverage in area {index}, skipping ookla masking.")
-
-        if not final_geom or final_geom.isEmpty():
-            log_message(f"No Ookla coverage in area {index} after intersection, skipping rasterization.")
-        else:
-            scored_layer = self.create_scored_boundary_layer(
-                clip_area=final_geom,
-                index=index,
-            )
-        self.progressChanged.emit(60.0)  # We just use nominal intervals for progress
-
         # Create a scored boundary layer
         raster_output = self._rasterize(
             scored_layer,
@@ -166,7 +127,7 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         # Create a new memory layer with the target CRS (EPSG:4326)
         subset_layer = QgsVectorLayer("Polygon", "subset", "memory")
         subset_layer.setCrs(self.target_crs)
-        subset_layer_data: QgsVectorDataProvider = subset_layer.dataProvider()
+        subset_layer_data = subset_layer.dataProvider()
         field = QgsField("score", QVariant.Double)
         fields = [field]
         # Add attributes (fields) from the point_layer
