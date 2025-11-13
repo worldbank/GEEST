@@ -1,4 +1,21 @@
+# -*- coding: utf-8 -*-
 """I18n tools."""
+
+__copyright__ = "Copyright 2019, 3Liz"
+__license__ = "GPL version 3"
+__email__ = "info@3liz.org"
+__revision__ = "$Format:%H$"
+
+# -----------------------------------------------------------
+# Copyright (C) 2019 3Liz
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
 
 from os.path import join
 
@@ -7,11 +24,6 @@ from qgis.PyQt.QtCore import QFileInfo, QLocale
 from qgis.PyQt.QtWidgets import QApplication
 
 from geest.utilities import resources_path
-
-__copyright__ = "Copyright 2019, 3Liz"
-__license__ = "GPL version 3"
-__email__ = "info@3liz.org"
-__revision__ = "$Format:%H$"
 
 
 def setup_translation(file_pattern="{}.qm", folder=None):
