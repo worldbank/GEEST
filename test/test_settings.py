@@ -69,7 +69,7 @@ class TestSettings(unittest.TestCase):
     def test_setting_with_default(self, mock_qsettings):
         """Test setting function with default value."""
         mock_settings_instance = MagicMock()
-        mock_settings_instance.value.return_value = None
+        mock_settings_instance.value.side_effect = lambda key, default=None, type=None: default
         mock_qsettings.return_value = mock_settings_instance
 
         result = setting("test_key", default="default_value")
