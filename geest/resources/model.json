@@ -506,7 +506,7 @@
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
                         {
-                            "indicator": "Street lights/Nigthttime lights",
+                            "indicator": "Street lights/Night time lights",
                             "id": "Street_Lights",
                             "output_filename": "SAF_output",
                             "description": "",
@@ -580,7 +580,7 @@
                     "dimension_weighting": 0.142857142857143,
                     "indicators": [
                         {
-                            "indicator": "percentage of the labor force comprising women with university degrees",
+                            "indicator": "Percentage of the labor force comprising women with university degrees",
                             "id": "Education",
                             "output_filename": "EDU_output",
                             "description": "",
