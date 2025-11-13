@@ -492,7 +492,7 @@ class TreePanel(QWidget):
             disable_action.triggered.connect(lambda: self.disable_item(item))
 
         add_to_map_action = QAction("Add to map", self)
-        add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
+        add_to_map_action.triggered.connect(lambda: add_to_map(item))
 
         run_item_action = QAction("Run Item Workflow", self)
 
