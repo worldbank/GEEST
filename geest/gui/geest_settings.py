@@ -58,7 +58,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         zero_default = bool(setting(key="default_raster_to_0", default=0))
         self.default_raster_to_0.setChecked(bool(zero_default))
 
-        show_layer_on_click = setting(key="show_layer_on_click", default=False)
+        show_layer_on_click = setting(key="show_layer_on_click", default=True)
         self.show_layer_on_click.setChecked(bool(show_layer_on_click))
 
         show_overlay = setting(key="show_overlay", default=True)

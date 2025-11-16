@@ -222,7 +222,7 @@ class TreePanel(QWidget):
         Slot that runs whenever an item in the tree is clicked.
         :param index: QModelIndex of the clicked item.
         """
-        show_layer_on_click = setting(key="show_layer_on_click", default=False)
+        show_layer_on_click = setting(key="show_layer_on_click", default=True)
         if show_layer_on_click:
             item = index.internalPointer()
             add_to_map(item)
