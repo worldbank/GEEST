@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """List of Overpass servers.
 
 This file mustn't be modified by users. This file is updated with the plugin.
@@ -20,6 +21,17 @@ core by updating this list below.
 __copyright__ = "Copyright 2023, 3Liz"
 __license__ = "GPL version 3"
 __email__ = "info@3liz.org"
+
+# -----------------------------------------------------------
+# Copyright (C) 2023 3Liz
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
 
 # The list is from the OSM wiki page
 # https://wiki.openstreetmap.org/wiki/Overpass_API

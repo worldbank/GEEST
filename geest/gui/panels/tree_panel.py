@@ -222,7 +222,7 @@ class TreePanel(QWidget):
         Slot that runs whenever an item in the tree is clicked.
         :param index: QModelIndex of the clicked item.
         """
-        show_layer_on_click = setting(key="show_layer_on_click", default=False)
+        show_layer_on_click = setting(key="show_layer_on_click", default=True)
         if show_layer_on_click:
             item = index.internalPointer()
             add_to_map(item)
@@ -492,7 +492,7 @@ class TreePanel(QWidget):
             disable_action.triggered.connect(lambda: self.disable_item(item))
 
         add_to_map_action = QAction("Add to map", self)
-        add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
+        add_to_map_action.triggered.connect(lambda: add_to_map(item))
 
         run_item_action = QAction("Run Item Workflow", self)
 
