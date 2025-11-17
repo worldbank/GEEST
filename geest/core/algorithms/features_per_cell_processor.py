@@ -19,6 +19,46 @@ from qgis.PyQt.QtCore import QVariant
 from geest.core.osm_downloaders import OSMDownloadType
 from geest.utilities import log_message, setting
 
+highway_lookup_table = {
+    "residential": 4,
+    "living_street": 4,
+    "pedestrian": 4,
+    "footway": 4,
+    "steps": 4,
+    "tertiary": 3,
+    "tertiary_link": 3,
+    "cycleway": 3,
+    "path": 3,
+    "secondary": 2,
+    "unclassified": 2,
+    "service": 2,
+    "road": 2,
+    "bridleway": 2,
+    "secondary_link": 2,
+    "track": 1,
+    "primary": 1,
+    "primary_link": 1,
+    "motorway": 0,
+    "trunk": 0,
+    "motorway_link": 0,
+    "trunk_link": 0,
+    "bus_guideway": -1,
+    "escape": -1,
+    "raceway": -1,
+    "construction": -1,
+    "proposed": -1,
+}
+cycleway_lookup_table = {
+    "lane": 3,
+    "shared_lane": 3,
+    "share_busway": 3,
+    "track": 3,
+    "separate": 3,
+    "crossing": 3,
+    "shoulder": 3,
+    "link": 3,
+}
+
 
 def select_grid_cells_and_count_features(
     grid_layer: QgsVectorLayer,
@@ -210,49 +250,9 @@ def select_grid_cells_and_assign_transport_score(
         level=Qgis.Info,
     )
 
-    highway_lookup_table = {
-        "residential": 5,
-        "living_street": 5,
-        "pedestrian": 5,
-        "footway": 5,
-        "steps": 5,
-        "tertiary": 4,
-        "tertiary_link": 4,
-        "cycleway": 4,
-        "path": 4,
-        "secondary": 3,
-        "unclassified": 3,
-        "service": 3,
-        "road": 3,
-        "bridleway": 3,
-        "secondary_link": 3,
-        "track": 2,
-        "primary": 2,
-        "primary_link": 2,
-        "motorway": 1,
-        "trunk": 1,
-        "motorway_link": 1,
-        "trunk_link": 1,
-        "bus_guideway": 0,
-        "escape": 0,
-        "raceway": 0,
-        "construction": 0,
-        "proposed": 0,
-    }
-    cycleway_lookup_table = {
-        "lane": 4,
-        "shared_lane": 4,
-        "share_busway": 4,
-        "track": 4,
-        "separate": 4,
-        "crossing": 4,
-        "shoulder": 4,
-        "link": 4,
-    }
-
-    if osm_transport_type == OSMDownloadType.CYCLEWAYS:
+    if osm_transport_type == OSMDownloadType.CYCLE:
         lookup_table = cycleway_lookup_table
-    elif osm_transport_type == OSMDownloadType.ROADS:
+    elif osm_transport_type == OSMDownloadType.ROAD:
         lookup_table = highway_lookup_table
     else:
         raise ValueError(f"Unsupported OSM transport type: {osm_transport_type}")
@@ -387,3 +387,54 @@ def select_grid_cells_and_assign_transport_score(
         "grid_with_feature_scores",
         "ogr",
     )
+
+
+def osm_mapping_table(osm_transport_type: OSMDownloadType) -> str:
+    """
+    Returns an HTML table as a string that maps OSM transport types to their scores.
+    Args:
+        osm_transport_type (OSMDownloadType): The type of OSM transport data.
+    Returns:
+        str: An HTML table as a string.
+    """
+
+    if osm_transport_type == OSMDownloadType.CYCLE:
+        lookup_table = cycleway_lookup_table
+    elif osm_transport_type == OSMDownloadType.ROAD:
+        lookup_table = highway_lookup_table
+    else:
+        raise ValueError(f"Unsupported OSM transport type: {osm_transport_type}")
+
+    # Prepare data for column wrapping
+    items = list(lookup_table.items())
+    max_rows = 10
+    num_columns = (len(items) + max_rows - 1) // max_rows
+
+    # Split items into columns
+    columns = []
+    for col in range(num_columns):
+        start = col * max_rows
+        end = start + max_rows
+        columns.append(items[start:end])
+
+    # Build HTML table
+    table_html = '<table border="1" style="border-collapse:collapse;">\n'
+    # Header row
+    table_html += "<tr>"
+    for col in range(num_columns):
+        table_html += "<th>Type</th><th>Score</th>"
+    table_html += "</tr>\n"
+
+    # Data rows
+    for row in range(max_rows):
+        table_html += "<tr>"
+        for col in columns:
+            if row < len(col):
+                k, v = col[row]
+                table_html += f"<td>{k}</td><td>{v}</td>"
+            else:
+                table_html += "<td></td><td></td>"
+        table_html += "</tr>\n"
+    table_html += "</table>"
+
+    return table_html

@@ -1,39 +1,34 @@
 # -*- coding: utf-8 -*-
+
+"""
+Specialised index score workflow for use in contextual dimensions.
+"""
+
 import os
-from typing import Optional
 
 from qgis import processing  # noqa: F401 # QGIS processing toolbox
 from qgis.core import (  # noqa: F401
+    Qgis,
     QgsFeature,
     QgsFeedback,
     QgsField,
     QgsGeometry,
     QgsProcessingContext,
-    QgsVectorDataProvider,
     QgsVectorFileWriter,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
 
-from geest.core import JsonTreeItem
+from geest.core import JsonTreeItem  # noqa: unused F401
 from geest.utilities import log_message
 
+from .contextual_index_score_mappings import score_mapping
 from .workflow_base import WorkflowBase
 
 
-class IndexScoreWithGHSLException(Exception):
-    """Custom exception for IndexScoreWithGHSLWorkflow errors."""
-
-    pass
-
-
-class IndexScoreWithGHSLWorkflow(WorkflowBase):
+class ContextualIndexScoreWorkflow(WorkflowBase):
     """
-    Concrete implementation of a 'use_index_score_with_ghsl' workflow.
-
-    This follows the same logic as the index score workflow but additionally
-    masks the result using the GHSL coverage layer to ensure that only areas
-    that have GHSL data are included in the final output.
+    Concrete implementation of a 'use_contextual_index_score' workflow.
     """
 
     def __init__(
@@ -43,7 +38,7 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
-        working_directory: Optional[str] = None,
+        working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
@@ -54,52 +49,25 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
         :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
-        log_message("\n\n\n\n")
-        log_message("--------------------------------------------")
-        log_message("Initializing Index Score with GHSL Workflow")
-        log_message("--------------------------------------------")
         super().__init__(
             item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
+
         index_score = self.attributes.get("index_score", 0)
-        log_message(f"Index score before rescaling to likert scale: {index_score}")
-        self.index_score = (float(index_score) / 100) * 5
-        log_message(f"Index score after rescaling to likert scale: {self.index_score}")
+        log_message(f"Index score before rescaling to contextual scale: {index_score}")
+        # Define mapping rules as (min_score, output_score) pairs
+
+        # Find the highest threshold less than or equal to index_score
+        for threshold in sorted(score_mapping.keys(), reverse=True):
+            if index_score >= threshold:
+                self.index_score = score_mapping[threshold]
+                break
+        log_message(f"Index score after rescaling to contextual dimension scale: {self.index_score}")
+        # Do not remove the following block
         self.features_layer = (
             True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
         )
-        self.workflow_name = "index_score"
-        # Get the analysis extents
-        self.study_area_bbox = self._study_area_bbox_4326()
-
-        # Prepare GHSL coverage layer - adds a minute or two to the workflow
-        # and requires internet access
-        ghsl_layer_path = os.path.join(self.working_directory, "study_area")
-        self.ghsl_layer_path = os.path.join(ghsl_layer_path, "ghsl_settlements_layer.parquet")
-        # Raise an error if the GHSL layer does not exist
-        if not os.path.exists(self.ghsl_layer_path):
-            log_message("ERROR: GHSL coverage layer not found ...")
-            raise IndexScoreWithGHSLException("GHSL coverage layer not found.")
-
-        # Ensure the GHSL layer is in the target CRS
-        ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
-        if ghsl_layer.crs() != self.target_crs:
-            log_message("Reprojecting GHSL layer to target CRS ...")
-            reprojected_ghsl_path = os.path.join(ghsl_layer_path, "ghsl_settlements_layer_4326.parquet")
-            if os.path.exists(reprojected_ghsl_path):
-                os.remove(reprojected_ghsl_path)
-
-            processing.run(
-                "native:reprojectlayer",
-                {
-                    "INPUT": ghsl_layer,
-                    "TARGET_CRS": self.target_crs,
-                    "OUTPUT": reprojected_ghsl_path,
-                },
-                context=self.context,
-            )
-            self.ghsl_layer_path = reprojected_ghsl_path
-            log_message("GHSL layer reprojected.")
+        self.workflow_name = "contextual_index_score"
 
     def _process_features_for_area(
         self,
@@ -111,7 +79,7 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
     ) -> str:
         """
         Executes the actual workflow logic for a single area
-        Must be implemented by sub classes.
+        Must be implemented by subclasses.
 
         :current_area: Current polygon from our study area.
         :current_bbox: Bounding box of the above area.
@@ -132,32 +100,6 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
             index=index,
         )
         self.progressChanged.emit(30.0)  # We just use nominal intervals for progress updates
-        # Now mask with GHSL coverage layer
-        # First select the features from the GHSL layer that intersect our current area
-        ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
-
-        # Select features in ghsl_layer that intersect current_area
-        expr = f"intersects($geometry, geom_from_wkt('{current_area.asWkt()}'))"
-        ghsl_layer.selectByExpression(expr, QgsVectorLayer.SetSelection)
-        # Now only keep the parts of the geometry of the current area that intersect with the ghsl_layer
-        ghsl_features = ghsl_layer.selectedFeatures()
-        final_geom: QgsGeometry = None
-        if ghsl_features:
-            ghsl_union_geom = QgsGeometry.unaryUnion([feat.geometry() for feat in ghsl_features])
-            # Intersect with the clip_area to get the final geometry to use
-            final_geom = clip_area.intersection(ghsl_union_geom)
-        else:
-            log_message(f"No GHSL coverage in area {index}, skipping ghsl masking.")
-
-        if not final_geom or final_geom.isEmpty():
-            log_message(f"No GHSL coverage in area {index} after intersection, skipping rasterization.")
-        else:
-            scored_layer = self.create_scored_boundary_layer(
-                clip_area=final_geom,
-                index=index,
-            )
-        self.progressChanged.emit(60.0)  # We just use nominal intervals for progress
-
         # Create a scored boundary layer
         raster_output = self._rasterize(
             scored_layer,
@@ -185,7 +127,7 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         # Create a new memory layer with the target CRS (EPSG:4326)
         subset_layer = QgsVectorLayer("Polygon", "subset", "memory")
         subset_layer.setCrs(self.target_crs)
-        subset_layer_data: QgsVectorDataProvider = subset_layer.dataProvider()
+        subset_layer_data = subset_layer.dataProvider()
         field = QgsField("score", QVariant.Double)
         fields = [field]
         # Add attributes (fields) from the point_layer

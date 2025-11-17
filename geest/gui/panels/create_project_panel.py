@@ -181,7 +181,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     def create_project(self):
         """Triggered when the Continue button is pressed."""
-
+        self.disable_widgets()
         if self.use_boundary_crs.isChecked():
             crs = self.layer_combo.currentLayer().crs()
         else:
