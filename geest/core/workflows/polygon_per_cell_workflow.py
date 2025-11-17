@@ -4,6 +4,7 @@
 This module contains functionality for polygon per cell workflow.
 """
 import os
+from urllib.parse import unquote
 
 from qgis.core import (
     Qgis,
@@ -53,7 +54,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
 
         layer_path = self.attributes.get("polygon_per_cell_shapefile", None)
         if layer_path:
-            layer_path = os.path.expanduser(layer_path)
+            layer_path = unquote(layer_path)
 
         if not layer_path:
             log_message(

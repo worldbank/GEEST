@@ -220,8 +220,7 @@ class OoklaDownloader:
 
         dataset = driver.Open(input_uri, 0)
         if dataset is None:
-            log_message(f"❌ Failed to open file: {input_uri}")
-            raise OoklaException(f"Failed to open file: {input_uri}")
+            raise OoklaException(f"Failed to open OOKLA data source: {input_uri}")
 
         # transform to output CRS
         transform = None
@@ -263,7 +262,13 @@ class OoklaDownloader:
             f"tile_y >= {min_y} AND tile_y <= {max_y}"
         )
         layer.SetAttributeFilter(filter_expr)
-        feature_count = layer.GetFeatureCount()
+
+        # Handle GDAL Parquet driver issues
+        try:
+            feature_count = layer.GetFeatureCount()
+        except RuntimeError:
+            feature_count = 0  # Process without knowing total count
+
         out_layer_defn = out_layer.GetLayerDefn()
 
         found_min_x = found_min_y = found_max_x = found_max_y = None
@@ -294,13 +299,16 @@ class OoklaDownloader:
             out_feature.Destroy()
 
             count += 1
-            if count % 1000 == 0:
-                log_message(f"Processed {count} of {feature_count} features...")
-                log_message(f"Kept {kept_count} features so far...")
+            # Update progress every 100 features
+            if count % 100 == 0:
                 if feature_count > 0:
                     progress = int((count / feature_count) * 100)
                     if self.feedback is not None:
                         self.feedback.setProgress(progress)
+                # Log every 1000 features to avoid log spam
+                if count % 1000 == 0:
+                    log_message(f"Processed {count} of {feature_count} features...")
+                    log_message(f"Kept {kept_count} features so far...")
 
         # Clean up
         dataset = None

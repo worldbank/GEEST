@@ -71,6 +71,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     def initUI(self):
         """⚙️ Initui.
         """
+        self.enable_widgets()  # Re-enable widgets in case they were disabled
         self.custom_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
             resources_path("resources", "geest-banner.png"),
@@ -215,15 +216,18 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             layer = self.layer_combo.currentLayer()
             if not layer:
                 QMessageBox.critical(self, "Error", "Please select a study area layer.")
+                self.enable_widgets()
                 return
 
             if not self.working_dir:
                 QMessageBox.critical(self, "Error", "Please select a working directory.")
+                self.enable_widgets()
                 return
 
             field_name = self.field_combo.currentField()
             if not field_name or field_name not in layer.fields().names():
                 QMessageBox.critical(self, "Error", f"Invalid area name field '{field_name}'.")
+                self.enable_widgets()
                 return
 
             # Copy default model.json if not present
