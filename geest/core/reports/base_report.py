@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Base Report module.
+
+This module contains functionality for base report.
+"""
 import math
 from collections import defaultdict
 
@@ -12,6 +16,8 @@ from qgis.core import (
     QgsLayoutItemMap,
     QgsLayoutItemMapGrid,
     QgsLayoutItemPage,
+    QgsLayoutItemPicture,
+    QgsLayoutItemShape,
     QgsLayoutMeasurement,
     QgsLayoutPoint,
     QgsLayoutSize,
@@ -19,6 +25,9 @@ from qgis.core import (
     QgsProject,
     QgsReadWriteContext,
     QgsRectangle,
+    QgsSimpleFillSymbolLayer,
+    QgsTextFormat,
+    QgsTextShadowSettings,
     QgsUnitTypes,
     QgsVectorLayer,
 )
@@ -26,7 +35,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor, QFont
 from qgis.PyQt.QtXml import QDomDocument
 
-from geest.utilities import log_message
+from geest.utilities import log_message, resources_path
 
 
 class BaseReport:
@@ -134,11 +143,18 @@ class BaseReport:
         if not self.layout.loadFromTemplate(document, context):
             raise ValueError(f"Failed to load the template into the layout from '{self.template_path}'.")
 
-    def make_page(self, title: str, description_key: str, current_page: int):
+    def make_page(self, title: str, description_key: str, current_page: int, show_header_and_footer: bool = False):
         """
         Create a new page in the layout and add a title and description.
 
         Parameters:
+            title (str): The title to display on the page.
+            description_key (str): The key to retrieve the description text.
+            current_page (int): The current page number.
+            show_header_and_footer (bool): Whether to show the header and footer on the page.
+
+        Returns:
+            QgsLayoutItemPage: The created page item.
 
         """
         # Compute and add summary statistics for each layer on separate pages
@@ -147,16 +163,19 @@ class BaseReport:
         page = QgsLayoutItemPage(self.layout)
         page.setPageSize("A4", QgsLayoutItemPage.Portrait)
         self.layout.pageCollection().addPage(page)
-        # Add a title label
-        title_label = QgsLayoutItemLabel(self.layout)
-        title_label.setText(title)
-        title_label.setFont(QFont("Arial", 20))
-        title_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
-        title_label.attemptMove(
-            QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters),
-            page=current_page,
-        )
-        self.layout.addLayoutItem(title_label)
+        if show_header_and_footer:
+            self.add_header_and_footer(current_page, title)
+        else:
+            # Add a title label
+            title_label = QgsLayoutItemLabel(self.layout)
+            title_label.setText(title)
+            title_label.setFont(QFont("Arial", 20))
+            title_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
+            title_label.attemptMove(
+                QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters),
+                page=current_page,
+            )
+            self.layout.addLayoutItem(title_label)
         description_text = self.page_descriptions.get(description_key, "")
         # Add description label to the current page
         description_label = QgsLayoutItemLabel(self.layout)
@@ -356,28 +375,113 @@ class BaseReport:
         map_item.setExtent(map_extent)
         map_item.refresh()
 
-    def make_footer(self, current_page: int):
+    def make_header(self, current_page: int, title: str = ""):
         """
-        Add a footer to the layout.
+        Add a header to the layout with page number and title.
+
+        Args:
+            current_page (int): The current page number.
+            title (str, optional): The title to display in the header. Defaults to "".
         """
-        # Set the page number
+
+        # Add background image
+        bg_image = QgsLayoutItemPicture(self.layout)
+        bg_image_path = resources_path("resources", "images", "geest-page-header-bg.png")
+        bg_image.setPicturePath(bg_image_path)
+        bg_image.attemptMove(
+            QgsLayoutPoint(0, 0, QgsUnitTypes.LayoutMillimeters),
+            page=current_page,
+        )
+        bg_image.setFixedSize(QgsLayoutSize(210, 30, QgsUnitTypes.LayoutMillimeters))
+        # Ensure image fills the frame
+        bg_image.setResizeMode(QgsLayoutItemPicture.Stretch)
+        self.layout.addLayoutItem(bg_image)
+
+        # Setup the font to render the heading and page no
+        text_format = QgsTextFormat()
+        text_format.setColor(QColor(255, 255, 255))
+        font = QFont("Arial")
+        text_format.setFont(font)
+        text_format.setSize(18)
+        text_format.setSizeUnit(QgsUnitTypes.RenderPoints)
+        shadow_settings = QgsTextShadowSettings()
+        shadow_settings.setEnabled(True)
+        text_format.setShadow(shadow_settings)
+
+        # Set the page title label on top left
+        page_title = QgsLayoutItemLabel(self.layout)
+        page_title.setText(title)
+        page_title.setTextFormat(text_format)
+        page_title.setMode(QgsLayoutItemLabel.ModeFont)
+        page_title.setVAlign(Qt.AlignCenter)
+        page_title.setHAlign(Qt.AlignLeft)
+        # wrap the text if too long
+        page_title.setFixedSize(QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters))
+        # Position the label on the current page
+        page_title.attemptMove(
+            QgsLayoutPoint(10, 1, QgsUnitTypes.LayoutMillimeters),
+            page=current_page,
+        )
+        self.layout.addLayoutItem(page_title)
+
+        # Make a semi-opaque white circle to go behind the page no
+        circle = QgsLayoutItemShape(self.layout)
+        circle.setShapeType(QgsLayoutItemShape.Ellipse)
+        circle.setFixedSize(QgsLayoutSize(10, 10, QgsUnitTypes.LayoutMillimeters))
+        circle.attemptMove(
+            QgsLayoutPoint(195, 5, QgsUnitTypes.LayoutMillimeters),
+            page=current_page,
+        )
+        fill_symbol = QgsSimpleFillSymbolLayer()
+        fill_symbol.setColor(QColor(255, 255, 255, 200))  # White with 200/255 opacity
+        # fill_symbol.setStrokeStyle(None)
+        self.layout.addLayoutItem(circle)
+
+        # Set the page number label on top
         page_number = QgsLayoutItemLabel(self.layout)
-        page_number.setText(f"Page {current_page}")
-        page_number.setFont(QFont("Arial", 8))
-        page_number.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
+        page_number.setText(f"{current_page}")
+        text_format.setSize(12)
+        text_format.setColor(QColor(0, 0, 0))
+        page_number.setVAlign(Qt.AlignCenter)
+        page_number.setHAlign(Qt.AlignCenter)
+        page_number.setTextFormat(text_format)
+
+        page_number.setFixedSize(QgsLayoutSize(10, 10, QgsUnitTypes.LayoutMillimeters))
         # Position the label on the current page
         page_number.attemptMove(
-            QgsLayoutPoint(20, 270, QgsUnitTypes.LayoutMillimeters),
+            QgsLayoutPoint(195, 5, QgsUnitTypes.LayoutMillimeters),
             page=current_page,
         )
         self.layout.addLayoutItem(page_number)
 
-    def add_header_and_footer(self, page_number):
+    def make_footer(self, current_page: int):
+        """
+        Add a footer to the layout with background image, rounded rectangle, and label.
+        """
+
+        # Add background image
+        bg_image = QgsLayoutItemPicture(self.layout)
+        bg_image_path = resources_path("resources", "images", "geest-page-footer-bg.png")
+        bg_image.setPicturePath(bg_image_path)
+        bg_image.attemptMove(
+            QgsLayoutPoint(0, 260, QgsUnitTypes.LayoutMillimeters),
+            page=current_page,
+        )
+        bg_image.setFixedSize(QgsLayoutSize(210, 30, QgsUnitTypes.LayoutMillimeters))
+        # Ensure image fills the frame
+        bg_image.setResizeMode(QgsLayoutItemPicture.Stretch)
+        self.layout.addLayoutItem(bg_image)
+
+    def add_header_and_footer(self, page_number, title: str = ""):
         """_summary_
 
         Args:
             page_number (_type_): _description_
+            title (str, optional): _description_. Defaults to "".
         """
+        self.make_header(page_number, title)
+        self.make_footer(page_number)
+
         footer_text = """
          <p>This plugin is built with support from the <strong>Canada Clean Energy and
          Forest Climate Facility (CCEFCF)</strong>, the <strong>Geospatial Operational
@@ -391,25 +495,33 @@ class BaseReport:
         # Add summary label to the current page
         footer_label = QgsLayoutItemLabel(self.layout)
         footer_label.setText(footer_text)
-        footer_label.setFont(QFont("Arial", 8))
-        footer_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
+        footer_label.setFixedSize(QgsLayoutSize(120, 40, QgsUnitTypes.LayoutMillimeters))
         # Use html mode
         footer_label.setMode(QgsLayoutItemLabel.ModeHtml)
         # Position the label on the current page
-        footer_label.attemptMove(QgsLayoutPoint(20, 270, QgsUnitTypes.LayoutMillimeters), page=page_number)
+        footer_label.attemptMove(QgsLayoutPoint(80, 265, QgsUnitTypes.LayoutMillimeters), page=page_number)
         footer_label.setHAlign(Qt.AlignJustify)
+        # Set the font to white
+        text_format = QgsTextFormat()
+        text_format.setColor(QColor(255, 255, 255))
+        font = QFont("Arial")
+        text_format.setFont(font)
+        text_format.setSize(7)
+        text_format.setSizeUnit(QgsUnitTypes.RenderPoints)
+
+        footer_label.setTextFormat(text_format)
         self.layout.addLayoutItem(footer_label)
 
         # Add credits label to the current page
         credits_label = QgsLayoutItemLabel(self.layout)
         credits_label.setText(credits_text)
-        credits_label.setFont(QFont("Arial", 8))
-        credits_label.setFixedSize(QgsLayoutSize(160, 40, QgsUnitTypes.LayoutMillimeters))
+        credits_label.setFixedSize(QgsLayoutSize(120, 40, QgsUnitTypes.LayoutMillimeters))
         # Use html mode
         credits_label.setMode(QgsLayoutItemLabel.ModeHtml)
+        credits_label.setTextFormat(text_format)
         # Position the label on the current page
-        credits_label.attemptMove(QgsLayoutPoint(20, 288, QgsUnitTypes.LayoutMillimeters), page=page_number)
-        credits_label.setHAlign(Qt.AlignCenter)
+        credits_label.attemptMove(QgsLayoutPoint(80, 278, QgsUnitTypes.LayoutMillimeters), page=page_number)
+        credits_label.setHAlign(Qt.AlignRight)
         self.layout.addLayoutItem(credits_label)
 
     def export_pdf(self, output_path):
@@ -425,6 +537,9 @@ class BaseReport:
         if self.layout is None:
             self.create_layout()
         export_settings = QgsLayoutExporter.PdfExportSettings()
+        # Makes links clickable etc.
+        # caution - changing to False make html links work but
+        # breaks map rendering
         export_settings.rasterizeWholeImage = True
         exporter = QgsLayoutExporter(self.layout)
         result = exporter.exportToPdf(output_path, export_settings)

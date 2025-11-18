@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Treeview module.
+
+This module contains functionality for treeview.
+"""
 import uuid
 
 from qgis.core import Qgis
@@ -11,6 +15,13 @@ from geest.utilities import log_message
 
 
 class JsonTreeModel(QAbstractItemModel):
+    """🎯 Json Tree Model.
+
+    Attributes:
+        original_value: Original value.
+        rootItem: Rootitem.
+    """
+
     collapseNodeRequested = pyqtSignal(object)  # Signal to notify the view to collapse a node
 
     """
@@ -430,6 +441,14 @@ class JsonTreeModel(QAbstractItemModel):
         """
 
         def recurse_tree(item):
+            """🔄 Recurse tree.
+
+            Args:
+                item: Item.
+
+            Returns:
+                The result of the operation.
+            """
             # Serialize each item, including UUID
             # Note we store the road paths but not the cycle paths
             # because the roads are used for native routing analysis
@@ -789,6 +808,11 @@ class JsonTreeView(QTreeView):
     """Custom QTreeView for Geest."""
 
     def __init__(self, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            parent: Parent.
+        """
         super().__init__(parent)
 
     def setModel(self, model: QAbstractItemModel):
@@ -823,6 +847,11 @@ class JsonTreeView(QTreeView):
                 self.collapse_single_nodes(child_item)
 
     def collapse_node_in_view(self, item):
+        """⚙️ Collapse node in view.
+
+        Args:
+            item: Item.
+        """
         index = self.treeView.model().indexFromItem(item)
         self.treeView.setExpanded(index, False)
 

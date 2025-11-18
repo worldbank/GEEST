@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Osm Downloader Task module.
+
+This module contains functionality for osm downloader task.
+"""
 import datetime
 import os
 import traceback
@@ -130,7 +134,11 @@ class OSMDownloaderTask(QgsTask):
             with open(os.path.join(self.working_dir, "error.txt"), "w") as f:
                 f.write(f"{datetime.datetime.now()}\n")
                 f.write(traceback.format_exc())
-            self.error_occurred.emit(f"Error in OSMDownloaderTask: {str(e)}")
+            if "probably too busy" in str(e).lower():
+                self.error_occurred.emit("Overpass API is probably too busy right now. Please try again later.")
+            else:
+                self.error_occurred.emit(f"Error in OSMDownloaderTask: {str(e)}")
+
         return True
 
     def create_study_area_directory(self, working_dir):

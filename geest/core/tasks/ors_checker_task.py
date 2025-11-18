@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Ors Checker Task module.
+
+This module contains functionality for ors checker task.
+"""
 from typing import Optional
 
 from qgis.core import Qgis, QgsTask
@@ -10,10 +14,23 @@ from geest.utilities import log_message
 
 
 class OrsCheckerTask(QgsTask):
+    """🎯 Ors Checker Task.
+
+    Attributes:
+        is_key_valid: Is key valid.
+        ors_client: Ors client.
+        url: Url.
+    """
+
     # Custom signal to emit when the job is finished
     job_finished = pyqtSignal(bool)
 
     def __init__(self, url: str):
+        """🏗️ Initialize the instance.
+
+        Args:
+            url: Url.
+        """
         super().__init__("ORS API Key Validation Task", QgsTask.CanCancel)
         self.url = url
         self.exception: Optional[Exception] = None

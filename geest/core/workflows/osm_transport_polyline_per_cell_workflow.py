@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Osm Transport Polyline Per Cell Workflow module.
+
+This module contains functionality for osm transport polyline per cell workflow.
+"""
 import os
 from typing import Optional
 from urllib.parse import unquote
@@ -60,7 +64,7 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         else:
             raise ValueError(f"Unsupported id for OSM Transport Polyline Per Cell Workflow: {id}")
 
-        layer_path = self.attributes.get("osm_transport_polygon_per_cell_shapefile", None)
+        layer_path = self.attributes.get("osm_transport_polyline_per_cell_shapefile", None)
         if layer_path:
             layer_path = unquote(layer_path)
 

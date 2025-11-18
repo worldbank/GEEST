@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Dont Use Workflow module.
+
+This module contains functionality for dont use workflow.
+"""
 from qgis.core import QgsFeedback, QgsGeometry, QgsProcessingContext
 
 from geest.core import JsonTreeItem

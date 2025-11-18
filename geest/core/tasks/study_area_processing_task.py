@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Study Area Processing Task module.
+
+This module contains functionality for study area processing task.
+"""
 import datetime
 import glob
 import os
@@ -173,7 +177,11 @@ class StudyAreaProcessingTask(QgsTask):
         Exports a QgsVectorLayer to a Shapefile in output_dir.
         Returns the full path to the .shp (main file).
         """
-        shapefile_path = os.path.join(output_dir, "boundaries.shp")
+        # ensure the study area directory exists
+        if not os.path.exists(os.path.join(output_dir, "study_area")):
+            os.makedirs(os.path.join(output_dir, "study_area"))
+
+        shapefile_path = os.path.join(output_dir, "study_area", "boundaries.shp")
         # Get the project's transform context (required for file writing)
         transform_context = QgsProject.instance().transformContext()
         options = QgsVectorFileWriter.SaveVectorOptions()
@@ -512,9 +520,27 @@ class StudyAreaProcessingTask(QgsTask):
         cell_size = self.cell_size_m
 
         def snap_down(value, base):
+            """🔄 Snap down.
+
+            Args:
+                value: Value.
+                base: Base.
+
+            Returns:
+                The result of the operation.
+            """
             return (int(value // base)) * base
 
         def snap_up(value, base):
+            """🔄 Snap up.
+
+            Args:
+                value: Value.
+                base: Base.
+
+            Returns:
+                The result of the operation.
+            """
             return (int(value // base) + 1) * base
 
         # Snap bounding values outward so we always cover the full geometry
@@ -592,6 +618,12 @@ class StudyAreaProcessingTask(QgsTask):
 
     # Helper to update time spent in a named metric block
     def track_time(self, metric_name, start_time):
+        """⚙️ Track time.
+
+        Args:
+            metric_name: Metric name.
+            start_time: Start time.
+        """
         self.metrics[metric_name] += time.time() - start_time
 
     ##########################################################################
@@ -712,6 +744,13 @@ class StudyAreaProcessingTask(QgsTask):
         log_message(f"Grid creation completed for area {normalized_name}.")
 
     def write_chunk(self, layer, task, normalized_name):
+        """⚙️ Write chunk.
+
+        Args:
+            layer: Layer.
+            task: Task.
+            normalized_name: Normalized name.
+        """
         start_time = time.time()
         # Write locking is intended for a future version where we might have multiple threads
         # currently I am just using the grid_from_bbox task to generate the geometries in a

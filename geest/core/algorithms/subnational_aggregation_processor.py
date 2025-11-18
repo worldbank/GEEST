@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Subnational Aggregation Processor module.
+
+This module contains functionality for subnational aggregation processor.
+"""
 import os
 import shutil
 import traceback
@@ -162,6 +166,9 @@ class SubnationalAggregationProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the WEE Subnational Area Aggregation Processing Task calculation task.
+
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             cleaned_aggregation_layer = self.fix_geometries()
@@ -235,7 +242,12 @@ class SubnationalAggregationProcessingTask(QgsTask):
             return False
 
     def fix_geometries(self) -> QgsVectorLayer:
-        """Fix geometries"""
+        """
+        Fix geometries in the aggregation layer.
+
+        Returns:
+            QgsVectorLayer: The layer with fixed geometries and retained fid field.
+        """
 
         params = {
             "INPUT": self.aggregation_layer,
@@ -249,8 +261,18 @@ class SubnationalAggregationProcessingTask(QgsTask):
 
         return output
 
-    def aggregate(self, aggregation_layer, raster_layer_path: str, name: str) -> None:
-        """Use aggregation vector to calculate the majority WEE SCORE and WEE x Population Score for each valid polygon."""
+    def aggregate(self, aggregation_layer: QgsVectorLayer, raster_layer_path: str, name: str) -> str:
+        """
+        Use aggregation vector to calculate the majority WEE SCORE and WEE x Population Score for each valid polygon.
+
+        Args:
+            aggregation_layer (QgsVectorLayer): The aggregation layer with fixed geometries.
+            raster_layer_path (str): Path to the raster layer to aggregate.
+            name (str): Name for the output layer.
+
+        Returns:
+            str: Path to the output geopackage file.
+        """
         output = os.path.join(self.output_dir, f"{name}.gpkg")
         params = {
             "INPUT": aggregation_layer,
@@ -264,6 +286,13 @@ class SubnationalAggregationProcessingTask(QgsTask):
         return output
 
     def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
+        """
+        Apply QML style by copying from source to destination.
+
+        Args:
+            source_qml (str): Path to the source QML file.
+            qml_path (str): Path where the QML file should be copied to.
+        """
 
         log_message(f"Copying QML style from {source_qml} to {qml_path}")
         # Apply QML Style
@@ -275,6 +304,9 @@ class SubnationalAggregationProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("Subnational aggregate calculation completed successfully.")

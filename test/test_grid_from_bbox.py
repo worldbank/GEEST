@@ -14,12 +14,20 @@ from geest.core.tasks import GridFromBboxTask
 
 
 def example_bbox():
-    """Returns a standard bounding box."""
+    """Returns a standard bounding box.
+
+    Returns:
+        QgsRectangle: A standard bounding box for testing.
+    """
     return QgsRectangle(0, 0, 100, 100)
 
 
 def example_crs():
-    """Returns the Coordinate Reference System."""
+    """Returns the Coordinate Reference System.
+
+    Returns:
+        QgsCoordinateReferenceSystem: A coordinate reference system for testing.
+    """
     return QgsCoordinateReferenceSystem("EPSG:4326")
 
 

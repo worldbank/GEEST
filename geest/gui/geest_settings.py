@@ -23,9 +23,8 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
     def __init__(self, parent=None):
         """Constructor for the settings buffer dialog.
 
-        :param parent: Parent widget of this dialog.
-        :type parent: QWidget
-
+        Args:
+            parent: Parent widget of this dialog.
         """
         QgsOptionsPageWidget.__init__(self, parent)
         self.setupUi(self)
@@ -58,7 +57,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         zero_default = bool(setting(key="default_raster_to_0", default=0))
         self.default_raster_to_0.setChecked(bool(zero_default))
 
-        show_layer_on_click = setting(key="show_layer_on_click", default=False)
+        show_layer_on_click = setting(key="show_layer_on_click", default=True)
         self.show_layer_on_click.setChecked(bool(show_layer_on_click))
 
         show_overlay = setting(key="show_overlay", default=True)
@@ -109,11 +108,25 @@ class GeestOptionsFactory(QgsOptionsWidgetFactory):
     """
 
     def __init__(self):  # pylint: disable=useless-super-delegation
+        """🏗️ Initialize the instance."""
         super().__init__()
         self.setTitle("Geest")
 
     def icon(self):  # pylint: disable=missing-function-docstring
+        """⚙️ Icon.
+
+        Returns:
+            The result of the operation.
+        """
         return QIcon(resources_path("resources", "geest-settings.svg"))
 
     def createWidget(self, parent):  # pylint: disable=missing-function-docstring
+        """⚙️ Createwidget.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         return GeestSettings(parent)

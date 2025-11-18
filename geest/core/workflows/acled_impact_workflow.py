@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Acled Impact Workflow module.
+
+This module contains functionality for acled impact workflow.
+"""
 import csv
 import os
 
@@ -23,6 +27,7 @@ from qgis.PyQt.QtCore import QVariant
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
 
+from .acled_impact_mappings import buffer_distances, event_scores
 from .workflow_base import WorkflowBase
 
 
@@ -120,24 +125,6 @@ class AcledImpactWorkflow(WorkflowBase):
             QgsVectorLayer: The reprojected point layer created from the CSV.
         """
         source_crs = QgsCoordinateReferenceSystem("EPSG:4326")  # Assuming the CSV uses WGS84
-        # Define scoring categories based on event_type
-        # See https://github.com/worldbank/GEEST/issues/71
-        # For where these lookups are specified
-        event_scores = {
-            "Battles": 0,
-            "Explosions/Remote violence": 1,
-            "Violence against civilians": 2,
-            "Protests": 4,
-            "Riots": 4,
-        }
-        buffer_distances = {
-            "Battles": 5000,
-            "Explosions/Remote violence": 5000,
-            "Violence against civilians": 2000,
-            "Protests": 1000,
-            "Riots": 2000,
-        }
-
         # Set up a coordinate transform from WGS84 to the target CRS
         transform_context = self.context.project().transformContext()
         coordinate_transform = QgsCoordinateTransform(source_crs, self.target_crs, transform_context)
