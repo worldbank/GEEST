@@ -5,7 +5,7 @@
   <language>ENG</language>
   <type>dataset</type>
   <title>Admin0</title>
-  <abstract>The feature class shows the Admin0 boundaries of Saint Lucia, the information was obtained from the website of the the Centre for Humanitarian Data, OCHA Services. (https://centre.humdata.org/). 
+  <abstract>The feature class shows the Admin0 boundaries of Saint Lucia, the information was obtained from the website of the the Centre for Humanitarian Data, OCHA Services. (https://centre.humdata.org/).
 
 The feature class shows the Admin0 boundaries of Saint Lucia. Representation in Admin0.</abstract>
   <keywords vocabulary="Search keys">

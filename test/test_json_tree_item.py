@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 import unittest
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
 from uuid import UUID
+
 from geest.core.json_tree_item import JsonTreeItem
 
 
@@ -184,50 +184,36 @@ class TestJsonTreeItem(unittest.TestCase):
         item = JsonTreeItem(self.test_data, role="indicator")
         item.setAttribute("factor_weighting", 1.0)  # Ensure valid weight
         item.enable()
-        self.assertEqual(
-            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
-        )
+        self.assertEqual(item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown())
 
         # Test "Excluded from analysis"
         item.setAttribute("factor_weighting", 0.0)
-        self.assertEqual(
-            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
-        )
+        self.assertEqual(item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown())
 
         # Test "Completed successfully"
         item.setAttribute("result", "Workflow Completed")
         item.setAttribute("result_file", "test_file.tif")
-        self.assertEqual(
-            item.getStatus(), "Completed successfully", msg=item.attributesAsMarkdown()
-        )
+        self.assertEqual(item.getStatus(), "Completed successfully", msg=item.attributesAsMarkdown())
 
         # Test "Workflow failed"
         item.setAttribute("analysis_mode", "use_csv_to_point_layer")
         item.setAttribute("result", "Error occurred")
-        self.assertEqual(
-            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
-        )
+        self.assertEqual(item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown())
 
         # Test "Required and not configured"
         item.setAttribute("analysis_mode", "Do Not Use")
         item.setAttribute("factor_weighting", 1.0)
-        self.assertEqual(
-            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
-        )
+        self.assertEqual(item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown())
 
         # Test "Not configured (optional)"
         item.setAttribute("factor_weighting", 0.0)
-        self.assertEqual(
-            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
-        )
+        self.assertEqual(item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown())
 
         # Test recursive weight checks
         parent = JsonTreeItem(self.test_data, role="factor")
         parent.setAttribute("dimension_weighting", 0.0)
         item.parentItem = parent
-        self.assertEqual(
-            item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown()
-        )
+        self.assertEqual(item.getStatus(), "Excluded from analysis", msg=item.attributesAsMarkdown())
 
     def test_paths(self):
         """Test getPaths method."""
@@ -267,9 +253,7 @@ class TestJsonTreeItem(unittest.TestCase):
         # Debugging: ensure childItems is populated
         self.assertEqual(len(analysis.childItems), 1)
 
-        descendants = analysis.getDescendantDimensions(
-            include_completed=False, include_disabled=True
-        )
+        descendants = analysis.getDescendantDimensions(include_completed=False, include_disabled=True)
         self.assertEqual(len(descendants), 1)
         self.assertIs(descendants[0], dimension)
 
@@ -286,9 +270,7 @@ class TestJsonTreeItem(unittest.TestCase):
         # Debugging: ensure childItems is populated
         self.assertEqual(len(dimension.childItems), 1)
 
-        descendants = dimension.getDescendantFactors(
-            include_completed=False, include_disabled=True
-        )
+        descendants = dimension.getDescendantFactors(include_completed=False, include_disabled=True)
         self.assertEqual(len(descendants), 1)
         self.assertIs(descendants[0], factor)
 

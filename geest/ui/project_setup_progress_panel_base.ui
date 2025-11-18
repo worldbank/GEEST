@@ -82,6 +82,9 @@
          <pointsize>16</pointsize>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
+       </property>
        <property name="text">
         <string>◀️</string>
        </property>
@@ -124,6 +127,9 @@
         <font>
          <pointsize>16</pointsize>
         </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgba(118, 182, 178, 255);</string>
        </property>
        <property name="text">
         <string>▶️</string>

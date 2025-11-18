@@ -1,3 +1,13 @@
-from .study_area import StudyAreaProcessingTask
-from .ors_checker import OrsCheckerTask
-from .grid_from_bbox import GridFromBbox
+# -*- coding: utf-8 -*-
+# flake8: noqa
+# isort: skip_file
+# black: skip-file
+"""📦 Tasks module.
+
+This module contains functionality for tasks.
+"""
+from .grid_from_bbox_task import GridFromBboxTask
+from .ors_checker_task import OrsCheckerTask
+from .osm_downloader_task import OSMDownloaderTask
+from .study_area_processing_task import StudyAreaProcessingTask
+from .ghsl_downloader_task import GHSLDownloaderTask

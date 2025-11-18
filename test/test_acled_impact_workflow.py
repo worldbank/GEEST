@@ -1,10 +1,13 @@
-import unittest
+# -*- coding: utf-8 -*-
 import os
-from unittest.mock import patch, MagicMock, mock_open
+import unittest
+from unittest.mock import MagicMock, mock_open, patch
+
 from qgis.core import QgsVectorLayer
+from utilities_for_testing import prepare_fixtures
+
 from geest.core import JsonTreeItem
 from geest.core.workflows import AcledImpactWorkflow
-from utilities_for_testing import prepare_fixtures
 
 
 class TestAcledImpactWorkflow(unittest.TestCase):
@@ -95,15 +98,11 @@ class TestAcledImpactWorkflow(unittest.TestCase):
             working_directory=self.working_directory,
         )
 
-        with patch.object(
-            workflow, "target_crs", MagicMock(authid=lambda: "EPSG:4326")
-        ):
+        with patch.object(workflow, "target_crs", MagicMock(authid=lambda: "EPSG:4326")):
             layer = workflow._load_csv_as_point_layer()
 
         self.assertIsInstance(layer, QgsVectorLayer)
-        mock_open_file.assert_called_once_with(
-            "mock_csv_file.csv", newline="", encoding="utf-8"
-        )
+        mock_open_file.assert_called_once_with("mock_csv_file.csv", newline="", encoding="utf-8")
         mock_writer.assert_called_once()
 
     @unittest.skip("This test is not ready")
@@ -111,9 +110,7 @@ class TestAcledImpactWorkflow(unittest.TestCase):
     @patch("geest.workflow.AcledImpactWorkflow._assign_scores")
     @patch("geest.workflow.AcledImpactWorkflow._overlay_analysis")
     @patch("geest.workflow.AcledImpactWorkflow._rasterize")
-    def test_process_features_for_area(
-        self, mock_rasterize, mock_overlay, mock_scores, mock_buffer
-    ):
+    def test_process_features_for_area(self, mock_rasterize, mock_overlay, mock_scores, mock_buffer):
         """Test the processing of features for an area."""
         mock_geometry = MagicMock()
         mock_layer = MagicMock(spec=QgsVectorLayer)
@@ -130,9 +127,7 @@ class TestAcledImpactWorkflow(unittest.TestCase):
             working_directory=self.working_directoryConfigured,
         )
 
-        result = workflow._process_features_for_area(
-            mock_geometry, mock_geometry, mock_layer, 0
-        )
+        result = workflow._process_features_for_area(mock_geometry, mock_geometry, mock_layer, 0)
         self.assertEqual(result, "mock_raster.tif")
         mock_buffer.assert_called_once()
         mock_scores.assert_called_once()

@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
+"""📦 Safety Raster Workflow module.
+
+This module contains functionality for safety raster workflow.
+"""
 import os
+from urllib.parse import unquote
+
 import numpy as np
+from qgis import processing  # QGIS processing toolbox
 from qgis.core import (
     Qgis,
     QgsFeedback,
@@ -9,10 +17,11 @@ from qgis.core import (
     QgsRasterLayer,
     QgsVectorLayer,
 )
-from qgis import processing  # QGIS processing toolbox
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class SafetyRasterWorkflow(WorkflowBase):
@@ -24,22 +33,25 @@ class SafetyRasterWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_nighttime_lights"
-        layer_name = self.attributes.get("nighttime_lights_raster", None)
+        layer_name = unquote(self.attributes.get("nighttime_lights_raster", None))
 
         if not layer_name:
             log_message(
@@ -55,9 +67,7 @@ class SafetyRasterWorkflow(WorkflowBase):
                     level=Qgis.Warning,
                 )
                 return False
-        self.raster_layer = QgsRasterLayer(
-            layer_name, "Nighttime Lights Raster", "gdal"
-        )
+        self.raster_layer = QgsRasterLayer(layer_name, "Nighttime Lights Raster", "gdal")
 
     def _process_raster_for_area(
         self,
@@ -83,9 +93,7 @@ class SafetyRasterWorkflow(WorkflowBase):
         max_val, median, percentile_75 = self.calculate_raster_stats(area_raster)
 
         # Dynamically build the reclassification table using the max value
-        reclass_table = self._build_reclassification_table(
-            max_val, median, percentile_75
-        )
+        reclass_table = self._build_reclassification_table(max_val, median, percentile_75)
         log_message(
             f"Reclassification table for area {index}: {reclass_table}",
             tag="Geest",
@@ -113,9 +121,7 @@ class SafetyRasterWorkflow(WorkflowBase):
         """
         bbox = bbox.boundingBox()
 
-        reclassified_raster = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif"
-        )
+        reclassified_raster = os.path.join(self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif")
 
         # Set up the reclassification using reclassifybytable
         params = {
@@ -126,11 +132,14 @@ class SafetyRasterWorkflow(WorkflowBase):
             "NODATA_FOR_MISSING": False,
             "NO_DATA": 255,  # No data value
             "OUTPUT": reclassified_raster,
+            "PROGRESS": self.feedback,
         }
 
         # Perform the reclassification using the raster calculator
-        reclass = processing.run(
-            "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
+        processing.run(
+            "native:reclassifybytable",  # noqa F841
+            params,  # noqa F841
+            feedback=QgsProcessingFeedback(),  # noqa F841
         )["OUTPUT"]
 
         log_message(
@@ -200,9 +209,7 @@ class SafetyRasterWorkflow(WorkflowBase):
             log_message("No valid data in the raster", "Geest", level=Qgis.Warning)
             return None, None, None
 
-    def _build_reclassification_table(
-        self, max_val: float, median: float, percentile_75: float
-    ):
+    def _build_reclassification_table(self, max_val: float, median: float, percentile_75: float):
         """
         Build a reclassification table dynamically using the max value from the raster.
         """

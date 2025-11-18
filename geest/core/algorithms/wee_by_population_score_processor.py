@@ -1,17 +1,23 @@
-import os
-import traceback
-from typing import Optional, List
-import shutil
+# -*- coding: utf-8 -*-
+"""📦 Wee By Population Score Processor module.
 
-from qgis.core import (
-    QgsTask,
-    QgsRasterLayer,
-    QgsVectorLayer,
-    QgsCoordinateReferenceSystem,
-)
+This module contains functionality for wee by population score processor.
+"""
+import os
+import shutil
+import traceback
+from typing import List, Optional
+
 from qgis import processing
-from geest.utilities import log_message, resources_path
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsRasterLayer,
+    QgsTask,
+    QgsVectorLayer,
+)
+
 from geest.core.algorithms import AreaIterator
+from geest.utilities import log_message, resources_path
 
 
 class WEEByPopulationScoreProcessingTask(QgsTask):
@@ -123,6 +129,9 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the WEE SCORE calculation task.
+
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.calculate_score()
@@ -142,18 +151,17 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         """
         Checks if GEEST and POP rasters have the same origin, dimensions, and pixel sizes.
 
-        Raises an exception if the check fails.
-
         Args:
-            geest_raster_path (QgsRasterLayer): Path to the GEEST raster.
-            pop_raster_path (QgsRasterLayer): Path to the POP raster.
-            dimension_check (bool): Flag to check if the rasters have the same dimensions.
-        returns:
-            None
+            geest_raster (QgsRasterLayer): The GEEST raster layer.
+            pop_raster (QgsRasterLayer): The population raster layer.
+            dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
+
+        Raises:
+            ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
         log_message("Validating input rasters")
         log_message(f"GEEST Raster: {geest_raster.source()}")
-        log_message(f"POP Raster  : {pop_raster.source()}")
+        log_message(f"POP Raster  : {pop_raster.source()}")  # noqa E203
 
         if not geest_raster.isValid() or not pop_raster.isValid():
             raise ValueError("One or both input rasters are invalid.")
@@ -186,16 +194,12 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
                 return
 
             wee_path = os.path.join(self.wee_folder, f"wee_masked_{index}.tif")
-            population_path = os.path.join(
-                self.population_folder, f"reclassified_{index}.tif"
-            )
+            population_path = os.path.join(self.population_folder, f"reclassified_{index}.tif")
             wee_layer = QgsRasterLayer(wee_path, "WEE")
             pop_layer = QgsRasterLayer(population_path, "POP")
             self.validate_rasters(wee_layer, pop_layer, dimension_check=False)
 
-            output_path = os.path.join(
-                self.output_dir, f"wee_by_population_score_{index}.tif"
-            )
+            output_path = os.path.join(self.output_dir, f"wee_by_population_score_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
@@ -225,7 +229,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
 
     def generate_vrt(self) -> None:
         """
-        Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
+        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
         """
         vrt_path = os.path.join(self.output_dir, "wee_by_population_score.vrt")
         qml_path = os.path.join(self.output_dir, "wee_by_population_score.qml")
@@ -251,6 +255,9 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("WEE SCORE calculation completed successfully.")

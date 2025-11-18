@@ -1,6 +1,26 @@
-import sys
+# -*- coding: utf-8 -*-
+"""Test suite for GEEST."""
+
+__copyright__ = "Copyright 2022, Tim Sutton"
+__license__ = "GPL version 3"
+__email__ = "tim@kartoza.com"
+__revision__ = "$Format:%H$"
+
+# -----------------------------------------------------------
+# Copyright (C) 2022 Tim Sutton
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
+
 import os
+import sys
 import unittest
+
 import qgis  # NOQA  For SIP API to V2 if run outside of QGIS
 
 try:
@@ -13,11 +33,14 @@ try:
 except ImportError:
     pipmain(["install", "coverage"])
     import coverage
-import tempfile
-from osgeo import gdal
-from qgis.PyQt import Qt
 
+import tempfile
+
+from osgeo import gdal
 from qgis.core import Qgis
+
+# flake8: noqa: F401
+from qgis.PyQt import Qt
 
 
 def _run_tests(test_suite, package_name, with_coverage=False):

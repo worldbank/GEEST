@@ -1,18 +1,24 @@
-import os
-import traceback
-from typing import Optional, List
-import shutil
+# -*- coding: utf-8 -*-
+"""📦 Opportunities By Wee Score Population Processor module.
 
-from qgis.core import (
-    QgsTask,
-    QgsRasterLayer,
-    QgsVectorLayer,
-    QgsCoordinateReferenceSystem,
-)
+This module contains functionality for opportunities by wee score population processor.
+"""
+import os
+import shutil
+import traceback
+from typing import List, Optional
+
 from qgis import processing
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsRasterLayer,
+    QgsTask,
+    QgsVectorLayer,
+)
+
 from geest.core import JsonTreeItem
-from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
+from geest.utilities import log_message, resources_path
 
 
 class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
@@ -62,21 +68,15 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
         target_crs: Optional[QgsCoordinateReferenceSystem] = None,
         force_clear: bool = False,
     ):
-        super().__init__(
-            "Opportunities WEE Score by Population Processor", QgsTask.CanCancel
-        )
+        super().__init__("Opportunities WEE Score by Population Processor", QgsTask.CanCancel)
         self.item = item
         self.study_area_gpkg_path = study_area_gpkg_path
 
-        self.output_dir = os.path.join(
-            working_directory, "opportunities_by_wee_score_by_population"
-        )
+        self.output_dir = os.path.join(working_directory, "opportunities_by_wee_score_by_population")
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the analysis and opportunities mask processor
-        self.opportunity_masks_folder = os.path.join(
-            working_directory, "opportunity_masks"
-        )
+        self.opportunity_masks_folder = os.path.join(working_directory, "opportunity_masks")
         self.wee_folder = os.path.join(working_directory, "wee_by_population_score")
 
         self.force_clear = force_clear
@@ -96,13 +96,14 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
         self.output_rasters: List[str] = []
         self.result_file_key = "wee_by_population_by_opportunities_mask_result_file"
         self.result_key = "wee_by_population_by_opportunities_mask_result"
-        log_message(
-            "Initialized Opportunities Mask by WEE SCORE by Population Processing Task"
-        )
+        log_message("Initialized Opportunities Mask by WEE SCORE by Population Processing Task")
 
     def run(self) -> bool:
         """
         Executes the Opportunities by WEE SCORE by Population calculation task.
+
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.calculate_score()
@@ -129,24 +130,21 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
         Checks if Opportunities Mask and WEE Score by Population
         rasters have the same origin, dimensions, and pixel sizes.
 
-        Raises an exception if the check fails.
-
         Args:
-            opportunities_mask_raster (QgsRasterLayer): Path to the mask raster.
-            wee_score_by_population_raster (QgsRasterLayer): Path to the WEE Score by Population raster.
-            dimension_check (bool): Flag to check if the rasters have the same dimensions.
-        returns:
-            None
+            opportunities_mask_raster (QgsRasterLayer): The mask raster layer.
+            wee_score_by_population_raster (QgsRasterLayer): The WEE Score by Population raster layer.
+            dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
+
+        Raises:
+            ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
         log_message("Validating input rasters")
-        log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")
-        log_message(
-            f"wee_score_by_population raster : {wee_score_by_population_raster.source()}"
-        )
+        log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")  # noqa: E293
+        log_message(f"wee_score_by_population raster : {wee_score_by_population_raster.source()}")  # noqa: E293, E203
 
         if (
-            not opportunities_mask_raster.isValid()
-            or not wee_score_by_population_raster.isValid()
+            not opportunities_mask_raster.isValid()  # noqa: W503
+            or not wee_score_by_population_raster.isValid()  # noqa: W503
         ):
             raise ValueError("One or both input rasters are invalid.")
 
@@ -181,23 +179,13 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
             if self.isCanceled():
                 return
 
-            mask_path = os.path.join(
-                self.opportunity_masks_folder, f"opportunites_mask_{index}.tif"
-            )
-            wee_score_by_population_path = os.path.join(
-                self.wee_folder, f"wee_by_population_score_{index}.tif"
-            )
+            mask_path = os.path.join(self.opportunity_masks_folder, f"opportunites_mask_{index}.tif")
+            wee_score_by_population_path = os.path.join(self.wee_folder, f"wee_by_population_score_{index}.tif")
             mask_layer = QgsRasterLayer(mask_path, "WEE")
-            wee_score_by_population_layer = QgsRasterLayer(
-                wee_score_by_population_path, "POP"
-            )
-            self.validate_rasters(
-                mask_layer, wee_score_by_population_layer, dimension_check=False
-            )
+            wee_score_by_population_layer = QgsRasterLayer(wee_score_by_population_path, "POP")
+            self.validate_rasters(mask_layer, wee_score_by_population_layer, dimension_check=False)
 
-            output_path = os.path.join(
-                self.output_dir, f"wee_by_population_by_opportunities_mask_{index}.tif"
-            )
+            output_path = os.path.join(self.output_dir, f"wee_by_population_by_opportunities_mask_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
@@ -227,19 +215,13 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
 
     def generate_vrt(self) -> str:
         """
-        Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
+        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
 
-
-        returns:
-
+        Returns:
             str: Path to the generated VRT file.
         """
-        vrt_path = os.path.join(
-            self.output_dir, "wee_by_population_by_opportunities_mask.vrt"
-        )
-        qml_path = os.path.join(
-            self.output_dir, "wee_by_population_by_opportunities_mask.qml"
-        )
+        vrt_path = os.path.join(self.output_dir, "wee_by_population_by_opportunities_mask.vrt")
+        qml_path = os.path.join(self.output_dir, "wee_by_population_by_opportunities_mask.qml")
         source_qml = resources_path("resources", "qml", "wee_by_population_score.qml")
 
         params = {
@@ -263,12 +245,11 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
-            log_message(
-                "Opportunities mask by WEE SCORE by Population calculation completed successfully."
-            )
+            log_message("Opportunities mask by WEE SCORE by Population calculation completed successfully.")
         else:
-            log_message(
-                "Opportunities mask by WEE SCORE by Population calculation failed."
-            )
+            log_message("Opportunities mask by WEE SCORE by Population calculation failed.")

@@ -1,10 +1,11 @@
-from qgis.core import (
-    edit,
-    Qgis,
-    QgsField,
-    QgsVectorLayer,
-)
+# -*- coding: utf-8 -*-
+"""📦 Polygon Per Cell Processor module.
+
+This module contains functionality for polygon per cell processor.
+"""
+from qgis.core import Qgis, QgsField, QgsVectorLayer, edit
 from qgis.PyQt.QtCore import QVariant
+
 from geest.utilities import log_message
 
 
@@ -33,9 +34,7 @@ def assign_reclassification_to_polygons(layer: QgsVectorLayer) -> QgsVectorLayer
             layer.dataProvider().addAttributes([QgsField("value", QVariant.Int)])
             layer.updateFields()
         for feature in layer.getFeatures():
-            perimeter = (
-                feature.geometry().length()
-            )  # Calculate the perimeter of the polygon
+            perimeter = feature.geometry().length()  # Calculate the perimeter of the polygon
 
             log_message(
                 f"Perimeter of polygon {feature.id()}: {perimeter}",

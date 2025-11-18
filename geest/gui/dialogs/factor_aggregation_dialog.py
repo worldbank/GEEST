@@ -1,38 +1,67 @@
+# -*- coding: utf-8 -*-
+"""📦 Factor Aggregation Dialog module.
+
+This module contains functionality for factor aggregation dialog.
+"""
+from qgis.core import Qgis
+from qgis.PyQt.QtCore import Qt, QUrl
+from qgis.PyQt.QtGui import QDesktopServices, QPixmap
 from qgis.PyQt.QtWidgets import (
-    QDialog,
+    QCheckBox,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QHBoxLayout,
     QHeaderView,
     QLabel,
-    QDoubleSpinBox,
     QPushButton,
     QSizePolicy,
+    QSpacerItem,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
-    QDialogButtonBox,
     QWidget,
-    QCheckBox,
-    QHBoxLayout,
-    QSpacerItem,
 )
-from qgis.PyQt.QtGui import QPixmap, QDesktopServices
-from qgis.PyQt.QtCore import Qt, QUrl
-from qgis.core import Qgis
-from geest.utilities import resources_path, setting
+
+from geest.core.json_tree_item import JsonTreeItem as tree_item
+from geest.gui.widgets import CustomBannerLabel
+from geest.utilities import (
+    is_qgis_dark_theme_active,
+    log_message,
+    resources_path,
+    setting,
+)
+
 from ..datasource_widget_factory import DataSourceWidgetFactory
 from ..factor_configuration_widget import FactorConfigurationWidget
-from geest.utilities import log_message, is_qgis_dark_theme_active
-from geest.gui.widgets import CustomBannerLabel
+from .custom_base_dialog import CustomBaseDialog
 
 
-class FactorAggregationDialog(QDialog):
+class FactorAggregationDialog(CustomBaseDialog):
+    """🎯 Factor Aggregation Dialog.
+
+    Attributes:
+        banner_label: Banner label.
+        button_box: Button box.
+        configuration_widget: Configuration widget.
+        data_sources: Data sources.
+        factor_data: Factor data.
+    """
 
     def __init__(self, factor_name, factor_data, factor_item, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            factor_name: Factor name.
+            factor_data: Factor data.
+            factor_item: Factor item.
+            parent: Parent.
+        """
         super().__init__(parent)
 
         self.setWindowTitle(factor_name)
         self.factor_name = factor_name
         self.factor_data = factor_data
-        self.tree_item = factor_item  # Reference to the QTreeView item to update
+        self.tree_item: tree_item = factor_item  # Reference to the QTreeView item to update
 
         # Initialize dictionaries
         self.guids = self.tree_item.getFactorIndicatorGuids()
@@ -58,9 +87,7 @@ class FactorAggregationDialog(QDialog):
         )
         layout.addWidget(self.banner_label)
         # Title label
-        self.title_label = QLabel(
-            "The Gender Enabling Environments Spatial Tool", self.banner_label
-        )
+        self.title_label = QLabel("The Gender Enabling Environments Spatial Tool", self.banner_label)
         self.title_label.setWordWrap(True)
         self.title_label.setStyleSheet(
             "color: white; font-size: 16px; background-color: rgba(0, 0, 0, 0.5); padding: 5px;"
@@ -68,9 +95,7 @@ class FactorAggregationDialog(QDialog):
         self.title_label.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
 
         # Positioning the title label with a 10px offset from the left and bottom of the banner
-        self.title_label.setGeometry(
-            10, self.banner_label.height() - 30, self.banner_label.width() - 20, 20
-        )
+        self.title_label.setGeometry(10, self.banner_label.height() - 30, self.banner_label.width() - 20, 20)
         self.title_label.setMargin(10)
 
         # Update layout
@@ -78,12 +103,8 @@ class FactorAggregationDialog(QDialog):
         # Hierarchy label
         parent_item = self.tree_item.parent()
         if parent_item:
-            hierarchy_label = QLabel(
-                f"{parent_item.data(0)} :: {self.tree_item.data(0)}"
-            )
-            hierarchy_label.setStyleSheet(
-                "font-size: 14px; font-weight: bold; color: gray;"
-            )
+            hierarchy_label = QLabel(f"{parent_item.data(0)} :: {self.tree_item.data(0)}")  # noqa E231
+            hierarchy_label.setStyleSheet("font-size: 14px; font-weight: bold; color: gray;")  # noqa E231
             layout.addWidget(hierarchy_label, alignment=Qt.AlignTop)
 
         # Description label
@@ -93,9 +114,7 @@ class FactorAggregationDialog(QDialog):
         layout.addWidget(description_label)
 
         # Configuration widget and table
-        self.configuration_widget = FactorConfigurationWidget(
-            self.tree_item, self.guids
-        )
+        self.configuration_widget = FactorConfigurationWidget(self.tree_item, self.guids)
 
         self.configuration_widget.selection_changed.connect(self.populate_table)
         layout.addWidget(self.configuration_widget)
@@ -104,9 +123,7 @@ class FactorAggregationDialog(QDialog):
         self.table = QTableWidget(self)
         self.table.setRowCount(len(self.guids))
         self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(
-            ["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""]
-        )
+        self.table.setHorizontalHeaderLabels(["Input", "Indicator", "Weight 0-1", "Use", "GUID", ""])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
@@ -126,9 +143,7 @@ class FactorAggregationDialog(QDialog):
         layout.addWidget(self.table)
 
         help_layout = QHBoxLayout()
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.help_icon = QPixmap(resources_path("resources", "images", "help.png"))
         self.help_icon = self.help_icon.scaledToWidth(20)
         self.help_label_icon = QLabel()
@@ -147,21 +162,15 @@ class FactorAggregationDialog(QDialog):
         layout.addWidget(self.help_label)
         self.help_label.linkActivated.connect(self.open_link_in_browser)
         help_layout.addWidget(self.help_label)
-        help_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
+        help_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout.addLayout(help_layout)
 
         # Buttons
-        self.button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        )
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         auto_calculate_button = QPushButton("Balance Weights")
         toggle_guid_button = QPushButton("Show GUIDs")
         if self.weighting_column_visible:
-            self.button_box.addButton(
-                auto_calculate_button, QDialogButtonBox.ActionRole
-            )
+            self.button_box.addButton(auto_calculate_button, QDialogButtonBox.ActionRole)
         verbose_mode = setting(key="verbose_mode", default=0)
         if verbose_mode:
             self.button_box.addButton(toggle_guid_button, QDialogButtonBox.ActionRole)
@@ -194,14 +203,21 @@ class FactorAggregationDialog(QDialog):
         self.configuration_widget.refresh_radio_buttons(attributes)
 
     def create_checkbox_widget(self, row: int, weighting_value: float) -> QWidget:
+        """⚙️ Create checkbox widget.
+
+        Args:
+            row: Row.
+            weighting_value: Weighting value.
+
+        Returns:
+            The result of the operation.
+        """
         checkbox = QCheckBox()
         if weighting_value > 0:
             checkbox.setChecked(True)
         else:
             checkbox.setChecked(False)
-        checkbox.stateChanged.connect(
-            lambda state, r=row: self.toggle_row_widgets(r, state)
-        )
+        checkbox.stateChanged.connect(lambda state, r=row: self.toggle_row_widgets(r, state))
 
         container = QWidget()
         layout = QHBoxLayout()
@@ -212,6 +228,12 @@ class FactorAggregationDialog(QDialog):
         return container
 
     def toggle_row_widgets(self, row: int, state: int):
+        """⚙️ Toggle row widgets.
+
+        Args:
+            row: Row.
+            state: State.
+        """
         is_enabled = state == Qt.Checked
         for col in range(self.table.columnCount()):
             if col in (3, 5):  # Skip Use (checkbox) and Reset columns
@@ -226,6 +248,7 @@ class FactorAggregationDialog(QDialog):
         self.validate_weightings()
 
     def populate_table(self):
+        """⚙️ Populate table."""
         self.table.setRowCount(len(self.guids))
         for row, guid in enumerate(self.guids):
             item = self.tree_item.getItemByGuid(guid)
@@ -233,9 +256,7 @@ class FactorAggregationDialog(QDialog):
             log_message(f"Populating table for GUID: {guid}")
             log_message(f"Attributes: {item.attributesAsMarkdown()}")
             # Data Source Widget
-            data_source_widget = DataSourceWidgetFactory.create_widget(
-                attributes["analysis_mode"], 1, attributes
-            )
+            data_source_widget = DataSourceWidgetFactory.create_widget(attributes["analysis_mode"], 1, attributes)
             # Expand the widget to fill the available horizontal space
             data_source_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             if not data_source_widget:
@@ -261,7 +282,7 @@ class FactorAggregationDialog(QDialog):
                 weighting_item.valueChanged.connect(self.validate_weightings)
                 self.table.setCellWidget(row, 2, weighting_item)
                 self.weightings[guid] = weighting_item
-                # Use (Checkbox)
+                # Use (Check box)
                 checkbox_widget = self.create_checkbox_widget(row, weighting_value)
             else:
                 checkbox_widget = self.create_checkbox_widget(row, 1)
@@ -277,15 +298,11 @@ class FactorAggregationDialog(QDialog):
             if self.weighting_column_visible:
                 reset_button = QPushButton("Reset")
                 reset_button.clicked.connect(
-                    lambda checked, item=weighting_item, value=default_factor_weighting: item.setValue(
-                        value
-                    )
+                    lambda checked, item=weighting_item, value=default_factor_weighting: item.setValue(value)
                 )
                 self.table.setCellWidget(row, 5, reset_button)
 
-        self.table.setColumnHidden(
-            4, not self.guid_column_visible
-        )  # Hide GUID column by default
+        self.table.setColumnHidden(4, not self.guid_column_visible)  # Hide GUID column by default
         self.validate_weightings()  # Initial validation check
         # If we dont have the weightings column, we can enable the OK button
         if not self.weighting_column_visible:
@@ -311,9 +328,8 @@ class FactorAggregationDialog(QDialog):
                 widget.setVisible(True)  # Explicitly show the widget
 
     def auto_calculate_weightings(self):
-        enabled_rows = [
-            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
-        ]
+        """⚙️ Auto calculate weightings."""
+        enabled_rows = [row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)]
         if not enabled_rows:
             equal_weighting = 0.0
         else:
@@ -329,10 +345,26 @@ class FactorAggregationDialog(QDialog):
         self.validate_weightings()
 
     def is_checkbox_checked(self, row: int) -> bool:
+        """⚙️ Check if checkbox checked.
+
+        Args:
+            row: Row.
+
+        Returns:
+            The result of the operation.
+        """
         checkbox = self.get_checkbox_in_row(row)
         return checkbox.isChecked() if checkbox else False
 
     def get_checkbox_in_row(self, row: int) -> QCheckBox:
+        """⚙️ Get checkbox in row.
+
+        Args:
+            row: Row.
+
+        Returns:
+            The result of the operation.
+        """
         container = self.table.cellWidget(row, 3)  # Use (Checkbox) column
         if container and isinstance(container, QWidget):
             layout = container.layout()
@@ -366,19 +398,13 @@ class FactorAggregationDialog(QDialog):
     def validate_weightings(self):
         """Validate weightings to ensure they sum to 1 and are within range."""
         try:
-            total_weighting = sum(
-                float(spin_box.value() or 0) for spin_box in self.weightings.values()
-            )
-            valid_sum = (
-                abs(total_weighting - 1.0) < 0.001
-            )  # Allow slight floating-point tolerance
+            total_weighting = sum(float(spin_box.value() or 0) for spin_box in self.weightings.values())
+            valid_sum = abs(total_weighting - 1.0) < 0.001  # Allow slight floating-point tolerance
         except ValueError:
             valid_sum = False
 
         # In the case that all rows are disabled, the sum is valid
-        enabled_rows = [
-            row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)
-        ]
+        enabled_rows = [row for row in range(self.table.rowCount()) if self.is_checkbox_checked(row)]
         enabled_rows_count = len(enabled_rows)
         if enabled_rows_count == 0:
             valid_sum = True
@@ -389,13 +415,9 @@ class FactorAggregationDialog(QDialog):
         # Update button state and cell highlighting
         for spin_box in self.weightings.values():
             if valid_sum:
-                spin_box.setStyleSheet(
-                    normal_color
-                )  # Reset font color to black if valid
+                spin_box.setStyleSheet(normal_color)  # Reset font color to black if valid
             else:
-                spin_box.setStyleSheet(
-                    "color: red;"
-                )  # Set font color to red if invalid
+                spin_box.setStyleSheet("color: red;")  # Set font color to red if invalid
 
         # Enable or disable the OK button based on the validity of the sum
         self.button_box.button(QDialogButtonBox.Ok).setEnabled(valid_sum)

@@ -1,30 +1,35 @@
-from qgis.core import (
-    Qgis,
-    QgsProcessingContext,
-    QgsFeedback,
-)
+# -*- coding: utf-8 -*-
+"""📦 Workflow Factory module.
+
+This module contains functionality for workflow factory.
+"""
+from qgis.core import Qgis, QgsFeedback, QgsProcessingContext
 
 from geest.core.workflows import (
-    DontUseWorkflow,
-    DefaultIndexScoreWorkflow,
-    FactorAggregationWorkflow,
-    DimensionAggregationWorkflow,
-    AnalysisAggregationWorkflow,
-    MultiBufferDistancesWorkflow,
-    PointPerCellWorkflow,
-    PolylinePerCellWorkflow,
-    PolygonPerCellWorkflow,
     AcledImpactWorkflow,
-    SinglePointBufferWorkflow,
+    AnalysisAggregationWorkflow,
+    ClassifiedPolygonWorkflow,
+    ContextualIndexScoreWorkflow,
+    DefaultIndexScoreWorkflow,
+    DimensionAggregationWorkflow,
+    DontUseWorkflow,
+    FactorAggregationWorkflow,
+    IndexScoreWithGHSLWorkflow,
+    IndexScoreWithOoklaWorkflow,
+    MultiBufferDistancesNativeWorkflow,
+    OsmTransportPolylinePerCellWorkflow,
+    PointPerCellWorkflow,
+    PolygonPerCellWorkflow,
+    PolylinePerCellWorkflow,
+    RasterReclassificationWorkflow,
     SafetyPolygonWorkflow,
     SafetyRasterWorkflow,
-    RasterReclassificationWorkflow,
+    SinglePointBufferWorkflow,
     StreetLightsBufferWorkflow,
-    ClassifiedPolygonWorkflow,
 )
+from geest.utilities import log_message
 
 from .json_tree_item import JsonTreeItem
-from geest.utilities import log_message
 
 
 class WorkflowFactory:
@@ -37,6 +42,7 @@ class WorkflowFactory:
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
     ):
@@ -44,64 +50,73 @@ class WorkflowFactory:
         Determines the workflow to return based on 'Analysis Mode' in the attributes.
         Passes the feedback object to the workflow for progress reporting.
 
-        :param item: The JsonTreeItem object representing the task.
-        :param cell_size_m: The cell size in meters for the analysis.
-        :param feedback: The QgsFeedback object for progress reporting.
-        :param context: The QgsProcessingContext object for processing. This can be used to
-            pass objects to the thread. e.g. the QgsProject Instance
+        Args:
+            item: The JsonTreeItem object representing the task.
+            cell_size_m: The cell size in meters for the analysis.
+            analysis_scale: The analysis scale string to determine the workflow e.g. local, national.
+            feedback: The QgsFeedback object for progress reporting.
+            context: The QgsProcessingContext object for processing. This can be used to
+                pass objects to the thread. e.g. the QgsProject Instance
 
-        :return: The workflow object to execute.
+        Returns:
+            Workflow: The workflow object to execute.
+
+        Raises:
+            ValueError: If an unknown analysis mode is encountered.
         """
         try:
             if not item:
                 return DontUseWorkflow({}, feedback)
 
             attributes = item.attributes()
-            log_message(f"Workflow Factory Called")
-            log_message(f"-----------------------")
+            log_message("Workflow Factory Called")
+            log_message("-----------------------")
             log_message(f"{item.attributesAsMarkdown()}")
-            log_message(f"-----------------------")
+            log_message("-----------------------")
 
             analysis_mode = attributes.get("analysis_mode", "")
 
             if analysis_mode == "use_index_score":
-                return DefaultIndexScoreWorkflow(item, cell_size_m, feedback, context)
+                return DefaultIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_contextual_index_score":
+                return ContextualIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_index_score_with_ookla":
+                return IndexScoreWithOoklaWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_index_score_with_ghsl":
+                return IndexScoreWithGHSLWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "Do Not Use":
-                return DontUseWorkflow(item, cell_size_m, feedback, context)
+                return DontUseWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_multi_buffer_point":
-                return MultiBufferDistancesWorkflow(
-                    item, cell_size_m, feedback, context
-                )
+                log_message("Using Multi Buffer Distances Native Workflow")
+                return MultiBufferDistancesNativeWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_single_buffer_point":
-                return SinglePointBufferWorkflow(item, cell_size_m, feedback, context)
+                return SinglePointBufferWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_point_per_cell":
-                return PointPerCellWorkflow(item, cell_size_m, feedback, context)
+                return PointPerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_polyline_per_cell":
-                return PolylinePerCellWorkflow(item, cell_size_m, feedback, context)
+                return PolylinePerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_osm_transport_polyline_per_cell":
+                return OsmTransportPolylinePerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_polygon_per_cell":
-                return PolygonPerCellWorkflow(item, cell_size_m, feedback, context)
+                return PolygonPerCellWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "factor_aggregation":
-                return FactorAggregationWorkflow(item, cell_size_m, feedback, context)
+                return FactorAggregationWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "dimension_aggregation":
-                return DimensionAggregationWorkflow(
-                    item, cell_size_m, feedback, context
-                )
+                return DimensionAggregationWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "analysis_aggregation":
-                return AnalysisAggregationWorkflow(item, cell_size_m, feedback, context)
+                return AnalysisAggregationWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_csv_to_point_layer":
-                return AcledImpactWorkflow(item, cell_size_m, feedback, context)
+                return AcledImpactWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_classify_polygon_into_classes":
-                return ClassifiedPolygonWorkflow(item, cell_size_m, feedback, context)
+                return ClassifiedPolygonWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_classify_safety_polygon_into_classes":
-                return SafetyPolygonWorkflow(item, cell_size_m, feedback, context)
+                return SafetyPolygonWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_nighttime_lights":
-                return SafetyRasterWorkflow(item, cell_size_m, feedback, context)
+                return SafetyRasterWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_environmental_hazards":
-                return RasterReclassificationWorkflow(
-                    item, cell_size_m, feedback, context
-                )
+                return RasterReclassificationWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_street_lights":
-                return StreetLightsBufferWorkflow(item, cell_size_m, feedback, context)
+                return StreetLightsBufferWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             else:
                 raise ValueError(f"Unknown Analysis Mode: {analysis_mode}")
 
@@ -110,4 +125,4 @@ class WorkflowFactory:
             import traceback
 
             log_message(traceback.format_exc(), level=Qgis.Critical)
-            return DontUseWorkflow(item, cell_size_m, feedback, context)
+            return DontUseWorkflow(item, cell_size_m, analysis_scale, feedback, context)

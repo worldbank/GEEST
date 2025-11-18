@@ -1,11 +1,14 @@
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-    QHBoxLayout,
-    QSpinBox,
-)
+# -*- coding: utf-8 -*-
+"""📦 Single Buffer Configuration Widget module.
+
+This module contains functionality for single buffer configuration widget.
+"""
 from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+from qgis.PyQt.QtWidgets import QHBoxLayout, QLabel, QSpinBox
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class SingleBufferConfigurationWidget(BaseConfigurationWidget):
@@ -27,9 +30,7 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
             self.buffer_distance_layout.addWidget(self.buffer_distance_label)
             self.buffer_distance_layout.addWidget(self.buffer_distance_input)
             default_distance = self.attributes.get("default_single_buffer_distance", 0)
-            buffer_distance = self.attributes.get(
-                "single_buffer_point_layer_distance", default_distance
-            )
+            buffer_distance = self.attributes.get("single_buffer_point_layer_distance", default_distance)
             if buffer_distance == 0:
                 buffer_distance = default_distance
             try:
@@ -54,9 +55,7 @@ class SingleBufferConfigurationWidget(BaseConfigurationWidget):
         if not self.isChecked():
             return None
 
-        self.attributes["single_buffer_point_layer_distance"] = (
-            self.buffer_distance_input.value()
-        )
+        self.attributes["single_buffer_point_layer_distance"] = self.buffer_distance_input.value()
 
         return self.attributes
 

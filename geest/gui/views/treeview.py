@@ -1,31 +1,28 @@
+# -*- coding: utf-8 -*-
+"""📦 Treeview module.
+
+This module contains functionality for treeview.
+"""
 import uuid
 
-# Change to this when implementing in QGIS
-from qgis.PyQt.QtWidgets import (
-    QAbstractItemDelegate,
-    QTreeView,
-    QMessageBox,
-)
-
-# Change to this when implementing in QGIS
-from qgis.PyQt.QtCore import (
-    QAbstractItemModel,
-    QModelIndex,
-    Qt,
-    pyqtSignal,
-)
-from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QAbstractItemDelegate, QTreeView, QMessageBox
-from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt
 from qgis.core import Qgis
-from geest.utilities import log_message
+from qgis.PyQt.QtCore import QAbstractItemModel, QModelIndex, Qt, pyqtSignal
+from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtWidgets import QMessageBox, QTreeView
+
 from geest.core import JsonTreeItem
+from geest.utilities import log_message
 
 
 class JsonTreeModel(QAbstractItemModel):
-    collapseNodeRequested = pyqtSignal(
-        object
-    )  # Signal to notify the view to collapse a node
+    """🎯 Json Tree Model.
+
+    Attributes:
+        original_value: Original value.
+        rootItem: Rootitem.
+    """
+
+    collapseNodeRequested = pyqtSignal(object)  # Signal to notify the view to collapse a node
 
     """
     A custom tree model for managing hierarchical JSON data in a QTreeView, including an "Analysis" root item
@@ -49,9 +46,7 @@ class JsonTreeModel(QAbstractItemModel):
         """
         super().__init__(parent)
         guid = str(uuid.uuid4())
-        self.rootItem = JsonTreeItem(
-            ["GEEST", "Status", "Weight"], role="root", guid=guid
-        )
+        self.rootItem = JsonTreeItem(["GEEST", "Status", "Weight"], role="root", guid=guid)
         self.original_value = None  # To store the original value before editing
         self.loadJsonData(json_data)
 
@@ -71,7 +66,11 @@ class JsonTreeModel(QAbstractItemModel):
         # Create the 'Analysis' parent item
         analysis_name = json_data.get("analysis_name", "Analysis")
         analysis_description = json_data.get("description", "No Description")
+        analysis_scale = json_data.get("analysis_scale", "local")
         analysis_cell_size_m = json_data.get("analysis_cell_size_m", 100.0)
+        # START I don't love that this list of layer paths is hard coded here
+        road_network_layer_path = json_data.get("road_network_layer_path", "")
+        # END
         working_folder = json_data.get("working_folder", "Not Set")
         guid = json_data.get("guid", str(uuid.uuid4()))  # Deserialize UUID
         analysis_result = json_data.get("result", "")
@@ -83,27 +82,15 @@ class JsonTreeModel(QAbstractItemModel):
         analysis_output_filename = json_data.get("output_filename", "WEE_Score")
         mask_mode = json_data.get("mask_mode", "None")
         buffer_distance_m = json_data.get("buffer_distance_m", 0.0)
-        opportunities_mask_result_file = json_data.get(
-            "opportunities_mask_result_file", ""
-        )
+        opportunities_mask_result_file = json_data.get("opportunities_mask_result_file", "")
         opportunities_mask_result = json_data.get("opportunities_mask_result", "")
-        wee_by_opportunities_mask_result = json_data.get(
-            "wee_by_opportunities_mask_result", ""
-        )
-        wee_by_opportunities_mask_result_file = json_data.get(
-            "wee_by_opportunities_mask_result_file", ""
-        )
+        wee_by_opportunities_mask_result = json_data.get("wee_by_opportunities_mask_result", "")
+        wee_by_opportunities_mask_result_file = json_data.get("wee_by_opportunities_mask_result_file", "")
         wee_by_population = json_data.get("wee_by_population", "")
-        wee_by_population_subnational_aggregation = json_data.get(
-            "wee_by_population_subnational_aggregation", ""
-        )
-        wee_score_subnational_aggregation = json_data.get(
-            "wee_score_subnational_aggregation", ""
-        )
-        opportunities_by_wee_score_by_population_subnational_aggregation = (
-            json_data.get(
-                "opportunities_by_wee_score_by_population_subnational_aggregation", ""
-            )
+        wee_by_population_subnational_aggregation = json_data.get("wee_by_population_subnational_aggregation", "")
+        wee_score_subnational_aggregation = json_data.get("wee_score_subnational_aggregation", "")
+        opportunities_by_wee_score_by_population_subnational_aggregation = json_data.get(
+            "opportunities_by_wee_score_by_population_subnational_aggregation", ""
         )
         opportunities_by_wee_score_subnational_aggregation = json_data.get(
             "opportunities_by_wee_score_subnational_aggregation", ""
@@ -120,6 +107,8 @@ class JsonTreeModel(QAbstractItemModel):
             "description": analysis_description,
             "working_folder": working_folder,
             "analysis_cell_size_m": analysis_cell_size_m,
+            "analysis_scale": analysis_scale,
+            "road_network_layer_path": road_network_layer_path,
             "result": analysis_result,
             "result_file": analysis_result_file,
             "execution_start_time": analysis_execution_start_time,
@@ -141,6 +130,7 @@ class JsonTreeModel(QAbstractItemModel):
             "wee_by_population_by_opportunities_mask_result_file": wee_by_population_by_opportunities_mask_result_file,
             "wee_by_population_by_opportunities_mask_result": wee_by_population_by_opportunities_mask_result,
         }
+
         for prefix in [
             "aggregation",
             "population",
@@ -148,35 +138,17 @@ class JsonTreeModel(QAbstractItemModel):
             "polygon_mask",
             "raster_mask",
         ]:
-            analysis_attributes[f"{prefix}_layer"] = json_data.get(
-                f"{prefix}_layer", ""
-            )
-            analysis_attributes[f"{prefix}_layer_name"] = json_data.get(
-                f"{prefix}_layer_name", ""
-            )
-            analysis_attributes[f"{prefix}_layer_source"] = json_data.get(
-                f"{prefix}_layer_source", ""
-            )
-            analysis_attributes[f"{prefix}_layer_provider_type"] = json_data.get(
-                f"{prefix}_layer_provider_type", ""
-            )
-            analysis_attributes[f"{prefix}_layer_crs"] = json_data.get(
-                f"{prefix}_layer_crs", ""
-            )
-            analysis_attributes[f"{prefix}_layer_wkb_type"] = json_data.get(
-                f"{prefix}_layer_wkb_type", ""
-            )
-            analysis_attributes[f"{prefix}_layer_id"] = json_data.get(
-                f"{prefix}_layer_id", ""
-            )
+            analysis_attributes[f"{prefix}_layer"] = json_data.get(f"{prefix}_layer", "")
+            analysis_attributes[f"{prefix}_layer_name"] = json_data.get(f"{prefix}_layer_name", "")
+            analysis_attributes[f"{prefix}_layer_source"] = json_data.get(f"{prefix}_layer_source", "")
+            analysis_attributes[f"{prefix}_layer_provider_type"] = json_data.get(f"{prefix}_layer_provider_type", "")
+            analysis_attributes[f"{prefix}_layer_crs"] = json_data.get(f"{prefix}_layer_crs", "")
+            analysis_attributes[f"{prefix}_layer_wkb_type"] = json_data.get(f"{prefix}_layer_wkb_type", "")
+            analysis_attributes[f"{prefix}_layer_id"] = json_data.get(f"{prefix}_layer_id", "")
             if prefix == "raster_mask":
-                analysis_attributes[f"{prefix}_raster"] = json_data.get(
-                    f"{prefix}_raster", ""
-                )
+                analysis_attributes[f"{prefix}_raster"] = json_data.get(f"{prefix}_raster", "")
             else:
-                analysis_attributes[f"{prefix}_shapefile"] = json_data.get(
-                    f"{prefix}_shapefile", ""
-                )
+                analysis_attributes[f"{prefix}_shapefile"] = json_data.get(f"{prefix}_shapefile", "")
 
         # Create the "Analysis" item
         status = ""
@@ -235,9 +207,7 @@ class JsonTreeModel(QAbstractItemModel):
             "output_filename": dimension.get("output_filename", ""),
             "name": dimension.get("name", ""),
             "description": dimension.get("description", ""),
-            "default_analysis_weighting": dimension.get(
-                "default_analysis_weighting", 0.0
-            ),
+            "default_analysis_weighting": dimension.get("default_analysis_weighting", 0.0),
             "analysis_weighting": dimension.get("analysis_weighting", 0.0),
             "analysis_mode": dimension.get("factor_aggregation", ""),
             "result": dimension.get("result", ""),
@@ -279,9 +249,7 @@ class JsonTreeModel(QAbstractItemModel):
             "output_filename": factor.get("output_filename", ""),
             "name": factor.get("name", ""),
             "description": factor.get("description", ""),
-            "default_dimension_weighting": factor.get(
-                "default_dimension_weighting", 0.0
-            ),
+            "default_dimension_weighting": factor.get("default_dimension_weighting", 0.0),
             "dimension_weighting": factor.get("dimension_weighting", 0.0),
             "analysis_mode": factor.get("factor_aggregation", ""),
             "result": factor.get("result", ""),
@@ -382,18 +350,32 @@ class JsonTreeModel(QAbstractItemModel):
             return item.data(index.column())
         elif role == Qt.ForegroundRole and index.column() == 2:
             return item.font_color
-        elif (
-            role == Qt.DecorationRole and index.column() == 0
-        ):  # Icon for the name column
+        elif role == Qt.DecorationRole and index.column() == 0:  # Icon for the name column
             return item.getIcon()
-        elif (
-            role == Qt.DecorationRole and index.column() == 1
-        ):  # Icon for the status column
+        elif role == Qt.DecorationRole and index.column() == 1:  # Icon for the status column
             return item.getStatusIcon()
         elif role == Qt.ToolTipRole and index.column() == 1:
             return item.getStatus()
         elif role == Qt.ToolTipRole and index.column() == 0:
-            return item.getItemTooltip()
+            # if the item role is "indicator" then use the
+            # description from its parent for the tooltip
+            # unless the indicator has an error in which case
+            # it uses its own tooltip
+            if item.role == "indicator":
+                if item.attribute("error"):
+                    # Force it to rich text so it doesn't get cut off
+                    return f"<p>{item.getItemTooltip()}</p>"
+                else:
+                    # Use the parent item's tooltip (dimension or factor)
+                    # to provide context for the indicator
+                    parent = item.parent()
+                    if parent and parent.role == "factor":
+                        # Force it to rich text so it doen't get cut off
+                        return f"<p>{parent.getItemTooltip()}</p>"
+            # Analysis, dimension and factor items use their own tooltip
+            # Force it to rich text so it doen't get cut off
+            return f"<p>{item.getItemTooltip()}</p>"
+
         elif role == Qt.FontRole:
             return item.getFont()
 
@@ -418,7 +400,7 @@ class JsonTreeModel(QAbstractItemModel):
             if column == 2:  # tree_view column
                 try:
                     value = float(value)
-                    return item.setData(column, f"{value:.2f}")
+                    return item.setData(column, f"{value:.2f}")  # noqa E231
                 except ValueError:
                     QMessageBox.critical(
                         None,
@@ -443,7 +425,7 @@ class JsonTreeModel(QAbstractItemModel):
         if not index.isValid():
             return Qt.NoItemFlags
 
-        item = index.internalPointer()
+        _ = index.internalPointer()
         if index.column() == 0 or index.column() == 1:
             return Qt.ItemIsEditable | Qt.ItemIsSelectable | Qt.ItemIsEnabled
 
@@ -459,13 +441,26 @@ class JsonTreeModel(QAbstractItemModel):
         """
 
         def recurse_tree(item):
+            """🔄 Recurse tree.
+
+            Args:
+                item: Item.
+
+            Returns:
+                The result of the operation.
+            """
             # Serialize each item, including UUID
+            # Note we store the road paths but not the cycle paths
+            # because the roads are used for native routing analysis
+            # by some of the algorithms
             if item.role == "analysis":
                 json_data = {
                     "analysis_name": item.attribute("analysis_name"),
                     "description": item.attribute("description"),
                     "working_folder": item.attribute("working_folder"),
                     "analysis_cell_size_m": item.attribute("analysis_cell_size_m"),
+                    "analysis_scale": item.attribute("analysis_scale"),
+                    "road_network_layer_path": item.attribute("road_network_layer_path"),
                     "guid": item.guid,  # Serialize UUID
                     "dimensions": [recurse_tree(child) for child in item.childItems],
                 }
@@ -506,7 +501,7 @@ class JsonTreeModel(QAbstractItemModel):
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            # Show the traceback tpp
+            # Show the trace back too
             log_message(f"{traceback.format_exc()}", level=Qgis.Critical)
             raise e
 
@@ -546,7 +541,7 @@ class JsonTreeModel(QAbstractItemModel):
         factor_weighting = 1 / num_factors
         for i in range(num_factors):
             factor_item = dimension_item.child(i)
-            factor_item.setData(2, f"{factor_weighting:.2f}")
+            factor_item.setData(2, f"{factor_weighting:.2f}")  # noqa E231
         # Update the dimension's total weighting
         dimension_item.setData(2, "1.00")
         # self.update_font_color(dimension_item, QColor(Qt.green))
@@ -588,7 +583,7 @@ class JsonTreeModel(QAbstractItemModel):
         layer_weighting = 1 / num_layers
         for i in range(num_layers):
             layer_item = factor_item.child(i)
-            layer_item.setData(2, f"{layer_weighting:.2f}")
+            layer_item.setData(2, f"{layer_weighting:.2f}")  # noqa E231
         # Update the factor's total weighting
         factor_item.setData(2, "1.00")
         # self.update_font_color(factor_item, QColor(Qt.green))
@@ -711,9 +706,7 @@ class JsonTreeModel(QAbstractItemModel):
                 return self.createIndex(row, 0, child_item)
 
             # Recursively search children
-            child_index = self._findIndexByGuid(
-                child_item, target_guid, self.createIndex(row, 0, parent_item)
-            )
+            child_index = self._findIndexByGuid(child_item, target_guid, self.createIndex(row, 0, parent_item))
             if child_index.isValid():
                 return child_index
 
@@ -815,6 +808,11 @@ class JsonTreeView(QTreeView):
     """Custom QTreeView for Geest."""
 
     def __init__(self, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            parent: Parent.
+        """
         super().__init__(parent)
 
     def setModel(self, model: QAbstractItemModel):
@@ -849,6 +847,11 @@ class JsonTreeView(QTreeView):
                 self.collapse_single_nodes(child_item)
 
     def collapse_node_in_view(self, item):
+        """⚙️ Collapse node in view.
+
+        Args:
+            item: Item.
+        """
         index = self.treeView.model().indexFromItem(item)
         self.treeView.setExpanded(index, False)
 

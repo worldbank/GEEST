@@ -1,18 +1,24 @@
-import os
-import traceback
-from typing import Optional, List
-import shutil
+# -*- coding: utf-8 -*-
+"""📦 Opportunities By Wee Score Processor module.
 
-from qgis.core import (
-    QgsTask,
-    QgsRasterLayer,
-    QgsVectorLayer,
-    QgsCoordinateReferenceSystem,
-)
+This module contains functionality for opportunities by wee score processor.
+"""
+import os
+import shutil
+import traceback
+from typing import List, Optional
+
 from qgis import processing
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsRasterLayer,
+    QgsTask,
+    QgsVectorLayer,
+)
+
 from geest.core import JsonTreeItem
-from geest.utilities import log_message, resources_path
 from geest.core.algorithms import AreaIterator
+from geest.utilities import log_message, resources_path
 
 
 class OpportunitiesByWeeScoreProcessingTask(QgsTask):
@@ -60,9 +66,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         os.makedirs(self.output_dir, exist_ok=True)
 
         # These folders should already exist from the analysis and opportunities mask processor
-        self.opportunity_masks_folder = os.path.join(
-            working_directory, "opportunity_masks"
-        )
+        self.opportunity_masks_folder = os.path.join(working_directory, "opportunity_masks")
         self.wee_folder = os.path.join(working_directory, "wee_score")
 
         self.force_clear = force_clear
@@ -87,14 +91,15 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the Opportunities by WEE SCORE calculation task.
+
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.calculate_score()
             vrt_filepath = self.generate_vrt()
             self.item.setAttribute(self.result_file_key, vrt_filepath)
-            self.item.setAttribute(
-                self.result_key, "WEE Score by Opportunities Mask Created OK"
-            )
+            self.item.setAttribute(self.result_key, "WEE Score by Opportunities Mask Created OK")
             return True
         except Exception as e:
             log_message(f"Task failed: {e}")
@@ -111,18 +116,17 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         """
         Checks if Opportunities Mask and WEE Score rasters have the same origin, dimensions, and pixel sizes.
 
-        Raises an exception if the check fails.
-
         Args:
-            opportunities_mask_raster (QgsRasterLayer): Path to the mask raster.
-            wee_score_raster (QgsRasterLayer): Path to the WEE Score raster.
-            dimension_check (bool): Flag to check if the rasters have the same dimensions.
-        returns:
-            None
+            opportunities_mask_raster (QgsRasterLayer): The mask raster layer.
+            wee_score_raster (QgsRasterLayer): The WEE Score raster layer.
+            dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
+
+        Raises:
+            ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
         log_message("Validating input rasters")
         log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")
-        log_message(f"wee_score_raster raster  : {wee_score_raster.source()}")
+        log_message(f"wee_score_raster raster  : {wee_score_raster.source()}")  # noqa: E203
 
         if not opportunities_mask_raster.isValid() or not wee_score_raster.isValid():
             raise ValueError("One or both input rasters are invalid.")
@@ -154,17 +158,13 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             if self.isCanceled():
                 return
 
-            mask_path = os.path.join(
-                self.opportunity_masks_folder, f"opportunites_mask_{index}.tif"
-            )
+            mask_path = os.path.join(self.opportunity_masks_folder, f"opportunites_mask_{index}.tif")
             wee_score_path = os.path.join(self.wee_folder, f"wee_masked_{index}.tif")
             mask_layer = QgsRasterLayer(mask_path, "WEE")
             wee_score_layer = QgsRasterLayer(wee_score_path, "POP")
             self.validate_rasters(mask_layer, wee_score_layer, dimension_check=False)
 
-            output_path = os.path.join(
-                self.output_dir, f"wee_by_opportunities_mask_{index}.tif"
-            )
+            output_path = os.path.join(self.output_dir, f"wee_by_opportunities_mask_{index}.tif")
             if not self.force_clear and os.path.exists(output_path):
                 log_message(f"Reusing existing raster: {output_path}")
                 self.output_rasters.append(output_path)
@@ -194,7 +194,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
 
     def generate_vrt(self) -> str:
         """
-        Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
+        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
 
         Returns:
             str: Path to the generated VRT file.
@@ -224,10 +224,11 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
-            log_message(
-                "Opportunities mask by WEE SCORE calculation completed successfully."
-            )
+            log_message("Opportunities mask by WEE SCORE calculation completed successfully.")
         else:
             log_message("Opportunities mask by WEE SCORE calculation failed.")

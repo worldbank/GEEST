@@ -1,16 +1,18 @@
 {
     "version": "0.2.0",
+
     "configurations": [
         {
             "name": "QGIS Plugin Debug",
             "type": "debugpy",
             "request": "launch",
-            "program": "${env:QGIS_EXECUTABLE}", // Set the QGIS executable path from an environment variable
+
+            "program": "", // Set the QGIS executable path from an environment variable
             //"program": "/usr/bin/qgis", // Replace with the actual QGIS executable path
-            "args": ["--project", "${workspaceFolder}/GEEST.qgs"], // Optional QGIS project
+            "args": ["--project", "/GEEST.qgs"], // Optional QGIS project
             "console": "integratedTerminal",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/geest"
+                "PYTHONPATH": "/planet_explorer"
             }
         },
         {
@@ -23,10 +25,10 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/geest", // Local path on your machine
-                    "remoteRoot": "${env:HOME}/.local/share/QGIS/QGIS3/profiles/GEEST2/python/plugins/geest" // Uses $HOME instead of hardcoding username
+                    "localRoot": "/planet_explorer", // Local path on your machine
+                    "remoteRoot": "/.local/share/QGIS/QGIS3/profiles/PLANET/python/plugins/planet_explorer" // Uses /home/timlinux instead of hardcoding username
                 }
             ]
-        }               
+        }
     ]
 }

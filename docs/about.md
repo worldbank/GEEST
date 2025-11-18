@@ -20,11 +20,11 @@ GEEST was built for the practical implementation of the <a href="https://documen
 ### The Practical Implementation
 
 <p style="text-align: justify;">
-One of GEEST's main strengths is its ability to address two critical concerns. First, it can detect regions where conditions are optimal—or at least favorable—for women to gain employment in specific sectors. This helps in targeting investment opportunities aimed at promoting gender equality in the workforce.  
-</p> 
+One of GEEST's main strengths is its ability to address two critical concerns. First, it can detect regions where conditions are optimal—or at least favorable—for women to gain employment in specific sectors. This helps in targeting investment opportunities aimed at promoting gender equality in the workforce.
+</p>
 <p style="text-align: justify;">
-Second, for existing job sites, GEEST highlights which infrastructure investment could be made to enhance women's participation in the workforce. By offering detailed visualizations and analysis for both dimensions and factors, GEEST enables users to identify specific gaps—such as the lack of digital infrastructure, childcare services, or hospitals in a region—that may act as barriers, negatively impacting the enablement scores. Once these barriers are identified, institutions can allocate targeted investments to strengthen these factors, ultimately creating environments that support increased female participation in the workforce.  
-</p> 
+Second, for existing job sites, GEEST highlights which infrastructure investment could be made to enhance women's participation in the workforce. By offering detailed visualizations and analysis for both dimensions and factors, GEEST enables users to identify specific gaps—such as the lack of digital infrastructure, childcare services, or hospitals in a region—that may act as barriers, negatively impacting the enablement scores. Once these barriers are identified, institutions can allocate targeted investments to strengthen these factors, ultimately creating environments that support increased female participation in the workforce.
+</p>
 
 #### GEEST serves to:
 - <strong>Identify employment and business opportunities</strong> for women across multiple sectors.

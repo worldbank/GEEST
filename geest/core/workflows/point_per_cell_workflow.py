@@ -1,18 +1,27 @@
+# -*- coding: utf-8 -*-
+"""📦 Point Per Cell Workflow module.
+
+This module contains functionality for point per cell workflow.
+"""
 import os
+from urllib.parse import unquote
+
 from qgis.core import (
     Qgis,
-    QgsGeometry,
     QgsFeedback,
-    QgsVectorLayer,
+    QgsGeometry,
     QgsProcessingContext,
+    QgsVectorLayer,
 )
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.core.algorithms.features_per_cell_processor import (
-    select_grid_cells,
     assign_values_to_grid,
+    select_grid_cells_and_count_features,
 )
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class PointPerCellWorkflow(WorkflowBase):
@@ -24,22 +33,27 @@ class PointPerCellWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters for rasterization.
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_point_per_cell"
         layer_path = self.attributes.get("point_per_cell_shapefile", None)
+        if layer_path:
+            layer_path = unquote(layer_path)
 
         if not layer_path:
             layer_path = self.attributes.get("point_per_cell_layer_source", None)
@@ -54,11 +68,9 @@ class PointPerCellWorkflow(WorkflowBase):
                 tag="Geest",
                 level=Qgis.Info,
             )
-            self.features_layer = QgsVectorLayer(
-                layer_path, "point_per_cell_layer", "ogr"
-            )
+            self.features_layer = QgsVectorLayer(layer_path, "point_per_cell_layer", "ogr")
             if not self.features_layer.isValid():
-                error = f"Point per cell layer is not valid. : {layer_path}"
+                error = f"Point per cell layer is not valid: {layer_path}"
                 self.attributes["error"] = error
                 self.attributes["result"] = f"{self.workflow_name} Workflow Failed"
                 raise Exception(error)
@@ -73,6 +85,7 @@ class PointPerCellWorkflow(WorkflowBase):
             self.attributes["result"] = f"{self.workflow_name} Workflow Failed"
 
             raise Exception(error)
+        self.feedback.setProgress(1.0)  # We just use nominal intervals for progress updates
 
     def _process_features_for_area(
         self,
@@ -95,18 +108,16 @@ class PointPerCellWorkflow(WorkflowBase):
         """
         area_features_count = area_features.featureCount()
         log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            f"Features layer for area {index + 1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,
         )
         # Step 1: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
-        area_grid = select_grid_cells(self.grid_layer, area_features, output_path)
+        output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
+        area_grid = select_grid_cells_and_count_features(self.grid_layer, area_features, output_path, self.feedback)
 
         # Step 2: Assign values to grid cells
-        grid = assign_values_to_grid(area_grid)
+        grid = assign_values_to_grid(area_grid, self.feedback)
 
         # Step 3: Rasterize the grid layer using the assigned values
         # Create a scored boundary layer

@@ -1,7 +1,14 @@
+# -*- coding: utf-8 -*-
+"""📦 Base Configuration Widget module.
+
+This module contains functionality for base configuration widget.
+"""
 from abc import abstractmethod
-from qgis.PyQt.QtWidgets import QRadioButton, QVBoxLayout, QWidget, QSizePolicy
-from qgis.PyQt.QtCore import pyqtSignal
+
 from qgis.core import Qgis
+from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtWidgets import QRadioButton, QSizePolicy, QVBoxLayout, QWidget
+
 from geest.utilities import log_message
 
 
@@ -23,11 +30,13 @@ class BaseConfigurationWidget(QWidget):
         parent: QWidget = None,
     ) -> None:
         """
+        Initialize the base configuration widget.
 
         Args:
-            analysis_mode (str): The analysis mode for the widget.
-            attributes (dict): The json tree items attributes for the widget.
-            humanised_label (str): Optional custom label for the radio button.
+            analysis_mode: The analysis mode for the widget.
+            attributes: The json tree items attributes for the widget.
+            humanised_label: Optional custom label for the radio button.
+            parent: Parent widget.
         """
         super().__init__(parent)
         self.analysis_mode = analysis_mode
@@ -46,9 +55,7 @@ class BaseConfigurationWidget(QWidget):
         # Internal container for the internal widgets
         self.internal_container: QWidget = QWidget(self)
         self.internal_container.setVisible(False)  # Initially hidden
-        self.internal_container.setSizePolicy(
-            QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        )
+        self.internal_container.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
         self.internal_layout: QVBoxLayout = QVBoxLayout(self.internal_container)
         self.internal_layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.internal_container)
@@ -57,9 +64,7 @@ class BaseConfigurationWidget(QWidget):
         self.radio_button.toggled.connect(self.on_toggled)
 
         # Log creation of widget
-        log_message(
-            f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'"
-        )
+        log_message(f"Creating Indicator Configuration Widget '{analysis_mode}' humanised as '{humanised_label}'")
 
         try:
             self.add_internal_widgets()
@@ -72,12 +77,18 @@ class BaseConfigurationWidget(QWidget):
     def isChecked(self) -> bool:
         """
         Return whether the radio button is checked.
+
+        Returns:
+            bool: True if the radio button is checked, False otherwise.
         """
         return self.radio_button.isChecked()
 
     def setChecked(self, checked: bool):
         """
         Set the radio button's checked state.
+
+        Args:
+            checked: The checked state to set.
         """
         self.radio_button.setChecked(checked)
 
@@ -101,6 +112,9 @@ class BaseConfigurationWidget(QWidget):
         """
         Updates the internal widgets with the current attributes.
         To be implemented by subclasses.
+
+        Args:
+            attributes: The attributes to update widgets with.
         """
         raise NotImplementedError("Subclasses must implement update_widgets.")
 
@@ -118,7 +132,7 @@ class BaseConfigurationWidget(QWidget):
                     # to avoid breaking the datasource widget logic.
                     data = self.attributes
                 data["analysis_mode"] = self.analysis_mode
-                log_message(f"\nData changed:\n\n********\n {data}\n\n********")
+                log_message(f"\nData changed: \n\n********\n {data}\n\n********")
                 self.data_changed.emit(data)
             except Exception as e:
                 log_message(f"Error in update_data: {e}", level=Qgis.Critical)
@@ -130,6 +144,9 @@ class BaseConfigurationWidget(QWidget):
         """
         Slot for when the radio button is toggled.
         Enables/disables internal widgets based on the radio button state.
+
+        Args:
+            checked: The new checked state of the radio button.
         """
         log_message(f"Radio button toggled: {checked}")
         # self.set_internal_widgets_enabled(checked)
@@ -144,7 +161,8 @@ class BaseConfigurationWidget(QWidget):
         """
         Enables or disables the internal widgets based on the radio button state.
         To be implemented by subclasses to manage their internal widgets.
+
+        Args:
+            enabled: Whether to enable or disable the internal widgets.
         """
-        raise NotImplementedError(
-            "Subclasses must implement set_internal_widgets_enabled."
-        )
+        raise NotImplementedError("Subclasses must implement set_internal_widgets_enabled.")

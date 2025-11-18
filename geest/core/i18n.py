@@ -1,30 +1,40 @@
+# -*- coding: utf-8 -*-
 """I18n tools."""
-
-from os.path import join
-
-from qgis.PyQt.QtCore import QLocale, QFileInfo
-from qgis.PyQt.QtWidgets import QApplication
-from qgis.core import QgsSettings
-
-from geest.utilities import resources_path
 
 __copyright__ = "Copyright 2019, 3Liz"
 __license__ = "GPL version 3"
 __email__ = "info@3liz.org"
 __revision__ = "$Format:%H$"
 
+# -----------------------------------------------------------
+# Copyright (C) 2019 3Liz
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
+
+from os.path import join
+
+from qgis.core import QgsSettings
+from qgis.PyQt.QtCore import QFileInfo, QLocale
+from qgis.PyQt.QtWidgets import QApplication
+
+from geest.utilities import resources_path
+
 
 def setup_translation(file_pattern="{}.qm", folder=None):
     """Find the translation file according to locale.
 
-    :param file_pattern: Custom file pattern to use to find QM files.
-    :type file_pattern: basestring
+    Args:
+        file_pattern: Custom file pattern to use to find QM files.
+        folder: Optional folder to look in if it's not the default.
 
-    :param folder: Optional folder to look in if it's not the default.
-    :type folder: basestring
-
-    :return: The locale and the file path to the QM file, or None.
-    :rtype: (basestring, basestring)
+    Returns:
+        tuple: The locale and the file path to the QM file, or None.
     """
     locale = QgsSettings().value("locale/userLocale", QLocale().name())
 
@@ -46,4 +56,13 @@ def setup_translation(file_pattern="{}.qm", folder=None):
 
 
 def tr(text, context="@default"):
+    """🔄 Tr.
+
+    Args:
+        text: Text.
+        context: Context.
+
+    Returns:
+        The result of the operation.
+    """
     return QApplication.translate(context, text)

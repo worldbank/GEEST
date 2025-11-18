@@ -1,9 +1,27 @@
-import os
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-)
+# -*- coding: utf-8 -*-
+"""GEEST GUI widgets."""
+
+__copyright__ = "Copyright 2022, Tim Sutton"
+__license__ = "GPL version 3"
+__email__ = "tim@kartoza.com"
+__revision__ = "$Format:%H$"
+
+# -----------------------------------------------------------
+# Copyright (C) 2022 Tim Sutton
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
+
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import QLabel
+
 from geest.utilities import log_message
+
 from .base_configuration_widget import BaseConfigurationWidget
 
 
@@ -13,6 +31,11 @@ class StreetLightsConfigurationWidget(BaseConfigurationWidget):
     """
 
     def add_internal_widgets(self) -> None:
+        """⚙️ Add internal widgets.
+
+        Returns:
+            The result of the operation.
+        """
         try:
             self.info_label = QLabel("Point locations representing street lights")
             self.internal_layout.addWidget(self.info_label)

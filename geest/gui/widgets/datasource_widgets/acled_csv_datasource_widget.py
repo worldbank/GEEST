@@ -1,12 +1,15 @@
+# -*- coding: utf-8 -*-
+"""📦 Acled Csv Datasource Widget module.
+
+This module contains functionality for acled csv datasource widget.
+"""
 import os
-from qgis.PyQt.QtWidgets import (
-    QLineEdit,
-    QToolButton,
-    QFileDialog,
-    QMessageBox,
-)
+
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QToolButton
+
 from geest.utilities import log_message
+
 from .base_datasource_widget import BaseDataSourceWidget
 
 
@@ -70,9 +73,7 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
         try:
             last_dir = os.getenv("GEEST_LAST_CSV_DIR", "")
 
-            file_path, _ = QFileDialog.getOpenFileName(
-                self, "Select ACLED CSV File", last_dir, "CSV Files (*.csv)"
-            )
+            file_path, _ = QFileDialog.getOpenFileName(self, "Select ACLED CSV File", last_dir, "CSV Files (*.csv)")
             if file_path:
                 self.csv_file_line_edit.setText(file_path)
                 self.validate_csv_file(file_path)
@@ -105,15 +106,11 @@ class AcledCsvDataSourceWidget(BaseDataSourceWidget):
                 QMessageBox.critical(self, "Invalid CSV", error_message)
             else:
                 log_message("CSV file validation successful.")
-                QMessageBox.information(
-                    self, "Valid CSV", "The selected CSV file is valid."
-                )
+                QMessageBox.information(self, "Valid CSV", "The selected CSV file is valid.")
 
         except Exception as e:
             log_message(f"Error validating CSV file: {e}", level=Qgis.Critical)
-            QMessageBox.critical(
-                self, "CSV Validation Error", f"An error occurred: {e}"
-            )
+            QMessageBox.critical(self, "CSV Validation Error", f"An error occurred: {e}")
 
     def update_attributes(self):
         """

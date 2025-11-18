@@ -3,6 +3,7 @@
     "description": "No Description",
     "working_folder": "/home/timlinux/dev/python/GEEST/test/test_data/wee_score",
     "analysis_cell_size_m": 1000,
+    "network_layer_path": "",
     "guid": "a4e162fd-8f5c-49de-abb4-cc37e10b70f7",
     "dimensions": [
         {

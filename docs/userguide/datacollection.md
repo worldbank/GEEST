@@ -11,7 +11,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>LAYER</b></th>
     <th style="border: 1px solid black; padding: 1px; text-align: center;"><b>DATA SOURCE/QUERY</b></th>
   </tr>
-  
+
   <!-- Contextual Section with Merged DIMENSION Cell -->
 
   <tr>
@@ -30,7 +30,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">WBL 2024 Pay+Parenthood Index Score</td>
     <td style="border: 1px solid black; padding: 1px; text-align: left;">
     <a href="https://wbl.worldbank.org/en/wbl" target="_blank">
-        WBL 2024 index score for Pay and Parenthood 
+        WBL 2024 index score for Pay and Parenthood
     </a>
   </tr>
   <tr>
@@ -41,7 +41,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
         WBL 2024 index score for Entrepreneurship
     </a>
   </tr>
-  
+
   <!-- Accessibility Section with Merged DIMENSION Cell -->
   <tr>
     <td rowspan="9" style="border: 1px solid black; padding: 1px; text-align: center; ">🚶ACCESSIBILITY</td>
@@ -137,7 +137,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     </a>
 </td>
 </tr>
-  
+
   <!-- Place Characterization Section with Merged DIMENSION Cell -->
   <tr>
     <td rowspan="10" style="border: 1px solid black; padding: 1px; text-align: center; ">🌍PLACE CHARACTERIZATION</td>
@@ -201,11 +201,10 @@ This page provides guidance on finding and collecting relevant data for the GEES
 </tr>
   <tr>
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">📚Education</td>
-    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Percentage of the labor force comprising women with university degrees</td>
+    <td style="border: 1px solid black; padding: 1px; text-align: left; ">Share of graduates by field, female (%)</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
-    <a href="https://genderdata.worldbank.org/en/indicator/sl-tlf-zs?education=Advanced">
-        WB data
-    </a>
+    <a href="https://genderdata.worldbank.org/en/indicator/se-ter-grad-fe-zs?fieldOfStudy=Science%2C+Technology%2C+Engineering+and+Mathematics+%28STEM%29">
+        WB data</a>
 </td>
 </tr>
   <tr>
@@ -213,8 +212,7 @@ This page provides guidance on finding and collecting relevant data for the GEES
     <td style="border: 1px solid black; padding: 1px; text-align: left; ">Individuals using the Internet (% of population)</td>
 <td style="border: 1px solid black; padding: 1px; text-align: left;">
     <a href="https://genderdata.worldbank.org/en/indicator/it-net-user-zs">
-        WB data
-    </a>
+        WB data</a>
 </td>
 </tr>
   <tr>
@@ -222,17 +220,17 @@ This page provides guidance on finding and collecting relevant data for the GEES
   <td style="border: 1px solid black; padding: 1px; text-align: left;">Global Natural Hazards Data</td>
   <td style="border: 1px solid black; padding: 1px; text-align: left;">
     <strong>General Data Source:</strong> <br>
-    <a href="https://firms.modaps.eosdis.nasa.gov/active_fire/" target="_blank">Fires</a> | 
-    <a href="https://app.mapx.org/?project=MX-5Z8-45E-K4I-SKH-75H&language=en&theme=color_light#4bf1789a-0cb9-49ef-b91f-a033f982d3d7" target="_blank">Flood</a> | 
-    <a href="https://gpm.nasa.gov/landslides/projects.html" target="_blank">Landslides</a> | 
-    <a href="https://develop.unepgrid.ch/en/datasetproxy/MX-E69IN-F14ZL-8UCLQ" target="_blank">Tropical Cyclones</a> | 
+    <a href="https://firms.modaps.eosdis.nasa.gov/active_fire/" target="_blank">Fires</a> |
+    <a href="https://app.mapx.org/?project=MX-5Z8-45E-K4I-SKH-75H&language=en&theme=color_light#4bf1789a-0cb9-49ef-b91f-a033f982d3d7" target="_blank">Flood</a> |
+    <a href="https://gpm.nasa.gov/landslides/projects.html" target="_blank">Landslides</a> |
+    <a href="https://develop.unepgrid.ch/en/datasetproxy/MX-E69IN-F14ZL-8UCLQ" target="_blank">Tropical Cyclones</a> |
     <a href="https://spei.csic.es/spei_database/#map_name=spei06#map_position=1475" target="_blank">Drought</a>
     <br><br>
     <strong>Direct Download Link:</strong> <br>
-    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fires_density_total&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🔥 Fires Download</a> | 
-    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fl_hazard_100_yrp&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🌊 Flood Download</a> | 
-    <a href="https://gpm.nasa.gov/sites/default/files/downloads/global-landslide-susceptibility-map-2-27-23.tif" target="_blank">⛰️ Landslides Download</a> | 
-    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=cy_frequency&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🌀 Tropical Cyclones Download</a> | 
+    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fires_density_total&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🔥 Fires Download</a> |
+    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=fl_hazard_100_yrp&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🌊 Flood Download</a> |
+    <a href="https://gpm.nasa.gov/sites/default/files/downloads/global-landslide-susceptibility-map-2-27-23.tif" target="_blank">⛰️ Landslides Download</a> |
+    <a href="https://datacore.unepgrid.ch/geoserver/wesr_risk/wcs?service=WCS&Version=2.0.1&request=GetCoverage&coverageId=cy_frequency&outputCRS=EPSG:4326&format=GEOTIFF&compression=DEFLATE" target="_blank">🌀 Tropical Cyclones Download</a> |
     <a href="https://data.humdata.org/dataset/30b85665-4c3d-4dc3-b543-3a567a3dea37/resource/6744572e-d5d1-4033-9d64-c87dc565586a/download/global-drought-spei-1.5-return-period-100-years.tif" target="_blank">🌵 Drought Download</a>
   </td>
 </tr>
@@ -256,22 +254,23 @@ This page provides guidance on finding and collecting relevant data for the GEES
 <p style="text-align: justify;">
 While the above table showcases data specific to Saint Lucia, similar data can be found for other countries through the following sources:
 
-1. **World Bank - Women, Business and the Law**: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
+1. <strong>World Bank - Women, Business and the Law</strong>: Offers indices on workplace discrimination, regulatory frameworks, financial inclusion, and more, helping to track progress on women’s economic empowerment across countries.
 
-2. **United Nations Development Programme (UNDP)**: Provides metrics on gender equality, economic participation, and sustainable development, essential for evaluating contextual and place-based factors.
+2. <strong>United Nations Development Programme (UNDP)</strong>: Provides metrics on gender equality, economic participation, and sustainable development, essential for evaluating contextual and place-based factors.
 
-3. **National Statistics Offices**: Many countries publish gender-disaggregated data, which is crucial for contextual and accessibility insights in specific regions.
+3. <strong>National Statistics Offices</strong>: Many countries publish gender-disaggregated data, which is crucial for contextual and accessibility insights in specific regions.
 
-4. **International Labour Organization (ILO)**: Collects data on labor force participation, wage disparities, and workplace regulations by country, supporting the analysis of gender gaps and regulatory environments.
+4. <strong>International Labour Organization (ILO)</strong>: Collects data on labor force participation, wage disparities, and workplace regulations by country, supporting the analysis of gender gaps and regulatory environments.
 
-5. **OpenStreetMap (OSM)**: A valuable open-source platform providing geospatial data, including the locations of educational, healthcare, and financial facilities, as well as transport and green spaces. OSM data can help assess accessibility and environmental factors at a local level.
+5. <strong>OpenStreetMap (OSM)</strong>: A valuable open-source platform providing geospatial data, including the locations of educational, healthcare, and financial facilities, as well as transport and green spaces. OSM data can help assess accessibility and environmental factors at a local level.
 
-6. **Humanitarian Data Exchange (Humdata)**: Maintained by the United Nations Office for the Coordination of Humanitarian Affairs (OCHA), Humdata offers open datasets on schools, health facilities, and other infrastructure, aiding in the geospatial analysis of services critical for accessibility assessments.
+6. <strong>Humanitarian Data Exchange (Humdata)</strong>: Maintained by the United Nations Office for the Coordination of Humanitarian Affairs (OCHA), Humdata offers open datasets on schools, health facilities, and other infrastructure, aiding in the geospatial analysis of services critical for accessibility assessments.
 
-7. **Global Natural Hazards Data**: Provides data on environmental hazards, including earthquakes, floods, cyclones, landslides, fires and others across regions. This data is essential for assessing natural risks and planning in vulnerable areas.
+7. <strong>Global Natural Hazards Data</strong>: Provides data on environmental hazards, including earthquakes, floods, cyclones, landslides, fires and others across regions. This data is essential for assessing natural risks and planning in vulnerable areas.
 
-8. **Mapillary**: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
+8. <strong>Mapillary</strong>: A collaborative platform that offers street-level imagery contributed by users worldwide. Mapillary data includes vector data on street crossings, sidewalks, and public lighting, making it useful for place-based and accessibility assessments.
 </p>
+
 
 ### Instructions for Data Collection:
 - **Query the Source**: Use the query instructions provided in the table to filter and collect specific data.
@@ -285,11 +284,11 @@ To access the data for inputting into the tool, visit the provided <a href="http
 > - Select a region from the dropdown list:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL.jpg" 
-    alt="WBL" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL.jpg"
+    alt="WBL"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -299,11 +298,11 @@ To access the data for inputting into the tool, visit the provided <a href="http
 >   - Entrepreneurship score for the Financial Inclusion factor.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL_data.jpg" 
-    alt="WBL" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/WBL_data.jpg"
+    alt="WBL"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -315,22 +314,22 @@ To access the data for inputting into the tool, visit the provided <a href="http
 > - Search for "health facilities for Saint Lucia" in the search bar and click on the most relevant link to access the dataset:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_search.jpg" 
-    alt="Humdata" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_search.jpg"
+    alt="Humdata"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
 > - In the newly opened webpage, scroll down until you reach the **Data and Resources** section and locate the dataset corresponding to shapefile point data and click on the Download button next to it:
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_download.jpg" 
-    alt="Humdata download" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/Humdata_download.jpg"
+    alt="Humdata download"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -339,11 +338,11 @@ To access the data for inputting into the tool, visit the provided <a href="http
 > - Click on the links in the table provided above as in the following example (pharmacies):
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_link.jpg" 
-    alt="OSM link" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_link.jpg"
+    alt="OSM link"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>
 
@@ -354,10 +353,10 @@ To access the data for inputting into the tool, visit the provided <a href="http
 > - Open QGIS, add the downloaded data and export it as a shapefile format for further processing.
 
 <p align="center">
-<img 
-    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_query.jpg" 
-    alt="OSM query" 
-    style="width:45%;" 
-    title="Click to enlarge" 
+<img
+    src="https://raw.githubusercontent.com/worldbank/GEEST/main/docs/images/new%20images/OSM_query.jpg"
+    alt="OSM query"
+    style="width:45%;"
+    title="Click to enlarge"
     onclick="window.open(this.src, '_blank')">
 </p>

@@ -1,6 +1,6 @@
 # coding=utf-8
 
-"""Utilities for AnimationWorkbench."""
+"""Utilities for GEEST."""
 
 __copyright__ = "Copyright 2022, Tim Sutton"
 __license__ = "GPL version 3"
@@ -18,27 +18,170 @@ __revision__ = "$Format:%H$"
 # (at your option) any later version.
 # ---------------------------------------------------------------------
 
-import os
-import logging
 import inspect
-from datetime import datetime
-import tempfile
-import re
+import logging
+import os
 import platform
-import subprocess
+import re
+import subprocess  # nosec B404
+import tempfile
+from datetime import datetime
 
-from qgis.PyQt.QtCore import QUrl, QSettings, QRect
+from osgeo import ogr, osr
+from qgis.core import (
+    Qgis,
+    QgsLayerTreeGroup,
+    QgsMessageLog,
+    QgsProject,
+    QgsVectorLayer,
+)
 from qgis.PyQt import uic
-from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsLayerTreeGroup, QgsVectorLayer
+from qgis.PyQt.QtCore import QRect, QSettings, QUrl
+from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import QApplication
-from qgis.core import QgsProject, Qgis
-from geest.core import setting
+
+from geest.core.settings import setting
 
 
-def log_window_geometry(geometry):
+def theme_background_image() -> QPixmap:
+    """🔄 Theme background image.
+
+    Returns:
+        The result of the operation.
+    """
+    # Load the background image
+    if is_qgis_dark_theme_active():
+        background_image = QPixmap(resources_path("resources", "images", "background-dark.png"))
+    else:
+        background_image = QPixmap(resources_path("resources", "images", "background.png"))
+    return background_image
+
+
+def theme_stylesheet() -> str:
+    """
+    Returns the appropriate stylesheet based on whether the QGIS dark theme is active.
+
+    Returns:
+        str: The stylesheet for the active theme (light or dark).
+    """
+    # 🚩 Be careful: One mistake in the style sheet and none of the
+    # subsequent rules will evaluate. If you are changing something,
+    # try move it to the top and check that all the subsequent rules work still...
+    light_theme_stylesheet = f"""
+        QPushButton {{
+            background-color: rgba(118, 182, 178, 255);
+        }}
+        QToolTip {{
+            color: #000000;
+            background-color: #FFFFDC;
+            border: 1px solid black;
+            border-radius: 2px; /* Rounded corners */
+            padding: 0px;
+        }}
+        QMenu {{
+            background-color: #ffffff; /* Solid white background */
+            color: #000000;            /* Text color */
+            border: 1px solid #aaa;
+            border-radius: 6px;
+        }}
+
+        QDialog {{
+            background-color: rgba(255, 255, 255, 255);
+            color: #000000;
+        }}
+        QDockWidget, QDialog {{
+            background-image: url({resources_path("resources", "images", "background-light.png")});
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+        QMenu::item {{
+            padding: 5px 20px;
+        }}
+
+        QMenu::item:selected {{
+            background-color: #f0f0f0;
+        }}
+        QTreeView, QTableWidget {{
+            background-color: rgba(0, 0, 0, 0);
+            border: 1px solid #aaa;
+        }}
+        QScrollArea {{
+            background-color: rgba(0, 0, 0, 0);
+        }}
+        QScrollArea > QWidget > QWidget {{
+            background-color: rgba(0, 0, 0, 0);
+        }}
+        QScrollArea > QWidget > QWidget > QLabel {{
+            background-color: rgba(118, 182, 178, 0);
+        }}
+        /* Uncomment this last rule when making a change to check that
+        all rules are rendering, then comment it out again... */
+        /*
+        QWidget {{
+            border: 2px solid red;
+        }}
+        */
+    """  # noqa E241,E222,E221
+
+    dark_theme_stylesheet = f"""
+        QToolTip {{
+            color: #ffffff;
+            background-color: #333333;
+            border: 1px solid #555555;
+            border-radius: 8px; /* Rounded corners */
+            padding: 5px;
+            max-width: 200px; /* Fixed maximum width */
+        }}
+
+        QMenu {{
+            background-color: #000000; /* Solid black background */
+            color: #ffffff;            /* Text color */
+            border: 1px solid #555555;
+            border-radius: 6px;
+        }}
+
+        QDockWidget {{
+            background-image: url({resources_path("resources", "images", "background-dark.png")});
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+
+        QMenu::item {{
+            padding: 5px 20px;
+        }}
+
+        QMenu::item:selected {{
+            background-color: #444444;
+        }}
+
+        QPushButton {{
+            background-color: rgba(118, 182, 178, 255);
+            color: #ffffff;
+        }}
+
+        QDialog {{
+            background-color: rgba(118, 182, 178, 255);
+            color: #000000;
+        }}
+
+        QScrollArea {{
+            background: transparent;
+        }}
+    """  # noqa E202
+
+    if is_qgis_dark_theme_active():
+        return dark_theme_stylesheet
+    else:
+        return light_theme_stylesheet
+
+
+def log_window_geometry(geometry) -> None:
     """
     Creates an ASCII-art diagram of the dialog's dimensions based on the
     given geometry (a QRect) and logs it with log_message in QGIS.
+
+    Args:
+        geometry: A QRect object or object with .rect() method containing the geometry information.
 
     Example output:
 
@@ -50,7 +193,7 @@ def log_window_geometry(geometry):
 
     """
     try:
-        if type(geometry) == QRect:
+        if type(geometry) is QRect:
             rect = geometry
         else:
             rect = geometry.rect()
@@ -62,25 +205,28 @@ def log_window_geometry(geometry):
     w = rect.width()
     h = rect.height()
     char_width = 20 - len(str(w))
-    top_line = f"\n+{'-'*char_width} {w} px {'-'*20}+"
+    top_line = f"\n+{'-' * char_width} {w} px {'-' * 20}+"
     middle_line = f"|{' ' * 47}{h} px"
-    bottom_line = f"+{'-'*47}+\n"
+    bottom_line = f"+{'-' * 47}+\n"
 
     diagram = (
         f"{top_line}\n"
-        f"|                                               |\n"
+        f"|                                               |\n"  # noqa E222
         f"{middle_line}\n"
-        f"|                                               |\n"
+        f"|                                               |\n"  # noqa E222
         f"{bottom_line}"
     )
 
     log_message(diagram)
 
 
-def get_free_memory_mb():
+def get_free_memory_mb() -> float:
     """
     Attempt to return the free system memory in MB (approx).
     Uses only modules from the Python standard library.
+
+    Returns:
+        float: Free memory in megabytes, or 0.0 if unable to determine.
     """
     system = platform.system()
 
@@ -90,6 +236,8 @@ def get_free_memory_mb():
             import ctypes.wintypes
 
             class MEMORYSTATUSEX(ctypes.Structure):
+                """🎯 M E M O R Y S T A T U S E X."""
+
                 _fields_ = [
                     ("dwLength", ctypes.wintypes.DWORD),
                     ("dwMemoryLoad", ctypes.wintypes.DWORD),
@@ -106,8 +254,8 @@ def get_free_memory_mb():
             memoryStatus.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
             ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(memoryStatus))
             return memoryStatus.ullAvailPhys / (1024 * 1024)
-        except Exception:
-            pass
+        except Exception:  # nosec B110
+            pass  # Platform-specific memory check - fallback acceptable
 
     # --- Linux ---
     elif system == "Linux":
@@ -118,14 +266,14 @@ def get_free_memory_mb():
                 match = re.search(r"^MemAvailable:\s+(\d+)\skB", meminfo, re.MULTILINE)
                 if match:
                     return float(match.group(1)) / 1024.0
-        except Exception:
-            pass
+        except Exception:  # nosec B110
+            pass  # Platform-specific memory check - fallback acceptable
 
     # --- macOS (Darwin) ---
     elif system == "Darwin":
         # One approach is to parse the output of the 'vm_stat' command
         try:
-            vm_stat = subprocess.check_output(["vm_stat"]).decode("utf-8")
+            vm_stat = subprocess.check_output(["vm_stat"]).decode("utf-8")  # nosec
             page_size = 4096  # Usually 4096 bytes
             free_pages = 0
             # Look for "Pages free: <number>"
@@ -133,14 +281,14 @@ def get_free_memory_mb():
             if match:
                 free_pages = int(match.group(1))
             return free_pages * page_size / (1024.0 * 1024.0)
-        except Exception:
-            pass
+        except Exception:  # nosec B110
+            pass  # Platform-specific memory check - fallback acceptable
 
     # If none of the above worked or on an unsupported OS, return 0.0
     return 0.0
 
 
-def log_layer_count():
+def log_layer_count() -> None:
     """
     Append the number of layers in the project and a timestamp to a text file,
     along with free system memory (approximate), using only standard library dependencies.
@@ -155,7 +303,9 @@ def log_layer_count():
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Compose the log entry text
-    log_entry = f"{timestamp} - Layer count: {layer_count} - Free memory: {free_memory_mb:.2f} MB\n"
+    log_entry = (
+        f"""{timestamp} - Layer count: {layer_count} - Free memory: {free_memory_mb:.2f} MB\n"""  # noqa E501,E297,E222
+    )
 
     # Send to QGIS log (optional)
     log_message(log_entry, level=Qgis.Info, tag="LayerCount")
@@ -167,7 +317,7 @@ def log_layer_count():
         log_file.write(log_entry)
 
 
-def resources_path(*args):
+def resources_path(*args) -> str:
     """Get the path to our resources folder.
 
     .. versionadded:: 2.0
@@ -175,11 +325,11 @@ def resources_path(*args):
     Note that in version 2.0 we removed the use of Qt Resource files in
     favour of directly accessing on-disk resources.
 
-    :param args List of path elements e.g. ['img', 'logos', 'image.png']
-    :type args: str
+    Args:
+        *args: List of path elements e.g. ['img', 'logos', 'image.png']
 
-    :return: Absolute path to the resources folder.
-    :rtype: str
+    Returns:
+        str: Absolute path to the resources folder.
     """
     path = os.path.dirname(__file__)
     path = os.path.abspath(path)
@@ -189,7 +339,7 @@ def resources_path(*args):
     return path
 
 
-def resource_url(path):
+def resource_url(path: str) -> str:
     """Get the a local filesystem url to a given resource.
 
     .. versionadded:: 1.0
@@ -197,23 +347,26 @@ def resource_url(path):
     Note that we dont use Qt Resource files in
     favour of directly accessing on-disk resources.
 
-    :param path: Path to resource e.g. /home/timlinux/foo/bar.png
-    :type path: str
+    Args:
+        path (str): Path to resource e.g. /home/timlinux/foo/bar.png
 
-    :return: A valid file url e.g. file:///home/timlinux/foo/bar.png
-    :rtype: str
+    Returns:
+        str: A valid file url e.g. file:///home/timlinux/foo/bar.png
     """
     url = QUrl.fromLocalFile(path)
     return str(url.toString())
 
 
-def get_ui_class(ui_file):
+def get_ui_class(ui_file: str):
     """Get UI Python class from .ui file.
 
        Can be filename.ui or subdirectory/filename.ui
 
-    :param ui_file: The file of the ui in safe.gui.ui
-    :type ui_file: str
+    Args:
+        ui_file (str): The file of the ui in safe.gui.ui
+
+    Returns:
+        The UI class from the .ui file.
     """
     os.path.sep.join(ui_file.split("/"))
     ui_file_path = os.path.abspath(
@@ -227,9 +380,7 @@ def get_ui_class(ui_file):
     return uic.loadUiType(ui_file_path)[0]
 
 
-def log_message(
-    message: str, level: int = Qgis.Info, tag: str = "Geest", force: bool = False
-) -> None:
+def log_message(message: str, level: int = Qgis.Info, tag: str = "Geest", force: bool = False) -> None:
     """
     Logs a message to both QgsMessageLog and a text file,
     including the caller's class or module name and line number.
@@ -241,7 +392,7 @@ def log_message(
         force (bool): If True, log the message even if verbose_mode is off.
     """
     verbose_mode = setting(key="verbose_mode", default=0)
-    if not verbose_mode and not force:
+    if not verbose_mode and not force and level != Qgis.Critical:
         return
     # Retrieve caller information
     caller_frame = inspect.stack()[1]
@@ -250,13 +401,14 @@ def log_message(
     line_number = caller_frame.lineno
 
     # Combine caller information with message
-    full_message = f"[{caller_name}:{line_number}] {message}"
+    full_message = f"[{caller_name}: {line_number}] {message}"
 
     # Log to QGIS Message Log if it is critical or force is true
     if level == Qgis.Critical or force:
         QgsMessageLog.logMessage(full_message, tag=tag, level=level)
 
     # Log to the file with appropriate logging level
+    # codeql[python/clear-text-logging-sensitive-data] - General logging utility; callers responsible for masking sensitive data
     if level == Qgis.Info:
         logging.info(full_message)
     elif level == Qgis.Warning:
@@ -292,6 +444,14 @@ def geest_layer_ids():
 
     # Recursively collect IDs of all layers in the "Geest" group
     def collect_layer_ids(group: QgsLayerTreeGroup) -> set:
+        """🔄 Collect layer ids.
+
+        Args:
+            group: Group.
+
+        Returns:
+            The result of the operation.
+        """
         layer_ids = set()
         for child in group.children():
             if isinstance(child, QgsLayerTreeGroup):
@@ -355,7 +515,7 @@ def linear_interpolation(
     """
     Scales a value using linear interpolation.
 
-    Parameters:
+    Args:
         value (float): The value to scale.
         output_min (float): The minimum of the output range.
         output_max (float): The maximum of the output range.
@@ -364,6 +524,9 @@ def linear_interpolation(
 
     Returns:
         float: The scaled value.
+
+    Raises:
+        ValueError: If domain_min and domain_max are the same value.
     """
     if domain_min == domain_max:
         raise ValueError("domain_min and domain_max cannot be the same value.")
@@ -406,16 +569,97 @@ def vector_layer_type(layer: QgsVectorLayer) -> str:
         return "Unknown"
 
 
-def version():
-    """Return the version of the plugin."""
+def version() -> str:
+    """Return the version of the plugin.
+
+    Returns:
+        str: The version string from metadata.txt.
+    """
     metadata_file = os.path.join(os.path.dirname(__file__), "metadata.txt")
     version = "Unknown"
     try:
         with open(metadata_file, "r") as f:
             for line in f:
-                if line.startswith("version="):
-                    version = line.split("=")[1].strip()
+                # Handle both "version=" and "version ="
+                if line.strip().startswith("version"):
+                    version = line.split("=")[1].strip().strip('"').strip("'")
                     break
     except FileNotFoundError:
         log_message("metadata.txt file not found", level=Qgis.Warning)
     return version
+
+
+##########################################################################
+# CRS / UTM calculation
+##########################################################################
+def calculate_utm_zone_from_layer(layer) -> str:
+    """
+    Determine a UTM zone from the centroid of a layer's bounding box.
+    Reprojected into WGS84 if possible. Return EPSG code.
+
+    Args:
+        layer: A QGIS vector or raster layer.
+
+    Returns:
+        str: UTM zone EPSG code, or None if layer is invalid.
+    """
+    if layer is None:
+        return None
+    # Get the layer's extent
+    extent = layer.extent()
+    bbox = (extent.xMinimum(), extent.xMaximum(), extent.yMinimum(), extent.yMaximum())
+
+    # Get the source EPSG code from the layer
+    source_epsg = layer.crs().authid().split(":")[-1] if layer.crs().authid() else None
+
+    # Calculate the UTM zone
+    utm_zone = calculate_utm_zone(bbox, source_epsg)
+    return utm_zone
+
+
+def calculate_utm_zone(bbox: tuple, source_epsg: str = None) -> str:
+    """
+    Determine a UTM zone from the centroid of (xmin, xmax, ymin, ymax),
+    reprojected into WGS84 if possible. Return EPSG code.
+
+    Args:
+        bbox (tuple): Bounding box as (xmin, xmax, ymin, ymax).
+        source_epsg (str): Source EPSG code. Defaults to None.
+
+    Returns:
+        str: UTM zone EPSG code.
+    """
+    (xmin, xmax, ymin, ymax) = bbox
+    log_message("Bounding box: %s, %s, %s, %s" % (xmin, xmax, ymin, ymax))
+    cx = xmin + (0.5 * (xmax - xmin))
+    cy = ymin + (0.5 * (ymax - ymin))
+    log_message("Centroid: %s, %s" % (cx, cy))
+    # If there's no source SRS, we'll assume it's already lat/lon
+    if not source_epsg:
+        # fallback if no known EPSG
+        log_message("Source has no EPSG, defaulting to a naive assumption of WGS84 bounding box.")
+        lon, lat = cx, cy
+    else:
+        # We have a known EPSG, so transform centroid to WGS84
+        src_ref = osr.SpatialReference()
+        src_ref.ImportFromEPSG(int(source_epsg))
+        wgs84_ref = osr.SpatialReference()
+        wgs84_ref.ImportFromEPSG(4326)
+        ct = osr.CoordinateTransformation(src_ref, wgs84_ref)
+        point = ogr.Geometry(ogr.wkbPoint)
+        point.AddPoint(cx, cy)
+        point.Transform(ct)
+        lon = point.GetX()
+        lat = point.GetY()
+        log_message("Transformed centroid: %s, %s" % (lon, lat))
+
+    # Standard formula for UTM zone
+    utm_zone = int((lon + 180) // 6) + 1
+    log_message("UTM zone: %s" % utm_zone)
+    # We guess north or south
+    if lat >= 0:
+        zone = 32600 + utm_zone  # Northern Hemisphere
+    else:
+        zone = 32700 + utm_zone  # Southern Hemisphere
+    log_message("EPSG code: %s" % zone)
+    return zone

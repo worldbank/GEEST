@@ -1,23 +1,29 @@
-import os
-import traceback
-import shutil
-from typing import Optional
-import subprocess
-import platform
+# -*- coding: utf-8 -*-
+"""📦 Population Processor module.
 
+This module contains functionality for population processor.
+"""
+import os
+import platform
+import shutil
+import subprocess  # nosec B404
+import traceback
+from typing import Optional
+
+from qgis import processing
 from qgis.core import (
     QgsApplication,
-    QgsTask,
-    QgsProcessingContext,
     QgsFeedback,
-    QgsRasterLayer,
+    QgsProcessingContext,
     QgsRasterDataProvider,
+    QgsRasterLayer,
+    QgsTask,
     QgsVectorLayer,
-    QgsFeature,
 )
-from qgis import processing
-from geest.utilities import log_message, resources_path
+
 from geest.core.algorithms import AreaIterator
+from geest.utilities import log_message, resources_path
+
 from .utilities import geometry_to_memory_layer
 
 
@@ -74,20 +80,23 @@ class PopulationRasterProcessingTask(QgsTask):
         self.clipped_rasters = []
         self.reclassified_rasters = []
         self.resampled_rasters = []
-        log_message(f"---------------------------------------------")
-        log_message(f"Population raster processing task initialized")
-        log_message(f"---------------------------------------------")
+        log_message("---------------------------------------------")
+        log_message("Population raster processing task initialized")
+        log_message("---------------------------------------------")
         log_message(f"Population raster path: {self.population_raster_path}")
         log_message(f"Study area GeoPackage path: {self.study_area_gpkg_path}")
         log_message(f"Output directory: {self.output_dir}")
         log_message(f"Cell size: {self.cell_size_m}")
         log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
         log_message(f"Force clear: {self.force_clear}")
-        log_message(f"---------------------------------------------")
+        log_message("---------------------------------------------")
 
     def run(self) -> bool:
         """
         Executes the task to process population rasters.
+
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.clip_population_rasters()
@@ -103,6 +112,9 @@ class PopulationRasterProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("Population raster processing completed successfully.")
@@ -114,17 +126,13 @@ class PopulationRasterProcessingTask(QgsTask):
         Clips the population raster using study area masks and records min and max values.
         """
         area_iterator = AreaIterator(self.study_area_gpkg_path)
-        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
-            area_iterator
-        ):
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
             if self.feedback and self.feedback.isCanceled():
                 return
             # create a temporary layer using the clip geometry
             clip_layer = geometry_to_memory_layer(clip_area, self.target_crs, "clip")
             layer_name = f"{index}.tif"
-            phase1_output = os.path.join(
-                self.output_dir, f"clipped_phase1_{layer_name}"
-            )
+            phase1_output = os.path.join(self.output_dir, f"clipped_phase1_{layer_name}")
             log_message(f"Processing mask {phase1_output}")
 
             # Clip the population raster using the mask
@@ -146,16 +154,12 @@ class PopulationRasterProcessingTask(QgsTask):
             else:
                 result = processing.run("gdal:cliprasterbymasklayer", params)
                 if not result["OUTPUT"]:
-                    log_message(
-                        f"Failed to do phase1 clip raster for mask: {layer_name}"
-                    )
+                    log_message(f"Failed to do phase1 clip raster for mask: {layer_name}")
                     continue
 
             del clip_layer
 
-            clipped_layer = QgsRasterLayer(
-                phase1_output, f"Phase1 Clipped {layer_name}"
-            )
+            clipped_layer = QgsRasterLayer(phase1_output, f"Phase1 Clipped {layer_name}")
             if not clipped_layer.isValid():
                 log_message(f"Invalid clipped raster layer for phase1: {layer_name}")
                 continue
@@ -164,9 +168,7 @@ class PopulationRasterProcessingTask(QgsTask):
             log_message("Expanding clip layer to area bbox now ....")
             # Now we need to expand the raster to the area_bbox so that it alighns
             # with the clipped products produced by workflows
-            phase2_output = os.path.join(
-                self.output_dir, f"clipped_phase2_{layer_name}"
-            )
+            phase2_output = os.path.join(self.output_dir, f"clipped_phase2_{layer_name}")
 
             if not self.force_clear and os.path.exists(phase2_output):
                 log_message(f"Reusing existing phase2 clipped raster: {phase2_output}")
@@ -179,7 +181,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 "MASK": clip_layer,
                 "SOURCE_CRS": None,
                 "TARGET_CRS": self.target_crs,
-                "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+                "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
                 "NODATA": None,
                 "ALPHA_BAND": False,
                 "CROP_TO_CUTLINE": False,
@@ -201,9 +203,7 @@ class PopulationRasterProcessingTask(QgsTask):
                 log_message(f"Failed to do phase2 clip raster for mask: {layer_name}")
                 continue
 
-            clipped_layer = QgsRasterLayer(
-                phase2_output, f"Phase2 Clipped {layer_name}"
-            )
+            clipped_layer = QgsRasterLayer(phase2_output, f"Phase2 Clipped {layer_name}")
             if not clipped_layer.isValid():
                 log_message(f"Invalid clipped raster layer for phase2: {layer_name}")
                 continue
@@ -217,19 +217,21 @@ class PopulationRasterProcessingTask(QgsTask):
         """
         Finds the gdalwarp executable using 'which' command on Unix-based systems
         and QGIS installation path on Windows.
+
+        Returns:
+            str: Path to the gdalwarp executable.
+
+        Raises:
+            FileNotFoundError: If gdalwarp executable is not found.
         """
         if platform.system() == "Windows":
             gdal_path = os.path.join(QgsApplication.prefixPath(), "bin", "gdalwarp.exe")
             if os.path.exists(gdal_path):
                 return gdal_path
             else:
-                raise FileNotFoundError(
-                    "gdalwarp.exe not found in QGIS installation path."
-                )
+                raise FileNotFoundError("gdalwarp.exe not found in QGIS installation path.")
         else:
-            result = subprocess.run(
-                ["which", "gdalwarp"], capture_output=True, text=True
-            )
+            result = subprocess.run(["which", "gdalwarp"], capture_output=True, text=True)  # nosec B603 B607
             if result.returncode == 0 and result.stdout.strip():
                 return result.stdout.strip()
             else:
@@ -254,9 +256,7 @@ class PopulationRasterProcessingTask(QgsTask):
 
         area_iterator = AreaIterator(self.study_area_gpkg_path)
 
-        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
-            area_iterator
-        ):
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
             if self.feedback and self.feedback.isCanceled():
                 return
 
@@ -302,12 +302,10 @@ class PopulationRasterProcessingTask(QgsTask):
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                )
+                )  # nosec B603
 
             except subprocess.CalledProcessError as e:
-                log_message(
-                    f"Failed to resample raster: {output_path}\nError: {e.stderr.decode()}"
-                )
+                log_message(f"Failed to resample raster: {output_path}\nError: {e.stderr.decode()}")
                 continue
 
             # Load the resampled raster
@@ -325,9 +323,7 @@ class PopulationRasterProcessingTask(QgsTask):
             self.global_min = min(self.global_min, stats.minimumValue)
             self.global_max = max(self.global_max, stats.maximumValue)
 
-            log_message(
-                f"Processed resample {layer_name}: Min={stats.minimumValue}, Max={stats.maximumValue}"
-            )
+            log_message(f"Processed resample {layer_name}: Min={stats.minimumValue}, Max={stats.maximumValue}")
             log_message(f"Resampled raster: {output_path}")
 
     def reclassify_resampled_rasters(self) -> None:
@@ -337,9 +333,7 @@ class PopulationRasterProcessingTask(QgsTask):
         area_iterator = AreaIterator(self.study_area_gpkg_path)
         range_third = (self.global_max - self.global_min) / 3
 
-        for index, (current_area, clip_area, current_bbox, progress) in enumerate(
-            area_iterator
-        ):
+        for index, (current_area, clip_area, current_bbox, progress) in enumerate(area_iterator):
             if self.feedback and self.feedback.isCanceled():
                 return
 
@@ -375,9 +369,9 @@ class PopulationRasterProcessingTask(QgsTask):
                 "OUTPUT": output_path,
             }
 
-            log_message(f"Reclassifying raster: {input_path}")
-            log_message(f"Reclassification table:\n {params['TABLE']}\n")
-            result = processing.run("native:reclassifybytable", params)
+            log_message(f"Reclassifying raster: {input_path}")  # noqa E231
+            log_message(f"Reclassification table:\n {params['TABLE']}\n")  # noqa E231
+            result = processing.run("native:reclassifybytable", params)  # noqa E231
 
             if not result["OUTPUT"]:
                 log_message(f"Failed to reclassify raster: {output_path}")
@@ -395,12 +389,8 @@ class PopulationRasterProcessingTask(QgsTask):
 
         resampled_vrt_path = os.path.join(self.output_dir, "resampled_population.vrt")
 
-        reclassified_vrt_path = os.path.join(
-            self.output_dir, "reclassified_population.vrt"
-        )
-        reclassified_qml_path = os.path.join(
-            self.output_dir, "reclassified_population.qml"
-        )
+        reclassified_vrt_path = os.path.join(self.output_dir, "reclassified_population.vrt")
+        reclassified_qml_path = os.path.join(self.output_dir, "reclassified_population.qml")
 
         # Generate VRT for clipped rasters
         if self.clipped_rasters:
@@ -433,10 +423,8 @@ class PopulationRasterProcessingTask(QgsTask):
                 "OUTPUT": reclassified_vrt_path,
             }
             processing.run("gdal:buildvirtualraster", params)
-            log_message(
-                f"Generated VRT for reclassified rasters: {reclassified_vrt_path}"
-            )
-            source_qml = resources_path("resources", "qml", f"population_3_classes.qml")
+            log_message(f"Generated VRT for reclassified rasters: {reclassified_vrt_path}")
+            source_qml = resources_path("resources", "qml", "population_3_classes.qml")
 
             log_message(f"Copying QML from {source_qml} to {reclassified_qml_path}")
             shutil.copyfile(source_qml, reclassified_qml_path)

@@ -93,9 +93,6 @@
    </item>
    <item row="3" column="0">
     <widget class="QScrollArea" name="scrollArea">
-     <property name="styleSheet">
-      <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -108,7 +105,7 @@
         <x>0</x>
         <y>0</y>
         <width>556</width>
-        <height>664</height>
+        <height>655</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
@@ -127,16 +124,16 @@
        <item row="0" column="0">
         <widget class="QLabel" name="intro_label">
          <property name="styleSheet">
-          <string notr="true">background-color: rgba(0, 0, 0, 0);</string>
+          <string notr="true"/>
          </property>
          <property name="text">
-          <string>The Gender Enabling Environments Spatial Tool (GEEST), developed by the **World Bank**, evaluates locations based on how supportive they are of women’s employment and business opportunities. 
+          <string>The Gender Enabling Environments Spatial Tool (GEEST), developed by the **World Bank**, evaluates locations based on how supportive they are of women’s employment and business opportunities.
 
-By incorporating 15 spatial factors across three dimensions: 
+By incorporating 15 spatial factors across three dimensions:
 
-1. **Contextual** , 
-1. **Accessibility**, and 
-1. **Place Characterization**, 
+1. **Contextual** ,
+1. **Accessibility**, and
+1. **Place Characterization**,
 
 GEEST offers a comprehensive analysis of how the environment impacts women's job prospects, indicating whether it is highly enabling or not enabling at all.</string>
          </property>

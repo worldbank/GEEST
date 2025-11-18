@@ -9,12 +9,13 @@ Test Suite.
 
 """
 
-import sys
 import os
-import unittest
+import sys
 import tempfile
+import unittest
+
+import qgis  # pylint: disable=unused-import # noqa F401
 from osgeo import gdal
-import qgis  # pylint: disable=unused-import
 
 try:
     from pip import main as pipmain
@@ -34,7 +35,13 @@ __copyright__ = "Copyright 2018, North Road"
 
 
 def _run_tests(test_suite, package_name, with_coverage=False):
-    """Core function to test a test suite."""
+    """Core function to test a test suite.
+
+    Args:
+        test_suite: The test suite to run.
+        package_name: Name of the package being tested.
+        with_coverage: Whether to run with coverage tracking.
+    """
     count = test_suite.countTestCases()
     print("########")
     print("%s tests has been discovered in %s" % (count, package_name))
@@ -66,8 +73,8 @@ def test_package(package="animation_workbench"):
     """Test package.
     This function is called by travis without arguments.
 
-    :param package: The package to test.
-    :type package: str
+    Args:
+        package: The package to test.
     """
     test_loader = unittest.defaultTestLoader
     try:

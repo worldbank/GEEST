@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 """Exceptions definitions."""
 
 from qgis.core import Qgis
 
-from .osm import OsmType
 from geest.core.i18n import tr
+
+from .osm import OsmType
 
 __copyright__ = "Copyright 2021, 3Liz"
 __license__ = "GPL version 3"
@@ -42,6 +44,11 @@ class OverpassBadRequestException(QuickOsmException):
     """Bad request exception."""
 
     def __init__(self, error: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            error: Error.
+        """
         message = tr("Bad request OverpassAPI.")
         if error:
             message += " "
@@ -53,6 +60,11 @@ class OverpassTimeoutException(QuickOsmException):
     """Time out exception"""
 
     def __init__(self, message: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+        """
         if not message:
             message = tr("OverpassAPI timeout, try again later or a smaller query.")
         super().__init__(message)
@@ -62,10 +74,13 @@ class OverpassManyRequestException(QuickOsmException):
     """Too many request exception."""
 
     def __init__(self, message: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+        """
         if not message:
-            message = tr(
-                "OverpassAPI has received too many requests, try again later or a smaller query."
-            )
+            message = tr("OverpassAPI has received too many requests, try again later or a smaller query.")
         super().__init__(message)
 
 
@@ -73,12 +88,16 @@ class OverpassMemoryException(QuickOsmException):
     """Out of memory exception."""
 
     def __init__(self, amount_memory: int, unit: str):
-        message = tr(
-            "OverpassAPI is out of memory, try another query or a smaller area."
+        """🏗️ Initialize the instance.
+
+        Args:
+            amount_memory: Amount memory.
+            unit: Unit.
+        """
+        message = tr("OverpassAPI is out of memory, try another query or a smaller area.")
+        details = tr("The server would need more or less {number} {unit} of RAM.").format(
+            number=amount_memory, unit=unit
         )
-        details = tr(
-            "The server would need more or less {number} {unit} of RAM."
-        ).format(number=amount_memory, unit=unit)
         super().__init__(message, details)
 
 
@@ -86,6 +105,11 @@ class OverpassRuntimeError(QuickOsmException):
     """Runtime exceeded exception."""
 
     def __init__(self, message: str):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+        """
         message = tr("Overpass error: {message}").format(message=message)
         super().__init__(message)
 
@@ -94,6 +118,12 @@ class NetWorkErrorException(QuickOsmException):
     """Network error exception."""
 
     def __init__(self, service: str, details: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            service: Service.
+            details: Details.
+        """
         if details:
             service = service + " : " + details
         super().__init__(service)
@@ -106,6 +136,12 @@ class QueryFactoryException(QuickOsmException):
     """Query can't be build exception."""
 
     def __init__(self, message: str = None, suffix: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+            suffix: Suffix.
+        """
         if not message:
             message = tr("Error while building the query")
         if suffix:
@@ -117,9 +153,12 @@ class QueryNotSupported(QuickOsmException):
     """Query not supported exception."""
 
     def __init__(self, key: str):
-        message = tr(
-            "The query is not supported by the plugin because of : {key}"
-        ).format(key=key)
+        """🏗️ Initialize the instance.
+
+        Args:
+            key: Key.
+        """
+        message = tr("The query is not supported by the plugin because of : {key}").format(key=key)
         super().__init__(message)
 
 
@@ -135,9 +174,7 @@ class NominatimBadRequest(QuickOsmException):
         :param query: Name of the place.
         :type query: basestring
         """
-        message = tr(
-            'Nominatim hasn\'t found any data for an area called "{place_name}".'
-        )
+        message = tr('Nominatim hasn\'t found any data for an area called "{place_name}".')
         message = message.format(place_name=query)
 
         super().__init__(message)
@@ -153,9 +190,7 @@ class NominatimAreaException(QuickOsmException):
         :type query: basestring
         """
         message = tr('No named area found for OSM {osm_type} called "{place_name}".')
-        message = message.format(
-            osm_type=OsmType.Relation.name.lower(), place_name=query
-        )
+        message = message.format(osm_type=OsmType.Relation.name.lower(), place_name=query)
 
         # No polygon has been found, we propose the "around" query.
         more_details = tr(
@@ -172,6 +207,12 @@ class FileDoesntExistException(QuickOsmException):
     """File doesn't exist exception."""
 
     def __init__(self, message: str = None, suffix: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+            suffix: Suffix.
+        """
         if not message:
             message = tr("The file does not exist.")
         if suffix:
@@ -183,6 +224,11 @@ class DirectoryOutPutException(QuickOsmException):
     """Directory doesn't exist exception."""
 
     def __init__(self, message: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+        """
         if not message:
             message = tr("The output directory does not exist.")
         super().__init__(message)
@@ -192,6 +238,12 @@ class FileOutPutException(QuickOsmException):
     """File already exist exception."""
 
     def __init__(self, message: str = None, suffix: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+            suffix: Suffix.
+        """
         if not message:
             message = tr("The output file already exist, set a prefix.")
         if suffix:
@@ -206,6 +258,7 @@ class MissingLayerUI(QuickOsmException):
     """No layer exception."""
 
     def __init__(self):
+        """🏗️ Initialize the instance."""
         message = tr("The layer combobox is empty.")
         super().__init__(message)
 
@@ -214,6 +267,12 @@ class MissingParameterException(QuickOsmException):
     """Missing parameter exception."""
 
     def __init__(self, message: str = None, suffix: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+            suffix: Suffix.
+        """
         if not message:
             message = tr("A parameter is missing :")
         if suffix:
@@ -225,6 +284,7 @@ class NoSelectedPreset(QuickOsmException):
     """No selected preset exception."""
 
     def __init__(self):
+        """🏗️ Initialize the instance."""
         message = tr("None of the preset is selected. You can't run nothing.")
         super().__init__(message)
 
@@ -233,9 +293,9 @@ class NoSelectedFeatures(QuickOsmException):
     """No selected features exception."""
 
     def __init__(self):
+        """🏗️ Initialize the instance."""
         message = tr(
-            "No selected features have been found in the layer."
-            " Please select some features or uncheck the option."
+            "No selected features have been found in the layer." " Please select some features or uncheck the option."
         )
         super().__init__(message)
 
@@ -244,6 +304,11 @@ class OsmObjectsException(QuickOsmException):
     """No OSM objects selected exception."""
 
     def __init__(self, message: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+        """
         if not message:
             message = tr("No osm objects selected. Please select one.")
         super().__init__(message)
@@ -253,6 +318,11 @@ class OutPutGeomTypesException(QuickOsmException):
     """No outputs geometries selected exception."""
 
     def __init__(self, message: str = None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            message: Message.
+        """
         if not message:
             message = tr("No outputs selected. Please select one.")
         super().__init__(message)

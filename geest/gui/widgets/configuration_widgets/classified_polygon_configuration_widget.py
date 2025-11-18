@@ -1,15 +1,14 @@
-import os
-from qgis.PyQt.QtWidgets import (
-    QLabel,
-    QTableWidget,
-    QTableWidgetItem,
-    QSpinBox,
-)
-from qgis.PyQt.QtCore import QVariant
-from qgis.PyQt.QtGui import QBrush, QColor
+# -*- coding: utf-8 -*-
+"""📦 Classified Polygon Configuration Widget module.
+
+This module contains functionality for classified polygon configuration widget.
+"""
 from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+from qgis.PyQt.QtWidgets import QLabel
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class ClassifiedPolygonConfigurationWidget(BaseConfigurationWidget):

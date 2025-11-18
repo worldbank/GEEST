@@ -1,6 +1,12 @@
+# -*- coding: utf-8 -*-
+"""📦 Index Score Workflow module.
+
+This module contains functionality for index score workflow.
+"""
 import os
-import glob
-from qgis.core import (
+
+from qgis import processing  # noqa: F401 # QGIS processing toolbox
+from qgis.core import (  # noqa: F401
     Qgis,
     QgsFeature,
     QgsFeedback,
@@ -11,10 +17,11 @@ from qgis.core import (
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QVariant
-from qgis import processing  # QGIS processing toolbox
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class DefaultIndexScoreWorkflow(WorkflowBase):
@@ -26,22 +33,32 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters for rasterization.
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
-        self.index_score = float((self.attributes.get("index_score", 0) / 100) * 5)
-        self.features_layer = True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
+
+        index_score = self.attributes.get("index_score", 0)
+        log_message(f"Index score before rescaling to likert scale: {index_score}")
+        self.index_score = (float(index_score) / 100) * 5
+        log_message(f"Index score after rescaling to likert scale: {self.index_score}")
+
+        self.features_layer = (
+            True  # Normally we would set this to a QgsVectorLayer but in this workflow it is not needed
+        )
         self.workflow_name = "index_score"
 
     def _process_features_for_area(
@@ -67,13 +84,14 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         log_message(f"Processing area {index} score workflow")
 
         log_message(f"Index score: {self.index_score}")
+        self.progressChanged.emit(10.0)  # We just use nominal intervals for progress updates
 
         # Create a scored boundary layer filtered by current_area
         scored_layer = self.create_scored_boundary_layer(
             clip_area=clip_area,
             index=index,
         )
-
+        self.progressChanged.emit(30.0)  # We just use nominal intervals for progress updates
         # Create a scored boundary layer
         raster_output = self._rasterize(
             scored_layer,
@@ -82,13 +100,13 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             value_field="score",
             default_value=255,
         )
+        self.progressChanged.emit(100.0)  # We just use nominal intervals for progress updates
+
         log_message(f"Raster output: {raster_output}")
         log_message(f"Workflow completed for area {index}")
         return raster_output
 
-    def create_scored_boundary_layer(
-        self, clip_area: QgsGeometry, index: int
-    ) -> QgsVectorLayer:
+    def create_scored_boundary_layer(self, clip_area: QgsGeometry, index: int) -> QgsVectorLayer:
         """
         Create a scored boundary layer, filtering features by the current_area.
 
@@ -97,8 +115,9 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         """
         output_prefix = f"{self.layer_id}_area_{index}"
 
+        self.progressChanged.emit(20.0)  # We just use nominal intervals for progress updates
         # Create a new memory layer with the target CRS (EPSG:4326)
-        subset_layer = QgsVectorLayer(f"Polygon", "subset", "memory")
+        subset_layer = QgsVectorLayer("Polygon", "subset", "memory")
         subset_layer.setCrs(self.target_crs)
         subset_layer_data = subset_layer.dataProvider()
         field = QgsField("score", QVariant.Double)
@@ -106,6 +125,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Add attributes (fields) from the point_layer
         subset_layer_data.addAttributes(fields)
         subset_layer.updateFields()
+        self.progressChanged.emit(40.0)  # We just use nominal intervals for progress updates
 
         feature = QgsFeature(subset_layer.fields())
         feature.setGeometry(clip_area)
@@ -115,6 +135,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
         # Add reprojected features to the new subset layer
         subset_layer_data.addFeatures(features)
         subset_layer.commitChanges()
+        self.progressChanged.emit(60.0)  # We just use nominal intervals for progress updates
 
         shapefile_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
         # Use QgsVectorFileWriter to save the layer to a shapefile
@@ -126,6 +147,7 @@ class DefaultIndexScoreWorkflow(WorkflowBase):
             "ESRI Shapefile",
         )
         layer = QgsVectorLayer(shapefile_path, "area_layer", "ogr")
+        self.progressChanged.emit(80.0)  # We just use nominal intervals for progress updates
 
         return layer
 

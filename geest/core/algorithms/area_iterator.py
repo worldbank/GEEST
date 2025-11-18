@@ -1,10 +1,13 @@
-from qgis.core import (
-    QgsFeatureRequest,
-    QgsVectorLayer,
-    QgsGeometry,
-    Qgis,
-)
+# -*- coding: utf-8 -*-
+
+"""📦 Area Iterator module.
+
+This module contains functionality for area iterator.
+"""
 from typing import Iterator, Tuple
+
+from qgis.core import Qgis, QgsFeatureRequest, QgsGeometry, QgsVectorLayer
+
 from geest.utilities import log_message
 
 
@@ -72,9 +75,7 @@ class AreaIterator:
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            raise ValueError(
-                "Failed to load 'study_area_polygons' layer from the GeoPackage."
-            )
+            raise ValueError("Failed to load 'study_area_polygons' layer from the GeoPackage.")
 
         if not self.clip_polygon_layer.isValid():
             log_message(
@@ -82,9 +83,7 @@ class AreaIterator:
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            raise ValueError(
-                "Failed to load 'study_area_clip_polygons' layer from the GeoPackage."
-            )
+            raise ValueError("Failed to load 'study_area_clip_polygons' layer from the GeoPackage.")
 
         if not self.bbox_layer.isValid():
             log_message(
@@ -92,9 +91,7 @@ class AreaIterator:
                 tag="Geest",
                 level=Qgis.Critical,
             )
-            raise ValueError(
-                "Failed to load 'study_area_bboxes' layer from the GeoPackage."
-            )
+            raise ValueError("Failed to load 'study_area_bboxes' layer from the GeoPackage.")
 
         # Get the total number of polygon features for progress calculation
         self.total_features: int = self.polygon_layer.featureCount()
@@ -129,18 +126,12 @@ class AreaIterator:
             # Iterate over each polygon feature and calculate progress
 
             # Sort polygon features by area in ascending order
-            sorted_features = sorted(
-                self.polygon_layer.getFeatures(), key=lambda f: f.geometry().area()
-            )
+            sorted_features = sorted(self.polygon_layer.getFeatures(), key=lambda f: f.geometry().area())
             for index, polygon_feature in enumerate(sorted_features):
                 polygon_id: int = polygon_feature.id()
                 # Request the corresponding bbox feature based on the polygon's ID
-                feature_request: QgsFeatureRequest = QgsFeatureRequest().setFilterFid(
-                    polygon_id
-                )
-                clip_feature = next(
-                    self.clip_polygon_layer.getFeatures(feature_request), None
-                )
+                feature_request: QgsFeatureRequest = QgsFeatureRequest().setFilterFid(polygon_id)
+                clip_feature = next(self.clip_polygon_layer.getFeatures(feature_request), None)
                 bbox_feature = next(self.bbox_layer.getFeatures(feature_request), None)
 
                 if bbox_feature and clip_feature:

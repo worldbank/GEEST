@@ -20,6 +20,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.pytest_cache/
 nosetests.xml
 coverage.xml
 *.cover
@@ -84,3 +85,20 @@ core
 # Don't ignore directories named 'core'
 !core/
 test_osm_roads_output.gpkg
+history.mp4
+history.gif
+profile.txt
+markdown-errors.txt
+markdown.txt
+test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C19_for*
+test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C20_for*
+test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C19_integration*
+test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C20_integration*
+test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C19_test*
+test/test_data/ghsl/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V2_0_R5_C20_test*
+test_osm_roads_output.xml
+
+# Presentation build artifacts
+docs/presentations/*.html
+docs/presentations/*.pdf
+./claude

@@ -1,7 +1,16 @@
+# -*- coding: utf-8 -*-
+"""📦 Workflow Queue module.
+
+This module contains functionality for workflow queue.
+"""
 from functools import partial
-from qgis.core import QgsApplication
+from typing import List
+
 from PyQt5.QtCore import QObject, pyqtSignal
-from typing import List, Optional
+from qgis.core import QgsApplication
+
+from geest.utilities import log_message
+
 from .workflow_job import WorkflowJob
 
 
@@ -15,8 +24,15 @@ class WorkflowQueue(QObject):
     status_changed = pyqtSignal()
     processing_completed = pyqtSignal(bool)
     status_message = pyqtSignal(str)
+    processing_error = pyqtSignal(str)  # propogate error messages
 
     def __init__(self, pool_size: int, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            pool_size: Pool size.
+            parent: Parent.
+        """
         super().__init__(parent=parent)
         # The maximum number of concurrent threads to allow
         self.thread_pool_size = pool_size
@@ -97,13 +113,15 @@ class WorkflowQueue(QObject):
 
             self.active_tasks[job.description()] = job
 
-            job.taskCompleted.connect(
-                partial(self.task_completed, job_name=job.description())
-            )
-            job.taskTerminated.connect(
-                partial(self.finalize_task, job_name=job.description())
-            )
-
+            job.taskCompleted.connect(partial(self.task_completed, job_name=job.description()))
+            job.taskTerminated.connect(partial(self.finalize_task, job_name=job.description()))
+            # Connect to error signal - this assumes your WorkflowJob has an error_occurred signal
+            if hasattr(job, "error_occurred"):
+                job.error_occurred.connect(self.handle_job_error)
+            else:
+                log_message("######################################################")
+                log_message(f"Job {job.description()} does not have an error_occurred signal.")
+                log_message("######################################################")
             QgsApplication.taskManager().addTask(job)
 
         self.update_status()
@@ -129,5 +147,21 @@ class WorkflowQueue(QObject):
         """
         Adds a job to the queue
         """
-        self.job_queue.append(job)
-        self.total_queue_size += 1
+        if job not in self.job_queue:
+            # Check if the job is already in the queue
+            self.status_message.emit(f"Adding workflow task: {job.description()}")
+            self.job_queue.append(job)
+            self.total_queue_size += 1
+        else:
+            # Job is already in the queue
+            self.status_message.emit(f"Job {job.description()} is already in the queue. Skipping.")
+            return
+
+    def handle_job_error(self, error_message: str):
+        """
+        Handle errors from workflow jobs
+        :param error_message: The error message from the job
+        """
+        self.status_message.emit(f"Error in workflow: {error_message}")
+        # Propagate the error up to listeners
+        self.processing_error.emit(error_message)

@@ -1,11 +1,29 @@
-import os
-from qgis.PyQt.QtWidgets import (
-    QDoubleSpinBox,
-)
-from qgis.PyQt.QtCore import QSettings
+# -*- coding: utf-8 -*-
+"""GEEST GUI widgets."""
+
+__copyright__ = "Copyright 2022, Tim Sutton"
+__license__ = "GPL version 3"
+__email__ = "tim@kartoza.com"
+__revision__ = "$Format:%H$"
+
+# -----------------------------------------------------------
+# Copyright (C) 2022 Tim Sutton
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
+
 from qgis.core import Qgis
-from .base_datasource_widget import BaseDataSourceWidget
+from qgis.PyQt.QtCore import QSettings
+from qgis.PyQt.QtWidgets import QDoubleSpinBox
+
 from geest.utilities import log_message
+
+from .base_datasource_widget import BaseDataSourceWidget
 
 
 class FixedValueDataSourceWidget(BaseDataSourceWidget):
@@ -47,7 +65,7 @@ class FixedValueDataSourceWidget(BaseDataSourceWidget):
         self.spin_box = QDoubleSpinBox()
         self.spin_box.setRange(0, 100)
         self.spin_box.setSingleStep(1)
-        self.spin_box.setValue(self.attributes.get(f"index_score", 0))
+        self.spin_box.setValue(self.attributes.get("index_score", 0))
         self.layout.addWidget(self.spin_box)
 
     def update_attributes(self):

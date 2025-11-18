@@ -1,19 +1,27 @@
+# -*- coding: utf-8 -*-
+"""📦 Raster Reclassification Workflow module.
+
+This module contains functionality for raster reclassification workflow.
+"""
 import os
+from urllib.parse import unquote
+
+from qgis import processing  # QGIS processing toolbox
 from qgis.core import (
     Qgis,
-    QgsGeometry,
     QgsFeedback,
-    QgsRasterLayer,
+    QgsGeometry,
     QgsProcessingContext,
     QgsProcessingFeedback,
+    QgsRasterLayer,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QVariant
-from qgis import processing  # QGIS processing toolbox
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.core.constants import GDAL_OUTPUT_DATA_TYPE
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class RasterReclassificationWorkflow(WorkflowBase):
@@ -25,19 +33,22 @@ class RasterReclassificationWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national'.
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_environmental_hazards"
 
@@ -47,6 +58,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
             self.range_boundaries = 0  # default value for range boundaries
 
         layer_name = self.attributes.get("environmental_hazards_raster", None)
+        if layer_name:
+            layer_name = unquote(layer_name)
 
         if not layer_name:
             log_message(
@@ -63,9 +76,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
                 )
                 return
 
-        self.raster_layer = QgsRasterLayer(
-            layer_name, "Environmental Hazards Raster", "gdal"
-        )
+        self.raster_layer = QgsRasterLayer(layer_name, "Environmental Hazards Raster", "gdal")
 
         if self.layer_id == "fire":
             self.reclassification_rules = [
@@ -198,8 +209,8 @@ class RasterReclassificationWorkflow(WorkflowBase):
 
         :return: Path to the reclassified raster.
         """
-        _ = current_area  # Unused in this analysis
-        __ = clip_area  # Unused in this analysis
+        del current_area  # Unused in this analysis noqa F841
+        del clip_area  # Unused in this analysis noqa F841
 
         # Apply the reclassification rules
         reclassified_raster = self._apply_reclassification(
@@ -221,9 +232,7 @@ class RasterReclassificationWorkflow(WorkflowBase):
         """
         bbox = bbox.boundingBox()
 
-        reclassified_raster_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif"
-        )
+        reclassified_raster_path = os.path.join(self.workflow_directory, f"{self.layer_id}_reclassified_{index}.tif")
 
         # Set up the reclassification using reclassifybytable
         params = {
@@ -232,12 +241,11 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "TABLE": self.reclassification_rules,  # Reclassification table
             "RANGE_BOUNDARIES": self.range_boundaries,
             "OUTPUT": "TEMPORARY_OUTPUT",
+            "PROGRESS": self.feedback,
         }
 
         # Perform the reclassification using the raster calculator
-        reclass = processing.run(
-            "native:reclassifybytable", params, feedback=QgsProcessingFeedback()
-        )["OUTPUT"]
+        reclass = processing.run("native:reclassifybytable", params, feedback=QgsProcessingFeedback())["OUTPUT"]
 
         clip_params = {
             "INPUT": reclass,
@@ -245,13 +253,12 @@ class RasterReclassificationWorkflow(WorkflowBase):
             "CROP_TO_CUTLINE": True,
             "KEEP_RESOLUTION": True,
             "DATA_TYPE": GDAL_OUTPUT_DATA_TYPE,
-            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",
+            "TARGET_EXTENT": f"{bbox.xMinimum()},{bbox.xMaximum()},{bbox.yMinimum()},{bbox.yMaximum()} [{self.target_crs.authid()}]",  # noqa E231
             "OUTPUT": reclassified_raster_path,
+            "PROGRESS": self.feedback,
         }
 
-        processing.run(
-            "gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback()
-        )
+        processing.run("gdal:cliprasterbymasklayer", clip_params, feedback=QgsProcessingFeedback())
         log_message(
             f"Reclassification for area {index} complete. Saved to {reclassified_raster_path}",
             tag="Geest",

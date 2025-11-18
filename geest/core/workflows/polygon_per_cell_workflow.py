@@ -1,17 +1,26 @@
+# -*- coding: utf-8 -*-
+"""📦 Polygon Per Cell Workflow module.
+
+This module contains functionality for polygon per cell workflow.
+"""
 import os
+from urllib.parse import unquote
+
 from qgis.core import (
     Qgis,
     QgsFeedback,
     QgsGeometry,
-    QgsVectorLayer,
     QgsProcessingContext,
+    QgsVectorLayer,
 )
-from .workflow_base import WorkflowBase
+
 from geest.core import JsonTreeItem
 from geest.core.algorithms.polygon_per_cell_processor import (
     assign_reclassification_to_polygons,
 )
 from geest.utilities import log_message
+
+from .workflow_base import WorkflowBase
 
 
 class PolygonPerCellWorkflow(WorkflowBase):
@@ -23,24 +32,29 @@ class PolygonPerCellWorkflow(WorkflowBase):
         self,
         item: JsonTreeItem,
         cell_size_m: float,
+        analysis_scale: str,
         feedback: QgsFeedback,
         context: QgsProcessingContext,
         working_directory: str = None,
     ):
         """
         Initialize the workflow with attributes and feedback.
-        :param attributes: Item containing workflow parameters.
+        :param item: JsonTreeItem representing the analysis, dimension, or factor to process.
+        :param cell_size_m: Cell size in meters
+        :param analysis_scale: Scale of the analysis, e.g., 'local', 'national
         :param feedback: QgsFeedback object for progress reporting and cancellation.
-        :context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
-        :working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
+        :param context: QgsProcessingContext object for processing. This can be used to pass objects to the thread. e.g. the QgsProject Instance
+        :param working_directory: Folder containing study_area.gpkg and where the outputs will be placed. If not set will be taken from QSettings.
         """
         super().__init__(
-            item, cell_size_m, feedback, context, working_directory
+            item, cell_size_m, analysis_scale, feedback, context, working_directory
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         # TODO fix inconsistent abbreviation below for Poly
         self.workflow_name = "use_polygon_per_cell"
 
         layer_path = self.attributes.get("polygon_per_cell_shapefile", None)
+        if layer_path:
+            layer_path = unquote(layer_path)
 
         if not layer_path:
             log_message(
@@ -57,9 +71,7 @@ class PolygonPerCellWorkflow(WorkflowBase):
                 )
                 return False
 
-        self.features_layer = QgsVectorLayer(
-            layer_path, "polygon_per_cell_layer", "ogr"
-        )
+        self.features_layer = QgsVectorLayer(layer_path, "polygon_per_cell_layer", "ogr")
 
     def _process_features_for_area(
         self,
@@ -82,14 +94,13 @@ class PolygonPerCellWorkflow(WorkflowBase):
         """
         area_features_count = area_features.featureCount()
         log_message(
-            f"Features layer for area {index+1} loaded with {area_features_count} features.",
+            f"Features layer for area {index + 1} loaded with {area_features_count} features.",
             tag="Geest",
             level=Qgis.Info,
         )
         # Step 1: Select grid cells that intersect with features
-        output_path = os.path.join(
-            self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg"
-        )
+        output_path = os.path.join(self.workflow_directory, f"{self.layer_id}_grid_cells.gpkg")
+        del output_path
         # Step 2: Assign reclassification values to polygons based on their perimeter
         polygon_areas = assign_reclassification_to_polygons(area_features)
         raster_output = self._rasterize(

@@ -1,14 +1,20 @@
-import os
+# -*- coding: utf-8 -*-
+"""📦 Safety Polygon Configuration Widget module.
+
+This module contains functionality for safety polygon configuration widget.
+"""
+from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import (
     QLabel,
+    QSizePolicy,
+    QSpinBox,
     QTableWidget,
     QTableWidgetItem,
-    QSpinBox,
 )
-from qgis.PyQt.QtWidgets import QSizePolicy
-from qgis.core import Qgis
-from .base_configuration_widget import BaseConfigurationWidget
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
@@ -37,18 +43,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.info_label = QLabel("Classify polygons according to safety levels")
             self.internal_layout.addWidget(self.info_label)
             self.table_widget = QTableWidget()
-            self.table_widget.setSizePolicy(
-                QSizePolicy.Expanding, QSizePolicy.Expanding
-            )
+            self.table_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             # Stop the label being editable
             self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
             self.internal_layout.addWidget(self.table_widget)
             self.table_widget.setColumnCount(2)
             self.table_widget.setColumnWidth(1, 80)
             self.table_widget.horizontalHeader().setStretchLastSection(False)
-            self.table_widget.horizontalHeader().setSectionResizeMode(
-                0, self.table_widget.horizontalHeader().Stretch
-            )
+            self.table_widget.horizontalHeader().setSectionResizeMode(0, self.table_widget.horizontalHeader().Stretch)
 
             return self.populate_table()
             self.internal_layout.addWidget(self.table_widget)
@@ -60,11 +62,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def populate_table(self):
+        """⚙️ Populate table.
+
+        Returns:
+            The result of the operation.
+        """
 
         self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
-        safety_classes = self.attributes.get(
-            f"classify_safety_polygon_into_classes_unique_values", {}
-        )
+        safety_classes = self.attributes.get("classify_safety_polygon_into_classes_unique_values", {})
         if not isinstance(safety_classes, dict):
             safety_classes = {}
             # remove any item from the safety_classes where the key is not a string
@@ -72,6 +77,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         self.table_widget.setRowCount(len(safety_classes))
 
         def validate_value(value):
+            """🔄 Validate value.
+
+            Args:
+                value: Value.
+
+            Returns:
+                The result of the operation.
+            """
             return 0 <= value <= 100
 
         log_message(f"Classes: {safety_classes}")
@@ -94,6 +107,11 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.table_widget.setCellWidget(row, 1, value_item)
 
             def on_value_changed(value):
+                """🔄 On value changed.
+
+                Args:
+                    value: Value.
+                """
                 # Color handling for current cell
                 if value is None or not (0 <= value <= 100):
                     value_item.setStyleSheet("color: red;")
@@ -109,6 +127,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.update_cell_colors()
 
     def update_cell_colors(self):
+        """⚙️ Update cell colors."""
         # Check if all values are zero
         all_zeros = True
         for r in range(self.table_widget.rowCount()):
@@ -121,11 +140,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         for r in range(self.table_widget.rowCount()):
             spin_widget = self.table_widget.cellWidget(r, 1)
             if spin_widget:
-                spin_widget.setStyleSheet(
-                    "color: red;" if all_zeros else "color: black;"
-                )
+                spin_widget.setStyleSheet("color: red;" if all_zeros else "color: black;")
 
     def table_to_dict(self):
+        """⚙️ Table to dict.
+
+        Returns:
+            The result of the operation.
+        """
         updated_attributes = {}
         for row in range(self.table_widget.rowCount()):
             spin_widget = self.table_widget.cellWidget(row, 1)
@@ -152,9 +174,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         # Serialize the self.table_widget back into the classify_polygon_into_classes_unique_values attribute
         updated_attributes = self.table_to_dict()
 
-        self.attributes["classify_safety_polygon_into_classes_unique_values"] = (
-            updated_attributes
-        )
+        self.attributes["classify_safety_polygon_into_classes_unique_values"] = updated_attributes
         # log_message("------------------------------------")
         # log_message("------------------------------------")
         # log_message(f"Attributes: {self.attributes}")

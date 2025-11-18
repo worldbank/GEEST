@@ -1,9 +1,15 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""📦 Proxy Model module.
+
+This module contains functionality for proxy model.
+"""
+from typing import Dict, List, Optional
 
 from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject, Qt
 
 from geest.core import JsonTreeItem
-from typing import Optional, Dict, List
 
 """
 This proxy model provides an alternate representation of the data model
@@ -15,22 +21,34 @@ Date added: 2024-10-31
 
 
 class PromotionProxyModel(QAbstractProxyModel):
+    """🎯 Promotion Proxy Model."""
+
     def __init__(self, parent: Optional[QObject] = None) -> None:
+        """🏗️ Initialize the instance.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         super().__init__(parent)
         self.source_model: Optional[QAbstractProxyModel] = None
         self.flattened_structure: List[str] = []  # Store guids instead of QModelIndex
         self.parent_mapping: Dict[str, Optional[str]] = {}  # Map guid to parent guid
-        self.guid_item_mapping: Dict[str, "JsonTreeItem"] = (
-            {}
-        )  # Map guid to JsonTreeItem
-        self.guid_index_mapping: Dict[str, QModelIndex] = (
-            {}
-        )  # Map guid to QModelIndex for easy lookups
-        self.promoted_mapping: Dict[str, str] = (
-            {}
-        )  # Map promoted child guid to its original parent's guid
+        self.guid_item_mapping: Dict[str, "JsonTreeItem"] = {}  # Map guid to JsonTreeItem
+        self.guid_index_mapping: Dict[str, QModelIndex] = {}  # Map guid to QModelIndex for easy lookups
+        self.promoted_mapping: Dict[str, str] = {}  # Map promoted child guid to its original parent's guid
 
     def setSourceModel(self, source_model: QAbstractProxyModel) -> None:
+        """⚙️ Setsourcemodel.
+
+        Args:
+            source_model: Source model.
+
+        Returns:
+            The result of the operation.
+        """
         if source_model is None:
             raise ValueError("source_model cannot be None")
         self.source_model = source_model
@@ -53,9 +71,9 @@ class PromotionProxyModel(QAbstractProxyModel):
 
             # Promote child if parent has only one child
             if (
-                parent_item.childCount() == 1
-                and parent_item is not self.source_model.rootItem
-                and parent_item.role is not "analysis"
+                parent_item.childCount() == 1  # noqa W503
+                and parent_item is not self.source_model.rootItem  # noqa W503
+                and parent_item.role is not "analysis"  # noqa W503
             ):
                 # log_message(
                 #    f"Found node with only one child {parent_item.data(0)}",
@@ -80,27 +98,31 @@ class PromotionProxyModel(QAbstractProxyModel):
             else:
                 # Normal addition to the flattened structure
                 self.flattened_structure.append(child_guid)
-                self.parent_mapping[child_guid] = (
-                    parent_item.guid if parent_item is not None else None
-                )
+                self.parent_mapping[child_guid] = parent_item.guid if parent_item is not None else None
                 self.guid_item_mapping[child_guid] = child_item
                 # Create a QModelIndex for each child item and store it in guid_index_mapping
-                index = self.source_model.index(
-                    i, 0, self.guid_index_mapping.get(parent_item.guid, QModelIndex())
-                )
+                index = self.source_model.index(i, 0, self.guid_index_mapping.get(parent_item.guid, QModelIndex()))
                 if index.isValid():
                     self.guid_index_mapping[child_guid] = index
                 # Recursively traverse all child nodes
                 self._buildFlattenedStructure(child_item)
 
-    def index(
-        self, row: int, column: int, parent: QModelIndex = QModelIndex()
-    ) -> QModelIndex:
+    def index(self, row: int, column: int, parent: QModelIndex = QModelIndex()) -> QModelIndex:
+        """⚙️ Index.
+
+        Args:
+            row: Row.
+            column: Column.
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         if (
-            self.source_model is None
-            or row < 0
-            or column < 0
-            or row >= len(self.flattened_structure)
+            self.source_model is None  # noqa W503
+            or row < 0  # noqa W503
+            or column < 0  # noqa W503
+            or row >= len(self.flattened_structure)  # noqa W503
         ):
             return QModelIndex()
 
@@ -110,6 +132,14 @@ class PromotionProxyModel(QAbstractProxyModel):
         return self.createIndex(row, column, item)
 
     def parent(self, index: QModelIndex) -> QModelIndex:
+        """⚙️ Parent.
+
+        Args:
+            index: Index.
+
+        Returns:
+            The result of the operation.
+        """
         if not index.isValid() or self.source_model is None:
             return QModelIndex()
 
@@ -135,17 +165,41 @@ class PromotionProxyModel(QAbstractProxyModel):
         return self.createIndex(parent_row, 0, parent_item)
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """⚙️ Rowcount.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         if not parent.isValid():
             return len(self.flattened_structure)
         return 0
 
     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """⚙️ Columncount.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         if self.source_model is None:
             return 0
         # Assuming the column count is uniform across all rows
         return self.source_model.columnCount(QModelIndex())
 
     def mapToSource(self, proxy_index: QModelIndex) -> QModelIndex:
+        """⚙️ Maptosource.
+
+        Args:
+            proxy_index: Proxy index.
+
+        Returns:
+            The result of the operation.
+        """
         if not proxy_index.isValid() or self.source_model is None:
             return QModelIndex()
 
@@ -157,6 +211,14 @@ class PromotionProxyModel(QAbstractProxyModel):
         return QModelIndex()
 
     def mapFromSource(self, source_index: QModelIndex) -> QModelIndex:
+        """⚙️ Mapfromsource.
+
+        Args:
+            source_index: Source index.
+
+        Returns:
+            The result of the operation.
+        """
         if not source_index.isValid():
             return QModelIndex()
 
@@ -170,6 +232,15 @@ class PromotionProxyModel(QAbstractProxyModel):
         return QModelIndex()
 
     def data(self, index: QModelIndex, role: int = Qt.DisplayRole):
+        """⚙️ Data.
+
+        Args:
+            index: Index.
+            role: Role.
+
+        Returns:
+            The result of the operation.
+        """
         if not index.isValid() or self.source_model is None:
             return None
 

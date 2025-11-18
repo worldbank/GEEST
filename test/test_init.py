@@ -1,9 +1,9 @@
 # coding=utf-8
-"""Tests QGIS plugin init."""
+import configparser
+import logging
+import os
+import unittest
 
-from future import standard_library
-
-standard_library.install_aliases()
 __author__ = "Tim Sutton <tim@kartoza.com>"
 __revision__ = "$Format:%H$"
 __date__ = "17/10/2010"
@@ -11,10 +11,8 @@ __license__ = "GPL"
 __copyright__ = "Copyright 2012, Australia Indonesia Facility for "
 __copyright__ += "Disaster Reduction"
 
-import os
-import unittest
-import logging
-import configparser
+
+"""Tests QGIS plugin init."""
 
 LOGGER = logging.getLogger("QGIS")
 IS_LOCAL = os.getenv("RUNNING_ON_LOCAL") == "1"
@@ -48,9 +46,7 @@ class TestInit(unittest.TestCase):
             "author",
         ]
 
-        file_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), os.pardir, "metadata.txt")
-        )
+        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "metadata.txt"))
         LOGGER.info(file_path)
         metadata = []
         parser = configparser.ConfigParser()

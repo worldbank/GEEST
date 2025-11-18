@@ -1,4 +1,20 @@
+# -*- coding: utf-8 -*-
 """Manage nominatim connexion."""
+
+__copyright__ = "Copyright 2021, 3Liz"
+__license__ = "GPL version 3"
+__email__ = "info@3liz.org"
+
+# -----------------------------------------------------------
+# Copyright (C) 2021 3Liz
+# -----------------------------------------------------------
+# Licensed under the terms of GNU GPL 3
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# ---------------------------------------------------------------------
 
 import json
 import logging
@@ -13,10 +29,6 @@ from .exceptions import (
     NominatimBadRequest,
 )
 from .osm import OsmType
-
-__copyright__ = "Copyright 2021, 3Liz"
-__license__ = "GPL version 3"
-__email__ = "info@3liz.org"
 
 # from QuickOSM.qgis_plugin_tools.tools.resources import plugin_test_data_path
 
@@ -78,28 +90,18 @@ class Nominatim(Downloader):
                 raise NominatimBadRequest(query)
             return data
 
-    def get_first_polygon_from_query(self, query: str, hack_test: bool = False) -> str:
+    def get_first_polygon_from_query(self, query: str) -> str:
         """Get first OSM_ID of a Nominatim area.
 
         :param query: Query to execute.
         :type query: basestring
-
-        :param hack_test: set up test without internet
-        :type hack_test: bool
 
         :return: First relation's with an "osm_id".
         :rtype: int
 
         :raise NominatimAreaException:
         """
-        if hack_test:
-            test_file = plugin_test_data_path("nominatim", "search.json")
-            with open(test_file, encoding="utf8") as json_file:
-                data = json.load(json_file)
-                if not data:
-                    raise NominatimBadRequest(query)
-        else:
-            data = self.query(query)
+        data = self.query(query)
         for result in data:
             if result.get("osm_type") == OsmType.Relation.name.lower():
                 osm_id = result.get("osm_id")
@@ -109,30 +111,18 @@ class Nominatim(Downloader):
         # If no result has been return
         raise NominatimAreaException(query)
 
-    def get_first_point_from_query(
-        self, query: str, hack_test: bool = False
-    ) -> (str, str):
+    def get_first_point_from_query(self, query: str, hack_test: bool = False) -> tuple:
         """Get first longitude, latitude of a Nominatim point.
 
         :param query: Query to execute.
         :type query: basestring
-
-        :param hack_test: set up test without internet
-        :type hack_test: bool
 
         :return: First node with its longitude and latitude.
         :rtype: tuple(float, float)
 
         :raise NominatimAreaException:
         """
-        if hack_test:
-            test_file = plugin_test_data_path("nominatim", "search.json")
-            with open(test_file, encoding="utf8") as json_file:
-                data = json.load(json_file)
-                if not data:
-                    raise NominatimBadRequest(query)
-        else:
-            data = self.query(query)
+        data = self.query(query)
         for result in data:
             lon = result.get("lon")
             lat = result.get("lat")

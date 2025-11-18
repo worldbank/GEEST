@@ -1,7 +1,14 @@
-from qgis.PyQt.QtWidgets import QLabel, QDoubleSpinBox
-from .base_configuration_widget import BaseConfigurationWidget
+# -*- coding: utf-8 -*-
+"""📦 Index Score Configuration Widget module.
+
+This module contains functionality for index score configuration widget.
+"""
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import QLabel
+
 from geest.utilities import log_message
+
+from .base_configuration_widget import BaseConfigurationWidget
 
 
 class IndexScoreConfigurationWidget(BaseConfigurationWidget):
@@ -17,9 +24,7 @@ class IndexScoreConfigurationWidget(BaseConfigurationWidget):
             self.info_label: QLabel = QLabel("Fill each polygon with a fixed value")
             self.internal_layout.addWidget(self.info_label)
         except Exception as e:
-            log_message(
-                f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical
-            )
+            log_message(f"Error in add_internal_widgets: {e}", "Geest", level=Qgis.Critical)
 
     def get_data(self) -> dict:
         """

@@ -1,19 +1,33 @@
+# -*- coding: utf-8 -*-
+"""📦 Osm Roads Downloader module.
+
+This module contains functionality for osm roads downloader.
+"""
+from typing import Optional
+
 from qgis.core import (
-    QgsRectangle,
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
-    QgsProject,
+    QgsFeedback,
+    QgsRectangle,
 )
-from qgis.gui import QgsMapCanvas
-from .osm_data_downloader_base import OSMDataDownloaderBase
+
 from geest.utilities import log_message
+
+from .osm_data_downloader_base import OSMDataDownloaderBase
 
 
 class OSMRoadsDownloader(OSMDataDownloaderBase):
+    """🎯 O S M Roads Downloader."""
+
     def __init__(
         self,
         extents: QgsRectangle,
-        output_path: str = None,
+        output_path: str = "",
+        output_crs: Optional[QgsCoordinateReferenceSystem] = None,
+        filename: str = "",  # will also set the layer name in the gpkg
+        use_cache: bool = False,
+        delete_gpkg: bool = True,
+        feedback: Optional[QgsFeedback] = None,
     ):
         """
         Initialize the OSMRoadsDownloader class.
@@ -21,10 +35,19 @@ class OSMRoadsDownloader(OSMDataDownloaderBase):
         Args:
             extents: A QgsRectangle object containing the bounding box coordinates for the query.
         """
-        super().__init__(extents=extents, output_path=output_path)
+        super().__init__(
+            extents=extents,
+            output_path=output_path,
+            output_crs=output_crs,
+            filename=filename,
+            use_cache=use_cache,
+            delete_gpkg=delete_gpkg,
+            feedback=feedback,
+        )
         # set the output type to line
+        # note the timeout - 60s needed to allow for larger country queries
         self._set_output_type("line")
-        osm_query = """[out:xml][timeout:25];
+        osm_query = """[out:xml][timeout:60];
 (
 node["highway"="motorway"]({{bbox}});
 node["highway"="motorway_link"]({{bbox}});
@@ -99,8 +122,9 @@ relation["junction"="circular"]({{bbox}});
 (._;>;);
 out geom;"""
         # outbody;""" ### Dont move the quotes to the next line !!!!
-        ### if you do the query_prepare will think the format is not in oql format
+        # if you do the query_prepare will think the format is not in oql format
 
         self.set_osm_query(osm_query)
         self.submit_query()
         log_message("OSMRoadsDownloader Initialized")
+        log_message("Now call process_response to convert from osm xml to gpkg")

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Test suite for study_area.py
 
@@ -6,13 +7,14 @@ versionadded: 2025-01-24
 """
 
 import os
-import unittest
 import shutil
+import unittest
 
-from osgeo import ogr, gdal
-from qgis.core import QgsVectorLayer, QgsFeedback
-from geest.core.tasks import StudyAreaProcessingTask
+from osgeo import ogr
+from qgis.core import QgsVectorLayer
 from utilities_for_testing import prepare_fixtures
+
+from geest.core.tasks import StudyAreaProcessingTask
 
 
 class TestStudyAreaProcessor(unittest.TestCase):
@@ -27,9 +29,7 @@ class TestStudyAreaProcessor(unittest.TestCase):
         """
         cls.cell_size_m = 1000
         cls.test_data_directory = prepare_fixtures()
-        cls.input_admin_path = os.path.join(
-            cls.test_data_directory, "admin", "Admin0.shp"
-        )
+        cls.input_admin_path = os.path.join(cls.test_data_directory, "admin", "Admin0.shp")
         cls.layer = QgsVectorLayer(cls.input_admin_path, "Admin0", "ogr")
         cls.field_name = "Name"
         # Define working directories
@@ -119,14 +119,6 @@ class TestStudyAreaProcessor(unittest.TestCase):
 
         self.assertTrue(os.path.exists(mask_path), "Raster mask was not created.")
 
-    def test_calculate_utm_zone(self):
-        """
-        Test UTM zone calculation.
-        """
-        bbox = (-10, 10, -10, 10)
-        utm_code = self.processor.calculate_utm_zone(bbox)
-        self.assertEqual(utm_code, 32631, "UTM zone calculation is incorrect.")
-
     def test_create_study_area_directory(self):
         """
         Test study area directory creation.
@@ -179,7 +171,6 @@ class TestStudyAreaProcessor(unittest.TestCase):
         """
         Test clip polygon creation.
         """
-        bbox = (-10, 10, -10, 10)
         aligned_box = (-12, 12, -12, 12)
 
         # Create a test geometry
@@ -198,9 +189,7 @@ class TestStudyAreaProcessor(unittest.TestCase):
         ds = ogr.Open(self.gpkg_path)
         layer = ds.GetLayerByName("study_area_clip_polygons")
         self.assertIsNotNone(layer, "Clip polygon layer was not created.")
-        self.assertGreater(
-            layer.GetFeatureCount(), 0, "Clip polygon layer has no features."
-        )
+        self.assertGreater(layer.GetFeatureCount(), 0, "Clip polygon layer has no features.")
 
 
 if __name__ == "__main__":
