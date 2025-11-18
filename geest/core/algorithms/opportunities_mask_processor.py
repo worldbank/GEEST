@@ -103,6 +103,8 @@ class OpportunitiesMaskProcessor(QgsTask):
         self.feedback = feedback
         self.clipped_rasters = []
         self.item = item
+        self.features_layer = None
+        self.raster_layer = None
         self.mask_mode = self.item.attribute("mask_mode", None)  # if set,  will be "point", "polygon" or "raster"
         if not self.mask_mode:
             raise Exception("Mask mode not set in the analysis.")
@@ -212,9 +214,12 @@ class OpportunitiesMaskProcessor(QgsTask):
         log_message(f"Working_directory: {self.working_directory}")
         log_message(f"Workflow directory: {self.workflow_directory}")
         log_message(f"Mask mode: {self.mask_mode}")
-        log_message(
-            f"Layer path: {self.features_layer.source() if self.mask_mode in ['point', 'polygon', 'ghsl'] else self.raster_layer.source()}"
-        )  # noqa E501
+        layer_source = None
+        if self.mask_mode in ["point", "polygon", "ghsl"] and self.features_layer:
+            layer_source = self.features_layer.source()
+        elif self.raster_layer:
+            layer_source = self.raster_layer.source()
+        log_message(f"Layer path: {layer_source if layer_source else 'Not set'}")
         log_message(f"Cell size: {self.cell_size_m}")
         log_message(f"CRS: {self.target_crs.authid() if self.target_crs else 'None'}")
         log_message(f"Force clear: {self.force_clear}")
