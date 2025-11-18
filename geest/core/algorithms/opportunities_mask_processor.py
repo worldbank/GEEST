@@ -227,7 +227,7 @@ class OpportunitiesMaskProcessor(QgsTask):
     def run(self) -> bool:
         """
         Executes the task to process mask for each area.
-        
+
         Returns:
             bool: True if the task completed successfully, False otherwise.
         """
@@ -271,7 +271,7 @@ class OpportunitiesMaskProcessor(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
-        
+
         Args:
             result (bool): The result of the task execution.
         """
@@ -290,7 +290,7 @@ class OpportunitiesMaskProcessor(QgsTask):
     ) -> str:
         """
         Executes the actual workflow logic for a single area.
-        
+
         Args:
             current_area (QgsGeometry): Current polygon from our study area.
             clip_area (QgsGeometry): Polygon to clip the features by.
@@ -383,7 +383,7 @@ class OpportunitiesMaskProcessor(QgsTask):
             clipped_layer (QgsVectorLayer): The clipped vector mask layer.
             current_bbox (QgsGeometry): The bounding box of the current area.
             index (int): The index of the current area.
-            
+
         Returns:
             str: Path to the mask raster layer generated from the input clipped polygon layer.
         """

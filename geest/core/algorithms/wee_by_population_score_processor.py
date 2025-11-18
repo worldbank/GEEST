@@ -129,7 +129,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the WEE SCORE calculation task.
-        
+
         Returns:
             bool: True if the task completed successfully, False otherwise.
         """
@@ -155,7 +155,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
             geest_raster (QgsRasterLayer): The GEEST raster layer.
             pop_raster (QgsRasterLayer): The population raster layer.
             dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
-            
+
         Raises:
             ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
@@ -255,7 +255,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
-        
+
         Args:
             result (bool): The result of the task execution.
         """

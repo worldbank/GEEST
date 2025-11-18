@@ -42,6 +42,14 @@ class ConfigurationWidgetFactory:
     def create_widget(key: str, value: int, attributes: dict) -> BaseConfigurationWidget:
         """
         Factory method to create a radio button based on key-value pairs.
+
+        Args:
+            key: The key identifying which configuration widget to create.
+            value: The value to configure the widget with.
+            attributes: Additional attributes to configure the widget.
+
+        Returns:
+            BaseConfigurationWidget: The created configuration widget, or None if no match.
         """
         verbose_mode = int(setting(key="verbose_mode", default=0))
         if verbose_mode:

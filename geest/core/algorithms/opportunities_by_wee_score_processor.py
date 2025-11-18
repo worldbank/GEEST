@@ -91,7 +91,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the Opportunities by WEE SCORE calculation task.
-        
+
         Returns:
             bool: True if the task completed successfully, False otherwise.
         """
@@ -120,7 +120,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
             opportunities_mask_raster (QgsRasterLayer): The mask raster layer.
             wee_score_raster (QgsRasterLayer): The WEE Score raster layer.
             dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
-            
+
         Raises:
             ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
@@ -224,7 +224,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
-        
+
         Args:
             result (bool): The result of the task execution.
         """

@@ -37,7 +37,7 @@ class GEESTTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the task. This is the main work method that performs the background operation.
-        
+
         Returns:
             bool: True if task completed successfully, False otherwise.
         """

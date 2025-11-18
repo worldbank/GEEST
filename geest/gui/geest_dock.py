@@ -56,8 +56,9 @@ class GeestDock(QDockWidget):
         Initializes the GeestDock with a parent and an optional JSON file.
         Sets up the main widget and stacked panels.
 
-        :param parent: The parent widget for the dock.
-        :param json_file: Path to a JSON file used for the TreePanel.
+        Args:
+            parent: The parent widget for the dock.
+            json_file: Path to a JSON file used for the TreePanel.
         """
         self.initialised = False
         super().__init__(parent)
@@ -371,7 +372,8 @@ class GeestDock(QDockWidget):
         """
         Handle panel change events and log the panel switch.
 
-        :param index: The index of the newly selected panel.
+        Args:
+            index: The index of the newly selected panel.
         """
         if index == INTRO_PANEL:
             log_message("Switched to Intro panel")

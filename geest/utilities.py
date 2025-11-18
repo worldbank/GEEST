@@ -224,7 +224,7 @@ def get_free_memory_mb() -> float:
     """
     Attempt to return the free system memory in MB (approx).
     Uses only modules from the Python standard library.
-    
+
     Returns:
         float: Free memory in megabytes, or 0.0 if unable to determine.
     """
@@ -364,7 +364,7 @@ def get_ui_class(ui_file: str):
 
     Args:
         ui_file (str): The file of the ui in safe.gui.ui
-        
+
     Returns:
         The UI class from the .ui file.
     """
@@ -524,7 +524,7 @@ def linear_interpolation(
 
     Returns:
         float: The scaled value.
-        
+
     Raises:
         ValueError: If domain_min and domain_max are the same value.
     """
@@ -570,7 +570,11 @@ def vector_layer_type(layer: QgsVectorLayer) -> str:
 
 
 def version() -> str:
-    """Return the version of the plugin."""
+    """Return the version of the plugin.
+
+    Returns:
+        str: The version string from metadata.txt.
+    """
     metadata_file = os.path.join(os.path.dirname(__file__), "metadata.txt")
     version = "Unknown"
     try:
@@ -592,10 +596,10 @@ def calculate_utm_zone_from_layer(layer) -> str:
     """
     Determine a UTM zone from the centroid of a layer's bounding box.
     Reprojected into WGS84 if possible. Return EPSG code.
-    
+
     Args:
         layer: A QGIS vector or raster layer.
-        
+
     Returns:
         str: UTM zone EPSG code, or None if layer is invalid.
     """
@@ -617,11 +621,11 @@ def calculate_utm_zone(bbox: tuple, source_epsg: str = None) -> str:
     """
     Determine a UTM zone from the centroid of (xmin, xmax, ymin, ymax),
     reprojected into WGS84 if possible. Return EPSG code.
-    
+
     Args:
         bbox (tuple): Bounding box as (xmin, xmax, ymin, ymax).
         source_epsg (str): Source EPSG code. Defaults to None.
-        
+
     Returns:
         str: UTM zone EPSG code.
     """

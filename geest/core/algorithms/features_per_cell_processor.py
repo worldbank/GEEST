@@ -82,7 +82,7 @@ def select_grid_cells_and_count_features(
 
     Returns:
         QgsVectorLayer: A new layer with grid cells containing a count of intersecting features.
-        
+
     Raises:
         Exception: If there are issues creating spatial index or processing features.
     """
@@ -248,10 +248,10 @@ def select_grid_cells_and_assign_transport_score(
         features_layer (QgsVectorLayer): The input OSM Roads layer containing features (e.g., lines).
         output_path (str): The output path for the new grid layer with transport scores.
         feedback (QgsFeedback): Optional feedback object for progress reporting.
-        
+
     Returns:
         QgsVectorLayer: A new layer with grid cells containing the highest score from the intersecting features.
-        
+
     Raises:
         Exception: If there are issues creating spatial index or processing features.
         ValueError: If the OSM transport type is unsupported.
@@ -405,13 +405,13 @@ def select_grid_cells_and_assign_transport_score(
 def osm_mapping_table(osm_transport_type: OSMDownloadType) -> str:
     """
     Returns an HTML table as a string that maps OSM transport types to their scores.
-    
+
     Args:
         osm_transport_type (OSMDownloadType): The type of OSM transport data.
-    
+
     Returns:
         str: An HTML table as a string mapping transport types to scores.
-        
+
     Raises:
         ValueError: If the OSM transport type is unsupported.
     """

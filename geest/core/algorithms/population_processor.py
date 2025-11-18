@@ -94,7 +94,7 @@ class PopulationRasterProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the task to process population rasters.
-        
+
         Returns:
             bool: True if the task completed successfully, False otherwise.
         """
@@ -112,7 +112,7 @@ class PopulationRasterProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
-        
+
         Args:
             result (bool): The result of the task execution.
         """
@@ -217,10 +217,10 @@ class PopulationRasterProcessingTask(QgsTask):
         """
         Finds the gdalwarp executable using 'which' command on Unix-based systems
         and QGIS installation path on Windows.
-        
+
         Returns:
             str: Path to the gdalwarp executable.
-            
+
         Raises:
             FileNotFoundError: If gdalwarp executable is not found.
         """

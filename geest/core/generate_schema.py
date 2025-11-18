@@ -23,7 +23,14 @@ import os
 
 
 def infer_schema(data):
-    """Infers the JSON schema from the given JSON data."""
+    """Infers the JSON schema from the given JSON data.
+
+    Args:
+        data: The JSON data to infer schema from.
+
+    Returns:
+        dict: The inferred JSON schema.
+    """
     if isinstance(data, dict):
         properties = {}
         required_keys = []
@@ -55,7 +62,12 @@ def infer_schema(data):
 
 
 def generate_schema_from_json(json_file, schema_file):
-    """Generates a schema from a JSON file and writes it to a schema file."""
+    """Generates a schema from a JSON file and writes it to a schema file.
+
+    Args:
+        json_file: Path to the JSON file to read.
+        schema_file: Path to the schema file to write.
+    """
     # Load the JSON file
     with open(json_file, "r") as f:
         data = json.load(f)

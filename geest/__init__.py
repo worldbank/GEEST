@@ -744,7 +744,11 @@ for module_name in list(sys.modules.keys()):
             self.dock_widget = None
 
     def kill_debug(self):
-        """Kill any running debugpy debugging sessions"""
+        """Kill any running debugpy debugging sessions.
+
+        Returns:
+            bool: True if debug processes were killed, False otherwise.
+        """
         try:
             # First try to use debugpy's built-in close method if available
             try:
@@ -841,11 +845,13 @@ for module_name in list(sys.modules.keys()):
     ) -> None:
         """
         Display an information message bar.
-        :param title: The title of the message bar.
-        :param message: The message inside the message bar.
-        :param more_details: The message inside the 'Show details' button.
-        :param button_text: Text of the button if 'more_details' is not empty.
-        :param duration: The duration for the display, default is 8 seconds.
+
+        Args:
+            title: The title of the message bar.
+            message: The message inside the message bar.
+            more_details: The message inside the 'Show details' button.
+            button_text: Text of the button if 'more_details' is not empty.
+            duration: The duration for the display, default is 8 seconds.
         """
         self.iface.messageBar().clearWidgets()
         widget = self.iface.messageBar().createMessage(title, message)
@@ -863,7 +869,10 @@ for module_name in list(sys.modules.keys()):
     ) -> None:
         """
         Display an information message box.
-        :param title: The title of the message box.
-        :param message: The message inside the message box.
+
+        Args:
+            parent: The parent widget for the message box.
+            title: The title of the message box.
+            message: The message inside the message box.
         """
         QMessageBox.information(parent, title, message)

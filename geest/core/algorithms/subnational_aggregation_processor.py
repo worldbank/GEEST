@@ -166,7 +166,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the WEE Subnational Area Aggregation Processing Task calculation task.
-        
+
         Returns:
             bool: True if the task completed successfully, False otherwise.
         """
@@ -244,7 +244,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
     def fix_geometries(self) -> QgsVectorLayer:
         """
         Fix geometries in the aggregation layer.
-        
+
         Returns:
             QgsVectorLayer: The layer with fixed geometries and retained fid field.
         """
@@ -264,12 +264,12 @@ class SubnationalAggregationProcessingTask(QgsTask):
     def aggregate(self, aggregation_layer: QgsVectorLayer, raster_layer_path: str, name: str) -> str:
         """
         Use aggregation vector to calculate the majority WEE SCORE and WEE x Population Score for each valid polygon.
-        
+
         Args:
             aggregation_layer (QgsVectorLayer): The aggregation layer with fixed geometries.
             raster_layer_path (str): Path to the raster layer to aggregate.
             name (str): Name for the output layer.
-            
+
         Returns:
             str: Path to the output geopackage file.
         """
@@ -288,7 +288,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
     def apply_qml_style(self, source_qml: str, qml_path: str) -> None:
         """
         Apply QML style by copying from source to destination.
-        
+
         Args:
             source_qml (str): Path to the source QML file.
             qml_path (str): Path where the QML file should be copied to.
@@ -304,7 +304,7 @@ class SubnationalAggregationProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
-        
+
         Args:
             result (bool): The result of the task execution.
         """
