@@ -36,11 +36,14 @@ class ORSClient(QObject):
         self.network_manager = QgsNetworkAccessManager.instance()
         self.check_api_key()
 
-    def check_api_key(self):
-        """⚙️ Check api key.
+    def check_api_key(self) -> str:
+        """Check API key.
 
         Returns:
-            The result of the operation.
+            str: The API key if found.
+
+        Raises:
+            EnvironmentError: If no API key is found in settings or environment.
         """
         self.api_key = setting(key="ors_key", default="")
         if not self.api_key:

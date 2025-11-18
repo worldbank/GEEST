@@ -5,6 +5,7 @@ This module contains functionality for utilities.
 """
 import os
 import shutil
+from typing import Optional
 
 from qgis import processing
 from qgis.core import (  # QgsWkbTypes,
@@ -102,7 +103,9 @@ def subset_vector_layer(
     return QgsVectorLayer(result["OUTPUT"], output_prefix, "ogr")
 
 
-def geometry_to_memory_layer(geometry: QgsGeometry, target_crs: QgsCoordinateReferenceSystem, layer_name: str) -> QgsVectorLayer:
+def geometry_to_memory_layer(
+    geometry: QgsGeometry, target_crs: QgsCoordinateReferenceSystem, layer_name: str
+) -> QgsVectorLayer:
     """
     Convert a QgsGeometry to a memory layer.
 
@@ -123,7 +126,9 @@ def geometry_to_memory_layer(geometry: QgsGeometry, target_crs: QgsCoordinateRef
     return memory_layer
 
 
-def check_and_reproject_layer(features_layer: QgsVectorLayer, target_crs: QgsCoordinateReferenceSystem) -> QgsVectorLayer:
+def check_and_reproject_layer(
+    features_layer: QgsVectorLayer, target_crs: QgsCoordinateReferenceSystem
+) -> QgsVectorLayer:
     """
     Checks if the features layer has valid geometries and the expected CRS.
 
@@ -137,7 +142,7 @@ def check_and_reproject_layer(features_layer: QgsVectorLayer, target_crs: QgsCoo
 
     Returns:
         QgsVectorLayer: The input layer, either reprojected or unchanged.
-        
+
     Raises:
         QgsProcessingException: If layer has no CRS or reprojected layer is invalid.
     """
@@ -182,7 +187,7 @@ def combine_rasters_to_vrt(
     rasters: list,
     target_crs: QgsCoordinateReferenceSystem,
     vrt_filepath: str,
-    source_qml: str = None,
+    source_qml: str = Optional[None],
 ) -> str:
     """
     Combine all the rasters into a single VRT file.
@@ -191,7 +196,7 @@ def combine_rasters_to_vrt(
         rasters (list): The rasters to combine into a VRT.
         target_crs (QgsCoordinateReferenceSystem): The CRS to assign to the VRT.
         vrt_filepath (str): The full path of the output VRT file to create.
-        source_qml (str, optional): The source QML file to apply to the VRT. Defaults to None.
+        source_qml (str): The source QML file to apply to the VRT. Defaults to None.
 
     Returns:
         str: The file path to the VRT file, or None if no valid rasters found.
