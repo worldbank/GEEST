@@ -215,7 +215,7 @@ class OpportunitiesMaskProcessor(QgsTask):
         log_message(f"Workflow directory: {self.workflow_directory}")
         log_message(f"Mask mode: {self.mask_mode}")
         layer_source = None
-        if self.mask_mode in ['point', 'polygon', 'ghsl'] and self.features_layer:
+        if self.mask_mode in ["point", "polygon", "ghsl"] and self.features_layer:
             layer_source = self.features_layer.source()
         elif self.raster_layer:
             layer_source = self.raster_layer.source()
