@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""📦 Proxy Model module.
+
+This module contains functionality for proxy model.
+"""
 from typing import Dict, List, Optional
 
 from qgis.PyQt.QtCore import QAbstractProxyModel, QModelIndex, QObject, Qt
@@ -17,7 +21,17 @@ Date added: 2024-10-31
 
 
 class PromotionProxyModel(QAbstractProxyModel):
+    """🎯 Promotion Proxy Model."""
+
     def __init__(self, parent: Optional[QObject] = None) -> None:
+        """🏗️ Initialize the instance.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         super().__init__(parent)
         self.source_model: Optional[QAbstractProxyModel] = None
         self.flattened_structure: List[str] = []  # Store guids instead of QModelIndex
@@ -27,6 +41,14 @@ class PromotionProxyModel(QAbstractProxyModel):
         self.promoted_mapping: Dict[str, str] = {}  # Map promoted child guid to its original parent's guid
 
     def setSourceModel(self, source_model: QAbstractProxyModel) -> None:
+        """⚙️ Setsourcemodel.
+
+        Args:
+            source_model: Source model.
+
+        Returns:
+            The result of the operation.
+        """
         if source_model is None:
             raise ValueError("source_model cannot be None")
         self.source_model = source_model
@@ -86,6 +108,16 @@ class PromotionProxyModel(QAbstractProxyModel):
                 self._buildFlattenedStructure(child_item)
 
     def index(self, row: int, column: int, parent: QModelIndex = QModelIndex()) -> QModelIndex:
+        """⚙️ Index.
+
+        Args:
+            row: Row.
+            column: Column.
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         if (
             self.source_model is None  # noqa W503
             or row < 0  # noqa W503
@@ -100,6 +132,14 @@ class PromotionProxyModel(QAbstractProxyModel):
         return self.createIndex(row, column, item)
 
     def parent(self, index: QModelIndex) -> QModelIndex:
+        """⚙️ Parent.
+
+        Args:
+            index: Index.
+
+        Returns:
+            The result of the operation.
+        """
         if not index.isValid() or self.source_model is None:
             return QModelIndex()
 
@@ -125,17 +165,41 @@ class PromotionProxyModel(QAbstractProxyModel):
         return self.createIndex(parent_row, 0, parent_item)
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """⚙️ Rowcount.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         if not parent.isValid():
             return len(self.flattened_structure)
         return 0
 
     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """⚙️ Columncount.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         if self.source_model is None:
             return 0
         # Assuming the column count is uniform across all rows
         return self.source_model.columnCount(QModelIndex())
 
     def mapToSource(self, proxy_index: QModelIndex) -> QModelIndex:
+        """⚙️ Maptosource.
+
+        Args:
+            proxy_index: Proxy index.
+
+        Returns:
+            The result of the operation.
+        """
         if not proxy_index.isValid() or self.source_model is None:
             return QModelIndex()
 
@@ -147,6 +211,14 @@ class PromotionProxyModel(QAbstractProxyModel):
         return QModelIndex()
 
     def mapFromSource(self, source_index: QModelIndex) -> QModelIndex:
+        """⚙️ Mapfromsource.
+
+        Args:
+            source_index: Source index.
+
+        Returns:
+            The result of the operation.
+        """
         if not source_index.isValid():
             return QModelIndex()
 
@@ -160,6 +232,15 @@ class PromotionProxyModel(QAbstractProxyModel):
         return QModelIndex()
 
     def data(self, index: QModelIndex, role: int = Qt.DisplayRole):
+        """⚙️ Data.
+
+        Args:
+            index: Index.
+            role: Role.
+
+        Returns:
+            The result of the operation.
+        """
         if not index.isValid() or self.source_model is None:
             return None
 

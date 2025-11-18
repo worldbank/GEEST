@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Datasource Widget Factory module.
+
+This module contains functionality for datasource widget factory.
+"""
 from typing import Optional
 
 from qgis.core import Qgis
@@ -25,6 +29,14 @@ class DataSourceWidgetFactory:
     def create_widget(widget_key: str, value: int, attributes: dict) -> Optional[BaseDataSourceWidget]:
         """
         Factory method to create a data source widget based on key-value pairs.
+
+        Args:
+            widget_key: The key identifying which widget type to create.
+            value: The value to configure the widget with.
+            attributes: Additional attributes to configure the widget.
+
+        Returns:
+            Optional[BaseDataSourceWidget]: The created widget, or None if no match.
         """
         log_message(
             f"Datasource widget factory called with key {widget_key}",

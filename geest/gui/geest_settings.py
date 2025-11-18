@@ -23,9 +23,8 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
     def __init__(self, parent=None):
         """Constructor for the settings buffer dialog.
 
-        :param parent: Parent widget of this dialog.
-        :type parent: QWidget
-
+        Args:
+            parent: Parent widget of this dialog.
         """
         QgsOptionsPageWidget.__init__(self, parent)
         self.setupUi(self)
@@ -109,11 +108,25 @@ class GeestOptionsFactory(QgsOptionsWidgetFactory):
     """
 
     def __init__(self):  # pylint: disable=useless-super-delegation
+        """🏗️ Initialize the instance."""
         super().__init__()
         self.setTitle("Geest")
 
     def icon(self):  # pylint: disable=missing-function-docstring
+        """⚙️ Icon.
+
+        Returns:
+            The result of the operation.
+        """
         return QIcon(resources_path("resources", "geest-settings.svg"))
 
     def createWidget(self, parent):  # pylint: disable=missing-function-docstring
+        """⚙️ Createwidget.
+
+        Args:
+            parent: Parent.
+
+        Returns:
+            The result of the operation.
+        """
         return GeestSettings(parent)

@@ -23,7 +23,21 @@ from qgis.PyQt.QtWidgets import QLabel, QSizePolicy
 
 
 class CustomBannerLabel(QLabel):
+    """🎯 Custom Banner Label.
+
+    Attributes:
+        banner_pixmap: Banner pixmap.
+        text: Text.
+    """
+
     def __init__(self, text, banner_path, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            text: Text.
+            banner_path: Banner path.
+            parent: Parent.
+        """
         super().__init__(parent)
         self.text = text
         self.banner_pixmap = QPixmap(banner_path)
@@ -31,6 +45,11 @@ class CustomBannerLabel(QLabel):
         self.setMinimumHeight(self.banner_pixmap.height())
 
     def paintEvent(self, event):
+        """⚙️ Paintevent.
+
+        Args:
+            event: Event.
+        """
         painter = QPainter(self)
 
         # Draw the banner image

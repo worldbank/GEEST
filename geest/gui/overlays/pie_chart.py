@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Pie Chart module.
+
+This module contains functionality for pie chart.
+"""
 import math
 
 from qgis.gui import QgsMapCanvasItem
@@ -16,7 +20,20 @@ proportions of different categories in the data.
 
 
 class PieChartItem(QgsMapCanvasItem):
+    """🎯 Pie Chart Item.
+
+    Attributes:
+        colors: Colors.
+        counts: Counts.
+        labels: Labels.
+    """
+
     def __init__(self, canvas):
+        """🏗️ Initialize the instance.
+
+        Args:
+            canvas: Canvas.
+        """
         super().__init__(canvas)
         self.setZValue(1000)  # Draw on top
         # self.counts = QSettings().value("geest/pie_data", None)

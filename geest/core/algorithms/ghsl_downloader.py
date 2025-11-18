@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""📦 Ghsl Downloader module.
+
+This module contains functionality for ghsl downloader.
+"""
 import os
 import zipfile
 
@@ -20,6 +24,16 @@ from geest.utilities import log_message, resources_path
 
 
 class GHSLDownloader:
+    """🎯 G H S L Downloader.
+
+    Attributes:
+        base_url: Base url.
+        delete_existing: Delete existing.
+        extents: Extents.
+        feedback: Feedback.
+        filename: Filename.
+    """
+
     BASE_URL = (
         "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/"
         "GHS_SMOD_GLOBE_R2023A/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000/"
@@ -148,10 +162,17 @@ class GHSLDownloader:
             loop = QEventLoop()
 
             def on_finished():
+                """🔄 On finished."""
                 log_message(f"Download finished: {zip_path}")
                 loop.quit()
 
             def on_error(err_code, err_msg):
+                """🔄 On error.
+
+                Args:
+                    err_code: Err code.
+                    err_msg: Err msg.
+                """
                 log_message(f"Download error {err_code}: {err_msg}")
                 loop.quit()
 

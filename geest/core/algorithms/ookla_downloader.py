@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""📦 Ookla Downloader module.
+
+This module contains functionality for ookla downloader.
+"""
 import os
 import timeit
 from typing import Optional
@@ -31,6 +35,16 @@ class OoklaException(Exception):
 
 
 class OoklaDownloader:
+    """🎯 Ookla Downloader.
+
+    Attributes:
+        delete_existing: Delete existing.
+        extents: Extents.
+        feedback: Feedback.
+        filename_prefix: Filename prefix.
+        output_path: Output path.
+    """
+
     # Construct VSI S3 path
     FIXED_INTERNET_URL = "/vsis3/ookla-open-data/parquet/performance/type=fixed/year=2025/quarter=3/2025-07-01_performance_fixed_tiles.parquet"
     MOBILE_INTERNET_URL = "/vsis3/ookla-open-data/parquet/performance/type=mobile/year=2025/quarter=3/2025-07-01_performance_mobile_tiles.parquet"
@@ -147,6 +161,11 @@ class OoklaDownloader:
         log_message(f"Data extraction complete. Combined data saved to: {combined_output_file}")
 
     def analysis_intro(self):
+        """⚙️ Analysis intro.
+
+        Returns:
+            The result of the operation.
+        """
         title = "Spatial Filter"
         body = (
             f"Filtering Records by Bounding Box\n"

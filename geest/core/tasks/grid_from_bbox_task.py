@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Grid From Bbox Task module.
+
+This module contains functionality for grid from bbox task.
+"""
 import time
 
 from osgeo import ogr
@@ -14,6 +18,15 @@ class GridFromBboxTask(QgsTask):
     """
 
     def __init__(self, chunk_id, bbox_chunk, geom, cell_size, feedback):
+        """🏗️ Initialize the instance.
+
+        Args:
+            chunk_id: Chunk id.
+            bbox_chunk: Bbox chunk.
+            geom: Geom.
+            cell_size: Cell size.
+            feedback: Feedback.
+        """
         super().__init__(f"CreateGridChunkTask-{chunk_id}", QgsTask.CanCancel)
         self.chunk_id = chunk_id
         self.bbox_chunk = bbox_chunk  # (x_start, x_end, y_start, y_end)
@@ -24,6 +37,11 @@ class GridFromBboxTask(QgsTask):
         self.features_out = []  # store geometries here
 
     def run(self):
+        """⚙️ Run.
+
+        Returns:
+            The result of the operation.
+        """
         log_message("##################################")
         log_message(f"Processing chunk {self.chunk_id}...")
         log_message(f"Chunk bbox: {self.bbox_chunk}")
@@ -97,10 +115,16 @@ class GridFromBboxTask(QgsTask):
         return True
 
     def finished(self, result):
+        """⚙️ Finished.
+
+        Args:
+            result: Result.
+        """
         # This is called in the main thread after `run` completes
         # We do *not* write to the data source here if we want to avoid concurrency issues.
         pass
 
     def cancel(self):
+        """⚙️ Cancel."""
         super().cancel()
         # clean up if needed

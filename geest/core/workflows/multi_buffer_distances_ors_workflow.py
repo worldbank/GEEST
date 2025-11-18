@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Multi Buffer Distances Ors Workflow module.
+
+This module contains functionality for multi buffer distances ors workflow.
+"""
 import os
 import traceback
 from urllib.parse import unquote

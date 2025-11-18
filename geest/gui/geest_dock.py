@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Geest Dock module.
+
+This module contains functionality for geest dock.
+"""
 import os
 from typing import Optional
 
@@ -38,13 +42,23 @@ HELP_PANEL = 8
 
 
 class GeestDock(QDockWidget):
+    """🎯 Geest Dock.
+
+    Attributes:
+        background_image: Background image.
+        initialised: Initialised.
+        plugin_version: Plugin version.
+        study_area_bbox: Study area bbox.
+    """
+
     def __init__(self, parent: Optional[QWidget] = None, json_file: Optional[str] = None) -> None:
         """
         Initializes the GeestDock with a parent and an optional JSON file.
         Sets up the main widget and stacked panels.
 
-        :param parent: The parent widget for the dock.
-        :param json_file: Path to a JSON file used for the TreePanel.
+        Args:
+            parent: The parent widget for the dock.
+            json_file: Path to a JSON file used for the TreePanel.
         """
         self.initialised = False
         super().__init__(parent)
@@ -313,6 +327,11 @@ class GeestDock(QDockWidget):
         self.initialised = True
 
     def paintEvent(self, event):
+        """⚙️ Paintevent.
+
+        Args:
+            event: Event.
+        """
         with QPainter(self) as painter:
             # Calculate the scaling and cropping offsets
             scaled_background = self.background_image.scaled(self.size(), Qt.KeepAspectRatioByExpanding)
@@ -353,7 +372,8 @@ class GeestDock(QDockWidget):
         """
         Handle panel change events and log the panel switch.
 
-        :param index: The index of the newly selected panel.
+        Args:
+            index: The index of the newly selected panel.
         """
         if index == INTRO_PANEL:
             log_message("Switched to Intro panel")

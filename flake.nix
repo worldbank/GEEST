@@ -17,7 +17,7 @@
     }:
     let
       system = "x86_64-linux";
-      profileName = "PLANET";
+      profileName = "GEEST";
       pkgs = import nixpkgs {
         inherit system;
         config = {
@@ -130,7 +130,6 @@
           pkgs.shellcheck
           pkgs.shfmt
           pkgs.stylua
-          pkgs.virtualenv
           pkgs.vscode
           pkgs.yamlfmt
           pkgs.yamllint
@@ -209,11 +208,11 @@
               echo "No requirements-dev.txt found, skipping pip install."
             fi
 
-            echo "Setting up and running pre-commit hooks..."
-            echo "-------------------------------------"
-            pre-commit clean > /dev/null
-            pre-commit install --install-hooks > /dev/null
-            pre-commit run --all-files || true
+            #echo "Setting up and running pre-commit hooks..."
+            #echo "-------------------------------------"
+            #pre-commit clean > /dev/null
+            #pre-commit install --install-hooks > /dev/null
+            #pre-commit run --all-files || true
 
             export PATH="$(pwd)/.nvim:$PATH"
           # Add PyQt and QGIS to python path for neovim
@@ -224,24 +223,34 @@
             ])
           }"
           export PYTHONPATH="$pythonWithPackages/lib/python*/site-packages:${qgisWithExtras}/share/qgis/python:$PYTHONPATH"
-            echo ""
-            echo "-----------------------"
-            echo "🌈 Your Dev Environment is prepared."
+            # Colors and styling
+            CYAN='\033[38;2;83;161;203m'
+            GREEN='\033[92m'
+            RED='\033[91m'
+            RESET='\033[0m'
+            ORANGE='\033[38;2;237;177;72m'
+            GRAY='\033[90m'
+            # Clear screen and show welcome banner
+            clear
+            echo -e "$RESET$ORANGE"
+            chafa geest/resources/geest-banner.png --size=30x80 --colors=256 | sed 's/^/                  /'
+            # Quick tips with icons
+            echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
+            echo -e "        🌈 Your Dev Environment is prepared."
+            echo -e ""
+            echo -e "Quick Commands:$RESET"
+            echo -e "   $GRAY▶$RESET  $CYAN./scripts/vscode.sh$RESET  - VSCode preconfigured for python dev"
+            echo -e "   $GRAY▶$RESET  $CYAN./scripts/checks.sh$RESET  - Run pre-commit checks"
+            echo -e "   $GRAY▶$RESET  $CYAN./scripts/clean.sh$RESET  - Cleanup dev dolder o "
+            echo -e "   $GRAY▶$RESET  $CYAN nix flake show$RESET    - Show available configurations"
+            echo -e "   $GRAY▶$RESET  $CYAN nix flake check$RESET   - Run all checks"
+            echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
             echo "To run QGIS with your profile, use one of these commands:"
+            echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
             echo ""
             echo "  scripts/run-qgis.sh"
             echo "  scripts/run-qgis-ltr.sh"
             echo "  scripts/run-qgis-master.sh"
-            echo ""
-            echo "📒 Note:"
-            echo "-----------------------"
-            echo "We provide a ready-to-use"
-            echo "VSCode environment which you"
-            echo "can start like this:"
-            echo ""
-            echo "./scripts/vscode.sh"
-            echo ""
-            echo ""
         '';
       };
     };

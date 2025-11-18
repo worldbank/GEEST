@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Toggle Switch module.
+
+This module contains functionality for toggle switch.
+"""
 from qgis.PyQt.QtCore import QRect, QSize, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QPainter
 from qgis.PyQt.QtWidgets import QWidget
@@ -10,12 +14,22 @@ class ToggleSwitch(QWidget):
     toggled = pyqtSignal(bool)
 
     def __init__(self, initial_value=False, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            initial_value: Initial value.
+            parent: Parent.
+        """
         super().__init__(parent)
         self.setFixedSize(QSize(60, 26))  # Size of the toggle switch
         self.checked = initial_value
 
     def paintEvent(self, event):
-        """Draw the toggle switch with a modern design."""
+        """Draw the toggle switch with a modern design.
+
+        Args:
+            event: The paint event.
+        """
         painter = QPainter(self)
         rect = self.rect()
 
@@ -38,17 +52,29 @@ class ToggleSwitch(QWidget):
         painter.drawRoundedRect(knob_rect, knob_radius, knob_radius)
 
     def mousePressEvent(self, event):
-        """Toggle the switch on mouse click."""
+        """Toggle the switch on mouse click.
+
+        Args:
+            event: The mouse press event.
+        """
         self.checked = not self.checked
         self.toggled.emit(self.checked)
         self.update()
 
     def isChecked(self):
-        """Return the current state of the toggle."""
+        """Return the current state of the toggle.
+
+        Returns:
+            bool: True if the toggle is checked, False otherwise.
+        """
         return self.checked
 
     def setChecked(self, checked):
-        """Set the state of the toggle and update the UI."""
+        """Set the state of the toggle and update the UI.
+
+        Args:
+            checked: The new checked state for the toggle.
+        """
         if self.checked != checked:
             self.checked = checked
             self.update()

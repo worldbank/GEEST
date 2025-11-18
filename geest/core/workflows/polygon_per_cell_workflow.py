@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Polygon Per Cell Workflow module.
+
+This module contains functionality for polygon per cell workflow.
+"""
 import os
 from urllib.parse import unquote
 

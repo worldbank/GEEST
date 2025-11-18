@@ -52,9 +52,7 @@ class TestSettings(unittest.TestCase):
             ]
         )
         result = deep_convert_dict(input_dict)
-        self.assertEqual(
-            result, {"key1": "value1", "key2": {"nested1": "nestedvalue1"}}
-        )
+        self.assertEqual(result, {"key1": "value1", "key2": {"nested1": "nestedvalue1"}})
         self.assertIsInstance(result, dict)
         self.assertIsInstance(result["key2"], dict)
         self.assertNotIsInstance(result["key2"], OrderedDict)

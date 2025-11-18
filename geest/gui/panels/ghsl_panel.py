@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Ghsl Panel module.
+
+This module contains functionality for ghsl panel.
+"""
 import os
 import traceback
 
@@ -27,12 +31,21 @@ FORM_CLASS = get_ui_class("ghsl_panel_base.ui")
 
 
 class GHSLPanel(FORM_CLASS, QWidget):
+    """🎯 G H S L Panel.
+
+    Attributes:
+        queue_manager: Queue manager.
+        settings: Settings.
+        working_directory: Working directory.
+    """
+
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
 
     ghsl_layer_path_changed = pyqtSignal(str)  # Signal to set the ghsl layer path
 
     def __init__(self):
+        """🏗️ Initialize the instance."""
         log_message("Loading GHSL panel")
         super().__init__()
         self.setWindowTitle("GEEST")
@@ -77,6 +90,7 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.working_directory = working_directory
 
     def initUI(self):
+        """⚙️ Initui."""
         self.custom_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
             resources_path("resources", "geest-banner.png"),
@@ -94,15 +108,23 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
 
     def emit_layer_change(self):
+        """⚙️ Emit layer change."""
         self.ghsl_layer_path_changed.emit(self.ghsl_layer.source())
 
     def on_next_button_clicked(self):
+        """⚙️ On next button clicked."""
         self.switch_to_next_tab.emit()
 
     def on_previous_button_clicked(self):
+        """⚙️ On previous button clicked."""
         self.switch_to_previous_tab.emit()
 
     def settlements_layer_path(self):
+        """⚙️ Settlements layer path.
+
+        Returns:
+            The result of the operation.
+        """
         if self.ghsl_layer:
             return self.ghsl_layer.source()
         return None
@@ -197,6 +219,11 @@ class GHSLPanel(FORM_CLASS, QWidget):
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress
     def ghsl_extract_progress_updated(self, progress: float):
+        """⚙️ Ghsl extract progress updated.
+
+        Args:
+            progress: Progress.
+        """
         self.child_progress_bar.setVisible(True)
         self.child_progress_bar.setEnabled(True)
         if progress == 0:
@@ -235,10 +262,16 @@ class GHSLPanel(FORM_CLASS, QWidget):
         self.enable_widgets()
 
     def resizeEvent(self, event):
+        """⚙️ Resizeevent.
+
+        Args:
+            event: Event.
+        """
         self.set_font_size()
         super().resizeEvent(event)
 
     def set_font_size(self):
+        """⚙️ Set font size."""
         # Scale the font size to fit the text in the available space
         # log_message(f"Description Label Width: {self.description.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases

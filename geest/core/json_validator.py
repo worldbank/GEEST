@@ -25,6 +25,15 @@ from jsonschema import validate
 
 
 class JSONValidator:
+    """🎯 J S O N Validator.
+
+    Attributes:
+        json_data: Json data.
+        json_data_path: Json data path.
+        json_schema: Json schema.
+        json_schema_path: Json schema path.
+    """
+
     def __init__(self, json_schema_path, json_data_path):
         """
         Constructor for the JSONValidator class.

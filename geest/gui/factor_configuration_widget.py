@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Factor Configuration Widget module.
+
+This module contains functionality for factor configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QButtonGroup, QVBoxLayout, QWidget
@@ -25,8 +29,10 @@ class FactorConfigurationWidget(QWidget):
     def __init__(self, item: JsonTreeItem, guids: list) -> None:
         """
         Initialize the widget with the item and guids.
-        :param item: Item containing the factor configuration.
-        :param guids: List of guids for the indicators that the settings in the config will be applied to.
+
+        Args:
+            item: Item containing the factor configuration.
+            guids: List of guids for the indicators that the settings in the config will be applied to.
         """
         super().__init__()
         log_message(
@@ -59,6 +65,9 @@ class FactorConfigurationWidget(QWidget):
     def create_radio_buttons(self, attributes: dict) -> None:
         """
         Uses the factory to create radio buttons from attributes dictionary.
+
+        Args:
+            attributes: Dictionary containing attributes for creating radio buttons.
         """
         analysis_mode = attributes.get("analysis_mode", "")
         log_message(f"Creating radio buttons for analysis mode: {analysis_mode}")
@@ -91,6 +100,9 @@ class FactorConfigurationWidget(QWidget):
     def refresh_radio_buttons(self, attributes: dict) -> None:
         """
         Refreshes the radio buttons.
+
+        Args:
+            attributes: Dictionary containing updated attributes for refreshing radio buttons.
         """
         log_message("Refreshing radio buttons")
         for key, value in attributes.items():
@@ -103,7 +115,9 @@ class FactorConfigurationWidget(QWidget):
         """
         Slot called when the selection in the radio button group changes.
         Emits the selection_changed signal.
-        :param button: The button that was clicked.
+
+        Args:
+            button: The button that was clicked.
         """
         log_message("Radio button selection changed")
         self.update_attributes(self.button_group.checkedButton().parent().get_data())
@@ -120,7 +134,8 @@ class FactorConfigurationWidget(QWidget):
         - A key exists in `new_data` but not in `self.attributes`.
         - A key exists in both, but their values are different.
 
-        :param new_data: A dictionary containing the new attribute values to be updated.
+        Args:
+            new_data: A dictionary containing the new attribute values to be updated.
         """
         # Log the received data
         # log_message(f"Received new data: {new_data}", tag="Geest", level=Qgis.Info)

@@ -24,13 +24,22 @@ class GEESTTask(QgsTask):
     finished = pyqtSignal(bool)
     error = pyqtSignal()
 
-    def __init__(self, description, node):
+    def __init__(self, description: str, node: dict):
+        """🏗️ Initialize the instance.
+
+        Args:
+            description (str): Description of the task.
+            node (dict): Node containing task data.
+        """
         super().__init__(description)
         self.node = node
 
-    def run(self):
+    def run(self) -> bool:
         """
         Executes the task. This is the main work method that performs the background operation.
+
+        Returns:
+            bool: True if task completed successfully, False otherwise.
         """
         try:
             output_path = self.node["output_path"]
@@ -58,7 +67,7 @@ class GEESTTask(QgsTask):
             self.error.emit()
             return False
 
-    def process_node(self):
+    def process_node(self) -> None:
         """
         Simulates the processing of the node.
         """
@@ -67,7 +76,7 @@ class GEESTTask(QgsTask):
         with open(output_path, "w") as f:
             f.write(f"Processed output for {self.node['name']}")
 
-    def cancel(self):
+    def cancel(self) -> None:
         """
         Handles task cancellation.
         """

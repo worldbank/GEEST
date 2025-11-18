@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from urllib.parse import unquote
 
+"""📦 Classified Polygon Workflow module.
+
+This module contains functionality for classified polygon workflow.
+"""
 from qgis.core import (
     Qgis,
     QgsFeedback,

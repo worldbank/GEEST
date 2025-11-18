@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Layer Description module.
+
+This module contains functionality for layer description.
+"""
 from qgis.gui import QgsMapCanvasItem
 from qgis.PyQt.QtCore import QRectF, QSettings, Qt
 from qgis.PyQt.QtGui import QColor, QFont, QIcon, QPainter
@@ -16,11 +20,25 @@ showing which layer is active etc.
 
 
 class LayerDescriptionItem(QgsMapCanvasItem):
+    """🎯 Layer Description Item."""
+
     def __init__(self, canvas):
+        """🏗️ Initialize the instance.
+
+        Args:
+            canvas: Canvas.
+        """
         super().__init__(canvas)
         self.setZValue(1000)  # Draw on top
 
     def paint(self, painter: QPainter, option=None, widget=None):
+        """⚙️ Paint.
+
+        Args:
+            painter: Painter.
+            option: Option.
+            widget: Widget.
+        """
         show_overlay = setting(key="show_overlay", default=False)
         if not show_overlay:
             return

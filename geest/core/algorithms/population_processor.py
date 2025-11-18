@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Population Processor module.
+
+This module contains functionality for population processor.
+"""
 import os
 import platform
 import shutil
@@ -90,6 +94,9 @@ class PopulationRasterProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the task to process population rasters.
+
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.clip_population_rasters()
@@ -105,6 +112,9 @@ class PopulationRasterProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("Population raster processing completed successfully.")
@@ -207,6 +217,12 @@ class PopulationRasterProcessingTask(QgsTask):
         """
         Finds the gdalwarp executable using 'which' command on Unix-based systems
         and QGIS installation path on Windows.
+
+        Returns:
+            str: Path to the gdalwarp executable.
+
+        Raises:
+            FileNotFoundError: If gdalwarp executable is not found.
         """
         if platform.system() == "Windows":
             gdal_path = os.path.join(QgsApplication.prefixPath(), "bin", "gdalwarp.exe")

@@ -30,9 +30,7 @@ class TestI18n(unittest.TestCase):
     @patch("geest.core.i18n.QgsSettings")
     @patch("geest.core.i18n.QLocale")
     @patch("geest.core.i18n.QFileInfo")
-    def test_setup_translation_with_valid_locale(
-        self, mock_file_info, mock_qlocale, mock_qsettings
-    ):
+    def test_setup_translation_with_valid_locale(self, mock_file_info, mock_qlocale, mock_qsettings):
         """Test setup_translation with valid locale."""
         # Mock settings to return a locale
         mock_settings_instance = MagicMock()
@@ -58,9 +56,7 @@ class TestI18n(unittest.TestCase):
     @patch("geest.core.i18n.QgsSettings")
     @patch("geest.core.i18n.QLocale")
     @patch("geest.core.i18n.QFileInfo")
-    def test_setup_translation_file_not_exists(
-        self, mock_file_info, mock_qlocale, mock_qsettings
-    ):
+    def test_setup_translation_file_not_exists(self, mock_file_info, mock_qlocale, mock_qsettings):
         """Test setup_translation when translation file doesn't exist."""
         # Mock settings to return a locale
         mock_settings_instance = MagicMock()
