@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Study Area Report module.
+
+This module contains functionality for study area report.
+"""
 from qgis.core import (
     QgsLayout,
     QgsLayoutItemLabel,

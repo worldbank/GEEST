@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
+"""📦 Workflow Factory module.
+
+This module contains functionality for workflow factory.
+"""
 from qgis.core import Qgis, QgsFeedback, QgsProcessingContext
 
 from geest.core.workflows import (
     AcledImpactWorkflow,
     AnalysisAggregationWorkflow,
     ClassifiedPolygonWorkflow,
+    ContextualIndexScoreWorkflow,
     DefaultIndexScoreWorkflow,
     DimensionAggregationWorkflow,
     DontUseWorkflow,
@@ -45,14 +50,19 @@ class WorkflowFactory:
         Determines the workflow to return based on 'Analysis Mode' in the attributes.
         Passes the feedback object to the workflow for progress reporting.
 
-        :param item: The JsonTreeItem object representing the task.
-        :param cell_size_m: The cell size in meters for the analysis.
-        :param analysis_scale: The analysis scale string to determine the workflow e.g. local, national.
-        :param feedback: The QgsFeedback object for progress reporting.
-        :param context: The QgsProcessingContext object for processing. This can be used to
-            pass objects to the thread. e.g. the QgsProject Instance
+        Args:
+            item: The JsonTreeItem object representing the task.
+            cell_size_m: The cell size in meters for the analysis.
+            analysis_scale: The analysis scale string to determine the workflow e.g. local, national.
+            feedback: The QgsFeedback object for progress reporting.
+            context: The QgsProcessingContext object for processing. This can be used to
+                pass objects to the thread. e.g. the QgsProject Instance
 
-        :return: The workflow object to execute.
+        Returns:
+            Workflow: The workflow object to execute.
+
+        Raises:
+            ValueError: If an unknown analysis mode is encountered.
         """
         try:
             if not item:
@@ -68,6 +78,8 @@ class WorkflowFactory:
 
             if analysis_mode == "use_index_score":
                 return DefaultIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
+            elif analysis_mode == "use_contextual_index_score":
+                return ContextualIndexScoreWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_index_score_with_ookla":
                 return IndexScoreWithOoklaWorkflow(item, cell_size_m, analysis_scale, feedback, context)
             elif analysis_mode == "use_index_score_with_ghsl":

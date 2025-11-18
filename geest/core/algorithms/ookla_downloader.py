@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""📦 Ookla Downloader module.
+
+This module contains functionality for ookla downloader.
+"""
 import os
 import timeit
 from typing import Optional
@@ -31,6 +35,16 @@ class OoklaException(Exception):
 
 
 class OoklaDownloader:
+    """🎯 Ookla Downloader.
+
+    Attributes:
+        delete_existing: Delete existing.
+        extents: Extents.
+        feedback: Feedback.
+        filename_prefix: Filename prefix.
+        output_path: Output path.
+    """
+
     # Construct VSI S3 path
     FIXED_INTERNET_URL = "/vsis3/ookla-open-data/parquet/performance/type=fixed/year=2025/quarter=3/2025-07-01_performance_fixed_tiles.parquet"
     MOBILE_INTERNET_URL = "/vsis3/ookla-open-data/parquet/performance/type=mobile/year=2025/quarter=3/2025-07-01_performance_mobile_tiles.parquet"
@@ -147,6 +161,11 @@ class OoklaDownloader:
         log_message(f"Data extraction complete. Combined data saved to: {combined_output_file}")
 
     def analysis_intro(self):
+        """⚙️ Analysis intro.
+
+        Returns:
+            The result of the operation.
+        """
         title = "Spatial Filter"
         body = (
             f"Filtering Records by Bounding Box\n"
@@ -202,8 +221,7 @@ class OoklaDownloader:
 
         dataset = driver.Open(input_uri, 0)
         if dataset is None:
-            log_message(f"❌ Failed to open file: {input_uri}")
-            raise OoklaException(f"Failed to open file: {input_uri}")
+            raise OoklaException(f"Failed to open OOKLA data source: {input_uri}")
 
         # transform to output CRS
         transform = None
@@ -245,7 +263,13 @@ class OoklaDownloader:
             f"tile_y >= {min_y} AND tile_y <= {max_y}"
         )
         layer.SetAttributeFilter(filter_expr)
-        feature_count = layer.GetFeatureCount()
+
+        # Handle GDAL Parquet driver issues
+        try:
+            feature_count = layer.GetFeatureCount()
+        except RuntimeError:
+            feature_count = 0  # Process without knowing total count
+
         out_layer_defn = out_layer.GetLayerDefn()
 
         found_min_x = found_min_y = found_max_x = found_max_y = None
@@ -276,13 +300,16 @@ class OoklaDownloader:
             out_feature.Destroy()
 
             count += 1
-            if count % 1000 == 0:
-                log_message(f"Processed {count} of {feature_count} features...")
-                log_message(f"Kept {kept_count} features so far...")
+            # Update progress every 100 features
+            if count % 100 == 0:
                 if feature_count > 0:
                     progress = int((count / feature_count) * 100)
                     if self.feedback is not None:
                         self.feedback.setProgress(progress)
+                # Log every 1000 features to avoid log spam
+                if count % 1000 == 0:
+                    log_message(f"Processed {count} of {feature_count} features...")
+                    log_message(f"Kept {kept_count} features so far...")
 
         # Clean up
         dataset = None

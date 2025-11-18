@@ -79,6 +79,14 @@ log_message("QGIS Version: {}".format(Qgis.QGIS_VERSION), force=True)
 
 
 def classFactory(iface):  # pylint: disable=missing-function-docstring
+    """🔄 Classfactory.
+
+    Args:
+        iface: Iface.
+
+    Returns:
+        The result of the operation.
+    """
     return GeestPlugin(iface)
 
 
@@ -108,6 +116,11 @@ class GeestPlugin:
     DEBUG_PORT = 9000  # Port for debugpy connection
 
     def __init__(self, iface):
+        """🏗️ Initialize the instance.
+
+        Args:
+            iface: Iface.
+        """
         self.iface = iface
         self.run_action = None
         self.debug_action = None
@@ -302,6 +315,7 @@ for module_name in list(sys.modules.keys()):
                         break
 
     def setup_map_canvas_items(self):
+        """⚙️ Setup map canvas items."""
         self.label_overlay = LayerDescriptionItem(self.iface.mapCanvas())
         experimental_features = int(os.getenv("GEEST_EXPERIMENTAL", 0))
         if experimental_features:
@@ -395,7 +409,19 @@ for module_name in list(sys.modules.keys()):
 
         # Step 2: Create and show dialog
         class TestPickerDialog(QDialog):
+            """🎯 Test Picker Dialog.
+
+            Attributes:
+                combo: Combo.
+            """
+
             def __init__(self, tests, parent=None):
+                """🏗️ Initialize the instance.
+
+                Args:
+                    tests: Tests.
+                    parent: Parent.
+                """
                 super().__init__(parent)
                 self.setWindowTitle("Select Test to Run")
                 self.setMinimumWidth(500)  # Make dialog wider to accommodate status icons
@@ -415,6 +441,11 @@ for module_name in list(sys.modules.keys()):
                 run_button.clicked.connect(self.accept)
 
             def selected_test(self):
+                """⚙️ Selected test.
+
+                Returns:
+                    The result of the operation.
+                """
                 return self.combo.currentText()
 
         dialog = TestPickerDialog(all_test_options, self.iface.mainWindow())
@@ -713,7 +744,11 @@ for module_name in list(sys.modules.keys()):
             self.dock_widget = None
 
     def kill_debug(self):
-        """Kill any running debugpy debugging sessions"""
+        """Kill any running debugpy debugging sessions.
+
+        Returns:
+            bool: True if debug processes were killed, False otherwise.
+        """
         try:
             # First try to use debugpy's built-in close method if available
             try:
@@ -810,11 +845,13 @@ for module_name in list(sys.modules.keys()):
     ) -> None:
         """
         Display an information message bar.
-        :param title: The title of the message bar.
-        :param message: The message inside the message bar.
-        :param more_details: The message inside the 'Show details' button.
-        :param button_text: Text of the button if 'more_details' is not empty.
-        :param duration: The duration for the display, default is 8 seconds.
+
+        Args:
+            title: The title of the message bar.
+            message: The message inside the message bar.
+            more_details: The message inside the 'Show details' button.
+            button_text: Text of the button if 'more_details' is not empty.
+            duration: The duration for the display, default is 8 seconds.
         """
         self.iface.messageBar().clearWidgets()
         widget = self.iface.messageBar().createMessage(title, message)
@@ -832,7 +869,10 @@ for module_name in list(sys.modules.keys()):
     ) -> None:
         """
         Display an information message box.
-        :param title: The title of the message box.
-        :param message: The message inside the message box.
+
+        Args:
+            parent: The parent widget for the message box.
+            title: The title of the message box.
+            message: The message inside the message box.
         """
         QMessageBox.information(parent, title, message)

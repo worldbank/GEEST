@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Opportunities By Wee Score Population Processor module.
+
+This module contains functionality for opportunities by wee score population processor.
+"""
 import os
 import shutil
 import traceback
@@ -97,6 +101,9 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the Opportunities by WEE SCORE by Population calculation task.
+
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.calculate_score()
@@ -123,14 +130,13 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
         Checks if Opportunities Mask and WEE Score by Population
         rasters have the same origin, dimensions, and pixel sizes.
 
-        Raises an exception if the check fails.
-
         Args:
-            opportunities_mask_raster (QgsRasterLayer): Path to the mask raster.
-            wee_score_by_population_raster (QgsRasterLayer): Path to the WEE Score by Population raster.
-            dimension_check (bool): Flag to check if the rasters have the same dimensions.
-        returns:
-            None
+            opportunities_mask_raster (QgsRasterLayer): The mask raster layer.
+            wee_score_by_population_raster (QgsRasterLayer): The WEE Score by Population raster layer.
+            dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
+
+        Raises:
+            ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
         log_message("Validating input rasters")
         log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")  # noqa: E293
@@ -209,11 +215,9 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
 
     def generate_vrt(self) -> str:
         """
-        Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
+        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
 
-
-        returns:
-
+        Returns:
             str: Path to the generated VRT file.
         """
         vrt_path = os.path.join(self.output_dir, "wee_by_population_by_opportunities_mask.vrt")
@@ -241,6 +245,9 @@ class OpportunitiesByWeeScorePopulationProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("Opportunities mask by WEE SCORE by Population calculation completed successfully.")

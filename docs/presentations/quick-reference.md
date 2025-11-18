@@ -59,7 +59,7 @@ def profile_function(func):
         start = time.perf_counter()
         result = func(*args, **kwargs)
         duration = time.perf_counter() - start
-        
+
         QgsMessageLog.logMessage(
             f"{func.__name__} took {duration:.4f}s",
             tag="Geest-Profile",
@@ -100,7 +100,7 @@ def track_memory(func):
         result = func(*args, **kwargs)
         current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
-        
+
         print(f"Current memory: {current / 1024 / 1024:.2f} MB")
         print(f"Peak memory: {peak / 1024 / 1024:.2f} MB")
         return result
@@ -153,7 +153,7 @@ from qgis.core import QgsCoordinateTransform, QgsProject
 class TransformCache:
     def __init__(self):
         self._cache = {}
-    
+
     def get(self, source_crs, dest_crs):
         key = (source_crs.authid(), dest_crs.authid())
         if key not in self._cache:
@@ -177,7 +177,7 @@ def benchmark(func, *args, runs=10, **kwargs):
         start = time.perf_counter()
         func(*args, **kwargs)
         times.append(time.perf_counter() - start)
-    
+
     return {
         'mean': statistics.mean(times),
         'median': statistics.median(times),
@@ -198,13 +198,13 @@ print(f"Std Dev: {results['stdev']:.4f}s")
 def test_geometry_intersection_benchmark(benchmark):
     """Benchmark geometry intersection operations."""
     from qgis.core import QgsGeometry
-    
+
     poly1 = QgsGeometry.fromWkt("POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))")
     poly2 = QgsGeometry.fromWkt("POLYGON((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, 0.5 0.5))")
-    
+
     # Benchmark the operation
     result = benchmark(poly1.intersection, poly2)
-    
+
     assert result is not None
     assert not result.isEmpty()
 ```
@@ -235,7 +235,7 @@ def process_in_batches(layer, batch_size=1000):
         if len(batch) >= batch_size:
             yield process_batch(batch)
             batch.clear()  # Clear batch for next iteration
-    
+
     # Process remaining
     if batch:
         yield process_batch(batch)
@@ -248,7 +248,7 @@ import gc
 
 def process_layer():
     layer = QgsVectorLayer(path, "layer", "ogr")
-    
+
     try:
         results = process(layer)
         return results
@@ -263,21 +263,21 @@ def process_layer():
 ```python
 class PerformanceMonitor:
     """Monitor performance across multiple operations."""
-    
+
     def __init__(self):
         self.metrics = {}
-    
+
     @contextmanager
     def measure(self, name):
         """Measure a code block."""
         start = time.perf_counter()
         yield
         duration = time.perf_counter() - start
-        
+
         if name not in self.metrics:
             self.metrics[name] = []
         self.metrics[name].append(duration)
-    
+
     def report(self):
         """Generate performance report."""
         print("\n=== Performance Report ===")
@@ -335,11 +335,11 @@ def process_study_area(self):
     """Process study area with profiling."""
     with timer("Load grid"):
         grid = self.load_grid()
-    
+
     with timer("Process cells"):
         for cell in grid.getFeatures():
             self.process_cell(cell)
-    
+
     with timer("Save results"):
         self.save_results()
 ```
@@ -350,7 +350,7 @@ def process_study_area(self):
 def test_cell_size_benchmark(benchmark):
     """Compare performance with different cell sizes."""
     cell_sizes = [50, 100, 250]
-    
+
     for size in cell_sizes:
         result = benchmark(
             process_with_cell_size,
@@ -367,7 +367,7 @@ def test_cell_size_benchmark(benchmark):
 def process_large_layer(layer_path):
     """Process large layer with memory tracking."""
     layer = QgsVectorLayer(layer_path, "layer", "ogr")
-    
+
     # Process in batches to control memory
     for batch in process_in_batches(layer, batch_size=1000):
         save_batch(batch)

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Tree Panel module.
+
+This module contains functionality for tree panel.
+"""
 import json
 import os
 import platform
@@ -61,6 +65,16 @@ from geest.utilities import log_message, resources_path, theme_stylesheet
 
 
 class TreePanel(QWidget):
+    """🎯 Tree Panel.
+
+    Attributes:
+        active_model: Active model.
+        help_button: Help button.
+        items_to_run: Items to run.
+        json_data: Json data.
+        json_file: Json file.
+    """
+
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_setup_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
@@ -68,6 +82,12 @@ class TreePanel(QWidget):
     switch_to_ghsl_tab = pyqtSignal()  # Signal to open the ghsl tab
 
     def __init__(self, parent=None, json_file=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            parent: Parent.
+            json_file: Json file.
+        """
         super().__init__(parent)
 
         # Initialize the QueueManager
@@ -206,6 +226,11 @@ class TreePanel(QWidget):
         self.queue_manager.processing_completed.connect(self.run_next_workflow_queue)
 
     def on_item_double_clicked(self, index):
+        """⚙️ On item double clicked.
+
+        Args:
+            index: Index.
+        """
         # Action to trigger on double-click
         item = index.internalPointer()
         if item.role == "indicator":
@@ -222,7 +247,7 @@ class TreePanel(QWidget):
         Slot that runs whenever an item in the tree is clicked.
         :param index: QModelIndex of the clicked item.
         """
-        show_layer_on_click = setting(key="show_layer_on_click", default=False)
+        show_layer_on_click = setting(key="show_layer_on_click", default=True)
         if show_layer_on_click:
             item = index.internalPointer()
             add_to_map(item)
@@ -235,9 +260,11 @@ class TreePanel(QWidget):
             QSettings().setValue("geest/pie_data", item.data(0))
 
     def on_previous_button_clicked(self):
+        """⚙️ On previous button clicked."""
         self.switch_to_previous_tab.emit()
 
     def on_next_button_clicked(self):
+        """⚙️ On next button clicked."""
         self.switch_to_next_tab.emit()
 
     def clear_item(self):
@@ -397,12 +424,22 @@ class TreePanel(QWidget):
 
     @pyqtSlot()
     def set_working_directory(self, working_directory):
+        """⚙️ Set working directory.
+
+        Args:
+            working_directory: Working directory.
+        """
         if working_directory:
             self.working_directory = working_directory
             self.working_directory_changed(working_directory)
 
     @pyqtSlot()
     def set_road_network_layer_path(self, network_layer_path):
+        """⚙️ Set road network layer path.
+
+        Args:
+            network_layer_path: Network layer path.
+        """
         if network_layer_path:
             log_message(f"Setting road_network_layer_path in model to {network_layer_path}")
             analysis_item = self.model.rootItem.child(0)
@@ -416,6 +453,11 @@ class TreePanel(QWidget):
 
     @pyqtSlot()
     def set_ghsl_layer_path(self, ghsl_layer_path: str):
+        """⚙️ Set ghsl layer path.
+
+        Args:
+            ghsl_layer_path: Ghsl layer path.
+        """
         if ghsl_layer_path:
             log_message(f"Setting ghsl_layer_path in model to {ghsl_layer_path}")
             analysis_item = self.model.rootItem.child(0)
@@ -492,12 +534,13 @@ class TreePanel(QWidget):
             disable_action.triggered.connect(lambda: self.disable_item(item))
 
         add_to_map_action = QAction("Add to map", self)
-        add_to_map_action.triggered.connect(lambda: self.add_to_map(item))
+        add_to_map_action.triggered.connect(lambda: add_to_map(item))
 
         run_item_action = QAction("Run Item Workflow", self)
 
         # If shift is pressed, change the text to "Rerun Item Workflow"
         def update_action_text():
+            """🔄 Update action text."""
             text = "Rerun Item Workflow" if QApplication.keyboardModifiers() & Qt.ShiftModifier else "Run Item Workflow"
             run_item_action.setText(text)
 
@@ -530,7 +573,9 @@ class TreePanel(QWidget):
             set_network_layers_action = QAction("Set Network Layers")
             set_network_layers_action.triggered.connect(self.switch_to_network_tab)  # Connect to method
             set_ghsl_layer_action = QAction("Set GHSL Layer")
-            set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to method
+            set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to metho
+            remove_unused_layers_action = QAction("Clean Unused Layers from Project")
+            remove_unused_layers_action.triggered.connect(self.clean_unused_layers)
             menu.addAction(edit_analysis_action)
             menu.addAction(set_network_layers_action)
             menu.addAction(set_ghsl_layer_action)
@@ -538,6 +583,8 @@ class TreePanel(QWidget):
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
             menu.addAction(run_item_action)
+            menu.addAction(open_working_directory_action)
+            menu.addAction(remove_unused_layers_action)
 
             # Add Animate Results action
             animate_results_action = QAction("Animate results", self)
@@ -672,9 +719,14 @@ class TreePanel(QWidget):
             working_directory=self.working_directory,
             report_name="Study Area Summary",
         )
+        self.overall_progress_bar.setVisible(True)
+        self.overall_progress_bar.setValue(10)
         report.create_layout()
+        self.overall_progress_bar.setValue(30)
         report.export_pdf(os.path.join(self.working_directory, "analysis_report.pdf"))
+        self.overall_progress_bar.setValue(60)
         report.export_qpt(os.path.join(self.working_directory, "analysis_report.qpt"))
+        self.overall_progress_bar.setValue(90)
 
         # open the pdf using the system PDF viewer
         # Windows
@@ -688,13 +740,19 @@ class TreePanel(QWidget):
             else:  # Linux
                 pdf_path = os.path.join(self.working_directory, "analysis_report.pdf")
                 subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
+        self.overall_progress_bar.setValue(100)
+        self.overall_progress_bar.setVisible(False)
 
     def generate_study_area_report(self):
         """Add a report showing population information for the study area."""
         gpkg_path = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
         report = StudyAreaReport(gpkg_path=gpkg_path, report_name="Study Area Summary")
+        self.overall_progress_bar.setVisible(True)
+        self.overall_progress_bar.setValue(10)
         report.create_layout()
+        self.overall_progress_bar.setValue(30)
         report.export_pdf(os.path.join(self.working_directory, "study_area_report.pdf"))
+        self.overall_progress_bar.setValue(90)
         # open the pdf using the system PDF viewer
         # Windows
         if os.name == "nt":  # Windows
@@ -707,6 +765,8 @@ class TreePanel(QWidget):
             else:  # Linux
                 pdf_path = os.path.join(self.working_directory, "study_area_report.pdf")
                 subprocess.run(["xdg-open", pdf_path], check=False)  # nosec B603 B607
+        self.overall_progress_bar.setValue(100)
+        self.overall_progress_bar.setVisible(False)
 
     def add_masked_scores_to_map(self, item):
         """Add the masked scores to the map."""
@@ -1005,6 +1065,34 @@ class TreePanel(QWidget):
             # If "Copy" was selected, copy the cell's content to the clipboard
             clipboard = QApplication.clipboard()
             clipboard.setText(item.text())
+
+    def clean_unused_layers(self):
+        # Remove any layers from the project that are not in the QGIS legend
+        from qgis.core import QgsLayerTreeGroup, QgsLayerTreeLayer
+
+        project = QgsProject.instance()
+        root = project.layerTreeRoot()
+        removed_count = 0
+
+        def collect_layer_ids(node):
+            ids = set()
+            if isinstance(node, QgsLayerTreeLayer):
+                layer = node.layer()
+                if layer:
+                    ids.add(layer.id())
+            elif isinstance(node, QgsLayerTreeGroup):
+                for child in node.children():
+                    ids.update(collect_layer_ids(child))
+            return ids
+
+        layers_in_legend = collect_layer_ids(root)
+        for layer in project.mapLayers().values():
+            if layer.id() not in layers_in_legend:
+                log_message(f"Removing unused layer: {layer.name()}")
+                project.removeMapLayer(layer.id())
+                removed_count += 1
+        # Show a message box to confirm completion and how many layers were removed
+        QMessageBox.information(self, "Clean Unused Layers", f"Unused layers have been removed: {removed_count}")
 
     def add_study_area_to_map(self):
         """Add the study area layers to the map.
@@ -1606,6 +1694,12 @@ class TreePanel(QWidget):
 
         # Get all items in the tree in a flat list (preorder traversal)
         def collect_items(item, items):
+            """🔄 Collect items.
+
+            Args:
+                item: Item.
+                items: Items.
+            """
             items.append(item)
             for i in range(item.childCount()):
                 collect_items(item.child(i), items)

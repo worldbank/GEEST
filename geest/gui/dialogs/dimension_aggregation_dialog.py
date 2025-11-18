@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Dimension Aggregation Dialog module.
+
+This module contains functionality for dimension aggregation dialog.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices, QPixmap
@@ -30,7 +34,25 @@ from .custom_base_dialog import CustomBaseDialog
 
 
 class DimensionAggregationDialog(CustomBaseDialog):
+    """🎯 Dimension Aggregation Dialog.
+
+    Attributes:
+        banner_label: Banner label.
+        button_box: Button box.
+        dimension_data: Dimension data.
+        dimension_name: Dimension name.
+        guid_column_visible: Guid column visible.
+    """
+
     def __init__(self, dimension_name, dimension_data, dimension_item, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            dimension_name: Dimension name.
+            dimension_data: Dimension data.
+            dimension_item: Dimension item.
+            parent: Parent.
+        """
         super().__init__(parent)
 
         self.setWindowTitle(dimension_name)

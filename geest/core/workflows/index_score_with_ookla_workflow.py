@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Index Score With Ookla Workflow module.
+
+This module contains functionality for index score with ookla workflow.
+"""
 import os
 from typing import Optional
 
@@ -22,6 +26,32 @@ from geest.core.algorithms.ookla_downloader import OoklaDownloader
 from geest.utilities import log_message
 
 from .workflow_base import WorkflowBase
+
+
+class ProgressBridgeFeedback(QgsFeedback):
+    """
+    A feedback wrapper that bridges progress updates to the workflow's progressChanged signal.
+    This ensures OOKLA download progress is visible in the UI.
+    """
+
+    def __init__(self, workflow, base_feedback):
+        super().__init__()
+        self.workflow = workflow
+        self.base_feedback = base_feedback
+
+    def setProgress(self, progress):
+        """Override to emit workflow progress signal."""
+        super().setProgress(progress)
+        if self.base_feedback:
+            self.base_feedback.setProgress(progress)
+        # Emit to workflow progress bar
+        self.workflow.progressChanged.emit(float(progress))
+
+    def isCanceled(self):
+        """Check if operation should be canceled."""
+        if self.base_feedback:
+            return self.base_feedback.isCanceled()
+        return super().isCanceled()
 
 
 class IndexScoreWithOoklaWorkflow(WorkflowBase):
@@ -69,6 +99,23 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         # Get the analysis extents
         self.study_area_bbox = self._study_area_bbox_4326()
 
+        # Lazy load OOKLA data during execute to avoid blocking __init__
+        self.ookla_layer_path = None
+        self.ookla_downloaded = False
+
+    def _download_ookla_data(self):
+        """
+        Download OOKLA data if not already downloaded.
+        This is called during execute() to prevent blocking __init__.
+        """
+        if self.ookla_downloaded:
+            return
+
+        log_message("Downloading OOKLA data (this may take several minutes)...")
+
+        # Bridge feedback to workflow progress signals
+        bridge_feedback = ProgressBridgeFeedback(self, self.feedback)
+
         # Prepare Ookla coverage layer - adds a minute or two to the workflow
         # and requires internet access
         ookla_layer_path = os.path.join(self.working_directory, "study_area")
@@ -78,10 +125,12 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
             filename_prefix="ookla",
             use_cache=True,
             delete_existing=True,
-            feedback=self.feedback,
+            feedback=bridge_feedback,  # Use bridge feedback for progress visibility
         )
         downloader.extract_data(output_crs=self.target_crs)
         self.ookla_layer_path = os.path.join(ookla_layer_path, "ookla_combined.parquet")
+        self.ookla_downloaded = True
+        log_message("OOKLA data download complete")
 
     def _process_features_for_area(
         self,
@@ -103,34 +152,27 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         :return: Raster file path of the output.
         """
         _ = area_features  # unused
-        log_message(f"Processing area {index} score workflow")
+
+        # Download OOKLA data on first area
+        if index == 0:
+            self._download_ookla_data()
 
         log_message(f"Index score: {self.index_score}")
         self.progressChanged.emit(10.0)  # We just use nominal intervals for progress updates
 
-        # Create a scored boundary layer filtered by current_area
-        scored_layer = self.create_scored_boundary_layer(
-            clip_area=clip_area,
-            index=index,
-        )
-        self.progressChanged.emit(30.0)  # We just use nominal intervals for progress updates
-        # Now mask with Ookla coverage layer
-        # First select the features from the Ookla layer that intersect our current area
+        # Mask with OOKLA coverage
         ookla_layer = QgsVectorLayer(self.ookla_layer_path, "ookla_layer", "ogr")
-        # Select features in ookla_layer that intersect current_area
         expr = f"intersects($geometry, geom_from_wkt('{current_area.asWkt()}'))"
         ookla_layer.selectByExpression(expr, QgsVectorLayer.SetSelection)
-        # Now only keep the parts of the geometry of the current area that intersect with the ookla_layer
         ookla_features = ookla_layer.selectedFeatures()
         final_geom: QgsGeometry = None
         if ookla_features:
             ookla_union_geom = QgsGeometry.unaryUnion([feat.geometry() for feat in ookla_features])
-            # Intersect with the clip_area to get the final geometry to use
             final_geom = clip_area.intersection(ookla_union_geom)
         else:
             log_message(f"No Ookla coverage in area {index}, skipping ookla masking.")
 
-        if final_geom.isEmpty():
+        if not final_geom or final_geom.isEmpty():
             log_message(f"No Ookla coverage in area {index} after intersection, skipping rasterization.")
         else:
             scored_layer = self.create_scored_boundary_layer(
@@ -139,7 +181,7 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
             )
         self.progressChanged.emit(60.0)  # We just use nominal intervals for progress
 
-        # Create a scored boundary layer
+        # Rasterize
         raster_output = self._rasterize(
             scored_layer,
             current_bbox,
@@ -163,13 +205,12 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         output_prefix = f"{self.layer_id}_area_{index}"
 
         self.progressChanged.emit(20.0)  # We just use nominal intervals for progress updates
-        # Create a new memory layer with the target CRS (EPSG:4326)
+        # Create memory layer
         subset_layer = QgsVectorLayer("Polygon", "subset", "memory")
         subset_layer.setCrs(self.target_crs)
         subset_layer_data: QgsVectorDataProvider = subset_layer.dataProvider()
         field = QgsField("score", QVariant.Double)
         fields = [field]
-        # Add attributes (fields) from the point_layer
         subset_layer_data.addAttributes(fields)
         subset_layer.updateFields()
         self.progressChanged.emit(40.0)  # We just use nominal intervals for progress updates
@@ -179,21 +220,35 @@ class IndexScoreWithOoklaWorkflow(WorkflowBase):
         score_field_index = subset_layer.fields().indexFromName("score")
         feature.setAttribute(score_field_index, self.index_score)
         features = [feature]
-        # Add reprojected features to the new subset layer
         subset_layer_data.addFeatures(features)
         subset_layer.commitChanges()
         self.progressChanged.emit(60.0)  # We just use nominal intervals for progress updates
 
         shapefile_path = os.path.join(self.workflow_directory, f"{output_prefix}.shp")
-        # Use QgsVectorFileWriter to save the layer to a shapefile
-        QgsVectorFileWriter.writeAsVectorFormat(
+        os.makedirs(self.workflow_directory, exist_ok=True)
+
+        # Write to shapefile
+        error, error_string = QgsVectorFileWriter.writeAsVectorFormat(
             subset_layer,
             shapefile_path,
             "utf-8",
             subset_layer.crs(),
             "ESRI Shapefile",
         )
+
+        if error != QgsVectorFileWriter.NoError:
+            log_message(f"Error writing shapefile: {error_string} (code: {error})")
+            return None
+
+        if not os.path.exists(shapefile_path):
+            log_message(f"Error: Shapefile not created at {shapefile_path}")
+            return None
+
         layer = QgsVectorLayer(shapefile_path, "area_layer", "ogr")
+
+        if not layer.isValid():
+            log_message(f"Error loading layer: {layer.error().message()}")
+            return None
         self.progressChanged.emit(80.0)  # We just use nominal intervals for progress updates
 
         return layer

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Multi Buffer Distances Ors Workflow module.
+
+This module contains functionality for multi buffer distances ors workflow.
+"""
 import os
 import traceback
 from urllib.parse import unquote
@@ -93,12 +97,12 @@ class MultiBufferDistancesORSWorkflow(WorkflowBase):
             )
             raise Exception("Invalid travel distances provided.")
 
-        layer_path = self.attributes.get("multi_buffer_shapefile", None)
+        layer_path = self.attributes.get("multi_buffer_point_shapefile", None)
         if layer_path:
             layer_path = unquote(layer_path)
         if not layer_path:
             log_message(
-                "Invalid points layer found in multi_buffer_shapefile, trying Multi Buffer Point_layer_name.",
+                "Invalid points layer found in multi_buffer_point_shapefile, trying Multi Buffer Point_layer_name.",
                 tag="Geest",
                 level=Qgis.Warning,
             )

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Analysis Aggregation Dialog module.
+
+This module contains functionality for analysis aggregation dialog.
+"""
 from urllib.parse import unquote
 
 from qgis.core import Qgis, QgsMapLayerProxyModel, QgsProject
@@ -39,7 +43,23 @@ FORM_CLASS = get_ui_class("analysis_dialog_base.ui")
 
 
 class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
+    """🎯 Analysis Aggregation Dialog.
+
+    Attributes:
+        analysis_data: Analysis data.
+        analysis_name: Analysis name.
+        custom_label: Custom label.
+        guid_column_visible: Guid column visible.
+        guids: Guids.
+    """
+
     def __init__(self, analysis_item, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            analysis_item: Analysis item.
+            parent: Parent.
+        """
         super().__init__(parent)
         # Dynamically load the .ui file
         self.setupUi(self)
@@ -203,6 +223,11 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         settings.setValue("AnalysisAggregationDialog/geometry", self.geometry())
 
     def closeEvent(self, event):
+        """⚙️ Closeevent.
+
+        Args:
+            event: Event.
+        """
         # Save geometry before closing
         settings = QSettings()
         settings.setValue("AnalysisAggregationDialog/geometry", self.saveGeometry())
@@ -317,6 +342,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
         self.raster_lineedit.hide()
 
     def aggregation_toolbutton_clicked(self):
+        """⚙️ Aggregation toolbutton clicked."""
         # Show a file dialog to select a raster file
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)
@@ -328,6 +354,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.aggregation_lineedit.show()
 
     def population_toolbutton_clicked(self):
+        """⚙️ Population toolbutton clicked."""
         # Show a file dialog to select a raster file
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)
@@ -339,6 +366,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.population_lineedit.show()
 
     def point_toolbutton_clicked(self):
+        """⚙️ Point toolbutton clicked."""
         # Show a file dialog to select a raster file
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)
@@ -350,6 +378,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.point_lineedit.show()
 
     def polygon_toolbutton_clicked(self):
+        """⚙️ Polygon toolbutton clicked."""
         # Show a file dialog to select a raster file
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)
@@ -361,6 +390,7 @@ class AnalysisAggregationDialog(FORM_CLASS, CustomBaseDialog):
             self.polygon_lineedit.show()
 
     def raster_toolbutton_clicked(self):
+        """⚙️ Raster toolbutton clicked."""
         # Show a file dialog to select a raster file
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFile)

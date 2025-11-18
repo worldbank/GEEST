@@ -29,14 +29,12 @@ from geest.utilities import resources_path
 def setup_translation(file_pattern="{}.qm", folder=None):
     """Find the translation file according to locale.
 
-    :param file_pattern: Custom file pattern to use to find QM files.
-    :type file_pattern: basestring
+    Args:
+        file_pattern: Custom file pattern to use to find QM files.
+        folder: Optional folder to look in if it's not the default.
 
-    :param folder: Optional folder to look in if it's not the default.
-    :type folder: basestring
-
-    :return: The locale and the file path to the QM file, or None.
-    :rtype: (basestring, basestring)
+    Returns:
+        tuple: The locale and the file path to the QM file, or None.
     """
     locale = QgsSettings().value("locale/userLocale", QLocale().name())
 
@@ -58,4 +56,13 @@ def setup_translation(file_pattern="{}.qm", folder=None):
 
 
 def tr(text, context="@default"):
+    """🔄 Tr.
+
+    Args:
+        text: Text.
+        context: Context.
+
+    Returns:
+        The result of the operation.
+    """
     return QApplication.translate(context, text)

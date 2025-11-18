@@ -2,6 +2,10 @@
 
 # A factory to generate osm downloaders based on the requested type
 
+"""📦 Osm Downloader Factory module.
+
+This module contains functionality for osm downloader factory.
+"""
 from geest.core.osm_downloaders import OSMCyclewayDownloader, OSMDownloadType, OSMRoadsDownloader
 
 

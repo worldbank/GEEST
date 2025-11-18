@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Base Report module.
+
+This module contains functionality for base report.
+"""
 import math
 from collections import defaultdict
 
@@ -412,11 +416,10 @@ class BaseReport:
         page_title.setVAlign(Qt.AlignCenter)
         page_title.setHAlign(Qt.AlignLeft)
         # wrap the text if too long
-        page_title.setWordWrap(True)
         page_title.setFixedSize(QgsLayoutSize(180, 40, QgsUnitTypes.LayoutMillimeters))
         # Position the label on the current page
         page_title.attemptMove(
-            QgsLayoutPoint(20, 20, QgsUnitTypes.LayoutMillimeters),
+            QgsLayoutPoint(10, 1, QgsUnitTypes.LayoutMillimeters),
             page=current_page,
         )
         self.layout.addLayoutItem(page_title)

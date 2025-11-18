@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Feature Per Cell Configuration Widget module.
+
+This module contains functionality for feature per cell configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 
@@ -23,6 +27,15 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
     # Normally we dont need to reimplement the __init__ method, but in this case we need to
     # change the label text next to the radio button
     def __init__(self, analysis_mode: str, attributes: dict) -> None:
+        """🏗️ Initialize the instance.
+
+        Args:
+            analysis_mode: Analysis mode.
+            attributes: Attributes.
+
+        Returns:
+            The result of the operation.
+        """
         humanised_label = "Feature per cell"
         super().__init__(
             humanised_label=humanised_label,  # In this special case we override the label
@@ -35,7 +48,9 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
         Adds internal widgets specific to self.set_internal_widgets_visible(self.isChecked()) - in this case there are none.
         """
         try:
-            self.info_label = QLabel("Count features per cell.")
+            self.info_label = QLabel(
+                "Count features per cell. Use this if your data is not categorised according to OSM road types. Cells will be scored based on the number of line features intersecting each cell."
+            )
             self.internal_layout.addWidget(self.info_label)
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)

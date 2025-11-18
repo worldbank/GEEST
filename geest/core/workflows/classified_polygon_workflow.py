@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
+from urllib.parse import unquote
 
+"""📦 Classified Polygon Workflow module.
+
+This module contains functionality for classified polygon workflow.
+"""
 from qgis.core import (
     Qgis,
     QgsFeedback,
@@ -43,6 +48,8 @@ class ClassifiedPolygonWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_classify_polygon_into_classes"
         layer_path = self.attributes.get("classify_polygon_into_classes_shapefile", None)
+        if layer_path:
+            layer_path = unquote(layer_path)
 
         if not layer_path:
             log_message(

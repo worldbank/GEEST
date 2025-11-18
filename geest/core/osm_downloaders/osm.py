@@ -20,7 +20,6 @@ from enum import Enum, unique
 
 from geest.core.i18n import tr
 
-
 # Wait for python 3.6 minimum version
 # class AutoEnum(Enum):
 #     # noinspection PyMethodParameters

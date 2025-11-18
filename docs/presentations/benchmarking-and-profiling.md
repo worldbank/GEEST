@@ -247,7 +247,7 @@ def profile_function(func):
         start = time.perf_counter()
         result = func(*args, **kwargs)
         duration = time.perf_counter() - start
-        
+
         QgsMessageLog.logMessage(
             f"{func.__name__} took {duration:.4f}s",
             tag="Geest-Profile",
@@ -268,7 +268,7 @@ class WorkflowJob:
         """Process the study area with profiling."""
         # ... existing code ...
         pass
-    
+
     @profile_function
     def _process_grid(self, grid_layer):
         """Process grid with timing."""
@@ -321,13 +321,13 @@ print(f"Speedup: {time1/time2:.2f}x")
 def test_geometry_intersection(benchmark):
     """Benchmark geometry intersection."""
     from qgis.core import QgsGeometry
-    
+
     poly1 = QgsGeometry.fromWkt("POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))")
     poly2 = QgsGeometry.fromWkt("POLYGON((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, 0.5 0.5))")
-    
+
     # Benchmark the intersection
     result = benchmark(poly1.intersection, poly2)
-    
+
     assert result is not None
 ```
 
@@ -358,14 +358,14 @@ test_geometry_intersection        45.23    127.89    52.34      8.45     49.12
 ```python
 def test_grid_processing_benchmark(benchmark):
     """Benchmark grid processing with different cell sizes."""
-    
+
     def process_with_cell_size(cell_size):
         grid = create_grid(bbox, cell_size)
         return process_all_cells(grid, features)
-    
+
     # Benchmark 100m cells
     result = benchmark(process_with_cell_size, 100)
-    
+
     assert result['processed_cells'] > 0
 ```
 
@@ -378,21 +378,21 @@ Compare: 50m vs 100m vs 250m cell sizes
 ```python
 def compare_algorithms(dataset):
     """Compare two algorithms for the same task."""
-    
+
     # Algorithm A: Spatial index
     start = time.perf_counter()
     result_a = process_with_spatial_index(dataset)
     time_a = time.perf_counter() - start
-    
+
     # Algorithm B: Brute force
     start = time.perf_counter()
     result_b = process_brute_force(dataset)
     time_b = time.perf_counter() - start
-    
+
     print(f"Spatial Index: {time_a:.2f}s")
     print(f"Brute Force: {time_b:.2f}s")
     print(f"Speedup: {time_b/time_a:.1f}x")
-    
+
     assert result_a == result_b  # Verify correctness
 ```
 
@@ -451,12 +451,12 @@ from memory_profiler import profile
 def process_large_dataset(layer_path):
     """Process a large geospatial dataset."""
     layer = QgsVectorLayer(layer_path, "layer", "ogr")
-    
+
     results = []
     for feature in layer.getFeatures():  # Memory grows here?
         processed = process_feature(feature)
         results.append(processed)  # Or here?
-    
+
     return results
 ```
 
@@ -472,12 +472,12 @@ Line #    Mem usage    Increment   Line Contents
      3     50.0 MiB     50.0 MiB   @profile
      4                             def process_large_dataset(layer_path):
      5     52.1 MiB      2.1 MiB       layer = QgsVectorLayer(...)
-     6                                 
+     6
      7     52.1 MiB      0.0 MiB       results = []
      8    245.8 MiB    193.7 MiB       for feature in layer.getFeatures():
      9    245.8 MiB      0.0 MiB           processed = process_feature(feature)
     10    245.8 MiB      0.0 MiB           results.append(processed)
-    11                                 
+    11
     12    245.8 MiB      0.0 MiB       return results
 ```
 
@@ -521,15 +521,15 @@ def process_in_batches(layer, batch_size=1000):
 ```python
 def process_layers():
     layer = QgsVectorLayer(path, "layer", "ogr")
-    
+
     # Process layer
     results = process(layer)
-    
+
     # Explicit cleanup (use sparingly, mainly for large layers)
     layer = None
     import gc
     gc.collect()  # Force collection if needed
-    
+
     return results
 ```
 
@@ -579,10 +579,10 @@ import gc
 
 def detect_memory_leak(function, iterations=100):
     """Run function multiple times and check for memory growth."""
-    
+
     tracemalloc.start()
     initial = tracemalloc.get_traced_memory()[0]
-    
+
     for i in range(iterations):
         function()
         if i % 10 == 0:
@@ -590,7 +590,7 @@ def detect_memory_leak(function, iterations=100):
             current = tracemalloc.get_traced_memory()[0]
             growth = (current - initial) / 1024 / 1024  # MB
             print(f"Iteration {i}: {growth:.2f} MB growth")
-    
+
     tracemalloc.stop()
 ```
 
@@ -661,7 +661,7 @@ class OptimizedProcessor:
         self._transforms = {}
         # Cache compiled expressions
         self._expressions = {}
-    
+
     def get_transform(self, source_crs, dest_crs):
         key = (source_crs.authid(), dest_crs.authid())
         if key not in self._transforms:
@@ -681,17 +681,17 @@ import time
 
 def benchmark_algorithm(algorithm, parameters):
     """Benchmark a QGIS processing algorithm."""
-    
+
     start = time.perf_counter()
     result = processing.run(algorithm, parameters)
     duration = time.perf_counter() - start
-    
+
     QgsMessageLog.logMessage(
         f"Algorithm '{algorithm}' took {duration:.2f}s",
         tag="Geest-Benchmark",
         level=Qgis.Info
     )
-    
+
     return result, duration
 ```
 
@@ -707,15 +707,15 @@ class ProfiledTask(QgsTask):
         super().__init__(description, QgsTask.CanCancel)
         self.start_time = None
         self.result = None
-    
+
     def run(self):
         self.start_time = time.perf_counter()
-        
+
         # Your processing logic
         self.result = self.process_data()
-        
+
         return True
-    
+
     def finished(self, result):
         duration = time.perf_counter() - self.start_time
         QgsMessageLog.logMessage(
@@ -820,21 +820,21 @@ def process_cell_worker(cell_wkt, layer_path):
     # Initialize in worker
     layer = QgsVectorLayer(layer_path, "layer", "ogr")
     cell_geom = QgsGeometry.fromWkt(cell_wkt)
-    
+
     # Process
     result = analyze_cell(cell_geom, layer)
     return result
 
 def parallel_grid_processing(grid_layer, data_layer_path):
     """Process grid cells in parallel."""
-    cells = [(f.geometry().asWkt(), data_layer_path) 
+    cells = [(f.geometry().asWkt(), data_layer_path)
              for f in grid_layer.getFeatures()]
-    
+
     with ProcessPoolExecutor(max_workers=4) as executor:
         results = list(executor.map(
             lambda x: process_cell_worker(*x), cells
         ))
-    
+
     return results
 ```
 
@@ -915,14 +915,14 @@ assert optimized_result == original_result
 # geest/core/profiling.py
 class PerformanceMonitor:
     """Centralized performance monitoring for GEEST."""
-    
+
     def __init__(self):
         self.metrics = {}
-    
+
     def time_operation(self, name):
         """Context manager for timing operations."""
         return TimingContext(name, self.metrics)
-    
+
     def log_metrics(self):
         """Log all collected metrics."""
         for name, duration in self.metrics.items():
@@ -1165,12 +1165,12 @@ def profile_worker(func, *args):
     """Profile a worker process."""
     profiler = Profile()
     profiler.enable()
-    
+
     result = func(*args)
-    
+
     profiler.disable()
     profiler.dump_stats(f'worker_{mp.current_process().pid}.prof')
-    
+
     return result
 ```
 
@@ -1190,7 +1190,7 @@ python -m pstats worker_*.prof
 import torch.profiler as profiler
 
 with profiler.profile(
-    activities=[profiler.ProfilerActivity.CPU, 
+    activities=[profiler.ProfilerActivity.CPU,
                 profiler.ProfilerActivity.CUDA]
 ) as prof:
     result = gpu_accelerated_operation()
@@ -1217,14 +1217,14 @@ def profile_slow_functions(threshold_seconds: float = 1.0):
             start = time.perf_counter()
             result = func(*args, **kwargs)
             duration = time.perf_counter() - start
-            
+
             if duration > threshold_seconds:
                 QgsMessageLog.logMessage(
                     f"SLOW: {func.__name__} took {duration:.2f}s",
                     tag="Geest-Performance",
                     level=Qgis.Warning
                 )
-            
+
             return result
         return wrapper
     return decorator
@@ -1239,9 +1239,9 @@ def profile_slow_functions(threshold_seconds: float = 1.0):
 
 def test_grid_processing_performance(benchmark):
     """Ensure grid processing doesn't regress."""
-    
+
     result = benchmark(process_test_grid)
-    
+
     # Alert if slower than baseline
     assert result.stats.stats.mean < 5.0, \
         f"Grid processing too slow: {result.stats.stats.mean:.2f}s"
