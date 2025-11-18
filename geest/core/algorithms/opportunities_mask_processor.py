@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Opportunities Mask Processor module.
+
+This module contains functionality for opportunities mask processor.
+"""
 import os
 import traceback
 from typing import Optional
@@ -222,7 +226,10 @@ class OpportunitiesMaskProcessor(QgsTask):
 
     def run(self) -> bool:
         """
-        Executes the task to process mask for each are.
+        Executes the task to process mask for each area.
+        
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             area_iterator = AreaIterator(self.study_area_gpkg_path)
@@ -264,6 +271,9 @@ class OpportunitiesMaskProcessor(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+        
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("Opportunities mask processing completed successfully.")
@@ -279,16 +289,17 @@ class OpportunitiesMaskProcessor(QgsTask):
         index: int,
     ) -> str:
         """
-        Executes the actual workflow logic for a single area
-        Must be implemented by subclasses.
+        Executes the actual workflow logic for a single area.
+        
+        Args:
+            current_area (QgsGeometry): Current polygon from our study area.
+            clip_area (QgsGeometry): Polygon to clip the features by.
+            current_bbox (QgsGeometry): Bounding box of the current area.
+            area_features (QgsVectorLayer): A vector layer of features to analyse that includes only features in the study area.
+            index (int): Iteration / number of area being processed.
 
-        :current_area: Current polygon from our study area.
-        :current_bbox: Bounding box of the above area.
-        :area_features: A vector layer of features to analyse that includes only features in the study area.
-            This is created by the base class using the features_layer and the current_area to subset the features.
-        :index: Iteration / number of area being processed.
-
-        :return: A raster layer file path if processing completes successfully, False if canceled or failed.
+        Returns:
+            str: A raster layer file path if processing completes successfully.
         """
         log_message(f"{self.workflow_name}  Processing Started for area {index}")
         log_message(f"Mask mode: {self.mask_mode}")
@@ -363,18 +374,18 @@ class OpportunitiesMaskProcessor(QgsTask):
         clipped_layer = QgsVectorLayer(output_path, output_name, "ogr")
         return clipped_layer
 
-    def generate_mask_layer(self, clipped_layer: QgsVectorLayer, current_bbox: QgsGeometry, index: int) -> None:
+    def generate_mask_layer(self, clipped_layer: QgsVectorLayer, current_bbox: QgsGeometry, index: int) -> str:
         """Generate the mask layer.
 
         This will be used to create a mask by rasterizing the input polygon layer.
 
         Args:
-            clipped_layer: The clipped vector mask layer.
-            current_bbox: The bounding box of the current area.
-            index: The index of the current area.
+            clipped_layer (QgsVectorLayer): The clipped vector mask layer.
+            current_bbox (QgsGeometry): The bounding box of the current area.
+            index (int): The index of the current area.
+            
         Returns:
-            Path to the mask raster layer generated from the input clipped polygon layer.
-
+            str: Path to the mask raster layer generated from the input clipped polygon layer.
         """
 
         rasterized_polygons_path = os.path.join(self.workflow_directory, f"opportunites_mask_{index}.tif")
@@ -401,17 +412,19 @@ class OpportunitiesMaskProcessor(QgsTask):
         del output
         return rasterized_polygons_path
 
-    def _subset_raster_layer(self, bbox: QgsGeometry, index: int):
+    def _subset_raster_layer(self, bbox: QgsGeometry, index: int) -> str:
         """
         Reproject and clip the raster to the bounding box of the current area.
 
         Overloaded version of the same method in the base class because that one
         fills the raster replacing nodata with 0 which is not what we want for this workflow.
 
-        :param bbox: The bounding box of the current area.
-        :param index: The index of the current area.
+        Args:
+            bbox (QgsGeometry): The bounding box of the current area.
+            index (int): The index of the current area.
 
-        :return: The path to the reprojected and clipped raster.
+        Returns:
+            str: The path to the reprojected and clipped raster.
         """
         # Convert the bbox to QgsRectangle
         bbox: QgsRectangle = bbox.boundingBox()
@@ -441,21 +454,22 @@ class OpportunitiesMaskProcessor(QgsTask):
         current_bbox: QgsGeometry,
         area_raster: str,
         index: int,
-    ):
+    ) -> str:
         """
         Executes the actual workflow logic for a single area using a raster.
 
         In this case we will convert it to a mask raster where any non-null pixel
         is given a value of 1 and all other pixels are set to nodata.
 
+        Args:
+            current_area (QgsGeometry): Current polygon from our study area.
+            clip_area (QgsGeometry): Polygon to clip the raster to.
+            current_bbox (QgsGeometry): Bounding box of the current area.
+            area_raster (str): A raster layer of features to analyse that includes only bbox pixels in the study area.
+            index (int): Index of the current area.
 
-        :current_area: Current polygon from our study area.
-        :clip_area: Polygon to clip the raster to.
-        :current_bbox: Bounding box of the above area.
-        :area_raster: A raster layer of features to analyse that includes only bbox pixels in the study area.
-        :index: Index of the current area.
-
-        :return: Path to the reclassified raster.
+        Returns:
+            str: Path to the reclassified raster.
         """
         log_message(f"{self.workflow_name}  Processing Raster Started for area {index}")
         opportunities_mask_path = os.path.join(self.workflow_directory, f"opportunities_mask_{index}.tif")

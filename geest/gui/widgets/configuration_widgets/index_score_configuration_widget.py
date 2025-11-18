@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Index Score Configuration Widget module.
+
+This module contains functionality for index score configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 

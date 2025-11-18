@@ -2,6 +2,10 @@
 # flake8: noqa
 # isort: skip_file
 # black: skip-file
+"""📦 Algorithms module.
+
+This module contains functionality for algorithms.
+"""
 from .area_iterator import AreaIterator
 from .native_network_analysis_processor import NativeNetworkAnalysisProcessor
 from .opportunities_by_wee_score_population_processor import (

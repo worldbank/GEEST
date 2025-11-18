@@ -4,8 +4,8 @@ These notes are designed to help you deliver an effective 1-hour seminar on benc
 
 ## Presentation Structure
 
-**Total Slides**: 68 (main) + 10 (bonus)  
-**Estimated Time**: 60 minutes  
+**Total Slides**: 68 (main) + 10 (bonus)
+**Estimated Time**: 60 minutes
 **Format**: Marp slide deck
 
 ## Timing Guide
@@ -105,7 +105,7 @@ Focus on slides: 1-7, 13-20, 29-32, 49-55, 63-68
 
 ### For Different Skill Levels
 
-**Junior Developers**: 
+**Junior Developers**:
 - More time on basics (Part 1-2)
 - Step-by-step tool installation
 - Simple examples first

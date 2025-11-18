@@ -77,6 +77,7 @@ def generate_schema_from_json(json_file, schema_file):
 
 # Main function to generate the schema
 def main():
+    """🔄 Main."""
     # Set default paths
     cwd = os.getcwd()
     model_json_path = os.path.join(cwd, "geest", "resources", "model.json")

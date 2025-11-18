@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Create Project Panel module.
+
+This module contains functionality for create project panel.
+"""
 import json
 import os
 import platform
@@ -36,6 +40,14 @@ FORM_CLASS = get_ui_class("create_project_panel_base.ui")
 
 
 class CreateProjectPanel(FORM_CLASS, QWidget):
+    """🎯 Create Project Panel.
+
+    Attributes:
+        queue_manager: Queue manager.
+        settings: Settings.
+        working_dir: Working dir.
+    """
+
     switch_to_next_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     # Signal to notify the parent to switch tabs
     switch_to_previous_tab = pyqtSignal()
@@ -43,6 +55,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
     working_directory_changed = pyqtSignal(str)
 
     def __init__(self):
+        """🏗️ Initialize the instance."""
         super().__init__()
         self.setWindowTitle("GEEST")
         # For running study area processing in a separate thread
@@ -56,6 +69,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.initUI()
 
     def initUI(self):
+        """⚙️ Initui."""
         self.enable_widgets()  # Re-enable widgets in case they were disabled
         self.custom_label = CustomBannerLabel(
             "The Gender Enabling Environments Spatial Tool",
@@ -151,6 +165,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.crs_label.setText(f"CRS: EPSG:{epsg}")  # noqa E231
 
     def on_previous_button_clicked(self):
+        """⚙️ On previous button clicked."""
         self.switch_to_previous_tab.emit()
 
     def load_boundary(self):
@@ -170,6 +185,7 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
             self.field_combo.setLayer(layer)
 
     def create_new_project_folder(self):
+        """⚙️ Create new project folder."""
         directory = QFileDialog.getExistingDirectory(self, "Create New Project Folder", self.working_dir)
         if directory:
             self.working_dir = directory
@@ -322,6 +338,11 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
 
     # Slot that listens for changes in the progress object which is used to measure subtask progress
     def subtask_progress_updated(self, progress: float):
+        """⚙️ Subtask progress updated.
+
+        Args:
+            progress: Progress.
+        """
         self.child_progress_bar.setVisible(True)
         self.child_progress_bar.setEnabled(True)
         self.child_progress_bar.setValue(int(progress))
@@ -377,10 +398,16 @@ class CreateProjectPanel(FORM_CLASS, QWidget):
         self.settings.setValue("recent_projects", recent_projects)
 
     def resizeEvent(self, event):
+        """⚙️ Resizeevent.
+
+        Args:
+            event: Event.
+        """
         self.set_font_size()
         super().resizeEvent(event)
 
     def set_font_size(self):
+        """⚙️ Set font size."""
         # Scale the font size to fit the text in the available space
         # log_message(f"Description Label Width: {self.description.rect().width()}")
         # scale the font size linearly from 16 pt to 8 ps as the width of the panel decreases

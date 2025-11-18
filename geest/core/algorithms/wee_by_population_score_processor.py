@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Wee By Population Score Processor module.
+
+This module contains functionality for wee by population score processor.
+"""
 import os
 import shutil
 import traceback
@@ -125,6 +129,9 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the WEE SCORE calculation task.
+        
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.calculate_score()
@@ -144,14 +151,13 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
         """
         Checks if GEEST and POP rasters have the same origin, dimensions, and pixel sizes.
 
-        Raises an exception if the check fails.
-
         Args:
-            geest_raster_path (QgsRasterLayer): Path to the GEEST raster.
-            pop_raster_path (QgsRasterLayer): Path to the POP raster.
-            dimension_check (bool): Flag to check if the rasters have the same dimensions.
-        returns:
-            None
+            geest_raster (QgsRasterLayer): The GEEST raster layer.
+            pop_raster (QgsRasterLayer): The population raster layer.
+            dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
+            
+        Raises:
+            ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
         log_message("Validating input rasters")
         log_message(f"GEEST Raster: {geest_raster.source()}")
@@ -223,7 +229,7 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
 
     def generate_vrt(self) -> None:
         """
-        Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
+        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
         """
         vrt_path = os.path.join(self.output_dir, "wee_by_population_score.vrt")
         qml_path = os.path.join(self.output_dir, "wee_by_population_score.qml")
@@ -249,6 +255,9 @@ class WEEByPopulationScoreProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+        
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("WEE SCORE calculation completed successfully.")

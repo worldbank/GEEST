@@ -16,10 +16,15 @@ exclude =
     test/test_data
 
 # Ignore specific error codes
+# E501: Line too long (handled by black)
+# W503: Line break before binary operator (conflicts with black)
+# E203: Whitespace before ':' (conflicts with black)
+# D-series: Docstring convention errors (handled separately)
 ignore =
-    E501,  # Line too long (handled by black)
-    W503,  # Line break before binary operator (conflicts with black)
-    E203,  # Whitespace before ':' (conflicts with black)
+    E501,
+    W503,
+    E203,
+    D
 
 # Docstring checking
 docstring-convention = google

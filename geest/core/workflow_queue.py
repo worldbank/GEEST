@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Workflow Queue module.
+
+This module contains functionality for workflow queue.
+"""
 from functools import partial
 from typing import List
 
@@ -23,6 +27,12 @@ class WorkflowQueue(QObject):
     processing_error = pyqtSignal(str)  # propogate error messages
 
     def __init__(self, pool_size: int, parent=None):
+        """🏗️ Initialize the instance.
+
+        Args:
+            pool_size: Pool size.
+            parent: Parent.
+        """
         super().__init__(parent=parent)
         # The maximum number of concurrent threads to allow
         self.thread_pool_size = pool_size

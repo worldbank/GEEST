@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Polyline Per Cell Workflow module.
+
+This module contains functionality for polyline per cell workflow.
+"""
 import os
 from urllib.parse import unquote
 

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Safety Polygon Configuration Widget module.
+
+This module contains functionality for safety polygon configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import (
     QLabel,
@@ -58,6 +62,11 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             log_message(traceback.format_exc(), level=Qgis.Critical)
 
     def populate_table(self):
+        """⚙️ Populate table.
+
+        Returns:
+            The result of the operation.
+        """
 
         self.table_widget.setHorizontalHeaderLabels(["Name", "Value 0-100"])
         safety_classes = self.attributes.get("classify_safety_polygon_into_classes_unique_values", {})
@@ -68,6 +77,14 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
         self.table_widget.setRowCount(len(safety_classes))
 
         def validate_value(value):
+            """🔄 Validate value.
+
+            Args:
+                value: Value.
+
+            Returns:
+                The result of the operation.
+            """
             return 0 <= value <= 100
 
         log_message(f"Classes: {safety_classes}")
@@ -90,6 +107,11 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.table_widget.setCellWidget(row, 1, value_item)
 
             def on_value_changed(value):
+                """🔄 On value changed.
+
+                Args:
+                    value: Value.
+                """
                 # Color handling for current cell
                 if value is None or not (0 <= value <= 100):
                     value_item.setStyleSheet("color: red;")
@@ -105,6 +127,7 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
             self.update_cell_colors()
 
     def update_cell_colors(self):
+        """⚙️ Update cell colors."""
         # Check if all values are zero
         all_zeros = True
         for r in range(self.table_widget.rowCount()):
@@ -120,6 +143,11 @@ class SafetyPolygonConfigurationWidget(BaseConfigurationWidget):
                 spin_widget.setStyleSheet("color: red;" if all_zeros else "color: black;")
 
     def table_to_dict(self):
+        """⚙️ Table to dict.
+
+        Returns:
+            The result of the operation.
+        """
         updated_attributes = {}
         for row in range(self.table_widget.rowCount()):
             spin_widget = self.table_widget.cellWidget(row, 1)

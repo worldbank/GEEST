@@ -44,6 +44,11 @@ from geest.core.settings import setting
 
 
 def theme_background_image() -> QPixmap:
+    """🔄 Theme background image.
+
+    Returns:
+        The result of the operation.
+    """
     # Load the background image
     if is_qgis_dark_theme_active():
         background_image = QPixmap(resources_path("resources", "images", "background-dark.png"))
@@ -170,10 +175,13 @@ def theme_stylesheet() -> str:
         return light_theme_stylesheet
 
 
-def log_window_geometry(geometry):
+def log_window_geometry(geometry) -> None:
     """
     Creates an ASCII-art diagram of the dialog's dimensions based on the
     given geometry (a QRect) and logs it with log_message in QGIS.
+
+    Args:
+        geometry: A QRect object or object with .rect() method containing the geometry information.
 
     Example output:
 
@@ -212,10 +220,13 @@ def log_window_geometry(geometry):
     log_message(diagram)
 
 
-def get_free_memory_mb():
+def get_free_memory_mb() -> float:
     """
     Attempt to return the free system memory in MB (approx).
     Uses only modules from the Python standard library.
+    
+    Returns:
+        float: Free memory in megabytes, or 0.0 if unable to determine.
     """
     system = platform.system()
 
@@ -225,6 +236,8 @@ def get_free_memory_mb():
             import ctypes.wintypes
 
             class MEMORYSTATUSEX(ctypes.Structure):
+                """🎯 M E M O R Y S T A T U S E X."""
+
                 _fields_ = [
                     ("dwLength", ctypes.wintypes.DWORD),
                     ("dwMemoryLoad", ctypes.wintypes.DWORD),
@@ -275,7 +288,7 @@ def get_free_memory_mb():
     return 0.0
 
 
-def log_layer_count():
+def log_layer_count() -> None:
     """
     Append the number of layers in the project and a timestamp to a text file,
     along with free system memory (approximate), using only standard library dependencies.
@@ -304,7 +317,7 @@ def log_layer_count():
         log_file.write(log_entry)
 
 
-def resources_path(*args):
+def resources_path(*args) -> str:
     """Get the path to our resources folder.
 
     .. versionadded:: 2.0
@@ -312,11 +325,11 @@ def resources_path(*args):
     Note that in version 2.0 we removed the use of Qt Resource files in
     favour of directly accessing on-disk resources.
 
-    :param args List of path elements e.g. ['img', 'logos', 'image.png']
-    :type args: str
+    Args:
+        *args: List of path elements e.g. ['img', 'logos', 'image.png']
 
-    :return: Absolute path to the resources folder.
-    :rtype: str
+    Returns:
+        str: Absolute path to the resources folder.
     """
     path = os.path.dirname(__file__)
     path = os.path.abspath(path)
@@ -326,7 +339,7 @@ def resources_path(*args):
     return path
 
 
-def resource_url(path):
+def resource_url(path: str) -> str:
     """Get the a local filesystem url to a given resource.
 
     .. versionadded:: 1.0
@@ -334,23 +347,26 @@ def resource_url(path):
     Note that we dont use Qt Resource files in
     favour of directly accessing on-disk resources.
 
-    :param path: Path to resource e.g. /home/timlinux/foo/bar.png
-    :type path: str
+    Args:
+        path (str): Path to resource e.g. /home/timlinux/foo/bar.png
 
-    :return: A valid file url e.g. file:///home/timlinux/foo/bar.png
-    :rtype: str
+    Returns:
+        str: A valid file url e.g. file:///home/timlinux/foo/bar.png
     """
     url = QUrl.fromLocalFile(path)
     return str(url.toString())
 
 
-def get_ui_class(ui_file):
+def get_ui_class(ui_file: str):
     """Get UI Python class from .ui file.
 
        Can be filename.ui or subdirectory/filename.ui
 
-    :param ui_file: The file of the ui in safe.gui.ui
-    :type ui_file: str
+    Args:
+        ui_file (str): The file of the ui in safe.gui.ui
+        
+    Returns:
+        The UI class from the .ui file.
     """
     os.path.sep.join(ui_file.split("/"))
     ui_file_path = os.path.abspath(
@@ -428,6 +444,14 @@ def geest_layer_ids():
 
     # Recursively collect IDs of all layers in the "Geest" group
     def collect_layer_ids(group: QgsLayerTreeGroup) -> set:
+        """🔄 Collect layer ids.
+
+        Args:
+            group: Group.
+
+        Returns:
+            The result of the operation.
+        """
         layer_ids = set()
         for child in group.children():
             if isinstance(child, QgsLayerTreeGroup):
@@ -491,7 +515,7 @@ def linear_interpolation(
     """
     Scales a value using linear interpolation.
 
-    Parameters:
+    Args:
         value (float): The value to scale.
         output_min (float): The minimum of the output range.
         output_max (float): The maximum of the output range.
@@ -500,6 +524,9 @@ def linear_interpolation(
 
     Returns:
         float: The scaled value.
+        
+    Raises:
+        ValueError: If domain_min and domain_max are the same value.
     """
     if domain_min == domain_max:
         raise ValueError("domain_min and domain_max cannot be the same value.")
@@ -542,7 +569,7 @@ def vector_layer_type(layer: QgsVectorLayer) -> str:
         return "Unknown"
 
 
-def version():
+def version() -> str:
     """Return the version of the plugin."""
     metadata_file = os.path.join(os.path.dirname(__file__), "metadata.txt")
     version = "Unknown"
@@ -561,10 +588,16 @@ def version():
 ##########################################################################
 # CRS / UTM calculation
 ##########################################################################
-def calculate_utm_zone_from_layer(layer):
+def calculate_utm_zone_from_layer(layer) -> str:
     """
     Determine a UTM zone from the centroid of a layer's bounding box.
     Reprojected into WGS84 if possible. Return EPSG code.
+    
+    Args:
+        layer: A QGIS vector or raster layer.
+        
+    Returns:
+        str: UTM zone EPSG code, or None if layer is invalid.
     """
     if layer is None:
         return None
@@ -580,10 +613,17 @@ def calculate_utm_zone_from_layer(layer):
     return utm_zone
 
 
-def calculate_utm_zone(bbox, source_epsg=None):
+def calculate_utm_zone(bbox: tuple, source_epsg: str = None) -> str:
     """
     Determine a UTM zone from the centroid of (xmin, xmax, ymin, ymax),
     reprojected into WGS84 if possible. Return EPSG code.
+    
+    Args:
+        bbox (tuple): Bounding box as (xmin, xmax, ymin, ymax).
+        source_epsg (str): Source EPSG code. Defaults to None.
+        
+    Returns:
+        str: UTM zone EPSG code.
     """
     (xmin, xmax, ymin, ymax) = bbox
     log_message("Bounding box: %s, %s, %s, %s" % (xmin, xmax, ymin, ymax))

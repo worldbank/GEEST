@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Workflow Factory module.
+
+This module contains functionality for workflow factory.
+"""
 from qgis.core import Qgis, QgsFeedback, QgsProcessingContext
 
 from geest.core.workflows import (

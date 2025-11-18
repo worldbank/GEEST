@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Multi Buffer Configuration Widget module.
+
+This module contains functionality for multi buffer configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QLineEdit, QRadioButton
 

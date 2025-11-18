@@ -182,10 +182,10 @@ See `CODING.md` for Google docstring format examples and `README-SETUP.md` for s
 **Verification:**
 ```bash
 # Check for files without UTF-8 pragma
-for f in $(find geest -name "*.py"); do 
-  if ! head -3 "$f" | grep -q "coding[:=]"; then 
-    echo "Missing: $f"; 
-  fi; 
+for f in $(find geest -name "*.py"); do
+  if ! head -3 "$f" | grep -q "coding[:=]"; then
+    echo "Missing: $f";
+  fi;
 done
 
 # Run pre-commit hook
@@ -226,10 +226,10 @@ All files that received UTF-8 pragmas also received license headers (18+ files)
 **Verification:**
 ```bash
 # Check for files without license headers
-for f in $(find geest -name "*.py" | head -20); do 
-  if ! head -20 "$f" | grep -qi "copyright\|license"; then 
-    echo "Missing license: $f"; 
-  fi; 
+for f in $(find geest -name "*.py" | head -20); do
+  if ! head -20 "$f" | grep -qi "copyright\|license"; then
+    echo "Missing license: $f";
+  fi;
 done
 ```
 

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Opportunities By Wee Score Processor module.
+
+This module contains functionality for opportunities by wee score processor.
+"""
 import os
 import shutil
 import traceback
@@ -87,6 +91,9 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     def run(self) -> bool:
         """
         Executes the Opportunities by WEE SCORE calculation task.
+        
+        Returns:
+            bool: True if the task completed successfully, False otherwise.
         """
         try:
             self.calculate_score()
@@ -109,14 +116,13 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
         """
         Checks if Opportunities Mask and WEE Score rasters have the same origin, dimensions, and pixel sizes.
 
-        Raises an exception if the check fails.
-
         Args:
-            opportunities_mask_raster (QgsRasterLayer): Path to the mask raster.
-            wee_score_raster (QgsRasterLayer): Path to the WEE Score raster.
-            dimension_check (bool): Flag to check if the rasters have the same dimensions.
-        returns:
-            None
+            opportunities_mask_raster (QgsRasterLayer): The mask raster layer.
+            wee_score_raster (QgsRasterLayer): The WEE Score raster layer.
+            dimension_check (bool): Flag to check if the rasters have the same dimensions. Defaults to False.
+            
+        Raises:
+            ValueError: If one or both input rasters are invalid, or if rasters don't share the same extent or dimensions when dimension_check is True.
         """
         log_message("Validating input rasters")
         log_message(f"opportunities_mask_raster: {opportunities_mask_raster.source()}")
@@ -188,7 +194,7 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
 
     def generate_vrt(self) -> str:
         """
-        Combines all WEE SCORE rasters into a single VRT and ap plies a QML style.
+        Combines all WEE SCORE rasters into a single VRT and applies a QML style.
 
         Returns:
             str: Path to the generated VRT file.
@@ -218,6 +224,9 @@ class OpportunitiesByWeeScoreProcessingTask(QgsTask):
     def finished(self, result: bool) -> None:
         """
         Called when the task completes.
+        
+        Args:
+            result (bool): The result of the task execution.
         """
         if result:
             log_message("Opportunities mask by WEE SCORE calculation completed successfully.")

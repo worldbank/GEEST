@@ -140,6 +140,7 @@
             # Add these for SQL linting/formatting:
             ps.black
             ps.click # needed by black
+            ps.darglint
             ps.debugpy
             ps.docformatter
             ps.flake8

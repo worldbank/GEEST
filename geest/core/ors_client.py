@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Ors Client module.
+
+This module contains functionality for ors client.
+"""
 import json
 import os
 
@@ -11,16 +15,33 @@ from geest.utilities import log_message
 
 
 class ORSClient(QObject):
+    """🎯 O R S Client.
+
+    Attributes:
+        base_url: Base url.
+        network_manager: Network manager.
+    """
+
     # Signal to emit when the request is finished
     request_finished = pyqtSignal(object)
 
     def __init__(self, base_url):
+        """🏗️ Initialize the instance.
+
+        Args:
+            base_url: Base url.
+        """
         super().__init__()
         self.base_url = base_url
         self.network_manager = QgsNetworkAccessManager.instance()
         self.check_api_key()
 
     def check_api_key(self):
+        """⚙️ Check api key.
+
+        Returns:
+            The result of the operation.
+        """
         self.api_key = setting(key="ors_key", default="")
         if not self.api_key:
             self.api_key = os.getenv("ORS_API_KEY")

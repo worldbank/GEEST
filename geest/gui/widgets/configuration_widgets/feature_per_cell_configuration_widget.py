@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Feature Per Cell Configuration Widget module.
+
+This module contains functionality for feature per cell configuration widget.
+"""
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QLabel
 
@@ -23,7 +27,16 @@ class FeaturePerCellConfigurationWidget(BaseConfigurationWidget):
     # Normally we dont need to reimplement the __init__ method, but in this case we need to
     # change the label text next to the radio button
     def __init__(self, analysis_mode: str, attributes: dict) -> None:
-        humanised_label = "Features per cell"
+        """🏗️ Initialize the instance.
+
+        Args:
+            analysis_mode: Analysis mode.
+            attributes: Attributes.
+
+        Returns:
+            The result of the operation.
+        """
+        humanised_label = "Feature per cell"
         super().__init__(
             humanised_label=humanised_label,  # In this special case we override the label
             analysis_mode=analysis_mode,

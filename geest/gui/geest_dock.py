@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""📦 Geest Dock module.
+
+This module contains functionality for geest dock.
+"""
 import os
 from typing import Optional
 
@@ -38,6 +42,15 @@ HELP_PANEL = 8
 
 
 class GeestDock(QDockWidget):
+    """🎯 Geest Dock.
+
+    Attributes:
+        background_image: Background image.
+        initialised: Initialised.
+        plugin_version: Plugin version.
+        study_area_bbox: Study area bbox.
+    """
+
     def __init__(self, parent: Optional[QWidget] = None, json_file: Optional[str] = None) -> None:
         """
         Initializes the GeestDock with a parent and an optional JSON file.
@@ -313,6 +326,11 @@ class GeestDock(QDockWidget):
         self.initialised = True
 
     def paintEvent(self, event):
+        """⚙️ Paintevent.
+
+        Args:
+            event: Event.
+        """
         with QPainter(self) as painter:
             # Calculate the scaling and cropping offsets
             scaled_background = self.background_image.scaled(self.size(), Qt.KeepAspectRatioByExpanding)

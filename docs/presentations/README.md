@@ -6,9 +6,9 @@ This directory contains presentation materials for the GEEST project.
 
 ### Benchmarking and Profiling
 
-**File**: `benchmarking-and-profiling.md`  
-**Format**: Marp (Markdown Presentation Ecosystem)  
-**Duration**: ~1 hour  
+**File**: `benchmarking-and-profiling.md`
+**Format**: Marp (Markdown Presentation Ecosystem)
+**Duration**: ~1 hour
 **Audience**: Development team
 
 A comprehensive presentation covering:
