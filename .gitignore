@@ -101,4 +101,4 @@ test_osm_roads_output.xml
 # Presentation build artifacts
 docs/presentations/*.html
 docs/presentations/*.pdf
-./claude
+.claude

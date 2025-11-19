@@ -248,9 +248,9 @@
             echo "To run QGIS with your profile, use one of these commands:"
             echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
             echo ""
-            echo "  scripts/run-qgis.sh"
-            echo "  scripts/run-qgis-ltr.sh"
-            echo "  scripts/run-qgis-master.sh"
+            echo "  scripts/start_qgis.sh"
+            echo "  scripts/start_qgis_ltr.sh"
+            echo "  scripts/start_qgis_master.sh"
         '';
       };
     };
