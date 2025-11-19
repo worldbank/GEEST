@@ -139,6 +139,16 @@ class OSMDownloaderTask(QgsTask):
             else:
                 self.error_occurred.emit(f"Error in OSMDownloaderTask: {str(e)}")
 
+            # Clean up any partial/malformed GeoPackage on failure
+            if os.path.exists(self.gpkg_path):
+                try:
+                    os.remove(self.gpkg_path)
+                    log_message(f"Removed malformed GeoPackage after download failure: {self.gpkg_path}")
+                except Exception as cleanup_error:
+                    log_message(f"Could not remove malformed GeoPackage: {cleanup_error}")
+
+            return False  # Return False on failure so callbacks know the task failed
+
         return True
 
     def create_study_area_directory(self, working_dir):

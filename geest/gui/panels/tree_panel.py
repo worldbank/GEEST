@@ -53,7 +53,7 @@ from geest.core.algorithms import (
 )
 from geest.core.reports import AnalysisReport, StudyAreaReport
 from geest.core.settings import set_setting, setting
-from geest.core.utilities import add_to_map
+from geest.core.utilities import add_to_map, validate_network_layer
 from geest.gui.dialogs import (
     AnalysisAggregationDialog,
     DimensionAggregationDialog,
@@ -106,6 +106,72 @@ class TreePanel(QWidget):
             self.load_json()
         else:
             self.json_data = {"dimensions": []}
+
+        # Inline warning banner (hidden by default)
+        self.warning_widget = QWidget()
+        self.warning_widget.setVisible(False)
+        warning_layout = QHBoxLayout(self.warning_widget)
+        warning_layout.setContentsMargins(12, 10, 12, 10)
+        warning_layout.setSpacing(12)
+
+        warning_icon = QLabel("⚠️")
+        warning_icon.setStyleSheet("font-size: 18px;")
+        warning_layout.addWidget(warning_icon)
+
+        self.warning_message_label = QLabel()
+        self.warning_message_label.setWordWrap(True)
+        self.warning_message_label.setStyleSheet("color: #856404; font-size: 13px;")
+        warning_layout.addWidget(self.warning_message_label, 1)
+
+        self.configure_network_button = QPushButton("Configure")
+        self.configure_network_button.clicked.connect(self._on_configure_clicked)
+        self.configure_network_button.setStyleSheet("""
+            QPushButton {
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #b8dce3, stop:1 #8ec8d0);
+                color: #000;
+                border: 1px solid #6fa8b0;
+                border-radius: 3px;
+                padding: 4px 12px;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #c8e8ef, stop:1 #9ed8e0);
+            }
+            QPushButton:pressed {
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #8ec8d0, stop:1 #b8dce3);
+            }
+        """)
+        warning_layout.addWidget(self.configure_network_button)
+
+        close_warning_button = QPushButton("✕")
+        close_warning_button.setFixedSize(24, 24)
+        close_warning_button.setStyleSheet("""
+            QPushButton {
+                border: none;
+                color: #856404;
+                background: transparent;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(0, 0, 0, 0.1);
+                border-radius: 3px;
+            }
+        """)
+        close_warning_button.clicked.connect(self.hide_validation_warning)
+        warning_layout.addWidget(close_warning_button)
+
+        self.warning_widget.setStyleSheet("""
+            QWidget {
+                background-color: #fff3cd;
+                border-left: 4px solid #ffc107;
+                border-radius: 3px;
+            }
+        """)
+
+        layout.addWidget(self.warning_widget)
 
         # Create a CustomTreeView widget to handle editing and reverts
         self.treeView = JsonTreeView()
@@ -1256,6 +1322,21 @@ class TreePanel(QWidget):
         log_message(f"Road Network layer path: {road_network_layer_path}")
         return road_network_layer_path
 
+    def show_validation_error(self, title: str, message: str):
+        """Show validation error in inline banner."""
+        self.warning_message_label.setText(f"<b>{title}:</b> {message}")
+        self.warning_widget.setVisible(True)
+
+    def hide_validation_warning(self):
+        """Hide validation warning banner."""
+        self.warning_widget.setVisible(False)
+        self.warning_message_label.setText("")
+
+    def _on_configure_clicked(self):
+        """Navigate to network config panel and dismiss warning."""
+        self.hide_validation_warning()
+        self.switch_to_network_tab.emit()
+
     def ghsl_layer(self):
         """Get the layer used for ghsl analysis."""
         ghsl_layer = QgsVectorLayer(
@@ -1283,8 +1364,25 @@ class TreePanel(QWidget):
 
         attributes = item.attributes()
 
-        # Include the network layers in the attributes by default
-        attributes["road_network_layer_path"] = self.road_network_layer_path()
+        # Validate road network layer if needed
+        analysis_mode = attributes.get("analysis_mode", "")
+        needs_road_network = analysis_mode in ["use_multi_buffer_point"]
+        road_network_path = self.road_network_layer_path()
+        if needs_road_network:
+            # Get expected CRS from study area
+            study_area_gpkg = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+            study_area_layer = QgsVectorLayer(
+                f"{study_area_gpkg}|layername=study_area_polygons", "study_area", "ogr"
+            )
+            expected_crs = study_area_layer.crs() if study_area_layer.isValid() else None
+
+            if expected_crs:
+                is_valid, error_msg = validate_network_layer(road_network_path, expected_crs)
+                if not is_valid:
+                    self.show_validation_error("Road Network Issue", error_msg)
+                    return
+        attributes["road_network_layer_path"] = road_network_path
+
         # Include the GHSL layer in the attributes by default
         attributes["ghsl_layer_path"] = self.ghsl_layer_path()
 
@@ -1299,6 +1397,8 @@ class TreePanel(QWidget):
         task = self.queue_manager.add_workflow(item, self.cell_size_m(), self.analysis_scale())
         if task is None:
             return
+
+        self.hide_validation_warning()
 
         # Connect workflow signals to TreePanel slots
         task.job_queued.connect(partial(self.on_workflow_created, item))
