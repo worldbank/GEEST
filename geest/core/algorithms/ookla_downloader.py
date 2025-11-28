@@ -96,7 +96,9 @@ class OoklaDownloader:
             fixed_threshold_mbps = float(setting(key="ookla_fixed_threshold", default=0.0))
             self.mobile_threshold_kbps = mobile_threshold_mbps * 1000
             self.fixed_threshold_kbps = fixed_threshold_mbps * 1000
-            log_message(f"Ookla thresholds enabled - Mobile: {mobile_threshold_mbps} Mbps, Fixed: {fixed_threshold_mbps} Mbps")
+            log_message(
+                f"Ookla thresholds enabled - Mobile: {mobile_threshold_mbps} Mbps, Fixed: {fixed_threshold_mbps} Mbps"
+            )
         else:
             # No thresholds - include all data
             self.mobile_threshold_kbps = 0.0
