@@ -292,7 +292,40 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="7" column="0" colspan="2">
+        <widget class="QLabel" name="description6">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Or download a unified active transport network (roads + cycleways combined):</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::MarkdownText</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignJustify|Qt::AlignTop</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0" colspan="2">
+        <widget class="QPushButton" name="download_active_transport_button">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>⬇️ Download active transport network from Open Street Map</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -323,6 +356,7 @@
   <tabstop>road_layer_combo</tabstop>
   <tabstop>load_road_layer_button</tabstop>
   <tabstop>download_road_layer_button</tabstop>
+  <tabstop>download_active_transport_button</tabstop>
   <tabstop>download_cycle_layer_button</tabstop>
   <tabstop>previous_button</tabstop>
   <tabstop>next_button</tabstop>

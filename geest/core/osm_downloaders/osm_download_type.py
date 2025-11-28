@@ -12,3 +12,4 @@ class OSMDownloadType(Enum):
 
     ROAD = "road"
     CYCLE = "cycle"
+    ACTIVE_TRANSPORT = "active_transport"

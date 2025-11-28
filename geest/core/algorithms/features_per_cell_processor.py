@@ -242,10 +242,13 @@ def select_grid_cells_and_assign_transport_score(
     Select grid cells that intersect with features, and assign a value
     based on the most beneficial road type intersecting the cell.
 
+    This function checks BOTH highway and cycleway attributes on each feature
+    and assigns the highest score from either attribute type.
+
     Args:
-        osm_transport_type (OSMDownloadType): The type of OSM transport data to use for scoring.
+        osm_transport_type (OSMDownloadType): The type of OSM transport data (road or cycle).
         grid_layer (QgsVectorLayer): The input grid layer containing polygon cells.
-        features_layer (QgsVectorLayer): The input OSM Roads layer containing features (e.g., lines).
+        features_layer (QgsVectorLayer): The input OSM layer containing features with highway and/or cycleway attributes.
         output_path (str): The output path for the new grid layer with transport scores.
         feedback (QgsFeedback): Optional feedback object for progress reporting.
 
@@ -254,36 +257,60 @@ def select_grid_cells_and_assign_transport_score(
 
     Raises:
         Exception: If there are issues creating spatial index or processing features.
-        ValueError: If the OSM transport type is unsupported.
     """
 
     log_message(
-        "Selecting grid cells that intersect with features and assigning a score.",
+        "Selecting grid cells that intersect with features and assigning best transport score (highway or cycleway).",
         tag="Geest",
         level=Qgis.Info,
     )
 
-    if osm_transport_type == OSMDownloadType.CYCLE:
-        lookup_table = cycleway_lookup_table
-    elif osm_transport_type == OSMDownloadType.ROAD:
-        lookup_table = highway_lookup_table
-    else:
-        raise ValueError(f"Unsupported OSM transport type: {osm_transport_type}")
-
     # Create a spatial index for the grid layer to optimize intersection queries
     grid_index = QgsSpatialIndex(grid_layer.getFeatures())
 
-    # Create a dictionary to hold the count of intersecting features for each grid cell ID
+    # Create dictionaries to hold the best scores and their source types for each grid cell ID
     grid_most_beneficial_road_scores = {}
+    grid_most_beneficial_road_types = {}
     counter = 0
     feature_count = features_layer.featureCount()
     verbose_mode = int(setting(key="verbose_mode", default=0))
+
+    # Check which fields exist ONCE before the loop (for efficiency)
+    field_names = features_layer.fields().names()
+    has_highway_field = "highway" in field_names
+    has_cycleway_field = "cycleway" in field_names
+
     # Iterate over each feature and use the spatial index to find the intersecting grid cells
     for feature in features_layer.getFeatures():
         feature_geom = feature.geometry()
-        road_type = feature["highway"]
-        road_score = lookup_table.get(road_type, 0)  # Default to
+
         if feature_geom.isEmpty():
+            continue
+
+        # Check for both highway and cycleway attributes and use the best score
+        road_score = 0
+        road_type = None
+
+        # Check highway attribute if it exists
+        if has_highway_field:
+            highway_type = feature.attribute("highway")
+            if highway_type:  # Not None and not empty string
+                highway_score = highway_lookup_table.get(highway_type, 0)
+                if highway_score > road_score:
+                    road_score = highway_score
+                    road_type = f"highway_{highway_type}"
+
+        # Check cycleway attribute if it exists
+        if has_cycleway_field:
+            cycleway_type = feature.attribute("cycleway")
+            if cycleway_type:  # Not None and not empty string
+                cycleway_score = cycleway_lookup_table.get(cycleway_type, 0)
+                if cycleway_score > road_score:
+                    road_score = cycleway_score
+                    road_type = f"cycleway_{cycleway_type}"
+
+        # Skip features with no valid score
+        if road_score == 0 or road_type is None:
             continue
 
         # Check actual geometry against grid cells
@@ -320,6 +347,7 @@ def select_grid_cells_and_assign_transport_score(
                     if verbose_mode:
                         log_message(f"Promoting score {road_score} to grid ID {grid_id}.", tag="Geest", level=Qgis.Info)
                     grid_most_beneficial_road_scores[grid_id] = road_score
+                    grid_most_beneficial_road_types[grid_id] = road_type
                 else:
                     if verbose_mode:
                         log_message(
@@ -336,6 +364,7 @@ def select_grid_cells_and_assign_transport_score(
                     )
                     log_message(f"Assigning score {road_score} to grid ID {grid_id}.", tag="Geest", level=Qgis.Info)
                 grid_most_beneficial_road_scores[grid_id] = road_score
+                grid_most_beneficial_road_types[grid_id] = road_type
         counter += 1
         feedback.setProgress((counter / feature_count) * 100.0)  # We just use nominal intervals for progress updates
 
@@ -346,11 +375,13 @@ def select_grid_cells_and_assign_transport_score(
     options.fileEncoding = "UTF-8"
     options.layerName = "grid_with_feature_counts"
 
-    # Define fields for the new layer: only 'id' and 'intersecting_features'
+    # Define fields for the new layer: 'id', 'value', and 'road_type'
     fields = QgsFields()
     fields.append(QgsField("id", QVariant.Int))
     # Will be used to hold the scaled value from 0-5
     fields.append(QgsField("value", QVariant.Int))
+    # Will be used to track which road/cycleway type gave the best score (e.g., "highway_residential" or "cycleway_lane")
+    fields.append(QgsField("road_type", QVariant.String))
 
     writer = QgsVectorFileWriter.create(
         fileName=output_path,
@@ -377,10 +408,12 @@ def select_grid_cells_and_assign_transport_score(
         new_feature = QgsFeature()
         new_feature.setGeometry(grid_feature.geometry())  # Use the original geometry
 
-        # Set the 'id' and 'intersecting_features' attributes
+        # Set the 'id', 'value', and 'road_type' attributes
         new_feature.setFields(fields)
-        new_feature.setAttribute("id", grid_feature.id())  # Set the grid cell ID
-        new_feature.setAttribute("value", grid_most_beneficial_road_scores[grid_feature.id()])
+        grid_id = grid_feature.id()
+        new_feature.setAttribute("id", grid_id)  # Set the grid cell ID
+        new_feature.setAttribute("value", grid_most_beneficial_road_scores[grid_id])
+        new_feature.setAttribute("road_type", grid_most_beneficial_road_types.get(grid_id, "unknown"))
 
         # Write the feature to the new layer
         writer.addFeature(new_feature)

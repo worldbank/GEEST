@@ -126,7 +126,7 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.road_layer_combo.currentIndexChanged.connect(self.emit_road_layer_change)
         self.load_road_layer_button.clicked.connect(self.load_road_layer)
         self.download_road_layer_button.clicked.connect(self.download_road_layer_button_clicked)
-
+        self.download_active_transport_button.clicked.connect(self.download_active_transport_button_clicked)
         self.download_cycle_layer_button.clicked.connect(self.download_cycle_layer_button_clicked)
 
         self.next_button.clicked.connect(self.on_next_button_clicked)
@@ -235,6 +235,60 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         except Exception as e:
             trace = traceback.format_exc()
             QMessageBox.critical(self, "Error", f"Error downloading network for study area: {e}\n{trace}")
+            self.enable_widgets()
+            return
+
+    def download_active_transport_button_clicked(self):
+        """Triggered when the Download Active Transport button is pressed."""
+        if self._reference_layer is None:
+            QMessageBox.critical(
+                self,
+                "Error",
+                "No boundary (reference) layer is set, unable to continue.",
+            )
+            return
+        if self._crs is None:
+            QMessageBox.critical(self, "Error", "No CRS is set, unable to continue.")
+            return
+        if self.working_directory is None or self.working_directory == "":
+            QMessageBox.critical(self, "Error", "Working directory is not set")
+            return
+
+        # Create the processor instance and process the features
+        debug_env = int(os.getenv("GEEST_DEBUG", 0))
+        feedback = QgsFeedback()  # Used to cancel tasks and measure subtask progress
+        try:
+            log_message("Creating OSM Active Transport Downloader Task")
+            processor = OSMDownloaderTask(
+                reference_layer=self._reference_layer,
+                osm_download_type=OSMDownloadType.ACTIVE_TRANSPORT,
+                crs=self._crs,
+                working_dir=self.working_directory,
+                filename="active_transport_network",
+                use_cache=True,
+                delete_gpkg=True,
+                feedback=feedback,
+            )
+            log_message("OSM Active Transport Downloader Task created, setting up call backs")
+            # Hook up the QTask feedback signal to the progress bar
+            # Measure overall task progress from the task object itself
+            processor.progressChanged.connect(self.osm_download_progress_updated)
+            processor.taskCompleted.connect(self.active_transport_download_done)
+            # Measure subtask progress from the feedback object
+            feedback.progressChanged.connect(self.osm_extract_progress_updated)
+            self.disable_widgets()
+            if debug_env:
+                processor.run()
+            else:
+                log_message("Adding task to queue manager")
+                self.queue_manager.add_task(processor)
+                self.queue_manager.start_processing()
+                log_message("Processing started")
+        except Exception as e:
+            trace = traceback.format_exc()
+            QMessageBox.critical(
+                self, "Error", f"Error downloading active transport network for study area: {e}\n{trace}"
+            )
             self.enable_widgets()
             return
 
@@ -355,6 +409,26 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.child_progress_bar.setVisible(False)
         self.enable_widgets()
 
+    def active_transport_download_done(self):
+        """⚙️ Active transport download done."""
+        log_message(
+            "*** OSM Active Transport download completed successfully. ***",
+            tag="Geest",
+            level=Qgis.Info,
+        )
+        network_layer_path = os.path.join(self.working_directory, "study_area", "active_transport_network.gpkg")
+        network_layer_path = f"{network_layer_path}|layername=active_transport_network"
+        log_message(f"Loading active transport network layer from {network_layer_path}")
+        layer = QgsVectorLayer(network_layer_path, "Active Transport Network", "ogr")
+        if not layer.isValid():
+            QMessageBox.critical(self, "Error", "Could not load the active transport network layer.")
+            return
+        # Load the layer in QGIS
+        QgsProject.instance().addMapLayer(layer)
+        self.progress_bar.setVisible(False)
+        self.child_progress_bar.setVisible(False)
+        self.enable_widgets()
+
     def cycle_download_done(self):
         """⚙️ Cycle download done."""
         # Just load the layer into the project - we dont need to store
@@ -398,7 +472,9 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.description.setFont(QFont("Arial", font_size))
         self.description4.setFont(QFont("Arial", font_size))
         self.description5.setFont(QFont("Arial", font_size))
+        self.description6.setFont(QFont("Arial", font_size))
         self.road_layer_combo.setFont(QFont("Arial", font_size))
         self.load_road_layer_button.setFont(QFont("Arial", font_size))
         self.download_road_layer_button.setFont(QFont("Arial", font_size))
+        self.download_active_transport_button.setFont(QFont("Arial", font_size))
         self.download_cycle_layer_button.setFont(QFont("Arial", font_size))

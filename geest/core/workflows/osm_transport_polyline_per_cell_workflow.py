@@ -61,6 +61,9 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
             self.osm_processing_type = OSMDownloadType.CYCLE
         elif id == "Footpaths_Location":
             self.osm_processing_type = OSMDownloadType.ROAD
+        elif id == "Active_Transport_Network":
+            # Unified active transport - uses both highway and cycleway with best score logic
+            self.osm_processing_type = OSMDownloadType.ACTIVE_TRANSPORT
         else:
             raise ValueError(f"Unsupported id for OSM Transport Polyline Per Cell Workflow: {id}")
 
