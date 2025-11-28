@@ -626,33 +626,6 @@ class StudyAreaProcessingTask(QgsTask):
         """
         self.metrics[metric_name] += time.time() - start_time
 
-    def _load_ghsl_layer_if_exists(self):
-        """
-        Load GHSL settlement layer if it exists in the study area directory.
-
-        Returns:
-            ogr.DataSource layer or None if not found.
-        """
-        ghsl_path = os.path.join(self.working_dir, "study_area", "ghsl_settlements_layer.parquet")
-        if not os.path.exists(ghsl_path):
-            log_message(f"GHSL settlement layer not found at {ghsl_path}, grid will not be filtered by GHSL.")
-            return None
-
-        try:
-            ghsl_ds = ogr.Open(ghsl_path, 0)  # read-only
-            if not ghsl_ds:
-                log_message(f"Could not open GHSL layer at {ghsl_path}")
-                return None
-            ghsl_layer = ghsl_ds.GetLayer(0)
-            if not ghsl_layer:
-                log_message("Could not get layer from GHSL datasource")
-                return None
-            log_message(f"GHSL settlement layer loaded from {ghsl_path} with {ghsl_layer.GetFeatureCount()} features. Grid will be filtered to exclude water and very low density rural areas.")
-            return ghsl_layer
-        except Exception as e:
-            log_message(f"Error loading GHSL layer: {e}", level="WARNING")
-            return None
-
     ##########################################################################
     # Create Vector Grid
     ##########################################################################
@@ -660,7 +633,6 @@ class StudyAreaProcessingTask(QgsTask):
         """
         Creates a vector grid covering bbox at self.cell_size_m spacing.
         Writes those cells that intersect 'geom' to layer 'study_area_grid'.
-        Optionally filters by GHSL settlement data if available.
         (In practice, this can be quite large for big extents.)
         """
         # ----------------------------
@@ -668,9 +640,6 @@ class StudyAreaProcessingTask(QgsTask):
         # ----------------------------
         grid_layer_name = "study_area_grid"
         self.create_grid_layer_if_not_exists(grid_layer_name)
-
-        # Check if GHSL settlement layer exists for filtering
-        ghsl_layer = self._load_ghsl_layer_if_exists()
 
         ds = ogr.Open(self.gpkg_path, 1)  # read-write
         layer = ds.GetLayerByName(grid_layer_name)
@@ -740,7 +709,7 @@ class StudyAreaProcessingTask(QgsTask):
                 # Not running in thread for now, see note below
                 task.run()
 
-                self.write_chunk(layer, task, normalized_name, ghsl_layer)
+                self.write_chunk(layer, task, normalized_name)
                 # We use the progress object to notify of progress in the subtask
                 # And the QgsTask progressChanged signal to track the main task
             else:
@@ -774,14 +743,13 @@ class StudyAreaProcessingTask(QgsTask):
         self.total_cells += self.current_geom_actual_cell_count
         log_message(f"Grid creation completed for area {normalized_name}.")
 
-    def write_chunk(self, layer, task, normalized_name, ghsl_layer=None):
+    def write_chunk(self, layer, task, normalized_name):
         """⚙️ Write chunk.
 
         Args:
             layer: Layer.
             task: Task.
             normalized_name: Normalized name.
-            ghsl_layer: Optional GHSL settlement layer for filtering grid cells.
         """
         start_time = time.time()
         # Write locking is intended for a future version where we might have multiple threads
@@ -799,26 +767,8 @@ class StudyAreaProcessingTask(QgsTask):
         self.write_lock = True
         feat_defn = layer.GetLayerDefn()
         layer.StartTransaction()
-
-        # Track filtered cells if GHSL filtering is active
-        filtered_count = 0
-        written_count = 0
-
         try:
             for geometry in task.features_out:
-                # If GHSL layer exists, check if grid cell intersects settlement areas
-                if ghsl_layer is not None:
-                    ghsl_layer.ResetReading()
-                    ghsl_layer.SetSpatialFilter(geometry)
-                    intersects_settlement = ghsl_layer.GetFeatureCount() > 0
-                    ghsl_layer.SetSpatialFilter(None)  # Clear filter
-
-                    if not intersects_settlement:
-                        # Skip this grid cell - it's in water or very low density rural area
-                        filtered_count += 1
-                        continue
-
-                # Write the grid cell
                 feature = ogr.Feature(feat_defn)
                 feature.SetField("grid_id", self.current_geom_actual_cell_count)
                 feature.SetField("area_name", normalized_name)
@@ -826,20 +776,13 @@ class StudyAreaProcessingTask(QgsTask):
                 layer.CreateFeature(feature)
                 feature = None
                 self.current_geom_actual_cell_count += 1
-                written_count += 1
                 if self.current_geom_actual_cell_count % 20000 == 0:
                     log_message(f"         Cell count: {self.current_geom_actual_cell_count}")
                     log_message(f"         Grid creation for part {normalized_name}")
-                    if ghsl_layer:
-                        log_message(f"         Filtered {filtered_count} cells by GHSL")
                     # commit changes
                     layer.CommitTransaction()
                     layer.StartTransaction()
             layer.CommitTransaction()  # Final commit
-
-            if ghsl_layer:
-                log_message(f"GHSL Filtering: Written {written_count} cells, filtered out {filtered_count} cells (water/very low density rural)")
-
             self.track_time("Writing chunks", start_time)
             self.write_lock = False
         except Exception as e:
