@@ -184,7 +184,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         for widget in self.findChildren(QWidget):
             widget.setEnabled(True)
 
-
     def download_active_transport_button_clicked(self):
         """Triggered when the Download Active Transport button is pressed."""
         if self._reference_layer is None:
@@ -239,7 +238,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             self.enable_widgets()
             return
 
-
     # Slot that listens for changes in the study_area task object which is used to measure overall task progress
     def osm_download_progress_updated(self, progress: float):
         """Slot to be called when the download task progress is updated."""
@@ -284,7 +282,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
             float_value_as_string = f"OSM extract progress: {progress}%"
             self.child_progress_bar.setFormat(float_value_as_string)
 
-
     def active_transport_download_done(self):
         """⚙️ Active transport download done."""
         log_message(
@@ -304,7 +301,6 @@ class RoadNetworkPanel(FORM_CLASS, QWidget):
         self.progress_bar.setVisible(False)
         self.child_progress_bar.setVisible(False)
         self.enable_widgets()
-
 
     def resizeEvent(self, event):
         """⚙️ Resizeevent.
