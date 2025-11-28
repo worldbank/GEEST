@@ -75,6 +75,16 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         else:
             log_message("Experimental features are disabled.")
 
+        # Ookla threshold settings
+        ookla_use_thresholds = bool(setting(key="ookla_use_thresholds", default=False))
+        self.ookla_use_thresholds.setChecked(ookla_use_thresholds)
+
+        ookla_mobile_threshold = float(setting(key="ookla_mobile_threshold", default=0.0))
+        self.ookla_mobile_threshold.setValue(ookla_mobile_threshold)
+
+        ookla_fixed_threshold = float(setting(key="ookla_fixed_threshold", default=0.0))
+        self.ookla_fixed_threshold.setValue(ookla_fixed_threshold)
+
     def apply(self):
         """Process the animation sequence.
 
@@ -100,6 +110,9 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         set_setting(key="show_layer_on_click", value=self.show_layer_on_click.isChecked())
         set_setting(key="show_overlay", value=self.show_overlay.isChecked())
         set_setting(key="show_pie_overlay", value=self.show_pie_overlay.isChecked())
+        set_setting(key="ookla_use_thresholds", value=self.ookla_use_thresholds.isChecked())
+        set_setting(key="ookla_mobile_threshold", value=self.ookla_mobile_threshold.value())
+        set_setting(key="ookla_fixed_threshold", value=self.ookla_fixed_threshold.value())
 
 
 class GeestOptionsFactory(QgsOptionsWidgetFactory):
