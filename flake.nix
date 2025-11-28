@@ -6,7 +6,6 @@
   inputs.geospatial.url = "github:imincik/geospatial-nix.repo";
   inputs.nixpkgs.follows = "geospatial/nixpkgs";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  # inputs.timvim.url = "github:timlinux/timvim";
 
   outputs =
     {
@@ -90,7 +89,6 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = [
 
-          #timvim.packages.${pkgs.system}.default
           qgisWithExtras
           pkgs.actionlint # for checking gh actions
           pkgs.bandit
@@ -214,7 +212,6 @@
             #pre-commit install --install-hooks > /dev/null
             #pre-commit run --all-files || true
 
-            export PATH="$(pwd)/.nvim:$PATH"
           # Add PyQt and QGIS to python path for neovim
           pythonWithPackages="${
             pkgs.python3.withPackages (ps: [
