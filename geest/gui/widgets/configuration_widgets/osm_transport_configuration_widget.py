@@ -39,30 +39,18 @@ class OsmTransportConfigurationWidget(BaseConfigurationWidget):
         """
         try:
             self.info_label = QLabel(
-                "Rank cells based on most beneficial OSM transport features in the cell according to the following ranking tables."
+                "Rank cells based on most beneficial active transport features (walkable and cyclable infrastructure) "
+                "in the cell. Uses best score when multiple road types exist in a cell."
             )
             self.info_label.setWordWrap(True)
             self.internal_layout.addWidget(self.info_label)
-            # make a label as an html table showing the road types and their scores
+            # make a label as an html table showing the unified active transport scores
             self.html_table_label = QLabel()
             self.html_table_label.setWordWrap(True)
             self.html_table_label.setTextFormat(Qt.RichText)
-            # create a table of 2x2 cells showing the OSM road types and their scores
-            road_types_html = osm_mapping_table(OSMDownloadType.ROAD)
-            cycle_types_html = osm_mapping_table(OSMDownloadType.CYCLE)
-            combined_table_html = f"""
-            <table border="1" cellpadding="4" cellspacing="0">
-                <tr>
-                    <th>OSM Road Scores</th>
-                    <th>OSM Cycleway Scores</th>
-                </tr>
-                <tr>
-                    <td>{road_types_html}</td>
-                    <td>{cycle_types_html}</td>
-                </tr>
-            </table>
-            """
-            self.html_table_label.setText(combined_table_html)
+            # Show the unified active transport lookup table
+            active_transport_html = osm_mapping_table(OSMDownloadType.ACTIVE_TRANSPORT)
+            self.html_table_label.setText(active_transport_html)
             self.internal_layout.addWidget(self.html_table_label)
         except Exception as e:
             log_message(f"Error in add_internal_widgets: {e}", level=Qgis.Critical)

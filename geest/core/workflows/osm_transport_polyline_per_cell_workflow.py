@@ -53,16 +53,8 @@ class OsmTransportPolylinePerCellWorkflow(WorkflowBase):
         )  # ⭐️ Item is a reference - whatever you change in this item will directly update the tree
         self.workflow_name = "use_osm_transport_polyline_per_cell"
 
-        # For now we will use the id attribute to determine if we should
-        # use the roads or cycleways lookup table
-        # This logic is specific to this workflow
-        id = self.attributes.get("id", None)
-        if id == "Cycle_Paths_Location":
-            self.osm_processing_type = OSMDownloadType.CYCLE
-        elif id == "Footpaths_Location":
-            self.osm_processing_type = OSMDownloadType.ROAD
-        else:
-            raise ValueError(f"Unsupported id for OSM Transport Polyline Per Cell Workflow: {id}")
+        # Use unified active transport - combines both highway and cycleway with best score logic
+        self.osm_processing_type = OSMDownloadType.ACTIVE_TRANSPORT
 
         layer_path = self.attributes.get("osm_transport_polyline_per_cell_shapefile", None)
         if layer_path:

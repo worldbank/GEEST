@@ -72,6 +72,59 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QGroupBox" name="groupBox_ookla">
+        <property name="title">
+         <string>Ookla Speed Test Thresholds (Digital Inclusion)</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_ookla">
+         <item row="0" column="0" colspan="2">
+          <widget class="QCheckBox" name="ookla_use_thresholds">
+           <property name="text">
+            <string>Filter Ookla data by speed thresholds</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_ookla_mobile">
+           <property name="text">
+            <string>Mobile speed threshold (Mbps):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="ookla_mobile_threshold">
+           <property name="maximum">
+            <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_ookla_fixed">
+           <property name="text">
+            <string>Fixed broadband threshold (Mbps):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QDoubleSpinBox" name="ookla_fixed_threshold">
+           <property name="maximum">
+            <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
