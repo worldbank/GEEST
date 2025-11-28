@@ -28,6 +28,7 @@ from qgis.core import (
     QgsProject,
     QgsRasterLayer,
     QgsVectorLayer,
+    QgsWkbTypes,
 )
 
 from ..utilities import log_message
@@ -168,3 +169,40 @@ def add_to_map(
             tag="Geest",
             level=Qgis.Info,
         )
+
+
+def validate_network_layer(layer_path: str, expected_crs: QgsCoordinateReferenceSystem) -> tuple:
+    """Validate network layer for road network analysis.
+
+    Args:
+        layer_path: Path to network layer (may include |layername=)
+        expected_crs: Expected coordinate reference system
+
+    Returns:
+        tuple: (is_valid: bool, error_message: str or None)
+    """
+    if not layer_path:
+        return False, "No network layer configured"
+
+    # Check file exists
+    base_path = layer_path.split("|")[0] if "|" in layer_path else layer_path
+    if not os.path.exists(base_path):
+        return False, f"Network layer file not found: {base_path}"
+
+    # Load and validate layer
+    layer = QgsVectorLayer(layer_path, "validation", "ogr")
+    if not layer.isValid():
+        return False, f"Network layer is invalid or cannot be loaded: {layer_path}"
+
+    # Check geometry type
+    if layer.geometryType() != QgsWkbTypes.LineGeometry:
+        return False, "Network layer must be a line (polyline) layer"
+
+    # Check CRS match
+    if layer.crs() != expected_crs:
+        return (
+            False,
+            f"Network layer CRS ({layer.crs().authid()}) doesn't match project CRS ({expected_crs.authid()})",
+        )
+
+    return True, None
