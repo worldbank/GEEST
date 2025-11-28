@@ -298,7 +298,11 @@ def select_grid_cells_and_assign_transport_score(
                 lookup_key = f"highway_{highway_type}"
                 highway_score = active_transport_lookup_table.get(lookup_key, 0)
                 if verbose_mode:
-                    log_message(f"highway_type='{highway_type}' → lookup_key='{lookup_key}' → score={highway_score}", tag="Geest", level=Qgis.Info)
+                    log_message(
+                        f"highway_type='{highway_type}' → lookup_key='{lookup_key}' → score={highway_score}",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
                 if highway_score > road_score:
                     road_score = highway_score
                     road_type = lookup_key
@@ -310,7 +314,11 @@ def select_grid_cells_and_assign_transport_score(
                 lookup_key = f"cycleway_{cycleway_type}"
                 cycleway_score = active_transport_lookup_table.get(lookup_key, 0)
                 if verbose_mode:
-                    log_message(f"cycleway_type='{cycleway_type}' → lookup_key='{lookup_key}' → score={cycleway_score}", tag="Geest", level=Qgis.Info)
+                    log_message(
+                        f"cycleway_type='{cycleway_type}' → lookup_key='{lookup_key}' → score={cycleway_score}",
+                        tag="Geest",
+                        level=Qgis.Info,
+                    )
                 if cycleway_score > road_score:
                     road_score = cycleway_score
                     road_type = lookup_key
@@ -318,7 +326,9 @@ def select_grid_cells_and_assign_transport_score(
         # Skip features with no valid score
         if road_score == 0 or road_type is None:
             if verbose_mode:
-                log_message(f"Skipping feature: road_score={road_score}, road_type={road_type}", tag="Geest", level=Qgis.Info)
+                log_message(
+                    f"Skipping feature: road_score={road_score}, road_type={road_type}", tag="Geest", level=Qgis.Info
+                )
             continue
 
         # Check actual geometry against grid cells
