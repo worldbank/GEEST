@@ -23,44 +23,44 @@ from qgis.PyQt.QtCore import QVariant
 from geest.core.osm_downloaders import OSMDownloadType
 from geest.utilities import log_message, setting
 
-highway_lookup_table = {
-    "residential": 5,
-    "living_street": 5,
-    "pedestrian": 5,
-    "footway": 5,
-    "steps": 5,
-    "tertiary": 4,
-    "tertiary_link": 4,
-    "cycleway": 4,
-    "path": 4,
-    "secondary": 3,
-    "unclassified": 3,
-    "service": 3,
-    "road": 3,
-    "bridleway": 3,
-    "secondary_link": 3,
-    "track": 2,
-    "primary": 2,
-    "primary_link": 2,
-    "motorway": 1,
-    "trunk": 1,
-    "motorway_link": 1,
-    "trunk_link": 1,
-    "bus_guideway": 0,
-    "escape": 0,
-    "raceway": 0,
-    "construction": 0,
-    "proposed": 0,
-}
-cycleway_lookup_table = {
-    "lane": 4,
-    "shared_lane": 4,
-    "share_busway": 4,
-    "track": 4,
-    "separate": 4,
-    "crossing": 4,
-    "shoulder": 4,
-    "link": 4,
+active_transport_lookup_table = {
+    # Highway types (walkable infrastructure - from OSM highway tag)
+    "highway_residential": 5,
+    "highway_living_street": 5,
+    "highway_pedestrian": 5,
+    "highway_footway": 5,
+    "highway_steps": 5,
+    "highway_tertiary": 4,
+    "highway_tertiary_link": 4,
+    "highway_cycleway": 4,
+    "highway_path": 4,
+    "highway_secondary": 3,
+    "highway_unclassified": 3,
+    "highway_service": 3,
+    "highway_road": 3,
+    "highway_bridleway": 3,
+    "highway_secondary_link": 3,
+    "highway_track": 2,
+    "highway_primary": 2,
+    "highway_primary_link": 2,
+    "highway_motorway": 1,
+    "highway_trunk": 1,
+    "highway_motorway_link": 1,
+    "highway_trunk_link": 1,
+    "highway_bus_guideway": 0,
+    "highway_escape": 0,
+    "highway_raceway": 0,
+    "highway_construction": 0,
+    "highway_proposed": 0,
+    # Cycleway types (cycling infrastructure - from OSM cycleway tag)
+    "cycleway_lane": 4,
+    "cycleway_shared_lane": 4,
+    "cycleway_share_busway": 4,
+    "cycleway_track": 4,
+    "cycleway_separate": 4,
+    "cycleway_crossing": 4,
+    "cycleway_shoulder": 4,
+    "cycleway_link": 4,
 }
 
 
@@ -295,22 +295,30 @@ def select_grid_cells_and_assign_transport_score(
         if has_highway_field:
             highway_type = feature.attribute("highway")
             if highway_type:  # Not None and not empty string
-                highway_score = highway_lookup_table.get(highway_type, 0)
+                lookup_key = f"highway_{highway_type}"
+                highway_score = active_transport_lookup_table.get(lookup_key, 0)
+                if verbose_mode:
+                    log_message(f"highway_type='{highway_type}' → lookup_key='{lookup_key}' → score={highway_score}", tag="Geest", level=Qgis.Info)
                 if highway_score > road_score:
                     road_score = highway_score
-                    road_type = f"highway_{highway_type}"
+                    road_type = lookup_key
 
         # Check cycleway attribute if it exists
         if has_cycleway_field:
             cycleway_type = feature.attribute("cycleway")
             if cycleway_type:  # Not None and not empty string
-                cycleway_score = cycleway_lookup_table.get(cycleway_type, 0)
+                lookup_key = f"cycleway_{cycleway_type}"
+                cycleway_score = active_transport_lookup_table.get(lookup_key, 0)
+                if verbose_mode:
+                    log_message(f"cycleway_type='{cycleway_type}' → lookup_key='{lookup_key}' → score={cycleway_score}", tag="Geest", level=Qgis.Info)
                 if cycleway_score > road_score:
                     road_score = cycleway_score
-                    road_type = f"cycleway_{cycleway_type}"
+                    road_type = lookup_key
 
         # Skip features with no valid score
         if road_score == 0 or road_type is None:
+            if verbose_mode:
+                log_message(f"Skipping feature: road_score={road_score}, road_type={road_type}", tag="Geest", level=Qgis.Info)
             continue
 
         # Check actual geometry against grid cells
@@ -449,10 +457,9 @@ def osm_mapping_table(osm_transport_type: OSMDownloadType) -> str:
         ValueError: If the OSM transport type is unsupported.
     """
 
-    if osm_transport_type == OSMDownloadType.CYCLE:
-        lookup_table = cycleway_lookup_table
-    elif osm_transport_type == OSMDownloadType.ROAD:
-        lookup_table = highway_lookup_table
+    if osm_transport_type == OSMDownloadType.ACTIVE_TRANSPORT:
+        # Use the unified active transport lookup table
+        lookup_table = active_transport_lookup_table
     else:
         raise ValueError(f"Unsupported OSM transport type: {osm_transport_type}")
 

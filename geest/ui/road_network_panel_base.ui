@@ -248,51 +248,6 @@
         </layout>
        </item>
        <item row="4" column="0" colspan="2">
-        <widget class="QPushButton" name="download_road_layer_button">
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>⬇️ Download roads from Open Street Map</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QLabel" name="description5">
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Optionally, download a cycle network layer for the study area.</string>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::MarkdownText</enum>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignJustify|Qt::AlignTop</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0" colspan="2">
-        <widget class="QPushButton" name="download_cycle_layer_button">
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>⬇️ Download cycleways from Open Street Map</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="2">
         <widget class="QLabel" name="description6">
          <property name="font">
           <font>
@@ -300,7 +255,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Or download a unified active transport network (roads + cycleways combined):</string>
+          <string>Download a unified active transport network (roads + cycleways combined):</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
@@ -313,7 +268,7 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="0" colspan="2">
+       <item row="5" column="0" colspan="2">
         <widget class="QPushButton" name="download_active_transport_button">
          <property name="font">
           <font>
@@ -355,9 +310,7 @@
   <tabstop>scrollArea</tabstop>
   <tabstop>road_layer_combo</tabstop>
   <tabstop>load_road_layer_button</tabstop>
-  <tabstop>download_road_layer_button</tabstop>
   <tabstop>download_active_transport_button</tabstop>
-  <tabstop>download_cycle_layer_button</tabstop>
   <tabstop>previous_button</tabstop>
   <tabstop>next_button</tabstop>
  </tabstops>
