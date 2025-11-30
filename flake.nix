@@ -248,6 +248,9 @@
             echo "  scripts/start_qgis.sh"
             echo "  scripts/start_qgis_ltr.sh"
             echo "  scripts/start_qgis_master.sh"
+            echo ""
+            echo -e "   $GRAY▶$RESET  $CYAN source .nvim-setup.sh$RESET - Configure nvim with QGIS libraries"
+            echo -e "   $GRAY▶$RESET  $CYAN vim filename.py$RESET      - Start nvim (aliased) with LSP"
         '';
       };
     };
