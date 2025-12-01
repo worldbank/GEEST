@@ -156,6 +156,10 @@
         "contextlib",
         "contextmanager",
         "stdev",
-        "Marpit"
+        "Marpit",
+        "hrsh",
+        "pasky",
+        "nvimrc",
+        "PYTHONPATH"
     ]
 }

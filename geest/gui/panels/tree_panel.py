@@ -53,7 +53,7 @@ from geest.core.algorithms import (
 )
 from geest.core.reports import AnalysisReport, StudyAreaReport
 from geest.core.settings import set_setting, setting
-from geest.core.utilities import add_to_map
+from geest.core.utilities import add_to_map, validate_network_layer
 from geest.gui.dialogs import (
     AnalysisAggregationDialog,
     DimensionAggregationDialog,
@@ -106,6 +106,78 @@ class TreePanel(QWidget):
             self.load_json()
         else:
             self.json_data = {"dimensions": []}
+
+        # Inline warning banner (hidden by default)
+        self.warning_widget = QWidget()
+        self.warning_widget.setVisible(False)
+        warning_layout = QHBoxLayout(self.warning_widget)
+        warning_layout.setContentsMargins(12, 10, 12, 10)
+        warning_layout.setSpacing(12)
+
+        warning_icon = QLabel("⚠️")
+        warning_icon.setStyleSheet("font-size: 18px;")
+        warning_layout.addWidget(warning_icon)
+
+        self.warning_message_label = QLabel()
+        self.warning_message_label.setWordWrap(True)
+        self.warning_message_label.setStyleSheet("color: #856404; font-size: 13px;")
+        warning_layout.addWidget(self.warning_message_label, 1)
+
+        self.configure_network_button = QPushButton("Configure")
+        self.configure_network_button.clicked.connect(self._on_configure_clicked)
+        self.configure_network_button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #b8dce3, stop:1 #8ec8d0);
+                color: #000;
+                border: 1px solid #6fa8b0;
+                border-radius: 3px;
+                padding: 4px 12px;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #c8e8ef, stop:1 #9ed8e0);
+            }
+            QPushButton:pressed {
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #8ec8d0, stop:1 #b8dce3);
+            }
+        """
+        )
+        warning_layout.addWidget(self.configure_network_button)
+
+        close_warning_button = QPushButton("✕")
+        close_warning_button.setFixedSize(24, 24)
+        close_warning_button.setStyleSheet(
+            """
+            QPushButton {
+                border: none;
+                color: #856404;
+                background: transparent;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(0, 0, 0, 0.1);
+                border-radius: 3px;
+            }
+        """
+        )
+        close_warning_button.clicked.connect(self.hide_validation_warning)
+        warning_layout.addWidget(close_warning_button)
+
+        self.warning_widget.setStyleSheet(
+            """
+            QWidget {
+                background-color: #fff3cd;
+                border-left: 4px solid #ffc107;
+                border-radius: 3px;
+            }
+        """
+        )
+
+        layout.addWidget(self.warning_widget)
 
         # Create a CustomTreeView widget to handle editing and reverts
         self.treeView = JsonTreeView()
@@ -245,7 +317,9 @@ class TreePanel(QWidget):
     def on_item_clicked(self, index: QModelIndex):
         """
         Slot that runs whenever an item in the tree is clicked.
-        :param index: QModelIndex of the clicked item.
+
+        Args:
+            index: QModelIndex of the clicked item.
         """
         show_layer_on_click = setting(key="show_layer_on_click", default=True)
         if show_layer_on_click:
@@ -348,7 +422,11 @@ class TreePanel(QWidget):
 
     @pyqtSlot(str)
     def working_directory_changed(self, new_directory):
-        """Change the working directory and load the model.json if available."""
+        """Change the working directory and load the model.json if available.
+
+        Args:
+            new_directory: Path to the new working directory.
+        """
         log_message(
             f"Working directory changed to {new_directory}",
             tag="Geest",
@@ -516,7 +594,11 @@ class TreePanel(QWidget):
         self.model.add_dimension()
 
     def open_context_menu(self, position: QPoint):
-        """Handle right-click context menu."""
+        """Handle right-click context menu.
+
+        Args:
+            position: Position where the context menu was requested.
+        """
 
         index = self.treeView.indexAt(position)
         if not index.isValid():
@@ -735,7 +817,16 @@ class TreePanel(QWidget):
         else:  # macOS and Linux
             system = platform.system().lower()
             if system == "darwin":  # macOS
-                pdf_path = os.path.join(self.working_directory, "analysis_report.pdf")
+                working_directory = self.working_directory
+                if not working_directory:
+                    log_message(
+                        "No working directory set, cannot open analysis report.",
+                        tag="Geest",
+                        level=Qgis.Warning,
+                    )
+                    return
+
+                pdf_path = os.path.join(working_directory, "analysis_report.pdf")
                 subprocess.run(["open", pdf_path], check=False)  # nosec B603 B607
             else:  # Linux
                 pdf_path = os.path.join(self.working_directory, "analysis_report.pdf")
@@ -769,7 +860,11 @@ class TreePanel(QWidget):
         self.overall_progress_bar.setVisible(False)
 
     def add_masked_scores_to_map(self, item):
-        """Add the masked scores to the map."""
+        """Add the masked scores to the map.
+
+        Args:
+            item: The analysis item containing masked score data.
+        """
         add_to_map(
             item,
             key="wee_by_opportunities_mask_result_file",
@@ -784,7 +879,11 @@ class TreePanel(QWidget):
         )
 
     def add_aggregates_to_map(self, item):
-        """Add all the aggregate produts to the map"""
+        """Add all the aggregate products to the map.
+
+        Args:
+            item: The analysis item containing aggregate data.
+        """
         add_to_map(
             item,
             key="wee_score_subnational_aggregation",
@@ -818,10 +917,8 @@ class TreePanel(QWidget):
 
         If item is none we assume that the working directory is the top level working directory.
 
-        args:
+        Args:
             item: The item to open the working directory for.
-        returns:
-            None
         """
         log_message("Opening working directory.")
         if item is None:
@@ -867,15 +964,27 @@ class TreePanel(QWidget):
             QMessageBox.warning(self, "Log File Not Found", "The log file does not exist.")
 
     def disable_item(self, item):
-        """Disable the item and its children."""
+        """Disable the item and its children.
+
+        Args:
+            item: The item to disable.
+        """
         item.disable()
 
     def enable_item(self, item):
-        """Enable the item and its children."""
+        """Enable the item and its children.
+
+        Args:
+            item: The item to enable.
+        """
         item.enable()
 
     def show_attributes(self, item):
-        """Show the attributes of the item in a table."""
+        """Show the attributes of the item in a table.
+
+        Args:
+            item: The item whose attributes to display.
+        """
         attributes = item.attributes()
         # Sort the data alphabetically by key name
         sorted_data = dict(sorted(attributes.items()))
@@ -974,7 +1083,11 @@ class TreePanel(QWidget):
         dialog.exec_()
 
     def show_error_file_popup(self, error_file_content):
-        """Show a popup message with the contents of the error file."""
+        """Show a popup message with the contents of the error file.
+
+        Args:
+            error_file_content: Content of the error file to display.
+        """
         msg_box = QMessageBox()
         msg_box.setWindowTitle("Error File Contents")
         msg_box.setText(error_file_content)
@@ -982,7 +1095,11 @@ class TreePanel(QWidget):
         msg_box.exec_()
 
     def copy_to_clipboard_as_markdown(self, table: QTableWidget):
-        """Copy the table content as Markdown to the clipboard."""
+        """Copy the table content as Markdown to the clipboard.
+
+        Args:
+            table: The table widget to copy.
+        """
         headers = [table.horizontalHeaderItem(i).text() for i in range(table.columnCount())]
         markdown_lines = ["| " + " | ".join(headers) + " |"]
         markdown_lines.append("| " + " | ".join("---" for _ in headers) + " |")
@@ -1019,7 +1136,14 @@ class TreePanel(QWidget):
         log_message("Table copied to clipboard as Markdown.")
 
     def create_nested_table(self, nested_data: dict) -> QTableWidget:
-        """Create a QTableWidget to display nested dictionary data."""
+        """Create a QTableWidget to display nested dictionary data.
+
+        Args:
+            nested_data: Dictionary data to display in the table.
+
+        Returns:
+            QTableWidget configured to display the nested data.
+        """
         nested_table = QTableWidget()
         nested_table.setRowCount(len(nested_data))
         nested_table.setColumnCount(2)
@@ -1043,13 +1167,23 @@ class TreePanel(QWidget):
         return nested_table
 
     def maximize_dialog(self, dialog, table):
-        """Maximize the dialog and adjust the table column widths."""
+        """Maximize the dialog and adjust the table column widths.
+
+        Args:
+            dialog: The dialog to maximize.
+            table: The table whose columns to adjust.
+        """
         dialog.showMaximized()
         # Adjust the first column to fit its content
         table.resizeColumnToContents(0)
 
     def show_context_menu(self, table, pos):
-        """Show a context menu with a copy option on right-click."""
+        """Show a context menu with a copy option on right-click.
+
+        Args:
+            table: The table widget.
+            pos: Position where the context menu was requested.
+        """
         # Get the cell at the position where the right-click occurred
         item = table.itemAt(pos)
         if not item:
@@ -1155,7 +1289,11 @@ class TreePanel(QWidget):
                 log_message(f"Added layer: {layer.name()} to group: {geest_group.name()}")
 
     def edit_analysis_aggregation(self, analysis_item):
-        """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis."""
+        """Open the AnalysisAggregationDialog for editing the weightings of factors in the analysis.
+
+        Args:
+            analysis_item: The analysis item to edit.
+        """
         dialog = AnalysisAggregationDialog(analysis_item, parent=self)
         dialog.resize(
             int(QApplication.desktop().screenGeometry().width() * 0.9),
@@ -1166,7 +1304,11 @@ class TreePanel(QWidget):
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def edit_dimension_aggregation(self, dimension_item):
-        """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension."""
+        """Open the DimensionAggregationDialog for editing the weightings of factors in a dimension.
+
+        Args:
+            dimension_item: The dimension item to edit.
+        """
         dimension_name = dimension_item.data(0)
         dimension_data = dimension_item.attributes()
         if not dimension_data:
@@ -1181,7 +1323,11 @@ class TreePanel(QWidget):
             self.save_json_to_working_directory()  # Save changes to the JSON if necessary
 
     def edit_factor_aggregation(self, factor_item):
-        """Open the FactorAggregationDialog for editing the weightings of layers in a factor."""
+        """Open the FactorAggregationDialog for editing the weightings of layers in a factor.
+
+        Args:
+            factor_item: The factor item to edit.
+        """
         factor_name = factor_item.data(0)
         factor_data = factor_item.attributes()
         if not factor_data:
@@ -1200,6 +1346,9 @@ class TreePanel(QWidget):
 
         We process in the order of layers, factors, and dimensions since there
         is a dependency between them. For example, a factor depends on its layers.
+
+        Args:
+            workflow_type: Type of workflow to start (indicators, factors, dimensions, analysis).
         """
         log_message("\n############################################")
         log_message(f"Starting {workflow_type} workflows")
@@ -1230,7 +1379,8 @@ class TreePanel(QWidget):
         """
         Recursively count workflows that need to be run visiting each node in the tree.
 
-        :param parent_item: The parent item to process. If none, start from the root.
+        Args:
+            parent_item: The parent item to process. If none, start from the root.
         """
         if parent_item is None:
             parent_item = self.model.rootItem
@@ -1239,25 +1389,61 @@ class TreePanel(QWidget):
         self.items_to_run = count
 
     def cell_size_m(self):
-        """Get the cell size in meters from the analysis item."""
+        """Get the cell size in meters from the analysis item.
+
+        Returns:
+            float: Cell size in meters.
+        """
         cell_size_m = self.model.get_analysis_item().attributes().get("analysis_cell_size_m", 100.0)
         return cell_size_m
 
     def analysis_scale(self):
-        """Get the analysis scale from the analysis item."""
+        """Get the analysis scale from the analysis item.
+
+        Returns:
+            str: Analysis scale (national or regional).
+        """
         analysis_scale = self.model.get_analysis_item().attributes().get("analysis_scale", "national")
         return analysis_scale
 
     def road_network_layer_path(self):
-        """Get the layer used for network analysis."""
+        """Get the layer used for network analysis.
+
+        Returns:
+            str: Path to the road network layer.
+        """
         analysis_item = self.model.get_analysis_item()
         log_message(analysis_item.attributesAsMarkdown())
         road_network_layer_path = analysis_item.attributes().get("road_network_layer_path", "")
         log_message(f"Road Network layer path: {road_network_layer_path}")
         return road_network_layer_path
 
+    def show_validation_error(self, title: str, message: str):
+        """Show validation error in inline banner.
+
+        Args:
+            title: Title of the validation error.
+            message: Error message to display.
+        """
+        self.warning_message_label.setText(f"<b>{title}:</b> {message}")
+        self.warning_widget.setVisible(True)
+
+    def hide_validation_warning(self):
+        """Hide validation warning banner."""
+        self.warning_widget.setVisible(False)
+        self.warning_message_label.setText("")
+
+    def _on_configure_clicked(self):
+        """Navigate to network config panel and dismiss warning."""
+        self.hide_validation_warning()
+        self.switch_to_network_tab.emit()
+
     def ghsl_layer(self):
-        """Get the layer used for ghsl analysis."""
+        """Get the layer used for ghsl analysis.
+
+        Returns:
+            QgsVectorLayer: The GHSL layer.
+        """
         ghsl_layer = QgsVectorLayer(
             self.model.get_analysis_item().attributes().get("ghsl_layer", ""),
             "GHSL Layer",
@@ -1266,7 +1452,11 @@ class TreePanel(QWidget):
         return ghsl_layer
 
     def ghsl_layer_path(self):
-        """Get the layer used for ghsl analysis."""
+        """Get the layer used for ghsl analysis.
+
+        Returns:
+            str: Path to the GHSL layer.
+        """
         analysis_item = self.model.get_analysis_item()
         log_message(analysis_item.attributesAsMarkdown())
         ghsl_layer_path = analysis_item.attributes().get("ghsl_layer_path", "")
@@ -1278,13 +1468,32 @@ class TreePanel(QWidget):
 
         ⭐️ These calls all pass a reference of the item to the workflow task.
             The task directly modifies the item's properties to update the tree.
+
+        Args:
+            item: The tree item to queue workflow for.
+            role: The role of the item (indicator, factor, dimension, analysis).
         """
         task = None
 
         attributes = item.attributes()
 
-        # Include the network layers in the attributes by default
-        attributes["road_network_layer_path"] = self.road_network_layer_path()
+        # Validate road network layer if needed
+        analysis_mode = attributes.get("analysis_mode", "")
+        needs_road_network = analysis_mode in ["use_multi_buffer_point"]
+        road_network_path = self.road_network_layer_path()
+        if needs_road_network:
+            # Get expected CRS from study area
+            study_area_gpkg = os.path.join(self.working_directory, "study_area", "study_area.gpkg")
+            study_area_layer = QgsVectorLayer(f"{study_area_gpkg}|layername=study_area_polygons", "study_area", "ogr")
+            expected_crs = study_area_layer.crs() if study_area_layer.isValid() else None
+
+            if expected_crs:
+                is_valid, error_msg = validate_network_layer(road_network_path, expected_crs)
+                if not is_valid:
+                    self.show_validation_error("Road Network Issue", error_msg)
+                    return
+        attributes["road_network_layer_path"] = road_network_path
+
         # Include the GHSL layer in the attributes by default
         attributes["ghsl_layer_path"] = self.ghsl_layer_path()
 
@@ -1299,6 +1508,8 @@ class TreePanel(QWidget):
         task = self.queue_manager.add_workflow(item, self.cell_size_m(), self.analysis_scale())
         if task is None:
             return
+
+        self.hide_validation_warning()
 
         # Connect workflow signals to TreePanel slots
         task.job_queued.connect(partial(self.on_workflow_created, item))
@@ -1366,6 +1577,9 @@ class TreePanel(QWidget):
         """
         Slot for handling when a workflow is created.
         Does nothing right now...
+
+        Args:
+            item: The workflow item that was created.
         """
         pass
 
@@ -1374,6 +1588,9 @@ class TreePanel(QWidget):
         """
         Slot for handling when a workflow starts.
         Update the tree item to indicate that the workflow is running.
+
+        Args:
+            item: The workflow item that was started.
         """
         # Get the node index for the item
         node_index = self.model.itemIndex(item)
@@ -1438,7 +1655,11 @@ class TreePanel(QWidget):
                     self.treeView.viewport().update()
 
     def task_progress_updated(self, progress):
-        """Slot to be called when the task progress is updated."""
+        """Slot to be called when the task progress is updated.
+
+        Args:
+            progress: Progress value (0-100).
+        """
         log_message(f"Task progress: {progress}")
         self.workflow_progress_bar.setValue(int(progress))
 
@@ -1447,6 +1668,10 @@ class TreePanel(QWidget):
         """
         Slot for handling when a workflow is completed.
         Update the tree item to indicate success or failure.
+
+        Args:
+            item: The workflow item that was completed.
+            success: Whether the workflow completed successfully.
         """
         queue_length = self.queue_manager.workflow_queue.active_queue_size()
         log_message(f"Queued {queue_length} workflows for processing.")
@@ -1489,7 +1714,7 @@ class TreePanel(QWidget):
             self.calculate_analysis_insights(item)
 
     def calculate_analysis_insights(self, item: JsonTreeItem):
-        """Caclulate insights for the analysis.
+        """Calculate insights for the analysis.
 
         Post process the analysis aggregation and store the output in the item.
 
@@ -1499,6 +1724,8 @@ class TreePanel(QWidget):
         - Opportunities Mask
         - Subnational Aggregation
 
+        Args:
+            item: The analysis item to calculate insights for.
         """
         log_message("############################################")
         log_message("Calculating analysis insights")
@@ -1587,8 +1814,10 @@ class TreePanel(QWidget):
     def update_tree_item_status(self, item, status):
         """
         Update the tree item to show the workflow status.
-        :param item: The tree item representing the workflow.
-        :param status: The status message or icon to display.
+
+        Args:
+            item: The tree item representing the workflow.
+            status: The status message or icon to display.
         """
         # Assuming column 1 is where status updates are shown
         item.setData(1, status)
@@ -1649,9 +1878,10 @@ class TreePanel(QWidget):
 
     def expand_all_nodes(self, index=None):
         """
-        :param index: QModelIndex - if None the root index is used
-
         Recursively expand all nodes in the tree view starting from the root.
+
+        Args:
+            index: QModelIndex - if None the root index is used.
         """
         if self.treeView.model() is None:
             return

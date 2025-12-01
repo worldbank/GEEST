@@ -6,7 +6,6 @@
   inputs.geospatial.url = "github:imincik/geospatial-nix.repo";
   inputs.nixpkgs.follows = "geospatial/nixpkgs";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  # inputs.timvim.url = "github:timlinux/timvim";
 
   outputs =
     {
@@ -90,7 +89,6 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = [
 
-          #timvim.packages.${pkgs.system}.default
           qgisWithExtras
           pkgs.actionlint # for checking gh actions
           pkgs.bandit
@@ -214,7 +212,6 @@
             #pre-commit install --install-hooks > /dev/null
             #pre-commit run --all-files || true
 
-            export PATH="$(pwd)/.nvim:$PATH"
           # Add PyQt and QGIS to python path for neovim
           pythonWithPackages="${
             pkgs.python3.withPackages (ps: [
@@ -248,9 +245,12 @@
             echo "To run QGIS with your profile, use one of these commands:"
             echo -e "$RESET$ORANGE \n__________________________________________________________________\n"
             echo ""
-            echo "  scripts/run-qgis.sh"
-            echo "  scripts/run-qgis-ltr.sh"
-            echo "  scripts/run-qgis-master.sh"
+            echo "  scripts/start_qgis.sh"
+            echo "  scripts/start_qgis_ltr.sh"
+            echo "  scripts/start_qgis_master.sh"
+            echo ""
+            echo -e "   $GRAY▶$RESET  $CYAN source .nvim-setup.sh$RESET - Configure nvim with QGIS libraries"
+            echo -e "   $GRAY▶$RESET  $CYAN vim filename.py$RESET      - Start nvim (aliased) with LSP"
         '';
       };
     };
