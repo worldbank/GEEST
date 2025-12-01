@@ -248,26 +248,14 @@
         </layout>
        </item>
        <item row="4" column="0" colspan="2">
-        <widget class="QPushButton" name="download_road_layer_button">
+        <widget class="QLabel" name="description6">
          <property name="font">
           <font>
            <pointsize>16</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>⬇️ Download roads from Open Street Map</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QLabel" name="description5">
-         <property name="font">
-          <font>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Optionally, download a cycle network layer for the study area.</string>
+          <string>Download a unified active transport network (roads + cycleways combined):</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
@@ -280,19 +268,19 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="0" colspan="2">
-        <widget class="QPushButton" name="download_cycle_layer_button">
+       <item row="5" column="0" colspan="2">
+        <widget class="QPushButton" name="download_active_transport_button">
          <property name="font">
           <font>
            <pointsize>16</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>⬇️ Download cycleways from Open Street Map</string>
+          <string>⬇️ Download active transport network from Open Street Map</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="9" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -322,8 +310,7 @@
   <tabstop>scrollArea</tabstop>
   <tabstop>road_layer_combo</tabstop>
   <tabstop>load_road_layer_button</tabstop>
-  <tabstop>download_road_layer_button</tabstop>
-  <tabstop>download_cycle_layer_button</tabstop>
+  <tabstop>download_active_transport_button</tabstop>
   <tabstop>previous_button</tabstop>
   <tabstop>next_button</tabstop>
  </tabstops>

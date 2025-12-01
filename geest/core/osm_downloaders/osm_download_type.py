@@ -10,5 +10,4 @@ from enum import Enum
 class OSMDownloadType(Enum):
     """🎯 O S M Download Type."""
 
-    ROAD = "road"
-    CYCLE = "cycle"
+    ACTIVE_TRANSPORT = "active_transport"

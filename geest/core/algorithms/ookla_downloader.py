@@ -16,10 +16,8 @@ from qgis.core import (
     QgsRectangle,
 )
 
+from geest.core.settings import setting
 from geest.utilities import log_message
-
-minimum_upload_kbps = 10000
-minimum_download_kbps = 20000
 
 ogr.UseExceptions()
 gdal.SetConfigOption("AWS_NO_SIGN_REQUEST", "YES")  # no credentials needed for public S3 access
@@ -90,6 +88,23 @@ class OoklaDownloader:
         # self.network_manager = QgsNetworkAccessManager()
         self.feedback = feedback
 
+        # Read Ookla threshold settings
+        use_thresholds = bool(setting(key="ookla_use_thresholds", default=False))
+        if use_thresholds:
+            # Convert from Mbps to kbps (multiply by 1000)
+            mobile_threshold_mbps = float(setting(key="ookla_mobile_threshold", default=0.0))
+            fixed_threshold_mbps = float(setting(key="ookla_fixed_threshold", default=0.0))
+            self.mobile_threshold_kbps = mobile_threshold_mbps * 1000
+            self.fixed_threshold_kbps = fixed_threshold_mbps * 1000
+            log_message(
+                f"Ookla thresholds enabled - Mobile: {mobile_threshold_mbps} Mbps, Fixed: {fixed_threshold_mbps} Mbps"
+            )
+        else:
+            # No thresholds - include all data
+            self.mobile_threshold_kbps = 0.0
+            self.fixed_threshold_kbps = 0.0
+            log_message("Ookla thresholds disabled - including all data")
+
     def _cache_dir(self):
         """
         Returns the directory path used for caching Ookla data, creating it if it does not exist.
@@ -137,17 +152,21 @@ class OoklaDownloader:
             log_message(f"Using cached Ookla data at: {combined_output_file}")
             return
 
-        # Combine fixed and mobile data
-        log_message("Combining fixed and mobile internet data...")
+        # Extract fixed internet data
+        log_message("Starting extraction of fixed internet data...")
         try:
-            self.extract_ookla_data(self.FIXED_INTERNET_URL, fixed_output_file, bbox, output_crs)
+            self.extract_ookla_data(
+                self.FIXED_INTERNET_URL, fixed_output_file, bbox, output_crs, self.fixed_threshold_kbps
+            )
         except Exception as e:
             raise OoklaException(f"Error extracting fixed internet data: {e}")
 
         # Extract mobile internet data
         log_message("Starting extraction of mobile internet data...")
         try:
-            self.extract_ookla_data(self.MOBILE_INTERNET_URL, mobile_output_file, bbox, output_crs)
+            self.extract_ookla_data(
+                self.MOBILE_INTERNET_URL, mobile_output_file, bbox, output_crs, self.mobile_threshold_kbps
+            )
         except Exception as e:
             raise OoklaException(f"Error extracting mobile internet data: {e}")
 
@@ -169,16 +188,18 @@ class OoklaDownloader:
         title = "Spatial Filter"
         body = (
             f"Filtering Records by Bounding Box\n"
-            f"We’re narrowing the dataset from the Parquet file\n"
+            f"We're narrowing the dataset from the Parquet file\n"
             f"to only those geometries intersecting the bounding box below.\n"
-            f"Minimum Upload Speed: [bold]{minimum_upload_kbps} kbps\n"
-            f"Minimum Download Speed: [bold]{minimum_download_kbps} kbps\n"
+            f"Mobile Threshold: [bold]{self.mobile_threshold_kbps} kbps ({self.mobile_threshold_kbps/1000} Mbps)\n"
+            f"Fixed Threshold: [bold]{self.fixed_threshold_kbps} kbps ({self.fixed_threshold_kbps/1000} Mbps)\n"
             f"Bounding Box Coordinates:\n"
             f"  Min X: {self.extents.xMinimum()}\n"
         )
         return (title, body)
 
-    def extract_ookla_data(self, input_uri, output_file, bbox_4326, output_crs: QgsCoordinateReferenceSystem):
+    def extract_ookla_data(
+        self, input_uri, output_file, bbox_4326, output_crs: QgsCoordinateReferenceSystem, speed_threshold_kbps: float
+    ):
         """
         This is the core logic for extracting data from OOKLA. The data
         can either be downloaded from S3 or read from a local Parquet file.
@@ -195,6 +216,7 @@ class OoklaDownloader:
             output_file (str): The path to the output Parquet file where filtered data will be saved.
             bbox_4326 (tuple): A tuple representing the bounding box (min_x, min_y, max_x, max_y) for filtering.
             output_crs (QgsCoordinateReferenceSystem): The coordinate reference system for the output data.
+            speed_threshold_kbps (float): Minimum speed threshold in kbps for both upload and download.
         """
         # Example row from the Parquet file:
         # OGRFeature(ookla):349644
@@ -256,12 +278,14 @@ class OoklaDownloader:
         kept_count = 0
 
         # Apply attribute filter for speed and extent directly at the layer level
+        # Use the passed speed_threshold_kbps for both upload and download filtering
         filter_expr = (
-            f"avg_u_kbps >= {minimum_upload_kbps} AND "
-            f"avg_d_kbps >= {minimum_download_kbps} AND "
+            f"avg_u_kbps >= {speed_threshold_kbps} AND "
+            f"avg_d_kbps >= {speed_threshold_kbps} AND "
             f"tile_x >= {min_x} AND tile_x <= {max_x} AND "
             f"tile_y >= {min_y} AND tile_y <= {max_y}"
         )
+        log_message(f"Applying Ookla filter: {filter_expr}")
         layer.SetAttributeFilter(filter_expr)
 
         # Handle GDAL Parquet driver issues
