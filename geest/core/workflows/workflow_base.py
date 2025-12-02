@@ -297,11 +297,7 @@ class WorkflowBase(QObject):
         filter_by_ghsl = setting(key="filter_study_areas_by_ghsl", default=True)
 
         # Load polygon layer to check intersects_ghsl attribute
-        polygon_layer = QgsVectorLayer(
-            f"{self.gpkg_path}|layername=study_area_polygons",
-            "study_area_polygons",
-            "ogr"
-        )
+        polygon_layer = QgsVectorLayer(f"{self.gpkg_path}|layername=study_area_polygons", "study_area_polygons", "ogr")
 
         log_layer_count()  # For performance tuning, write the number of open layers to a log file
 

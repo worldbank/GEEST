@@ -87,7 +87,7 @@ class GHSLProcessor:
         output_raster_paths = []
         for layer in self.input_raster_layers:
             # Skip non-TIF files (auxiliary files like .aux.xml, .clr, etc.)
-            if not layer.lower().endswith('.tif'):
+            if not layer.lower().endswith(".tif"):
                 log_message(f"Skipping non-TIF file: {layer}")
                 continue
 

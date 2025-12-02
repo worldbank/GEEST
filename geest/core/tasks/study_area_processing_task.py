@@ -786,7 +786,7 @@ class StudyAreaProcessingTask(QgsTask):
             bool: True if intersects any GHSL feature, False otherwise
         """
         # Check if GHSL layer exists
-        if not hasattr(self, 'ghsl_layer_name') or self.ghsl_layer_name is None:
+        if not hasattr(self, "ghsl_layer_name") or self.ghsl_layer_name is None:
             log_message("GHSL layer not available, defaulting to True for intersection", level="INFO")
             return True
 
