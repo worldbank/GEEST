@@ -79,7 +79,6 @@ class TreePanel(QWidget):
     switch_to_setup_tab = pyqtSignal()
     switch_to_previous_tab = pyqtSignal()  # Signal to notify the parent to switch tabs
     switch_to_network_tab = pyqtSignal()  # Signal to open the road network tab
-    switch_to_ghsl_tab = pyqtSignal()  # Signal to open the ghsl tab
 
     def __init__(self, parent=None, json_file=None):
         """🏗️ Initialize the instance.
@@ -654,13 +653,10 @@ class TreePanel(QWidget):
             edit_analysis_action.triggered.connect(lambda: self.edit_analysis_aggregation(item))  # Connect to method
             set_network_layers_action = QAction("Set Network Layers")
             set_network_layers_action.triggered.connect(self.switch_to_network_tab)  # Connect to method
-            set_ghsl_layer_action = QAction("Set GHSL Layer")
-            set_ghsl_layer_action.triggered.connect(self.switch_to_ghsl_tab)  # Connect to metho
             remove_unused_layers_action = QAction("Clean Unused Layers from Project")
             remove_unused_layers_action.triggered.connect(self.clean_unused_layers)
             menu.addAction(edit_analysis_action)
             menu.addAction(set_network_layers_action)
-            menu.addAction(set_ghsl_layer_action)
             menu.addAction(show_json_attributes_action)
             menu.addAction(clear_item_action)
             menu.addAction(clear_results_action)
@@ -1243,6 +1239,7 @@ class TreePanel(QWidget):
             geest_group = root.insertGroup(0, "Geest Study Area")  # Insert at the top of the layers panel
 
         layers = [
+            "ghsl_settlements",
             "study_area_polygons",
             "study_area_clip_polygons",
             "study_area_grid",

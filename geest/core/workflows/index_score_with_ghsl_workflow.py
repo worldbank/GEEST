@@ -76,34 +76,11 @@ class IndexScoreWithGHSLWorkflow(WorkflowBase):
         # Get the analysis extents
         self.study_area_bbox = self._study_area_bbox_4326()
 
-        # Prepare GHSL coverage layer - adds a minute or two to the workflow
-        # and requires internet access
-        ghsl_layer_path = os.path.join(self.working_directory, "study_area")
-        self.ghsl_layer_path = os.path.join(ghsl_layer_path, "ghsl_settlements_layer.parquet")
-        # Raise an error if the GHSL layer does not exist
-        if not os.path.exists(self.ghsl_layer_path):
-            log_message("ERROR: GHSL coverage layer not found ...")
-            raise IndexScoreWithGHSLException("GHSL coverage layer not found.")
-
-        # Ensure the GHSL layer is in the target CRS
+        self.ghsl_layer_path = f"{self.gpkg_path}|layername=ghsl_settlements"
         ghsl_layer = QgsVectorLayer(self.ghsl_layer_path, "ghsl_layer", "ogr")
-        if ghsl_layer.crs() != self.target_crs:
-            log_message("Reprojecting GHSL layer to target CRS ...")
-            reprojected_ghsl_path = os.path.join(ghsl_layer_path, "ghsl_settlements_layer_4326.parquet")
-            if os.path.exists(reprojected_ghsl_path):
-                os.remove(reprojected_ghsl_path)
-
-            processing.run(
-                "native:reprojectlayer",
-                {
-                    "INPUT": ghsl_layer,
-                    "TARGET_CRS": self.target_crs,
-                    "OUTPUT": reprojected_ghsl_path,
-                },
-                context=self.context,
-            )
-            self.ghsl_layer_path = reprojected_ghsl_path
-            log_message("GHSL layer reprojected.")
+        if not ghsl_layer.isValid():
+            log_message("ERROR: GHSL coverage layer not found in study_area.gpkg")
+            raise IndexScoreWithGHSLException("GHSL coverage layer not found in study_area.gpkg")
 
     def _process_features_for_area(
         self,

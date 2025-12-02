@@ -85,6 +85,10 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         ookla_fixed_threshold = float(setting(key="ookla_fixed_threshold", default=0.0))
         self.ookla_fixed_threshold.setValue(ookla_fixed_threshold)
 
+        # GHSL filter setting
+        filter_study_areas_by_ghsl = bool(setting(key="filter_study_areas_by_ghsl", default=True))
+        self.filter_study_areas_by_ghsl.setChecked(filter_study_areas_by_ghsl)
+
     def apply(self):
         """Process the animation sequence.
 
@@ -113,6 +117,7 @@ class GeestSettings(FORM_CLASS, QgsOptionsPageWidget):
         set_setting(key="ookla_use_thresholds", value=self.ookla_use_thresholds.isChecked())
         set_setting(key="ookla_mobile_threshold", value=self.ookla_mobile_threshold.value())
         set_setting(key="ookla_fixed_threshold", value=self.ookla_fixed_threshold.value())
+        set_setting(key="filter_study_areas_by_ghsl", value=self.filter_study_areas_by_ghsl.isChecked())
 
 
 class GeestOptionsFactory(QgsOptionsWidgetFactory):

@@ -72,7 +72,17 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="filter_study_areas_by_ghsl">
+        <property name="text">
+         <string>Filter study areas by GHSL settlements (skip areas without settlements)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
        <widget class="QGroupBox" name="groupBox_ookla">
         <property name="title">
          <string>Ookla Speed Test Thresholds (Digital Inclusion)</string>

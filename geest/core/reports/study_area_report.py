@@ -119,6 +119,46 @@ class StudyAreaReport(BaseReport):
                 del layer
                 log_message(f"Layer '{layer_name}' deleted.")
 
+    def compute_ghsl_statistics(self):
+        """
+        Compute GHSL intersection statistics from the study_area_polygons layer.
+
+        Returns:
+            dict: A dictionary containing 'total', 'intersects', 'percentage', and 'has_ghsl'.
+                  Returns None if GHSL data is not available.
+        """
+        uri = f"{self.gpkg_path}|layername=study_area_polygons"
+        layer = QgsVectorLayer(uri, "study_area_polygons", "ogr")
+
+        if not layer.isValid():
+            return None
+
+        # Check if intersects_ghsl field exists
+        field_names = [field.name() for field in layer.fields()]
+        if "intersects_ghsl" not in field_names:
+            return None
+
+        total_count = 0
+        intersects_count = 0
+
+        for feat in layer.getFeatures():
+            total_count += 1
+            intersects_ghsl = feat["intersects_ghsl"]
+            if intersects_ghsl == 1:
+                intersects_count += 1
+
+        if total_count == 0:
+            return None
+
+        percentage = (intersects_count / total_count) * 100
+
+        return {
+            "total": total_count,
+            "intersects": intersects_count,
+            "percentage": percentage,
+            "has_ghsl": True,
+        }
+
     def compute_study_area_creation_statistics(self, field_name="geom_total_duration_secs"):
         """
         Compute statistical summary for a given field in the layer.
@@ -156,6 +196,65 @@ class StudyAreaReport(BaseReport):
             "sum": sum_val,
             "std_dev": std_dev,
         }
+
+    def add_ghsl_acknowledgements(self, current_page):
+        """
+        Add GHSL (Global Human Settlement Layer) acknowledgements and statistics to the report.
+
+        Parameters:
+            current_page (int): The page number where the GHSL section should be added.
+
+        Returns:
+            int: The next available page number.
+        """
+        # Add a new page for GHSL acknowledgements
+        page = self.make_page(
+            title="Global Human Settlement Layer (GHSL)",
+            description_key=None,
+            current_page=current_page,
+            show_header_and_footer=True,
+        )
+        del page
+
+        # GHSL acknowledgements text
+        acknowledgements_text = (
+            "Data Source: Copernicus Emergency Management Service\n\n"
+            "Product: GHS-SMOD R2023A\n"
+            "Provider: European Commission Joint Research Centre\n"
+            "URL: https://human-settlement.emergency.copernicus.eu/download.php?ds=smod\n"
+            "License: CC BY 4.0\n\n"
+            "Purpose in GEEST:\n"
+            "The Global Human Settlement Layer is used to identify settled areas within the study region. "
+            "Study area polygons are marked with an 'intersects_ghsl' attribute to indicate whether they "
+            "contain settlements. This allows filtering of uninhabited areas during analysis workflows."
+        )
+
+        # Add acknowledgements label
+        ack_label = QgsLayoutItemLabel(self.layout)
+        ack_label.setText(acknowledgements_text)
+        ack_label.setFont(QFont("Arial", 10))
+        ack_label.adjustSizeToText()
+        ack_label.attemptMove(QgsLayoutPoint(20, 60, QgsUnitTypes.LayoutMillimeters), page=current_page)
+        self.layout.addLayoutItem(ack_label)
+
+        # Compute and add GHSL statistics if available
+        ghsl_stats = self.compute_ghsl_statistics()
+        if ghsl_stats:
+            stats_text = (
+                f"\n\nGHSL Intersection Statistics:\n"
+                f"Total study area polygons: {ghsl_stats['total']}\n"
+                f"Polygons intersecting GHSL: {ghsl_stats['intersects']}\n"
+                f"Percentage with settlements: {ghsl_stats['percentage']:.1f}%"
+            )
+
+            stats_label = QgsLayoutItemLabel(self.layout)
+            stats_label.setText(stats_text)
+            stats_label.setFont(QFont("Arial", 10))
+            stats_label.adjustSizeToText()
+            stats_label.attemptMove(QgsLayoutPoint(20, 160, QgsUnitTypes.LayoutMillimeters), page=current_page)
+            self.layout.addLayoutItem(stats_label)
+
+        return current_page + 1
 
     def create_layout(self):
         """
@@ -221,3 +320,6 @@ class StudyAreaReport(BaseReport):
                     crs=crs,
                 )
             current_page += 1
+
+        # Add GHSL acknowledgements section
+        current_page = self.add_ghsl_acknowledgements(current_page)
