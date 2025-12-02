@@ -19,11 +19,11 @@ Edit `config.json`:
 
 Commit, push and merge changes upstream.
 
-### 4. Pull Latest Changes
+### 3. Pull Latest Changes
 
 Pull latest changes through git.
 
-### 5. Create and Push Tag
+### 4. Create and Push Tag
 
 ```bash
 # Create tag (must start with 'v')
@@ -33,7 +33,7 @@ git tag -a v1.2.3 -m "Release version 1.2.3"
 git push origin v1.2.3
 ```
 
-### 6. Automated Build
+### 5. Automated Build
 
 Pushing the tag automatically triggers `.github/workflows/release.yml` which:
 
@@ -42,7 +42,7 @@ Pushing the tag automatically triggers `.github/workflows/release.yml` which:
 - Uploads ZIP to release
 - Updates plugin repository XML
 
-### 7. Verify
+### 6. Verify
 
 Check release at: https://github.com/worldbank/GEEST/releases
 
