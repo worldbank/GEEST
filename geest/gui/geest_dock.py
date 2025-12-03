@@ -7,6 +7,7 @@ import os
 from typing import Optional
 
 from qgis.core import Qgis, QgsProject
+from qgis.gui import QgsMessageBar
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QPainter
 from qgis.PyQt.QtWidgets import QDockWidget, QStackedWidget, QVBoxLayout, QWidget
@@ -72,6 +73,10 @@ class GeestDock(QDockWidget):
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for a cleaner look
         layout.setSpacing(0)  # Remove spacing between elements
 
+        # Add a message bar at the top of the dock widget
+        self.message_bar: QgsMessageBar = QgsMessageBar()
+        layout.addWidget(self.message_bar)
+
         # Create a stacked widget
         self.stacked_widget: QStackedWidget = QStackedWidget()
         self.study_area_bbox = None
@@ -82,6 +87,7 @@ class GeestDock(QDockWidget):
         self.setup_widget: SetupPanel = SetupPanel()
         self.open_project_widget: OpenProjectPanel = OpenProjectPanel()
         self.road_network_widget: RoadNetworkPanel = RoadNetworkPanel()
+        self.road_network_widget.set_message_bar(self.message_bar)  # Pass message bar reference
         self.create_project_widget: CreateProjectPanel = CreateProjectPanel()
         self.tree_widget: TreePanel = TreePanel(json_file=self.json_file)
         help_widget: HelpPanel = HelpPanel()
